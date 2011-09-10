@@ -14,8 +14,8 @@
 ActiveRecord::Schema.define(:version => 20110910032729) do
 
   create_table "mo_messages", :force => true do |t|
-    t.string   "message"
-    t.string   "sender"
+    t.string   "from"
+    t.string   "body"
     t.string   "guid"
     t.datetime "created_at"
     t.datetime "updated_at"
