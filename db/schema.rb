@@ -22,6 +22,8 @@ ActiveRecord::Schema.define(:version => 20110910044041) do
   end
 
   create_table "mt_messages", :force => true do |t|
+    t.string   "to"
+    t.string   "body"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
