@@ -1,0 +1,17 @@
+development:
+  url: http://nuntium.instedd.org
+  account: swpp
+  application: sms_dating
+  password: dating
+
+production:
+  url: http://nuntium.instedd.org
+  account: swpp
+  application: sms_dating
+  password: dating
+
+test:
+  url: http://nuntium.instedd.org
+  account: swpp
+  application: sms_dating
+  password: dating
