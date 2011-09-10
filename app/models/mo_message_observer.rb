@@ -1,9 +1,7 @@
-class MoMessageObserver < ActiveRecord::Observer
-  observe :mo_message
-
+class MoMessageObserver < ActiveModel::Observer
   def after_create(mo_message)
-    m = MtMessage.create :to => mo_message.from, :body => "you send: #{mo_message.body}"
-    p m
+    logger.info 'creating an mt_message'
+    MtMessage.create :to => mo_message.from, :body => "you send: #{mo_message.body}"
   end
 end
 

@@ -1,6 +1,6 @@
-class MtMessageObserver < ActiveRecord::Observer
+class MtMessageObserver < ActiveModel::Observer
   def after_create(mt_message)
-    Nuntium.send_ao mt_message.attributes.silce 'to', 'body'
+    Nuntium.send_ao mt_message.attributes.slice('to', 'body')
   end
 end
 
