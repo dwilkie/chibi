@@ -39,3 +39,6 @@ group :test do
   gem 'turn', :require => false
 end
 
+group :test, :development do
+  gem "rspec-rails", "~> 2.6"
+end
