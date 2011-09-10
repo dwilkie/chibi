@@ -11,12 +11,17 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110910032729) do
+ActiveRecord::Schema.define(:version => 20110910044041) do
 
   create_table "mo_messages", :force => true do |t|
     t.string   "from"
     t.string   "body"
     t.string   "guid"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "mt_messages", :force => true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
   end
