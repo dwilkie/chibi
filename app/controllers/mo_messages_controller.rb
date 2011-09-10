@@ -3,6 +3,7 @@ class MoMessagesController < ApplicationController
 
   def create
     MoMessage.create(params.slice :from, :body, :guid)
+    render :nothing => true
   end
 end
 
