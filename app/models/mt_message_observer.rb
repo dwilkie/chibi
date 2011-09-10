@@ -1,4 +1,4 @@
-class MtMessageObserver < ActiveModel::Observer
+class MtMessageObserver < ActiveRecord::Observer
   observe :mt_message
 
   def after_create(mt_message)
