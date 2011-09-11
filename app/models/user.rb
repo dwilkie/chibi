@@ -15,6 +15,6 @@ class User < ActiveRecord::Base
   end
 
   def update_status(value)
-    update_attributes :status => STATUS[value]
+    self.status = STATUS[value]
   end
 end

@@ -30,8 +30,9 @@ ActiveRecord::Schema.define(:version => 20110910134927) do
 
   create_table "users", :force => true do |t|
     t.string   "phone_number"
-    t.string   "profile"
-    t.string   "status",       :default => "newbie"
+    t.string   "profile_details"
+    t.string   "interests"
+    t.string   "status",          :default => "newbie"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
