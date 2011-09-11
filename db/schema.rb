@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110910044041) do
+ActiveRecord::Schema.define(:version => 20110910134927) do
 
   create_table "mo_messages", :force => true do |t|
     t.string   "from"
@@ -24,6 +24,14 @@ ActiveRecord::Schema.define(:version => 20110910044041) do
   create_table "mt_messages", :force => true do |t|
     t.string   "to"
     t.string   "body"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "users", :force => true do |t|
+    t.string   "phone_number"
+    t.string   "profile"
+    t.string   "status",       :default => "newbie"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
