@@ -11,7 +11,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110910134927) do
+ActiveRecord::Schema.define(:version => 20110911070204) do
+
+  create_table "interests", :force => true do |t|
+    t.string   "value"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "mo_messages", :force => true do |t|
     t.string   "from"
@@ -28,10 +34,16 @@ ActiveRecord::Schema.define(:version => 20110910134927) do
     t.datetime "updated_at"
   end
 
+  create_table "user_interests", :id => false, :force => true do |t|
+    t.integer "user_id"
+    t.integer "interest_id"
+  end
+
   create_table "users", :force => true do |t|
     t.string   "phone_number"
     t.string   "profile_details"
-    t.string   "interests"
+    t.string   "looking_for"
+    t.string   "suggestions"
     t.string   "status",          :default => "newbie"
     t.datetime "created_at"
     t.datetime "updated_at"

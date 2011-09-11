@@ -3,7 +3,8 @@ class CreateUsers < ActiveRecord::Migration
     create_table :users do |t|
       t.string :phone_number
       t.string :profile_details
-      t.string :interests
+      t.string :looking_for
+      t.string :suggestions
       t.string :status, :default => 'newbie'
 
       t.timestamps
