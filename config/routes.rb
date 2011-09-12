@@ -1,4 +1,4 @@
-SmsDate::Application.routes.draw do
+ChatBox::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
   match "nuntium" => "mo_messages#create"

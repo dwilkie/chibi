@@ -4,4 +4,5 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-SmsDate::Application.load_tasks
+ChatBox::Application.load_tasks
+

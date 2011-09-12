@@ -9,7 +9,7 @@ if defined?(Bundler)
   # Bundler.require(:default, :assets, Rails.env)
 end
 
-module SmsDate
+module ChatBox
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -46,3 +46,4 @@ module SmsDate
     config.assets.version = '1.0'
   end
 end
+
