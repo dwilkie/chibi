@@ -7,3 +7,4 @@ class LookingForHandler
     [:to => user.phone_number, :body => "nhom skual #{matches.size} nak: #{matches.join(', ')}"]
   end
 end
+

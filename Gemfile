@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 gem 'rails', '3.1.0'
 gem 'nuntium_api', '0.13'
 gem 'haml'
+gem 'state_machine'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'

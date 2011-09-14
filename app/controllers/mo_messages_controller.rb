@@ -6,7 +6,9 @@ class MoMessagesController < ApplicationController
   end
 
   def create
-    MoMessage.create(params.slice :from, :body, :guid)
+    message = MoMessage.new(params.slice :from, :body, :guid)
+    message.user = User.find_or_create_by_mobile_number(message.origin)
+    message.save
     render :nothing => true
   end
 
