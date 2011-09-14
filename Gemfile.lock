@@ -1,8 +1,6 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    action_sms (0.1.1)
-      tropo_message (>= 0.1.0)
     actionmailer (3.1.0)
       actionpack (= 3.1.0)
       mail (~> 2.3.0)
@@ -135,7 +133,6 @@ GEM
     treetop (1.4.10)
       polyglot
       polyglot (>= 0.3.1)
-    tropo_message (0.1.0)
     turn (0.8.2)
       ansi (>= 1.2.2)
     tzinfo (0.3.29)
@@ -147,7 +144,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  action_sms
   coffee-rails (~> 3.1.0)
   jquery-rails
   nuntium_api (= 0.13)
