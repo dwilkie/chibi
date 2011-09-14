@@ -1,11 +1,21 @@
 class Nuntium
-  CONFIG = YAML.load_file(File.expand_path('../../../config/nuntium.yml', __FILE__))[Rails.env]
+  CONFIG = %w{url account application password incoming_user incoming_password}
+
+  class << self
+    CONFIG.each do |config|
+      define_method(config) do
+        ENV["NUNTIUM_#{config.upcase}"]
+      end
+    end
+  end
+
   def self.new_from_config
-    Nuntium.new CONFIG['url'], CONFIG['account'], CONFIG['application'], CONFIG['password']
+    new url, account, application, password
   end
 
   def self.send_ao(messages)
-    nuntium = Nuntium.new_from_config
+    nuntium = new_from_config
     nuntium.send_ao messages
   end
 end
+
