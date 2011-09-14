@@ -1,6 +1,7 @@
 ChatBox::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
+  resources :mo_messages
   match "nuntium" => "mo_messages#create"
 
   # Sample of regular route:
