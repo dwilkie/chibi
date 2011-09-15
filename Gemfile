@@ -4,6 +4,8 @@ gem 'rails', '3.1.0'
 gem 'nuntium_api', '0.13'
 gem 'haml'
 gem 'state_machine'
+gem 'squeel', :git => "git://github.com/ernie/squeel.git"
+gem 'conversational', :git => "git://github.com/dwilkie/conversational.git"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -11,7 +13,6 @@ gem 'state_machine'
 group :development do
   gem 'sqlite3'
 end
-
 
 # Gems used only for assets and not required
 # in production environments by default.

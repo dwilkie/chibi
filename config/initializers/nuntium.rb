@@ -13,9 +13,15 @@ class Nuntium
     new url, account, application, password
   end
 
-  def self.send_ao(messages)
+  def self.address(addr, with_protocol = false)
+    address_without_protocol = addr =~ %r(^(.*?)://(.*?)$) ? $2 : addr
+    with_protocol ? "sms://#{address_without_protocol}" : address_without_protocol
+  end
+
+  def self.send_mt(message)
     nuntium = new_from_config
-    nuntium.send_ao messages
+    message.merge! "to" => self.address(message["to"], true)
+    nuntium.send_ao message
   end
 end
 

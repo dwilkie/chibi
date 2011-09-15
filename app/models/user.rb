@@ -17,8 +17,12 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.match_sex(user)
+    user.looking_for.present? ? where(:sex => user.looking_for) : scoped
+  end
+
   def self.matches(user, limit = 5)
-    where(:sex => user.looking_for).limit(limit)
+    match_sex(user).limit(limit)
   end
 
 #  STATUS = {

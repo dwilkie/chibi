@@ -1,3 +1,20 @@
+GIT
+  remote: git://github.com/dwilkie/conversational.git
+  revision: 6752e215cebde432da88e8e22bc308fbd00c294a
+  specs:
+    conversational (0.3.2)
+      activesupport
+      i18n
+
+GIT
+  remote: git://github.com/ernie/squeel.git
+  revision: 550fe6b9ef074fc06356713f89df1946bd4cc3e1
+  specs:
+    squeel (0.9.0)
+      activerecord (~> 3.0)
+      activesupport (~> 3.0)
+      polyamorous (~> 0.5.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -69,6 +86,8 @@ GEM
       httparty
       json
     pg (0.11.0)
+    polyamorous (0.5.0)
+      activerecord (~> 3.0)
     polyglot (0.3.2)
     rack (1.3.2)
     rack-cache (1.0.3)
@@ -147,6 +166,7 @@ PLATFORMS
 
 DEPENDENCIES
   coffee-rails (~> 3.1.0)
+  conversational!
   haml
   jquery-rails
   nuntium_api (= 0.13)
@@ -156,6 +176,7 @@ DEPENDENCIES
   ruby-debug19
   sass-rails (~> 3.1.0)
   sqlite3
+  squeel!
   state_machine
   turn
   uglifier

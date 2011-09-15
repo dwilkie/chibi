@@ -1,13 +1,17 @@
 class RockingHandler < MessageHandler
-  def process!(text)
-    if text.include?("find")
+  def process!
+    if body.include?("find")
       matches = User.matches(user)
-      reply I18.t(
+      usernames = User.matches(user).map {|user| user.username }
+      message = I18n.t(
         "messages.suggestions",
-        :looking_for => user.looking_for)
-        :usernames => matches
-         "nhom skual #{matches.size} nak: #{matches.join(', ')}"
+        :looking_for => user.looking_for,
+        :usernames => usernames
+      )
+    else
+      message = "text 'find' to find"
     end
+    reply message
   end
 end
 
