@@ -5,7 +5,7 @@ gem 'nuntium_api', '0.13'
 gem 'haml'
 gem 'state_machine'
 gem 'squeel', :git => "git://github.com/ernie/squeel.git"
-gem 'conversational', :git => "git://github.com/dwilkie/conversational.git"
+gem 'conversational'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -34,15 +34,18 @@ gem 'jquery-rails'
 # Deploy with Capistrano
 # gem 'capistrano'
 
-# To use debugger
-gem 'ruby-debug19', :require => 'ruby-debug', :group => [:development, :test]
+group :test, :development do
+  gem 'rspec-rails'
+  gem 'ruby-debug19', :require => 'ruby-debug'
+end
 
 group :test do
   # Pretty printed test output
   gem 'turn', :require => false
-end
-
-group :test, :development do
-  gem "rspec-rails", "~> 2.6"
+  gem 'factory_girl'
+  gem 'spork', :git => 'git://github.com/timcharper/spork.git'
+  gem 'fakeweb'
+  gem 'guard-rspec'
+  gem 'guard-spork'
 end
 

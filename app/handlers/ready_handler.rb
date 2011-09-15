@@ -1,10 +1,19 @@
-class ReadyHandler
-  def process!(text, user)
-    text.split.each do |value|
-      user.interests.create :value => value
+class ReadyHandler < MessageHandler
+
+  def process!
+    if contains_command?(:meet)
+      matches = User.matches(user)
+      usernames = User.matches(user).map {|user| user.username }
+      message = I18n.t(
+        "messages.suggestions",
+        :looking_for => user.looking_for,
+        :usernames => usernames
+      )
+    else
+      message = "text 'find' to find"
     end
-    user.update_status :looking_for
-    user.save
-    [:to => user.phone_number, :body => "ja, jong ban met srey or pros?"]
+
+    reply message
   end
 end
+
