@@ -7,7 +7,6 @@ gem 'state_machine'
 gem 'squeel', :git => "git://github.com/ernie/squeel.git"
 gem 'conversational'
 gem 'sunspot_rails'
-gem 'devise'
 gem 'pg'
 
 # Bundle edge Rails instead:

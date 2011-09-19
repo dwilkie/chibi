@@ -1,4 +1,4 @@
-class MoMessagesController < ApplicationController
+class AtMessagesController < ApplicationController
 
   http_basic_authenticate_with :name => Nuntium.incoming_user,
                                :password => Nuntium.incoming_password,

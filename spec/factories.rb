@@ -7,17 +7,17 @@ FactoryGirl.define do
       state "registered_details"
 
       trait :male do
-        dob { 24.years.ago }
+        date_of_birth { 24.years.ago }
         name "Sok"
         sequence(:username) {|n| "sok#{n}" }
-        sex "m"
+        gender "m"
       end
 
       trait :female do
-        dob { 21.years.ago }
+        date_of_birth { 21.years.ago }
         name "Srey mau"
         sequence(:username) {|n| "sreymau#{n}" }
-        sex "f"
+        gender "f"
       end
 
       male

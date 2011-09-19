@@ -91,8 +91,6 @@ class User < ActiveRecord::Base
       # (don't match anyone who has a potential friendship with the user's id)
       without(:potential_friend_ids, user.id)
 
-      # exclude users who have already been searched for by this user (they already have the results)
-
       # Use facets here to split out the desired date ranges
       # then return the results based off their sizes
 
@@ -111,7 +109,7 @@ class User < ActiveRecord::Base
 
       without(user) # don't include the user in the search results
     end
-    search
+    search.results
   end
 end
 

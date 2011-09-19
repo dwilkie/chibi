@@ -62,10 +62,6 @@ GEM
       activesupport
       i18n
     crack (0.1.8)
-    devise (1.4.5)
-      bcrypt-ruby (~> 3.0)
-      orm_adapter (~> 0.0.3)
-      warden (~> 1.0.3)
     diff-lcs (1.1.3)
     erubis (2.7.0)
     escape (0.0.4)
@@ -101,7 +97,6 @@ GEM
     nuntium_api (0.13)
       httparty
       json
-    orm_adapter (0.0.5)
     pg (0.11.0)
     polyamorous (0.5.0)
       activerecord (~> 3.0)
@@ -186,8 +181,6 @@ GEM
     uglifier (1.0.3)
       execjs (>= 0.3.0)
       multi_json (>= 1.0.2)
-    warden (1.0.5)
-      rack (>= 1.0)
 
 PLATFORMS
   ruby
@@ -195,7 +188,6 @@ PLATFORMS
 DEPENDENCIES
   coffee-rails (~> 3.1.0)
   conversational
-  devise
   factory_girl
   fakeweb
   guard-rspec

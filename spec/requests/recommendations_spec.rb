@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "Recommendations" do
-  include MessagingHelpers
+  #include MessagingHelpers
   include TranslationHelpers
 
   let(:girls_looking_for_boys) do
@@ -18,7 +18,7 @@ describe "Recommendations" do
     context "and is not chatting" do
       shared_examples_for "recommend sok some girls to chat with" do
         before do
-          send_message(:from => sok, :body => message)
+          post at_messages_path, :from => sok, :body => message
         end
 
         context "the reply" do
