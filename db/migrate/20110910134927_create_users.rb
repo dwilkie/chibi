@@ -4,7 +4,7 @@ class CreateUsers < ActiveRecord::Migration
       t.string :mobile_number
       t.string :name
       t.string :username
-      t.date   :dob
+      t.date   :date_of_birth
       t.string :sex, :limit => 1
       t.string :location
       t.string :looking_for, :limit => 1
@@ -17,7 +17,7 @@ class CreateUsers < ActiveRecord::Migration
     add_index :users, :location
     add_index :users, :looking_for
     add_index :users, :sex
-    add_index :users, :dob
+    add_index :users, :date_of_birth
   end
 end
 

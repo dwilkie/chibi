@@ -1,8 +1,9 @@
 ChatBox::Application.routes.draw do
+  devise_for :accounts
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
-  resources :mo_messages
-  #match "nuntium" => "mo_messages#create"
+  resources :at_messages
 
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'

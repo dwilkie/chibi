@@ -1,7 +1,8 @@
 .bundle
 db/*.sqlite3
-log/*.log
+log/*.*
 tmp/
 .sass-cache/
 vendor/ruby
 *.swp
+solr/

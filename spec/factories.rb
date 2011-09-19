@@ -23,21 +23,33 @@ FactoryGirl.define do
       male
 
       factory :user_with_registered_interests do
+        # add interests here
         state "registered_interests"
 
-        factory :user_with_registered_looking_for do
-          looking_for "f"
-          state "registered_looking_for"
+        factory :registered_user do
+          state "ready"
 
-          factory :registered_user do
-            state "ready"
+          factory :registered_female_user do
+            female
 
-            factory :female_registered_user do
-              female
+            factory :girl_looking_for_guy do
+              looking_for "m"
+            end
 
-              factory :straight_female_registered_user do
-                looking_for "m"
-              end
+            factory :girl_looking_for_girl do
+              looking_for "f"
+            end
+          end
+
+          factory :registered_male_user do
+            male
+
+            factory :guy_looking_for_girl do
+              looking_for "f"
+            end
+
+            factory :guy_looking_for_guy do
+              looking_for "m"
             end
           end
         end

@@ -6,13 +6,12 @@ gem 'haml'
 gem 'state_machine'
 gem 'squeel', :git => "git://github.com/ernie/squeel.git"
 gem 'conversational'
+gem 'sunspot_rails'
+gem 'devise'
+gem 'pg'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
-
-group :development do
-  gem 'sqlite3'
-end
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -20,10 +19,6 @@ group :assets do
   gem 'sass-rails', "  ~> 3.1.0"
   gem 'coffee-rails', "~> 3.1.0"
   gem 'uglifier'
-end
-
-group :production do
-  gem 'pg'
 end
 
 gem 'jquery-rails'

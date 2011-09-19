@@ -4,15 +4,15 @@ describe "Recommendations" do
   include MessagingHelpers
   include TranslationHelpers
 
-  let(:straight_girls) do
-    create_list(:straight_female_registered_user, 4, :sex => "f")
+  let(:girls_looking_for_boys) do
+    create_list(:girl_looking_for_guy, 4, :sex => "f")
   end
 
-  context "Sok, is looking for a girl" do
-    let(:sok) { create(:registered_user) }
+  let(:sok) { create(:registered_male_user) }
 
+  context "Sok, is looking for a girl" do
     before do
-      straight_girls
+      girls_looking_for_boys
     end
 
     context "and is not chatting" do
@@ -25,16 +25,22 @@ describe "Recommendations" do
           let(:reply) { last_reply }
 
           it "should be sent to Sok" do
+            p MtMessage.last
             reply.user.should == sok
           end
 
           it "should suggest Sok 4 straight girls to chat with" do
-            usernames = straight_girls.map { |girl| girl.username }
+            usernames = girls_looking_for_boys.map { |girl| girl.username }
             reply.body.should == spec_translate(
               :suggestions,
               :looking_for => sok.looking_for,
               :usernames => usernames
             )
+          end
+
+          it "should not suggest Sok to chat with himself" do
+            usernames = girls_looking_for_boys.map { |girl| girl.username }
+            reply.body.should_not include(sok.username)
           end
         end
       end

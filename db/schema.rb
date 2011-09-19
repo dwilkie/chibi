@@ -11,33 +11,58 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110911070204) do
+ActiveRecord::Schema.define(:version => 20110919043415) do
 
-  create_table "interests", :force => true do |t|
-    t.string   "description"
+  create_table "accounts", :force => true do |t|
+    t.string   "email",                                 :default => "", :null => false
+    t.string   "encrypted_password",     :limit => 128, :default => "", :null => false
+    t.string   "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer  "sign_in_count",                         :default => 0
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string   "current_sign_in_ip"
+    t.string   "last_sign_in_ip"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "mo_messages", :force => true do |t|
+  add_index "accounts", ["email"], :name => "index_accounts_on_email", :unique => true
+  add_index "accounts", ["reset_password_token"], :name => "index_accounts_on_reset_password_token", :unique => true
+
+  create_table "ao_messages", :force => true do |t|
+    t.string   "body"
+    t.integer  "subscription_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "at_messages", :force => true do |t|
     t.string   "from"
     t.string   "body"
-    t.string   "guid"
-    t.integer  "user_id"
+    t.integer  "subscription_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "mt_messages", :force => true do |t|
-    t.string   "body"
+  create_table "friendships", :force => true do |t|
     t.integer  "user_id"
+    t.integer  "friend_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "user_interests", :force => true do |t|
+  create_table "subscriptions", :force => true do |t|
     t.integer  "user_id"
-    t.integer  "interest_id"
+    t.integer  "account_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "user_matches", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "suggested_friend_id_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -46,7 +71,7 @@ ActiveRecord::Schema.define(:version => 20110911070204) do
     t.string   "mobile_number"
     t.string   "name"
     t.string   "username"
-    t.date     "dob"
+    t.date     "date_of_birth"
     t.string   "sex",           :limit => 1
     t.string   "location"
     t.string   "looking_for",   :limit => 1
@@ -55,7 +80,7 @@ ActiveRecord::Schema.define(:version => 20110911070204) do
     t.datetime "updated_at"
   end
 
-  add_index "users", ["dob"], :name => "index_users_on_dob"
+  add_index "users", ["date_of_birth"], :name => "index_users_on_date_of_birth"
   add_index "users", ["location"], :name => "index_users_on_location"
   add_index "users", ["looking_for"], :name => "index_users_on_looking_for"
   add_index "users", ["mobile_number"], :name => "index_users_on_mobile_number", :unique => true
