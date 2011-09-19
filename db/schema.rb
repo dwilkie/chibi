@@ -46,6 +46,13 @@ ActiveRecord::Schema.define(:version => 20110919043415) do
     t.datetime "updated_at"
   end
 
+  create_table "friendship_suggestions", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "suggested_friend_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "friendships", :force => true do |t|
     t.integer  "user_id"
     t.integer  "friend_id"
@@ -60,19 +67,12 @@ ActiveRecord::Schema.define(:version => 20110919043415) do
     t.datetime "updated_at"
   end
 
-  create_table "user_matches", :force => true do |t|
-    t.integer  "user_id"
-    t.integer  "suggested_friend_id_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "users", :force => true do |t|
     t.string   "mobile_number"
     t.string   "name"
     t.string   "username"
     t.date     "date_of_birth"
-    t.string   "sex",           :limit => 1
+    t.string   "gender",        :limit => 1
     t.string   "location"
     t.string   "looking_for",   :limit => 1
     t.string   "state",                      :default => "newbie"
@@ -81,10 +81,10 @@ ActiveRecord::Schema.define(:version => 20110919043415) do
   end
 
   add_index "users", ["date_of_birth"], :name => "index_users_on_date_of_birth"
+  add_index "users", ["gender"], :name => "index_users_on_gender"
   add_index "users", ["location"], :name => "index_users_on_location"
   add_index "users", ["looking_for"], :name => "index_users_on_looking_for"
   add_index "users", ["mobile_number"], :name => "index_users_on_mobile_number", :unique => true
-  add_index "users", ["sex"], :name => "index_users_on_sex"
   add_index "users", ["username"], :name => "index_users_on_username", :unique => true
 
 end

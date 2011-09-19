@@ -10,8 +10,13 @@ class User < ActiveRecord::Base
   has_many :accepted_friendships, :class_name => "Friendship", :foreign_key => "friend_id"
   has_many :accepted_friends, :through => :accepted_friendships, :source => :user
 
-  has_many :user_matches
-  has_many :friend_suggestions, :through => :user_matches
+  # describes friendship suggestions given to a user
+  has_many :friendship_suggestions
+  has_many :friend_suggestions, :through => :friendship_suggestions, :source => :suggested_friend
+
+  # describes friendship suggestions given to a user from the point of view of the suggested user
+  has_many :potential_friendships, :class_name => "FriendshipSuggestion", :foreign_key => "suggested_friend_id"
+  has_many :potential_friends, :through => :potential_friendships, :source => :user
 
   validates :mobile_number, :presence => true, :uniqueness => true
   validates :username, :uniqueness => true
@@ -35,26 +40,32 @@ class User < ActiveRecord::Base
   end
 
   searchable do
-    string :sex
+    string :gender
     string :looking_for
     text :location, :boost => 5
+
     integer :friend_ids, :multiple => true do
-      friends.map(&:id)
+      friendships.map(&:friend_id)
     end
 
     integer :accepted_friend_ids, :multiple => true do
-      accepted_friends.map(&:id)
+      accepted_friendships.map(&:user_id)
     end
+
+    integer :potential_friend_ids, :multiple => true do
+      potential_friendships.map(&:user_id)
+    end
+
     date :date_of_birth
     # http://stackoverflow.com/questions/5103077/date-range-facets-with-sunspot-in-ruby-on-rails
   end
 
   def self.matches(user, limit = 5)
     search = self.search do
-      # Match the sex i'm looking for if I actually care
-      with(:sex, user.looking_for) if user.looking_for
+      # Match the gender i'm looking for if I actually care
+      with(:gender, user.looking_for) if user.looking_for
       any_of do
-        with(:looking_for, user.sex) # Match people looking for my sex
+        with(:looking_for, user.gender) # Match people looking for my gender
         with(:looking_for, nil)      # or are indifferent
       end
 
@@ -68,15 +79,18 @@ class User < ActiveRecord::Base
       # do a fulltext search on interests with a minimum match of 0
       # boosting up chatty users
 
-      # exclude users who are already friends
-
-      # exclude users who have already accepted me as a friend
+      # don't match anyone that the user already befriended
+      # (don't match anyone who has an accepted friend with the user's id)
       without(:accepted_friend_ids, user.id)
 
-      # exclude users who I have accepted as a friend
+      # don't match anyone that already befriended the user
+      # (don't match anyone who has a friend with the user's id)
       without(:friend_ids, user.id)
 
-      #without(:accepted_friend_ids).any_of(user.accepted_friends.map(&:id))
+      # don't match anyone who has already been suggested to this user before
+      # (don't match anyone who has a potential friendship with the user's id)
+      without(:potential_friend_ids, user.id)
+
       # exclude users who have already been searched for by this user (they already have the results)
 
       # Use facets here to split out the desired date ranges
