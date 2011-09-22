@@ -1,11 +1,9 @@
 class AtMessage < ActiveRecord::Base
   belongs_to :subscription
-
-  attr_accessible :from, :body, :guid
-  after_create :process!
+  attr_accessible :from, :body
 
   def origin
-    Nuntium.address(from)
+    from
   end
 
   def process!

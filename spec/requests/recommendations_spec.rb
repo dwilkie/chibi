@@ -5,10 +5,12 @@ describe "Recommendations" do
   include TranslationHelpers
 
   let(:girls_looking_for_boys) do
-    create_list(:girl_looking_for_guy, 4, :sex => "f")
+    create_list(:girl_looking_for_guy, 4)
   end
 
   let(:sok) { create(:registered_male_user) }
+
+  let(:account) { create :account }
 
   context "Sok, is looking for a girl" do
     before do
@@ -18,14 +20,15 @@ describe "Recommendations" do
     context "and is not chatting" do
       shared_examples_for "recommend sok some girls to chat with" do
         before do
-          post at_messages_path, :from => sok, :body => message
+          post at_messages_path,
+          {:from => sok.mobile_number, :body => message},
+          {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(account.username, "foobar")}
         end
 
         context "the reply" do
-          let(:reply) { last_reply }
+          let(:reply) { AoMessage.last }
 
           it "should be sent to Sok" do
-            p MtMessage.last
             reply.user.should == sok
           end
 

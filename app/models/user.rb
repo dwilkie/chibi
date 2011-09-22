@@ -2,6 +2,9 @@ class User < ActiveRecord::Base
   has_many :subscriptions
   has_many :accounts, :through => :subscriptions
 
+  has_many :at_messages, :through => :subscriptions
+  has_many :ao_messages, :through => :subscriptions
+
   # describes initiated friendships i.e. chat initiated by user
   has_many :friendships
   has_many :friends, :through => :friendships

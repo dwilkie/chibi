@@ -1,18 +1,16 @@
 class AtMessagesController < ApplicationController
 
-  http_basic_authenticate_with :name => Nuntium.incoming_user,
-                               :password => Nuntium.incoming_password,
-                               :only => :create
-
   def index
-    @mo_messages = MoMessage.scoped
+    @at_messages = AtMessage.scoped
   end
 
   def create
-    message = MoMessage.new(params.slice :from, :body, :guid)
-    message.user = User.find_or_create_by_mobile_number(message.origin)
+    message = AtMessage.new(params.slice :from, :body)
+    user = User.find_or_create_by_mobile_number(message.origin)
+    message.subscription = @account.subscriptions.find_or_create_by_user_id(user.id)
     message.save
-    render :nothing => true
+    message.process! # move this into a background process
+    head :created, :location => messages_url(message), :links =>
   end
 
 end

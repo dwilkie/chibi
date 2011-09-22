@@ -1,6 +1,5 @@
 class AoMessage < ActiveRecord::Base
   belongs_to :subscription
-  after_create :deliver!
 
   attr_accessible :body
 

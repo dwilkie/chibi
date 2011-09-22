@@ -4,5 +4,8 @@ class Subscription < ActiveRecord::Base
 
   has_many :at_messages
   has_many :ao_messages
+
+  validates :user, :account, :presence => true
+
 end
 

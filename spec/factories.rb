@@ -1,4 +1,11 @@
 FactoryGirl.define do
+
+  factory :account do
+    sequence(:username) {|n| "testaccount#{n}" }
+    sequence(:email) {|n| "testaccount#{n}@example.com" }
+    password "foobar"
+  end
+
   factory :user do
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
 
