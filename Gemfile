@@ -4,8 +4,7 @@ gem 'rails', '3.1.0'
 gem 'nuntium_api', '0.13'
 gem 'haml'
 gem 'state_machine'
-gem 'squeel', :git => "git://github.com/ernie/squeel.git"
-gem 'conversational'
+gem 'conversational', '~> 0.4.1'
 gem 'sunspot_rails'
 gem 'pg'
 
