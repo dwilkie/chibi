@@ -20,13 +20,10 @@ describe "Recommendations" do
 
   context "Sok is looking for a girl" do
     context "and there are many girls looking for guys" do
-      before(:all) do
-        sok
-        girls_looking_for_boys
-      end
-
-      context "when sok searches", :search => true do
+      context "when he searches", :search => true do
         before(:all) do
+          sok
+          girls_looking_for_boys
           Sunspot.commit
           search(sok)
         end
@@ -40,12 +37,11 @@ describe "Recommendations" do
           )
         end
 
-        it "should recommend him 5 girls to chat with" do
+        it "should give him 5 recommendations" do
           reply.body.should include(5.to_s)
         end
 
-        it "should not recommend that Sok chats with himself" do
-          p reply
+        it "should not recommend that he chats with himself" do
           reply.body.should_not include(sok.username)
         end
       end
