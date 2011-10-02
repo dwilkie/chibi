@@ -22,14 +22,14 @@ If you've already installed it on your machine, you may skip this step.
 We need libpq-dev to be able to install the Ruby pg gem. After the setup completes, then run the following commands:
 
     sudo -u postgres createuser --superuser $USER
-    sudo -u postgres psql postgresql
+    sudo -u postgres psql postgres
 
 
 In the first command, using $USER will automatically add your user to PostgreSQL. If you want another user, just replace $USER with the correct user name. The second command will bring you directly into the psql console, and will open up the postgres database. It's just the database corresponding to the postgres user, which for some reason is necessary when installing PostgreSQL.
 
 Once in the psql prompt, type the following command:
 
-    postgres=# \password <user>
+    \password <user>
 
 
 Replace <user> with your actual user name. So anyway, type whatever password you want for your user IN the database twice, then once it returns you to the prompt, type "\q" (without the quotes!) to exit the psql prompt.
