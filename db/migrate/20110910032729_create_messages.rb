@@ -1,6 +1,6 @@
-class CreateAtMessages < ActiveRecord::Migration
+class CreateMessages < ActiveRecord::Migration
   def change
-    create_table :at_messages do |t|
+    create_table :messages do |t|
       t.string     :from
       t.string     :body
       t.references :subscription

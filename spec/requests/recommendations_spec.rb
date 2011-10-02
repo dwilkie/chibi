@@ -8,8 +8,7 @@ describe "Recommendations" do
     create_list(:girl_looking_for_guy, 4)
   end
 
-  let(:sok) { create(:registered_male_user) }
-
+  let(:sok) { create(:guy_looking_for_girl) }
   let(:account) { create :account }
 
   context "Sok, is looking for a girl" do
@@ -20,49 +19,56 @@ describe "Recommendations" do
     context "and is not chatting" do
       shared_examples_for "recommend sok some girls to chat with" do
         before do
-          post at_messages_path,
-          {:from => sok.mobile_number, :body => message},
+          post messages_path,
+          {:from => sok.mobile_number, :body => message_text},
           {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(account.username, "foobar")}
         end
 
-        context "the reply" do
-          let(:reply) { AoMessage.last }
+        context "the last message" do
+          let(:last_message) { Message.last }
 
-          it "should be sent to Sok" do
-            reply.user.should == sok
+          it "should have a reply" do
+            last_message.reply.should be_present
           end
 
-          it "should suggest Sok 4 straight girls to chat with" do
-            usernames = girls_looking_for_boys.map { |girl| girl.username }
-            reply.body.should == spec_translate(
-              :suggestions,
-              :looking_for => sok.looking_for,
-              :usernames => usernames
-            )
-          end
+          context "reply" do
+            let(:reply) { last_message.reply }
 
-          it "should not suggest Sok to chat with himself" do
-            usernames = girls_looking_for_boys.map { |girl| girl.username }
-            reply.body.should_not include(sok.username)
+            it "should be sent to Sok" do
+              reply.subscription.user.should == sok
+            end
+
+            it "should suggest Sok 4 straight girls to chat with" do
+              usernames = girls_looking_for_boys.map { |girl| girl.username }
+              reply.body.should == spec_translate(
+                :suggestions,
+                :looking_for => sok.looking_for,
+                :usernames => usernames
+              )
+            end
+
+            it "should not suggest Sok to chat with himself" do
+              reply.body.should_not include(sok.username)
+            end
           end
         end
       end
 
       context "sends the keyword 'meet'" do
         it_should_behave_like "recommend sok some girls to chat with" do
-          let(:message) { "nhom chong meet srey" }
+          let(:message_text) { "nhom chong meet srey" }
         end
       end
 
       context "sends the keyword 'met'" do
         it_should_behave_like "recommend sok some girls to chat with" do
-          let(:message) { "nhom chong met srey" }
+          let(:message_text) { "nhom chong met srey" }
         end
       end
 
       context "sends the keyword 'find'" do
         it_should_behave_like "recommend sok some girls to chat with" do
-          let(:message) { "nhom chong find srey" }
+          let(:message_text) { "nhom chong find srey" }
         end
       end
     end

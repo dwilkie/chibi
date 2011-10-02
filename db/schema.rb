@@ -24,21 +24,6 @@ ActiveRecord::Schema.define(:version => 20110919043415) do
   add_index "accounts", ["email"], :name => "index_accounts_on_email", :unique => true
   add_index "accounts", ["username"], :name => "index_accounts_on_username", :unique => true
 
-  create_table "ao_messages", :force => true do |t|
-    t.string   "body"
-    t.integer  "subscription_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "at_messages", :force => true do |t|
-    t.string   "from"
-    t.string   "body"
-    t.integer  "subscription_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "friendship_suggestions", :force => true do |t|
     t.integer  "user_id"
     t.integer  "suggested_friend_id"
@@ -49,6 +34,22 @@ ActiveRecord::Schema.define(:version => 20110919043415) do
   create_table "friendships", :force => true do |t|
     t.integer  "user_id"
     t.integer  "friend_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "messages", :force => true do |t|
+    t.string   "from"
+    t.string   "body"
+    t.integer  "subscription_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "replies", :force => true do |t|
+    t.string   "body"
+    t.integer  "message_id"
+    t.integer  "subscription_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

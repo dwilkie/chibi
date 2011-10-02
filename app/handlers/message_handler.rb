@@ -3,26 +3,26 @@ class MessageHandler
   class_suffix "Handler"
 
   cattr_accessor :commands
-  attr_accessor :subscription, :user, :body
+  attr_accessor :message, :subscription, :user, :body
 
-  def process!(at_message)
-    self.subscription = at_message.subscription
+  def process!(message)
+    self.message = message
+    self.subscription = message.subscription
     self.user = subscription.user
-    self.body = at_message.body
+    self.body = message.body
     self.topic = user.state
     details.process!
   end
 
   protected
 
-  def reply(text)
-    message = subscription.ao_messages.create(:body => text)
-    message.deliver!
+  def reply(text, subscription = nil)
+    subscription ||= self.subscription
+    message.create_reply(:subscription => subscription, :body => text)
   end
 
   def contains_command?(command)
     body =~ /\b#{self.class.commands[command].join("\\b|\\b")}\b/
   end
-
 end
 
