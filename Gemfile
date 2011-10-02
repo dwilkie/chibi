@@ -40,5 +40,6 @@ group :test do
   gem 'fakeweb'
   gem 'guard-rspec'
   gem 'guard-spork'
+  gem "sunspot_test"
 end
 

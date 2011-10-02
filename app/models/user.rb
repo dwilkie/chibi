@@ -111,6 +111,9 @@ class User < ActiveRecord::Base
 #      end
 
       without(user) # don't include the user in the search results
+
+      # limit to only 5 matches
+      paginate(:page => 1, :per_page => 5)
     end
     search.results
   end
