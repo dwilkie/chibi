@@ -7,13 +7,13 @@ FactoryGirl.define do
   end
 
   factory :friendship do
-    association :user, :factory => :girl_looking_for_guy
-    association :friend, :factory => :girl_looking_for_guy
+    association :user, :factory => :registered_user
+    association :friend, :factory => :registered_user
   end
 
   factory :friendship_suggestion do
-    association :user, :factory => :girl_looking_for_guy
-    association :suggested_friend, :factory => :girl_looking_for_guy
+    association :user, :factory => :registered_user
+    association :suggested_friend, :factory => :registered_user
   end
 
   factory :user do
