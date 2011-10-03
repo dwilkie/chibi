@@ -40,7 +40,7 @@ group :test do
   gem 'fakeweb'
   gem 'guard-rspec'
   gem 'guard-spork'
-  gem "sunspot_test"
-  gem "database_cleaner"
+  gem 'sunspot_test'
+  gem 'database_cleaner'
 end
 
