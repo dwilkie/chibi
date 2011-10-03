@@ -5,6 +5,8 @@ class CreateFriendships < ActiveRecord::Migration
       t.references :friend
       t.timestamps
     end
+
+    add_index :friendships, [:user_id, :friend_id], :unique => true
   end
 end
 

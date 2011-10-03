@@ -6,6 +6,9 @@ class CreateReplies < ActiveRecord::Migration
       t.references  :subscription
       t.timestamps
     end
+
+    add_index :replies,      :message_id
+    add_index :replies,      :subscription_id
   end
 end
 

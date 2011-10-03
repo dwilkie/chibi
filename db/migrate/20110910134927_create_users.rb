@@ -14,10 +14,7 @@ class CreateUsers < ActiveRecord::Migration
 
     add_index :users, :username, :unique => true
     add_index :users, :mobile_number, :unique => true
-    add_index :users, :location
-    add_index :users, :looking_for
-    add_index :users, :gender
-    add_index :users, :date_of_birth
+
   end
 end
 

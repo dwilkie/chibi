@@ -5,6 +5,8 @@ class CreateFriendshipSuggestions < ActiveRecord::Migration
       t.references :suggested_friend
       t.timestamps
     end
+
+    add_index :friendship_suggestions, [:user_id, :suggested_friend_id], :unique => true
   end
 end
 

@@ -5,6 +5,9 @@ class CreateSubscriptions < ActiveRecord::Migration
       t.references :account
       t.timestamps
     end
+
+    add_index :subscriptions, [:user_id, :account_id], :unique => true
+
   end
 end
 
