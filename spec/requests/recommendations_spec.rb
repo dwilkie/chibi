@@ -4,13 +4,45 @@ describe "Recommendations" do
   include MessagingHelpers
   include TranslationHelpers
 
-  let(:girls_looking_for_boys) do
-    create_list(:girl_looking_for_guy, 6)
+  let(:girl_looking_for_boy) do
+    create(:girl_looking_for_guy)
   end
 
-  let(:sok) { create(:guy_looking_for_girl) }
-  let(:last_message) { Message.last }
-  let(:reply) { last_message.reply }
+  let(:sok) do
+    create(:guy_looking_for_girl)
+  end
+
+  let(:girlfriend_of_sok) do
+    create(:friendship, :user => sok).friend
+  end
+
+  let(:girl_that_befriended_sok) do
+    create(:friendship, :friend => sok).user
+  end
+
+  let(:girl_that_was_already_suggested_for_sok) do
+    create(:friendship_suggestion, :user => sok).suggested_friend
+  end
+
+  let(:girl_that_sok_was_suggested_to) do
+    create(:friendship_suggestion, :suggested_friend => sok).user
+  end
+
+  let(:users) do
+    [
+      sok, girl_looking_for_boy,
+      girlfriend_of_sok, girl_that_befriended_sok,
+      girl_that_was_already_suggested_for_sok, girl_that_sok_was_suggested_to
+    ]
+  end
+
+  let(:last_message) do
+    Message.last
+  end
+
+  let(:reply) do
+    last_message.reply
+  end
 
   SEARCH_KEYWORDS = {
     :meet => "nhom chong meet srey",
@@ -19,17 +51,30 @@ describe "Recommendations" do
   }
 
   context "Sok is looking for a girl" do
-    context "and there are many girls looking for guys" do
-      context "when he searches", :search => true do
+    context "and there are many girls looking for guys", :search => true do
+      def reload_index_and_commit(reload_instances)
+        reload_instances.each do |instance|
+          instance.reload.index
+        end
+
+        Sunspot.commit
+      end
+
+      before(:all) do
+        reload_index_and_commit(users)
+      end
+
+      context "when he searches" do
         before(:all) do
-          sok
-          girls_looking_for_boys
-          Sunspot.commit
           search(sok)
         end
 
-        it "should recommend him some girls to chat with" do
-          usernames = girls_looking_for_boys.slice(0..4).map { |girl| girl.username }
+        it "should give him 2 recommendations" do
+          reply.body.should include(2.to_s)
+        end
+
+        it "should recommend that he chats with a girl that he was suggested to and the girl looking for a guy" do
+          usernames = [girl_looking_for_boy, girl_that_sok_was_suggested_to].map { |girl| girl.username }
           reply.body.should == spec_translate(
             :suggestions,
             :looking_for => sok.looking_for,
@@ -37,12 +82,20 @@ describe "Recommendations" do
           )
         end
 
-        it "should give him 5 recommendations" do
-          reply.body.should include(5.to_s)
-        end
-
         it "should not recommend that he chats with himself" do
           reply.body.should_not include(sok.username)
+        end
+
+        it "should not recommend that he chats with his girlfriend" do
+          reply.body.should_not include(girlfriend_of_sok.username)
+        end
+
+        it "should not recommend that he chats with the girl that befriended him" do
+          reply.body.should_not include(girl_that_befriended_sok.username)
+        end
+
+        it "should not recommend that he chats with the girl that was already suggested to him" do
+          reply.body.should_not include(girl_that_was_already_suggested_for_sok.username)
         end
       end
     end

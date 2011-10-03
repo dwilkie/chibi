@@ -6,6 +6,16 @@ FactoryGirl.define do
     password "foobar"
   end
 
+  factory :friendship do
+    association :user, :factory => :girl_looking_for_guy
+    association :friend, :factory => :girl_looking_for_guy
+  end
+
+  factory :friendship_suggestion do
+    association :user, :factory => :girl_looking_for_guy
+    association :suggested_friend, :factory => :girl_looking_for_guy
+  end
+
   factory :user do
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
 
