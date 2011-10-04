@@ -18,7 +18,7 @@ class MessageHandler
 
   def reply(text, subscription = nil)
     subscription ||= self.subscription
-    message.create_reply(:subscription => subscription, :body => text)
+    Reply.create(:subscription => subscription, :body => text, :to => user.mobile_number)
   end
 
   def contains_command?(command)

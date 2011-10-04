@@ -1,6 +1,6 @@
 module TranslationHelpers
   TRANSLATIONS = {
-    :suggestions => "messages.suggestions"
+    :new_match => "messages.new_match"
   }
 
   def spec_translate(key, options = {})

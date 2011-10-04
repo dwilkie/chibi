@@ -1,9 +1,8 @@
 ChatBox::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
-  resources :messages, :only => [:index, :create, :show] do
-    resource :reply, :only => :show
-  end
+  resources :messages, :only => [:index, :create, :show]
+  resources :replies,  :only => [:index, :update]
 
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'

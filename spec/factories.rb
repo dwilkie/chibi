@@ -6,14 +6,17 @@ FactoryGirl.define do
     password "foobar"
   end
 
-  factory :friendship do
+  factory :chat do
     association :user, :factory => :registered_user
     association :friend, :factory => :registered_user
   end
 
-  factory :friendship_suggestion do
-    association :user, :factory => :registered_user
-    association :suggested_friend, :factory => :registered_user
+  factory :active_chat, :parent => :chat do
+    after_create do |chat|
+      chat.active_users << chat.user
+      chat.active_users << chat.friend
+      chat.save
+    end
   end
 
   factory :user do
@@ -51,6 +54,10 @@ FactoryGirl.define do
 
             factory :girl_looking_for_guy do
               looking_for "m"
+
+              factory :chatting_girl_looking_for_guy do
+                after_create { |user| FactoryGirl.create(:active_chat, :friend => user) }
+              end
             end
 
             factory :girl_looking_for_girl do

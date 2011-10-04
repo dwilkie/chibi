@@ -2,11 +2,10 @@ class ReadyHandler < MessageHandler
 
   def process!
     if contains_command?(:meet)
-      usernames = User.matches(user).map {|user| user.username }
       message = I18n.t(
-        "messages.suggestions",
-        :looking_for => user.looking_for,
-        :usernames => usernames
+        "messages.new_match",
+        :match => User.match(user),
+        :name => user.name
       )
     else
       message = "text 'find' to find"
