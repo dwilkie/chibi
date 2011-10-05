@@ -17,7 +17,6 @@ FactoryGirl.define do
 
     factory :user_with_registered_details do
       location "Phnom Penh"
-      state "registered_details"
 
       trait :male do
         date_of_birth { 24.years.ago }
@@ -35,39 +34,33 @@ FactoryGirl.define do
 
       male
 
-      factory :user_with_registered_interests do
-        # add interests here
-        state "registered_interests"
+      factory :registered_user do
 
-        factory :registered_user do
-          state "ready"
+        factory :registered_female_user do
+          female
 
-          factory :registered_female_user do
-            female
+          factory :girl_looking_for_guy do
+            looking_for "m"
 
-            factory :girl_looking_for_guy do
-              looking_for "m"
-
-              factory :chatting_girl_looking_for_guy do
-                after_create { |user| FactoryGirl.create(:active_chat, :friend => user) }
-              end
-            end
-
-            factory :girl_looking_for_girl do
-              looking_for "f"
+            factory :chatting_girl_looking_for_guy do
+              after_create { |user| FactoryGirl.create(:active_chat, :friend => user) }
             end
           end
 
-          factory :registered_male_user do
-            male
+          factory :girl_looking_for_girl do
+            looking_for "f"
+          end
+        end
 
-            factory :guy_looking_for_girl do
-              looking_for "f"
-            end
+        factory :registered_male_user do
+          male
 
-            factory :guy_looking_for_guy do
-              looking_for "m"
-            end
+          factory :guy_looking_for_girl do
+            looking_for "f"
+          end
+
+          factory :guy_looking_for_guy do
+            looking_for "m"
           end
         end
       end

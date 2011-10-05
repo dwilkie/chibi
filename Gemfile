@@ -2,7 +2,6 @@ source 'http://rubygems.org'
 
 gem 'rails', '3.1.0'
 gem 'haml'
-gem 'state_machine'
 gem 'conversational', '~> 0.4.1'
 gem 'sunspot_rails'
 gem 'pg'

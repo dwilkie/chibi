@@ -9,7 +9,7 @@ class MessageHandler
     self.message = message
     self.user = message.user
     self.body = message.body
-    self.topic = user.state
+    self.topic = user.currently_chatting? ? "chat" : "search"
     details.process!
   end
 
@@ -21,7 +21,7 @@ class MessageHandler
     reply.user = user
     reply.body = text
     reply.to = user.mobile_number
-    reply.save
+    reply.save!
   end
 
   def contains_command?(command)

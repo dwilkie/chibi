@@ -8,7 +8,6 @@ class CreateUsers < ActiveRecord::Migration
       t.string :gender, :limit => 1
       t.string :location
       t.string :looking_for, :limit => 1
-      t.string  :state, :default => 'newbie'
       t.references :active_chat
       t.timestamps
     end

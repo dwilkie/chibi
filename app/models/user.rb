@@ -20,20 +20,6 @@ class User < ActiveRecord::Base
     self.username = name.gsub(/\s+/, "") << id.to_s if attribute_present?(:name) && persisted?
   end
 
-  state_machine :initial => :newbie do
-    event :register_details do
-      transition [:newbie] => :registered_details
-    end
-
-    event :register_interests do
-      transition [:registered_details] => :registered_interests
-    end
-
-    event :register_looking_for do
-      transition [:registered_interests] => :ready
-    end
-  end
-
   searchable do
     string  :gender
     string  :looking_for
@@ -110,5 +96,8 @@ class User < ActiveRecord::Base
     gender == 'f'
   end
 
+  def currently_chatting?
+    self.active_chat_id.present?
+  end
 end
 

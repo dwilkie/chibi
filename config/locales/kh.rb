@@ -2,9 +2,12 @@
   :kh => {
     :messages => {
       :new_match => lambda {|key, options|
+        name = options[:name]
         match = options[:match]
-        personal_pronoun = match.female? ? "her" : "him"
-        "Hallo #{options[:name]}, #{match.username} chong chat mui bong. Send #{personal_pronoun} a msg now by replying to this txt. e.g. 'Hi #{match.name} how r u?' Reply with 'bye' 2 stop chatting"
+        personal_pronoun = match ? (match.female? ? "her" : "him") : "them"
+        reply = "Sousdey"
+        reply << name if name
+        reply << ", #{match.username} jong chat jea moy chleuy torb tov neang re ban-chhop chat doy sor-say 'bye bye' rok mit tmey teat"
       }
     }
   }

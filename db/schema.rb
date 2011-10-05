@@ -55,7 +55,6 @@ ActiveRecord::Schema.define(:version => 20110919042428) do
     t.string   "gender",         :limit => 1
     t.string   "location"
     t.string   "looking_for",    :limit => 1
-    t.string   "state",                       :default => "newbie"
     t.integer  "active_chat_id"
     t.datetime "created_at"
     t.datetime "updated_at"
