@@ -3,12 +3,11 @@ class MessageHandler
   class_suffix "Handler"
 
   cattr_accessor :commands
-  attr_accessor :message, :subscription, :user, :body
+  attr_accessor :message, :user, :body
 
   def process!(message)
     self.message = message
-    self.subscription = message.subscription
-    self.user = subscription.user
+    self.user = message.user
     self.body = message.body
     self.topic = user.state
     details.process!
@@ -16,9 +15,13 @@ class MessageHandler
 
   protected
 
-  def reply(text, subscription = nil)
-    subscription ||= self.subscription
-    Reply.create(:subscription => subscription, :body => text, :to => user.mobile_number)
+  def reply(text, user = nil)
+    user ||= self.user
+    reply = Reply.new
+    reply.user = user
+    reply.body = text
+    reply.to = user.mobile_number
+    reply.save
   end
 
   def contains_command?(command)

@@ -13,17 +13,6 @@
 
 ActiveRecord::Schema.define(:version => 20110919042428) do
 
-  create_table "accounts", :force => true do |t|
-    t.string   "email"
-    t.string   "username"
-    t.string   "password_digest"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "accounts", ["email"], :name => "index_accounts_on_email", :unique => true
-  add_index "accounts", ["username"], :name => "index_accounts_on_username", :unique => true
-
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
     t.integer  "friend_id"
@@ -36,34 +25,27 @@ ActiveRecord::Schema.define(:version => 20110919042428) do
   create_table "messages", :force => true do |t|
     t.string   "from"
     t.string   "body"
-    t.integer  "subscription_id"
+    t.integer  "user_id"
+    t.integer  "chat_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "messages", ["subscription_id"], :name => "index_messages_on_subscription_id"
+  add_index "messages", ["user_id"], :name => "index_messages_on_user_id"
 
   create_table "replies", :force => true do |t|
     t.string   "to"
     t.string   "body"
-    t.boolean  "read",            :default => false
-    t.integer  "subscription_id"
+    t.boolean  "read",       :default => false
+    t.integer  "user_id"
     t.integer  "chat_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   add_index "replies", ["chat_id"], :name => "index_replies_on_chat_id"
-  add_index "replies", ["subscription_id"], :name => "index_replies_on_subscription_id"
-
-  create_table "subscriptions", :force => true do |t|
-    t.integer  "user_id"
-    t.integer  "account_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "subscriptions", ["user_id", "account_id"], :name => "index_subscriptions_on_user_id_and_account_id", :unique => true
+  add_index "replies", ["read"], :name => "index_replies_on_read"
+  add_index "replies", ["user_id"], :name => "index_replies_on_user_id"
 
   create_table "users", :force => true do |t|
     t.string   "mobile_number"

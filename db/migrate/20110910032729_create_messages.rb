@@ -3,11 +3,12 @@ class CreateMessages < ActiveRecord::Migration
     create_table :messages do |t|
       t.string     :from
       t.string     :body
-      t.references :subscription
+      t.references :user
+      t.references :chat
       t.timestamps
     end
 
-    add_index :messages, :subscription_id
+    add_index :messages, :user_id
   end
 end
 

@@ -1,6 +1,6 @@
 class Message < ActiveRecord::Base
-  belongs_to :subscription
-  has_one :reply
+  belongs_to :user
+  belongs_to :chat
 
   attr_accessible :from, :body
 

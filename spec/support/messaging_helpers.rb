@@ -1,12 +1,7 @@
 module MessagingHelpers
-  attr_accessor :account
-
-  def account
-    @account ||= create :account
-  end
 
   def search(user)
-    post_message(:from => user.mobile_number, :body => MessageHandler.commands[:meet].first)
+    post_message(:from => user.mobile_number, :body => "")
   end
 
   def send_message(options = {})
@@ -22,7 +17,7 @@ module MessagingHelpers
     post messages_path,
     {:from => options[:from], :body => options[:body]},
     {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
-      account.username, "foobar"
+      ENV["CHAT_BOX_USERNAME"], ENV["CHAT_BOX_PASSWORD"]
     )}
   end
 end

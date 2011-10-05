@@ -1,11 +1,4 @@
 FactoryGirl.define do
-
-  factory :account do
-    sequence(:username) {|n| "testaccount#{n}" }
-    sequence(:email) {|n| "testaccount#{n}@example.com" }
-    password "foobar"
-  end
-
   factory :chat do
     association :user, :factory => :registered_user
     association :friend, :factory => :registered_user

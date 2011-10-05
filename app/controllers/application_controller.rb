@@ -1,16 +1,8 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
-  before_filter :authenticate
+  http_basic_authenticate_with :name => ENV["CHAT_BOX_USERNAME"], :password => ENV["CHAT_BOX_PASSWORD"]
 
-#  force_ssl this breaks the tests...
+  # force_ssl # this breaks the tests...
 
-  protected
-
-  def authenticate
-    authenticate_with_http_basic do |username, password|
-      @account = Account.find_by_username(username)
-      @account && @account.authenticate(password)
-    end
-  end
 end
 

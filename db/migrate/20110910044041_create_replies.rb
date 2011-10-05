@@ -4,13 +4,14 @@ class CreateReplies < ActiveRecord::Migration
       t.string      :to
       t.string      :body
       t.boolean     :read,          :default => false
-      t.references  :subscription
+      t.references  :user
       t.references  :chat
       t.timestamps
     end
 
-    add_index :replies,      :subscription_id
+    add_index :replies,      :user_id
     add_index :replies,      :chat_id
+    add_index :replies,      :read
   end
 end
 
