@@ -4,11 +4,22 @@ require 'spec_helper'
 # https://github.com/pivotal/sunspot_matchers
 
 describe User do
-  let(:sok) {
-    create(:registered_male_user, :location => "Siem Reap")
-  }
 
-  let(:mara) { create(:registered_female_user) }
+  let(:user) do
+    create(:user)
+  end
+
+  let(:user_with_complete_profile) do
+    create(:user_with_complete_profile)
+  end
+
+  let(:sok) do
+    create(:registered_male_user, :location => "Siem Reap")
+  end
+
+  let(:mara) do
+    create(:registered_female_user)
+  end
 
   let(:guys_looking_for_girls) do
     create_list(:guy_looking_for_girls, 4)
@@ -18,20 +29,51 @@ describe User do
     it "should not include the person being matched" do
       subject.class.matches(sok).should_not include(sok)
     end
+  end
 
-    context "with less than 5 registered users" do
-      before do
-        guys_looking_for_girls
+  describe "#profile_complete?", :wip => true do
+    context "has a complete profile" do
+      it "should be true" do
+        user_with_complete_profile.should be_profile_complete
       end
+    end
 
-      it "should return all the registered users" do
-        subject.class.matches(sok).size.should == 4
-      end
-
-      it "should only include registered users" do
-        subject.class.matches(sok).each do |match|
-          match.should be_ready
+    context "is missing their" do
+      shared_examples_for "missing profile" do
+        before do
+          user_with_complete_profile.send("#{attribute}=", nil)
         end
+
+        it "should not be true" do
+          user_with_complete_profile.should_not be_profile_complete
+        end
+      end
+
+      PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
+
+      PROFILE_ATTRIBUTES.each do |attribute|
+        context attribute do
+          it_should_behave_like "missing profile" do
+            let(:attribute) {attribute}
+          end
+        end
+      end
+    end
+  end
+
+  describe "#age=" do
+    context "15" do
+      before do
+        Timecop.freeze(Time.now)
+        user.age = 15
+      end
+
+      after do
+        Timecop.return
+      end
+
+      it "should set the user's date of birth to 15 years ago" do
+        user.date_of_birth.should == 15.years.ago.utc
       end
     end
   end

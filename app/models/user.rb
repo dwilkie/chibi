@@ -20,6 +20,8 @@ class User < ActiveRecord::Base
     self.username = name.gsub(/\s+/, "") << id.to_s if attribute_present?(:name) && persisted?
   end
 
+  PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
+
   searchable do
     string  :gender
     string  :looking_for
@@ -94,6 +96,21 @@ class User < ActiveRecord::Base
 
   def female?
     gender == 'f'
+  end
+
+  def profile_complete?
+    profile_complete = true
+
+    PROFILE_ATTRIBUTES.each do |attribute|
+      profile_complete = send(attribute).present?
+      break unless profile_complete
+    end
+
+    profile_complete
+  end
+
+  def age=(value)
+    self.date_of_birth = value.years.ago.utc
   end
 
   def currently_chatting?

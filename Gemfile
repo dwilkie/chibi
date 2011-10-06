@@ -40,5 +40,6 @@ group :test do
   gem 'guard-spork'
   gem 'sunspot_test'
   gem 'database_cleaner'
+  gem 'timecop'
 end
 

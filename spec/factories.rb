@@ -34,7 +34,8 @@ FactoryGirl.define do
 
       male
 
-      factory :registered_user do
+      factory :user_with_complete_profile do
+        looking_for "e"
 
         factory :registered_female_user do
           female
