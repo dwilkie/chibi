@@ -1,241 +1,133 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Ruby on Rails: Welcome aboard</title>
-    <style type="text/css" media="screen">
-      body {
-        margin: 0;
-        margin-bottom: 25px;
-        padding: 0;
-        background-color: #f0f0f0;
-        font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
-        font-size: 13px;
-        color: #333;
-      }
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
 
-      h1 {
-        font-size: 28px;
-        color: #000;
-      }
+    <!-- CSS -->
+    <!--link rel="stylesheet" href="application.css" media="screen"/-->
+    <link rel="shortcut icon" href="assets/favicon.png"/>
+    <link href="/assets/application.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/assets/style.css" />
 
-      a  {color: #03c}
-      a:hover {
-        background-color: #03c;
-        color: white;
-        text-decoration: none;
-      }
+    <!-- jQuery Library-->
+    <script src="/assets/jQuery.min.js"></script>
+    <script src="/assets/jquery.timeago.js"></script>
+    <script src="/assets/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+    <script src="/assets/functions.js"></script>
 
+    <title>Chibi</title>
+</head>
+<body>
 
-      #page {
-        background-color: #f0f0f0;
-        width: 750px;
-        margin: 0;
-        margin-left: auto;
-        margin-right: auto;
-      }
+  <div id="fancy">
+      <div class="wrap">
 
-      #content {
-        float: left;
-        background-color: white;
-        border: 3px solid #aaa;
-        border-top: none;
-        padding: 25px;
-        width: 500px;
-      }
+        <div class="intro">
 
-      #sidebar {
-        float: right;
-        width: 175px;
-      }
+          <a href="/" id="logo"><img src="assets/logo.png" alt="Chibi" /></a>
+          <h1>meet new friends</h1>
+          <p>Chibi is a SMS dating service that helps you find and chat with new friends. Chibi is 100% anonymous, works on all phones and does not require an Internet connection. Just text to register and start chatting immediately.</p>
+        </div><!-- intro close -->
 
-      #footer {
-        clear: both;
-      }
+        <div class="preview">
 
-      #header, #about, #getting-started {
-        padding-left: 75px;
-        padding-right: 30px;
-      }
+          <img src="assets/preview.jpg" alt="preview" />
 
+        </div><!-- preview close -->
 
-      #header {
-        background-image: url("/assets/rails.png");
-        background-repeat: no-repeat;
-        background-position: top left;
-        height: 64px;
-      }
-      #header h1, #header h2 {margin: 0}
-      #header h2 {
-        color: #888;
-        font-weight: normal;
-        font-size: 16px;
-      }
+        <div class="titleSeparator">
+          <h2>How it works</h2>
+        </div>
 
+        <a href="#" rel="left" class="arrow arrowLeft"></a>
+        <div class="sliderContainer">
+          <ul class="slider">
+            <li>
+              <div class="oneOfFour">
+                <a href="assets/scr02.jpg" class="lightbox" title="Example caption"><img src="assets/scr02-thumb.jpg" alt="thumb" /></a>
+              </div>
+              <div class="threeOfFour last">
+                <h4>Registration & Chat</h4>
+                <p>Sed ut perspiciatis unde omnis iste natus error sit voluptia accusant doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et  quasi.</p>
+              </div>
+            </li>
+            <li>
+              <div class="twoOfFour">
+                <h4>Business Model</h4>
+                <p>Sed ut perspiatis unde omnis iste natus error sit voluptia accusant doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et  quasi.</p>
+              </div>
+              <div class="oneOfFour">
+                <a href="assets/scr04.jpg" class="lightbox"><img src="assets/scr04-thumb.jpg" alt="thumb" /></a>
+              </div>
+            <div class="oneOfFour last">
+              <a href="assets/scr03.jpg" class="lightbox"><img src="assets/scr03-thumb.jpg" alt="thumb" /></a>
+            </div>
+            </li>
+            <li>
+            <div class="oneOfFour">
+              <a href="assets/scr02.jpg" class="lightbox" rel="group1"><img src="assets/scr02-thumb.jpg" alt="thumb" /></a>
+            </div>
+            <div class="oneOfFour">
+              <a href="assets/scr03.jpg" class="lightbox" rel="group1"><img src="assets/scr03-thumb.jpg" alt="thumb" /></a>
+            </div>
+              <div class="twoOfFour last">
+                <h4>Setting things up</h4>
+                <p>Sed ut perspiciatis unde omnis iste natus error sit voluptia accusant doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et  quasi.</p>
+              </div>
+            </li>
+            <li>
+              <div class="oneOfFour">
+                <a href="assets/scr01.jpg" class="lightbox" rel="group2"><img src="assets/scr01-thumb.jpg" alt="thumb" /></a>
+              </div>
+              <div class="oneOfFour">
+                <a href="assets/scr02.jpg" class="lightbox" rel="group2"><img src="assets/scr02-thumb.jpg" alt="thumb" /></a>
+              </div>
+              <div class="oneOfFour">
+                <a href="assets/scr03.jpg" class="lightbox" rel="group2"><img src="assets/scr03-thumb.jpg" alt="thumb" /></a>
+              </div>
+              <div class="oneOfFour last">
+                <a href="assets/scr04.jpg" class="lightbox" rel="group2"><img src="assets/scr04-thumb.jpg" alt="thumb" /></a>
+              </div>
+            </li>
+          </ul><!-- slider close -->
+          <ul class="sliderController"></ul>
+        </div>
+        <a href="#" rel="right" class="arrow arrowRight"></a>
 
-      #about h3 {
-        margin: 0;
-        margin-bottom: 10px;
-        font-size: 14px;
-      }
+        <div class="clear"></div>
 
-      #about-content {
-        background-color: #ffd;
-        border: 1px solid #fc0;
-        margin-left: -55px;
-        margin-right: -10px;
-      }
-      #about-content table {
-        margin-top: 10px;
-        margin-bottom: 10px;
-        font-size: 11px;
-        border-collapse: collapse;
-      }
-      #about-content td {
-        padding: 10px;
-        padding-top: 3px;
-        padding-bottom: 3px;
-      }
-      #about-content td.name  {color: #555}
-      #about-content td.value {color: #000}
+        <div class="titleSeparator">
+          <h2>About Us</h2>
+        </div>
 
-      #about-content ul {
-        padding: 0;
-        list-style-type: none;
-      }
+        <span class="subtitle">Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet.</span>
 
-      #about-content.failure {
-        background-color: #fcc;
-        border: 1px solid #f00;
-      }
-      #about-content.failure p {
-        margin: 0;
-        padding: 10px;
-      }
-
-
-      #getting-started {
-        border-top: 1px solid #ccc;
-        margin-top: 25px;
-        padding-top: 15px;
-      }
-      #getting-started h1 {
-        margin: 0;
-        font-size: 20px;
-      }
-      #getting-started h2 {
-        margin: 0;
-        font-size: 14px;
-        font-weight: normal;
-        color: #333;
-        margin-bottom: 25px;
-      }
-      #getting-started ol {
-        margin-left: 0;
-        padding-left: 0;
-      }
-      #getting-started li {
-        font-size: 18px;
-        color: #888;
-        margin-bottom: 25px;
-      }
-      #getting-started li h2 {
-        margin: 0;
-        font-weight: normal;
-        font-size: 18px;
-        color: #333;
-      }
-      #getting-started li p {
-        color: #555;
-        font-size: 13px;
-      }
-
-
-      #sidebar ul {
-        margin-left: 0;
-        padding-left: 0;
-      }
-      #sidebar ul h3 {
-        margin-top: 25px;
-        font-size: 16px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #ccc;
-      }
-      #sidebar li {
-        list-style-type: none;
-      }
-      #sidebar ul.links li {
-        margin-bottom: 5px;
-      }
-
-      .filename {
-        font-style: italic;
-      }
-    </style>
-    <script type="text/javascript">
-      function about() {
-        info = document.getElementById('about-content');
-        if (window.XMLHttpRequest)
-          { xhr = new XMLHttpRequest(); }
-        else
-          { xhr = new ActiveXObject("Microsoft.XMLHTTP"); }
-        xhr.open("GET","rails/info/properties",false);
-        xhr.send("");
-        info.innerHTML = xhr.responseText;
-        info.style.display = 'block'
-      }
-    </script>
-  </head>
-  <body>
-    <div id="page">
-      <div id="sidebar">
-        <ul id="sidebar-items">
+        <ul class="faq">
           <li>
-            <h3>Browse the documentation</h3>
-            <ul class="links">
-              <li><a href="http://guides.rubyonrails.org/">Rails Guides</a></li>
-              <li><a href="http://api.rubyonrails.org/">Rails API</a></li>
-              <li><a href="http://www.ruby-doc.org/core/">Ruby core</a></li>
-              <li><a href="http://www.ruby-doc.org/stdlib/">Ruby standard library</a></li>
-            </ul>
+            <h5>Ut enim ad minima veniam</h5>
+            <p>Quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi.</p>
           </li>
-        </ul>
-      </div>
+          <li class="even">
+            <h5>Nam libero tempore cum soluta</h5>
+            <p>Quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi.</p>
+          </li>
+          <li>
+            <h5>Autem vel eum iure reprehenderit</h5>
+            <p>Quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi.</p>
+          </li>
+          <li class="even">
+            <h5>Nam libero tempore cum soluta</h5>
+            <p>Quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi.</p>
+          </li>
+          <li class="clear"></li>
+        </ul><!-- faq close -->
 
-      <div id="content">
-        <div id="header">
-          <h1>Welcome aboard</h1>
-          <h2>You&rsquo;re riding Ruby on Rails!</h2>
-        </div>
+        <div id="footer">
+          &copy; 2011 <a href="http://chibitxt.me">Chibi</a> All rights reserved.
+        </div><!-- footer close -->
 
-        <div id="about">
-          <h3><a href="rails/info/properties" onclick="about(); return false">About your application&rsquo;s environment</a></h3>
-          <div id="about-content" style="display: none"></div>
-        </div>
-
-        <div id="getting-started">
-          <h1>Getting started</h1>
-          <h2>Here&rsquo;s how to get rolling:</h2>
-
-          <ol>
-            <li>
-              <h2>Use <code>rails generate</code> to create your models and controllers</h2>
-              <p>To see all available options, run it without parameters.</p>
-            </li>
-
-            <li>
-              <h2>Set up a default route and remove <span class="filename">public/index.html</span></h2>
-              <p>Routes are set up in <span class="filename">config/routes.rb</span>.</p>
-            </li>
-
-            <li>
-              <h2>Create your database</h2>
-              <p>Run <code>rake db:create</code> to create your database. If you're not using SQLite (the default), edit <span class="filename">config/database.yml</span> with your username and password.</p>
-            </li>
-          </ol>
-        </div>
-      </div>
-
-      <div id="footer">&nbsp;</div>
-    </div>
-  </body>
+      </div><!-- wrap close -->
+    </div><!-- fancy close -->
+</body>
 </html>
+
