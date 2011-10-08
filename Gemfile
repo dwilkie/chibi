@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.1.0'
+gem 'rails', '3.1.1'
 gem 'haml'
 gem 'conversational', '~> 0.4.1'
 gem 'sunspot_rails'
