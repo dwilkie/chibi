@@ -1,0 +1,14 @@
+%tr{:class => cycle("odd", "even")}
+  %td
+    = user.name
+  %td
+    = truncate(user.mobile_number, :length => 10)
+  %td
+    = user.date_of_birth
+  %td
+    = user.gender
+  %td
+    = user.location
+  %td
+    = user.looking_for
+

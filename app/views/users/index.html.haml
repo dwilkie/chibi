@@ -1,0 +1,20 @@
+%h2
+  Users
+  = "(#{@user_count})"
+%table
+  %tr
+    %th
+      Name
+    %th
+      Mobile Number
+    %th
+      DOB
+    %th
+      Gender
+    %th
+      Location
+    %th
+      Looking For
+  = render @users
+= paginate @users
+

@@ -541,3 +541,22 @@ h5{
   color: #fff;
 }
 
+// User added styles
+
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+th {
+    padding: 0 0.5em;
+    text-align: left;
+  }
+
+td {
+    padding: 0 0.5em;
+  }
+

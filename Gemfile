@@ -5,6 +5,7 @@ gem 'haml'
 gem 'conversational', '~> 0.4.1'
 gem 'sunspot_rails'
 gem 'pg'
+gem 'kaminari'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'

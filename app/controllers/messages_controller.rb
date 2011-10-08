@@ -1,5 +1,4 @@
 class MessagesController < ApplicationController
-
   def index
     @messages = Message.scoped
   end
