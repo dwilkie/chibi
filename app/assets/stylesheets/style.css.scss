@@ -7,27 +7,26 @@ body, h1, h2, h3, h3, h4, h5, h6, p, ul, ol, li, form, input, img, blockquote, c
   border: none;
 }
 
-
 /* - -- --- LOAD CUSTOM FONT --- -- - */
 
 @font-face {
   font-family: 'DroidSansRegular';
-  src: url('../font/DroidSans-webfont.eot');
+  src: font-url('DroidSans-webfont.eot');
   src: local('DroidSans'),
-    url('../font/DroidSans-webfont.woff') format('woff'),
-    url('../font/DroidSans-webfont.ttf') format('truetype'),
-    url('../font/DroidSans-webfont.svg#webfontLahtyDxO') format('svg');
+    font-url('DroidSans-webfont.woff') format('woff'),
+    font-url('DroidSans-webfont.ttf') format('truetype'),
+    font-url('DroidSans-webfont.svg#webfontLahtyDxO') format('svg');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'DroidSansBold';
-  src: url('../font/DroidSans-Bold-webfont.eot');
+  src: font-url('DroidSans-Bold-webfont.eot');
   src: local('DroidSans Bold'),
-    url('../font/DroidSans-Bold-webfont.woff') format('woff'),
-    url('../font/DroidSans-Bold-webfont.ttf') format('truetype'),
-    url('../font/DroidSans-Bold-webfont.svg#webfont8VfWbLAP') format('svg');
+    font-url('DroidSans-Bold-webfont.woff') format('woff'),
+    font-url('DroidSans-Bold-webfont.ttf') format('truetype'),
+    font-url('DroidSans-Bold-webfont.svg#webfont8VfWbLAP') format('svg');
   font-weight: normal;
   font-style: normal;
 }
