@@ -1,5 +1,4 @@
 class User < ActiveRecord::Base
-
   has_many :messages, :through => :subscriptions
   has_many :replies,  :through => :subscriptions
 
@@ -22,7 +21,9 @@ class User < ActiveRecord::Base
 
   PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
 
-  searchable do
+  # disables sunspots autotomatic autoindexing...
+  # turn this back on when solr is enabled on Heroku
+  searchable :auto_index => false do
     string  :gender
     string  :looking_for
     text    :location, :boost => 5
