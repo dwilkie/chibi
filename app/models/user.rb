@@ -99,6 +99,10 @@ class User < ActiveRecord::Base
     gender == 'f'
   end
 
+  def male?
+    gender == 'm'
+  end
+
   def profile_complete?
     profile_complete = true
 

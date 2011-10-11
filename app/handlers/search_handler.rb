@@ -19,35 +19,37 @@ class SearchHandler < MessageHandler
 
     profile_complete = user.profile_complete?
 
+    extract_gender(stripped_body, profile_complete)
     extract_date_of_birth(stripped_body, profile_complete)
     extract_name(stripped_body, profile_complete)
   end
 
   def extract_date_of_birth(body, force_update)
-    match = strip_match!(body, /(\d{2})\s*(chnam|yo)?/)[1]
+    match = strip_match!(body, /(\d{2})\s*(chnam|yo)?/).try(:[], 1)
     user.age = match.to_i if match && (force_update || user.date_of_birth.nil?)
   end
 
   def extract_name(body, force_update)
-    match = strip_match!(body, /\A(im|i'm|m|kjom|nhom|nyom|knhom|knyom)?\s*(\b\w+\b)/i)[2]
+    match = strip_match!(body, /\A(im|i'm|m|kjom|nhom|nyom|knhom|knyom)?\s*(\b\w+\b)/i).try(:[], 2)
     user.name = match.downcase if match && (force_update || user.name.nil?)
   end
 
   def extract_gender(body, force_update)
-    # test cases:
+    if from_female?(body)
+      user.gender = "f"
+    elsif from_male?(body)
+      user.gender = "m"
+    end
+  end
 
-    # want girl friend
-    # want girlfriend
-    # jong rok mit srey
-    # kjom broh jong rok mit srey
+  def from_female?(body)
+    match = strip_match!(body, /\b(srey|girl|f|female)\b/)
+    match
+  end
 
-    # if there's 1 gender, then assume that's what the user is looking for
-    # if there's 2 genders then the first one is their gender, 2nd is what their looking for
-    # if they say *friend* without a gender then they r looking for a friend (don't know gender)
-    # if they say gender + *friend* or *friend* + gender they're looking for that gender
-    # keywords: girlfriend, boyfriend, friend, srey, broh, girl, boy, \bm\b, \bf\b, man, woman, bf, gf, bfriend, gfriend
-    match = strip_match!(body, /||/)
-
+  def from_male?(body)
+    match = strip_match!(body, /\b(bros|broh|m|male|boy)\b/)
+    match
   end
 
   def strip_match!(body, regexp)

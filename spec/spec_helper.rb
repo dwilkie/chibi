@@ -32,6 +32,9 @@ Spork.each_run do
     # instead of true.
     config.use_transactional_fixtures = false
 
+    config.treat_symbols_as_metadata_keys_with_true_values = true
+    config.filter_run :focus => true
+
     # use database cleaner if not using transactional fixtures
 
     config.before(:suite) do

@@ -31,7 +31,7 @@ describe User do
     end
   end
 
-  describe "#profile_complete?", :wip => true do
+  describe "#profile_complete?" do
     context "has a complete profile" do
       it "should be true" do
         user_with_complete_profile.should be_profile_complete
@@ -60,6 +60,63 @@ describe User do
       end
     end
   end
+
+  describe "female?" do
+    context "gender is 'f'" do
+      before do
+        subject.gender = "f"
+      end
+
+      it "should be true" do
+        subject.should be_female
+      end
+    end
+
+    context "gender is 'm'" do
+      before do
+        subject.gender = "m"
+      end
+
+      it "should be false" do
+        subject.should_not be_female
+      end
+    end
+
+    context "gender is not set" do
+      it "should be false" do
+        subject.should_not be_female
+      end
+    end
+  end
+
+  describe "male?" do
+    context "gender is 'm'" do
+      before do
+        subject.gender = "m"
+      end
+
+      it "should be true" do
+        subject.should be_male
+      end
+    end
+
+    context "gender is 'f'" do
+      before do
+        subject.gender = "f"
+      end
+
+      it "should be false" do
+        subject.should_not be_male
+      end
+    end
+
+    context "gender is not set" do
+      it "should be false" do
+        subject.should_not be_male
+      end
+    end
+  end
+
 
   describe "#age=" do
     context "15" do
