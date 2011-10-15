@@ -41,12 +41,12 @@ user. If you really don't care to have a database for your user, just skip this 
 
 Also, you need to change the postgresql.conf file to make PostgreSQL listen on at least localhost. If you have a setup where you want to listen on an external IP or something, change this line to either the IP or just '*' or something.
 
-    # /etc/postgresql/8.4/main/postgresql.conf
+    # /etc/postgresql/9.1/main/postgresql.conf
     listen_addresses = 'localhost'
 
 Then, in pg_hba.conf, make sure you've got this (note I didn't change this file when setting up):
 
-    # /etc/postgresql/8.4/main/pg_hba.conf:
+    # /etc/postgresql/9.1/main/pg_hba.conf:
     # "local" is for Unix domain socket connections only
     local   all         all                               md5
 
