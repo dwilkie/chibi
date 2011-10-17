@@ -1,5 +1,4 @@
 class SearchHandler < MessageHandler
-
   def process!
     extract_user_details
 
@@ -32,6 +31,13 @@ class SearchHandler < MessageHandler
     user.name = match.downcase if match && (force_update || user.name.nil?)
   end
 
+  def extract_gender_and_looking_for(body, force_update)
+    unless includes_gender_and_looking_for?(body)
+      extract_looking_for(body, :include_shared_gender_words => user.gender.present?)
+      extract_gender(body, force_update)
+    end
+  end
+
   def includes_gender_and_looking_for?(body)
     tmp_body = body.dup
     if sex = gender(tmp_body, :only_first => true)
@@ -43,19 +49,13 @@ class SearchHandler < MessageHandler
     end
   end
 
-  def extract_gender_and_looking_for(body, force_update)
-    unless includes_gender_and_looking_for?(body)
-      extract_looking_for(body)
-      extract_gender(body, force_update)
-    end
-  end
-
-  def extract_looking_for(body)
-    user.looking_for = looking_for(body)
+  def extract_looking_for(body, options = {})
+    user.looking_for = looking_for(body, options)
   end
 
   def extract_gender(body, force_update)
-    user.gender = gender(body)
+    sex = gender(body)
+    user.gender = sex if sex && (user.gender.nil? || force_update)
   end
 
   def looking_for(body, options = {})
@@ -79,12 +79,24 @@ class SearchHandler < MessageHandler
   end
 
   def looking_for_female?(body, options = {})
-    regexp = options[:use_only_shared_gender_words] ? /\b(girl|srey)\b/i : /\b(girlfriend|gf|friend girl|girl friend|met srey|mit srey)\b/i
+    if options[:include_shared_gender_words]
+      regexp = /\b(girl|srey|girlfriend|gf|friend girl|girl friend|met srey|mit srey)\b/i
+    elsif options[:use_only_shared_gender_words]
+      regexp = /\b(girl|srey)\b/i
+    else
+      regexp = /\b(girlfriend|gf|friend girl|girl friend|met srey|mit srey)\b/i
+    end
     strip_match!(body, regexp)
   end
 
   def looking_for_male?(body, options = {})
-    regexp = options[:use_only_shared_gender_words] ? /\b(boy|bros|pros)\b/i : /\b(boyfriend|bf|friend boy|boy friend|met bros|met pros|mit bros|mit pros)\b/i
+    if options[:include_shared_gender_words]
+      regexp = /\b(boy|bros|pros|boyfriend|bf|friend boy|boy friend|met bros|met pros|mit bros|mit pros)\b/i
+    elsif options[:use_only_shared_gender_words]
+      regexp = /\b(boy|bros|pros)\b/i
+    else
+      regexp = /\b(boyfriend|bf|friend boy|boy friend|met bros|met pros|mit bros|mit pros)\b/i
+    end
     strip_match!(body, regexp)
   end
 

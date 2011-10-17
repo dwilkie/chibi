@@ -11,7 +11,7 @@ def gender_examples(examples, options)
 end
 
 def check_gender_and_looking_for(message, gender, looking_for)
-  context "'#{message}'", :focus do
+  context "'#{message}'" do
     before do
       subject.user = user
       subject.body = message
@@ -69,70 +69,273 @@ describe SearchHandler do
       subject.process!
     end
 
-    context "where the message is" do
-      #keywords: girlfriend, boyfriend, friend, srey, bros, bros, girl, boy, \bm\b, \bf\b, man, woman, bf, gf, bfriend, gfriend
+    context "where the user is" do
+      context "a guy" do
+        before do
+          user.update_attribute(:gender, "m")
+        end
 
-      # gender unknown
-      #   looking_for unknown   (1)
-      #   looking_for known     (2)
-      # gender known
-      #   looking_for unknown   (3)
-      #   looking_for known
-      #     profile_incomplete (4)
-      #     profile_complete   (5)
+        shared_examples_for "a guy texting" do
+          context "and the message is" do
+            # looking for a guy
+            gender_examples(
+              ["bros", "pros", "boy"],
+              :gender => :male,
+              :looking_for => :male
+            )
 
-      # messages:
-        # jong rok mit srey
-          # 1. {:gender => nil, :looking_for => 'f'}
-          # 2. {:gender => nil, :looking_for => 'f'}
-          # 3. {:gender => <unchanged>, :looking_for => 'f'}
-          # 4. {:gender => <unchanged>, :looking_for => 'f'}
-          # 5  {:gender => <unchanged>, :looking_for => 'f'}
-        # kjom bros jong rok mit srey
-          # 1. {:gender => 'm', :looking_for => 'f'}
+            # looking for a girl
+            gender_examples(
+              ["srey", "girl"],
+              :gender => :male,
+              :looking_for => :female
+            )
 
-      GUY_LOOKING_FOR_GIRL = ["kjom bros jong rok mit srey", "asdfas asd m jab girl sweet"]
-      GIRL_LOOKING_FOR_GUY = ["kunthia f pp blah bros", "nhom srey jong mian bf"]
-      GAY = ["nhom bros jong rok mit bros", "bob m jong mian boy friend"]
-      LESBIAN = ["nhom girl jong rok mit srey", "mara f jong mian girl for fun"]
-      GUY_LOOKING_FOR_FRIEND = ["nhom boy looking for friend", "dave m jong rok met", "john bros rok mit"]
-      GIRL_LOOKING_FOR_FRIEND = ["nhom kunthia f looking for friend", "mara srey jong rok met", "john female rok mit"]
+            # looking for a friend
+            gender_examples(
+              ["friend", "met", "mit"],
+              :gender => :male,
+              :looking_for => :either
+            )
+          end
+        end
 
-      gender_examples(
-        ["bros", "pros", "boy", "m", "male"],
-        :gender => :male,
-        :looking_for => nil
-      )
+        it_should_behave_like "a guy texting"
 
-      gender_examples(
-        ["srey", "girl", "f", "female"],
-        :gender => :female,
-        :looking_for => nil
-      )
+        context "and is looking for a" do
+          context "guy" do
+            before do
+              user.update_attribute(:looking_for, "m")
+            end
 
-      gender_examples(
-        ["girl friend", "gf", "girlfriend", "friend girl", "met srey", "mit srey"],
-        :gender => nil,
-        :looking_for => :female
-      )
+            it_should_behave_like "a guy texting"
+          end
 
-      gender_examples(
-        ["boy friend" , "bf", "boyfriend", "friend boy", "met bros", "met pros", "mit bros", "mit pros"],
-        :gender => nil,
-        :looking_for => :male
-      )
+          context "girl" do
+            before do
+              user.update_attribute(:looking_for, "f")
+            end
 
-      gender_examples(
-        ["friend", "mit", "met"],
-        :gender => nil,
-        :looking_for => :either
-      )
+            it_should_behave_like "a guy texting"
+          end
 
-      gender_examples(
-        ["kjom bros jong rok mit srey", "asdfas asd m jab girl sweet", "sadf pros jaba asd srey cute"],
-        :gender => :male,
-        :looking_for => :female
-      )
+          context "friend" do
+            before do
+              user.update_attribute(:looking_for, "e")
+            end
+
+            it_should_behave_like "a guy texting"
+          end
+        end
+      end
+
+      context "a girl" do
+        before do
+          user.update_attribute(:gender, "f")
+        end
+
+        shared_examples_for "a girl texting" do
+          context "and the message is" do
+            # looking for a girl
+            gender_examples(
+              ["srey", "girl"],
+              :gender => :female,
+              :looking_for => :female
+            )
+
+            # looking for a guy
+            gender_examples(
+              ["bros", "pros", "boy"],
+              :gender => :female,
+              :looking_for => :male
+            )
+
+            # looking for a friend
+            gender_examples(
+              ["friend", "met", "mit"],
+              :gender => :female,
+              :looking_for => :either
+            )
+          end
+        end
+
+        it_should_behave_like "a girl texting"
+
+        context "and is looking for a" do
+          context "guy" do
+            before do
+              user.update_attribute(:looking_for, "m")
+            end
+
+            it_should_behave_like "a girl texting"
+          end
+
+          context "girl" do
+            before do
+              user.update_attribute(:looking_for, "f")
+            end
+
+            it_should_behave_like "a girl texting"
+          end
+
+          context "friend" do
+            before do
+              user.update_attribute(:looking_for, "e")
+            end
+
+            it_should_behave_like "a girl texting"
+          end
+        end
+      end
+
+      context "looking for a", :focus do
+        context "guy" do
+          before do
+            user.update_attribute(:looking_for, "m")
+          end
+
+          context "and the message is" do
+            # guy texting
+            gender_examples(
+              ["bros", "pros", "boy", "m", "male"],
+              :gender => :male,
+              :looking_for => :male
+            )
+
+            # girl texting
+            gender_examples(
+              ["srey", "girl", "f", "female"],
+              :gender => :female,
+              :looking_for => :male
+            )
+          end
+        end
+
+        context "girl" do
+          before do
+            user.update_attribute(:looking_for, "f")
+          end
+
+          context "and the message is" do
+            # guy texting
+            gender_examples(
+              ["bros", "pros", "boy", "m", "male"],
+              :gender => :male,
+              :looking_for => :female
+            )
+
+            # girl texting
+            gender_examples(
+              ["srey", "girl", "f", "female"],
+              :gender => :female,
+              :looking_for => :female
+            )
+          end
+        end
+
+        context "friend" do
+          before do
+            user.update_attribute(:looking_for, "e")
+          end
+
+          context "and the message is" do
+            # guy texting
+            gender_examples(
+              ["bros", "pros", "boy", "m", "male"],
+              :gender => :male,
+              :looking_for => :either
+            )
+
+            # girl texting
+            gender_examples(
+              ["srey", "girl", "f", "female"],
+              :gender => :female,
+              :looking_for => :either
+            )
+          end
+        end
+      end
+
+      context "new" do
+        context "and the message is" do
+          # guy texting
+          gender_examples(
+            ["bros", "pros", "boy", "m", "male"],
+            :gender => :male,
+            :looking_for => nil
+          )
+
+          # girl texting
+          gender_examples(
+            ["srey", "girl", "f", "female"],
+            :gender => :female,
+            :looking_for => nil
+          )
+
+          # looking for a girl
+          gender_examples(
+            ["girl friend", "gf", "girlfriend", "friend girl", "met srey", "mit srey"],
+            :gender => nil,
+            :looking_for => :female
+          )
+
+          # looking for a guy
+          gender_examples(
+            ["boy friend" , "bf", "boyfriend", "friend boy", "met bros", "met pros", "mit bros", "mit pros"],
+            :gender => nil,
+            :looking_for => :male
+          )
+
+          # looking for a friend
+          gender_examples(
+            ["friend", "mit", "met"],
+            :gender => nil,
+            :looking_for => :either
+          )
+
+          # guy looking for a girl
+          gender_examples(
+            ["kjom bros jong rok mit srey", "asdfas asd m jab girl sweet", "sadf pros jaba asd srey cute"],
+            :gender => :male,
+            :looking_for => :female
+          )
+
+          # girl looking for a guy
+          gender_examples(
+            ["kunthia f pp blah bros saat nas", "nhom srey jong mian pros hot", "i girl want boy rich"],
+            :gender => :female,
+            :looking_for => :male
+          )
+
+          # guy looking for guy
+          gender_examples(
+            ["nhom bros jong rok mit bros", "bob m jong mian boy hot", "dsafds male jong pros"],
+            :gender => :male,
+            :looking_for => :male
+          )
+
+          # girl looking for girl
+          gender_examples(
+            ["nhom girl jong rok mit srey", "mara f jong mian girl for fun", "kunthia female jong mian srey cute"],
+            :gender => :female,
+            :looking_for => :female
+          )
+
+          # guy looking for friend
+          gender_examples(
+            ["nhom boy looking for friend to txt", "dave m jong rok met likes squash", "john bros rok mit funny"],
+            :gender => :male,
+            :looking_for => :either
+          )
+
+          # girl looking for friend
+          gender_examples(
+            ["nhom kunthia f looking for friend play txt", "mara srey jong rok met leng sms", "john female rok mit cute"],
+            :gender => :female,
+            :looking_for => :either
+          )
+        end
+      end
 
       context "'kjom Vichet 23chnam phnom penh jong rok mit srey'" do
         def normalize_profile(new_profile_value)
