@@ -114,6 +114,10 @@ class User < ActiveRecord::Base
     profile_complete
   end
 
+  def age
+    Time.now.utc.year - date_of_birth.utc.year
+  end
+
   def age=(value)
     self.date_of_birth = value.years.ago.utc
   end

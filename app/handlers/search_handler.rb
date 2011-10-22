@@ -21,6 +21,13 @@ class SearchHandler < MessageHandler
     extract_name(stripped_body, profile_complete)
   end
 
+  def extract_gender_and_looking_for(body, force_update)
+    unless includes_gender_and_looking_for?(body)
+      extract_looking_for(body, :include_shared_gender_words => user.gender.present?)
+      extract_gender(body, force_update)
+    end
+  end
+
   def extract_date_of_birth(body, force_update)
     match = strip_match!(body, /(\d{2})\s*(chnam|yo)?/).try(:[], 1)
     user.age = match.to_i if match && (force_update || user.date_of_birth.nil?)
@@ -29,13 +36,6 @@ class SearchHandler < MessageHandler
   def extract_name(body, force_update)
     match = strip_match!(body, /\A(im|i'm|m|kjom|nhom|nyom|knhom|knyom)?\s*(\b\w+\b)/i).try(:[], 2)
     user.name = match.downcase if match && (force_update || user.name.nil?)
-  end
-
-  def extract_gender_and_looking_for(body, force_update)
-    unless includes_gender_and_looking_for?(body)
-      extract_looking_for(body, :include_shared_gender_words => user.gender.present?)
-      extract_gender(body, force_update)
-    end
   end
 
   def includes_gender_and_looking_for?(body)
@@ -50,7 +50,8 @@ class SearchHandler < MessageHandler
   end
 
   def extract_looking_for(body, options = {})
-    user.looking_for = looking_for(body, options)
+    user_looking_for = looking_for(body, options)
+    user.looking_for = user_looking_for if user_looking_for
   end
 
   def extract_gender(body, force_update)

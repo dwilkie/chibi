@@ -1,21 +1,27 @@
 require 'spec_helper'
 
 def gender_examples(examples, options)
-  gender = options[:gender]
-  looking_for = options[:looking_for]
-
   examples.each do |message|
-    check_gender_and_looking_for(message, gender, looking_for)
-    check_gender_and_looking_for(message.upcase, gender, looking_for)
+    check_gender_and_looking_for(message, options)
+    check_gender_and_looking_for(message.upcase, options) if message.present?
   end
 end
 
-def check_gender_and_looking_for(message, gender, looking_for)
+def check_gender_and_looking_for(message, options)
+  new_options = options.dup
+  gender = new_options.delete(:gender)
+  looking_for = new_options.delete(:looking_for)
+
   context "'#{message}'" do
     before do
       subject.user = user
       subject.body = message
+      Timecop.freeze(Time.now)
       process_message
+    end
+
+    after do
+      Timecop.return
     end
 
     context "the user's" do
@@ -42,13 +48,31 @@ def check_gender_and_looking_for(message, gender, looking_for)
           end
         end
       end
+
+      check_user_attributes(new_options)
+    end
+  end
+end
+
+def check_user_attributes(options)
+  options.each do |attribute, value|
+    context attribute do
+      if attribute
+        it "should be #{value}" do
+          user.send(attribute).should == value
+        end
+      else
+        it "should be unknown" do
+          user.send(attribute).should be_nil
+        end
+      end
     end
   end
 end
 
 describe SearchHandler do
   let(:user) do
-    create(:user)
+    User.new
   end
 
   let(:user_with_complete_profile) do
@@ -57,14 +81,6 @@ describe SearchHandler do
 
   describe "#process!" do
 
-    before do
-      Timecop.freeze(Time.now)
-    end
-
-    after do
-      Timecop.return
-    end
-
     def process_message
       subject.process!
     end
@@ -72,10 +88,10 @@ describe SearchHandler do
     context "where the user is" do
       context "a guy" do
         before do
-          user.update_attribute(:gender, "m")
+          user.gender = "m"
         end
 
-        shared_examples_for "a guy texting" do
+        shared_examples_for "a guy texting" do |looking_for|
           context "and the message is" do
             # looking for a guy
             gender_examples(
@@ -97,44 +113,51 @@ describe SearchHandler do
               :gender => :male,
               :looking_for => :either
             )
+
+            # can't determine who they're looking for
+            gender_examples(
+              ["hello", "", "laskhdg"],
+              :gender => :male,
+              :looking_for => looking_for
+            )
           end
         end
 
-        it_should_behave_like "a guy texting"
+        it_should_behave_like "a guy texting", nil
 
         context "and is looking for a" do
           context "guy" do
             before do
-              user.update_attribute(:looking_for, "m")
+              user.looking_for = "m"
             end
 
-            it_should_behave_like "a guy texting"
+            it_should_behave_like "a guy texting", :male
           end
 
           context "girl" do
             before do
-              user.update_attribute(:looking_for, "f")
+              user.looking_for = "f"
             end
 
-            it_should_behave_like "a guy texting"
+            it_should_behave_like "a guy texting", :female
           end
 
           context "friend" do
             before do
-              user.update_attribute(:looking_for, "e")
+              user.looking_for = "e"
             end
 
-            it_should_behave_like "a guy texting"
+            it_should_behave_like "a guy texting", :either
           end
         end
       end
 
       context "a girl" do
         before do
-          user.update_attribute(:gender, "f")
+          user.gender = "f"
         end
 
-        shared_examples_for "a girl texting" do
+        shared_examples_for "a girl texting" do |looking_for|
           context "and the message is" do
             # looking for a girl
             gender_examples(
@@ -156,42 +179,49 @@ describe SearchHandler do
               :gender => :female,
               :looking_for => :either
             )
+
+            # can't determine they're looking for
+            gender_examples(
+              ["hello", "", "laskhdg"],
+              :gender => :female,
+              :looking_for => looking_for
+            )
           end
         end
 
-        it_should_behave_like "a girl texting"
+        it_should_behave_like "a girl texting", nil
 
         context "and is looking for a" do
           context "guy" do
             before do
-              user.update_attribute(:looking_for, "m")
+              user.looking_for = "m"
             end
 
-            it_should_behave_like "a girl texting"
+            it_should_behave_like "a girl texting", :male
           end
 
           context "girl" do
             before do
-              user.update_attribute(:looking_for, "f")
+              user.looking_for = "f"
             end
 
-            it_should_behave_like "a girl texting"
+            it_should_behave_like "a girl texting", :female
           end
 
           context "friend" do
             before do
-              user.update_attribute(:looking_for, "e")
+              user.looking_for = "e"
             end
 
-            it_should_behave_like "a girl texting"
+            it_should_behave_like "a girl texting", :either
           end
         end
       end
 
-      context "looking for a", :focus do
+      context "looking for a" do
         context "guy" do
           before do
-            user.update_attribute(:looking_for, "m")
+            user.looking_for = "m"
           end
 
           context "and the message is" do
@@ -213,7 +243,7 @@ describe SearchHandler do
 
         context "girl" do
           before do
-            user.update_attribute(:looking_for, "f")
+            user.looking_for = "f"
           end
 
           context "and the message is" do
@@ -235,7 +265,7 @@ describe SearchHandler do
 
         context "friend" do
           before do
-            user.update_attribute(:looking_for, "e")
+            user.looking_for = "e"
           end
 
           context "and the message is" do
@@ -333,6 +363,15 @@ describe SearchHandler do
             ["nhom kunthia f looking for friend play txt", "mara srey jong rok met leng sms", "john female rok mit cute"],
             :gender => :female,
             :looking_for => :either
+          )
+
+          # Vichet 23 guy from phnom penh looking for a girl
+          gender_examples(
+            ["kjom Vichet pros 23chnam phnom penh jong rok mit srey", "Vichet bros 23 phnom penh srey sexy"],
+            :gender => :male,
+            :looking_for => :female,
+            :age => 23,
+            :name => "vichet"
           )
         end
       end

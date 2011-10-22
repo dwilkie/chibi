@@ -49,9 +49,7 @@ describe User do
         end
       end
 
-      PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
-
-      PROFILE_ATTRIBUTES.each do |attribute|
+      ["name", "date_of_birth", "location", "gender", "looking_for"].each do |attribute|
         context attribute do
           it_should_behave_like "missing profile" do
             let(:attribute) {attribute}
@@ -117,12 +115,11 @@ describe User do
     end
   end
 
-
   describe "#age=" do
     context "15" do
       before do
         Timecop.freeze(Time.now)
-        user.age = 15
+        subject.age = 15
       end
 
       after do
@@ -130,7 +127,37 @@ describe User do
       end
 
       it "should set the user's date of birth to 15 years ago" do
-        user.date_of_birth.should == 15.years.ago.utc
+        subject.date_of_birth.should == 15.years.ago.utc
+      end
+    end
+  end
+
+  describe "#age" do
+    before do
+      Timecop.freeze(Time.now)
+    end
+
+    after do
+      Timecop.return
+    end
+
+    context "when user.age = 23" do
+      before do
+        subject.age = 23
+      end
+
+      it "should return 23" do
+        subject.age.should == 23
+      end
+    end
+
+    context "when the user's date of birth is 23 years ago" do
+      before do
+        subject.date_of_birth = 23.years.ago.utc
+      end
+
+      it "should return 23" do
+        subject.age.should == 23
       end
     end
   end
