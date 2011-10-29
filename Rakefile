@@ -4,5 +4,5 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-ChatBox::Application.load_tasks
+Chibi::Application.load_tasks
 

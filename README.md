@@ -1,4 +1,4 @@
-# ChatBox
+# Chibi
 
 ## Configuring Nuntium with Android
 
@@ -76,7 +76,7 @@ and type "bundle install" to install the gem.
 ### Step 3 - Configure Your Rails 3 Project
 To create a new Rails project that uses the PostgreSQL database, use the following command:
 
-    rails new chat_box -d postgresql
+    rails new chibi -d postgresql
 
 Alternatively, if you have an existing project that you want to switch over to PostgreSQL, just modify your config/database.yml file as follows:
 
@@ -87,7 +87,7 @@ Alternatively, if you have an existing project that you want to switch over to P
       adapter: postgresql
       encoding: unicode
       host: localhost
-      database: chat_box_development
+      database: chibi_development
       pool: 5
       username: <user>
       password: <password>
@@ -99,7 +99,7 @@ Alternatively, if you have an existing project that you want to switch over to P
       adapter: postgresql
       encoding: unicode
       host: localhost
-      database: chat_box_test
+      database: chibi_test
       pool: 5
       username: <user>
       password: <password>
@@ -112,8 +112,8 @@ A nice thing about the database.yml file is that you can specify even a differen
 
 You will need to add the development and test databases above using the createdb command.
 
-    createdb chat_box_development
-    createdb chat_box_test
+    createdb chibi_development
+    createdb chibi_test
 
 ## Setting up Sphinx (Ubuntu)
 
