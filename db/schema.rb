@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110919042428) do
+ActiveRecord::Schema.define(:version => 20111029062409) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -21,6 +21,16 @@ ActiveRecord::Schema.define(:version => 20110919042428) do
   end
 
   add_index "chats", ["user_id", "friend_id"], :name => "index_chats_on_user_id_and_friend_id", :unique => true
+
+  create_table "locations", :force => true do |t|
+    t.string   "city"
+    t.string   "country_code"
+    t.float    "latitude"
+    t.float    "longitude"
+    t.integer  "user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "messages", :force => true do |t|
     t.string   "from"
@@ -53,7 +63,6 @@ ActiveRecord::Schema.define(:version => 20110919042428) do
     t.string   "username"
     t.date     "date_of_birth"
     t.string   "gender",         :limit => 1
-    t.string   "location"
     t.string   "looking_for",    :limit => 1
     t.integer  "active_chat_id"
     t.datetime "created_at"

@@ -1,0 +1,64 @@
+# Sample localization file for English. Add more files in this directory for other locales.
+# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
+
+en:
+  close_session:
+    - bye
+    - goodbye
+  i_am:
+    - i am
+    - "i'm"
+    - im
+  years_old:
+    - years old
+    - yo
+  girlfriend:
+    - girlfriend
+    - gf
+    - friend girl
+    - girl friend
+  girl:
+    - f
+    - female
+  could_mean_girl_or_girlfriend:
+    - girl
+  boyfriend:
+    - boyfriend
+    - bf
+    - friend boy
+    - boy friend
+  boy:
+    - "(?<!')m"
+    - male
+  could_mean_boy_or_boyfriend:
+    - boy
+    - guy
+  friend:
+    - friend
+kh:
+  i_am:
+    - kjom
+    - nhom
+    - nyom
+    - knhom
+    - knyom
+  years_old:
+    - chnam
+    - yo
+  girlfriend:
+    - met srey
+    - mit srey
+  could_mean_girl_or_girlfriend:
+    - srey
+  boyfriend:
+    - met bros
+    - met pros
+    - mit bros
+    - mit pros
+  could_mean_boy_or_boyfriend:
+    - bros
+    - pros
+  friend:
+    - mit
+    - met
+

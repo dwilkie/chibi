@@ -1,4 +1,6 @@
 class User < ActiveRecord::Base
+  has_one :location
+
   has_many :messages, :through => :subscriptions
   has_many :replies,  :through => :subscriptions
 
@@ -115,7 +117,7 @@ class User < ActiveRecord::Base
   end
 
   def age
-    Time.now.utc.year - date_of_birth.utc.year
+    Time.now.utc.year - date_of_birth.utc.year if date_of_birth?
   end
 
   def age=(value)
@@ -123,7 +125,7 @@ class User < ActiveRecord::Base
   end
 
   def currently_chatting?
-    self.active_chat_id.present?
+    active_chat_id?
   end
 end
 

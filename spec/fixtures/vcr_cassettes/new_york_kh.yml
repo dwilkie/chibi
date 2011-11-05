@@ -1,0 +1,242 @@
+---
+- request:
+    method: get
+    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=new+york%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sun, 30 Oct 2011 07:21:10 GMT
+      expires:
+      - Mon, 31 Oct 2011 07:21:10 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      transfer-encoding:
+      - chunked
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"E New York St\",\n               \"short_name\"
+      : \"E New York St\",\n               \"types\" : [ \"route\" ]\n            },\n
+      \           {\n               \"long_name\" : \"Poly High\",\n               \"short_name\"
+      : \"Poly High\",\n               \"types\" : [ \"neighborhood\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Long Beach\",\n
+      \              \"short_name\" : \"Long Beach\",\n               \"types\" :
+      [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Los Angeles\",\n               \"short_name\" : \"Los Angeles\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"California\",\n               \"short_name\"
+      : \"CA\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"United States\",\n
+      \              \"short_name\" : \"US\",\n               \"types\" : [ \"country\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"90813\",\n               \"short_name\" : \"90813\",\n               \"types\"
+      : [ \"postal_code\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"E New York St, Long Beach, CA 90813, USA\",\n         \"geometry\" : {\n
+      \           \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 33.7851480,\n                  \"lng\" : -118.17725320\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 33.7843790,\n
+      \                 \"lng\" : -118.18668690\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 33.78486760,\n               \"lng\"
+      : -118.18175240\n            },\n            \"location_type\" : \"GEOMETRIC_CENTER\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 33.78611248029150,\n                  \"lng\" : -118.17725320\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 33.78341451970851,\n
+      \                 \"lng\" : -118.18668690\n               }\n            }\n
+      \        },\n         \"partial_match\" : true,\n         \"types\" : [ \"route\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+- request:
+    method: get
+    uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=33.7848676%2C-118.1817524&sensor=false
+    body: ''
+    headers:
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sun, 30 Oct 2011 07:21:11 GMT
+      expires:
+      - Mon, 31 Oct 2011 07:21:11 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      transfer-encoding:
+      - chunked
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"901\",\n               \"short_name\"
+      : \"901\",\n               \"types\" : [ \"street_number\" ]\n            },\n
+      \           {\n               \"long_name\" : \"E New York St\",\n               \"short_name\"
+      : \"E New York St\",\n               \"types\" : [ \"route\" ]\n            },\n
+      \           {\n               \"long_name\" : \"Poly High\",\n               \"short_name\"
+      : \"Poly High\",\n               \"types\" : [ \"neighborhood\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Long Beach\",\n
+      \              \"short_name\" : \"Long Beach\",\n               \"types\" :
+      [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Los Angeles\",\n               \"short_name\" : \"Los Angeles\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"California\",\n               \"short_name\"
+      : \"CA\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"United States\",\n
+      \              \"short_name\" : \"US\",\n               \"types\" : [ \"country\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"90813\",\n               \"short_name\" : \"90813\",\n               \"types\"
+      : [ \"postal_code\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"901 E New York St, Long Beach, CA 90813, USA\",\n         \"geometry\" :
+      {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 33.78486790,\n                  \"lng\" : -118.18068770\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 33.78486760,\n
+      \                 \"lng\" : -118.18175240\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 33.78488320,\n               \"lng\"
+      : -118.18175240\n            },\n            \"location_type\" : \"RANGE_INTERPOLATED\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 33.78621673029150,\n                  \"lng\" : -118.1798710697085\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 33.78351876970850,\n
+      \                 \"lng\" : -118.1825690302915\n               }\n            }\n
+      \        },\n         \"types\" : [ \"street_address\" ]\n      },\n      {\n
+      \        \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Poly High\",\n               \"short_name\" : \"Poly High\",\n               \"types\"
+      : [ \"neighborhood\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Long Beach\",\n               \"short_name\" : \"Long Beach\",\n               \"types\"
+      : [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Los Angeles\",\n               \"short_name\" : \"Los Angeles\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"California\",\n               \"short_name\"
+      : \"CA\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"United States\",\n
+      \              \"short_name\" : \"US\",\n               \"types\" : [ \"country\",
+      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Poly High, Long Beach, CA, USA\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 33.80256190,\n
+      \                 \"lng\" : -118.16780\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 33.7826170,\n                  \"lng\" : -118.18950080\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 33.7925370,\n               \"lng\" : -118.18540420\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 33.80256190,\n                  \"lng\" : -118.16780\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 33.7826170,\n                  \"lng\" : -118.18950080\n               }\n
+      \           }\n         },\n         \"types\" : [ \"neighborhood\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"90813\",\n               \"short_name\" : \"90813\",\n               \"types\"
+      : [ \"postal_code\" ]\n            },\n            {\n               \"long_name\"
+      : \"Long Beach\",\n               \"short_name\" : \"Long Beach\",\n               \"types\"
+      : [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Los Angeles\",\n               \"short_name\" : \"Los Angeles\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"California\",\n               \"short_name\"
+      : \"CA\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"United States\",\n
+      \              \"short_name\" : \"US\",\n               \"types\" : [ \"country\",
+      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Long Beach, CA 90813, USA\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 33.7902080,\n
+      \                 \"lng\" : -118.1665510\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 33.7667420,\n                  \"lng\" : -118.2406360\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 33.77936040,\n               \"lng\" : -118.19710310\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 33.7902080,\n                  \"lng\" : -118.1665510\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 33.7667420,\n                  \"lng\" : -118.2406360\n               }\n
+      \           }\n         },\n         \"types\" : [ \"postal_code\" ]\n      },\n
+      \     {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Long Beach\",\n               \"short_name\" : \"Long Beach\",\n               \"types\"
+      : [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Los Angeles\",\n               \"short_name\" : \"Los Angeles\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"California\",\n               \"short_name\"
+      : \"CA\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"United States\",\n
+      \              \"short_name\" : \"US\",\n               \"types\" : [ \"country\",
+      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Long Beach, CA, USA\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 33.8854590,\n
+      \                 \"lng\" : -118.0632530\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 33.6905930,\n                  \"lng\" : -118.2489660\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 33.80416670,\n               \"lng\" : -118.15805560\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 33.8854590,\n                  \"lng\" : -118.0632530\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 33.6905930,\n                  \"lng\" : -118.2489660\n               }\n
+      \           }\n         },\n         \"types\" : [ \"locality\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Los Angeles\",\n               \"short_name\" : \"Los Angeles\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"California\",\n               \"short_name\"
+      : \"CA\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"United States\",\n
+      \              \"short_name\" : \"US\",\n               \"types\" : [ \"country\",
+      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Los Angeles, California, USA\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 34.82319290,\n
+      \                 \"lng\" : -117.6456040\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 32.750040,\n                  \"lng\" : -118.9517210\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 34.38718210,\n               \"lng\" : -118.11226790\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 34.82319290,\n                  \"lng\" : -117.6456040\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 32.750040,\n                  \"lng\" : -118.9517210\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_2\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"California\",\n               \"short_name\" : \"CA\",\n               \"types\"
+      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"United States\",\n               \"short_name\"
+      : \"US\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"California, USA\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 42.00951690,\n                  \"lng\" : -114.1312110\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 32.5288320,\n
+      \                 \"lng\" : -124.4820030\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 36.7782610,\n               \"lng\"
+      : -119.41793240\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 42.00951690,\n                  \"lng\" : -114.1312110\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 32.5288320,\n
+      \                 \"lng\" : -124.4820030\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"United States\",\n               \"short_name\" : \"US\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"United States\",\n         \"geometry\" : {\n            \"bounds\" : {\n
+      \              \"northeast\" : {\n                  \"lat\" : 71.53879999999999,\n
+      \                 \"lng\" : -66.8854170\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 18.77630,\n                  \"lng\" : 170.59570\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 37.090240,\n               \"lng\" : -95.7128910\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 71.53879999999999,\n                  \"lng\"
+      : -66.8854170\n               },\n               \"southwest\" : {\n                  \"lat\"
+      : 18.77630,\n                  \"lng\" : 170.59570\n               }\n            }\n
+      \        },\n         \"types\" : [ \"country\", \"political\" ]\n      }\n
+      \  ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'

@@ -12,6 +12,10 @@ FactoryGirl.define do
     end
   end
 
+  factory :location do
+    country_code "KH"
+  end
+
   factory :user do
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
 

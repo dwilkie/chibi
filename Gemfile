@@ -6,6 +6,9 @@ gem 'conversational', '~> 0.4.1'
 gem 'sunspot_rails'
 gem 'pg'
 gem 'kaminari'
+gem "geocoder"
+gem "phony"
+gem "countries", :require => 'iso3166'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -37,6 +40,7 @@ group :test do
   gem 'factory_girl'
   gem 'spork', :git => 'git://github.com/timcharper/spork.git'
   gem 'fakeweb'
+  gem 'vcr', :git => 'git://github.com/myronmarston/vcr.git'
   gem 'guard-rspec'
   gem 'guard-spork'
   gem 'sunspot_test'

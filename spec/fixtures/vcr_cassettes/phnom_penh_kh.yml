@@ -1,0 +1,230 @@
+---
+- request:
+    method: get
+    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=phnom+penh%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sun, 30 Oct 2011 07:21:06 GMT
+      expires:
+      - Mon, 31 Oct 2011 07:21:06 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      transfer-encoding:
+      - chunked
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"Phnom Penh\",\n               \"short_name\"
+      : \"Phnom Penh\",\n               \"types\" : [ \"locality\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Prampir Makara\",\n
+      \              \"short_name\" : \"Prampir Makara\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Phnom Penh\",\n               \"short_name\"
+      : \"Phnom Penh\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Phnom Penh, Cambodia\",\n         \"geometry\" : {\n            \"location\"
+      : {\n               \"lat\" : 11.5588310,\n               \"lng\" : 104.9174450\n
+      \           },\n            \"location_type\" : \"APPROXIMATE\",\n            \"viewport\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 11.56976250,\n
+      \                 \"lng\" : 104.93345240\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 11.54789910,\n                  \"lng\" : 104.90143760\n
+      \              }\n            }\n         },\n         \"types\" : [ \"locality\",
+      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+- request:
+    method: get
+    uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=11.558831%2C104.917445&sensor=false
+    body: ''
+    headers:
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sun, 30 Oct 2011 07:21:06 GMT
+      expires:
+      - Mon, 31 Oct 2011 07:21:06 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      transfer-encoding:
+      - chunked
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"115\",\n               \"short_name\"
+      : \"115\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Khan 7 Makara\",\n               \"short_name\"
+      : \"Khan 7 Makara\",\n               \"types\" : [ \"sublocality\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Phnom Penh\",\n
+      \              \"short_name\" : \"Phnom Penh\",\n               \"types\" :
+      [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Prampir Makara\",\n               \"short_name\" : \"Prampir Makara\",\n
+      \              \"types\" : [ \"administrative_area_level_2\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Phnom Penh\",\n
+      \              \"short_name\" : \"Phnom Penh\",\n               \"types\" :
+      [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"115, Phnom Penh, Cambodia\",\n
+      \        \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.55988810,\n                  \"lng\" : 104.91722830\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.55810220,\n                  \"lng\" : 104.91718650\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 11.55899520,\n
+      \              \"lng\" : 104.91720740\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.56034413029150,\n                  \"lng\"
+      : 104.9185563802915\n               },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.55764616970850,\n                  \"lng\" : 104.9158584197085\n               }\n
+      \           }\n         },\n         \"types\" : [ \"route\" ]\n      },\n      {\n
+      \        \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Sangkat Veal Vong\",\n               \"short_name\" : \"Sangkat Veal Vong\",\n
+      \              \"types\" : [ \"neighborhood\", \"political\" ]\n            },\n
+      \           {\n               \"long_name\" : \"Phnom Penh\",\n               \"short_name\"
+      : \"Phnom Penh\",\n               \"types\" : [ \"locality\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Prampir Makara\",\n
+      \              \"short_name\" : \"Prampir Makara\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Phnom Penh\",\n               \"short_name\"
+      : \"Phnom Penh\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Sangkat Veal Vong, Phnom Penh, Cambodia\",\n         \"geometry\" : {\n
+      \           \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 11.56798850,\n                  \"lng\" : 104.91758840\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 11.55572340,\n
+      \                 \"lng\" : 104.9068740\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 11.55908890,\n               \"lng\"
+      : 104.91114450\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 11.56798850,\n                  \"lng\" : 104.91758840\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 11.55572340,\n
+      \                 \"lng\" : 104.9068740\n               }\n            }\n         },\n
+      \        \"types\" : [ \"neighborhood\", \"political\" ]\n      },\n      {\n
+      \        \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Khan 7 Makara\",\n               \"short_name\" : \"Khan 7 Makara\",\n               \"types\"
+      : [ \"sublocality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Phnom Penh\",\n               \"short_name\" : \"Phnom Penh\",\n               \"types\"
+      : [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Prampir Makara\",\n               \"short_name\" : \"Prampir Makara\",\n
+      \              \"types\" : [ \"administrative_area_level_2\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Phnom Penh\",\n
+      \              \"short_name\" : \"Phnom Penh\",\n               \"types\" :
+      [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Khan 7 Makara, Phnom Penh, Cambodia\",\n
+      \        \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.57147830,\n                  \"lng\" : 104.92034640\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.55579660,\n                  \"lng\" : 104.90655310\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 11.56316010,\n
+      \              \"lng\" : 104.91260440\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.57147830,\n                  \"lng\" : 104.92034640\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.55579660,\n                  \"lng\" : 104.90655310\n               }\n
+      \           }\n         },\n         \"types\" : [ \"sublocality\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Prampir Makara\",\n               \"short_name\" : \"Prampir Makara\",\n
+      \              \"types\" : [ \"administrative_area_level_2\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Phnom Penh\",\n
+      \              \"short_name\" : \"Phnom Penh\",\n               \"types\" :
+      [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Prampir Makara, Cambodia\",\n
+      \        \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.57187610,\n                  \"lng\" : 104.92073250\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.55556310,\n                  \"lng\" : 104.90622750\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 11.56316010,\n
+      \              \"lng\" : 104.91260440\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.57187610,\n                  \"lng\" : 104.92073250\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.55556310,\n                  \"lng\" : 104.90622750\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
+      \              \"long_name\" : \"Phnom Penh\",\n               \"short_name\"
+      : \"Phnom Penh\",\n               \"types\" : [ \"locality\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Phnom Penh\",\n
+      \              \"short_name\" : \"Phnom Penh\",\n               \"types\" :
+      [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Phnom Penh, Cambodia\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 11.67392350,\n                  \"lng\" : 104.94844440\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 11.43720760,\n
+      \                 \"lng\" : 104.77652550\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 11.56821270,\n               \"lng\"
+      : 104.86881260\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 11.67392350,\n                  \"lng\" : 104.94844440\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 11.43720760,\n
+      \                 \"lng\" : 104.77652550\n               }\n            }\n
+      \        },\n         \"types\" : [ \"locality\", \"political\" ]\n      },\n
+      \     {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Phnom Penh\",\n               \"short_name\" : \"Phnom Penh\",\n               \"types\"
+      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Phnom Penh, Cambodia\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 11.6824860,\n                  \"lng\" : 104.9688030\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 11.4287260,\n
+      \                 \"lng\" : 104.7796530\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 11.54487290,\n               \"lng\"
+      : 104.89216680\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 11.6824860,\n                  \"lng\" : 104.9688030\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 11.4287260,\n
+      \                 \"lng\" : 104.7796530\n               }\n            }\n         },\n
+      \        \"types\" : [ \"administrative_area_level_1\", \"political\" ]\n      },\n
+      \     {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.177999999999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
+      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.177999999999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'

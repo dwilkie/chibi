@@ -9,6 +9,10 @@ describe User do
     create(:user)
   end
 
+  let(:new_user) do
+    build(:user)
+  end
+
   let(:user_with_complete_profile) do
     create(:user_with_complete_profile)
   end
@@ -23,6 +27,17 @@ describe User do
 
   let(:guys_looking_for_girls) do
     create_list(:guy_looking_for_girls, 4)
+  end
+
+  it "should not be valid without a mobile number" do
+    new_user.mobile_number = nil
+    user.should_not be_valid
+  end
+
+  context "factory" do
+    it "factory should be valid" do
+      new_user.should be_valid
+    end
   end
 
   describe ".matches" do
@@ -160,6 +175,14 @@ describe User do
         subject.age.should == 23
       end
     end
+
+    context "when the user's date of birth is unknown" do
+
+      it "should return nil" do
+        subject.age.should be_nil
+      end
+    end
+
   end
 end
 

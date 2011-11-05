@@ -6,7 +6,6 @@ class CreateUsers < ActiveRecord::Migration
       t.string :username
       t.date   :date_of_birth
       t.string :gender, :limit => 1
-      t.string :location
       t.string :looking_for, :limit => 1
       t.references :active_chat
       t.timestamps

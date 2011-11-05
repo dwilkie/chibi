@@ -1,0 +1,182 @@
+---
+- request:
+    method: get
+    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=siem+reab%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sun, 30 Oct 2011 07:29:40 GMT
+      expires:
+      - Mon, 31 Oct 2011 07:29:40 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      transfer-encoding:
+      - chunked
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"Siem Reap\",\n               \"short_name\"
+      : \"Siem Reap\",\n               \"types\" : [ \"locality\", \"political\" ]\n
+      \           },\n            {\n               \"long_name\" : \"Siem Reap\",\n
+      \              \"short_name\" : \"Siem Reap\",\n               \"types\" : [
+      \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Siem Reap\",\n               \"short_name\"
+      : \"Siem Reap\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Siem Reap, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 13.4213470,\n
+      \                 \"lng\" : 103.92190930\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 13.31587990,\n                  \"lng\" : 103.77651210\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 13.36222220,\n               \"lng\" : 103.85972220\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 13.4056420,\n                  \"lng\" : 103.92375190\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 13.31879460,\n                  \"lng\" : 103.79569250\n               }\n
+      \           }\n         },\n         \"types\" : [ \"locality\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+- request:
+    method: get
+    uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=13.3622222%2C103.8597222&sensor=false
+    body: ''
+    headers:
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sun, 30 Oct 2011 07:29:41 GMT
+      expires:
+      - Mon, 31 Oct 2011 07:29:41 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      transfer-encoding:
+      - chunked
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"Charles De Gaulle\",\n               \"short_name\"
+      : \"Charles De Gaulle\",\n               \"types\" : [ \"route\" ]\n            },\n
+      \           {\n               \"long_name\" : \"Siem Reap\",\n               \"short_name\"
+      : \"Siem Reap\",\n               \"types\" : [ \"locality\", \"political\" ]\n
+      \           },\n            {\n               \"long_name\" : \"Siem Reap\",\n
+      \              \"short_name\" : \"Siem Reap\",\n               \"types\" : [
+      \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Siem Reap\",\n               \"short_name\"
+      : \"Siem Reap\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Charles De Gaulle, Siem Reap, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 13.36385380,\n
+      \                 \"lng\" : 103.86006440\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 13.361750,\n                  \"lng\" : 103.85975520\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 13.36280590,\n               \"lng\" : 103.85988140\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 13.36415088029150,\n                  \"lng\"
+      : 103.8612587802915\n               },\n               \"southwest\" : {\n                  \"lat\"
+      : 13.36145291970850,\n                  \"lng\" : 103.8585608197085\n               }\n
+      \           }\n         },\n         \"types\" : [ \"route\" ]\n      },\n      {\n
+      \        \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Siem Reap\",\n               \"short_name\" : \"Siem Reap\",\n               \"types\"
+      : [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Siem Reap\",\n               \"short_name\" : \"Siem Reap\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Siem Reap\",\n               \"short_name\"
+      : \"Siem Reap\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Siem Reap, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 13.4213470,\n
+      \                 \"lng\" : 103.92190930\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 13.31587990,\n                  \"lng\" : 103.77651210\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 13.36222220,\n               \"lng\" : 103.85972220\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 13.4213470,\n                  \"lng\" : 103.92190930\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 13.31587990,\n                  \"lng\" : 103.77651210\n               }\n
+      \           }\n         },\n         \"types\" : [ \"locality\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Siem Reap\",\n               \"short_name\" : \"Siem Reap\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Siem Reap\",\n               \"short_name\"
+      : \"Siem Reap\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Siem Reap, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 13.50932530,\n
+      \                 \"lng\" : 103.92379760\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 13.22340220,\n                  \"lng\" : 103.7324810\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 13.36709680,\n               \"lng\" : 103.84481340\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 13.50932530,\n                  \"lng\" : 103.92379760\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 13.22340220,\n                  \"lng\" : 103.7324810\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
+      \              \"long_name\" : \"Siem Reap\",\n               \"short_name\"
+      : \"Siem Reap\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Siem Reap, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 14.2219980,\n
+      \                 \"lng\" : 104.6890930\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 12.7161090,\n                  \"lng\" : 103.3926540\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 13.69153770,\n               \"lng\" : 104.10013260\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.2219980,\n                  \"lng\" : 104.6890930\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 12.7161090,\n                  \"lng\" : 103.3926540\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.177999999999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
+      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.177999999999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
