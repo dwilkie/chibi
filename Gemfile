@@ -38,7 +38,7 @@ group :test do
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'factory_girl'
-  gem 'spork', :git => 'git://github.com/timcharper/spork.git'
+  gem 'spork', :git => 'git://github.com/sporkrb/spork.git'
   gem 'fakeweb'
   gem 'vcr', :git => 'git://github.com/myronmarston/vcr.git'
   gem 'guard-rspec'
