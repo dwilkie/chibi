@@ -22,6 +22,7 @@ en:
     - female
   could_mean_girl_or_girlfriend:
     - girl
+    - woman
   boyfriend:
     - boyfriend
     - bf
@@ -33,6 +34,7 @@ en:
   could_mean_boy_or_boyfriend:
     - boy
     - guy
+    - man
   friend:
     - friend
 kh:
@@ -44,7 +46,6 @@ kh:
     - knyom
   years_old:
     - chnam
-    - yo
   girlfriend:
     - met srey
     - mit srey
