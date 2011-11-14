@@ -33,7 +33,6 @@ class MessageHandler
       all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
     end
    "(#{all_keywords.join('|')})"
-
   end
 
   def contains_command?(command)

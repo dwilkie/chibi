@@ -120,14 +120,14 @@ class SearchHandler < MessageHandler
   def includes_gender?(body, options)
     strip_match!(
       body,
-      /\b#{keywords(:could_mean_boy_or_boyfriend, :boy, :could_mean_girl_or_girlfriend, :girl)}\b/i,
+      /#{keywords(:i_am)}?\s*\b#{keywords(:could_mean_boy_or_boyfriend, :boy, :could_mean_girl_or_girlfriend, :girl)}\b/i,
       options
     )
   end
 
   def from?(sex, body, options)
     could_mean = "could_mean_#{sex}_or_#{sex}friend"
-    strip_match!(body, /\b#{keywords(sex, could_mean)}\b/i, options)
+    strip_match!(body, /#{keywords(:i_am)}?\s*\b#{keywords(sex, could_mean)}\b/i, options)
   end
 
   def from_girl?(body, options = {})

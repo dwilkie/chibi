@@ -1,5 +1,20 @@
 require 'spec_helper'
 
+
+def keywords(country_code, *keys)
+  all_keywords = []
+  keys.each do |key|
+    english_keywords = SearchHandler.keywords["en"][key.to_s]
+    localized_keywords = SearchHandler.keywords.try(:[], country_code.downcase).try(:[], key.to_s)
+    all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
+  end
+  all_keywords
+end
+
+def user_examples(country_code)
+  
+end
+
 def registration_examples(examples, options)
   examples.each do |message|
     assert_user_attributes(message, options)
@@ -8,6 +23,8 @@ def registration_examples(examples, options)
 end
 
 def assert_user_attributes(message, options)
+  user_attributes = [:gender, :looking_for, :location, :name, :age]
+
   gender = options[:gender]
   looking_for = options[:looking_for]
   location = options[:location]
@@ -27,14 +44,20 @@ def assert_user_attributes(message, options)
       Timecop.return
     end
 
-    context "the user's profile" do
-      it "should be updated" do
-        gender ? user.should(send("be_#{gender}")) : user.gender.should(be_nil)
-        looking_for ? user.looking_for.should(eq(looking_for.to_s[0])) : user.looking_for.should(be_nil)
-        location ? user.location.city.should(eq("Phnom Penh")) : user.location.city.should(be_nil)
-        name ? user.name.should(eq(name)) : user.name.should(be_nil)
-        age ? user.age.should(eq(age)) : user.age.should(be_nil)
-      end
+    example_name = []
+
+    gender ? example_name << "the user should be #{gender}" : example_name << "the user's gender should be unknown"
+    location ? example_name <<  "in #{location}" : example_name << "location unknown"
+    looking_for ? example_name <<  "looking for a #{looking_for == :either ? 'friend' : looking_for}" : example_name << "looking for unknown"
+    name ? example_name <<  "name is #{name}" : example_name << "name unknown"
+    age ? example_name <<  "#{age} years old" : example_name << "age unknown"
+
+    it example_name.join(", ") do
+      gender ? user.should(send("be_#{gender}")) : user.gender.should(be_nil)
+      looking_for ? user.looking_for.should(eq(looking_for.to_s[0])) : user.looking_for.should(be_nil)
+      location ? user.location.city.should(eq("Phnom Penh")) : user.location.city.should(be_nil)
+      name ? user.name.should(eq(name)) : user.name.should(be_nil)
+      age ? user.age.should(eq(age)) : user.age.should(be_nil)
     end
   end
 end
@@ -51,6 +74,9 @@ describe SearchHandler do
     end
 
     context "where the user is" do
+
+      # from 'US'
+
       # a guy texting
       context "a guy" do
         before do
@@ -61,21 +87,21 @@ describe SearchHandler do
           context "and the message is" do
             # a guy looking for a guy
             registration_examples(
-              ["bros", "pros", "boy", "guy"],
+              keywords("KH", :could_mean_boy_or_boyfriend),
               :gender => :male,
               :looking_for => :male
             )
 
             # a guy looking for a girl
             registration_examples(
-              ["srey", "girl"],
+              keywords("KH", :could_mean_girl_or_girlfriend),
               :gender => :male,
               :looking_for => :female
             )
 
             # a guy looking for a friend
             registration_examples(
-              ["friend", "met", "mit"],
+              keywords("KH", :friend),
               :gender => :male,
               :looking_for => :either
             )
@@ -132,21 +158,21 @@ describe SearchHandler do
           context "and the message is" do
             # a girl looking for a girl
             registration_examples(
-              ["srey", "girl"],
+              keywords("KH", :could_mean_girl_or_girlfriend),
               :gender => :female,
               :looking_for => :female
             )
 
             # a girl looking for a guy
             registration_examples(
-              ["bros", "pros", "boy"],
+              keywords("KH", :could_mean_boy_or_boyfriend),
               :gender => :female,
               :looking_for => :male
             )
 
             # a girl looking for a friend
             registration_examples(
-              ["friend", "met", "mit"],
+              keywords("KH", :friend),
               :gender => :female,
               :looking_for => :either
             )
@@ -203,7 +229,7 @@ describe SearchHandler do
           context "and the message is" do
             # guy texting
             registration_examples(
-              ["bros", "pros", "boy", "m", "male"],
+              keywords("KH", :boy, :could_mean_boy_or_boyfriend),
               :gender => :male,
               :looking_for => :male
             )
@@ -268,81 +294,76 @@ describe SearchHandler do
         # user is new
         context "and the message is", :focus do
           # guy texting
-          registration_examples(
-            ["bros", "pros", "boy", "m", "male"],
-            :gender => :male,
-            :looking_for => nil
-          )
+#          registration_examples(
+#            ["bros", "pros", "boy", "m", "male", "nhom pros jong leng sms"],
+#            :gender => :male
+#          )
 
-          # girl texting
-          registration_examples(
-            ["srey", "girl", "f", "female"],
-            :gender => :female,
-            :looking_for => nil
-          )
+#          # girl texting
+#          registration_examples(
+#            ["srey", "girl", "f", "female", "nhom srey jong leng sms"],
+#            :gender => :female
+#          )
 
-          # looking for a girl
-          registration_examples(
-            ["girl friend", "gf", "girlfriend", "friend girl", "met srey", "mit srey"],
-            :gender => nil,
-            :looking_for => :female
-          )
+#          # looking for a girl
+#          registration_examples(
+#            ["girl friend", "gf", "girlfriend", "friend girl", "met srey", "mit srey"],
+#            :looking_for => :female
+#          )
 
-          # looking for a guy
-          registration_examples(
-            ["boy friend" , "bf", "boyfriend", "friend boy", "met bros", "met pros", "mit bros", "mit pros"],
-            :gender => nil,
-            :looking_for => :male
-          )
+#          # looking for a guy
+#          registration_examples(
+#            ["boy friend" , "bf", "boyfriend", "friend boy", "met bros", "met pros", "mit bros", "mit pros"],
+#            :looking_for => :male
+#          )
 
-          # looking for a friend
-          registration_examples(
-            ["friend", "mit", "met"],
-            :gender => nil,
-            :looking_for => :either
-          )
+#          # looking for a friend
+#          registration_examples(
+#            ["friend", "mit", "met"],
+#            :looking_for => :either
+#          )
 
-          # guy looking for a girl
-          registration_examples(
-            ["bros jong rok mit srey", "m jab girl sweet", "pros jaba asd srey cute"],
-            :gender => :male,
-            :looking_for => :female
-          )
+#          # guy looking for a girl
+#          registration_examples(
+#            ["bros jong rok mit srey", "m jab girl sweet", "pros jaba asd srey cute"],
+#            :gender => :male,
+#            :looking_for => :female
+#          )
 
-          # girl looking for a guy
-          registration_examples(
-            ["f blah bros saat nas", "nhom srey jong mian pros hot", "i girl want boy rich"],
-            :gender => :female,
-            :looking_for => :male
-          )
+#          # girl looking for a guy
+#          registration_examples(
+#            ["f blah bros saat nas", "nhom srey jong mian pros hot", "i girl want boy rich"],
+#            :gender => :female,
+#            :looking_for => :male
+#          )
 
-          # guy looking for guy
-          registration_examples(
-            ["nhom bros jong rok mit bros", "m jong mian boy hot", "guy jong pros"],
-            :gender => :male,
-            :looking_for => :male
-          )
+#          # guy looking for guy
+#          registration_examples(
+#            ["nhom bros jong rok mit bros", "m jong mian boy hot", "guy jong pros"],
+#            :gender => :male,
+#            :looking_for => :male
+#          )
 
-          # girl looking for girl
-          registration_examples(
-            ["nhom girl jong rok mit srey", "f jong mian girl for fun", "female jong mian srey cute"],
-            :gender => :female,
-            :looking_for => :female
-          )
+#          # girl looking for girl
+#          registration_examples(
+#            ["nhom girl jong rok mit srey", "f jong mian girl for fun", "female jong mian srey cute"],
+#            :gender => :female,
+#            :looking_for => :female
+#          )
 
-          # guy looking for friend
-          registration_examples(
-            ["nhom boy looking for friend to txt", "m jong rok met likes squash", "bros rok mit funny"],
-            :gender => :male,
-            :looking_for => :either
-          )
+#          # guy looking for friend
+#          registration_examples(
+#            ["nhom boy looking for friend to txt", "m jong rok met likes squash", "bros rok mit funny"],
+#            :gender => :male,
+#            :looking_for => :either
+#          )
 
-          # girl looking for friend
-          registration_examples(
-            ["nhom f looking for friend play txt", "srey jong rok met leng sms", "female rok mit cute"],
-            :gender => :female,
-            :looking_for => :either
-          )
+#          # girl looking for friend
+#          registration_examples(
+#            ["nhom f looking for friend play txt", "srey jong rok met leng sms", "female rok mit cute"],
+#            :gender => :female,
+#            :looking_for => :either
+#          )
 
           # frank
           registration_examples(
@@ -363,5 +384,6 @@ describe SearchHandler do
     end
   end
 end
+
 
 
