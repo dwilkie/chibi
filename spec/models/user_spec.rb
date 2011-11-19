@@ -17,32 +17,48 @@ describe User do
     create(:user_with_complete_profile)
   end
 
-  let(:sok) do
-    create(:registered_male_user, :location => "Siem Reap")
-  end
-
-  let(:mara) do
-    create(:registered_female_user)
-  end
-
-  let(:guys_looking_for_girls) do
-    create_list(:guy_looking_for_girls, 4)
-  end
-
   it "should not be valid without a mobile number" do
     new_user.mobile_number = nil
-    user.should_not be_valid
+    new_user.should_not be_valid
   end
 
   context "factory" do
-    it "factory should be valid" do
+    it "should be valid" do
       new_user.should be_valid
     end
   end
 
-  describe ".matches" do
-    it "should not include the person being matched" do
-      subject.class.matches(sok).should_not include(sok)
+  describe ".match", :focus do
+    context "given the user being matched has an unknown gender and looking for preference" do
+      context "and there are other users with unknown genders and looking for preferences" do
+        let(:another_user) { create(:user) }
+
+        before do
+          another_user
+        end
+
+        it "should match the user with one of these users because other users with complete profiles probably don't want to be matched with this user" do
+          subject.class.match(user).should == another_user
+        end
+      end
+
+      it "should return nil" do
+        subject.class.match(user).should be_nil
+      end
+    end
+
+    context "given there are existing users" do
+      before do
+        user_with_complete_profile
+      end
+
+      it "should return a single user" do
+        subject.class.match(user).should be_a(subject.class)
+      end
+
+      it "should not return the person being matched" do
+        subject.class.match(user).should_not == user
+      end
     end
   end
 
