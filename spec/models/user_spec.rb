@@ -30,15 +30,24 @@ describe User do
 
   describe ".matches", :focus do
 
+    # chamroune is looking for a girl
+    # he should only match with
+    # girls who have not specified what they are looking for not
+    # totally unknown users
+    
     USER_MATCHES = {
+      :alex => [:jamie],
+      :jamie => [:alex],
+      :chamroune => [:pauline],
+      :pauline => [:chamroune],
       :nok => [:dave, :michael],
-      :dave => [:mara, :nok],
-      :harriet => [:eva],
-      :eva => [:harriet],
-      :hanh => [:view],
-      :view => [:hanh],
-      :mara => [:dave, :michael, :harriet, :eva],
-      :michael => [:nok, :mara, :hanh, :view]
+      :dave => [:nok, :mara],
+      :harriet => [:eva, :mara],
+      :eva => [:harriet, :mara],
+      :hanh => [:view, :michael],
+      :view => [:hanh, :michael],
+      :mara => [:dave, :harriet, :eva, :michael],
+      :michael => [:nok, :hanh, :view, :mara]
     }
 
     USER_MATCHES.each do |user, matches|
@@ -60,9 +69,8 @@ describe User do
         load_matches
       end
 
-      it "should match the user with a compatible match based off their gender and looking for preference" do
+      it "should match the user with the best compatible match" do
         USER_MATCHES.each do |user, matches|
-          p user
           subject.class.matches(send(user)).map { |match| match.name.to_sym }.should == matches
         end
       end
