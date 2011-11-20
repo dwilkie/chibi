@@ -23,8 +23,10 @@ class User < ActiveRecord::Base
 
   PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
 
-  def self.match(user)
-
+  def self.matches(user)
+    looking_for = user.looking_for == "e" ? (Random.rand(2) == 0 ? "m" : "f") : user.looking_for
+    match_scope = scoped.where(:gender => looking_for, :looking_for => user.gender)
+    match_scope = match_scope.where("\"#{self.table_name}\".\"id\" != ?", user.id)
   end
 
   def female?

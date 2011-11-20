@@ -28,36 +28,43 @@ describe User do
     end
   end
 
-  describe ".match", :focus do
-    context "given the user being matched has an unknown gender and looking for preference" do
-      context "and there are other users with unknown genders and looking for preferences" do
-        let(:another_user) { create(:user) }
+  describe ".matches", :focus do
 
-        before do
-          another_user
-        end
+    USER_MATCHES = {
+      :nok => [:dave, :michael],
+      :dave => [:mara, :nok],
+      :harriet => [:eva],
+      :eva => [:harriet],
+      :hanh => [:view],
+      :view => [:hanh],
+      :mara => [:dave, :michael, :harriet, :eva],
+      :michael => [:nok, :mara, :hanh, :view]
+    }
 
-        it "should match the user with one of these users because other users with complete profiles probably don't want to be matched with this user" do
-          subject.class.match(user).should == another_user
-        end
-      end
+    USER_MATCHES.each do |user, matches|
+      let(user) { create(user) }
+    end
 
-      it "should return nil" do
-        subject.class.match(user).should be_nil
+    def load_matches
+      USER_MATCHES.each do |user, matches|
+        send(user)
       end
     end
 
-    context "given there are existing users" do
+    it "should not include the person being matched" do
+      subject.class.matches(user).should_not include(user)
+    end
+
+    context "given there are other users" do
       before do
-        user_with_complete_profile
+        load_matches
       end
 
-      it "should return a single user" do
-        subject.class.match(user).should be_a(subject.class)
-      end
-
-      it "should not return the person being matched" do
-        subject.class.match(user).should_not == user
+      it "should match the user with a compatible match based off their gender and looking for preference" do
+        USER_MATCHES.each do |user, matches|
+          p user
+          subject.class.matches(send(user)).map { |match| match.name.to_sym }.should == matches
+        end
       end
     end
   end
