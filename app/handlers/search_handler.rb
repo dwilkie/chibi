@@ -40,10 +40,9 @@ class SearchHandler < MessageHandler
   end
 
   def extract_location(body, force_update)
-    if force_update || !user.location.try(:city?)
-      location = user.build_location
-      location.mobile_number = user.mobile_number
+    if force_update || !location.city?
       location.address = body
+      location.locate!
     end
   end
 
