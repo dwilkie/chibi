@@ -207,7 +207,6 @@ DEPENDENCIES
   ruby-debug19
   sass-rails (~> 3.1.0)
   spork!
-  sunspot_rails
   sunspot_test
   timecop
   turn
