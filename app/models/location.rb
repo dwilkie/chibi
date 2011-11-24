@@ -20,28 +20,20 @@ class Location < ActiveRecord::Base
     DIALING_CODES[Phony.split(mobile_number).first]
   end
 
-  private
-
+  # move into a background job
   def locate!
-    find_city_from_address if address_changed? && country_code?
+    geocode
+    reverse_geocode if latitude? && longitude?
   end
 
-  def address_changed?
-    address.present?
-  end
+  private
 
   def country
     ISO3166::Country[country_code].name
   end
 
   def full_address
-    address.present? ? address + ", #{country}" : address
-  end
-
-  # move into a background job
-  def find_city_from_address
-    geocode
-    reverse_geocode if latitude? && longitude?
+    address + ", #{country}" if address.present? && country_code?
   end
 end
 

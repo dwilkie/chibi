@@ -1,4 +1,5 @@
 ---
+http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=phnom+penh%2C+Cambodia&language=en&sensor=false
@@ -16,9 +17,9 @@
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Sun, 30 Oct 2011 07:21:06 GMT
+      - Thu, 24 Nov 2011 16:47:24 GMT
       expires:
-      - Mon, 31 Oct 2011 07:21:06 GMT
+      - Fri, 25 Nov 2011 16:47:24 GMT
       cache-control:
       - public, max-age=86400
       server:
@@ -49,6 +50,7 @@
       \              }\n            }\n         },\n         \"types\" : [ \"locality\",
       \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
     http_version: '1.1'
+  recorded_at: Thu, 24 Nov 2011 16:47:32 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=11.558831%2C104.917445&sensor=false
@@ -66,9 +68,9 @@
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Sun, 30 Oct 2011 07:21:06 GMT
+      - Thu, 24 Nov 2011 16:47:24 GMT
       expires:
-      - Mon, 31 Oct 2011 07:21:06 GMT
+      - Fri, 25 Nov 2011 16:47:24 GMT
       cache-control:
       - public, max-age=86400
       server:
@@ -228,3 +230,5 @@
       \           }\n         },\n         \"types\" : [ \"country\", \"political\"
       ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
     http_version: '1.1'
+  recorded_at: Thu, 24 Nov 2011 16:47:32 GMT
+recorded_with: VCR 2.0.0.beta2

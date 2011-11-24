@@ -1,4 +1,5 @@
 ---
+http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=battambong%2C+Cambodia&language=en&sensor=false
@@ -16,9 +17,9 @@
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Sun, 30 Oct 2011 07:29:45 GMT
+      - Thu, 24 Nov 2011 16:47:32 GMT
       expires:
-      - Mon, 31 Oct 2011 07:29:45 GMT
+      - Fri, 25 Nov 2011 16:47:32 GMT
       cache-control:
       - public, max-age=86400
       server:
@@ -53,6 +54,7 @@
       \           }\n         },\n         \"types\" : [ \"locality\", \"political\"
       ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
     http_version: '1.1'
+  recorded_at: Thu, 24 Nov 2011 16:47:40 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=13.1%2C103.2&sensor=false
@@ -70,9 +72,9 @@
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Sun, 30 Oct 2011 07:29:45 GMT
+      - Thu, 24 Nov 2011 16:47:32 GMT
       expires:
-      - Mon, 31 Oct 2011 07:29:45 GMT
+      - Fri, 25 Nov 2011 16:47:32 GMT
       cache-control:
       - public, max-age=86400
       server:
@@ -180,3 +182,5 @@
       \           }\n         },\n         \"types\" : [ \"country\", \"political\"
       ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
     http_version: '1.1'
+  recorded_at: Thu, 24 Nov 2011 16:47:40 GMT
+recorded_with: VCR 2.0.0.beta2
