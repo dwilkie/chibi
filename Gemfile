@@ -42,7 +42,6 @@ group :test do
   gem 'vcr', :git => 'git://github.com/myronmarston/vcr.git'
   gem 'guard-rspec'
   gem 'guard-spork'
-  gem 'sunspot_test'
   gem 'database_cleaner'
   gem 'timecop'
 end
