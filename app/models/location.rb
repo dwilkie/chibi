@@ -1,7 +1,7 @@
 class Location < ActiveRecord::Base
   belongs_to :user
 
-  attr_accessor :address, :mobile_number
+  attr_accessor :address
 
   geocoded_by :full_address
 
@@ -16,39 +16,24 @@ class Location < ActiveRecord::Base
 
   validates :country_code, :presence => true
 
-  before_validation :locate
-
   def self.country_code(mobile_number)
     DIALING_CODES[Phony.split(mobile_number).first]
   end
 
+  # move into a background job
+  def locate!
+    geocode
+    reverse_geocode if latitude? && longitude?
+  end
+
   private
-
-  def locate
-    find_country_code_from_mobile_number
-    find_city_from_address if address_changed? && country_code?
-  end
-
-  def address_changed?
-    address.present?
-  end
 
   def country
     ISO3166::Country[country_code].name
   end
 
   def full_address
-    address.present? ? address + ", #{country}" : address
-  end
-
-  def find_country_code_from_mobile_number
-    self.country_code = self.class.country_code(mobile_number) if mobile_number.present?
-  end
-
-  # move into a background job
-  def find_city_from_address
-    geocode
-    reverse_geocode if latitude? && longitude?
+    address + ", #{country}" if address.present? && country_code?
   end
 end
 

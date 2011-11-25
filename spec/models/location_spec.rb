@@ -76,82 +76,80 @@ describe Location, :focus do
     end
   end
 
-  MOBILE_NUMBER_EXAMPLES.each do |example|
-    context "#mobile_number = '#{example[:sample_number]}'" do
-      before do
-        location.mobile_number = example[:sample_number]
-      end
-
-      context "before validation" do
+  describe "#locate!" do
+    ADDRESS_EXAMPLES.each do |example|
+      context "#country_code = '#{example[:country_code]}'" do
         before do
-          location.valid?
-        end
-  
-        it "should set the country code to '#{example[:expected_country_code]}'" do
-          location.country_code.should == example[:expected_country_code]
-        end
-      end
-    end
-  end
-
-  context "#country_code = 'KH'" do
-    context "and #address = nil" do
-      it "should not try to determine the city from the latitude and longitude" do
-        FakeWeb.last_request.should be_nil
-      end
-    end
-  end
-
-  ADDRESS_EXAMPLES.each do |example|
-    context "#country_code = '#{example[:country_code]}'" do
-      before do
-        location.country_code = example[:country_code]
-      end
-      
-      context "and #address = '#{example[:address]}'" do
-        before do
-          location.address = example[:address]
+          subject.country_code = example[:country_code]
         end
 
-        context "before validation" do
+        context "and #address = '#{example[:address]}'" do
           before do
+            subject.address = example[:address]
             VCR.use_cassette(example[:address] + " " + example[:country_code].downcase) do
-              location.valid?
+              subject.locate!
             end
           end
 
           if example[:expected_latitude]
             it "should set the latitude from the address" do
-              location.latitude.should == example[:expected_latitude]
+              subject.latitude.should == example[:expected_latitude]
             end
           else
             it "should not set the latitude from the address" do
-              location.latitude.should be_nil
+              subject.latitude.should be_nil
             end
           end
 
           if example[:expected_longitude]
             it "should set the longitude from the address" do
-              location.longitude.should == example[:expected_longitude]
+              subject.longitude.should == example[:expected_longitude]
             end
           else
             it "should not set the longitude from the address" do
-              location.longitude.should be_nil
+              subject.longitude.should be_nil
             end
           end
 
           if example[:expected_city]
             it "should set the city from the latitude and longitude" do
-              location.city.should == example[:expected_city]
+              subject.city.should == example[:expected_city]
             end
           else
             it "should not set the city from the latitude and longitude" do
-              location.city.should be_nil
+              subject.city.should be_nil
             end
           end
         end
       end
     end
+
+    context "#country_code.present? => false" do
+      it "should not try to geocode" do
+        subject.locate!
+      end
+
+      context "and address.present? => true" do
+        before do
+          subject.address = "somewhere"
+        end
+
+        it "should not try to geocode" do
+          subject.locate!
+        end
+      end
+    end
+
+    context "#country_code.present? => true" do
+      before do
+        subject.country_code = "XY"
+      end
+
+      context "and #address = nil" do
+        it "should not try to geocode" do
+          subject.locate!
+        end
+      end
+    end
   end
 end
-

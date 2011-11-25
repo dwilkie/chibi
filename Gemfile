@@ -3,7 +3,6 @@ source 'http://rubygems.org'
 gem 'rails', '3.1.1'
 gem 'haml'
 gem 'conversational', '~> 0.4.1'
-gem 'sunspot_rails'
 gem 'pg'
 gem 'kaminari'
 gem "geocoder"
@@ -43,7 +42,6 @@ group :test do
   gem 'vcr', :git => 'git://github.com/myronmarston/vcr.git'
   gem 'guard-rspec'
   gem 'guard-spork'
-  gem 'sunspot_test'
   gem 'database_cleaner'
   gem 'timecop'
 end

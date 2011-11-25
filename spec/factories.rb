@@ -19,11 +19,30 @@ FactoryGirl.define do
   factory :user do
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
 
-    factory :user_with_empty_profile do
+    # users with unknown details
+    factory :alex do
+      name "alex"
+    end
+
+    factory :jamie do
+      name "jamie"
+    end
+
+    # user with unknown gender
+    factory :chamroune do
+      name "chamroune"
+      looking_for "f"
+    end
+
+    # user with unknown looking for preference
+    factory :pauline do
+      name "pauline"
+      gender "f"
     end
 
     # straight girl
     factory :nok do
+      name "nok"
       gender "f"
       looking_for "m"
     end

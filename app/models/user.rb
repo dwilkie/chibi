@@ -24,9 +24,24 @@ class User < ActiveRecord::Base
   PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
 
   def self.matches(user)
-    looking_for = user.looking_for == "e" ? (Random.rand(2) == 0 ? "m" : "f") : user.looking_for
-    match_scope = scoped.where(:gender => looking_for, :looking_for => user.gender)
-    match_scope = match_scope.where("\"#{self.table_name}\".\"id\" != ?", user.id)
+    # don't match the user being matched
+    match_scope = scoped.where("\"#{table_name}\".\"id\" != ?", user.id)
+    
+    # if the user's gender is unknown and their looking for preference
+    # is also unknown, only match them with other users that are
+    # in the same situation
+    if !user.gender? && !user.looking_for?
+      match_scope = match_scope.where(:gender => nil, :looking_for => nil)
+    else
+      # if the user's gender is known, match him/her with other users
+      # that are looking for his/her gender or other users that explicitly indifferent
+      match_scope = user.gender? ? match_scope.where("\"#{table_name}\".\"looking_for\" = ? OR \"#{table_name}\".\"looking_for\" = ?", user.gender, "e") : match_scope.where(:gender => user.looking_for, :looking_for => nil)
+
+      # if the user is indifferent about the gender they are seeking
+      # match them with either males or females (but not unknowns) otherwise
+      # match them with the gender they are seeking
+      match_scope = user.looking_for == "e" ? match_scope.where("\"#{table_name}\".\"gender\" IS NOT NULL") : match_scope.where(:gender => user.looking_for)
+    end
   end
 
   def female?

@@ -1,4 +1,5 @@
 ---
+http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=new+york%2C+Cambodia&language=en&sensor=false
@@ -16,9 +17,9 @@
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Sun, 30 Oct 2011 07:21:10 GMT
+      - Thu, 24 Nov 2011 16:47:36 GMT
       expires:
-      - Mon, 31 Oct 2011 07:21:10 GMT
+      - Fri, 25 Nov 2011 16:47:36 GMT
       cache-control:
       - public, max-age=86400
       server:
@@ -60,6 +61,7 @@
       \        },\n         \"partial_match\" : true,\n         \"types\" : [ \"route\"
       ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
     http_version: '1.1'
+  recorded_at: Thu, 24 Nov 2011 16:47:44 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=33.7848676%2C-118.1817524&sensor=false
@@ -77,9 +79,9 @@
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Sun, 30 Oct 2011 07:21:11 GMT
+      - Thu, 24 Nov 2011 16:47:36 GMT
       expires:
-      - Mon, 31 Oct 2011 07:21:11 GMT
+      - Fri, 25 Nov 2011 16:47:36 GMT
       cache-control:
       - public, max-age=86400
       server:
@@ -224,19 +226,7 @@
       \              \"southwest\" : {\n                  \"lat\" : 32.5288320,\n
       \                 \"lng\" : -124.4820030\n               }\n            }\n
       \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"United States\",\n               \"short_name\" : \"US\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"United States\",\n         \"geometry\" : {\n            \"bounds\" : {\n
-      \              \"northeast\" : {\n                  \"lat\" : 71.53879999999999,\n
-      \                 \"lng\" : -66.8854170\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 18.77630,\n                  \"lng\" : 170.59570\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 37.090240,\n               \"lng\" : -95.7128910\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 71.53879999999999,\n                  \"lng\"
-      : -66.8854170\n               },\n               \"southwest\" : {\n                  \"lat\"
-      : 18.77630,\n                  \"lng\" : 170.59570\n               }\n            }\n
-      \        },\n         \"types\" : [ \"country\", \"political\" ]\n      }\n
-      \  ],\n   \"status\" : \"OK\"\n}\n"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
     http_version: '1.1'
+  recorded_at: Thu, 24 Nov 2011 16:47:44 GMT
+recorded_with: VCR 2.0.0.beta2
