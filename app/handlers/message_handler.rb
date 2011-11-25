@@ -8,7 +8,7 @@ class MessageHandler
   def process!(message)
     self.message = message
     self.user = message.user
-    self.loccation = user.location
+    self.location = user.location
     self.body = message.body
     self.topic = user.currently_chatting? ? "chat" : "search"
     details.process!

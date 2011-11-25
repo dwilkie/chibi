@@ -1,0 +1,36 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=JONG+ROK%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Fri, 25 Nov 2011 05:44:49 GMT
+      expires:
+      - Sat, 26 Nov 2011 05:44:49 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      transfer-encoding:
+      - chunked
+    body: ! "{\n   \"results\" : [],\n   \"status\" : \"ZERO_RESULTS\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Fri, 25 Nov 2011 05:44:49 GMT
+recorded_with: VCR 2.0.0.beta2

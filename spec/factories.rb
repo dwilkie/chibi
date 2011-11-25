@@ -19,6 +19,10 @@ FactoryGirl.define do
   factory :user do
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
 
+    factory :user_with_location do
+      location
+    end
+
     # users with unknown details
     factory :alex do
       name "alex"
@@ -91,4 +95,3 @@ FactoryGirl.define do
     end
   end
 end
-

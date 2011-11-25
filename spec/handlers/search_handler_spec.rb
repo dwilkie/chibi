@@ -68,17 +68,19 @@ def assert_user_attributes(message, options)
   name = options[:name]
   age = options[:age]
 
+  vcr_options = options[:vcr] || {}
+  vcr_options[:cassette] ||= "no_results"
+
   context "'#{message}'" do
     before do
       subject.user = user
       subject.body = message
-      subject.country_code = "KH"
-      Timecop.freeze(Time.now)
-      process_message
-    end
-
-    after do
-      Timecop.return
+      subject.location = user.location
+      Timecop.freeze(Time.now) do
+        VCR.use_cassette(vcr_options[:cassette], :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
+          process_message
+        end
+      end
     end
 
     example_name = []
@@ -99,9 +101,9 @@ def assert_user_attributes(message, options)
   end
 end
 
-describe SearchHandler, :focus do
+describe SearchHandler do
   let(:user) do
-    build(:user)
+    build(:user_with_location)
   end
 
   describe "#process!" do
@@ -329,7 +331,7 @@ describe SearchHandler, :focus do
 
       context "new" do
         # user is new
-        context "and the message is" do
+        context "and the message is", :focus do
           # guy texting
           registration_examples(
             keywords("KH", :boy, :could_mean_boy_or_boyfriend),
@@ -424,7 +426,7 @@ describe SearchHandler, :focus do
 
           # Vichet 23 guy looking for a girl
           registration_examples(
-            ["kjom Vichet pros 23chnam jong rok mit srey", "Vichet bros 23 phnom penh srey sexy"],
+            ["kjom Vichet pros 23chnam jong rok mit srey"],
             :gender => :male,
             :looking_for => :female,
             :age => 23,
