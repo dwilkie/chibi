@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Location, :focus do
+describe Location do
 
   let(:location) { build(:location) }
 
@@ -58,6 +58,13 @@ describe Location, :focus do
       :expected_city => "New York",
       :expected_latitude => 40.7143528,
       :expected_longitude => -74.00597309999999
+    },
+    {
+      :country_code => "TH",
+      :address => "chang mai",
+      :expected_city => "Samoeng",
+      :expected_latitude => 18.7964642,
+      :expected_longitude => 98.6600586
     }
   ]
 

@@ -3,7 +3,7 @@ require 'spec_helper'
 # stub out solr with mocks here
 # https://github.com/pivotal/sunspot_matchers
 
-describe User do
+describe User, :focus do
 
   let(:user) do
     create(:user)
@@ -22,6 +22,11 @@ describe User do
     new_user.should_not be_valid
   end
 
+  it "should not be valid with a mobile number that cannot be resolved to a location" do
+    new_user.mobile_number = "9995566778990"
+    new_user.should_not be_valid
+  end
+
   context "factory" do
     it "should be valid" do
       new_user.should be_valid
@@ -34,14 +39,14 @@ describe User do
     # he should only match with
     # girls who have not specified what they are looking for not
     # totally unknown users
-    
+
     USER_MATCHES = {
       :alex => [:jamie],
       :jamie => [:alex],
       :chamroune => [:pauline],
       :pauline => [:chamroune],
-      :nok => [:dave, :michael],
-      :dave => [:nok, :mara],
+      :nok => [:michael],
+      :dave => [:mara],
       :harriet => [:eva, :mara],
       :eva => [:harriet, :mara],
       :hanh => [:view, :michael],
@@ -69,7 +74,7 @@ describe User do
         load_matches
       end
 
-      it "should match the user with the best compatible match" do
+      it "should match the user with the best compatible match", :focus do
         USER_MATCHES.each do |user, matches|
           subject.class.matches(send(user)).map { |match| match.name.to_sym }.should == matches
         end
@@ -216,4 +221,3 @@ describe User do
 
   end
 end
-

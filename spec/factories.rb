@@ -13,14 +13,41 @@ FactoryGirl.define do
   end
 
   factory :location do
-    country_code "KH"
+    country_code "XY"
+
+    factory :cambodia do
+      country_code "KH"
+
+      factory :phnom_penh do
+        city "Phnom Penh"
+        latitude 11.558831
+        longitude 104.917445
+      end
+    end
+
+    factory :thailand do
+      country_code "TH"
+
+      factory :chiang_mai do
+        city "Samoeng"
+        latitude 18.7964642
+        longitude 98.6600586
+      end
+    end
+
+    factory :vietnam do
+      country_code "VN"
+    end
   end
 
   factory :user do
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
 
-    factory :user_with_location do
-      location
+    factory :user_with_complete_profile do
+      name "veronica"
+      date_of_birth { 23.years.ago }
+      gender "f"
+      looking_for "m"
     end
 
     # users with unknown details
@@ -49,6 +76,7 @@ FactoryGirl.define do
       name "nok"
       gender "f"
       looking_for "m"
+      association :location, :factory => :chiang_mai
     end
 
     # straight guy
@@ -56,6 +84,7 @@ FactoryGirl.define do
       name "dave"
       gender "m"
       looking_for "f"
+      association :location, :factory => :phnom_penh
     end
 
     # lesbians
@@ -74,9 +103,11 @@ FactoryGirl.define do
       name "hanh"
       gender "m"
       looking_for "m"
+      association :location, :factory => :vietnam
 
       factory :view do
         name "view"
+        association :location, :factory => :chiang_mai
       end
     end
 
@@ -85,6 +116,7 @@ FactoryGirl.define do
       name "mara"
       gender "f"
       looking_for "e"
+      association :location, :factory => :phnom_penh
     end
 
     # bi guy
@@ -92,6 +124,7 @@ FactoryGirl.define do
       name "michael"
       gender "m"
       looking_for "e"
+      association :location, :factory => :chiang_mai
     end
   end
 end

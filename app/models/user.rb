@@ -15,10 +15,20 @@ class User < ActiveRecord::Base
   belongs_to :active_chat, :class_name => "Chat"
 
   validates :mobile_number, :presence => true, :uniqueness => true
+  validates :location, :presence => true
   validates :username, :uniqueness => true
 
   before_validation(:on => :update) do
     self.username = name.gsub(/\s+/, "") << id.to_s if attribute_present?(:name) && persisted?
+  end
+
+  before_validation do
+    unless location.present? || mobile_number.nil?
+      user_country = Location.country_code(mobile_number)
+      self.location = build_location(
+        :country_code => user_country
+      ) if user_country
+    end
   end
 
   PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
@@ -26,7 +36,7 @@ class User < ActiveRecord::Base
   def self.matches(user)
     # don't match the user being matched
     match_scope = scoped.where("\"#{table_name}\".\"id\" != ?", user.id)
-    
+
     # if the user's gender is unknown and their looking for preference
     # is also unknown, only match them with other users that are
     # in the same situation
@@ -75,4 +85,3 @@ class User < ActiveRecord::Base
     active_chat_id?
   end
 end
-
