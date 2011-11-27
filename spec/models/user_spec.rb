@@ -22,8 +22,8 @@ describe User, :focus do
     new_user.should_not be_valid
   end
 
-  it "should not be valid with a mobile number that cannot be resolved to a location" do
-    new_user.mobile_number = "9995566778990"
+  it "should not be valid without a location" do
+    new_user.location = nil
     new_user.should_not be_valid
   end
 
