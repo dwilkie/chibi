@@ -3,7 +3,7 @@ require 'spec_helper'
 # stub out solr with mocks here
 # https://github.com/pivotal/sunspot_matchers
 
-describe User, :focus do
+describe User do
 
   let(:user) do
     create(:user)
@@ -35,11 +35,6 @@ describe User, :focus do
 
   describe ".matches", :focus do
 
-    # chamroune is looking for a girl
-    # he should only match with
-    # girls who have not specified what they are looking for not
-    # totally unknown users
-
     USER_MATCHES = {
       :alex => [:jamie],
       :jamie => [:alex],
@@ -51,8 +46,8 @@ describe User, :focus do
       :eva => [:harriet, :mara],
       :hanh => [:view, :michael],
       :view => [:hanh, :michael],
-      :mara => [:dave, :harriet, :eva, :michael],
-      :michael => [:nok, :hanh, :view, :mara]
+      :mara => [:dave, :harriet, :eva],
+      :michael => [:nok, :hanh, :view]
     }
 
     USER_MATCHES.each do |user, matches|

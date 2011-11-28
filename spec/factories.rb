@@ -23,6 +23,18 @@ FactoryGirl.define do
         latitude 11.558831
         longitude 104.917445
       end
+
+      factory :siem_reap do
+        city "Siem Reap"
+        latitude 13.3622222
+        longitude 103.8597222
+      end
+
+      factory :battambang do
+        city "Battambang"
+        latitude 13.1
+        longitude 103.2
+      end
     end
 
     factory :thailand do
@@ -33,10 +45,6 @@ FactoryGirl.define do
         latitude 18.7964642
         longitude 98.6600586
       end
-    end
-
-    factory :vietnam do
-      country_code "VN"
     end
   end
 
@@ -93,9 +101,11 @@ FactoryGirl.define do
       name "harriet"
       gender "f"
       looking_for "f"
+      association :location, :factory => :siem_reap
 
       factory :eva do
         name "eva"
+        association :location, :factory => :battambang
       end
     end
 
@@ -104,11 +114,10 @@ FactoryGirl.define do
       name "hanh"
       gender "m"
       looking_for "m"
-      association :location, :factory => :vietnam
+      association :location, :factory => :chiang_mai
 
       factory :view do
         name "view"
-        association :location, :factory => :chiang_mai
       end
     end
 

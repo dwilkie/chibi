@@ -14,7 +14,6 @@ class User < ActiveRecord::Base
 
   belongs_to :active_chat, :class_name => "Chat"
 
-
   validates :mobile_number, :presence => true, :uniqueness => true
   validates :location, :presence => true
   validates :username, :uniqueness => true
@@ -43,6 +42,9 @@ class User < ActiveRecord::Base
       # match them with either males or females (but not unknowns) otherwise
       # match them with the gender they are seeking
       match_scope = user.looking_for == "e" ? match_scope.where("\"#{table_name}\".\"gender\" IS NOT NULL") : match_scope.where(:gender => user.looking_for)
+
+      # only match users from the same country
+      match_scope = match_scope.joins(:location).where(:locations => {:country_code => user.location.country_code})
     end
   end
 
