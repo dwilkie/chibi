@@ -42,12 +42,12 @@ describe User do
       :pauline => [:chamroune],
       :nok => [:michael],
       :dave => [:mara],
-      :harriet => [:eva, :mara],
-      :eva => [:harriet, :mara],
-      :hanh => [:view, :michael],
-      :view => [:hanh, :michael],
-      :mara => [:dave, :harriet, :eva],
-      :michael => [:nok, :hanh, :view]
+      :harriet => [:mara],
+      :eva => [:mara],
+      :hanh => [:michael, :view],
+      :view => [:hanh],
+      :mara => [:dave, :eva, :harriet],
+      :michael => [:hanh, :nok]
     }
 
     USER_MATCHES.each do |user, matches|
@@ -58,6 +58,8 @@ describe User do
       USER_MATCHES.each do |user, matches|
         send(user)
       end
+      create(:chat, :user => eva, :friend => harriet)
+      create(:chat, :user => michael, :friend => view)
     end
 
     it "should not include the person being matched" do

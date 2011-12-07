@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :chat do
-    association :user, :factory => :registered_user
-    association :friend, :factory => :registered_user
+    association :user, :factory => :user
+    association :friend, :factory => :user
   end
 
   factory :active_chat, :parent => :chat do
@@ -59,6 +59,9 @@ FactoryGirl.define do
       looking_for "m"
     end
 
+    # do not reorder these factories because the tests rely on
+    # the order so they fail when match statements are left off
+
     # users with unknown details
     factory :alex do
       name "alex"
@@ -101,11 +104,11 @@ FactoryGirl.define do
       name "harriet"
       gender "f"
       looking_for "f"
-      association :location, :factory => :siem_reap
+      association :location, :factory => :battambang
 
       factory :eva do
         name "eva"
-        association :location, :factory => :battambang
+        association :location, :factory => :siem_reap
       end
     end
 
@@ -114,10 +117,12 @@ FactoryGirl.define do
       name "hanh"
       gender "m"
       looking_for "m"
+      age 28
       association :location, :factory => :chiang_mai
 
       factory :view do
         name "view"
+        age 26
       end
     end
 
@@ -134,6 +139,7 @@ FactoryGirl.define do
       name "michael"
       gender "m"
       looking_for "e"
+      age 29
       association :location, :factory => :chiang_mai
     end
   end

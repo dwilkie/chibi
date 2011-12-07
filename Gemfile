@@ -5,7 +5,7 @@ gem 'haml'
 gem 'conversational', '~> 0.4.1'
 gem 'pg'
 gem 'kaminari'
-gem "geocoder"
+gem "geocoder", :git => "git://github.com/dwilkie/geocoder.git"
 gem "phony"
 gem "countries", :require => 'iso3166'
 
@@ -45,4 +45,3 @@ group :test do
   gem 'database_cleaner'
   gem 'timecop'
 end
-
