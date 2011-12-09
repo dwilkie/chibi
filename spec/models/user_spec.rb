@@ -35,6 +35,56 @@ describe User do
 
   describe ".matches", :focus do
 
+    # Match Explanations
+    # see spec/factories.rb for where users are defined
+
+    # Alex and Jamie:
+    # Alex and Jamie have not specified their gender or what gender they are looking for.
+    # We don't want to initiate a chat with other users who have already specified this info
+    # because the other user may not be interesed in the gender of Jamie or Alex.
+    # There are no other users in this situation so they only match with each other.
+
+    # Chamroune and Pauline:
+    # Chamroune is looking for a female, but his/her gender is unknown. Similarly to Alex and Jamie,
+    # we don't want to just match Chamroune with any female, incase that female is not looking for
+    # the gender of Chamroune. Pauline on the other hand is a female,
+    # but she has not yet specified what gender she is looking for.
+    # In this match Chamroune will be happy because he will be chatting with a female and Pauline can't complain
+    # if she is not looking for Chamroune's gender because she hasn't specified what she's looking for.
+    # Furthermore, other users who have specified their gender should not be matched with Pauline incase,
+    # pauline isn't interested in their gender.
+
+    # Nok with Michael:
+    # Nok is a female looking for a male. Dave is a male, looking for a female, but she can't be matched him
+    # because Dave is in Cambodia and Nok is in Thailand. Hanh and View are both guys in Thailand
+    # but they are gay so she also can't be matched with either of them. Michael is a guy from Thailand
+    # who looking for either a guy or a girl so Michael matches with Nok.
+
+    # Dave with Mara
+    # Dave is in Cambodia looking for a female. Harriet, Eva and Mara are all females in Cambodia however
+    # Harriet and Eva are lesbians, while Mara is looking for either a girl or a guy so
+    # Mara matches with Dave.
+
+    # Harriet and Eva with Mara
+    # Harriet is currently already chatting with Eva both of them could only be matched with Mara.
+    # Thes matches should however never take place because they're in a chat session so they can't be searching.
+
+    # Hanh with Michael and View
+    # All three guys live in Chiang Mai, Thailand. Michael is bi and View is gay so either are a match.
+    # Michael is only one year older than Hanh, whereas View is two years younger, so Michael is matched first.
+
+    # View with Hanh
+    # View has previously chatted with Michael so only Hanh is matched
+
+    # Mara with Dave
+    # Mara is bi, so she could match with either, Dave, Harriet or Eva who are all in Cambodia.
+    # However Eva and Harriet are currently chatting so Dave is her match.
+
+    # Michael with Hanh and Nok
+    # Michael has previously chatted with View which leaves Nok and Hanh.
+    # Nok hasn't specified her age yet and Hanh is only one year younger so Michael is matched with
+    # Hanh before Nok.
+
     USER_MATCHES = {
       :alex => [:jamie],
       :jamie => [:alex],
@@ -46,7 +96,7 @@ describe User do
       :eva => [:mara],
       :hanh => [:michael, :view],
       :view => [:hanh],
-      :mara => [:dave, :eva, :harriet],
+      :mara => [:dave],
       :michael => [:hanh, :nok]
     }
 
@@ -58,7 +108,7 @@ describe User do
       USER_MATCHES.each do |user, matches|
         send(user)
       end
-      create(:chat, :user => eva, :friend => harriet)
+      create(:active_chat, :user => eva, :friend => harriet)
       create(:chat, :user => michael, :friend => view)
     end
 

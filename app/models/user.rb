@@ -45,10 +45,13 @@ class User < ActiveRecord::Base
     end
 
     # don't match users who already initiated a chat with this user
-    match_scope = match_scope.joins("LEFT OUTER JOIN chats AS initiated_chats ON initiated_chats.user_id = users.id").where("\"initiated_chats\".\"friend_id\" != ? OR \"initiated_chats\".\"friend_id\" IS NULL", user.id)
+    match_scope = match_scope.joins("LEFT OUTER JOIN chats AS initiated_chats ON initiated_chats.user_id = #{table_name}.id").where("\"initiated_chats\".\"friend_id\" != ? OR \"initiated_chats\".\"friend_id\" IS NULL", user.id)
 
     # don't match users who this user has already initiated a chat with
-    match_scope = match_scope.joins("LEFT OUTER JOIN chats as responded_chats ON responded_chats.friend_id = users.id").where("\"responded_chats\".\"user_id\" != ? OR \"responded_chats\".\"user_id\" IS NULL", user.id)
+    match_scope = match_scope.joins("LEFT OUTER JOIN chats as responded_chats ON responded_chats.friend_id = #{table_name}.id").where("\"responded_chats\".\"user_id\" != ? OR \"responded_chats\".\"user_id\" IS NULL", user.id)
+
+    # don't match users who currently are in a chat
+    match_scope = match_scope.where(:active_chat_id => nil)
 
     # only match users from the same country
     match_scope = match_scope.joins(:location).where(:locations => {:country_code => user.location.country_code})
