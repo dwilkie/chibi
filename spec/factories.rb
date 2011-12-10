@@ -83,20 +83,42 @@ FactoryGirl.define do
       gender "f"
     end
 
-    # straight girl
+    # straight girls
     factory :nok do
       name "nok"
       gender "f"
       looking_for "m"
       association :location, :factory => :chiang_mai
+
+      factory :joy do
+        name "joy"
+        age 27
+        association :location, :factory => :phnom_penh
+      end
     end
 
-    # straight guy
+    # straight guys
     factory :dave do
       name "dave"
       gender "m"
       looking_for "f"
+      age 28
       association :location, :factory => :phnom_penh
+
+      factory :con do
+        name "con"
+        age 33
+      end
+
+      factory :paul do
+        name "paul"
+        age 35
+      end
+
+      factory :luke do
+        name "luke"
+        age 25
+      end
     end
 
     # lesbians
@@ -131,6 +153,7 @@ FactoryGirl.define do
       name "mara"
       gender "f"
       looking_for "e"
+      age 25
       association :location, :factory => :phnom_penh
     end
 

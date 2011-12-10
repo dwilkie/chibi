@@ -1,8 +1,5 @@
 require 'spec_helper'
 
-# stub out solr with mocks here
-# https://github.com/pivotal/sunspot_matchers
-
 describe User do
 
   let(:user) do
@@ -60,10 +57,31 @@ describe User do
     # but they are gay so she also can't be matched with either of them. Michael is a guy from Thailand
     # who looking for either a guy or a girl so Michael matches with Nok.
 
-    # Dave with Mara
-    # Dave is in Cambodia looking for a female. Harriet, Eva and Mara are all females in Cambodia however
-    # Harriet and Eva are lesbians, while Mara is looking for either a girl or a guy so
-    # Mara matches with Dave.
+    # Joy with Con, Dave, Paul and Luke:
+    # Joy is a straight female in Cambodia. Con, Dave and Luke are straight males also in Cambodia.
+    # Dave is two years older than Joy, Con is 6 years older, Paul 8 years older and Luke is 2 years younger.
+    # Even though Joy is closer in age to Dave, Con matches before Dave because Con has initiated more
+    # chats and he is still just in the free age zone (up to 6 years older) where age difference doesn't really
+    # matter. Paul has also initiated more chats than Dave but he is just outside the free age zone
+    # and the age difference is starting to be a concern. In this case Dave matches higher even though he
+    # has initiated less chats than Paul. If Paul intiates more chats however,
+    # he can still overtake Dave, but the larger the age gap (over 6 years) the more chats you have to initiate
+    # to keep in touch with the young ones. Luke has initiated more chats than Con, Dave and Paul
+    # but he matches last because he is 2 years younger than Joy.
+    # We are assuming that Joy being a female is looking for an older guy.
+
+    # Dave with Mara and Joy
+    # Dave is in Cambodia looking for a female. Harriet, Eva, Mara and Joy are all females in Cambodia however
+    # Harriet and Eva are gay, so they are ruled out. Mara is bi and Joy is straight so both are matches.
+    # Although Joy is closer in age to Dave than Mara, Mara matches first because she has initiated more chats.
+
+    # Con with Joy
+    # Joy and Mara both match, but Con has already chatted with Mara, so Joy is Con's match
+
+    # Paul with Joy and Mara
+    # Joy and Mara are both younger girls but fall outside of the free age zone. Joy is 8 years younger than
+    # Paul while Mara is 10 years younger. Even though Mara has initiated more chats than Joy, Joy is still matched
+    # before Mara. Mara would have to initiate 3 times as many chats as Joy for her to be match before Joy
 
     # Harriet and Eva with Mara
     # Harriet is currently already chatting with Eva both of them could only be matched with Mara.
@@ -77,8 +95,9 @@ describe User do
     # View has previously chatted with Michael so only Hanh is matched
 
     # Mara with Dave
-    # Mara is bi, so she could match with either, Dave, Harriet or Eva who are all in Cambodia.
-    # However Eva and Harriet are currently chatting so Dave is her match.
+    # Mara is bi, so she could match with either, Dave, Con, Luke, Harriet or Eva who are all in Cambodia.
+    # However Eva and Harriet are currently chatting and Mara has already chatted with Luke and Con, so Dave
+    # is her match.
 
     # Michael with Hanh and Nok
     # Michael has previously chatted with View which leaves Nok and Hanh.
@@ -91,12 +110,16 @@ describe User do
       :chamroune => [:pauline],
       :pauline => [:chamroune],
       :nok => [:michael],
-      :dave => [:mara],
+      :joy => [:con, :dave, :paul, :luke],
+      :dave => [:mara, :joy],
+      :con => [:joy],
+      :paul => [:joy, :mara],
+      :luke => [:mara, :joy],
       :harriet => [:mara],
       :eva => [:mara],
       :hanh => [:michael, :view],
       :view => [:hanh],
-      :mara => [:dave],
+      :mara => [:luke, :dave, :paul],
       :michael => [:hanh, :nok]
     }
 
@@ -108,8 +131,14 @@ describe User do
       USER_MATCHES.each do |user, matches|
         send(user)
       end
-      create(:active_chat, :user => eva, :friend => harriet)
-      create(:chat, :user => michael, :friend => view)
+      create(:active_chat, :user => eva,        :friend => harriet)
+      create(:chat,        :user => michael,    :friend => view)
+      create(:chat,        :user => con,        :friend => mara)
+      create(:chat,        :user => mara,       :friend => nok)
+      create(:chat,        :user => hanh,       :friend => nok)
+      create(:chat,        :user => luke,       :friend => nok)
+      create(:chat,        :user => luke,       :friend => hanh)
+      create(:chat,        :user => paul,       :friend => nok)
     end
 
     it "should not include the person being matched" do
@@ -157,7 +186,7 @@ describe User do
     end
   end
 
-  describe "female?" do
+  describe "#female?" do
     context "gender is 'f'" do
       before do
         subject.gender = "f"
@@ -185,7 +214,40 @@ describe User do
     end
   end
 
-  describe "male?" do
+  describe "#hetrosexual?" do
+    it "should be true only for straight males and straight females" do
+      # unknown sexual preference
+      subject.should_not be_hetrosexual
+
+      # gay guy
+      subject.gender = "m"
+      subject.looking_for = "m"
+      subject.should_not be_hetrosexual
+
+      # bi guy
+      subject.looking_for = "e"
+      subject.should_not be_hetrosexual
+
+      # straight guy
+      subject.looking_for = "f"
+      subject.should be_hetrosexual
+
+      # gay girl
+      subject.gender = "f"
+      subject.looking_for = "f"
+      subject.should_not be_hetrosexual
+
+      # bi girl
+      subject.looking_for = "e"
+      subject.should_not be_hetrosexual
+
+      # straight girl
+      subject.looking_for = "m"
+      subject.should be_hetrosexual
+    end
+  end
+
+  describe "#male?" do
     context "gender is 'm'" do
       before do
         subject.gender = "m"
@@ -265,6 +327,5 @@ describe User do
         subject.age.should be_nil
       end
     end
-
   end
 end
