@@ -30,7 +30,7 @@ describe User do
     end
   end
 
-  describe ".matches", :focus do
+  describe ".matches" do
 
     # Match Explanations
     # see spec/factories.rb for where users are defined
@@ -150,7 +150,7 @@ describe User do
         load_matches
       end
 
-      it "should match the user with the best compatible match", :focus do
+      it "should match the user with the best compatible match" do
         USER_MATCHES.each do |user, matches|
           subject.class.matches(send(user)).map { |match| match.name.to_sym }.should == matches
         end
@@ -290,6 +290,17 @@ describe User do
         subject.date_of_birth.should == 15.years.ago.utc
       end
     end
+
+    context "nil" do
+      before do
+        subject.age = nil
+      end
+
+      it "should set the user' date of birth to nil" do
+        subject.date_of_birth.should be_nil
+      end
+    end
+
   end
 
   describe "#age" do

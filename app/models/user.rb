@@ -92,7 +92,7 @@ class User < ActiveRecord::Base
   end
 
   def age=(value)
-    self.date_of_birth = value.years.ago.utc
+    self.date_of_birth = value.nil? ? value : value.years.ago.utc
   end
 
   def currently_chatting?

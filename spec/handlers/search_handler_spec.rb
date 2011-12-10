@@ -38,401 +38,277 @@ KEYWORDS = {
   }
 }
 
-def keywords(country_code, *keys)
-  all_keywords = []
-  keys.each do |key|
-    english_keywords = KEYWORDS[:en][key]
-    localized_keywords = KEYWORDS.try(:[], country_code.downcase.to_sym).try(:[], key)
-    all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
+describe SearchHandler do
+  let(:user) do
+    build(:user)
   end
-  all_keywords
-end
 
-def user_examples(country_code)
+  describe "#process!" do
+    def keywords(*keys)
+      country_code = user.location.country_code
+      all_keywords = []
+      keys.each do |key|
+        english_keywords = KEYWORDS[:en][key]
+        localized_keywords = KEYWORDS.try(:[], country_code.downcase.to_sym).try(:[], key)
+        all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
+      end
+      all_keywords
+    end
 
-end
+    def registration_examples(examples, options)
+      examples.each do |message|
+        assert_user_attributes(message, options)
+        assert_user_attributes(message.upcase, options) if message.present?
+      end
+    end
 
-def registration_examples(examples, options)
-  examples.each do |message|
-    assert_user_attributes(message, options)
-    assert_user_attributes(message.upcase, options) if message.present?
-  end
-end
+    def assert_user_attributes(message, options)
+      user_attributes = [:gender, :looking_for, :name, :age]
 
-def assert_user_attributes(message, options)
-  user_attributes = [:gender, :looking_for, :location, :name, :age]
+      user.gender = options[:gender] ? options[:gender].to_s[0] : nil
+      user.looking_for = options[:looking_for] ? options[:looking_for].to_s[0] : nil
+      user.name = options[:name]
+      user.age = options[:age]
 
-  gender = options[:gender]
-  looking_for = options[:looking_for]
-  location = options[:location]
-  name = options[:name]
-  age = options[:age]
-
-  vcr_options = options[:vcr] || {}
-  vcr_options[:cassette] ||= "no_results"
-
-  context "'#{message}'" do
-    before do
       subject.user = user
       subject.body = message
       subject.location = user.location
+
+      vcr_options = options[:vcr] || {}
+      vcr_options[:cassette] ||= "no_results"
+
       Timecop.freeze(Time.now) do
         VCR.use_cassette(vcr_options[:cassette], :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
           process_message
         end
       end
+
+      options[:expected_gender] ? user.should(send("be_#{options[:expected_gender]}")) : user.gender.should(be_nil)
+      options[:expected_looking_for] ? user.looking_for.should(eq(options[:expected_looking_for].to_s[0])) : user.looking_for.should(be_nil)
+      options[:expected_city] ? user.location.city.should(eq(options[:expected_city])) : user.location.city.should(be_nil)
+      options[:expected_name] ? user.name.should(eq(options[:expected_name])) : user.name.should(be_nil)
+      options[:expected_age] ? user.age.should(eq(options[:expected_age])) : user.age.should(be_nil)
     end
-
-    example_name = []
-
-    gender ? example_name << "the user should be #{gender}" : example_name << "the user's gender should be unknown"
-    location ? example_name <<  "in #{location}" : example_name << "location unknown"
-    looking_for ? example_name <<  "looking for a #{looking_for == :either ? 'friend' : looking_for}" : example_name << "looking for unknown"
-    name ? example_name <<  "name is #{name}" : example_name << "name unknown"
-    age ? example_name <<  "#{age} years old" : example_name << "age unknown"
-
-    it example_name.join(", ") do
-      gender ? user.should(send("be_#{gender}")) : user.gender.should(be_nil)
-      looking_for ? user.looking_for.should(eq(looking_for.to_s[0])) : user.looking_for.should(be_nil)
-      location ? user.location.city.should(eq(location)) : user.location.city.should(be_nil)
-      name ? user.name.should(eq(name)) : user.name.should(be_nil)
-      age ? user.age.should(eq(age)) : user.age.should(be_nil)
-    end
-  end
-end
-
-describe SearchHandler do
-  let(:user) do
-    build(:user_with_location)
-  end
-
-  describe "#process!" do
 
     def process_message
       subject.process!
     end
 
-    context "where the user is" do
+    def assert_looking_for(options = {})
+      # the message indicates the user is looking for a guy
+      registration_examples(
+        keywords(:could_mean_boy_or_boyfriend),
+        { :expected_looking_for => :male }.merge(options)
+      )
 
-      # from 'US'
+      # the message indicates the user is looking for a girl
+      registration_examples(
+        keywords(:could_mean_girl_or_girlfriend),
+        { :expected_looking_for => :female }.merge(options)
+      )
 
-      # a guy texting
-      context "a guy" do
-        before do
-          user.gender = "m"
-        end
+      # the message indicates the user is looking for a friend
+      registration_examples(
+        keywords(:friend),
+        { :expected_looking_for => :either}.merge(options)
+      )
 
-        shared_examples_for "a guy texting" do |looking_for|
-          context "and the message is" do
-            # a guy looking for a guy
-            registration_examples(
-              keywords("KH", :could_mean_boy_or_boyfriend),
-              :gender => :male,
-              :looking_for => :male
-            )
+      # can't determine what he/she is looking for from the message
+      registration_examples(
+        ["hello", "", "laskhdg"],
+        { :expected_looking_for => options[:expected_looking_for_when_undetermined] }.merge(options)
+      )
+    end
 
-            # a guy looking for a girl
-            registration_examples(
-              keywords("KH", :could_mean_girl_or_girlfriend),
-              :gender => :male,
-              :looking_for => :female
-            )
+    def assert_gender(options = {})
+      # the message indicates a guy is texting
+      registration_examples(
+        keywords(:boy, :could_mean_boy_or_boyfriend),
+        { :expected_gender => :male }.merge(options)
+      )
 
-            # a guy looking for a friend
-            registration_examples(
-              keywords("KH", :friend),
-              :gender => :male,
-              :looking_for => :either
-            )
+      # the message indicates a girl is texting
+      registration_examples(
+        keywords(:girl, :could_mean_girl_or_girlfriend),
+        { :expected_gender => :female }.merge(options)
+      )
+    end
 
-            # can't determine who they're looking for
-            registration_examples(
-              ["hello", "", "laskhdg"],
-              :gender => :male,
-              :looking_for => looking_for
-            )
-          end
-        end
+    context "for users with a missing gender or looking for preference" do
+      it "should determine the missing information based off the message and what the user has already provided" do
+        # a guy is texting
+        assert_looking_for(
+          :gender => :male,
+          :expected_gender => :male
+        )
 
-        # not yet known what he's looking for
-        it_should_behave_like "a guy texting", nil
+        # a gay guy is texting
+        assert_looking_for(
+          :gender => :male,
+          :expected_gender => :male,
+          :looking_for => :male,
+          :expected_looking_for_when_undetermined => :male
+        )
 
-        context "and is looking for a" do
-          # a guy is already looking for a guy
-          context "guy" do
-            before do
-              user.looking_for = "m"
-            end
+        # a straight guy is texting
+        assert_looking_for(
+          :gender => :male,
+          :expected_gender => :male,
+          :looking_for => :female,
+          :expected_looking_for_when_undetermined => :female
+        )
 
-            it_should_behave_like "a guy texting", :male
-          end
+        # a bi guy is texting
+        assert_looking_for(
+          :gender => :male,
+          :expected_gender => :male,
+          :looking_for => :either,
+          :expected_looking_for_when_undetermined => :either
+        )
 
-          context "girl" do
-            # a guy is already looking for a girl
-            before do
-              user.looking_for = "f"
-            end
+        # a girl is texting
+        assert_looking_for(
+          :gender => :female,
+          :expected_gender => :female,
+        )
 
-            it_should_behave_like "a guy texting", :female
-          end
+        # a gay girl is texting
+        assert_looking_for(
+          :gender => :female,
+          :expected_gender => :female,
+          :looking_for => :female,
+          :expected_looking_for_when_undetermined => :female
+        )
 
-          context "friend" do
-            # a guy is already looking for a friend
-            before do
-              user.looking_for = "e"
-            end
+        # a straight girl is texting
+        assert_looking_for(
+          :gender => :female,
+          :expected_gender => :female,
+          :looking_for => :male,
+          :expected_looking_for_when_undetermined => :male
+        )
 
-            it_should_behave_like "a guy texting", :either
-          end
-        end
+        # a bi girl is texting
+        assert_looking_for(
+          :gender => :female,
+          :expected_gender => :female,
+          :looking_for => :either,
+          :expected_looking_for_when_undetermined => :either
+        )
+
+        # a user with a unknown gender looking for a guy is texting
+        assert_gender(
+          :looking_for => :male,
+          :expected_looking_for => :male
+        )
+
+        # a user with a unknown gender looking for a girl is texting
+        assert_gender(
+          :looking_for => :female,
+          :expected_looking_for => :female
+        )
+
+        # a user with a unknown gender looking for a friend is texting
+        assert_gender(
+          :looking_for => :either,
+          :expected_looking_for => :either
+        )
       end
+    end
 
-      context "a girl" do
-        # a girl texting
-        before do
-          user.gender = "f"
-        end
+    context "for new users" do
+      it "should try to determine as much info about the user as possible from the message" do
+        # the message indicates a guy is texting
+        registration_examples(
+          keywords(:boy, :could_mean_boy_or_boyfriend),
+          :expected_gender => :male
+        )
 
-        shared_examples_for "a girl texting" do |looking_for|
-          context "and the message is" do
-            # a girl looking for a girl
-            registration_examples(
-              keywords("KH", :could_mean_girl_or_girlfriend),
-              :gender => :female,
-              :looking_for => :female
-            )
+        # the message indicates a girl is texting
+        registration_examples(
+          keywords(:girl, :could_mean_girl_or_girlfriend),
+          :expected_gender => :female
+        )
 
-            # a girl looking for a guy
-            registration_examples(
-              keywords("KH", :could_mean_boy_or_boyfriend),
-              :gender => :female,
-              :looking_for => :male
-            )
+        # the message indicates the user is looking for a girl
+        registration_examples(
+          keywords(:girlfriend),
+          :expected_looking_for => :female
+        )
 
-            # a girl looking for a friend
-            registration_examples(
-              keywords("KH", :friend),
-              :gender => :female,
-              :looking_for => :either
-            )
+        # the message indicates the user is looking for a guy
+        registration_examples(
+          keywords(:boyfriend),
+          :expected_looking_for => :male
+        )
 
-            # can't determine they're looking for
-            registration_examples(
-              ["hello", "", "laskhdg"],
-              :gender => :female,
-              :looking_for => looking_for
-            )
-          end
-        end
+        # the message indicates the user is looking for a friend
+        registration_examples(
+          keywords(:friend),
+          :expected_looking_for => :either
+        )
 
-        # not yet known what she's looking for
-        it_should_behave_like "a girl texting", nil
+        # the message indicates a guy is texting looking for a girl
+        registration_examples(
+          keywords(:guy_looking_for_a_girl),
+          :expected_gender => :male,
+          :expected_looking_for => :female
+        )
 
-        context "and is looking for a" do
-          # a girl is already looking for a guy
-          context "guy" do
-            before do
-              user.looking_for = "m"
-            end
+        # the message indicates a girl is texting looking for a guy
+        registration_examples(
+          keywords(:girl_looking_for_a_guy),
+          :expected_gender => :female,
+          :expected_looking_for => :male
+        )
 
-            it_should_behave_like "a girl texting", :male
-          end
+        # the message indicates a guy looking for guy
+        registration_examples(
+          keywords(:guy_looking_for_a_guy),
+          :expected_gender => :male,
+          :expected_looking_for => :male
+        )
 
-          context "girl" do
-            # a girl is already looking for a girl
-            before do
-              user.looking_for = "f"
-            end
+        # the message indicates a girl looking for girl
+        registration_examples(
+          keywords(:girl_looking_for_a_girl),
+          :expected_gender => :female,
+          :expected_looking_for => :female
+        )
 
-            it_should_behave_like "a girl texting", :female
-          end
+        # the message indicates a guy looking for friend
+        registration_examples(
+          keywords(:guy_looking_for_a_friend),
+          :expected_gender => :male,
+          :expected_looking_for => :either
+        )
 
-          context "friend" do
-            # a girl is already looking for a friend
-            before do
-              user.looking_for = "e"
-            end
+        # the message indicates a girl looking for friend
+        registration_examples(
+          keywords(:girl_looking_for_a_friend),
+          :expected_gender => :female,
+          :expected_looking_for => :either
+        )
 
-            it_should_behave_like "a girl texting", :either
-          end
-        end
-      end
+        # guy named frank
+        registration_examples(
+          keywords(:guy_named_frank),
+          :expected_name => "frank",
+          :expected_gender => :male
+        )
 
-      context "looking for a" do
-        context "guy" do
-          # is already looking for a guy (gender unknown)
-          before do
-            user.looking_for = "m"
-          end
+        # girl named mara
+        registration_examples(
+          keywords(:girl_named_mara),
+          :expected_name => "mara",
+          :expected_gender => :female
+        )
 
-          context "and the message is" do
-            # guy texting
-            registration_examples(
-              keywords("KH", :boy, :could_mean_boy_or_boyfriend),
-              :gender => :male,
-              :looking_for => :male
-            )
-
-            # girl texting
-            registration_examples(
-              keywords("KH", :girl, :could_mean_girl_or_girlfriend),
-              :gender => :female,
-              :looking_for => :male
-            )
-          end
-        end
-
-        context "girl" do
-          # is already looking for a girl (gender unknown)
-          before do
-            user.looking_for = "f"
-          end
-
-          context "and the message is" do
-            # guy texting
-            registration_examples(
-              keywords("KH", :boy, :could_mean_boy_or_boyfriend),
-              :gender => :male,
-              :looking_for => :female
-            )
-
-            # girl texting
-            registration_examples(
-              keywords("KH", :girl, :could_mean_girl_or_girlfriend),
-              :gender => :female,
-              :looking_for => :female
-            )
-          end
-        end
-
-        context "friend" do
-          # is already looking for a friend (gender unknown)
-          before do
-            user.looking_for = "e"
-          end
-
-          context "and the message is" do
-            # guy texting
-            registration_examples(
-              keywords("KH", :boy, :could_mean_boy_or_boyfriend),
-              :gender => :male,
-              :looking_for => :either
-            )
-
-            # girl texting
-            registration_examples(
-              keywords("KH", :girl, :could_mean_girl_or_girlfriend),
-              :gender => :female,
-              :looking_for => :either
-            )
-          end
-        end
-      end
-
-      context "new" do
-        # user is new
-        context "and the message is", :focus do
-          # guy texting
-          registration_examples(
-            keywords("KH", :boy, :could_mean_boy_or_boyfriend),
-            :gender => :male
-          )
-
-          # girl texting
-          registration_examples(
-            keywords("KH", :girl, :could_mean_girl_or_girlfriend),
-            :gender => :female
-          )
-
-          # looking for a girl
-          registration_examples(
-            keywords("KH", :girlfriend),
-            :looking_for => :female
-          )
-
-          # looking for a guy
-          registration_examples(
-            keywords("KH", :boyfriend),
-            :looking_for => :male
-          )
-
-          # looking for a friend
-          registration_examples(
-            keywords("KH", :friend),
-            :looking_for => :either
-          )
-
-          # guy looking for a girl
-          registration_examples(
-            keywords("KH", :guy_looking_for_a_girl),
-            :gender => :male,
-            :looking_for => :female
-          )
-
-          # girl looking for a guy
-          registration_examples(
-            keywords("KH", :girl_looking_for_a_guy),
-            :gender => :female,
-            :looking_for => :male
-          )
-
-          # guy looking for guy
-          registration_examples(
-            keywords("KH", :guy_looking_for_a_guy),
-            :gender => :male,
-            :looking_for => :male
-          )
-
-          # girl looking for girl
-          registration_examples(
-            keywords("KH", :girl_looking_for_a_girl),
-            :gender => :female,
-            :looking_for => :female
-          )
-
-          # guy looking for friend
-          registration_examples(
-            keywords("KH", :guy_looking_for_a_friend),
-            :gender => :male,
-            :looking_for => :either
-          )
-
-          # girl looking for friend
-          registration_examples(
-            keywords("KH", :girl_looking_for_a_friend),
-            :gender => :female,
-            :looking_for => :either
-          )
-
-          # guy named frank
-          registration_examples(
-            keywords("KH", :guy_named_frank),
-            :name => "frank",
-            :gender => :male
-          )
-
-          # girl named mara
-          registration_examples(
-            keywords("KH", :girl_named_mara),
-            :name => "mara",
-            :gender => :female
-          )
-
-          # 23 year old
-          registration_examples(
-            keywords("KH", :"23_year_old"),
-            :age => 23
-          )
-
-          # Vichet 23 guy looking for a girl
-          registration_examples(
-            ["kjom Vichet pros 23chnam jong rok mit srey"],
-            :gender => :male,
-            :looking_for => :female,
-            :age => 23,
-            :name => "vichet"
-          )
-        end
+        # 23 year old
+        registration_examples(
+          keywords(:"23_year_old"),
+          :expected_age => 23
+        )
       end
     end
   end

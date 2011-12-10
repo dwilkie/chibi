@@ -13,7 +13,7 @@ FactoryGirl.define do
   end
 
   factory :location do
-    country_code "XY"
+    country_code "KH"
 
     factory :cambodia do
       country_code "KH"
