@@ -17,7 +17,8 @@ KEYWORDS = {
     :girl_looking_for_a_friend => ["f looking for a friend to go shopping with", "girl seeking friend"],
     :guy_named_frank => ["im frank man", "i'm frank male", "i am frank guy"],
     :girl_named_mara => ["im mara f", "i'm mara girl", "i am mara woman"],
-    :"23_year_old" => ["im 23 years old", "23yo", "23 yo"]
+    :"23_year_old" => ["im 23 years old", "23yo", "23 yo", "blah 23 badfa"],
+    :phnom_penhian => ["from phnom penh"]
   },
 
   :kh => {
@@ -34,7 +35,8 @@ KEYWORDS = {
     :girl_looking_for_a_friend => ["nhom srey jong rok met sabai", "srey jong rok mit leng sms", "srey rok met cute"],
     :guy_named_frank => ["kjom frank pros", "nhom frank bros", "nyom frank pros", "knhom frank pros", "knyom frank bros"],
     :girl_named_mara => ["kjom mara srey", "nhom mara srey", "nyom mara srey", "knhom mara srey", "knyom mara srey"],
-    :"23_year_old" => ["kjom 23chnam", "23 chnam", "23"]
+    :"23_year_old" => ["kjom 23chnam", "23 chnam", "23", "dsakle 23dadsa"],
+    :phnom_penhian => ["mau pi phnum penh"]
   }
 }
 
@@ -43,13 +45,19 @@ describe SearchHandler do
     build(:user)
   end
 
+  let(:cambodian) do
+    create(:cambodian)
+  end
+
   describe "#process!" do
     def keywords(*keys)
-      country_code = user.location.country_code
+      options = keys.extract_options!
+      options[:user] ||= user
+      options[:country_code] ||= options[:user].location.country_code
       all_keywords = []
       keys.each do |key|
         english_keywords = KEYWORDS[:en][key]
-        localized_keywords = KEYWORDS.try(:[], country_code.downcase.to_sym).try(:[], key)
+        localized_keywords = KEYWORDS.try(:[], options[:country_code].to_s.downcase.to_sym).try(:[], key)
         all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
       end
       all_keywords
@@ -65,29 +73,41 @@ describe SearchHandler do
     def assert_user_attributes(message, options)
       user_attributes = [:gender, :looking_for, :name, :age]
 
-      user.gender = options[:gender] ? options[:gender].to_s[0] : nil
-      user.looking_for = options[:looking_for] ? options[:looking_for].to_s[0] : nil
-      user.name = options[:name]
-      user.age = options[:age]
+      options[:user] ||= user
 
-      subject.user = user
+      options[:user].gender = options[:gender] ? options[:gender].to_s[0] : nil
+      options[:user].looking_for = options[:looking_for] ? options[:looking_for].to_s[0] : nil
+      options[:user].name = options[:name]
+      options[:user].age = options[:age]
+      options[:user].location.city = options[:city]
+
+      subject.user = options[:user]
       subject.body = message
-      subject.location = user.location
+      subject.location = options[:user].location
 
       vcr_options = options[:vcr] || {}
-      vcr_options[:cassette] ||= "no_results"
+
+      if vcr_options[:expect_results]
+        match_requests_on = {}
+        cassette = vcr_options[:cassette] ||= "results"
+      else
+        match_requests_on = {:match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]}
+        cassette = vcr_options[:cassette] ||= "no_results"
+      end
+
+      cassette = message if cassette == :message
 
       Timecop.freeze(Time.now) do
-        VCR.use_cassette(vcr_options[:cassette], :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
+        VCR.use_cassette(cassette, match_requests_on.merge(:erb => true)) do
           process_message
         end
       end
 
-      options[:expected_gender] ? user.should(send("be_#{options[:expected_gender]}")) : user.gender.should(be_nil)
-      options[:expected_looking_for] ? user.looking_for.should(eq(options[:expected_looking_for].to_s[0])) : user.looking_for.should(be_nil)
-      options[:expected_city] ? user.location.city.should(eq(options[:expected_city])) : user.location.city.should(be_nil)
-      options[:expected_name] ? user.name.should(eq(options[:expected_name])) : user.name.should(be_nil)
-      options[:expected_age] ? user.age.should(eq(options[:expected_age])) : user.age.should(be_nil)
+      options[:expected_gender] ? options[:user].should(send("be_#{options[:expected_gender]}")) : options[:user].gender.should(be_nil)
+      options[:expected_looking_for] ? options[:user].looking_for.should(eq(options[:expected_looking_for].to_s[0])) : options[:user].looking_for.should(be_nil)
+      options[:expected_city] ? options[:user].location.city.should(eq(options[:expected_city])) : options[:user].location.city.should(be_nil)
+      options[:expected_name] ? options[:user].name.should(eq(options[:expected_name])) : options[:user].name.should(be_nil)
+      options[:expected_age] ? options[:user].age.should(eq(options[:expected_age])) : options[:user].age.should(be_nil)
     end
 
     def process_message
@@ -217,7 +237,7 @@ describe SearchHandler do
     end
 
     context "for new users" do
-      it "should try to determine as much info about the user as possible from the message" do
+      it "should try to determine as much info about the user as possible from the message", :focus do
         # the message indicates a guy is texting
         registration_examples(
           keywords(:boy, :could_mean_boy_or_boyfriend),
@@ -308,6 +328,13 @@ describe SearchHandler do
         registration_examples(
           keywords(:"23_year_old"),
           :expected_age => 23
+        )
+
+        registration_examples(
+          keywords(:phnom_penhian, :country_code => :kh),
+          :expected_city => "Phnom Penh",
+          :user => cambodian,
+          :vcr => {:expect_results => true}
         )
       end
     end

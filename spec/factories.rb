@@ -59,6 +59,10 @@ FactoryGirl.define do
       looking_for "m"
     end
 
+    factory :cambodian do
+      association :location, :factory => :cambodia
+    end
+
     # do not reorder these factories because the tests rely on
     # the order so they fail when match statements are left off
 

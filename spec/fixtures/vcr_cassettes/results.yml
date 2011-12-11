@@ -1,0 +1,85 @@
+---
+http_interactions:
+
+<% phnom_penh = {:latitude => 11.558831, :longitude => 104.917445} %>
+<% phnom_penh[:geocoded] ="{\"results\":[{\"geometry\":{\"location\":{\"lat\":#{phnom_penh[:latitude]},\"lng\":#{phnom_penh[:longitude]}}}}],\"status\":\"OK\"}" %>
+<% phnom_penh[:reverse_geocoded] = "{\"results\":[{\"address_components\":[{\"long_name\":\"Phnom Penh\",\"types\":[\"locality\"]},{\"short_name\":\"KH\",\"types\":[\"country\"]}]}],\"status\":\"OK\"}" %>
+
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=from+phnom+penh%2C+Cambodia&language=en&sensor=false
+  response:
+    status:
+      code: 200
+      message: OK
+    body: ! <%= phnom_penh[:geocoded].to_json %>
+    http_version: '1.1'
+  recorded_at: Sun, 11 Dec 2011 07:56:08 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=<%= phnom_penh[:latitude] %>%2C<%= phnom_penh[:longitude] %>&sensor=false
+  response:
+    status:
+      code: 200
+      message: OK
+    body: ! <%= phnom_penh[:reverse_geocoded].to_json %>
+    http_version: '1.1'
+  recorded_at: Sun, 11 Dec 2011 07:56:08 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=FROM+PHNOM+PENH%2C+Cambodia&language=en&sensor=false
+  response:
+    status:
+      code: 200
+      message: OK
+    body: ! <%= phnom_penh[:geocoded].to_json %>
+    http_version: '1.1'
+  recorded_at: Sun, 11 Dec 2011 07:55:37 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=<%= phnom_penh[:latitude] %>%2C<%= phnom_penh[:longitude] %>&sensor=false
+  response:
+    status:
+      code: 200
+      message: OK
+    body: ! <%= phnom_penh[:reverse_geocoded].to_json %>
+    http_version: '1.1'
+  recorded_at: Sun, 11 Dec 2011 07:55:37 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=mau+pi+phnum+penh%2C+Cambodia&language=en&sensor=false
+  response:
+    status:
+      code: 200
+      message: OK
+    body: ! <%= phnom_penh[:geocoded].to_json %>
+    http_version: '1.1'
+  recorded_at: Sun, 11 Dec 2011 07:55:38 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=<%= phnom_penh[:latitude] %>%2C<%= phnom_penh[:longitude] %>&sensor=false
+  response:
+    status:
+      code: 200
+      message: OK
+    body: ! <%= phnom_penh[:reverse_geocoded].to_json %>
+    http_version: '1.1'
+  recorded_at: Sun, 11 Dec 2011 07:55:38 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=MAU+PI+PHNUM+PENH%2C+Cambodia&language=en&sensor=false
+  response:
+    body: ! <%= phnom_penh[:geocoded].to_json %>
+    http_version: '1.1'
+  recorded_at: Sun, 11 Dec 2011 07:55:39 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=<%= phnom_penh[:latitude] %>%2C<%= phnom_penh[:longitude] %>&sensor=false
+  response:
+    status:
+      code: 200
+      message: OK
+    body: ! <%= phnom_penh[:reverse_geocoded].to_json %>
+    http_version: '1.1'
+  recorded_at: Sun, 11 Dec 2011 07:55:39 GMT
+recorded_with: VCR 2.0.0.rc1
