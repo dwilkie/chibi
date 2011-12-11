@@ -111,12 +111,12 @@ FactoryGirl.define do
 
       factory :con do
         name "con"
-        age 33
+        age 37
       end
 
       factory :paul do
         name "paul"
-        age 35
+        age 39
       end
 
       factory :luke do

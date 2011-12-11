@@ -59,7 +59,7 @@ describe User do
 
     # Joy with Con, Dave, Paul and Luke:
     # Joy is a straight female in Cambodia. Con, Dave and Luke are straight males also in Cambodia.
-    # Dave is two years older than Joy, Con is 6 years older, Paul 8 years older and Luke is 2 years younger.
+    # Dave is two years older than Joy, Con is 10 years older, Paul 12 years older and Luke is 2 years younger.
     # Even though Joy is closer in age to Dave, Con matches before Dave because Con has initiated more
     # chats and he is still just in the free age zone (up to 6 years older) where age difference doesn't really
     # matter. Paul has also initiated more chats than Dave but he is just outside the free age zone
@@ -139,10 +139,6 @@ describe User do
       create(:chat,        :user => luke,       :friend => nok)
       create(:chat,        :user => luke,       :friend => hanh)
       create(:chat,        :user => paul,       :friend => nok)
-    end
-
-    it "should not include the person being matched" do
-      subject.class.matches(user).should_not include(user)
     end
 
     context "given there are other users" do

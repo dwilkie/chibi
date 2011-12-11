@@ -24,13 +24,6 @@ class User < ActiveRecord::Base
 
   PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
 
-  # the age difference where the user's age becomes a factor in the ordering of results
-  AGE_BEARING_CUTOFF = 6
-
-  # the age difference on the undesirable side (for straight people),
-  # where number of chats is no longer a factor in the ordering of results
-  OUT_OF_RANGE_CUTOFF = 2
-
   def self.matches(user)
     # don't match the user being matched
     match_scope = scoped.where("\"#{table_name}\".\"id\" != ?", user.id)
@@ -101,6 +94,61 @@ class User < ActiveRecord::Base
 
   private
 
+  # the age difference where the user's age becomes a factor in the ordering of results
+  AGE_BEARING_CUTOFF = 10
+
+  # the age difference on the undesirable side (for straight people),
+  # where number of chats is no longer a factor in the ordering of results
+  OUT_OF_RANGE_CUTOFF = 2
+
+  # Orders users by a function based on the age difference of the user being matched
+  # and the amount of chats the user has initiated. Orders in ASC order.
+
+  # The function when matching a female with a male is:
+  # |a| + 100                  for a <= -K2
+  # 1/(c + 1)                  for -K2 < a <= K1
+  # (|a| - K1 + 1)^2 / (c + 1) for a > K1
+
+  # Similarly, the function when matching a male with a female is:
+  # (|a| - K1 + 1)^2 / (c + 1) for a < -K1
+  # 1/(c + 1)                  for -K1 <= a < K2
+  # |a| + 100                  for a >= K2
+
+  # The function when matching males with males or females with females is:
+  # (|a| - K1 + 1)^2 / (c + 1) for a < -K1
+  # 1/(c + 1)                  for -K1 <= a <= K1
+  # (|a| - K1 + 1)^2 / (c + 1) for a > K1
+
+  # where:
+  # a is the age difference in years between the user being matched and the db user
+  # c is the number of chats the db user has initiated
+  # K1 is the age bearing cutoff in years (AGE_BEARING_CUTOFF)
+  # K2 is the out of range cutoff in years (OUT_OF_RANGE_CUTOFF)
+
+  # Examples:
+  # User being matched is female & the current db user is male:
+  # a = 25 (the male db user is 25 years older than the female being matched)
+  # c = 50 (the male db user has initiated 50 chats)
+  # K1 = 10
+  # (25 - 10 + 1)^2 / (50 + 1) = 25.4
+
+  # Next db user is male
+  # a = 11 (the male db user is 11 years older than the female being matched)
+  # c = 5  (the male db user has initiated 0 chats)
+  # K1 = 10
+  # (11 - 10 + 1)^2 / (0 + 1) = 4
+
+  # Next db user is male
+  # a = -2 (the male db user is 2 years younger than the female being matched)
+  # K2 = 2
+  # 2 + 100 = 102
+
+  # Next db user is female
+  # a = -10 (the female db user is 10 years younger than the female being matched)
+  # c = 1 (the female db user has initiated 1 chat)
+  # K1 = 10
+  # 1/(1 + 1) = 0.5
+
   def self.order_by_age_difference_and_initiated_chats(user, scope)
     # join all users on intitated chats
     scope = scope.joins("LEFT OUTER JOIN \"chats\" AS \"initiated_chats\" ON \"initiated_chats\".\"user_id\" = \"#{table_name}\".\"id\"")
@@ -114,18 +162,18 @@ class User < ActiveRecord::Base
 
     if user.female?
       # prefer older guys
-      age_bearing_case ||= "#{age_diff_in_years} >= #{AGE_BEARING_CUTOFF}"
+      age_bearing_case ||= "#{age_diff_in_years} > #{AGE_BEARING_CUTOFF}"
       out_of_range_case = "#{age_diff_in_years} <= #{OUT_OF_RANGE_CUTOFF * -1} AND #{table_name}.gender = 'm'"
     elsif user.male?
       # prefer younger girls
-      age_bearing_case ||= "#{age_diff_in_years} <= #{AGE_BEARING_CUTOFF * -1}"
+      age_bearing_case ||= "#{age_diff_in_years} < #{AGE_BEARING_CUTOFF * -1}"
       out_of_range_case = "#{age_diff_in_years} >= #{OUT_OF_RANGE_CUTOFF} AND #{table_name}.gender = 'f'"
     end
 
     # significantly disadvantage non prefered age group
     out_of_range_clause = "WHEN #{out_of_range_case} THEN #{abs_age_diff_in_years} + 100" if out_of_range_case
 
-    order_sql = user.date_of_birth? ? "CASE WHEN #{age_bearing_case} THEN (POWER(#{abs_age_diff_in_years} - 5, 2)) * 1.0/#{chat_factor} #{out_of_range_clause} ELSE 1.0/#{chat_factor} END" : "1.0/#{chat_factor}"
+    order_sql = user.date_of_birth? ? "CASE WHEN #{age_bearing_case} THEN (POWER(#{abs_age_diff_in_years} - #{AGE_BEARING_CUTOFF} + 1, 2)) * 1.0/#{chat_factor} #{out_of_range_clause} ELSE 1.0/#{chat_factor} END" : "1.0/#{chat_factor}"
 
     scope.order(order_sql)
   end
