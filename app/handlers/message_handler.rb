@@ -2,7 +2,6 @@ class MessageHandler
   include Conversational::Conversation
   class_suffix "Handler"
 
-  cattr_accessor :keywords
   attr_accessor :message, :user, :body, :location
 
   def process!(message)
@@ -28,8 +27,8 @@ class MessageHandler
   def keywords(*keys)
     all_keywords = []
     keys.each do |key|
-      english_keywords = self.class.keywords["en"][key.to_s]
-      localized_keywords = self.class.keywords.try(:[], location.country_code.downcase).try(:[], key.to_s)
+      english_keywords = MESSAGE_KEYWORDS["en"][key.to_s]
+      localized_keywords = MESSAGE_KEYWORDS.try(:[], location.country_code.downcase).try(:[], key.to_s)
       all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
     end
    "(#{all_keywords.join('|')})"
@@ -39,4 +38,3 @@ class MessageHandler
     body =~ /\b#{self.class.commands[command].join("\\b|\\b")}\b/
   end
 end
-
