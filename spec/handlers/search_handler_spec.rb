@@ -330,10 +330,11 @@ describe SearchHandler do
           :expected_age => 23
         )
 
+        # Phnom Penhian
         registration_examples(
           keywords(:phnom_penhian, :country_code => :kh),
-          :expected_city => "Phnom Penh",
           :user => cambodian,
+          :expected_city => "Phnom Penh",
           :vcr => {:expect_results => true}
         )
       end
