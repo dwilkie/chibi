@@ -1,0 +1,166 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=mondol+kiri%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 16:43:59 GMT
+      expires:
+      - Tue, 13 Dec 2011 16:43:59 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"Mondol Kiri\",\n               \"short_name\"
+      : \"Mondol Kiri\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Mondol Kiri, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 13.4233940,\n
+      \                 \"lng\" : 107.6061020\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 12.0597290,\n                  \"lng\" : 106.3519530\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 12.78794270,\n               \"lng\" : 107.10119310\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 13.48336440,\n                  \"lng\" : 108.12566820\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 12.09059990,\n                  \"lng\" : 106.0767180\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 16:43:59 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=12.7879427%2C107.1011931&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 16:43:59 GMT
+      expires:
+      - Tue, 13 Dec 2011 16:43:59 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"141\",\n               \"short_name\"
+      : \"141\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Pechr Chenda\",\n               \"short_name\"
+      : \"Pechr Chenda\",\n               \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Mondol Kiri\",\n               \"short_name\" : \"Mondol Kiri\",\n               \"types\"
+      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"141, Cambodia\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 12.79033290,\n                  \"lng\" : 107.15564490\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 12.78319820,\n
+      \                 \"lng\" : 107.15551610\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 12.78677280,\n               \"lng\"
+      : 107.15564390\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 12.79033290,\n                  \"lng\" : 107.1569294802915\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 12.78319820,\n
+      \                 \"lng\" : 107.1542315197085\n               }\n            }\n
+      \        },\n         \"types\" : [ \"route\" ]\n      },\n      {\n         \"address_components\"
+      : [\n            {\n               \"long_name\" : \"Pechr Chenda\",\n               \"short_name\"
+      : \"Pechr Chenda\",\n               \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Mondol Kiri\",\n               \"short_name\" : \"Mondol Kiri\",\n               \"types\"
+      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Pechr Chenda, Cambodia\",\n
+      \        \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 12.91430530,\n                  \"lng\" : 107.59048460\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 12.50211290,\n                  \"lng\" : 106.50678630\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 12.70545720,\n
+      \              \"lng\" : 107.00670310\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 12.91430530,\n                  \"lng\" : 107.59048460\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 12.50211290,\n                  \"lng\" : 106.50678630\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
+      \              \"long_name\" : \"Mondol Kiri\",\n               \"short_name\"
+      : \"Mondol Kiri\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Mondol Kiri, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 13.4233940,\n
+      \                 \"lng\" : 107.6061020\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 12.0597290,\n                  \"lng\" : 106.3519530\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 12.78794270,\n               \"lng\" : 107.10119310\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 13.4233940,\n                  \"lng\" : 107.6061020\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 12.0597290,\n                  \"lng\" : 106.3519530\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
+      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 16:44:00 GMT
+recorded_with: VCR 2.0.0.rc1

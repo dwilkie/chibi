@@ -7,7 +7,7 @@ gem 'pg'
 gem 'kaminari'
 gem "geocoder", :git => "git://github.com/dwilkie/geocoder.git"
 gem "phony"
-gem "countries", :require => 'iso3166'
+gem "countries", :git => "git://github.com/dwilkie/countries.git", :require => 'iso3166'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'

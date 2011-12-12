@@ -1,0 +1,166 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=otdar+mean+chey%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 17:19:36 GMT
+      expires:
+      - Tue, 13 Dec 2011 17:19:36 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"Oddar Meancheay\",\n               \"short_name\"
+      : \"Oddar Meancheay\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Oddar Meancheay, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 14.4395070,\n
+      \                 \"lng\" : 104.4748510\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 13.9096780,\n                  \"lng\" : 103.0405580\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 14.17171950,\n               \"lng\" : 103.63627150\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.51764260,\n                  \"lng\" : 104.14850910\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 13.82526820,\n                  \"lng\" : 103.12403390\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 17:19:37 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=14.1717195%2C103.6362715&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 17:19:36 GMT
+      expires:
+      - Tue, 13 Dec 2011 17:19:36 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"56\",\n               \"short_name\"
+      : \"56\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Samraong\",\n               \"short_name\"
+      : \"Samraong\",\n               \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Oddar Meancheay\",\n               \"short_name\" : \"Oddar Meancheay\",\n
+      \              \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Cambodia\",\n
+      \              \"short_name\" : \"KH\",\n               \"types\" : [ \"country\",
+      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"56, Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n
+      \              \"northeast\" : {\n                  \"lat\" : 14.23876080,\n
+      \                 \"lng\" : 103.56751440\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 14.23754610,\n                  \"lng\" : 103.56634480\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 14.23815350,\n               \"lng\" : 103.56692960\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.23950243029150,\n                  \"lng\"
+      : 103.5682785802915\n               },\n               \"southwest\" : {\n                  \"lat\"
+      : 14.23680446970850,\n                  \"lng\" : 103.5655806197085\n               }\n
+      \           }\n         },\n         \"types\" : [ \"route\" ]\n      },\n      {\n
+      \        \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Samraong\",\n               \"short_name\" : \"Samraong\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Oddar Meancheay\",\n               \"short_name\"
+      : \"Oddar Meancheay\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Samraong, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 14.438670,\n
+      \                 \"lng\" : 103.83110050\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 14.11393560,\n                  \"lng\" : 103.40057370\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 14.21985550,\n               \"lng\" : 103.58997330\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.438670,\n                  \"lng\" : 103.83110050\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 14.11393560,\n                  \"lng\" : 103.40057370\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
+      \              \"long_name\" : \"Oddar Meancheay\",\n               \"short_name\"
+      : \"Oddar Meancheay\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Oddar Meancheay, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 14.4395070,\n
+      \                 \"lng\" : 104.4748510\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 13.9096780,\n                  \"lng\" : 103.0405580\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 14.17171950,\n               \"lng\" : 103.63627150\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.4395070,\n                  \"lng\" : 104.4748510\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 13.9096780,\n                  \"lng\" : 103.0405580\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
+      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 17:19:37 GMT
+recorded_with: VCR 2.0.0.rc1

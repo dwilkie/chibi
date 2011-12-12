@@ -1,4 +1,12 @@
 GIT
+  remote: git://github.com/dwilkie/countries.git
+  revision: 87de510675ad5acacb7d50fe11daf170a8fb42e5
+  specs:
+    countries (0.8.0)
+      currencies (= 0.4.0)
+      currencies (>= 0.2.0)
+
+GIT
   remote: git://github.com/dwilkie/geocoder.git
   revision: 4ecdf4017c4688c5206028d8de1e62ff87a04256
   specs:
@@ -62,9 +70,6 @@ GEM
     conversational (0.4.1)
       activesupport
       i18n
-    countries (0.7.0)
-      currencies (= 0.4.0)
-      currencies (>= 0.2.0)
     currencies (0.4.0)
     database_cleaner (0.7.0)
     diff-lcs (1.1.3)
@@ -183,7 +188,7 @@ PLATFORMS
 DEPENDENCIES
   coffee-rails (~> 3.1.0)
   conversational (~> 0.4.1)
-  countries
+  countries!
   database_cleaner
   factory_girl
   fakeweb

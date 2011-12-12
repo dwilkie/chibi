@@ -1,0 +1,194 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=svaay+rieng%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 17:16:38 GMT
+      expires:
+      - Tue, 13 Dec 2011 17:16:38 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"Svay Rieng\",\n               \"short_name\"
+      : \"Svay Rieng\",\n               \"types\" : [ \"locality\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Svay Rieng\",\n
+      \              \"short_name\" : \"Svay Rieng\",\n               \"types\" :
+      [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Svay Rieng\",\n               \"short_name\"
+      : \"Svay Rieng\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Svay Rieng, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 11.10100960,\n
+      \                 \"lng\" : 105.80893990\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 11.06790740,\n                  \"lng\" : 105.7840490\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 11.08333330,\n               \"lng\" : 105.80\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.0942830,\n                  \"lng\" : 105.81600740\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.07238320,\n                  \"lng\" : 105.78399260\n               }\n
+      \           }\n         },\n         \"types\" : [ \"locality\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 17:16:39 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=11.0833333%2C105.8&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 17:16:39 GMT
+      expires:
+      - Tue, 13 Dec 2011 17:16:39 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"334\",\n               \"short_name\"
+      : \"334\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Svay Rieng\",\n               \"short_name\"
+      : \"Svay Rieng\",\n               \"types\" : [ \"locality\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Svay Rieng\",\n
+      \              \"short_name\" : \"Svay Rieng\",\n               \"types\" :
+      [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Svay Rieng\",\n               \"short_name\"
+      : \"Svay Rieng\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"334, Svay Rieng, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 11.08321660,\n
+      \                 \"lng\" : 105.80206810\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 11.08287970,\n                  \"lng\" : 105.80164970\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 11.08297520,\n               \"lng\" : 105.80179730\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.08439713029150,\n                  \"lng\"
+      : 105.8032078802915\n               },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.08169916970850,\n                  \"lng\" : 105.8005099197085\n               }\n
+      \           }\n         },\n         \"types\" : [ \"route\" ]\n      },\n      {\n
+      \        \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Svay Rieng\",\n               \"short_name\" : \"Svay Rieng\",\n               \"types\"
+      : [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Svay Rieng\",\n               \"short_name\" : \"Svay Rieng\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Svay Rieng\",\n               \"short_name\"
+      : \"Svay Rieng\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Svay Rieng, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 11.10100960,\n
+      \                 \"lng\" : 105.80893990\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 11.06790740,\n                  \"lng\" : 105.7840490\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 11.08333330,\n               \"lng\" : 105.80\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.10100960,\n                  \"lng\" : 105.80893990\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.06790740,\n                  \"lng\" : 105.7840490\n               }\n
+      \           }\n         },\n         \"types\" : [ \"locality\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Svay Rieng\",\n               \"short_name\" : \"Svay Rieng\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Svay Rieng\",\n               \"short_name\"
+      : \"Svay Rieng\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Svay Rieng, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 11.10833710,\n
+      \                 \"lng\" : 105.83481790\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 11.05164980,\n                  \"lng\" : 105.78237530\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 11.07299080,\n               \"lng\" : 105.79967690\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.10833710,\n                  \"lng\" : 105.83481790\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 11.05164980,\n                  \"lng\" : 105.78237530\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
+      \              \"long_name\" : \"Svay Rieng\",\n               \"short_name\"
+      : \"Svay Rieng\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Svay Rieng, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 11.586630,\n
+      \                 \"lng\" : 106.2076570\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 10.7898730,\n                  \"lng\" : 105.5837710\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 11.1427220,\n               \"lng\" : 105.82902980\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.586630,\n                  \"lng\" : 106.2076570\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 10.7898730,\n                  \"lng\" : 105.5837710\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
+      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 17:16:40 GMT
+recorded_with: VCR 2.0.0.rc1

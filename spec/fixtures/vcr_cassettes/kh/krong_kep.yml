@@ -1,0 +1,206 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=krong+kep%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 17:31:01 GMT
+      expires:
+      - Tue, 13 Dec 2011 17:31:01 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"Krong Kep\",\n               \"short_name\"
+      : \"Krong Kep\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Krong Kep, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 10.62053940,\n
+      \                 \"lng\" : 104.42908290\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 10.35316990,\n                  \"lng\" : 104.25505610\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 10.51523510,\n               \"lng\" : 104.3326440\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 10.60298740,\n                  \"lng\" : 104.46070340\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 10.42745780,\n                  \"lng\" : 104.20458460\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 17:31:02 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=10.5152351%2C104.332644&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 17:31:02 GMT
+      expires:
+      - Tue, 13 Dec 2011 17:31:02 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"33 A\",\n               \"short_name\"
+      : \"33 A\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Kep\",\n               \"short_name\" : \"Kep\",\n
+      \              \"types\" : [ \"locality\", \"political\" ]\n            },\n
+      \           {\n               \"long_name\" : \"Kep\",\n               \"short_name\"
+      : \"Kep\",\n               \"types\" : [ \"administrative_area_level_2\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Krong Kep\",\n
+      \              \"short_name\" : \"Krong Kep\",\n               \"types\" : [
+      \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"33 A, Kep, Cambodia\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 10.52018610,\n                  \"lng\" : 104.33381080\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 10.51392540,\n
+      \                 \"lng\" : 104.33040940\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 10.51717170,\n               \"lng\"
+      : 104.33236390\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 10.52018610,\n                  \"lng\" : 104.33381080\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 10.51392540,\n
+      \                 \"lng\" : 104.33040940\n               }\n            }\n
+      \        },\n         \"types\" : [ \"route\" ]\n      },\n      {\n         \"address_components\"
+      : [\n            {\n               \"long_name\" : \"Kep\",\n               \"short_name\"
+      : \"Kep\",\n               \"types\" : [ \"locality\", \"political\" ]\n            },\n
+      \           {\n               \"long_name\" : \"Kep\",\n               \"short_name\"
+      : \"Kep\",\n               \"types\" : [ \"administrative_area_level_2\", \"political\"
+      ]\n            },\n            {\n               \"long_name\" : \"Krong Kep\",\n
+      \              \"short_name\" : \"Krong Kep\",\n               \"types\" : [
+      \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Kep, Cambodia\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 10.5288260,\n                  \"lng\" : 104.33638570\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 10.47562940,\n
+      \                 \"lng\" : 104.29132460\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 10.49672150,\n               \"lng\"
+      : 104.3181010\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 10.5288260,\n                  \"lng\" : 104.33638570\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 10.47562940,\n
+      \                 \"lng\" : 104.29132460\n               }\n            }\n
+      \        },\n         \"types\" : [ \"locality\", \"political\" ]\n      },\n
+      \     {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Kep\",\n               \"short_name\" : \"Kep\",\n               \"types\"
+      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Krong Kep\",\n               \"short_name\"
+      : \"Krong Kep\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Kep, Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n
+      \              \"northeast\" : {\n                  \"lat\" : 10.54443690,\n
+      \                 \"lng\" : 104.3504620\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 10.47491770,\n                  \"lng\" : 104.28420070\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 10.50480790,\n               \"lng\" : 104.32100950\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 10.54443690,\n                  \"lng\" : 104.3504620\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 10.47491770,\n                  \"lng\" : 104.28420070\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
+      \              \"long_name\" : \"Krong Kep\",\n               \"short_name\"
+      : \"Krong Kep\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Krong Kep, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 10.62053940,\n
+      \                 \"lng\" : 104.42908290\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 10.35316990,\n                  \"lng\" : 104.25505610\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 10.51523510,\n               \"lng\" : 104.3326440\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 10.62053940,\n                  \"lng\" : 104.42908290\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 10.35316990,\n                  \"lng\" : 104.25505610\n               }\n
+      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
+      \              \"long_name\" : \"Kampot province\",\n               \"short_name\"
+      : \"Kampot province\",\n               \"types\" : [ \"administrative_area_level_1\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Kampot province, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+      : {\n               \"northeast\" : {\n                  \"lat\" : 11.1618230,\n
+      \                 \"lng\" : 104.7421950\n               },\n               \"southwest\"
+      : {\n                  \"lat\" : 10.409080,\n                  \"lng\" : 103.9098660\n
+      \              }\n            },\n            \"location\" : {\n               \"lat\"
+      : 10.73253510,\n               \"lng\" : 104.37919120\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 11.1618230,\n                  \"lng\" : 104.7421950\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 10.409080,\n                  \"lng\" : 103.9098660\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
+      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 17:31:03 GMT
+recorded_with: VCR 2.0.0.rc1

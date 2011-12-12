@@ -1,0 +1,169 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=stueng+traeng%2C+Cambodia&language=en&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 17:01:34 GMT
+      expires:
+      - Tue, 13 Dec 2011 17:01:34 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"Stung Treng\",\n               \"short_name\"
+      : \"Stung Treng\",\n               \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Stung Treng\",\n               \"short_name\" : \"Stung Treng\",\n               \"types\"
+      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Stung Treng, Cambodia\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 13.93106820,\n                  \"lng\" : 106.22749330\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 13.38828360,\n
+      \                 \"lng\" : 105.91197970\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 13.79164340,\n               \"lng\"
+      : 106.11105010\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 13.96495950,\n                  \"lng\" : 106.36716890\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 13.61819850,\n
+      \                 \"lng\" : 105.85493130\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_2\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 17:01:34 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=13.7916434%2C106.1110501&sensor=false
+    body: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Mon, 12 Dec 2011 17:01:34 GMT
+      expires:
+      - Tue, 13 Dec 2011 17:01:34 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
+      \           {\n               \"long_name\" : \"National Highway 7\",\n               \"short_name\"
+      : \"NH 7\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Stung Treng\",\n               \"short_name\"
+      : \"Stung Treng\",\n               \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Stung Treng\",\n               \"short_name\" : \"Stung Treng\",\n               \"types\"
+      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"National Highway 7, Cambodia\",\n
+      \        \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 13.80112010,\n                  \"lng\" : 106.10096130\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 13.79484290,\n                  \"lng\" : 106.097890\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 13.79765790,\n               \"lng\"
+      : 106.10015210\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 13.80112010,\n                  \"lng\" : 106.10096130\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 13.79484290,\n
+      \                 \"lng\" : 106.097890\n               }\n            }\n         },\n
+      \        \"types\" : [ \"route\" ]\n      },\n      {\n         \"address_components\"
+      : [\n            {\n               \"long_name\" : \"Stung Treng\",\n               \"short_name\"
+      : \"Stung Treng\",\n               \"types\" : [ \"administrative_area_level_2\",
+      \"political\" ]\n            },\n            {\n               \"long_name\"
+      : \"Stung Treng\",\n               \"short_name\" : \"Stung Treng\",\n               \"types\"
+      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Stung Treng, Cambodia\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 13.93106820,\n                  \"lng\" : 106.22749330\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 13.38828360,\n
+      \                 \"lng\" : 105.91197970\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 13.79164340,\n               \"lng\"
+      : 106.11105010\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 13.93106820,\n                  \"lng\" : 106.22749330\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 13.38828360,\n
+      \                 \"lng\" : 105.91197970\n               }\n            }\n
+      \        },\n         \"types\" : [ \"administrative_area_level_2\", \"political\"
+      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Stung Treng\",\n               \"short_name\" : \"Stung Treng\",\n               \"types\"
+      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+      \        ],\n         \"formatted_address\" : \"Stung Treng, Cambodia\",\n         \"geometry\"
+      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 14.5876190,\n                  \"lng\" : 106.6629030\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 13.1084770,\n
+      \                 \"lng\" : 105.5211770\n               }\n            },\n
+      \           \"location\" : {\n               \"lat\" : 13.5764730,\n               \"lng\"
+      : 105.96998780\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+      : 14.5876190,\n                  \"lng\" : 106.6629030\n               },\n
+      \              \"southwest\" : {\n                  \"lat\" : 13.1084770,\n
+      \                 \"lng\" : 105.5211770\n               }\n            }\n         },\n
+      \        \"types\" : [ \"administrative_area_level_1\", \"political\" ]\n      },\n
+      \     {\n         \"address_components\" : [\n            {\n               \"long_name\"
+      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
+      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
+      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
+      \              },\n               \"southwest\" : {\n                  \"lat\"
+      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
+      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
+      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Mon, 12 Dec 2011 17:01:35 GMT
+recorded_with: VCR 2.0.0.rc1
