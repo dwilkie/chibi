@@ -61,11 +61,11 @@ describe User do
     # Joy is a straight female in Cambodia. Con, Dave and Luke are straight males also in Cambodia.
     # Dave is two years older than Joy, Con is 10 years older, Paul 12 years older and Luke is 2 years younger.
     # Even though Joy is closer in age to Dave, Con matches before Dave because Con has initiated more
-    # chats and he is still just in the free age zone (up to 6 years older) where age difference doesn't really
+    # chats and he is still just in the free age zone (up to 10 years older) where age difference doesn't really
     # matter. Paul has also initiated more chats than Dave but he is just outside the free age zone
     # and the age difference is starting to be a concern. In this case Dave matches higher even though he
     # has initiated less chats than Paul. If Paul intiates more chats however,
-    # he can still overtake Dave, but the larger the age gap (over 6 years) the more chats you have to initiate
+    # he can still overtake Dave, but the larger the age gap (over 10 years) the more chats you have to initiate
     # to keep in touch with the young ones. Luke has initiated more chats than Con, Dave and Paul
     # but he matches last because he is 2 years younger than Joy.
     # We are assuming that Joy being a female is looking for an older guy.
@@ -79,30 +79,32 @@ describe User do
     # Joy and Mara both match, but Con has already chatted with Mara, so Joy is Con's match
 
     # Paul with Joy and Mara
-    # Joy and Mara are both younger girls but fall outside of the free age zone. Joy is 8 years younger than
-    # Paul while Mara is 10 years younger. Even though Mara has initiated more chats than Joy, Joy is still matched
+    # Joy and Mara are both younger girls but fall outside of the free age zone. Joy is 12 years younger than
+    # Paul while Mara is 14 years younger. Even though Mara has initiated more chats than Joy, Joy is still matched
     # before Mara. Mara would have to initiate 3 times as many chats as Joy for her to be match before Joy
 
     # Harriet and Eva with Mara
     # Harriet is currently already chatting with Eva both of them could only be matched with Mara.
-    # Thes matches should however never take place because they're in a chat session so they can't be searching.
+    # These matches should however never take place because they're in a chat session so they can't be searching.
 
     # Hanh with Michael and View
     # All three guys live in Chiang Mai, Thailand. Michael is bi and View is gay so either are a match.
-    # Michael is only one year older than Hanh, whereas View is two years younger, so Michael is matched first.
+    # Both of them are in the free age zone, but michael has initiated more chats, so he is matched first
 
     # View with Hanh
     # View has previously chatted with Michael so only Hanh is matched
 
-    # Mara with Dave
-    # Mara is bi, so she could match with either, Dave, Con, Luke, Harriet or Eva who are all in Cambodia.
-    # However Eva and Harriet are currently chatting and Mara has already chatted with Luke and Con, so Dave
-    # is her match.
+    # Mara with Luke, Dave and Paul
+    # Mara is bi, so she could match with either, Dave, Con, Paul, Luke, Harriet or Eva who are all in Cambodia.
+    # However Eva and Harriet are currently chatting and Mara has already chatted with Con, so that leaves
+    # Dave, Luke and Paul. Luke and Dave are both within the free age zone so Luke matches before Dave,
+    # because he has initiated more chats. Paul has also initiated more chats than Dave but he falls outside
+    # the free age zone, so Dave is matched before him.
 
     # Michael with Hanh and Nok
-    # Michael has previously chatted with View which leaves Nok and Hanh.
-    # Nok hasn't specified her age yet and Hanh is only one year younger so Michael is matched with
-    # Hanh before Nok.
+    # Michael has previously chatted with View which leaves Nok and Hanh. Even though Nok hasn't specified
+    # her age yet we give her the benifit of the doubt and assume she's in the free age zone.
+    # Hanh has initiated more chat than Nok so he is matched first.
 
     USER_MATCHES = {
       :alex => [:jamie],
