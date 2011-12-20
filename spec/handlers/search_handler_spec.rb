@@ -18,7 +18,9 @@ KEYWORDS = {
     :guy_named_frank => ["im frank man", "i'm frank male", "i am frank guy"],
     :girl_named_mara => ["im mara f", "i'm mara girl", "i am mara woman"],
     :"23_year_old" => ["im 23 years old", "23yo", "23 yo", "blah 23 badfa"],
-    :phnom_penhian => ["from phnom penh"]
+    :phnom_penhian => ["from phnom penh"],
+    :mara_25_pp_wants_friend => ["hi im mara 25 pp looking for friends"],
+    :davo_28_guy_wants_bf => ["hi my name is davo male 28 looking for friends"]
   },
 
   :kh => {
@@ -36,11 +38,13 @@ KEYWORDS = {
     :guy_named_frank => ["kjom frank pros", "nhom frank bros", "nyom frank pros", "knhom frank pros", "knyom frank bros"],
     :girl_named_mara => ["kjom mara srey", "nhom mara srey", "nyom mara srey", "knhom mara srey", "knyom mara srey"],
     :"23_year_old" => ["kjom 23chnam", "23 chnam", "23", "dsakle 23dadsa"],
-    :phnom_penhian => ["mau pi phnum penh"]
+    :phnom_penhian => ["mok pi phnum penh" ,"mok pi pp"],
+    :mara_25_pp_wants_friend => ["kjom mara 25 pp jong ban met"],
+    :davo_28_guy_wants_friend => ["kjom chhmous davo bros 28 rok met srolanh ped doch knea"]
   }
 }
 
-describe SearchHandler do
+describe SearchHandler, :focus do
   let(:user) do
     build(:user)
   end
@@ -237,7 +241,7 @@ describe SearchHandler do
     end
 
     context "for new users" do
-      it "should try to determine as much info about the user as possible from the message", :focus do
+      it "should try to determine as much info about the user as possible from the message" do
         # the message indicates a guy is texting
         registration_examples(
           keywords(:boy, :could_mean_boy_or_boyfriend),
@@ -330,11 +334,32 @@ describe SearchHandler do
           :expected_age => 23
         )
 
+        # davo 28 guy wants friend
+        registration_examples(
+          keywords(:davo_28_guy_wants_bf),
+          :expected_age => 28,
+          :expected_name => "davo",
+          :expected_gender => :male,
+          :expected_looking_for => :either
+        )
+
+        # put location based examples below here
+
         # Phnom Penhian
         registration_examples(
           keywords(:phnom_penhian, :country_code => :kh),
           :user => cambodian,
           :expected_city => "Phnom Penh",
+          :vcr => {:expect_results => true}
+        )
+
+        # mara 25 phnom penh wants friend
+        registration_examples(
+          keywords(:mara_25_pp_wants_friend, :country_code => :kh),
+          :expected_age => 25,
+          :expected_city => "Phnom Penh",
+          :expected_name => "mara",
+          :expected_looking_for => :either,
           :vcr => {:expect_results => true}
         )
       end

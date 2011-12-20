@@ -35,7 +35,8 @@ class SearchHandler < MessageHandler
   end
 
   def extract_name(body, force_update)
-    match = strip_match!(body, /\A#{keywords(:i_am)}\s*(\b\w+\b)/i).try(:[], 2)
+    match = strip_match!(body, /#{keywords(:my_name_is)}\s*(\b\w+\b)/i).try(:[], 2)
+    match = strip_match!(body, /#{keywords(:i_am)}\s*(\b\w+\b)/i).try(:[], 2) unless match
     user.name = match.downcase if match && (force_update || user.name.nil?)
   end
 
@@ -143,4 +144,3 @@ class SearchHandler < MessageHandler
     $~
   end
 end
-

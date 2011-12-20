@@ -5,6 +5,8 @@ en:
   close_session:
     - bye
     - goodbye
+  my_name_is:
+    - my name is
   i_am:
     - i am
     - "i'm"
@@ -37,7 +39,10 @@ en:
     - man
   friend:
     - friend
+    - friends
 kh:
+  my_name_is:
+    - chhmous
   i_am:
     - kjom
     - nhom
@@ -62,4 +67,3 @@ kh:
   friend:
     - mit
     - met
-
