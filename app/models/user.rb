@@ -203,6 +203,6 @@ class User < ActiveRecord::Base
     scope = scope.group("\"#{table_name}\".\"id\"").group("locations.id")
 
     # order by distance
-    scope.order(Location.distance_from(user.location))
+    scope.order(Location.distance_from_sql(user.location))
   end
 end
