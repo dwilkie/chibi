@@ -1,16 +1,16 @@
 GIT
-  remote: git://github.com/dwilkie/countries.git
-  revision: 87de510675ad5acacb7d50fe11daf170a8fb42e5
+  remote: git://github.com/alexreisner/geocoder.git
+  revision: 0e157f6794d1639db4ceebd19628b8812872413a
   specs:
-    countries (0.8.0)
-      currencies (= 0.4.0)
-      currencies (>= 0.2.0)
+    geocoder (1.1.0)
 
 GIT
-  remote: git://github.com/dwilkie/geocoder.git
-  revision: 4ecdf4017c4688c5206028d8de1e62ff87a04256
+  remote: git://github.com/hexorx/countries.git
+  revision: 52ebdc96864a9db587e614eb553b115f4850e02c
   specs:
-    geocoder (1.0.5)
+    countries (0.8.1)
+      currencies (= 0.4.0)
+      currencies (>= 0.2.0)
 
 GIT
   remote: git://github.com/myronmarston/vcr.git

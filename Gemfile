@@ -5,9 +5,9 @@ gem 'haml'
 gem 'conversational', '~> 0.4.1'
 gem 'pg'
 gem 'kaminari'
-gem "geocoder", :git => "git://github.com/dwilkie/geocoder.git"
+gem "geocoder", :git => "git://github.com/alexreisner/geocoder.git"
 gem "phony"
-gem "countries", :git => "git://github.com/dwilkie/countries.git", :require => 'iso3166'
+gem "countries", :git => "git://github.com/hexorx/countries.git", :require => 'iso3166'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
