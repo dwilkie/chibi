@@ -4,32 +4,10 @@ describe "Initiating a chat" do
   include MessagingHelpers
   include TranslationHelpers
 
-  let(:sok) do
-    create(:registered_male_user)
-  end
+  USERS = [:dave, :nok, :mara]
 
-  let(:chatting_girl_looking_for_guy) do
-    create(:chatting_girl_looking_for_guy)
-  end
-
-  let(:boy_looking_for_a_friend) do
-    create(:registered_male_user)
-  end
-
-  let(:friend_of_sok) do
-    create(:chat, :user => sok).friend
-  end
-
-  let(:chat_friend_of_sok) do
-    create(:chat, :friend => sok).user
-  end
-
-  let(:users) do
-    [sok, chatting_girl_looking_for_guy, boy_looking_for_a_friend, friend_of_sok, chat_friend_of_sok]
-  end
-
-  let(:last_message) do
-    Message.last
+  USERS.each do |user|
+    let(user) { create(user) }
   end
 
   let(:reply) do
@@ -40,26 +18,36 @@ describe "Initiating a chat" do
     User.last
   end
 
-  def reload_index_and_commit(reload_instances)
-    reload_instances.each do |instance|
-      instance.reload.index
-    end
-    Sunspot.commit
+  let(:new_location) do
+    Location.last
   end
 
-  context "as new user", :wip => true do
-    context "when I text", :search => true do
+  let(:new_chat) do
+    Chat.last
+  end
+
+  before do
+    USERS.each do |user|
+      user
+    end
+  end
+
+  context "as new user", :focus do
+    context "when I text" do
       let(:my_number) { "8553243313" }
-      before do
-        reload_index_and_commit(users)
-      end
 
       context "'hello'" do
         before do
-          send_message(:from => my_number, :body => "hello")
+          VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
+            send_message(:from => my_number, :body => "hello")
+          end
         end
 
-        it "should create a reply for the user which includes a match" do
+        it "should start a chat between the new user and an existing user" do
+          new_user.mobile_number.should == my_number
+          new_location.user.should == new_user
+          new_location.country_code.should == "KH"
+          new_chat.user.should == new_user
           reply.body.should == spec_translate(
             :new_match,
             :name => nil,
@@ -67,32 +55,6 @@ describe "Initiating a chat" do
           )
           reply.to.should == my_number
         end
-      end
-
-      context "'kjom sok 23chnam phnom penh jong rok mit srey'" do
-        before do
-          send_message(:from => my_number, :body => "kjom sok 23chnam phnom penh jong rok mit srey")
-        end
-
-        context "the new user" do
-          it "should have name: 'sok'" do
-            new_user.name.should == "sok"
-          end
-
-          it "should have a date of birth 23 years ago" do
-            new_user.date_of_birth.should == 23.years.ago
-          end
-        end
-
-        it "should create a reply for sok which includes a match who is a girl in phnom penh and younger than 23 years old" do
-          reply.body.should == spec_translate(
-            :new_match,
-            :name => "sok",
-            :match => sok
-          )
-          reply.to.should == my_number
-        end
-
       end
     end
   end
@@ -146,4 +108,3 @@ describe "Initiating a chat" do
     end
   end
 end
-

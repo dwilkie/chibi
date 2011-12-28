@@ -1,6 +1,8 @@
 class SearchHandler < MessageHandler
   def process!
     extract_user_details
+    user.active_chat == user.chats.build(:friend => User.matches(user).first)
+    user.save
 
 #    reply I18n.t(
 #      "messages.new_match",

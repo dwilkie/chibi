@@ -45,6 +45,8 @@ KEYWORDS = {
 }
 
 describe SearchHandler, :focus do
+  include SharedExamples
+
   let(:user) do
     build(:user)
   end
@@ -86,6 +88,7 @@ describe SearchHandler, :focus do
       options[:user].location.city = options[:city]
 
       subject.user = options[:user]
+      subject.user.stub(:save)
       subject.body = message
       subject.location = options[:user].location
 
@@ -156,6 +159,10 @@ describe SearchHandler, :focus do
         keywords(:girl, :could_mean_girl_or_girlfriend),
         { :expected_gender => :female }.merge(options)
       )
+    end
+
+    it_should_behave_like "starting a chat" do
+      let(:method) { :process_message }
     end
 
     context "for users with a missing gender or looking for preference" do

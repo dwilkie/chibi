@@ -21,4 +21,3 @@ module MessagingHelpers
     )}
   end
 end
-
