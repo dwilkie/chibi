@@ -298,7 +298,25 @@ describe User do
         subject.date_of_birth.should be_nil
       end
     end
+  end
 
+  describe "#currently_chatting?" do
+    context "given the user is in an active chat session" do
+      let(:active_chat) { create(:active_chat, :user => user) }
+      before do
+        active_chat
+      end
+
+      it "should be true" do
+        user.should be_currently_chatting
+      end
+    end
+
+    context "given the user is not in an active chat session" do
+      it "should be false" do
+        user.should_not be_currently_chatting
+      end
+    end
   end
 
   describe "#age" do
