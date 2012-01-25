@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 gem 'rails', '3.2.0'
 gem 'haml'
-gem 'conversational', '~> 0.4.1'
+gem 'conversational', '~> 0.4.2'
 gem 'pg'
 gem 'kaminari'
 gem "geocoder", :git => "git://github.com/alexreisner/geocoder.git"
