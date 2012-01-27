@@ -95,6 +95,10 @@ class User < ActiveRecord::Base
     active_chat_id?
   end
 
+  def screen_name
+    (self.name || Faker::Name.first_name.downcase) + id.to_s
+  end
+
   private
 
   # the age difference where the user's age becomes a factor in the ordering of results

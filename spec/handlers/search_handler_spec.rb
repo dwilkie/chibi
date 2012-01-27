@@ -45,8 +45,7 @@ KEYWORDS = {
 }
 
 describe SearchHandler do
-  include SharedExamples
-  include MockHelpers
+  include TranslationHelpers
 
   let(:user) do
     build(:user)
@@ -370,15 +369,62 @@ describe SearchHandler do
     end
 
     context "given there is a match for this user" do
+
+      def stub_match(options = {})
+        unless options[:match] == false
+          options[:match] ||= create(:user)
+          User.stub(:matches).and_return([options[:match]])
+        end
+      end
+
+      let(:friend) { create(:user, :id => 888) }
+
       before do
         subject.user = user
         subject.location = user.location
-        stub_match
+        subject.body = ""
+        Faker::Name.stub(:first_name).and_return("Wilfred")
+        stub_match(:match => friend)
       end
 
-      it_should_behave_like "starting a chat" do
-        let(:method) { :process_message }
-        let(:reference_user) { user }
+      it "should start a new chat session" do
+        Chat.count.should == 0
+        process_message
+        Chat.count.should == 1
+        new_chat = Chat.first
+        new_chat.active_users.count.should == 2
+        new_chat.user.active_chat.should == new_chat
+        new_chat.friend.active_chat.should == new_chat
+        new_chat.user.should == user
+        user.active_chat.should == new_chat
+      end
+
+      it "should create replies for the participants of the chat" do
+        process_message
+        replies = Reply.all
+
+        reply_to_user = replies[0]
+
+        reply_to_user.body.should == spec_translate(
+          :new_chat_started,
+          :users_name => nil,
+          :friends_screen_name => "wilfred888",
+          :to_user => true,
+          :locale => :kh
+        )
+        reply_to_user.to.should == user.mobile_number
+
+        reply_to_friend = replies[1]
+
+        reply_to_friend.body.should == spec_translate(
+          :new_chat_started,
+          :users_name => nil,
+          :friends_screen_name => "wilfred" + user.id.to_s,
+          :to_user => false,
+          :locale => :kh
+        )
+
+        reply_to_friend.to.should == friend.mobile_number
       end
     end
   end

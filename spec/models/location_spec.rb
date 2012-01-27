@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 # see the individual specs for each location under spec/models/location
-describe Location, :focus do
+describe Location do
   include LocationHelpers
 
   let(:location) { build(:location) }
@@ -43,6 +43,13 @@ describe Location, :focus do
     it "should return an uppercase string of the country code" do
       subject.country_code = :ab
       subject.country_code.should == "AB"
+    end
+  end
+
+  describe "#locale" do
+    it "should return a lowercase symbol of the country code" do
+      subject.country_code = "AB"
+      subject.locale.should == :ab
     end
   end
 end

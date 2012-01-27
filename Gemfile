@@ -8,6 +8,7 @@ gem 'kaminari'
 gem "geocoder", :git => "git://github.com/alexreisner/geocoder.git"
 gem "phony"
 gem "countries", :git => "git://github.com/hexorx/countries.git", :require => 'iso3166'
+gem "faker"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'

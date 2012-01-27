@@ -4,7 +4,7 @@ describe "Initiating a chat" do
   include MessagingHelpers
   include TranslationHelpers
 
-  USERS = [:dave, :nok, :mara]
+  USERS = [:dave, :nok, :mara, :alex]
 
   USERS.each do |user|
     let(user) { create(user) }
@@ -22,87 +22,57 @@ describe "Initiating a chat" do
     Location.last
   end
 
-  let(:new_chat) do
-    Chat.last
-  end
-
-  before do
+  def load_users
     USERS.each do |user|
-      user
+      send(user)
     end
   end
 
-  context "as new user", :focus do
+  before do
+    load_users
+  end
+
+  context "as new user" do
     context "when I text" do
       let(:my_number) { "8553243313" }
 
       context "'hello'" do
         before do
+          Faker::Name.stub(:first_name).and_return("Wilfred")
           VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
             send_message(:from => my_number, :body => "hello")
           end
         end
 
-        it "should start a chat between the new user and an existing user" do
+        it "should start a chat between the new user and an existing user and notify both users" do
           new_user.mobile_number.should == my_number
           new_location.user.should == new_user
           new_location.country_code.should == "KH"
-          new_chat.user.should == new_user
-          reply.body.should == spec_translate(
-            :new_match,
-            :name => nil,
-            :match => sok
+
+          replies = Reply.all
+
+          reply_to_user = replies[0]
+
+          reply_to_user.body.should == spec_translate(
+            :new_chat_started,
+            :users_name => nil,
+            :friends_screen_name => "alex" + alex.id.to_s,
+            :to_user => true,
+            :locale => :kh
           )
-          reply.to.should == my_number
-        end
-      end
-    end
-  end
+          reply_to_user.to.should == my_number
 
-  context "as an existing user" do
-    context "and there are other users in the system", :search => true do
+          reply_to_friend = replies[1]
 
-      before(:all) do
-        reload_index_and_commit(users)
-      end
-
-      context "when he searches" do
-        before(:all) do
-          search(sok)
-        end
-
-        it "should find him a match" do
-          reply.body.should == spec_translate(
-            :new_match,
-            :name => sok.name,
-            :match => boy_looking_for_a_friend
+          reply_to_friend.body.should == spec_translate(
+            :new_chat_started,
+            :users_name => "Alex",
+            :friends_screen_name => "wilfred" + new_user.id.to_s,
+            :to_user => false,
+            :locale => :kh
           )
-        end
-      end
-    end
 
-    shared_examples_for "recommend sok some users to chat with" do
-      before do
-        send_message(:from => sok.mobile_number,:body => message_text)
-      end
-
-      context "the last message" do
-        it "should have a reply" do
-          last_message.reply.should be_present
-        end
-
-        context "reply" do
-          it "should be sent to Sok" do
-            reply.subscription.user.should == sok
-          end
-
-          it "should contain some recommendations" do
-            reply.body.should == spec_translate(
-              :suggestions,
-              :looking_for => sok.looking_for,
-              :usernames => []
-            )
-          end
+          reply_to_friend.to.should == alex.mobile_number
         end
       end
     end

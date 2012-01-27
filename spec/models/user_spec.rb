@@ -353,9 +353,26 @@ describe User do
     end
 
     context "when the user's date of birth is unknown" do
-
       it "should return nil" do
         subject.age.should be_nil
+      end
+    end
+  end
+
+  describe "#screen_name" do
+    context "the user has a name" do
+      let(:user_with_name) { create(:user, :name => "sok", :id => 69) }
+
+      it "should return a combination of the user's name and id" do
+        user_with_name.screen_name.should == "sok69"
+      end
+    end
+
+    context "the user has no name" do
+      let(:user_without_name) { create(:user, :id => 88) }
+
+      it "should return a combination of a random name and id" do
+        user_without_name.screen_name.should =~ /^[a-z]+88$/
       end
     end
   end

@@ -21,20 +21,16 @@ class MessageHandler
     reply.user = user
     reply.body = text
     reply.to = user.mobile_number
-    reply.save!
+    reply.save
   end
 
   def keywords(*keys)
     all_keywords = []
     keys.each do |key|
       english_keywords = MESSAGE_KEYWORDS["en"][key.to_s]
-      localized_keywords = MESSAGE_KEYWORDS.try(:[], location.country_code.downcase).try(:[], key.to_s)
+      localized_keywords = MESSAGE_KEYWORDS.try(:[], location.locale.to_s).try(:[], key.to_s)
       all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
     end
    "(#{all_keywords.join('|')})"
-  end
-
-  def contains_command?(command)
-    body =~ /\b#{self.class.commands[command].join("\\b|\\b")}\b/
   end
 end

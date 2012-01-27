@@ -1,13 +1,8 @@
 class SearchHandler < MessageHandler
   def process!
     update_user_details
-    start_new_chat
-
-#    reply I18n.t(
-#      "messages.new_match",
-#      :match => User.match(user),
-#      :name => user.name
-#    )
+    chat = start_new_chat
+    reply_to_participants(chat)
   end
 
   private
@@ -32,8 +27,41 @@ class SearchHandler < MessageHandler
     chat.friend = friend
     chat.active_users << friend if friend.present?
 
-    # save the chat
-    chat.save
+    # save and return the chat
+    chat if chat.save
+  end
+
+  def reply_to_participants(chat)
+    locale = location.locale
+
+    if chat
+      friend = chat.friend
+
+      reply_to_user = I18n.t(
+        "messages.new_chat_started",
+        :users_name => user.name,
+        :friends_screen_name => friend.screen_name,
+        :to_user => true,
+        :locale => locale
+      )
+
+      reply_to_friend = I18n.t(
+        "messages.new_chat_started",
+        :users_name => friend.name,
+        :friends_screen_name => user.screen_name,
+        :to_user => false,
+        :locale => locale
+      )
+
+      reply reply_to_user
+      reply reply_to_friend, friend
+    else
+      reply I18n.t(
+        "messages.could_not_start_new_chat",
+        :users_name => user.name,
+        :location => locale
+      )
+    end
   end
 
   def extract_user_details

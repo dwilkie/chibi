@@ -1,15 +1,14 @@
 {
   :kh => {
     :messages => {
-      :new_match => lambda {|key, options|
-        name = options[:name]
-        match = options[:match]
-        personal_pronoun = match ? (match.female? ? "neang" : "guot") : "guot"
-        reply = "Sousdey"
-        reply << name if name
-        reply << ", #{match.username} jong chat jea moy. Chleuy torb tov #{person_pronoun} re ban-chhop chat doy sor-say 'bye bye' rok mit tmey teat"
+      :new_chat_started => lambda {|key, options|
+        users_name = " #{options[:users_name]}" if options[:users_name]
+        friends_screen_name = options[:friends_screen_name]
+        greeting = "Sousdey"
+        greeting << users_name.capitalize if users_name
+        introduction = options[:to_user] ? "Alow nih, bong jaap pdaum chat jea moy #{friends_screen_name} haey" : "#{friends_screen_name} jong chat jea moy"
+        greeting << "! " << introduction << "! " << "Chleuy torb tov #{friends_screen_name} re ban-chhop chat doy sor-say 'new' rok mit tmey teat"
       }
     }
   }
 }
-

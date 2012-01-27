@@ -33,6 +33,10 @@ class Location < ActiveRecord::Base
     read_attribute(:country_code).to_s.upcase
   end
 
+  def locale
+    country_code.downcase.to_sym
+  end
+
   private
 
   def country()
