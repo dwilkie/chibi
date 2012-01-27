@@ -59,7 +59,7 @@ class SearchHandler < MessageHandler
       reply I18n.t(
         "messages.could_not_start_new_chat",
         :users_name => user.name,
-        :location => locale
+        :locale => locale
       )
     end
   end

@@ -47,12 +47,26 @@ KEYWORDS = {
 describe SearchHandler do
   include TranslationHelpers
 
+  def setup_handler
+    subject.user = user
+    subject.location = user.location
+    subject.body = ""
+  end
+
   let(:user) do
     build(:user)
   end
 
   let(:cambodian) do
     create(:cambodian)
+  end
+
+  let(:replies) do
+    Reply.all
+  end
+
+  let(:reply) do
+    Reply.last
   end
 
   describe "#process!" do
@@ -368,7 +382,27 @@ describe SearchHandler do
       end
     end
 
-    context "given there is a match for this user" do
+    context "given there is no match for this user", :focus do
+      before do
+        setup_handler
+        process_message
+      end
+
+      it "should reply saying there are no matches at this time" do
+        replies.count.should == 1
+
+        reply.body.should == spec_translate(
+          :could_not_start_new_chat,
+          :users_name => "Mara (pls fix translation)",
+          :locale => :kh
+        )
+
+        reply.to.should == user.mobile_number
+      end
+
+    end
+
+    context "given there is a match for this user", :focus do
 
       def stub_match(options = {})
         unless options[:match] == false
@@ -380,9 +414,7 @@ describe SearchHandler do
       let(:friend) { create(:user, :id => 888) }
 
       before do
-        subject.user = user
-        subject.location = user.location
-        subject.body = ""
+        setup_handler
         Faker::Name.stub(:first_name).and_return("Wilfred")
         stub_match(:match => friend)
       end
@@ -401,7 +433,7 @@ describe SearchHandler do
 
       it "should create replies for the participants of the chat" do
         process_message
-        replies = Reply.all
+        replies.count.should == 2
 
         reply_to_user = replies[0]
 

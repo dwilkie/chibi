@@ -1,6 +1,7 @@
 module TranslationHelpers
   TRANSLATIONS = {
-    :new_chat_started => "messages.new_chat_started"
+    :new_chat_started => "messages.new_chat_started",
+    :could_not_start_new_chat => "messages.could_not_start_new_chat"
   }
 
   def spec_translate(key, options = {})

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Initiating a chat" do
+describe "Initiating a chat", :focus do
   include MessagingHelpers
   include TranslationHelpers
 
@@ -14,6 +14,10 @@ describe "Initiating a chat" do
     Reply.last
   end
 
+  let(:replies) do
+    Reply.all
+  end
+
   let(:new_user) do
     User.last
   end
@@ -22,19 +26,44 @@ describe "Initiating a chat" do
     Location.last
   end
 
+  let(:my_number) { "8553243313" }
+
   def load_users
     USERS.each do |user|
       send(user)
     end
   end
 
-  before do
-    load_users
+  context "as a user" do
+    context "given there are no matches for me" do
+      context "when I text 'hello'" do
+        before do
+          VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
+            send_message(:from => my_number, :body => "hello")
+          end
+        end
+
+        it "should reply saying there are no matches at this time" do
+          replies.count.should == 1
+
+          reply.body.should == spec_translate(
+            :could_not_start_new_chat,
+            :users_name => "Mara (pls fix translation)",
+            :locale => :kh
+          )
+
+          reply.to.should == my_number
+        end
+      end
+    end
   end
 
   context "as new user" do
+    before do
+      load_users
+    end
+
     context "when I text" do
-      let(:my_number) { "8553243313" }
 
       context "'hello'" do
         before do
@@ -48,8 +77,6 @@ describe "Initiating a chat" do
           new_user.mobile_number.should == my_number
           new_location.user.should == new_user
           new_location.country_code.should == "KH"
-
-          replies = Reply.all
 
           reply_to_user = replies[0]
 
