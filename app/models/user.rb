@@ -54,7 +54,10 @@ class User < ActiveRecord::Base
     match_scope = filter_by_location(user, match_scope)
 
     # then by age difference and number of initiated chats
-    order_by_age_difference_and_initiated_chats(user, match_scope)
+    match_scope = order_by_age_difference_and_initiated_chats(user, match_scope)
+
+    # make sure the records are not read only
+    match_scope.readonly(false)
   end
 
   def female?

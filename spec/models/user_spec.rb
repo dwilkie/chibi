@@ -150,7 +150,11 @@ describe User do
 
       it "should match the user with the best compatible match" do
         USER_MATCHES.each do |user, matches|
-          subject.class.matches(send(user)).map { |match| match.name.to_sym }.should == matches
+          results = subject.class.matches(send(user))
+          results.map { |match| match.name.to_sym }.should == matches
+          results.each do |result|
+            result.should_not be_readonly
+          end
         end
       end
     end
