@@ -44,8 +44,9 @@ KEYWORDS = {
   }
 }
 
-describe SearchHandler, :focus do
+describe SearchHandler do
   include SharedExamples
+  include MockHelpers
 
   let(:user) do
     build(:user)
@@ -159,10 +160,6 @@ describe SearchHandler, :focus do
         keywords(:girl, :could_mean_girl_or_girlfriend),
         { :expected_gender => :female }.merge(options)
       )
-    end
-
-    it_should_behave_like "starting a chat" do
-      let(:method) { :process_message }
     end
 
     context "for users with a missing gender or looking for preference" do
@@ -369,6 +366,19 @@ describe SearchHandler, :focus do
           :expected_looking_for => :either,
           :vcr => {:expect_results => true}
         )
+      end
+    end
+
+    context "given there is a match for this user" do
+      before do
+        subject.user = user
+        subject.location = user.location
+        stub_match
+      end
+
+      it_should_behave_like "starting a chat" do
+        let(:method) { :process_message }
+        let(:reference_user) { user }
       end
     end
   end

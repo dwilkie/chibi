@@ -1,8 +1,7 @@
 class SearchHandler < MessageHandler
   def process!
-    extract_user_details
-    user.active_chat == user.chats.build(:friend => User.matches(user).first)
-    user.save
+    update_user_details
+    start_new_chat
 
 #    reply I18n.t(
 #      "messages.new_match",
@@ -12,6 +11,30 @@ class SearchHandler < MessageHandler
   end
 
   private
+
+  def update_user_details
+    extract_user_details
+    user.save
+  end
+
+  def start_new_chat
+    # create a new chat
+    chat = Chat.new
+
+    # find a friend for the user
+    friend = User.matches(user).first
+
+    # set the user the chat
+    chat.user = user
+    chat.active_users << user
+
+    # set the friend in the chat (if found)
+    chat.friend = friend
+    chat.active_users << friend if friend.present?
+
+    # save the chat
+    chat.save
+  end
 
   def extract_user_details
     stripped_body = self.body.dup
