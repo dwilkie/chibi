@@ -3,18 +3,21 @@ require 'spec_helper'
 describe Location do
   include LocationHelpers
 
-  ADDRESS_EXAMPLES = {
-    "chang mai" => {
-      :expected_city => "Samoeng",
-      :expected_latitude => 18.7964642,
-      :expected_longitude => 98.6600586
-    }
-  }
+  describe "Thailand" do
 
-  describe "Thailand", :focus do
+    let(:address_examples) do
+      {
+        "chang mai" => {
+          :expected_city => "Samoeng",
+          :expected_latitude => 18.7964642,
+          :expected_longitude => 98.6600586
+        }
+      }
+    end
+
     describe "#locate!" do
       it "should determine the correct location and city from the address" do
-        assert_locate!(:th, ADDRESS_EXAMPLES)
+        assert_locate!(:th, address_examples)
       end
     end
 
