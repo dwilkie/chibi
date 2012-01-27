@@ -39,5 +39,7 @@ Chibi::Application.configure do
 
   # Allow pass debug_assets=true as a query parameter to load pages with unpackaged assets
   config.assets.allow_debugging = true
-end
 
+  # Override global setting so that errors are raised when the translation file is wrong
+  config.i18n.fallbacks = false
+end
