@@ -48,7 +48,7 @@ describe "Initiating a chat", :focus do
 
           reply.body.should == spec_translate(
             :could_not_start_new_chat,
-            :users_name => "Mara (pls fix translation)",
+            :users_name => nil,
             :locale => :kh
           )
 
