@@ -71,7 +71,45 @@ describe "Initiating a chat" do
       load_users
     end
 
-    context "when I text" do
+    context "with missing profile information" do
+
+      context "when I text" do
+        context "'23 srey jong rok met pros'" do
+          before do
+            VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
+              send_message(:from => alex.mobile_number, :body => "23 srey jong rok met pros")
+              alex.reload
+            end
+          end
+
+          it "should update my profile and connect me with a match" do
+            alex.name.should == "alex"
+            alex.age.should == 23
+            alex.gender.should == "f"
+            alex.looking_for.should == "m"
+
+            reply_to_user.body.should == spec_translate(
+              :new_chat_started,
+              :users_name => "Alex",
+              :friends_screen_name => "dave" + dave.id.to_s,
+              :to_user => true,
+              :locale => :kh
+            )
+
+            reply_to_user.to.should == alex.mobile_number
+
+            reply_to_friend.body.should == spec_translate(
+              :new_chat_started,
+              :users_name => "Dave",
+              :friends_screen_name => "alex" + alex.id.to_s,
+              :to_user => false,
+              :locale => :kh
+            )
+
+            reply_to_friend.to.should == dave.mobile_number
+          end
+        end
+      end
     end
   end
 
@@ -121,10 +159,10 @@ describe "Initiating a chat" do
         end
       end
 
-      context "'knyom map 27 pp jong rok met srey'" do
+      context "'knyom map pros 27 pp jong rok met srey'" do
         before do
           VCR.use_cassette("results", :erb => true) do
-            send_message(:from => my_number, :body => "knyom map 27 pp jong rok met srey")
+            send_message(:from => my_number, :body => "knyom map pros 27 pp jong rok met srey")
           end
         end
 
@@ -135,7 +173,27 @@ describe "Initiating a chat" do
           new_user.age.should == 27
           new_user.location.city.should == "Phnom Penh"
           new_user.looking_for.should == "f"
-          new_user.gender.should be_nil
+          new_user.gender.should == "m"
+
+          reply_to_user.body.should == spec_translate(
+            :new_chat_started,
+            :users_name => "Map",
+            :friends_screen_name => "mara" + mara.id.to_s,
+            :to_user => true,
+            :locale => :kh
+          )
+
+          reply_to_user.to.should == my_number
+
+          reply_to_friend.body.should == spec_translate(
+            :new_chat_started,
+            :users_name => "Mara",
+            :friends_screen_name => "map" + new_user.id.to_s,
+            :to_user => false,
+            :locale => :kh
+          )
+
+          reply_to_friend.to.should == mara.mobile_number
         end
       end
     end
