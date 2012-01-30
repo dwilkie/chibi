@@ -39,7 +39,7 @@ class Location < ActiveRecord::Base
 
   private
 
-  def country()
+  def country
     ISO3166::Country[country_code]
   end
 
