@@ -16,11 +16,6 @@ class User < ActiveRecord::Base
 
   validates :mobile_number, :presence => true, :uniqueness => true
   validates :location, :presence => true
-  validates :username, :uniqueness => true
-
-  before_validation(:on => :update) do
-    self.username = name.gsub(/\s+/, "") << id.to_s if attribute_present?(:name) && persisted?
-  end
 
   PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
 
