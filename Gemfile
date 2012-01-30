@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.0'
+gem 'rails', '3.2.1'
 gem 'haml'
 gem 'conversational', '~> 0.4.2'
 gem 'pg'
