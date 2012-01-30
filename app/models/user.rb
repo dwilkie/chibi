@@ -84,7 +84,7 @@ class User < ActiveRecord::Base
   end
 
   def age
-    Time.now.utc.year - date_of_birth.utc.year if date_of_birth?
+    Time.now.utc.year - date_of_birth.year if date_of_birth?
   end
 
   def age=(value)

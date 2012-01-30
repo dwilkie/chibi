@@ -344,7 +344,7 @@ describe User do
 
     context "when the user's date of birth is 23 years ago" do
       before do
-        subject.date_of_birth = 23.years.ago.utc
+        subject.date_of_birth = 23.years.ago.utc.to_date
       end
 
       it "should return 23" do
