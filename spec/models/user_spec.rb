@@ -24,9 +24,23 @@ describe User do
     new_user.should_not be_valid
   end
 
-  context "factory" do
+  describe "factory" do
     it "should be valid" do
       new_user.should be_valid
+    end
+  end
+
+  describe "associations" do
+    describe "location" do
+      before do
+        user
+      end
+
+      it "should be autosaved" do
+        user.location.city = "Melbourne"
+        user.save
+        user.location.reload.city.should == "Melbourne"
+      end
     end
   end
 

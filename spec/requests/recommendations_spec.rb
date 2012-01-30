@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Initiating a chat", :focus do
+describe "Initiating a chat" do
   include MessagingHelpers
   include TranslationHelpers
 
@@ -16,6 +16,14 @@ describe "Initiating a chat", :focus do
 
   let(:replies) do
     Reply.all
+  end
+
+  let(:reply_to_user) do
+    replies[0]
+  end
+
+  let(:reply_to_friend) do
+    replies[1]
   end
 
   let(:new_user) do
@@ -58,7 +66,23 @@ describe "Initiating a chat", :focus do
     end
   end
 
+  context "as an existing user" do
+    before do
+      load_users
+    end
+
+    context "when I text" do
+    end
+  end
+
   context "as new user" do
+
+    def assert_new_user
+      new_user.mobile_number.should == my_number
+      new_location.user.should == new_user
+      new_location.country_code.should == "KH"
+    end
+
     before do
       load_users
     end
@@ -74,11 +98,7 @@ describe "Initiating a chat", :focus do
         end
 
         it "should start a chat between the new user and an existing user and notify both users" do
-          new_user.mobile_number.should == my_number
-          new_location.user.should == new_user
-          new_location.country_code.should == "KH"
-
-          reply_to_user = replies[0]
+          assert_new_user
 
           reply_to_user.body.should == spec_translate(
             :new_chat_started,
@@ -89,8 +109,6 @@ describe "Initiating a chat", :focus do
           )
           reply_to_user.to.should == my_number
 
-          reply_to_friend = replies[1]
-
           reply_to_friend.body.should == spec_translate(
             :new_chat_started,
             :users_name => "Alex",
@@ -100,6 +118,24 @@ describe "Initiating a chat", :focus do
           )
 
           reply_to_friend.to.should == alex.mobile_number
+        end
+      end
+
+      context "'knyom map 27 pp jong rok met srey'" do
+        before do
+          VCR.use_cassette("results", :erb => true) do
+            send_message(:from => my_number, :body => "knyom map 27 pp jong rok met srey")
+          end
+        end
+
+        it "should create a new user called 'map' and start a chat with a girl close to phnom penh" do
+          assert_new_user
+
+          new_user.name.should == "map"
+          new_user.age.should == 27
+          new_user.location.city.should == "Phnom Penh"
+          new_user.looking_for.should == "f"
+          new_user.gender.should be_nil
         end
       end
     end

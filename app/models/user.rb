@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base
-  has_one :location
+  has_one :location, :autosave => true
 
   has_many :messages, :through => :subscriptions
   has_many :replies,  :through => :subscriptions
