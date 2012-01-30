@@ -3,6 +3,7 @@ class CreateUsers < ActiveRecord::Migration
     create_table :users do |t|
       t.string :mobile_number
       t.string :name
+      t.string :screen_name
       t.date   :date_of_birth
       t.string :gender, :limit => 1
       t.string :looking_for, :limit => 1

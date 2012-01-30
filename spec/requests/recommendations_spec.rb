@@ -4,27 +4,8 @@ describe "Initiating a chat" do
   include MessagingHelpers
   include TranslationHelpers
 
-  USERS = [:dave, :nok, :mara, :alex]
-
-  USERS.each do |user|
-    let(user) { create(user) }
-  end
-
-  let(:reply) do
-    Reply.last
-  end
-
-  let(:replies) do
-    Reply.all
-  end
-
-  let(:reply_to_user) do
-    replies[0]
-  end
-
-  let(:reply_to_friend) do
-    replies[1]
-  end
+  include_context "existing users"
+  include_context "replies"
 
   let(:new_user) do
     User.last
@@ -35,12 +16,6 @@ describe "Initiating a chat" do
   end
 
   let(:my_number) { "8553243313" }
-
-  def load_users
-    USERS.each do |user|
-      send(user)
-    end
-  end
 
   context "as a user" do
     context "given there are no matches for me" do
@@ -54,13 +29,13 @@ describe "Initiating a chat" do
         it "should reply saying there are no matches at this time" do
           replies.count.should == 1
 
-          reply.body.should == spec_translate(
+          last_reply.body.should == spec_translate(
             :could_not_start_new_chat,
             :users_name => nil,
             :locale => :kh
           )
 
-          reply.to.should == my_number
+          last_reply.to.should == my_number
         end
       end
     end

@@ -40,7 +40,7 @@ class SearchHandler < MessageHandler
       reply_to_user = I18n.t(
         "messages.new_chat_started",
         :users_name => user.name,
-        :friends_screen_name => friend.screen_name,
+        :friends_screen_name => friend.screen_id,
         :to_user => true,
         :locale => locale
       )
@@ -48,7 +48,7 @@ class SearchHandler < MessageHandler
       reply_to_friend = I18n.t(
         "messages.new_chat_started",
         :users_name => friend.name,
-        :friends_screen_name => user.screen_name,
+        :friends_screen_name => user.screen_id,
         :to_user => false,
         :locale => locale
       )

@@ -15,7 +15,11 @@ class User < ActiveRecord::Base
   belongs_to :active_chat, :class_name => "Chat"
 
   validates :mobile_number, :presence => true, :uniqueness => true
-  validates :location, :presence => true
+  validates :location, :screen_name, :presence => true
+
+  before_validation(:on => :create) do
+    self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
+  end
 
   PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
 
@@ -90,8 +94,8 @@ class User < ActiveRecord::Base
     active_chat_id?
   end
 
-  def screen_name
-    (self.name || Faker::Name.first_name.downcase) + id.to_s
+  def screen_id
+    (self.name || self.screen_name) + id.to_s
   end
 
   private

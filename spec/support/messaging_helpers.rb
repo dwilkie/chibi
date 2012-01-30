@@ -1,14 +1,12 @@
 module MessagingHelpers
 
-  def search(user)
+  def initiate_chat(user)
+    load_users
     post_message(:from => user.mobile_number, :body => "")
   end
 
   def send_message(options = {})
     post_message options
-  end
-
-  def last_reply
   end
 
   private

@@ -19,6 +19,11 @@ describe User do
     new_user.should_not be_valid
   end
 
+  it "should not be valid without a screen name" do
+    user.screen_name = nil
+    user.should_not be_valid
+  end
+
   it "should not be valid without a location" do
     new_user.location = nil
     new_user.should_not be_valid
@@ -41,6 +46,14 @@ describe User do
         user.save
         user.location.reload.city.should == "Melbourne"
       end
+    end
+  end
+
+  describe "callbacks" do
+    it "should generate a screen name before validation on create" do
+      new_user.screen_name.should be_nil
+      new_user.valid?
+      new_user.screen_name.should be_present
     end
   end
 
@@ -373,20 +386,20 @@ describe User do
     end
   end
 
-  describe "#screen_name" do
+  describe "#screen_id" do
     context "the user has a name" do
       let(:user_with_name) { create(:user, :name => "sok", :id => 69) }
 
       it "should return a combination of the user's name and id" do
-        user_with_name.screen_name.should == "sok69"
+        user_with_name.screen_id.should == "sok69"
       end
     end
 
     context "the user has no name" do
       let(:user_without_name) { create(:user, :id => 88) }
 
-      it "should return a combination of a random name and id" do
-        user_without_name.screen_name.should =~ /^[a-z]+88$/
+      it "should return a combination of the screen name and id" do
+        user_without_name.screen_id.should == "#{user_without_name.screen_name}88"
       end
     end
   end

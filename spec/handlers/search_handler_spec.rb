@@ -46,12 +46,9 @@ KEYWORDS = {
 
 describe SearchHandler do
   include TranslationHelpers
+  include HandlerHelpers
 
-  def setup_handler
-    subject.user = user
-    subject.location = user.location
-    subject.body = ""
-  end
+  include_context "replies"
 
   let(:user) do
     build(:user)
@@ -59,14 +56,6 @@ describe SearchHandler do
 
   let(:cambodian) do
     create(:cambodian)
-  end
-
-  let(:replies) do
-    Reply.all
-  end
-
-  let(:reply) do
-    Reply.last
   end
 
   describe "#process!" do
@@ -384,20 +373,20 @@ describe SearchHandler do
 
     context "given there is no match for this user" do
       before do
-        setup_handler
+        setup_handler(user)
         process_message
       end
 
       it "should reply saying there are no matches at this time" do
         replies.count.should == 1
 
-        reply.body.should == spec_translate(
+        last_reply.body.should == spec_translate(
           :could_not_start_new_chat,
           :users_name => nil,
           :locale => :kh
         )
 
-        reply.to.should == user.mobile_number
+        last_reply.to.should == user.mobile_number
       end
     end
 
@@ -413,7 +402,7 @@ describe SearchHandler do
       let(:friend) { create(:user, :id => 888) }
 
       before do
-        setup_handler
+        setup_handler(user)
         Faker::Name.stub(:first_name).and_return("Wilfred")
         stub_match(:match => friend)
       end
@@ -434,8 +423,6 @@ describe SearchHandler do
         process_message
         replies.count.should == 2
 
-        reply_to_user = replies[0]
-
         reply_to_user.body.should == spec_translate(
           :new_chat_started,
           :users_name => nil,
@@ -444,8 +431,6 @@ describe SearchHandler do
           :locale => :kh
         )
         reply_to_user.to.should == user.mobile_number
-
-        reply_to_friend = replies[1]
 
         reply_to_friend.body.should == spec_translate(
           :new_chat_started,

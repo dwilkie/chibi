@@ -60,6 +60,7 @@ ActiveRecord::Schema.define(:version => 20111029062409) do
   create_table "users", :force => true do |t|
     t.string   "mobile_number"
     t.string   "name"
+    t.string   "screen_name"
     t.date     "date_of_birth"
     t.string   "gender",         :limit => 1
     t.string   "looking_for",    :limit => 1
