@@ -382,7 +382,7 @@ describe SearchHandler do
       end
     end
 
-    context "given there is no match for this user", :focus do
+    context "given there is no match for this user" do
       before do
         setup_handler
         process_message
@@ -393,16 +393,15 @@ describe SearchHandler do
 
         reply.body.should == spec_translate(
           :could_not_start_new_chat,
-          :users_name => "Mara (pls fix translation)",
+          :users_name => nil,
           :locale => :kh
         )
 
         reply.to.should == user.mobile_number
       end
-
     end
 
-    context "given there is a match for this user", :focus do
+    context "given there is a match for this user" do
 
       def stub_match(options = {})
         unless options[:match] == false
