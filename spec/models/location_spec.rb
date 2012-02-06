@@ -34,8 +34,18 @@ describe Location do
       build(:location).locate!.should be_nil
 
       # try to locate without a country code
-      subject.country_code = "TH"
+      subject.country_code = nil
+      subject.address = "new york"
       subject.locate!.should be_nil
+
+      # do not try to reverse geocode unless the latitude or longitude changes
+      new_york = create(:new_york)
+      new_york.address = "some new address"
+
+      VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
+        # this should not raise a vcr error
+        new_york.locate!
+      end
     end
   end
 

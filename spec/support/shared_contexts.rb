@@ -1,5 +1,5 @@
 shared_context "existing users" do
-  USERS = [:dave, :nok, :mara, :alex]
+  USERS = [:dave, :nok, :mara, :alex, :joy]
 
   USERS.each do |user|
     let(user) { create(user) }

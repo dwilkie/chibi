@@ -21,7 +21,10 @@ class User < ActiveRecord::Base
     self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
   end
 
-  PROFILE_ATTRIBUTES = ["name", "date_of_birth", "location", "gender", "looking_for"]
+  delegate :city, :to => :location, :allow_nil => true
+  delegate :locale, :to => :location, :allow_nil => true
+
+  PROFILE_ATTRIBUTES = [:name, :date_of_birth, :city, :gender, :looking_for]
 
   def self.matches(user)
     # don't match the user being matched
@@ -80,6 +83,16 @@ class User < ActiveRecord::Base
     end
 
     profile_complete
+  end
+
+  def missing_profile_attributes
+    profile_attributes = []
+
+    PROFILE_ATTRIBUTES.each do |attribute|
+      profile_attributes << attribute unless send(attribute).present?
+    end
+
+    profile_attributes
   end
 
   def age

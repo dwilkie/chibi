@@ -383,7 +383,7 @@ describe SearchHandler do
         last_reply.body.should == spec_translate(
           :could_not_start_new_chat,
           :users_name => nil,
-          :locale => :kh
+          :locale => user.locale
         )
 
         last_reply.to.should == user.mobile_number
@@ -399,7 +399,7 @@ describe SearchHandler do
         end
       end
 
-      let(:friend) { create(:user, :id => 888) }
+      let(:friend) { create(:english, :id => 888) }
 
       before do
         setup_handler(user)
@@ -428,8 +428,9 @@ describe SearchHandler do
           :users_name => nil,
           :friends_screen_name => "wilfred888",
           :to_user => true,
-          :locale => :kh
+          :locale => user.locale
         )
+
         reply_to_user.to.should == user.mobile_number
 
         reply_to_friend.body.should == spec_translate(
@@ -437,7 +438,7 @@ describe SearchHandler do
           :users_name => nil,
           :friends_screen_name => "wilfred" + user.id.to_s,
           :to_user => false,
-          :locale => :kh
+          :locale => friend.locale
         )
 
         reply_to_friend.to.should == friend.mobile_number

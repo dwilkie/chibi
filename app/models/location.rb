@@ -25,7 +25,7 @@ class Location < ActiveRecord::Base
     if address.present? && country_code?
       localize_address!
       geocode
-      reverse_geocode if latitude? && longitude?
+      reverse_geocode if latitude? && longitude? && (latitude_changed? || longitude_changed?)
     end
   end
 

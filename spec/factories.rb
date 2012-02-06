@@ -46,6 +46,20 @@ FactoryGirl.define do
         longitude 98.6600586
       end
     end
+
+    factory :england do
+      country_code "EN"
+    end
+
+    factory :united_states do
+      country_code "US"
+
+      factory :new_york do
+        city "New York"
+        latitude 40.7143528
+        longitude -74.00597309999999
+      end
+    end
   end
 
   factory :user do
@@ -57,10 +71,15 @@ FactoryGirl.define do
       date_of_birth { 23.years.ago }
       gender "f"
       looking_for "m"
+      association :location, :factory => :phnom_penh
     end
 
     factory :cambodian do
       association :location, :factory => :cambodia
+    end
+
+    factory :english do
+      association :location, :factory => :england
     end
 
     # do not reorder these factories because the tests rely on

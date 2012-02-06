@@ -4,13 +4,14 @@ describe Location do
   include LocationHelpers
 
   describe "US" do
+    let(:new_york) { build(:new_york) }
 
     let(:address_examples) do
       {
         "new york" => {
-          :expected_city => "New York",
-          :expected_latitude => 40.7143528,
-          :expected_longitude => -74.00597309999999
+          :expected_city => new_york.city,
+          :expected_latitude => new_york.latitude,
+          :expected_longitude => new_york.longitude
         }
       }
     end

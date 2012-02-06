@@ -21,9 +21,7 @@ describe "Initiating a chat" do
     context "given there are no matches for me" do
       context "when I text 'hello'" do
         before do
-          VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
-            send_message(:from => my_number, :body => "hello")
-          end
+          send_message(:from => my_number, :body => "hello")
         end
 
         it "should reply saying there are no matches at this time" do
@@ -32,7 +30,7 @@ describe "Initiating a chat" do
           last_reply.body.should == spec_translate(
             :could_not_start_new_chat,
             :users_name => nil,
-            :locale => :kh
+            :locale => new_user.locale
           )
 
           last_reply.to.should == my_number
@@ -51,10 +49,8 @@ describe "Initiating a chat" do
       context "when I text" do
         context "'23 srey jong rok met pros'" do
           before do
-            VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
-              send_message(:from => alex.mobile_number, :body => "23 srey jong rok met pros")
-              alex.reload
-            end
+            send_message(:from => alex.mobile_number, :body => "23 srey jong rok met pros")
+            alex.reload
           end
 
           it "should update my profile and connect me with a match" do
@@ -65,20 +61,20 @@ describe "Initiating a chat" do
 
             reply_to_user.body.should == spec_translate(
               :new_chat_started,
-              :users_name => "Alex",
-              :friends_screen_name => "dave" + dave.id.to_s,
+              :users_name => alex.name,
+              :friends_screen_name => dave.screen_id,
               :to_user => true,
-              :locale => :kh
+              :locale => new_user.locale
             )
 
             reply_to_user.to.should == alex.mobile_number
 
             reply_to_friend.body.should == spec_translate(
               :new_chat_started,
-              :users_name => "Dave",
-              :friends_screen_name => "alex" + alex.id.to_s,
+              :users_name => dave.name,
+              :friends_screen_name => alex.screen_id,
               :to_user => false,
-              :locale => :kh
+              :locale => new_user.locale
             )
 
             reply_to_friend.to.should == dave.mobile_number
@@ -104,10 +100,7 @@ describe "Initiating a chat" do
 
       context "'hello'" do
         before do
-          Faker::Name.stub(:first_name).and_return("Wilfred")
-          VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
-            send_message(:from => my_number, :body => "hello")
-          end
+          send_message(:from => my_number, :body => "hello")
         end
 
         it "should start a chat between the new user and an existing user and notify both users" do
@@ -116,18 +109,18 @@ describe "Initiating a chat" do
           reply_to_user.body.should == spec_translate(
             :new_chat_started,
             :users_name => nil,
-            :friends_screen_name => "alex" + alex.id.to_s,
+            :friends_screen_name => alex.screen_id,
             :to_user => true,
-            :locale => :kh
+            :locale => new_user.locale
           )
           reply_to_user.to.should == my_number
 
           reply_to_friend.body.should == spec_translate(
             :new_chat_started,
-            :users_name => "Alex",
-            :friends_screen_name => "wilfred" + new_user.id.to_s,
+            :users_name => alex.name,
+            :friends_screen_name => new_user.screen_id,
             :to_user => false,
-            :locale => :kh
+            :locale => new_user.locale
           )
 
           reply_to_friend.to.should == alex.mobile_number
@@ -136,9 +129,9 @@ describe "Initiating a chat" do
 
       context "'knyom map pros 27 pp jong rok met srey'" do
         before do
-          VCR.use_cassette("results", :erb => true) do
-            send_message(:from => my_number, :body => "knyom map pros 27 pp jong rok met srey")
-          end
+          # ensure that joy is the first match by increasing her initiated chat count
+          create(:chat, :user => joy)
+          send_message(:from => my_number, :body => "knyom map pros 27 pp jong rok met srey", :location => true)
         end
 
         it "should create a new user called 'map' and start a chat with a girl close to phnom penh" do
@@ -153,22 +146,22 @@ describe "Initiating a chat" do
           reply_to_user.body.should == spec_translate(
             :new_chat_started,
             :users_name => "Map",
-            :friends_screen_name => "mara" + mara.id.to_s,
+            :friends_screen_name => joy.screen_id,
             :to_user => true,
-            :locale => :kh
+            :locale => new_user.locale
           )
 
           reply_to_user.to.should == my_number
 
           reply_to_friend.body.should == spec_translate(
             :new_chat_started,
-            :users_name => "Mara",
-            :friends_screen_name => "map" + new_user.id.to_s,
+            :users_name => joy.name,
+            :friends_screen_name => new_user.screen_id,
             :to_user => false,
-            :locale => :kh
+            :locale => joy.locale
           )
 
-          reply_to_friend.to.should == mara.mobile_number
+          reply_to_friend.to.should == joy.mobile_number
         end
       end
     end

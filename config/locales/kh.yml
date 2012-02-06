@@ -1,0 +1,14 @@
+kh:
+  activerecord:
+    attributes:
+      user:
+        name: "chhmos"
+        date_of_birth: "a-yu"
+        gender: "phet"
+        looking_for: "avey del nek rok"
+        city: "ti-tang"
+  support:
+    array:
+      last_word_connector: ! ' & '
+      two_words_connector: ! ' & '
+      words_connector: ! ', '

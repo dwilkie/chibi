@@ -10,9 +10,7 @@ describe User do
     build(:user)
   end
 
-  let(:user_with_complete_profile) do
-    create(:user_with_complete_profile)
-  end
+  let(:user_with_complete_profile) { build(:user_with_complete_profile) }
 
   it "should not be valid without a mobile number" do
     new_user.mobile_number = nil
@@ -188,30 +186,41 @@ describe User do
   end
 
   describe "#profile_complete?" do
-    context "has a complete profile" do
-      it "should be true" do
-        user_with_complete_profile.should be_profile_complete
+    it "should only be true if all the profile attributes are present" do
+      user_with_complete_profile.should be_profile_complete
+
+      ["name", "date_of_birth", "gender", "looking_for"].each do |attribute|
+        reference_user = build(:user_with_complete_profile)
+        reference_user.send("#{attribute}=", nil)
+        reference_user.should_not be_profile_complete
       end
+
+      user_with_complete_profile.location.city = nil
+      user_with_complete_profile.should_not be_profile_complete
     end
+  end
 
-    context "is missing their" do
-      shared_examples_for "missing profile" do
-        before do
-          user_with_complete_profile.send("#{attribute}=", nil)
-        end
+  describe "#missing_profile_attributes" do
+    it "should return the missing attributes of the user" do
+      subject.missing_profile_attributes.should == [:name, :date_of_birth, :city, :gender, :looking_for]
+      user_with_complete_profile.missing_profile_attributes.should == []
 
-        it "should not be true" do
-          user_with_complete_profile.should_not be_profile_complete
-        end
-      end
+      user_with_complete_profile.date_of_birth = nil
+      user_with_complete_profile.missing_profile_attributes.should == [:date_of_birth]
+    end
+  end
 
-      ["name", "date_of_birth", "location", "gender", "looking_for"].each do |attribute|
-        context attribute do
-          it_should_behave_like "missing profile" do
-            let(:attribute) {attribute}
-          end
-        end
-      end
+  describe "#city" do
+    it "should delegate to location" do
+      subject.city.should be_nil
+      user_with_complete_profile.city.should be_present
+    end
+  end
+
+  describe "#locale" do
+    it "should delegate to location" do
+      subject.locale.should be_nil
+      user.locale.should be_present
     end
   end
 
