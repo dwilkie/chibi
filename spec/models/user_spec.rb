@@ -27,6 +27,10 @@ describe User do
     new_user.should_not be_valid
   end
 
+  it "should default to being online" do
+    subject.should be_online
+  end
+
   describe "factory" do
     it "should be valid" do
       new_user.should be_valid
@@ -410,6 +414,13 @@ describe User do
       it "should return a combination of the screen name and id" do
         user_without_name.screen_id.should == "#{user_without_name.screen_name}88"
       end
+    end
+  end
+
+  describe "#logout!" do
+    it "should mark the user as offline" do
+      user.logout!
+      user.should_not be_online
     end
   end
 end

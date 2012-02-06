@@ -17,6 +17,20 @@ describe ChatHandler do
       chat
     end
 
+    shared_examples_for "notifying the user's partner" do
+      it "should notify the user's partner that the chat has ended and how to update their profile" do
+        replies[0].body.should == spec_translate(
+          :chat_has_ended,
+          :missing_profile_attributes => partner_of_user_who_ended_chat.missing_profile_attributes,
+          :friends_screen_name => user_who_ended_chat.screen_id,
+          :locale => partner_of_user_who_ended_chat.locale
+        )
+
+        replies[0].to.should == partner_of_user_who_ended_chat.mobile_number
+        partner_of_user_who_ended_chat.reload.active_chat.should be_nil
+      end
+    end
+
     shared_examples_for "ending the current chat and starting a new one" do
       it "should end the current chat and notify the partner of the user that ended the chat" do
 
@@ -72,17 +86,7 @@ describe ChatHandler do
           user_who_ended_chat.active_chat.should_not == chat
         end
 
-        it "should notify the user's partner that the chat has ended and how to update their profile" do
-          replies[0].body.should == spec_translate(
-            :chat_has_ended,
-            :missing_profile_attributes => partner_of_user_who_ended_chat.missing_profile_attributes,
-            :friends_screen_name => user_who_ended_chat.screen_id,
-            :locale => partner_of_user_who_ended_chat.locale
-          )
-
-          replies[0].to.should == partner_of_user_who_ended_chat.mobile_number
-          partner_of_user_who_ended_chat.reload.active_chat.should be_nil
-        end
+        it_should_behave_like "notifying the user's partner"
       end
     end
 
@@ -93,6 +97,28 @@ describe ChatHandler do
 
         last_reply.body.should == "#{user_who_texted.screen_id}: #{body}"
         last_reply.to.should == other_chat_participant.mobile_number
+      end
+    end
+
+    shared_examples_for "putting the user offline" do
+      before do
+        subject.process!
+      end
+
+      it_should_behave_like "notifying the user's partner"
+
+      it "should notify the user that he is now offline" do
+        replies[1].body.should == spec_translate(
+          :chat_has_ended,
+          :friends_screen_name => partner_of_user_who_ended_chat.screen_id,
+          :missing_profile_attributes => user_who_ended_chat.missing_profile_attributes,
+          :offline => true,
+          :locale => user_who_ended_chat.locale
+        )
+
+        user_who_ended_chat.reload
+        user_who_ended_chat.active_chat.should be_nil
+        user_who_ended_chat.should_not be_online
       end
     end
 
@@ -120,6 +146,17 @@ describe ChatHandler do
             let(:new_partner) { :users_new_partner }
           end
         end
+
+        context "'stop'" do
+          before do
+            subject.body = "stop"
+          end
+
+          it_should_behave_like "putting the user offline" do
+            let(:user_who_ended_chat) { user }
+            let(:partner_of_user_who_ended_chat) { friend }
+          end
+        end
       end
     end
 
@@ -144,6 +181,17 @@ describe ChatHandler do
             let(:user_who_ended_chat) { friend }
             let(:partner_of_user_who_ended_chat) { user }
             let(:new_partner) { :friends_new_partner }
+          end
+        end
+
+        context "'stop'" do
+          before do
+            subject.body = "stop"
+          end
+
+          it_should_behave_like "putting the user offline" do
+            let(:user_who_ended_chat) { friend }
+            let(:partner_of_user_who_ended_chat) { user }
           end
         end
       end

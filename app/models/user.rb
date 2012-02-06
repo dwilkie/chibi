@@ -111,6 +111,10 @@ class User < ActiveRecord::Base
     (self.name || self.screen_name) + id.to_s
   end
 
+  def logout!
+    update_attributes!(:online => false)
+  end
+
   private
 
   # the age difference where the user's age becomes a factor in the ordering of results

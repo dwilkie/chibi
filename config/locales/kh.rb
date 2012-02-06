@@ -22,7 +22,8 @@
       },
 
       :chat_has_ended => lambda {|key, options|
-        notification = "Chat jea-moy #{options[:friends_screen_name]} job huey. "
+        notification = "Chat jea-moy #{options[:friends_screen_name]} "
+        options[:offline] ? notification << "trov ban job & pel nis nek jaak jenh haey. " : notification << "job huey. "
 
         if options[:missing_profile_attributes].any?
           notification << "Pjeur "
@@ -33,12 +34,13 @@
           end
 
           notification << translated_missing_attributes.to_sentence(:locale => :kh)
-          notification << " d3 update profile & chat m-dong teat. "
+          notification << " d3 update profile & chat m-dong teat"
         else
-          notification << "Sorsay avey moy d3 chat m-dong teat. "
+          notification << "Sorsay avey moy d3 chat m-dong teat"
         end
 
-        notification << "Sorsay 'stop' d3 jaak jenh"
+        notification << ". Sorsay 'stop' d3 jaak jenh" unless options[:offline]
+        notification
       }
     }
   }

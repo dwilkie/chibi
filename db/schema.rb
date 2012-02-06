@@ -64,12 +64,14 @@ ActiveRecord::Schema.define(:version => 20111029062409) do
     t.date     "date_of_birth"
     t.string   "gender",         :limit => 1
     t.string   "looking_for",    :limit => 1
+    t.boolean  "online",                      :default => true, :null => false
     t.integer  "active_chat_id"
-    t.datetime "created_at",                  :null => false
-    t.datetime "updated_at",                  :null => false
+    t.datetime "created_at",                                    :null => false
+    t.datetime "updated_at",                                    :null => false
   end
 
   add_index "users", ["active_chat_id"], :name => "index_users_on_active_chat_id"
   add_index "users", ["mobile_number"], :name => "index_users_on_mobile_number", :unique => true
+  add_index "users", ["online"], :name => "index_users_on_online"
 
 end
