@@ -10,6 +10,10 @@ FactoryGirl.define do
       chat.active_users << chat.friend
       chat.save
     end
+
+    factory :active_chat_with_inactivity do
+      updated_at { 10.minutes.ago }
+    end
   end
 
   factory :location do

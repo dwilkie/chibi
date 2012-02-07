@@ -14,7 +14,7 @@ class ChatHandler < MessageHandler
   private
 
   def end_current_chat
-    chat.active_users.clear
+    chat.deactivate!
     @chat = nil
     @chat_initiator = nil
     @chat_partner = nil
