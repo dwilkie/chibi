@@ -52,6 +52,9 @@ class User < ActiveRecord::Base
     # exclude currently chatting users
     match_scope = match_scope.where(:active_chat_id => nil)
 
+    # exclude offline users
+    match_scope = match_scope.where(:online => true)
+
     # order first by location
     match_scope = filter_by_location(user, match_scope)
 

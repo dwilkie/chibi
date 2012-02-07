@@ -120,8 +120,8 @@ describe User do
     # All three guys live in Chiang Mai, Thailand. Michael is bi and View is gay so either are a match.
     # Both of them are in the free age zone, but michael has initiated more chats, so he is matched first
 
-    # View with Hanh
-    # View has previously chatted with Michael so only Hanh is matched
+    # View with Nobody :(
+    # View has previously chatted with Michael and Hanh is offline, so nobody is matched
 
     # Mara with Luke, Dave and Paul
     # Mara is bi, so she could match with either, Dave, Con, Paul, Luke, Harriet or Eva who are all in Cambodia.
@@ -130,10 +130,11 @@ describe User do
     # because he has initiated more chats. Paul has also initiated more chats than Dave but he falls outside
     # the free age zone, so Dave is matched before him.
 
-    # Michael with Hanh and Nok
+    # Michael with Nok
     # Michael has previously chatted with View which leaves Nok and Hanh. Even though Nok hasn't specified
-    # her age yet we give her the benifit of the doubt and assume she's in the free age zone.
-    # Hanh has initiated more chat than Nok so he is matched first.
+    # her age yet, we give her the benifit of the doubt and assume she's in the free age zone.
+    # Hanh has initiated more chat than Nok so he would have been matched before Nok, but
+    # Hanh is offline so he is eliminated from the results anyway.
 
     USER_MATCHES = {
       :alex => [:jamie],
@@ -149,9 +150,9 @@ describe User do
       :harriet => [:mara],
       :eva => [:mara],
       :hanh => [:michael, :view],
-      :view => [:hanh],
+      :view => [],
       :mara => [:luke, :dave, :paul],
-      :michael => [:hanh, :nok]
+      :michael => [:nok]
     }
 
     USER_MATCHES.each do |user, matches|
@@ -162,6 +163,8 @@ describe User do
       USER_MATCHES.each do |user, matches|
         send(user)
       end
+
+      # create some chats
       create(:active_chat, :user => eva,        :friend => harriet)
       create(:chat,        :user => michael,    :friend => view)
       create(:chat,        :user => con,        :friend => mara)
@@ -170,6 +173,9 @@ describe User do
       create(:chat,        :user => luke,       :friend => nok)
       create(:chat,        :user => luke,       :friend => hanh)
       create(:chat,        :user => paul,       :friend => nok)
+
+      # logout hanh
+      hanh.logout!
     end
 
     context "given there are other users" do
