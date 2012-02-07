@@ -1,7 +1,7 @@
 module HandlerHelpers
-  def setup_handler(user)
+  def setup_handler(user, options = {})
     subject.user = user
     subject.location = user.location
-    subject.body = ""
+    subject.body = options[:body] || ""
   end
 end

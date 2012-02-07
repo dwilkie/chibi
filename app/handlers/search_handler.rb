@@ -1,12 +1,17 @@
 class SearchHandler < MessageHandler
   def process!
-    update_user_details
-    start_new_chat
+    if user_wants_to_logout?
+      logout_user
+    else
+      update_user_details
+      start_new_chat
+    end
   end
 
   private
 
   def update_user_details
+    user.online = true
     extract_user_details
     user.save
   end

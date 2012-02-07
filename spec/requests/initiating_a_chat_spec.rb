@@ -18,22 +18,41 @@ describe "Initiating a chat" do
   let(:my_number) { "8553243313" }
 
   context "as a user" do
-    context "given there are no matches for me" do
-      context "when I text 'hello'" do
+    context "when I text" do
+      context "'hello'" do
+        context "given there are no matches for me" do
+          before do
+            send_message(:from => my_number, :body => "hello")
+          end
+
+          it "should reply telling me that there are no matches at this time" do
+            replies.count.should == 1
+
+            last_reply.body.should == spec_translate(
+              :could_not_start_new_chat,
+              :users_name => nil,
+              :locale => new_user.locale
+            )
+
+            last_reply.to.should == my_number
+          end
+        end
+      end
+
+      context "'stop'" do
         before do
-          send_message(:from => my_number, :body => "hello")
+          send_message(:from => my_number, :body => "stop")
         end
 
-        it "should reply saying there are no matches at this time" do
-          replies.count.should == 1
-
-          last_reply.body.should == spec_translate(
-            :could_not_start_new_chat,
-            :users_name => nil,
+        it "should log me out and tell me how to log in again" do
+          replies[0].body.should == spec_translate(
+            :chat_has_ended,
+            :missing_profile_attributes => new_user.missing_profile_attributes,
+            :offline => true,
             :locale => new_user.locale
           )
 
-          last_reply.to.should == my_number
+          replies[0].to.should == my_number
         end
       end
     end
@@ -44,41 +63,38 @@ describe "Initiating a chat" do
       load_users
     end
 
-    context "with missing profile information" do
+    context "when I text" do
+      context "'23 srey jong rok met pros'" do
+        before do
+          send_message(:from => alex.mobile_number, :body => "23 srey jong rok met pros")
+          alex.reload
+        end
 
-      context "when I text" do
-        context "'23 srey jong rok met pros'" do
-          before do
-            send_message(:from => alex.mobile_number, :body => "23 srey jong rok met pros")
-            alex.reload
-          end
+        it "should update my profile and connect me with a match" do
+          alex.name.should == "alex"
+          alex.age.should == 23
+          alex.gender.should == "f"
+          alex.looking_for.should == "m"
 
-          it "should update my profile and connect me with a match" do
-            alex.name.should == "alex"
-            alex.age.should == 23
-            alex.gender.should == "f"
-            alex.looking_for.should == "m"
+          reply_to_user.body.should == spec_translate(
+            :new_chat_started,
+            :users_name => alex.name,
+            :friends_screen_name => dave.screen_id,
+            :to_user => true,
+            :locale => new_user.locale
+          )
 
-            reply_to_user.body.should == spec_translate(
-              :new_chat_started,
-              :users_name => alex.name,
-              :friends_screen_name => dave.screen_id,
-              :to_user => true,
-              :locale => new_user.locale
-            )
+          reply_to_user.to.should == alex.mobile_number
 
-            reply_to_user.to.should == alex.mobile_number
+          reply_to_friend.body.should == spec_translate(
+            :new_chat_started,
+            :users_name => dave.name,
+            :friends_screen_name => alex.screen_id,
+            :to_user => false,
+            :locale => new_user.locale
+          )
 
-            reply_to_friend.body.should == spec_translate(
-              :new_chat_started,
-              :users_name => dave.name,
-              :friends_screen_name => alex.screen_id,
-              :to_user => false,
-              :locale => new_user.locale
-            )
-
-            reply_to_friend.to.should == dave.mobile_number
-          end
+          reply_to_friend.to.should == dave.mobile_number
         end
       end
     end
@@ -103,7 +119,7 @@ describe "Initiating a chat" do
           send_message(:from => my_number, :body => "hello")
         end
 
-        it "should start a chat between the new user and an existing user and notify both users" do
+        it "should start a chat between an existing anonymous user and myself and notify both of us" do
           assert_new_user
 
           reply_to_user.body.should == spec_translate(
@@ -134,7 +150,7 @@ describe "Initiating a chat" do
           send_message(:from => my_number, :body => "knyom map pros 27 pp jong rok met srey", :location => true)
         end
 
-        it "should create a new user called 'map' and start a chat with a girl close to phnom penh" do
+        it "should save me as 'map' a 27 yo male from Phnom Penh and start a chat with a matching female" do
           assert_new_user
 
           new_user.name.should == "map"

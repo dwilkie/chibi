@@ -22,8 +22,13 @@
       },
 
       :chat_has_ended => lambda {|key, options|
-        notification = "Ur chat with #{options[:friends_screen_name]} has ended"
-        notification << " & u r now offline" if options[:offline]
+        if options[:friends_screen_name]
+          notification = "Ur chat with #{options[:friends_screen_name]} has ended"
+          notification << " & u r now offline" if options[:offline]
+        else
+          notification = "U r now offline"
+        end
+
         notification << ". "
 
         if options[:missing_profile_attributes].any?

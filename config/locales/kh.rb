@@ -22,8 +22,14 @@
       },
 
       :chat_has_ended => lambda {|key, options|
-        notification = "Chat jea-moy #{options[:friends_screen_name]} "
-        options[:offline] ? notification << "trov ban job & pel nis nek jaak jenh haey. " : notification << "job huey. "
+        if options[:friends_screen_name]
+          notification = "Chat jea-moy #{options[:friends_screen_name]} "
+          options[:offline] ? notification << "trov ban job & pel nis nek jaak jenh haey" : notification << "job huey"
+        else
+          notification = "Pel nis nek jaak jenh haey"
+        end
+
+        notification << ". "
 
         if options[:missing_profile_attributes].any?
           notification << "Pjeur "

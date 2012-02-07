@@ -100,7 +100,7 @@ describe ChatHandler do
       end
     end
 
-    shared_examples_for "putting the user offline" do
+    shared_examples_for "logging out the user" do
       before do
         subject.process!
       end
@@ -152,7 +152,7 @@ describe ChatHandler do
             subject.body = "stop"
           end
 
-          it_should_behave_like "putting the user offline" do
+          it_should_behave_like "logging out the user" do
             let(:user_who_ended_chat) { user }
             let(:partner_of_user_who_ended_chat) { friend }
           end
@@ -189,7 +189,7 @@ describe ChatHandler do
             subject.body = "stop"
           end
 
-          it_should_behave_like "putting the user offline" do
+          it_should_behave_like "logging out the user" do
             let(:user_who_ended_chat) { friend }
             let(:partner_of_user_who_ended_chat) { user }
           end

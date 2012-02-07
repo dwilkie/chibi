@@ -54,6 +54,10 @@ describe SearchHandler do
     build(:user)
   end
 
+  let(:offline_user) do
+    build(:offline_user)
+  end
+
   let(:cambodian) do
     create(:cambodian)
   end
@@ -371,6 +375,42 @@ describe SearchHandler do
       end
     end
 
+    context "given the message text is" do
+      context "'stop'" do
+        before do
+          setup_handler(user, :body => "stop")
+          process_message
+        end
+
+        it "should logout the user and notify him that he is now offline" do
+          replies[0].body.should == spec_translate(
+            :chat_has_ended,
+            :missing_profile_attributes => user.missing_profile_attributes,
+            :offline => true,
+            :locale => user.locale
+          )
+
+          user.reload
+          user.active_chat.should be_nil
+          user.should_not be_online
+        end
+      end
+
+      context "anything else but 'stop'" do
+        context "and the user is offline" do
+          before do
+            setup_handler(offline_user)
+            process_message
+          end
+
+          it "should login the user" do
+            offline_user.reload
+            offline_user.should be_online
+          end
+        end
+      end
+    end
+
     context "given there is no match for this user" do
       before do
         setup_handler(user)
@@ -391,7 +431,6 @@ describe SearchHandler do
     end
 
     context "given there is a match for this user" do
-
       def stub_match(options = {})
         unless options[:match] == false
           options[:match] ||= create(:user)

@@ -29,6 +29,21 @@ class MessageHandler
     user.locale
   end
 
+  def user_wants_to_logout?
+    body.strip.downcase == "stop"
+  end
+
+  def logout_user(old_chat_partners_screen_id = nil)
+    user.logout!
+    reply I18n.t(
+      "messages.chat_has_ended",
+      :friends_screen_name => old_chat_partners_screen_id,
+      :missing_profile_attributes => user.missing_profile_attributes,
+      :offline => true,
+      :locale => locale
+    )
+  end
+
   def start_new_chat(old_chat_partners_screen_id = nil)
     introduce_participants(create_new_chat, old_chat_partners_screen_id)
   end

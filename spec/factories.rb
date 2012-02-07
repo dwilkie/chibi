@@ -66,6 +66,10 @@ FactoryGirl.define do
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
     location
 
+    factory :offline_user do
+      online false
+    end
+
     factory :user_with_complete_profile do
       name "veronica"
       date_of_birth { 23.years.ago }
