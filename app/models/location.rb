@@ -20,7 +20,7 @@ class Location < ActiveRecord::Base
     DIALING_CODES[Phony.split(mobile_number).first] if mobile_number
   end
 
-  # move into a background job
+  # long running task
   def locate!
     if address.present? && country_code?
       localize_address!

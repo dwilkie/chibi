@@ -9,6 +9,7 @@ gem "geocoder", :git => "git://github.com/alexreisner/geocoder.git"
 gem "phony"
 gem "countries", :git => "git://github.com/hexorx/countries.git", :require => 'iso3166'
 gem "faker"
+gem "resque"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -45,4 +46,5 @@ group :test do
   gem 'guard-spork'
   gem 'database_cleaner'
   gem 'timecop'
+  gem 'resque_spec'
 end
