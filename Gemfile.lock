@@ -224,6 +224,7 @@ DEPENDENCIES
   pg
   phony
   rails (= 3.2.1)
+  redis
   resque
   resque_spec
   rspec-rails
