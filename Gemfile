@@ -10,6 +10,7 @@ gem "phony"
 gem "countries", :git => "git://github.com/hexorx/countries.git", :require => 'iso3166'
 gem "faker"
 gem "resque"
+gem "thin"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
