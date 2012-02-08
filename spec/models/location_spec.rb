@@ -6,6 +6,12 @@ describe Location do
 
   let(:location) { build(:location) }
 
+  describe "factory" do
+    it "should be valid" do
+      location.should be_valid
+    end
+  end
+
   it "should not be valid without a country code" do
     location.country_code = nil
     location.should_not be_valid
