@@ -7,6 +7,7 @@ class Chat < ActiveRecord::Base
 
   validates :user, :friend, :presence => true
 
+  # a chat with inactivity, is an active chat with no activity in the past inactivity_period minutes
   def self.with_inactivity(inactivity_period = 10.minutes)
     joins(:user).where(
       "users.active_chat_id = chats.id"
