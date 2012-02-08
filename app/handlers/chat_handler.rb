@@ -38,12 +38,12 @@ class ChatHandler < MessageHandler
       :friends_screen_name => user.screen_id,
       :missing_profile_attributes => chat_partner.missing_profile_attributes,
       :locale => locale(chat_partner)
-    ), chat_partner
+    ), chat_partner, chat
   end
 
   def forward_message
     # prepend the user's screen id before the body and reply to the correct chat partner
-    reply "#{user.screen_id}: #{body}", chat_partner
+    reply "#{user.screen_id}: #{body}", chat_partner, chat
   end
 
   def user_wants_to_chat_with_someone_new?

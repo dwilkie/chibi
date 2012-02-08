@@ -18,6 +18,10 @@ describe ChatHandler do
     end
 
     shared_examples_for "notifying the user's partner" do
+      before do
+        subject.process!
+      end
+
       it "should notify the user's partner that the chat has ended and how to update their profile" do
         replies[0].body.should == spec_translate(
           :chat_has_ended,
@@ -27,24 +31,14 @@ describe ChatHandler do
         )
 
         replies[0].to.should == partner_of_user_who_ended_chat.mobile_number
+        replies[0].chat.should == chat
         partner_of_user_who_ended_chat.reload.active_chat.should be_nil
       end
     end
 
     shared_examples_for "ending the current chat and starting a new one" do
-      it "should end the current chat and notify the partner of the user that ended the chat" do
 
-        subject.process!
-
-        replies[0].body.should == spec_translate(
-          :chat_has_ended,
-          :friends_screen_name => user_who_ended_chat.screen_id,
-          :missing_profile_attributes => partner_of_user_who_ended_chat.missing_profile_attributes,
-          :locale => partner_of_user_who_ended_chat.locale
-        )
-
-        replies[0].to.should == partner_of_user_who_ended_chat.mobile_number
-      end
+      it_should_behave_like "notifying the user's partner"
 
       context "given there is nobody new to chat with" do
         before do
@@ -59,12 +53,15 @@ describe ChatHandler do
           )
 
           replies[1].to.should == user_who_ended_chat.mobile_number
+          replies[1].chat.should be_nil
 
           user.reload.active_chat.should be_nil
         end
       end
 
       context "given there is someone new to chat with" do
+        let(:new_chat) { Chat.last }
+
         before do
           send(new_partner)
           subject.process!
@@ -81,33 +78,31 @@ describe ChatHandler do
 
           replies[1].to.should == user_who_ended_chat.mobile_number
 
-          user_who_ended_chat.reload
-          user_who_ended_chat.active_chat.should be_a(Chat)
-          user_who_ended_chat.active_chat.should_not == chat
+          new_chat.should_not == chat
+          user_who_ended_chat.reload.active_chat.should == new_chat
+          replies[1].chat.should == new_chat
         end
-
-        it_should_behave_like "notifying the user's partner"
       end
     end
 
     shared_examples_for "forwarding the message to the other chat participant" do
-      it "should forward the message to the other chat participant and prepend the screen name of person texting" do
+      it "should forward the message to the other chat participant and prepend the screen id of the user texting" do
         subject.body = body
         subject.process!
 
-        last_reply.body.should == "#{user_who_texted.screen_id}: #{body}"
-        last_reply.to.should == other_chat_participant.mobile_number
+        replies[0].body.should == "#{user_who_texted.screen_id}: #{body}"
+        replies[0].to.should == other_chat_participant.mobile_number
+        replies[0].chat.should == chat
       end
     end
 
     shared_examples_for "logging out the user" do
-      before do
-        subject.process!
-      end
 
       it_should_behave_like "notifying the user's partner"
 
       it "should notify the user that he is now offline" do
+        subject.process!
+
         replies[1].body.should == spec_translate(
           :chat_has_ended,
           :friends_screen_name => partner_of_user_who_ended_chat.screen_id,
@@ -125,13 +120,6 @@ describe ChatHandler do
     context "where the message comes from the user who initiated the chat" do
       before do
         setup_handler(user)
-      end
-
-      it_should_behave_like "forwarding the message to the other chat participant" do
-        let(:body) { "Hi knyom sok 27 nov kt want 2 chat with me? 012 232 234" }
-        let(:user_who_texted) { user }
-        let(:other_chat_participant) { friend }
-        let(:new_partner) { :users_new_partner }
       end
 
       context "and the message text is" do
@@ -157,18 +145,20 @@ describe ChatHandler do
             let(:partner_of_user_who_ended_chat) { friend }
           end
         end
+
+        context "anything other than 'new' or 'stop'" do
+          it_should_behave_like "forwarding the message to the other chat participant" do
+            let(:body) { "Hi knyom sok 27 nov kt want 2 chat with me? 012 232 234" }
+            let(:user_who_texted) { user }
+            let(:other_chat_participant) { friend }
+          end
+        end
       end
     end
 
     context "where the message comes from the user who is the chat partner" do
       before do
         setup_handler(friend)
-      end
-
-      it_should_behave_like "forwarding the message to the other chat participant" do
-        let(:body) { "Hi sok, no sorry m in pp" }
-        let(:user_who_texted) { friend }
-        let(:other_chat_participant) { user }
       end
 
       context "and the message text is" do
@@ -192,6 +182,14 @@ describe ChatHandler do
           it_should_behave_like "logging out the user" do
             let(:user_who_ended_chat) { friend }
             let(:partner_of_user_who_ended_chat) { user }
+          end
+        end
+
+        context "anything other than 'new' or 'stop'" do
+          it_should_behave_like "forwarding the message to the other chat participant" do
+            let(:body) { "Hi sok, no sorry m in pp" }
+            let(:user_who_texted) { friend }
+            let(:other_chat_participant) { user }
           end
         end
       end

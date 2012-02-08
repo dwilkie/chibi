@@ -390,9 +390,7 @@ describe SearchHandler do
             :locale => user.locale
           )
 
-          user.reload
-          user.active_chat.should be_nil
-          user.should_not be_online
+          user.reload.should_not be_online
         end
       end
 
@@ -404,8 +402,7 @@ describe SearchHandler do
           end
 
           it "should login the user" do
-            offline_user.reload
-            offline_user.should be_online
+            offline_user.reload.should be_online
           end
         end
       end
@@ -439,6 +436,7 @@ describe SearchHandler do
       end
 
       let(:friend) { create(:english, :id => 888) }
+      let(:new_chat) { Chat.last }
 
       before do
         setup_handler(user)
@@ -450,7 +448,6 @@ describe SearchHandler do
         Chat.count.should == 0
         process_message
         Chat.count.should == 1
-        new_chat = Chat.first
         new_chat.active_users.count.should == 2
         new_chat.user.active_chat.should == new_chat
         new_chat.friend.active_chat.should == new_chat
@@ -471,6 +468,7 @@ describe SearchHandler do
         )
 
         reply_to_user.to.should == user.mobile_number
+        reply_to_user.chat.should == new_chat
 
         reply_to_friend.body.should == spec_translate(
           :new_chat_started,
@@ -481,6 +479,7 @@ describe SearchHandler do
         )
 
         reply_to_friend.to.should == friend.mobile_number
+        reply_to_friend.chat.should == new_chat
       end
     end
   end

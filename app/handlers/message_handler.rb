@@ -15,10 +15,11 @@ class MessageHandler
 
   protected
 
-  def reply(text, user = nil)
+  def reply(text, user = nil, chat = nil)
     user ||= self.user
     reply = Reply.new
     reply.user = user
+    reply.chat = chat
     reply.body = text
     reply.to = user.mobile_number
     reply.save
@@ -69,8 +70,8 @@ class MessageHandler
         :locale => locale(friend)
       )
 
-      reply reply_to_user
-      reply reply_to_friend, friend
+      reply reply_to_user, user, new_chat
+      reply reply_to_friend, friend, new_chat
     else
       reply I18n.t(
         "messages.could_not_start_new_chat",
