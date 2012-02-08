@@ -1,5 +1,7 @@
 class ChatHandler < MessageHandler
   def process!
+    assign_message_to_chat
+
     if (wants_new_chat = user_wants_to_chat_with_someone_new?) || user_wants_to_logout?
       old_chat_partners_screen_id = chat_partner.screen_id
 
@@ -12,6 +14,11 @@ class ChatHandler < MessageHandler
   end
 
   private
+
+  def assign_message_to_chat
+    message.chat = chat
+    message.save
+  end
 
   def end_current_chat
     chat.deactivate!

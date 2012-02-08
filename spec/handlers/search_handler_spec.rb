@@ -94,10 +94,8 @@ describe SearchHandler do
       options[:user].age = options[:age]
       options[:user].location.city = options[:city]
 
-      subject.user = options[:user]
-      subject.user.stub(:save)
-      subject.body = message
-      subject.location = options[:user].location
+      options[:user].stub(:save)
+      setup_handler(options[:user], :body => message)
 
       vcr_options = options[:vcr] || {}
 
@@ -453,6 +451,7 @@ describe SearchHandler do
         new_chat.friend.active_chat.should == new_chat
         new_chat.user.should == user
         user.active_chat.should == new_chat
+        subject.message.chat.should == new_chat
       end
 
       it "should create replies for the participants of the chat" do

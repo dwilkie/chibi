@@ -1,4 +1,9 @@
 FactoryGirl.define do
+  factory :message do
+    user
+    from "123456789"
+  end
+
   factory :chat do
     association :user, :factory => :user
     association :friend, :factory => :user

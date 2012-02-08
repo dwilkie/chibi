@@ -17,6 +17,16 @@ describe ChatHandler do
       chat
     end
 
+    shared_examples_for "associating the message with the current chat" do
+      before do
+        subject.process!
+      end
+
+      it "should associate the message with the current chat" do
+        subject.message.chat.should == chat
+      end
+    end
+
     shared_examples_for "notifying the user's partner" do
       before do
         subject.process!
@@ -122,6 +132,8 @@ describe ChatHandler do
         setup_handler(user)
       end
 
+      it_should_behave_like "associating the message with the current chat"
+
       context "and the message text is" do
         context "'new'" do
           before do
@@ -160,6 +172,8 @@ describe ChatHandler do
       before do
         setup_handler(friend)
       end
+
+      it_should_behave_like "associating the message with the current chat"
 
       context "and the message text is" do
         context "'new'" do

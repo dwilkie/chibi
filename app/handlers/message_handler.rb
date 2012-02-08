@@ -97,6 +97,9 @@ class MessageHandler
     # create a new chat
     chat = Chat.new
 
+    # associate the message with the new chat
+    message.chat = chat
+
     # find a friend for the user
     friend = User.matches(user).first
 
