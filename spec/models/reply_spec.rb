@@ -209,34 +209,17 @@ describe Reply do
       end
     end
 
-    context ":to_user => true" do
-      before do
-        subject.introduce(partner, :to_user => true)
-      end
-
-      it "should introduce the user to his new partner" do
-        subject.body.should == spec_translate(
-          :new_chat_started,
-          :friends_screen_name => partner.screen_id,
-          :users_name => user.name,
-          :to_user => true,
-          :locale => user.locale
-        )
-      end
-    end
-
-    context ":to_user => true, :old_friends_screen_name => mikey013" do
+    context ":old_friends_screen_name => mikey013" do
       before do
         subject.introduce(partner, :to_user => true, :old_friends_screen_name => "mikey013")
       end
 
-      it "should introduce the user to his new partner" do
+      it "should let the user know that previous chat has finished introduce the user to his new partner" do
         subject.body.should == spec_translate(
           :new_chat_started,
           :friends_screen_name => partner.screen_id,
           :old_friends_screen_name => "mikey013",
           :users_name => user.name,
-          :to_user => true,
           :locale => user.locale
         )
       end

@@ -44,7 +44,6 @@ class Reply < ActiveRecord::Base
       :users_name => user.name,
       :friends_screen_name => partner.screen_id,
       :old_friends_screen_name => options[:old_friends_screen_name],
-      :to_user => options[:to_user],
       :locale => user.locale
     )
     save
