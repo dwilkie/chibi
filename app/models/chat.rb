@@ -39,8 +39,7 @@ class Chat < ActiveRecord::Base
 
   def introduce_participants(options = {})
     [user, friend].each do |reference_user|
-      chat_partner = partner(reference_user)
-      replies.build(:user => reference_user).introduce(chat_partner, options.merge(:to_user => chat_partner == user))
+      replies.build(:user => reference_user).introduce(partner(reference_user), options)
     end
   end
 
