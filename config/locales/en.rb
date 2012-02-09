@@ -17,9 +17,7 @@
       },
 
       :could_not_start_new_chat => lambda {|key, options|
-        greeting = "Hi"
-        greeting << " #{options[:users_name].capitalize}" if options[:users_name]
-        greeting << "! we can't find a match for u at this time. We'll let u know when someone comes online!"
+        "Sorry we can't find a match for u at this time. We'll let u know when someone comes online!"
       },
 
       :logged_out_or_chat_has_ended => lambda {|key, options|
@@ -27,6 +25,9 @@
           notification = "Ur chat with #{options[:friends_screen_name]} has ended"
           notification << " & u r now offline" if options[:logged_out]
         else
+          # There's no friends screen name
+          # so assume there is no chat and they logged out
+          options[:logged_out] = true
           notification = "U r now offline"
         end
 
@@ -47,8 +48,8 @@
           notification << "Send us a txt 2 "
         end
 
-        notification << "chat again."
-        notification << " Txt 'stop' 2 go offline" unless options[:logged_out]
+        notification << "chat again"
+        notification << ". Txt 'stop' 2 go offline" unless options[:logged_out]
         notification
       }
     }

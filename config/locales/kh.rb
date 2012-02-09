@@ -17,9 +17,7 @@
       },
 
       :could_not_start_new_chat => lambda {|key, options|
-        greeting = "Sousdey"
-        greeting << " #{options[:users_name].capitalize}" if options[:users_name]
-        greeting << "! som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
+        "Som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
       },
 
       :logged_out_or_chat_has_ended => lambda {|key, options|
@@ -27,6 +25,9 @@
           notification = "Chat jea-moy #{options[:friends_screen_name]} "
           options[:logged_out] ? notification << "trov ban job & pel nis nek jaak jenh haey" : notification << "job huey"
         else
+          # There's no friends screen name
+          # so assume there is no chat and they logged out
+          options[:logged_out] = true
           notification = "Pel nis nek jaak jenh haey"
         end
 
