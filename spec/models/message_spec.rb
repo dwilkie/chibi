@@ -17,7 +17,7 @@ describe Message do
     new_message.should_not be_valid
   end
 
-  it "should not be valid without a from" do
+  it "should not be valid without a 'from'" do
     new_message.from = nil
     new_message.should_not be_valid
   end

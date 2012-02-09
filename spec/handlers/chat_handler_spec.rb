@@ -33,21 +33,14 @@ describe ChatHandler do
       end
 
       it "should notify the user's partner that the chat has ended and how to update their profile" do
-        replies[0].body.should == spec_translate(
-          :chat_has_ended,
-          :missing_profile_attributes => partner_of_user_who_ended_chat.missing_profile_attributes,
-          :friends_screen_name => user_who_ended_chat.screen_id,
-          :locale => partner_of_user_who_ended_chat.locale
-        )
-
-        replies[0].to.should == partner_of_user_who_ended_chat.mobile_number
-        replies[0].chat.should == chat
+        chat.replies.count.should == 1
+        reply = reply_to(partner_of_user_who_ended_chat, chat)
+        reply.body.should include(user_who_ended_chat.screen_id)
         partner_of_user_who_ended_chat.reload.active_chat.should be_nil
       end
     end
 
     shared_examples_for "ending the current chat and starting a new one" do
-
       it_should_behave_like "notifying the user's partner"
 
       context "given there is nobody new to chat with" do
@@ -56,16 +49,15 @@ describe ChatHandler do
         end
 
         it "should notify the user that there is nobody to chat to at this time" do
-          replies[1].body.should == spec_translate(
+          reply = reply_to(user_who_ended_chat)
+
+          reply.body.should == spec_translate(
             :could_not_start_new_chat,
             :users_name => nil,
             :locale => user_who_ended_chat.locale
           )
 
-          replies[1].to.should == user_who_ended_chat.mobile_number
-          replies[1].chat.should be_nil
-
-          user.reload.active_chat.should be_nil
+          user.reload.should_not be_currently_chatting
         end
       end
 
@@ -78,19 +70,12 @@ describe ChatHandler do
         end
 
         it "should notify the user that the chat ended the chat and start a new chat for him" do
-          replies[1].body.should == spec_translate(
-            :new_chat_started,
-            :old_friends_screen_name => partner_of_user_who_ended_chat.screen_id,
-            :friends_screen_name => send(new_partner).screen_id,
-            :users_name => user_who_ended_chat.name,
-            :locale => user_who_ended_chat.locale
-          )
+          reply = reply_to(user_who_ended_chat, new_chat)
+          reply.body.should include(partner_of_user_who_ended_chat.screen_id)
+          reply.body.should include(send(new_partner).screen_id)
+          reply.body.should include(user_who_ended_chat.name.to_s)
 
-          replies[1].to.should == user_who_ended_chat.mobile_number
-
-          new_chat.should_not == chat
           user_who_ended_chat.reload.active_chat.should == new_chat
-          replies[1].chat.should == new_chat
         end
       end
     end
@@ -100,9 +85,10 @@ describe ChatHandler do
         subject.body = body
         subject.process!
 
-        replies[0].body.should == "#{user_who_texted.screen_id}: #{body}"
-        replies[0].to.should == other_chat_participant.mobile_number
-        replies[0].chat.should == chat
+        chat.replies.count.should == 1
+        reply = reply_to(other_chat_participant, chat)
+        reply.body.should include(user_who_texted.screen_id)
+        reply.body.should include(body)
       end
     end
 
@@ -113,16 +99,11 @@ describe ChatHandler do
       it "should notify the user that he is now offline" do
         subject.process!
 
-        replies[1].body.should == spec_translate(
-          :chat_has_ended,
-          :friends_screen_name => partner_of_user_who_ended_chat.screen_id,
-          :missing_profile_attributes => user_who_ended_chat.missing_profile_attributes,
-          :offline => true,
-          :locale => user_who_ended_chat.locale
-        )
+        reply = reply_to(user_who_ended_chat)
+        reply.body.should include(partner_of_user_who_ended_chat.screen_id)
 
         user_who_ended_chat.reload
-        user_who_ended_chat.active_chat.should be_nil
+        user_who_ended_chat.should_not be_currently_chatting
         user_who_ended_chat.should_not be_online
       end
     end

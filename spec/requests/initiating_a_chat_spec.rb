@@ -28,13 +28,11 @@ describe "Initiating a chat" do
           it "should reply telling me that there are no matches at this time" do
             replies.count.should == 1
 
-            last_reply.body.should == spec_translate(
+            reply_to(new_user).body.should == spec_translate(
               :could_not_start_new_chat,
               :users_name => nil,
               :locale => new_user.locale
             )
-
-            last_reply.to.should == my_number
           end
         end
       end
@@ -46,9 +44,9 @@ describe "Initiating a chat" do
 
         it "should log me out and tell me how to log in again" do
           replies[0].body.should == spec_translate(
-            :chat_has_ended,
+            :logged_out_or_chat_has_ended,
             :missing_profile_attributes => new_user.missing_profile_attributes,
-            :offline => true,
+            :logged_out => true,
             :locale => new_user.locale
           )
 
@@ -76,25 +74,19 @@ describe "Initiating a chat" do
           alex.gender.should == "f"
           alex.looking_for.should == "m"
 
-          reply_to_user.body.should == spec_translate(
+          reply_to(alex).body.should == spec_translate(
             :new_chat_started,
             :users_name => alex.name,
             :friends_screen_name => dave.screen_id,
-            :to_user => true,
             :locale => new_user.locale
           )
 
-          reply_to_user.to.should == alex.mobile_number
-
-          reply_to_friend.body.should == spec_translate(
+          reply_to(dave).body.should == spec_translate(
             :new_chat_started,
             :users_name => dave.name,
             :friends_screen_name => alex.screen_id,
-            :to_user => false,
             :locale => new_user.locale
           )
-
-          reply_to_friend.to.should == dave.mobile_number
         end
       end
     end
@@ -122,24 +114,19 @@ describe "Initiating a chat" do
         it "should start a chat between an existing anonymous user and myself and notify both of us" do
           assert_new_user
 
-          reply_to_user.body.should == spec_translate(
+          reply_to(new_user).body.should == spec_translate(
             :new_chat_started,
             :users_name => nil,
             :friends_screen_name => alex.screen_id,
-            :to_user => true,
             :locale => new_user.locale
           )
-          reply_to_user.to.should == my_number
 
-          reply_to_friend.body.should == spec_translate(
+          reply_to(alex).body.should == spec_translate(
             :new_chat_started,
             :users_name => alex.name,
             :friends_screen_name => new_user.screen_id,
-            :to_user => false,
             :locale => new_user.locale
           )
-
-          reply_to_friend.to.should == alex.mobile_number
         end
       end
 
@@ -159,25 +146,19 @@ describe "Initiating a chat" do
           new_user.looking_for.should == "f"
           new_user.gender.should == "m"
 
-          reply_to_user.body.should == spec_translate(
+          reply_to(new_user).body.should == spec_translate(
             :new_chat_started,
             :users_name => "Map",
             :friends_screen_name => joy.screen_id,
-            :to_user => true,
             :locale => new_user.locale
           )
 
-          reply_to_user.to.should == my_number
-
-          reply_to_friend.body.should == spec_translate(
+          reply_to(joy).body.should == spec_translate(
             :new_chat_started,
             :users_name => joy.name,
             :friends_screen_name => new_user.screen_id,
-            :to_user => false,
             :locale => joy.locale
           )
-
-          reply_to_friend.to.should == joy.mobile_number
         end
       end
     end

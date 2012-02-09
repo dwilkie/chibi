@@ -15,14 +15,12 @@ class MessageHandler
 
   protected
 
-  def reply(text, user = nil, chat = nil)
-    user ||= self.user
-    reply = Reply.new
-    reply.user = user
-    reply.chat = chat
-    reply.body = text
-    reply.to = user.mobile_number
-    reply.save
+  def active_chat
+    @active_chat ||= user.active_chat
+  end
+
+  def chat_partner
+    @chat_partner ||= active_chat.partner(user)
   end
 
   def locale(user = nil)
@@ -34,50 +32,24 @@ class MessageHandler
     body.strip.downcase == "stop"
   end
 
-  def logout_user(old_chat_partners_screen_id = nil)
-    user.logout!
-    reply I18n.t(
-      "messages.chat_has_ended",
-      :friends_screen_name => old_chat_partners_screen_id,
-      :missing_profile_attributes => user.missing_profile_attributes,
-      :offline => true,
-      :locale => locale
-    )
+  def logout_user
+    user.logout!(:notify => true, :notify_chat_partner => true)
   end
 
-  def start_new_chat(old_chat_partners_screen_id = nil)
+  def start_new_chat
+    if user.currently_chatting?
+      old_chat_partners_screen_id = chat_partner.screen_id
+      deactivate_chat
+    end
+
     introduce_participants(create_new_chat, old_chat_partners_screen_id)
   end
 
   def introduce_participants(new_chat, old_chat_partners_screen_id = nil)
     if new_chat
-      friend = new_chat.friend
-
-      reply_to_user = I18n.t(
-        "messages.new_chat_started",
-        :users_name => user.name,
-        :old_friends_screen_name => old_chat_partners_screen_id,
-        :friends_screen_name => friend.screen_id,
-        :to_user => true,
-        :locale => locale
-      )
-
-      reply_to_friend = I18n.t(
-        "messages.new_chat_started",
-        :users_name => friend.name,
-        :friends_screen_name => user.screen_id,
-        :to_user => false,
-        :locale => locale(friend)
-      )
-
-      reply reply_to_user, user, new_chat
-      reply reply_to_friend, friend, new_chat
+      new_chat.introduce_participants(:old_friends_screen_name => old_chat_partners_screen_id)
     else
-      reply I18n.t(
-        "messages.could_not_start_new_chat",
-        :users_name => user.name,
-        :locale => locale
-      )
+      user.replies.build.explain_chat_could_not_be_started
     end
   end
 
@@ -92,6 +64,12 @@ class MessageHandler
   end
 
   private
+
+  def deactivate_chat
+    active_chat.deactivate!(:notify => chat_partner)
+    @active_chat = nil
+    @chat_partner = nil
+  end
 
   def create_new_chat
     # create a new chat

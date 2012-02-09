@@ -10,6 +10,14 @@ describe User do
     build(:user)
   end
 
+  let(:friend) do
+    create(:user)
+  end
+
+  let(:active_chat) do
+    create(:active_chat, :user => user, :friend => friend)
+  end
+
   let(:user_with_complete_profile) { build(:user_with_complete_profile) }
 
   it "should not be valid without a mobile number" do
@@ -352,7 +360,6 @@ describe User do
 
   describe "#currently_chatting?" do
     context "given the user is in an active chat session" do
-      let(:active_chat) { create(:active_chat, :user => user) }
       before do
         active_chat
       end
@@ -421,12 +428,71 @@ describe User do
         user_without_name.screen_id.should == "#{user_without_name.screen_name}88"
       end
     end
+
+    context "the user has not yet been validated" do
+      it "should return a combination of the screen name and 0" do
+        subject.screen_id.should be_nil
+      end
+    end
+
   end
 
   describe "#logout!" do
+    include_context "replies"
+
+    let(:reply) { reply_to(user) }
+    let(:reply_to_partner) { reply_to(friend, active_chat) }
+
     it "should mark the user as offline" do
       user.logout!
       user.should_not be_online
+    end
+
+    context "passing no options" do
+      before do
+        user.logout!
+      end
+
+      it "should not create any notifications" do
+        reply.should be_nil
+        reply_to_partner.should be_nil
+      end
+    end
+
+    context "given the user is in an active chat session" do
+      before do
+        active_chat
+      end
+
+      it "should deactivate the chat" do
+        user.should be_currently_chatting
+        user.logout!
+        user.reload.should_not be_currently_chatting
+      end
+
+      context ":notify => true" do
+        it "should notify the user that their chat has ended and they are now offline" do
+          user.logout!(:notify => true)
+          reply.body.should include(friend.screen_name)
+          reply_to_partner.should be_nil
+        end
+      end
+
+      context "passing :notify_chat_partner => true" do
+        it "should notify the chat partner that their chat has ended" do
+          user.logout!(:notify_chat_partner => true)
+          reply_to_partner.body.should include(user.screen_id)
+          reply.should be_nil
+        end
+      end
+    end
+
+    context ":notify => true" do
+      it "should notify the user that they are now offline" do
+        user.logout!(:notify => true)
+        reply.body.should_not include(friend.screen_name)
+        reply_to_partner.should be_nil
+      end
     end
   end
 end

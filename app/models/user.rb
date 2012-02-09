@@ -1,8 +1,8 @@
 class User < ActiveRecord::Base
   has_one :location, :autosave => true
 
-  has_many :messages, :through => :subscriptions
-  has_many :replies,  :through => :subscriptions
+  has_many :messages
+  has_many :replies
 
   # describes initiated chats i.e. chat initiated by user
   has_many :chats
@@ -111,11 +111,19 @@ class User < ActiveRecord::Base
   end
 
   def screen_id
-    (self.name || self.screen_name) + id.to_s
+    sn = name || screen_name
+    sn + id.to_s if sn
   end
 
-  def logout!
+  def logout!(options = {})
+    if currently_chatting?
+      partner = active_chat.partner(self)
+      notify = partner if options[:notify_chat_partner]
+      active_chat.deactivate!(:notify => notify)
+    end
+
     update_attributes!(:online => false)
+    replies.build.logout_or_end_chat(:partner => partner, :logout => true) if options[:notify]
   end
 
   private

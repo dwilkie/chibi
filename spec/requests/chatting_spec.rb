@@ -22,15 +22,13 @@ describe "Chatting" do
         end
 
         it "should end my current chat and start a new one" do
-          replies[3].body.should == spec_translate(
+          reply_to(dave).body.should == spec_translate(
             :new_chat_started,
             :old_friends_screen_name => joy.screen_id,
             :friends_screen_name => mara.screen_id,
             :users_name => dave.name,
             :locale => dave.locale
           )
-
-          replies[3].to.should == dave.mobile_number
         end
       end
 
@@ -40,15 +38,13 @@ describe "Chatting" do
         end
 
         it "should end my current chat and log me out" do
-          replies[3].body.should == spec_translate(
-            :chat_has_ended,
+          reply_to(dave).body.should == spec_translate(
+            :logged_out_or_chat_has_ended,
             :friends_screen_name => joy.screen_id,
             :missing_profile_attributes => dave.missing_profile_attributes,
-            :offline => true,
+            :logged_out => true,
             :locale => dave.locale
           )
-
-          replies[3].to.should == dave.mobile_number
         end
       end
 
@@ -63,9 +59,7 @@ describe "Chatting" do
           dave.age.should_not == 27
           dave.location.city.should_not == "Kampong Thom"
           dave.mobile_number.should_not == "012232234"
-
-          last_reply.body.should == "dave#{dave.id}: Hi knyom sok 27 nov kt want 2 chat with me? 012 232 234"
-          last_reply.to.should == joy.mobile_number
+          reply_to(joy).body.should == "dave#{dave.id}: Hi knyom sok 27 nov kt want 2 chat with me? 012 232 234"
         end
       end
     end
@@ -74,14 +68,12 @@ describe "Chatting" do
 
       shared_examples_for "ending my current chat" do
         it "should end my current chat and give me instructions on how to start a new one" do
-          replies[2].body.should == spec_translate(
-            :chat_has_ended,
+          reply_to(dave).body.should == spec_translate(
+            :logged_out_or_chat_has_ended,
             :missing_profile_attributes => [],
             :friends_screen_name => joy.screen_id,
             :locale => dave.locale
           )
-
-          replies[2].to.should == dave.mobile_number
         end
       end
 
@@ -109,9 +101,7 @@ describe "Chatting" do
 
         it "should forward her message to me" do
           joy.name.should_not == "sara"
-
-          last_reply.body.should == "#{joy.screen_id}: Hi Dave, knyom sara bong nov na?"
-          last_reply.to.should == dave.mobile_number
+          reply_to(dave).body.should == "#{joy.screen_id}: Hi Dave, knyom sara bong nov na?"
         end
       end
     end

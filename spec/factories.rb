@@ -1,7 +1,12 @@
 FactoryGirl.define do
   factory :message do
     user
-    from "123456789"
+    from { user.mobile_number }
+  end
+
+  factory :reply do
+    user
+    to { user.mobile_number }
   end
 
   factory :chat do
@@ -79,12 +84,15 @@ FactoryGirl.define do
       online false
     end
 
-    factory :user_with_complete_profile do
+    factory :user_with_name do
       name "veronica"
-      date_of_birth { 23.years.ago }
-      gender "f"
-      looking_for "m"
-      association :location, :factory => :phnom_penh
+
+      factory :user_with_complete_profile do
+        date_of_birth { 23.years.ago }
+        gender "f"
+        looking_for "m"
+        association :location, :factory => :phnom_penh
+      end
     end
 
     factory :cambodian do

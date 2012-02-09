@@ -14,13 +14,10 @@ end
 
 shared_context "replies" do
   let(:replies) { Reply.all }
-  let(:last_reply) { Reply.last }
 
-  let(:reply_to_user) do
-    replies[0]
-  end
-
-  let(:reply_to_friend) do
-    replies[1]
+  def reply_to(reference_user, reference_chat = nil)
+    scope = Reply.where(:to => reference_user.mobile_number)
+    scope = scope.where(:chat_id => reference_chat.id) if reference_chat
+    scope.last
   end
 end

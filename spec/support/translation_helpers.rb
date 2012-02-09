@@ -1,8 +1,8 @@
 module TranslationHelpers
   TRANSLATIONS = {
-    :new_chat_started => "messages.new_chat_started",
-    :could_not_start_new_chat => "messages.could_not_start_new_chat",
-    :chat_has_ended => "messages.chat_has_ended"
+    :new_chat_started => "replies.new_chat_started",
+    :could_not_start_new_chat => "replies.could_not_start_new_chat",
+    :logged_out_or_chat_has_ended => "replies.logged_out_or_chat_has_ended"
   }
 
   def spec_translate(key, options = {})

@@ -1,16 +1,17 @@
 {
   :kh => {
-    :messages => {
+    :replies => {
       :new_chat_started => lambda {|key, options|
         greeting = "Sousdey"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
+        notification = ""
+
         if options[:old_friends_screen_name]
-          notification = "Chat jea-moy #{options[:old_friends_screen_name]} job haey. Pel nis nek jaap pdeum chat jea-moy #{options[:friends_screen_name]}!"
-        else
-          notification = options[:to_user] ? "Pel nis nek jaap pdeum chat jea-moy #{options[:friends_screen_name]} haey!" : "#{options[:friends_screen_name]} jong chat jea-moy!"
-          notification << " Chleuy torb tov #{options[:friends_screen_name]} reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
+          notification << "Chat jea-moy #{options[:old_friends_screen_name]} job haey & pel nis "
         end
+
+        notification << "#{options[:friends_screen_name]} jong chat jea-moy! Chleuy torb tov #{options[:friends_screen_name]} reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
 
         greeting << "! " << notification
       },
@@ -18,13 +19,13 @@
       :could_not_start_new_chat => lambda {|key, options|
         greeting = "Sousdey"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
-        greeting << ", som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
+        greeting << "! som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
       },
 
-      :chat_has_ended => lambda {|key, options|
+      :logged_out_or_chat_has_ended => lambda {|key, options|
         if options[:friends_screen_name]
           notification = "Chat jea-moy #{options[:friends_screen_name]} "
-          options[:offline] ? notification << "trov ban job & pel nis nek jaak jenh haey" : notification << "job huey"
+          options[:logged_out] ? notification << "trov ban job & pel nis nek jaak jenh haey" : notification << "job huey"
         else
           notification = "Pel nis nek jaak jenh haey"
         end
@@ -45,7 +46,7 @@
           notification << "Sorsay avey moy d3 chat m-dong teat"
         end
 
-        notification << ". Sorsay 'stop' d3 jaak jenh" unless options[:offline]
+        notification << ". Sorsay 'stop' d3 jaak jenh" unless options[:logged_out]
         notification
       }
     }

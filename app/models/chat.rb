@@ -7,6 +7,8 @@ class Chat < ActiveRecord::Base
 
   validates :user, :friend, :presence => true
 
+  alias_attribute :initiator, :user
+
   # a chat with inactivity, is an active chat with no activity in the past inactivity_period minutes
   def self.with_inactivity(inactivity_period = 10.minutes)
     joins(:user).where(
@@ -22,11 +24,39 @@ class Chat < ActiveRecord::Base
     end
   end
 
-  def deactivate!
+  def deactivate!(options = {})
     active_users.clear
+
+    if options[:notify]
+      notify = (options[:notify] == user || options[:notify] == friend) ? [options[:notify]] : [user, friend]
+      reply_chat_has_ended(*notify)
+    end
+  end
+
+  def forward_message(reference_user, message)
+    replies.build(:user => partner(reference_user)).forward_message(reference_user.screen_id, message)
+  end
+
+  def introduce_participants(options = {})
+    [user, friend].each do |reference_user|
+      chat_partner = partner(reference_user)
+      replies.build(:user => reference_user).introduce(chat_partner, options.merge(:to_user => chat_partner == user))
+    end
   end
 
   def active?
     active_users.any?
+  end
+
+  def partner(reference_user)
+    user == reference_user ? friend : user
+  end
+
+  private
+
+  def reply_chat_has_ended(*destination_users)
+    destination_users.each do |destination_user|
+      replies.build(:user => destination_user).logout_or_end_chat(:partner => partner(destination_user))
+    end
   end
 end

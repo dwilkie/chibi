@@ -95,6 +95,7 @@ describe SearchHandler do
       options[:user].location.city = options[:city]
 
       options[:user].stub(:save)
+      options[:user].stub_chain(:replies, :build, :explain_chat_could_not_be_started)
       setup_handler(options[:user], :body => message)
 
       vcr_options = options[:vcr] || {}
@@ -381,13 +382,7 @@ describe SearchHandler do
         end
 
         it "should logout the user and notify him that he is now offline" do
-          replies[0].body.should == spec_translate(
-            :chat_has_ended,
-            :missing_profile_attributes => user.missing_profile_attributes,
-            :offline => true,
-            :locale => user.locale
-          )
-
+          reply_to(user).body.should be_present
           user.reload.should_not be_online
         end
       end
@@ -413,15 +408,8 @@ describe SearchHandler do
       end
 
       it "should reply saying there are no matches at this time" do
-        replies.count.should == 1
-
-        last_reply.body.should == spec_translate(
-          :could_not_start_new_chat,
-          :users_name => nil,
-          :locale => user.locale
-        )
-
-        last_reply.to.should == user.mobile_number
+        reply_to(user).should be_present
+        user.should_not be_currently_chatting
       end
     end
 
@@ -435,6 +423,8 @@ describe SearchHandler do
 
       let(:friend) { create(:english, :id => 888) }
       let(:new_chat) { Chat.last }
+      let(:reply_to_user) { reply_to(user, new_chat) }
+      let(:reply_to_friend) { reply_to(friend, new_chat) }
 
       before do
         setup_handler(user)
@@ -456,29 +446,9 @@ describe SearchHandler do
 
       it "should create replies for the participants of the chat" do
         process_message
-        replies.count.should == 2
-
-        reply_to_user.body.should == spec_translate(
-          :new_chat_started,
-          :users_name => nil,
-          :friends_screen_name => "wilfred888",
-          :to_user => true,
-          :locale => user.locale
-        )
-
-        reply_to_user.to.should == user.mobile_number
-        reply_to_user.chat.should == new_chat
-
-        reply_to_friend.body.should == spec_translate(
-          :new_chat_started,
-          :users_name => nil,
-          :friends_screen_name => "wilfred" + user.id.to_s,
-          :to_user => false,
-          :locale => friend.locale
-        )
-
-        reply_to_friend.to.should == friend.mobile_number
-        reply_to_friend.chat.should == new_chat
+        new_chat.replies.count.should == 2
+        reply_to_user.body.should include("wilfred888")
+        reply_to_friend.body.should include("wilfred" + user.id.to_s)
       end
     end
   end
