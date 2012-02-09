@@ -80,7 +80,7 @@ describe Reply do
     end
   end
 
-  describe "#logout_or_end_chat" do
+  describe "#logout_or_end_chat", :focus do
     before do
       subject.user = user
     end
@@ -90,42 +90,31 @@ describe Reply do
       let(:args) { [] }
     end
 
+    shared_examples_for "telling the user that they are logged out" do
+      it "should tell the user that they have been logged out" do
+        subject.body.should == spec_translate(:anonymous_logged_out, user.locale)
+      end
+    end
+
     context "passing no options" do
       before do
         subject.logout_or_end_chat
       end
 
-      it "should tell the user that their chat has ended" do
-        subject.body.should == spec_translate(
-          :logged_out_or_chat_has_ended,
-          :missing_profile_attributes => user.missing_profile_attributes,
-          :locale => user.locale
-        )
-      end
+      it_should_behave_like "telling the user that they are logged out"
     end
 
     context ":partner => #<User...>" do
-      it "should use the partners name in the reply" do
+      it "should tell the user that their chat has ended" do
         subject.logout_or_end_chat(:partner => partner)
-
-        subject.body.should == spec_translate(
-          :logged_out_or_chat_has_ended,
-          :friends_screen_name => partner.screen_id,
-          :missing_profile_attributes => user.missing_profile_attributes,
-          :locale => user.locale
-        )
+        subject.body.should == spec_translate(:anonymous_chat_has_ended, user.locale, partner.screen_id)
       end
 
       context ":logout => true" do
         it "should tell the user that their chat has ended and they have been logged out" do
           subject.logout_or_end_chat(:partner => partner, :logout => true)
-
           subject.body.should == spec_translate(
-            :logged_out_or_chat_has_ended,
-            :missing_profile_attributes => user.missing_profile_attributes,
-            :friends_screen_name => partner.screen_id,
-            :logged_out => true,
-            :locale => user.locale
+            :anonymous_logged_out_and_chat_has_ended, user.locale, partner.screen_id
           )
         end
       end
@@ -136,14 +125,7 @@ describe Reply do
         subject.logout_or_end_chat(:logout => true)
       end
 
-      it "should tell the user that they have been logged out" do
-        subject.body.should == spec_translate(
-          :logged_out_or_chat_has_ended,
-          :missing_profile_attributes => user.missing_profile_attributes,
-          :logged_out => true,
-          :locale => user.locale
-        )
-      end
+      it_should_behave_like "telling the user that they are logged out"
     end
   end
 

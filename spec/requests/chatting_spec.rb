@@ -23,11 +23,8 @@ describe "Chatting" do
 
         it "should end my current chat and start a new one" do
           reply_to(dave).body.should == spec_translate(
-            :new_chat_started,
-            :old_friends_screen_name => joy.screen_id,
-            :friends_screen_name => mara.screen_id,
-            :users_name => dave.name,
-            :locale => dave.locale
+            :personalized_old_chat_ended_new_chat_started,
+            dave.locale, dave.name.capitalize, joy.screen_id, mara.screen_id,
           )
         end
       end
@@ -39,11 +36,7 @@ describe "Chatting" do
 
         it "should end my current chat and log me out" do
           reply_to(dave).body.should == spec_translate(
-            :logged_out_or_chat_has_ended,
-            :friends_screen_name => joy.screen_id,
-            :missing_profile_attributes => dave.missing_profile_attributes,
-            :logged_out => true,
-            :locale => dave.locale
+            :logged_out_and_chat_has_ended, dave.locale, joy.screen_id
           )
         end
       end
@@ -69,10 +62,7 @@ describe "Chatting" do
       shared_examples_for "ending my current chat" do
         it "should end my current chat and give me instructions on how to start a new one" do
           reply_to(dave).body.should == spec_translate(
-            :logged_out_or_chat_has_ended,
-            :missing_profile_attributes => [],
-            :friends_screen_name => joy.screen_id,
-            :locale => dave.locale
+            :chat_has_ended, dave.locale, joy.screen_id
           )
         end
       end
