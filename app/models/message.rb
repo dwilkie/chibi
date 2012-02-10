@@ -14,6 +14,19 @@ class Message < ActiveRecord::Base
   end
 
   def process!
-    MessageHandler.new.process! self
+    if user_wants_to_logout?
+      user.logout!(:notify => true, :notify_chat_partner => true)
+    else
+      unless user.currently_chatting?
+        #update_user_details
+        build_chat(:user => user, :friend => User.matches(user).first).activate(:notify => true)
+      end
+    end
+  end
+
+  private
+
+  def user_wants_to_logout?
+    body.strip.downcase == "stop"
   end
 end

@@ -188,23 +188,10 @@ describe Reply do
       let(:args) { [partner] }
     end
 
-    context "passing no options" do
-      it "should tell the user that someone is interested in chatting with them" do
-        assert_reply(
-          :introduce, :anonymous_new_chat_started, [partner], [partner.screen_id]
-        )
-      end
-    end
-
-    context ":old_friends_screen_name => mikey013" do
-      it "should let the user know that previous chat has finished introduce the user to his new partner" do
-        assert_reply(
-          :introduce,
-          :anonymous_old_chat_ended_new_chat_started,
-          [partner, {:old_friends_screen_name => "mikey013"}],
-          ["mikey013", partner.screen_id]
-        )
-      end
+    it "should tell the user that someone is interested in chatting with them" do
+      assert_reply(
+        :introduce, :anonymous_new_chat_started, [partner], [partner.screen_id]
+      )
     end
   end
 end

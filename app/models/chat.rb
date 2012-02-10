@@ -24,6 +24,23 @@ class Chat < ActiveRecord::Base
     end
   end
 
+  def activate(options = {})
+    active_users << user if user
+    active_users << friend if friend
+    if valid?
+      if user.currently_chatting?
+        current_chat = user.active_chat
+        current_partner = current_chat.partner(user) if options[:notify]
+        current_chat.deactivate!(:notify => current_partner)
+      end
+      result = save
+      introduce_participants if options[:notify]
+    else
+      replies.build(:user => user).explain_chat_could_not_be_started if options[:notify] && user
+    end
+    result
+  end
+
   def deactivate!(options = {})
     active_users.clear
 
@@ -37,14 +54,14 @@ class Chat < ActiveRecord::Base
     replies.build(:user => partner(reference_user)).forward_message(reference_user.screen_id, message)
   end
 
-  def introduce_participants(options = {})
+  def introduce_participants
     [user, friend].each do |reference_user|
-      replies.build(:user => reference_user).introduce(partner(reference_user), options)
+      replies.build(:user => reference_user).introduce(partner(reference_user))
     end
   end
 
   def active?
-    active_users.any?
+    active_users.size >= 2
   end
 
   def partner(reference_user)

@@ -20,16 +20,6 @@ module TranslationHelpers
       :kh => "Sousdey! #[0] jong chat jea-moy! Chleuy torb tov #[0] reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
     },
 
-    :anonymous_old_chat_ended_new_chat_started => {
-      :en => "Hi! Ur chat with #[0] has ended & now #[1] wants 2 chat with u! Send #[1] a msg now or reply with 'new' 2 chat with someone new",
-      :kh => "Sousdey! Chat jea-moy #[0] job haey & pel nis #[1] jong chat jea-moy! Chleuy torb tov #[1] reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
-    },
-
-    :personalized_old_chat_ended_new_chat_started => {
-      :en => "Hi [0]! Ur chat with #[1] has ended & now #[2] wants 2 chat with u! Send #[2] a msg now or reply with 'new' 2 chat with someone new",
-      :kh => "Sousdey #[0]! Chat jea-moy #[1] job haey & pel nis #[2] jong chat jea-moy! Chleuy torb tov #[2] reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
-    },
-
     :logged_out_and_chat_has_ended => {
       :en => "Ur chat with #[0] has ended & u r now offline. Send us a txt 2 chat again",
       :kh => "Chat jea-moy #[0] trov ban job & pel nis nek jaak jenh haey. Sorsay avey moy d3 chat m-dong teat"

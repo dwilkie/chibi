@@ -38,12 +38,11 @@ class Reply < ActiveRecord::Base
     save
   end
 
-  def introduce(partner, options = {})
+  def introduce(partner)
     self.body = I18n.t(
       "replies.new_chat_started",
       :users_name => user.name,
       :friends_screen_name => partner.screen_id,
-      :old_friends_screen_name => options[:old_friends_screen_name],
       :locale => user.locale
     )
     save

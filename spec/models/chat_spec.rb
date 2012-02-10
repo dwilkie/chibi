@@ -4,20 +4,20 @@ describe Chat do
   include_context "replies"
   include TranslationHelpers
 
-  let(:chat) do
-    create(:chat)
-  end
-
-  let(:new_chat) do
-    build(:chat)
-  end
-
   let(:user) do
     create(:english)
   end
 
   let(:friend) do
     create(:cambodian)
+  end
+
+  let(:chat) do
+    create(:chat, :user => user, :friend => friend)
+  end
+
+  let(:new_chat) do
+    build(:chat, :user => user, :friend => friend)
   end
 
   let(:active_chat) do
@@ -57,6 +57,105 @@ describe Chat do
       active_chat.should be_active
       active_chat.active_users.clear
       active_chat.should_not be_active
+
+      active_chat.active_users << user
+      active_chat.should_not be_active
+
+      active_chat.active_users << friend
+      active_chat.should be_active
+    end
+  end
+
+  describe "#activate" do
+    context "given the chat is valid" do
+      it "should set the active users and save the chat" do
+        new_chat.activate.should be_true
+        new_chat.should be_active
+        new_chat.should be_persisted
+      end
+
+      context "passing :notify => true" do
+        it "should introduce the new chat participants" do
+          new_chat.activate(:notify => true)
+          reply_to(user, new_chat).body.should == spec_translate(
+            :anonymous_new_chat_started, user.locale, friend.screen_id
+          )
+
+          reply_to(friend, new_chat).body.should == spec_translate(
+            :anonymous_new_chat_started, friend.locale, user.screen_id
+          )
+        end
+      end
+
+      context "and the user is currently in another chat" do
+        let(:current_chat_partner) { create(:user) }
+        let(:current_active_chat)  { create(:active_chat, :user => user, :friend => current_chat_partner) }
+
+        before do
+          current_active_chat
+        end
+
+        it "should deactivate the other chat" do
+          new_chat.activate
+          current_active_chat.should_not be_active
+        end
+
+        context "passing :notify => true" do
+          it "should notify the current chat partner the chat has ended" do
+            new_chat.activate(:notify => true)
+            reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
+              :anonymous_chat_has_ended, current_chat_partner.locale, user.screen_id
+            )
+            reply_to(user, current_active_chat).should be_nil
+          end
+        end
+
+        context "passing no options" do
+          it "should not notify the current chat partner the chat has ended" do
+            new_chat.activate
+            reply_to(current_chat_partner, current_active_chat).should be_nil
+          end
+        end
+      end
+    end
+
+    context "given the chat is missing a friend" do
+      before do
+        subject.user = user
+      end
+
+      context "or a user" do
+        before do
+          subject.user = nil
+        end
+
+        it "should not activate or save the chat" do
+          subject.activate.should be_false
+          subject.should_not be_active
+          subject.should_not be_persisted
+        end
+      end
+
+      context "passing :notify => true" do
+        before do
+          subject.activate(:notify => true)
+        end
+
+        it "should notify the user that there are no matches at this time" do
+          reply_to(user).body.should == spec_translate(:could_not_start_new_chat, user.locale)
+        end
+      end
+
+      context "passing no options" do
+        before do
+          subject.activate
+        end
+
+        it "should not notify the user that there are no matches at this time" do
+          subject.activate
+          reply_to(user).should be_nil
+        end
+      end
     end
   end
 
@@ -100,18 +199,6 @@ describe Chat do
 
       reply_to_user.body.should == spec_translate(:anonymous_new_chat_started, user.locale, friend.screen_id)
       reply_to_friend.body.should == spec_translate(:anonymous_new_chat_started, friend.locale, user.screen_id)
-    end
-
-    context ":old_friends_screen_name => 'mary4123'" do
-      before do
-        active_chat.introduce_participants(:old_friends_screen_name => "mary4123")
-      end
-
-      it "should tell the user that their chat with 'mary4123' has ended and introduce the new partner" do
-        reply_to_user.body.should == spec_translate(
-          :anonymous_old_chat_ended_new_chat_started, user.locale, "mary4123", friend.screen_id
-        )
-      end
     end
   end
 

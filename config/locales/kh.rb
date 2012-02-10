@@ -5,13 +5,7 @@
         greeting = "Sousdey"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
-        notification = ""
-
-        if options[:old_friends_screen_name]
-          notification << "Chat jea-moy #{options[:old_friends_screen_name]} job haey & pel nis "
-        end
-
-        notification << "#{options[:friends_screen_name]} jong chat jea-moy! Chleuy torb tov #{options[:friends_screen_name]} reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
+        notification = "#{options[:friends_screen_name]} jong chat jea-moy! Chleuy torb tov #{options[:friends_screen_name]} reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
 
         greeting << "! " << notification
       },

@@ -5,13 +5,7 @@
         greeting = "Hi"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
-        notification = ""
-
-        if options[:old_friends_screen_name]
-          notification << "Ur chat with #{options[:old_friends_screen_name]} has ended & now "
-        end
-
-        notification << "#{options[:friends_screen_name]} wants 2 chat with u! Send #{options[:friends_screen_name]} a msg now or reply with 'new' 2 chat with someone new"
+        notification = "#{options[:friends_screen_name]} wants 2 chat with u! Send #{options[:friends_screen_name]} a msg now or reply with 'new' 2 chat with someone new"
 
         greeting << "! " << notification
       },

@@ -54,10 +54,6 @@ describe SearchHandler do
     build(:user)
   end
 
-  let(:offline_user) do
-    build(:offline_user)
-  end
-
   let(:cambodian) do
     create(:cambodian)
   end
@@ -370,88 +366,6 @@ describe SearchHandler do
           :expected_name => "mara",
           :expected_looking_for => :either,
           :vcr => {:expect_results => true}
-        )
-      end
-    end
-
-    context "given the message text is" do
-      context "'stop'" do
-        before do
-          setup_handler(user, :body => "stop")
-          process_message
-        end
-
-        it "should logout the user and notify him that he is now offline" do
-          reply_to(user).body.should == spec_translate(
-            :anonymous_logged_out, user.locale
-          )
-          user.reload.should_not be_online
-        end
-      end
-
-      context "anything else but 'stop'" do
-        context "and the user is offline" do
-          before do
-            setup_handler(offline_user)
-            process_message
-          end
-
-          it "should login the user" do
-            offline_user.reload.should be_online
-          end
-        end
-      end
-    end
-
-    context "given there is no match for this user" do
-      before do
-        setup_handler(user)
-        process_message
-      end
-
-      it "should reply saying there are no matches at this time" do
-        reply_to(user).body.should == spec_translate(:could_not_start_new_chat, user.locale)
-        user.should_not be_currently_chatting
-      end
-    end
-
-    context "given there is a match for this user" do
-      def stub_match(options = {})
-        unless options[:match] == false
-          options[:match] ||= create(:user)
-          User.stub(:matches).and_return([options[:match]])
-        end
-      end
-
-      let(:friend) { create(:english, :id => 888) }
-      let(:new_chat) { Chat.last }
-      let(:reply_to_user) { reply_to(user, new_chat) }
-      let(:reply_to_friend) { reply_to(friend, new_chat) }
-
-      before do
-        setup_handler(user)
-        stub_match(:match => friend)
-      end
-
-      it "should start a new chat session" do
-        Chat.count.should == 0
-        process_message
-        Chat.count.should == 1
-        new_chat.active_users.count.should == 2
-        new_chat.user.active_chat.should == new_chat
-        new_chat.friend.active_chat.should == new_chat
-        new_chat.user.should == user
-        user.active_chat.should == new_chat
-        subject.message.chat.should == new_chat
-      end
-
-      it "should introduce the participants of the chat" do
-        process_message
-        reply_to_user.body.should == spec_translate(
-          :anonymous_new_chat_started, user.locale, friend.screen_id
-        )
-        reply_to_friend.body.should == spec_translate(
-          :anonymous_new_chat_started, friend.locale, user.screen_id
         )
       end
     end
