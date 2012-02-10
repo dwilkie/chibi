@@ -17,7 +17,7 @@
       },
 
       :could_not_start_new_chat => lambda {|key, options|
-        "Sorry we can't find a match for u at this time. We'll let u know when someone comes online!"
+        "Sorry we can't find a match for u at this time. We'll let u know when someone comes online"
       },
 
       :logged_out_or_chat_has_ended => lambda {|key, options|
