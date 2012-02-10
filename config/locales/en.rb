@@ -35,7 +35,7 @@
 
         if options[:missing_profile_attributes].any?
           notification << "Txt us "
-          notification << "ur " unless options[:missing_profile_attributes].first == :looking_for
+          options[:missing_profile_attributes].first == :looking_for ? notification << "the " : notification << "ur "
 
           translated_missing_attributes = []
           options[:missing_profile_attributes].each do |attribute|
