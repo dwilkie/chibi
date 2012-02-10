@@ -33,9 +33,9 @@ describe ChatHandler do
       end
 
       it "should notify the user's partner that the chat has ended and how to update their profile" do
-        chat.replies.count.should == 1
-        reply = reply_to(partner_of_user_who_ended_chat, chat)
-        reply.body.should include(user_who_ended_chat.screen_id)
+        reply_to(partner_of_user_who_ended_chat, chat).body.should == spec_translate(
+          :anonymous_chat_has_ended, partner_of_user_who_ended_chat.locale, user_who_ended_chat.screen_id
+        )
         partner_of_user_who_ended_chat.reload.active_chat.should be_nil
       end
     end
@@ -49,12 +49,9 @@ describe ChatHandler do
         end
 
         it "should notify the user that there is nobody to chat to at this time" do
-          reply = reply_to(user_who_ended_chat)
-
-          reply.body.should == spec_translate(
+          reply_to(user_who_ended_chat).body.should == spec_translate(
             :could_not_start_new_chat,
-            :users_name => nil,
-            :locale => user_who_ended_chat.locale
+            user_who_ended_chat.locale
           )
 
           user.reload.should_not be_currently_chatting
@@ -70,10 +67,12 @@ describe ChatHandler do
         end
 
         it "should notify the user that the chat ended the chat and start a new chat for him" do
-          reply = reply_to(user_who_ended_chat, new_chat)
-          reply.body.should include(partner_of_user_who_ended_chat.screen_id)
-          reply.body.should include(send(new_partner).screen_id)
-          reply.body.should include(user_who_ended_chat.name.to_s)
+          reply_to(user_who_ended_chat, new_chat).body.should == spec_translate(
+            :anonymous_old_chat_ended_new_chat_started,
+            user_who_ended_chat.locale,
+            partner_of_user_who_ended_chat.screen_id,
+            send(new_partner).screen_id
+          )
 
           user_who_ended_chat.reload.active_chat.should == new_chat
         end
@@ -85,10 +84,9 @@ describe ChatHandler do
         subject.body = body
         subject.process!
 
-        chat.replies.count.should == 1
-        reply = reply_to(other_chat_participant, chat)
-        reply.body.should include(user_who_texted.screen_id)
-        reply.body.should include(body)
+        reply_to(other_chat_participant, chat).body.should == spec_translate(
+          :forward_message, other_chat_participant.locale, user_who_texted.screen_id, body
+        )
       end
     end
 
@@ -99,8 +97,11 @@ describe ChatHandler do
       it "should notify the user that he is now offline" do
         subject.process!
 
-        reply = reply_to(user_who_ended_chat)
-        reply.body.should include(partner_of_user_who_ended_chat.screen_id)
+        reply_to(user_who_ended_chat).body.should == spec_translate(
+          :anonymous_logged_out_and_chat_has_ended,
+          user_who_ended_chat.locale,
+          partner_of_user_who_ended_chat.screen_id
+        )
 
         user_who_ended_chat.reload
         user_who_ended_chat.should_not be_currently_chatting

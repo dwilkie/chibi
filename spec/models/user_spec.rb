@@ -439,6 +439,7 @@ describe User do
 
   describe "#logout!" do
     include_context "replies"
+    include TranslationHelpers
 
     let(:reply) { reply_to(user) }
     let(:reply_to_partner) { reply_to(friend, active_chat) }
@@ -473,7 +474,9 @@ describe User do
       context ":notify => true" do
         it "should notify the user that their chat has ended and they are now offline" do
           user.logout!(:notify => true)
-          reply.body.should include(friend.screen_name)
+          reply.body.should == spec_translate(
+            :anonymous_logged_out_and_chat_has_ended, user.locale, friend.screen_id
+          )
           reply_to_partner.should be_nil
         end
       end
@@ -481,7 +484,9 @@ describe User do
       context "passing :notify_chat_partner => true" do
         it "should notify the chat partner that their chat has ended" do
           user.logout!(:notify_chat_partner => true)
-          reply_to_partner.body.should include(user.screen_id)
+          reply_to_partner.body.should == spec_translate(
+            :anonymous_chat_has_ended, friend.locale, user.screen_id
+          )
           reply.should be_nil
         end
       end
@@ -490,7 +495,7 @@ describe User do
     context ":notify => true" do
       it "should notify the user that they are now offline" do
         user.logout!(:notify => true)
-        reply.body.should_not include(friend.screen_name)
+        reply.body.should == spec_translate(:anonymous_logged_out, user.locale)
         reply_to_partner.should be_nil
       end
     end

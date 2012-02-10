@@ -6,7 +6,7 @@ module TranslationHelpers
     },
 
     :anonymous_user_logs_out => {
-      :en => "U r now offline. Txt us ur name, age, city, sex & whom ur seeking 2 update ur profile & chat again",
+      :en => "U r now offline. Txt us ur name, age, city, sex & gender ur seeking 2 update ur profile & chat again",
       :kh => "Pel nis nek jaak jenh haey. Pjeur chhmos, a-yu, ti-tang, phet & avey del nek rok d3 update profile & chat m-dong teat"
     },
 
@@ -20,6 +20,11 @@ module TranslationHelpers
       :kh => "Sousdey! #[0] jong chat jea-moy! Chleuy torb tov #[0] reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
     },
 
+    :anonymous_old_chat_ended_new_chat_started => {
+      :en => "Hi! Ur chat with #[0] has ended & now #[1] wants 2 chat with u! Send #[1] a msg now or reply with 'new' 2 chat with someone new",
+      :kh => "Sousdey! Chat jea-moy #[0] job haey & pel nis #[1] jong chat jea-moy! Chleuy torb tov #[1] reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
+    },
+
     :personalized_old_chat_ended_new_chat_started => {
       :en => "Hi [0]! Ur chat with #[1] has ended & now #[2] wants 2 chat with u! Send #[2] a msg now or reply with 'new' 2 chat with someone new",
       :kh => "Sousdey #[0]! Chat jea-moy #[1] job haey & pel nis #[2] jong chat jea-moy! Chleuy torb tov #[2] reu ban-chhop chat daoy sorsay 'new' rok mit tmey teat"
@@ -31,7 +36,7 @@ module TranslationHelpers
     },
 
     :anonymous_logged_out_and_chat_has_ended => {
-      :en => "Ur chat with #[0] has ended & u r now offline. Txt us ur name, age, city, sex & whom ur seeking 2 update ur profile & chat again",
+      :en => "Ur chat with #[0] has ended & u r now offline. Txt us ur name, age, city, sex & gender ur seeking 2 update ur profile & chat again",
       :kh => "Chat jea-moy #[0] trov ban job & pel nis nek jaak jenh haey. Pjeur chhmos, a-yu, ti-tang, phet & avey del nek rok d3 update profile & chat m-dong teat"
     },
 
@@ -41,13 +46,23 @@ module TranslationHelpers
     },
 
     :anonymous_logged_out => {
-      :en => "U r now offline. Txt us ur name, age, city, sex & whom ur seeking 2 update ur profile & chat again",
+      :en => "U r now offline. Txt us ur name, age, city, sex & gender ur seeking 2 update ur profile & chat again",
       :kh => "Pel nis nek jaak jenh haey. Pjeur chhmos, a-yu, ti-tang, phet & avey del nek rok d3 update profile & chat m-dong teat"
     },
 
+    :only_missing_sexual_preference_logged_out => {
+      :en => "U r now offline. Txt us the gender ur seeking 2 update ur profile & chat again",
+      :kh => "Pel nis nek jaak jenh haey. Pjeur avey del nek rok d3 update profile & chat m-dong teat"
+    },
+
     :anonymous_chat_has_ended => {
-      :en => "Ur chat with #[0] has ended. Txt us ur name, age, city, sex & whom ur seeking 2 update ur profile & chat again. Txt 'stop' 2 go offline",
+      :en => "Ur chat with #[0] has ended. Txt us ur name, age, city, sex & gender ur seeking 2 update ur profile & chat again. Txt 'stop' 2 go offline",
       :kh => "Chat jea-moy #[0] job huey. Pjeur chhmos, a-yu, ti-tang, phet & avey del nek rok d3 update profile & chat m-dong teat. Sorsay 'stop' d3 jaak jenh"
+    },
+
+    :forward_message => {
+      :en => "#[0]: #[1]",
+      :kh => "#[0]: #[1]"
     }
   }
 

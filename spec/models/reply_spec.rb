@@ -4,10 +4,28 @@ describe Reply do
   include TranslationHelpers
 
   let(:user) { build(:user) }
+
+  # add more users here as you get more languages
+  let(:local_users) do
+    [build(:cambodian), build(:english)]
+  end
+
   let(:new_reply) { build(:reply, :user => user) }
   let(:partner) { build(:user_with_name) }
 
+  def assert_reply(method, key, args = [], interpolations = [], test_users = nil)
+    (test_users || local_users).each do |local_user|
+      subject.user = local_user
+      subject.send(method, *args)
+      subject.body.should == spec_translate(key, local_user.locale, *interpolations)
+    end
+  end
+
   shared_examples_for "replying to a user" do
+    before do
+      subject.user = user
+    end
+
     it "should persist the reply" do
       subject.send(method, *args)
       subject.should be_persisted
@@ -80,73 +98,70 @@ describe Reply do
     end
   end
 
-  describe "#logout_or_end_chat", :focus do
-    before do
-      subject.user = user
-    end
-
+  describe "#logout_or_end_chat" do
     it_should_behave_like "replying to a user" do
       let(:method) { :logout_or_end_chat }
       let(:args) { [] }
     end
 
-    shared_examples_for "telling the user that they are logged out" do
-      it "should tell the user that they have been logged out" do
-        subject.body.should == spec_translate(:anonymous_logged_out, user.locale)
-      end
-    end
-
     context "passing no options" do
-      before do
-        subject.logout_or_end_chat
+      it "should tell the user that they have been logged out" do
+        assert_reply(:logout_or_end_chat, :anonymous_logged_out)
       end
-
-      it_should_behave_like "telling the user that they are logged out"
     end
 
     context ":partner => #<User...>" do
       it "should tell the user that their chat has ended" do
-        subject.logout_or_end_chat(:partner => partner)
-        subject.body.should == spec_translate(:anonymous_chat_has_ended, user.locale, partner.screen_id)
+        assert_reply(
+          :logout_or_end_chat, :anonymous_chat_has_ended, [{:partner => partner}], [partner.screen_id]
+        )
       end
 
       context ":logout => true" do
         it "should tell the user that their chat has ended and they have been logged out" do
-          subject.logout_or_end_chat(:partner => partner, :logout => true)
-          subject.body.should == spec_translate(
-            :anonymous_logged_out_and_chat_has_ended, user.locale, partner.screen_id
+          assert_reply(
+            :logout_or_end_chat,
+            :anonymous_logged_out_and_chat_has_ended,
+            [{:partner => partner, :logout => true}],
+            [partner.screen_id]
           )
         end
       end
     end
 
     context ":logout => true" do
-      before do
-        subject.logout_or_end_chat(:logout => true)
+      it "should tell the user that they have been logged out" do
+        assert_reply(:logout_or_end_chat, :anonymous_logged_out, [{:logout => true}])
       end
 
-      it_should_behave_like "telling the user that they are logged out"
+      context "given an english user is only missing their sexual preference" do
+        # special case
+
+        let(:english_user_only_missing_sexual_preference) do
+          build(:english_user_with_complete_profile, :looking_for => nil)
+        end
+
+        it "should tell them to text in the gender they're seeking" do
+          assert_reply(
+            :logout_or_end_chat,
+            :only_missing_sexual_preference_logged_out,
+            [{:logout => true}],
+            [],
+            [english_user_only_missing_sexual_preference]
+          )
+        end
+      end
     end
   end
 
   describe "#explain_chat_could_not_be_started" do
-    before do
-      subject.user = user
-    end
-
     it_should_behave_like "replying to a user" do
       let(:method) { :explain_chat_could_not_be_started }
       let(:args) { [] }
     end
 
     it "should tell the user that their chat could not be started at this time" do
-      subject.explain_chat_could_not_be_started
-
-      subject.body.should == spec_translate(
-        :could_not_start_new_chat,
-        :users_name => user.name,
-        :locale => user.locale
-      )
+      assert_reply(:explain_chat_could_not_be_started, :could_not_start_new_chat)
     end
   end
 
@@ -161,48 +176,33 @@ describe Reply do
     end
 
     it "should show the message in a chat context" do
-      subject.forward_message("mike", "hi how r u doing")
-      subject.body.should == "mike: hi how r u doing"
+      assert_reply(
+        :forward_message, :forward_message, ["mike", "hi how r u doing"], ["mike", "hi how r u doing"]
+      )
     end
   end
 
   describe "introduce" do
-    before do
-      subject.user = user
-    end
-
     it_should_behave_like "replying to a user" do
       let(:method) { :introduce }
       let(:args) { [partner] }
     end
 
     context "passing no options" do
-      before do
-        subject.introduce(partner)
-      end
-
       it "should tell the user that someone is interested in chatting with them" do
-        subject.body.should == spec_translate(
-          :new_chat_started,
-          :friends_screen_name => partner.screen_id,
-          :users_name => user.name,
-          :locale => user.locale
+        assert_reply(
+          :introduce, :anonymous_new_chat_started, [partner], [partner.screen_id]
         )
       end
     end
 
     context ":old_friends_screen_name => mikey013" do
-      before do
-        subject.introduce(partner, :to_user => true, :old_friends_screen_name => "mikey013")
-      end
-
       it "should let the user know that previous chat has finished introduce the user to his new partner" do
-        subject.body.should == spec_translate(
-          :new_chat_started,
-          :friends_screen_name => partner.screen_id,
-          :old_friends_screen_name => "mikey013",
-          :users_name => user.name,
-          :locale => user.locale
+        assert_reply(
+          :introduce,
+          :anonymous_old_chat_ended_new_chat_started,
+          [partner, {:old_friends_screen_name => "mikey013"}],
+          ["mikey013", partner.screen_id]
         )
       end
     end

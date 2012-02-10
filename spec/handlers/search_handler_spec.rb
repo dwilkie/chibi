@@ -382,7 +382,9 @@ describe SearchHandler do
         end
 
         it "should logout the user and notify him that he is now offline" do
-          reply_to(user).body.should be_present
+          reply_to(user).body.should == spec_translate(
+            :anonymous_logged_out, user.locale
+          )
           user.reload.should_not be_online
         end
       end
@@ -408,7 +410,7 @@ describe SearchHandler do
       end
 
       it "should reply saying there are no matches at this time" do
-        reply_to(user).should be_present
+        reply_to(user).body.should == spec_translate(:could_not_start_new_chat, user.locale)
         user.should_not be_currently_chatting
       end
     end
@@ -428,7 +430,6 @@ describe SearchHandler do
 
       before do
         setup_handler(user)
-        Faker::Name.stub(:first_name).and_return("Wilfred")
         stub_match(:match => friend)
       end
 
@@ -444,11 +445,14 @@ describe SearchHandler do
         subject.message.chat.should == new_chat
       end
 
-      it "should create replies for the participants of the chat" do
+      it "should introduce the participants of the chat" do
         process_message
-        new_chat.replies.count.should == 2
-        reply_to_user.body.should include("wilfred888")
-        reply_to_friend.body.should include("wilfred" + user.id.to_s)
+        reply_to_user.body.should == spec_translate(
+          :anonymous_new_chat_started, user.locale, friend.screen_id
+        )
+        reply_to_friend.body.should == spec_translate(
+          :anonymous_new_chat_started, friend.locale, user.screen_id
+        )
       end
     end
   end

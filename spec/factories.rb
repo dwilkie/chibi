@@ -63,6 +63,12 @@ FactoryGirl.define do
 
     factory :england do
       country_code "EN"
+
+      factory :london do
+        city "London"
+        latitude 51.5081289
+        longitude -0.128005
+      end
     end
 
     factory :united_states do
@@ -92,6 +98,10 @@ FactoryGirl.define do
         gender "f"
         looking_for "m"
         association :location, :factory => :phnom_penh
+
+        factory :english_user_with_complete_profile do
+          association :location, :factory => :london
+        end
       end
     end
 

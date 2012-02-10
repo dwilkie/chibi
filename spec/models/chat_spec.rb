@@ -1,6 +1,9 @@
 require 'spec_helper'
 
 describe Chat do
+  include_context "replies"
+  include TranslationHelpers
+
   let(:chat) do
     create(:chat)
   end
@@ -26,11 +29,11 @@ describe Chat do
   end
 
   let(:reply_to_user) do
-    active_chat.replies.where(:to => user.mobile_number).first
+    reply_to(user, active_chat)
   end
 
   let(:reply_to_friend) do
-    active_chat.replies.where(:to => friend.mobile_number).first
+    reply_to(friend, active_chat)
   end
 
   describe "factory" do
@@ -68,18 +71,16 @@ describe Chat do
     context ":notify => true" do
       it "should notify both active users the the chat has ended" do
         active_chat.deactivate!(:notify => true)
-
-        active_chat.replies.count.should == 2
-        reply_to_user.body.should include(friend.screen_id)
-        reply_to_friend.body.should include(user.screen_id)
+        reply_to_user.body.should == spec_translate(:anonymous_chat_has_ended, user.locale, friend.screen_id)
+        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale, user.screen_id)
       end
     end
 
     context ":notify => #<User...>" do
       it "should notify the user specified that the chat has ended" do
         active_chat.deactivate!(:notify => friend)
-        active_chat.replies.count.should == 1
-        reply_to_friend.body.should include(user.screen_id)
+        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale, user.screen_id)
+        reply_to_user.should be_nil
       end
     end
   end
@@ -89,8 +90,7 @@ describe Chat do
       active_chat.forward_message(user, "hello friend")
 
       active_chat.replies.count.should == 1
-      reply_to_friend.body.should include(user.screen_id)
-      reply_to_friend.body.should include("hello friend")
+      reply_to_friend.body.should == spec_translate(:forward_message, friend.locale, user.screen_id, "hello friend")
     end
   end
 
@@ -98,9 +98,8 @@ describe Chat do
     it "should send an introduction to both participants" do
       active_chat.introduce_participants
 
-      active_chat.replies.count.should == 2
-      reply_to_user.body.should include(friend.screen_id)
-      reply_to_friend.body.should include(user.screen_id)
+      reply_to_user.body.should == spec_translate(:anonymous_new_chat_started, user.locale, friend.screen_id)
+      reply_to_friend.body.should == spec_translate(:anonymous_new_chat_started, friend.locale, user.screen_id)
     end
 
     context ":old_friends_screen_name => 'mary4123'" do
@@ -108,8 +107,10 @@ describe Chat do
         active_chat.introduce_participants(:old_friends_screen_name => "mary4123")
       end
 
-      it "should tell the user that their chat with 'mary4123' has ended" do
-        reply_to_user.body.should include("mary4123")
+      it "should tell the user that their chat with 'mary4123' has ended and introduce the new partner" do
+        reply_to_user.body.should == spec_translate(
+          :anonymous_old_chat_ended_new_chat_started, user.locale, "mary4123", friend.screen_id
+        )
       end
     end
   end
