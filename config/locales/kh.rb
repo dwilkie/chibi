@@ -14,30 +14,6 @@
         "Som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
       },
 
-
-      :logged_out_or_chat_has_ended => lambda {|key, options|
-        notification = options[:logged_out] ? "U r now offline." : "Ur chat session has ended."
-
-        if options[:missing_profile_attributes].any?
-          notification << "Txt us "
-          options[:missing_profile_attributes].first == :looking_for ? notification << "the " : notification << "ur "
-
-          translated_missing_attributes = []
-          options[:missing_profile_attributes].each do |attribute|
-            translated_missing_attributes << User.human_attribute_name(attribute, :locale => :en).downcase
-          end
-
-          notification << translated_missing_attributes.to_sentence(:locale => :en)
-          notification << " 2 update ur profile & "
-        else
-          notification << "Send us a txt 2 "
-        end
-
-        notification << "chat again with someone new"
-        notification << ". Txt 'stop' 2 go offline" unless options[:logged_out]
-        notification
-      },
-
       :logged_out_or_chat_has_ended => lambda {|key, options|
         notification = options[:logged_out] ? "Pel nis nek jaak jenh haey. " : "Chat trov ban job haey. "
 
