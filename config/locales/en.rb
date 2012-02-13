@@ -15,17 +15,7 @@
       },
 
       :logged_out_or_chat_has_ended => lambda {|key, options|
-        if options[:friends_screen_name]
-          notification = "Ur chat with #{options[:friends_screen_name]} has ended"
-          notification << " & u r now offline" if options[:logged_out]
-        else
-          # There's no friends screen name
-          # so assume there is no chat and they logged out
-          options[:logged_out] = true
-          notification = "U r now offline"
-        end
-
-        notification << ". "
+        notification = options[:logged_out] ? "U r now offline. " : "Ur chat session has ended. "
 
         if options[:missing_profile_attributes].any?
           notification << "Txt us "
@@ -42,7 +32,7 @@
           notification << "Send us a txt 2 "
         end
 
-        notification << "chat again"
+        notification << "chat with someone new"
         notification << ". Txt 'stop' 2 go offline" unless options[:logged_out]
         notification
       }

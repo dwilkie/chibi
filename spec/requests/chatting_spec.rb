@@ -23,8 +23,8 @@ describe "Chatting" do
 
         it "should end my current chat and start a new one" do
           reply_to(dave).body.should == spec_translate(
-            :personalized_old_chat_ended_new_chat_started,
-            dave.locale, dave.name.capitalize, joy.screen_id, mara.screen_id,
+            :personalized_new_chat_started,
+            dave.locale, dave.name.capitalize, mara.screen_id,
           )
         end
       end
@@ -36,7 +36,7 @@ describe "Chatting" do
 
         it "should end my current chat and log me out" do
           reply_to(dave).body.should == spec_translate(
-            :logged_out_and_chat_has_ended, dave.locale, joy.screen_id
+            :logged_out, dave.locale
           )
         end
       end
@@ -62,7 +62,7 @@ describe "Chatting" do
       shared_examples_for "ending my current chat" do
         it "should end my current chat and give me instructions on how to start a new one" do
           reply_to(dave).body.should == spec_translate(
-            :chat_has_ended, dave.locale, joy.screen_id
+            :chat_has_ended, dave.locale
           )
         end
       end
@@ -91,7 +91,9 @@ describe "Chatting" do
 
         it "should forward her message to me" do
           joy.name.should_not == "sara"
-          reply_to(dave).body.should == "#{joy.screen_id}: Hi Dave, knyom sara bong nov na?"
+          reply_to(dave).body.should == spec_translate(
+            :forward_message, dave.locale, joy.screen_id, "Hi Dave, knyom sara bong nov na?"
+          )
         end
       end
     end

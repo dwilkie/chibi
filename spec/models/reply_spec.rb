@@ -105,27 +105,8 @@ describe Reply do
     end
 
     context "passing no options" do
-      it "should tell the user that they have been logged out" do
-        assert_reply(:logout_or_end_chat, :anonymous_logged_out)
-      end
-    end
-
-    context ":partner => #<User...>" do
       it "should tell the user that their chat has ended" do
-        assert_reply(
-          :logout_or_end_chat, :anonymous_chat_has_ended, [{:partner => partner}], [partner.screen_id]
-        )
-      end
-
-      context ":logout => true" do
-        it "should tell the user that their chat has ended and they have been logged out" do
-          assert_reply(
-            :logout_or_end_chat,
-            :anonymous_logged_out_and_chat_has_ended,
-            [{:partner => partner, :logout => true}],
-            [partner.screen_id]
-          )
-        end
+        assert_reply(:logout_or_end_chat, :anonymous_chat_has_ended)
       end
     end
 

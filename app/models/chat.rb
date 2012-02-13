@@ -25,20 +25,24 @@ class Chat < ActiveRecord::Base
   end
 
   def activate(options = {})
-    active_users << user if user
+    self.friend ||= user.match
+    active_users << user
     active_users << friend if friend
-    if valid?
-      if user.currently_chatting?
-        current_chat = user.active_chat
-        current_partner = current_chat.partner(user) if options[:notify]
-        current_chat.deactivate!(:notify => current_partner)
-      end
-      result = save
+
+    if user.currently_chatting?
+      current_chat = user.active_chat
+      current_partner = current_chat.partner(user) if options[:notify]
+      current_chat.deactivate!(:notify => current_partner)
+    end
+
+    if friend.present?
+      save
       introduce_participants if options[:notify]
     else
-      replies.build(:user => user).explain_chat_could_not_be_started if options[:notify] && user
+      replies.build(
+        :user => user
+      ).explain_chat_could_not_be_started if options[:notify] && options[:notify_no_match] != false
     end
-    result
   end
 
   def deactivate!(options = {})
@@ -72,7 +76,7 @@ class Chat < ActiveRecord::Base
 
   def reply_chat_has_ended(*destination_users)
     destination_users.each do |destination_user|
-      replies.build(:user => destination_user).logout_or_end_chat(:partner => partner(destination_user))
+      replies.build(:user => destination_user).logout_or_end_chat
     end
   end
 end

@@ -37,7 +37,7 @@ describe "Initiating a chat" do
         end
 
         it "should log me out and tell me how to log in again" do
-          reply_to(new_user).body.should == spec_translate(:anonymous_user_logs_out, new_user.locale)
+          reply_to(new_user).body.should == spec_translate(:anonymous_logged_out, new_user.locale)
         end
       end
     end

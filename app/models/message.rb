@@ -16,17 +16,30 @@ class Message < ActiveRecord::Base
   def process!
     if user_wants_to_logout?
       user.logout!(:notify => true, :notify_chat_partner => true)
-    else
-      unless user.currently_chatting?
-        #update_user_details
-        build_chat(:user => user, :friend => User.matches(user).first).activate(:notify => true)
-      end
+      return
     end
+
+    start_new_chat = true
+
+    if user.currently_chatting?
+      unless user_wants_to_chat_with_someone_new?
+        user.active_chat.forward_message(user, body)
+        start_new_chat = false
+      end
+    else
+      user.update_profile(body, :online => true)
+    end
+
+    build_chat(:user => user).activate(:notify => true) if start_new_chat
   end
 
   private
 
   def user_wants_to_logout?
     body.strip.downcase == "stop"
+  end
+
+  def user_wants_to_chat_with_someone_new?
+    body.strip.downcase == "new"
   end
 end

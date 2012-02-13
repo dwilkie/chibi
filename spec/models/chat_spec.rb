@@ -24,6 +24,10 @@ describe Chat do
     create(:active_chat, :user => user, :friend => friend)
   end
 
+  let(:unique_active_chat) do
+    create(:active_chat)
+  end
+
   let(:active_chat_with_inactivity) do
     create(:active_chat_with_inactivity)
   end
@@ -67,55 +71,71 @@ describe Chat do
   end
 
   describe "#activate" do
-    context "given the chat is valid" do
+    shared_examples_for "activating a chat" do
       it "should set the active users and save the chat" do
-        new_chat.activate.should be_true
-        new_chat.should be_active
-        new_chat.should be_persisted
+        reference_chat.activate
+        reference_chat.should be_active
+        reference_chat.should be_persisted
+        user.active_chat.should == reference_chat
+        friend.active_chat.should == reference_chat
       end
 
       context "passing :notify => true" do
         it "should introduce the new chat participants" do
-          new_chat.activate(:notify => true)
-          reply_to(user, new_chat).body.should == spec_translate(
+          reference_chat.activate(:notify => true)
+          reply_to(user, reference_chat).body.should == spec_translate(
             :anonymous_new_chat_started, user.locale, friend.screen_id
           )
 
-          reply_to(friend, new_chat).body.should == spec_translate(
+          reply_to(friend, reference_chat).body.should == spec_translate(
             :anonymous_new_chat_started, friend.locale, user.screen_id
           )
         end
       end
 
-      context "and the user is currently in another chat" do
-        let(:current_chat_partner) { create(:user) }
-        let(:current_active_chat)  { create(:active_chat, :user => user, :friend => current_chat_partner) }
-
-        before do
-          current_active_chat
+      context "passing no options" do
+        it "should not introduce the new chat participants" do
+          reference_chat.activate
+          reply_to(user, reference_chat).should be_nil
+          reply_to(friend, reference_chat).should be_nil
         end
+      end
+    end
 
-        it "should deactivate the other chat" do
+    context "given the user is currently in another chat" do
+      let(:current_chat_partner) { create(:user) }
+      let(:current_active_chat)  { create(:active_chat, :user => user, :friend => current_chat_partner) }
+
+      before do
+        current_active_chat
+      end
+
+      it "should deactivate the other chat" do
+        new_chat.activate
+        current_active_chat.should_not be_active
+      end
+
+      context "passing :notify => true" do
+        it "should notify the current chat partner the chat has ended" do
+          new_chat.activate(:notify => true)
+          reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
+            :anonymous_chat_has_ended, current_chat_partner.locale
+          )
+          reply_to(user, current_active_chat).should be_nil
+        end
+      end
+
+      context "passing no options" do
+        it "should not notify the current chat partner the chat has ended" do
           new_chat.activate
-          current_active_chat.should_not be_active
+          reply_to(current_chat_partner, current_active_chat).should be_nil
         end
+      end
+    end
 
-        context "passing :notify => true" do
-          it "should notify the current chat partner the chat has ended" do
-            new_chat.activate(:notify => true)
-            reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
-              :anonymous_chat_has_ended, current_chat_partner.locale, user.screen_id
-            )
-            reply_to(user, current_active_chat).should be_nil
-          end
-        end
-
-        context "passing no options" do
-          it "should not notify the current chat partner the chat has ended" do
-            new_chat.activate
-            reply_to(current_chat_partner, current_active_chat).should be_nil
-          end
-        end
+    context "given the chat already has a friend" do
+      it_should_behave_like "activating a chat" do
+        let(:reference_chat) { new_chat }
       end
     end
 
@@ -124,36 +144,55 @@ describe Chat do
         subject.user = user
       end
 
-      context "or a user" do
+      it "should try to find a friend for the user" do
+        user.should_receive(:match)
+        subject.activate
+      end
+
+      context "and a friend is found for this user" do
         before do
-          subject.user = nil
+          user.stub(:match).and_return(friend)
         end
 
-        it "should not activate or save the chat" do
-          subject.activate.should be_false
-          subject.should_not be_active
-          subject.should_not be_persisted
+        it_should_behave_like "activating a chat" do
+          let(:reference_chat) { subject }
         end
       end
 
-      context "passing :notify => true" do
+      context "and a friend could not be found for this user" do
+
+        shared_examples_for "not notifying the user of no match" do
+          it "should not notify the user that there are no matches at this time" do
+            subject.activate
+            reply_to(user).should be_nil
+          end
+        end
+
         before do
-          subject.activate(:notify => true)
+          user.stub(:match).and_return(nil)
         end
 
-        it "should notify the user that there are no matches at this time" do
-          reply_to(user).body.should == spec_translate(:could_not_start_new_chat, user.locale)
-        end
-      end
+        context "passing :notify => true" do
+          it "should notify the user that there are no matches at this time" do
+            subject.activate(:notify => true)
+            reply_to(user).body.should == spec_translate(:could_not_start_new_chat, user.locale)
+          end
 
-      context "passing no options" do
-        before do
-          subject.activate
+          context "with :notify_no_match => false" do
+            before do
+              subject.activate(:notify => true, :notify_no_match => false)
+            end
+
+            it_should_behave_like "not notifying the user of no match"
+          end
         end
 
-        it "should not notify the user that there are no matches at this time" do
-          subject.activate
-          reply_to(user).should be_nil
+        context "passing no options" do
+          before do
+            subject.activate
+          end
+
+          it_should_behave_like "not notifying the user of no match"
         end
       end
     end
@@ -170,15 +209,15 @@ describe Chat do
     context ":notify => true" do
       it "should notify both active users the the chat has ended" do
         active_chat.deactivate!(:notify => true)
-        reply_to_user.body.should == spec_translate(:anonymous_chat_has_ended, user.locale, friend.screen_id)
-        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale, user.screen_id)
+        reply_to_user.body.should == spec_translate(:anonymous_chat_has_ended, user.locale)
+        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale)
       end
     end
 
     context ":notify => #<User...>" do
       it "should notify the user specified that the chat has ended" do
         active_chat.deactivate!(:notify => friend)
-        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale, user.screen_id)
+        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale)
         reply_to_user.should be_nil
       end
     end
@@ -226,7 +265,7 @@ describe Chat do
   describe ".with_inactivity" do
     before do
       active_chat_with_inactivity
-      active_chat
+      unique_active_chat
       chat
     end
 
@@ -246,20 +285,20 @@ describe Chat do
   describe ".end_inactive" do
     before do
       chat
-      active_chat
+      unique_active_chat
       active_chat_with_inactivity
     end
 
     it "should deactivate the chat with inactivity" do
 
       chat.should_not be_active
-      active_chat.should be_active
+      unique_active_chat.should be_active
       active_chat_with_inactivity.should be_active
 
       subject.class.end_inactive
 
       chat.should_not be_active
-      active_chat.should be_active
+      unique_active_chat.should be_active
       active_chat_with_inactivity.should_not be_active
     end
   end

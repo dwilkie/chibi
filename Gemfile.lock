@@ -66,9 +66,6 @@ GEM
       execjs
     coffee-script-source (1.2.0)
     columnize (0.3.6)
-    conversational (0.4.2)
-      activesupport
-      i18n
     currencies (0.4.0)
     daemons (1.1.7)
     database_cleaner (0.7.1)
@@ -209,7 +206,6 @@ PLATFORMS
 
 DEPENDENCIES
   coffee-rails (~> 3.2.1)
-  conversational (~> 0.4.2)
   countries!
   database_cleaner
   factory_girl

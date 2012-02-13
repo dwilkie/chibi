@@ -14,18 +14,32 @@
         "Som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
       },
 
+
       :logged_out_or_chat_has_ended => lambda {|key, options|
-        if options[:friends_screen_name]
-          notification = "Chat jea-moy #{options[:friends_screen_name]} "
-          options[:logged_out] ? notification << "trov ban job & pel nis nek jaak jenh haey" : notification << "job huey"
+        notification = options[:logged_out] ? "U r now offline." : "Ur chat session has ended."
+
+        if options[:missing_profile_attributes].any?
+          notification << "Txt us "
+          options[:missing_profile_attributes].first == :looking_for ? notification << "the " : notification << "ur "
+
+          translated_missing_attributes = []
+          options[:missing_profile_attributes].each do |attribute|
+            translated_missing_attributes << User.human_attribute_name(attribute, :locale => :en).downcase
+          end
+
+          notification << translated_missing_attributes.to_sentence(:locale => :en)
+          notification << " 2 update ur profile & "
         else
-          # There's no friends screen name
-          # so assume there is no chat and they logged out
-          options[:logged_out] = true
-          notification = "Pel nis nek jaak jenh haey"
+          notification << "Send us a txt 2 "
         end
 
-        notification << ". "
+        notification << "chat again with someone new"
+        notification << ". Txt 'stop' 2 go offline" unless options[:logged_out]
+        notification
+      },
+
+      :logged_out_or_chat_has_ended => lambda {|key, options|
+        notification = options[:logged_out] ? "Pel nis nek jaak jenh haey. " : "Chat trov ban job haey. "
 
         if options[:missing_profile_attributes].any?
           notification << "Pjeur "
@@ -36,9 +50,9 @@
           end
 
           notification << translated_missing_attributes.to_sentence(:locale => :kh)
-          notification << " d3 update profile & chat m-dong teat"
+          notification << " d3 update profile & rok mit tmey teat"
         else
-          notification << "Sorsay avey moy d3 chat m-dong teat"
+          notification << "Sorsay avey moy d3 rok mit tmey teat"
         end
 
         notification << ". Sorsay 'stop' d3 jaak jenh" unless options[:logged_out]

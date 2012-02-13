@@ -16,7 +16,6 @@ class Reply < ActiveRecord::Base
   def logout_or_end_chat(options = {})
     self.body = I18n.t(
       "replies.logged_out_or_chat_has_ended",
-      :friends_screen_name => options[:partner].try(:screen_id),
       :missing_profile_attributes => user.missing_profile_attributes,
       :logged_out => options[:logout],
       :locale => user.locale

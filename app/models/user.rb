@@ -21,8 +21,7 @@ class User < ActiveRecord::Base
     self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
   end
 
-  delegate :city, :to => :location, :allow_nil => true
-  delegate :locale, :to => :location, :allow_nil => true
+  delegate :city, :locale, :address, :address=, :locate!, :to => :location, :allow_nil => true
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :city, :gender, :looking_for]
 
@@ -63,6 +62,12 @@ class User < ActiveRecord::Base
 
     # make sure the records are not read only
     match_scope.readonly(false)
+  end
+
+  def update_profile(info, options = {})
+    self.online = options[:online] || false
+    extract(info)
+    save
   end
 
   def female?
@@ -123,7 +128,11 @@ class User < ActiveRecord::Base
     end
 
     update_attributes!(:online => false)
-    replies.build.logout_or_end_chat(:partner => partner, :logout => true) if options[:notify]
+    replies.build.logout_or_end_chat(:logout => true) if options[:notify]
+  end
+
+  def match
+   self.class.matches(self).first
   end
 
   private
@@ -238,5 +247,148 @@ class User < ActiveRecord::Base
 
     # order by distance
     scope.order(Location.distance_from_sql(user.location))
+  end
+
+  def extract(info)
+    stripped_info = info.dup
+
+    profile_complete = profile_complete?
+
+    extract_gender_and_looking_for(stripped_info, profile_complete)
+    extract_date_of_birth(stripped_info, profile_complete)
+    extract_name(stripped_info, profile_complete)
+    extract_location(stripped_info, profile_complete)
+  end
+
+  def extract_gender_and_looking_for(info, force_update)
+    unless includes_gender_and_looking_for?(info)
+      extract_looking_for(info, :include_shared_gender_words => gender.present?)
+      extract_gender(info, force_update)
+    end
+  end
+
+  def extract_date_of_birth(info, force_update)
+    match = strip_match!(info, /(\d{2})\s*#{profile_keywords(:years_old)}?/i).try(:[], 1)
+    self.age = match.to_i if match && (force_update || date_of_birth.nil?)
+  end
+
+  def extract_name(info, force_update)
+    match = strip_match!(info, /#{profile_keywords(:my_name_is)}\s*(\b\w+\b)/i).try(:[], 2)
+    match = strip_match!(info, /#{profile_keywords(:i_am)}\s*(\b\w+\b)/i).try(:[], 2) unless match
+    self.name = match.downcase if match && (force_update || name.nil?)
+  end
+
+  def extract_location(info, force_update)
+    if force_update || !location.city?
+      self.address = info
+      locate!
+    end
+  end
+
+  def includes_gender_and_looking_for?(info)
+    tmp_info = info.dup
+    if sex = determine_gender(tmp_info, :only_first => true)
+      if wants = determine_looking_for(tmp_info, :use_only_shared_gender_words => true)
+        # we have the sex and looking for already so remove all references to
+        # gender and looking for from the message
+        determine_gender(info, :only_first => true)
+        determine_looking_for(info, :include_shared_gender_words => true)
+        self.gender = sex
+        self.looking_for = wants
+        info = tmp_info
+      end
+    end
+  end
+
+  def extract_looking_for(info, options = {})
+    user_looking_for = determine_looking_for(info, options)
+    self.looking_for = user_looking_for if user_looking_for
+  end
+
+  def extract_gender(info, force_update)
+    sex = determine_gender(info)
+    self.gender = sex if sex && (gender.nil? || force_update)
+  end
+
+  def determine_looking_for(info, options = {})
+    if info_suggests_looking_for_girl?(info, options)
+      "f"
+    elsif info_suggests_looking_for_boy?(info, options)
+      "m"
+    elsif !options[:use_only_shared_gender_words] && info_suggests_looking_for_friend?(info)
+      "e"
+    end
+  end
+
+  def determine_gender(info, options = {})
+    text = options[:only_first] ? includes_gender?(info, options).try(:[], 0).to_s : info
+    if info_suggests_from_girl?(text, options)
+      "f"
+    elsif info_suggests_from_boy?(text, options)
+      "m"
+    end
+  end
+
+  def info_suggests_looking_for?(sex, info, options)
+    looking_for = "#{sex}friend"
+    could_mean = "could_mean_#{sex}_or_#{looking_for}"
+
+    if options[:include_shared_gender_words]
+      regexp = /\b#{profile_keywords(could_mean, looking_for)}\b/i
+    elsif options[:use_only_shared_gender_words]
+      regexp = /\b#{profile_keywords(could_mean)}\b/i
+    else
+      regexp = /\b#{profile_keywords(looking_for)}\b/i
+    end
+    strip_match!(info, regexp)
+  end
+
+  def info_suggests_looking_for_girl?(info, options = {})
+    info_suggests_looking_for?(:girl, info, options)
+  end
+
+  def info_suggests_looking_for_boy?(info, options = {})
+   info_suggests_looking_for?(:boy, info, options)
+  end
+
+  def info_suggests_looking_for_friend?(info)
+    strip_match!(info, /\b#{profile_keywords(:friend)}\b/i)
+  end
+
+  def includes_gender?(info, options)
+    strip_match!(
+      info,
+      /#{profile_keywords(:i_am)}?\s*\b#{profile_keywords(:could_mean_boy_or_boyfriend, :boy, :could_mean_girl_or_girlfriend, :girl)}\b/i,
+      options
+    )
+  end
+
+  def info_suggests_from?(sex, info, options)
+    could_mean = "could_mean_#{sex}_or_#{sex}friend"
+    strip_match!(info, /#{profile_keywords(:i_am)}?\s*\b#{profile_keywords(sex, could_mean)}\b/i, options)
+  end
+
+  def info_suggests_from_girl?(info, options = {})
+    info_suggests_from?(:girl, info, options)
+  end
+
+  def info_suggests_from_boy?(info, options = {})
+    info_suggests_from?(:boy, info, options)
+  end
+
+  def strip_match!(info, regexp, options = {})
+    options[:only_first] ? info.sub!(regexp, "") : info.gsub!(regexp, "")
+    info.strip!
+    $~
+  end
+
+  def profile_keywords(*keys)
+    all_keywords = []
+    keys.each do |key|
+      english_keywords = USER_PROFILE_KEYWORDS["en"][key.to_s]
+      localized_keywords = USER_PROFILE_KEYWORDS.try(:[], location.locale.to_s).try(:[], key.to_s)
+      all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
+    end
+   "(#{all_keywords.join('|')})"
   end
 end
