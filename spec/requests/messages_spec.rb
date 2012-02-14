@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "Messages" do
 
-  describe "POST /messages.json" do
+  describe "POST /messages" do
     include MessagingHelpers
     include TranslationHelpers
 

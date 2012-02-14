@@ -29,6 +29,9 @@ module MessagingHelpers
         {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
           ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"]
         )}
+
+        response.location.should == message_path(Message.last)
+        response.status.should be(201)
       end
     end
   end
