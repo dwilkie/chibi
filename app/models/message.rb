@@ -30,7 +30,7 @@ class Message < ActiveRecord::Base
       user.update_profile(body, :online => true)
     end
 
-    build_chat(:user => user).activate(:notify => true) if start_new_chat
+    build_chat(:user => user).activate!(:notify => true) if start_new_chat
   end
 
   private

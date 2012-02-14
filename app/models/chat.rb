@@ -24,7 +24,7 @@ class Chat < ActiveRecord::Base
     end
   end
 
-  def activate(options = {})
+  def activate!(options = {})
     self.friend ||= user.match
     active_users << user
     active_users << friend if friend
@@ -36,7 +36,7 @@ class Chat < ActiveRecord::Base
     end
 
     if friend.present?
-      save
+      save!
       introduce_participants if options[:notify]
     else
       replies.build(

@@ -70,10 +70,10 @@ describe Chat do
     end
   end
 
-  describe "#activate" do
+  describe "#activate!" do
     shared_examples_for "activating a chat" do
       it "should set the active users and save the chat" do
-        reference_chat.activate
+        reference_chat.activate!
         reference_chat.should be_active
         reference_chat.should be_persisted
         user.active_chat.should == reference_chat
@@ -82,7 +82,7 @@ describe Chat do
 
       context "passing :notify => true" do
         it "should introduce the new chat participants" do
-          reference_chat.activate(:notify => true)
+          reference_chat.activate!(:notify => true)
           reply_to(user, reference_chat).body.should == spec_translate(
             :anonymous_new_chat_started, user.locale, friend.screen_id
           )
@@ -95,7 +95,7 @@ describe Chat do
 
       context "passing no options" do
         it "should not introduce the new chat participants" do
-          reference_chat.activate
+          reference_chat.activate!
           reply_to(user, reference_chat).should be_nil
           reply_to(friend, reference_chat).should be_nil
         end
@@ -111,13 +111,13 @@ describe Chat do
       end
 
       it "should deactivate the other chat" do
-        new_chat.activate
+        new_chat.activate!
         current_active_chat.should_not be_active
       end
 
       context "passing :notify => true" do
         it "should notify the current chat partner the chat has ended" do
-          new_chat.activate(:notify => true)
+          new_chat.activate!(:notify => true)
           reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
             :anonymous_chat_has_ended, current_chat_partner.locale
           )
@@ -127,7 +127,7 @@ describe Chat do
 
       context "passing no options" do
         it "should not notify the current chat partner the chat has ended" do
-          new_chat.activate
+          new_chat.activate!
           reply_to(current_chat_partner, current_active_chat).should be_nil
         end
       end
@@ -146,7 +146,7 @@ describe Chat do
 
       it "should try to find a friend for the user" do
         user.should_receive(:match)
-        subject.activate
+        subject.activate!
       end
 
       context "and a friend is found for this user" do
@@ -163,7 +163,7 @@ describe Chat do
 
         shared_examples_for "not notifying the user of no match" do
           it "should not notify the user that there are no matches at this time" do
-            subject.activate
+            subject.activate!
             reply_to(user).should be_nil
           end
         end
@@ -174,13 +174,13 @@ describe Chat do
 
         context "passing :notify => true" do
           it "should notify the user that there are no matches at this time" do
-            subject.activate(:notify => true)
+            subject.activate!(:notify => true)
             reply_to(user).body.should == spec_translate(:could_not_start_new_chat, user.locale)
           end
 
           context "with :notify_no_match => false" do
             before do
-              subject.activate(:notify => true, :notify_no_match => false)
+              subject.activate!(:notify => true, :notify_no_match => false)
             end
 
             it_should_behave_like "not notifying the user of no match"
@@ -189,7 +189,7 @@ describe Chat do
 
         context "passing no options" do
           before do
-            subject.activate
+            subject.activate!
           end
 
           it_should_behave_like "not notifying the user of no match"
