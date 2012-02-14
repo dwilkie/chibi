@@ -1,5 +1,11 @@
 %h2
   Messages
+  = "(#{@message_count})"
 %table
+  %tr
+    %th
+      From
+    %th
+      Body
   = render @messages
-
+= paginate @messages

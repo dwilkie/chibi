@@ -1,6 +1,12 @@
 class MessagesController < ApplicationController
+  protect_from_forgery :except => :create
+
+  before_filter :authenticate_admin, :except => :create
+  before_filter :authenticate_api, :only => :create
+
   def index
-    @messages = Message.scoped
+    @message_count = Message.count
+    @messages = Message.page params[:page]
   end
 
   def create

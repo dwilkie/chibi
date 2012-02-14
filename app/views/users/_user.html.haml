@@ -2,13 +2,14 @@
   %td
     = user.name
   %td
-    = truncate(user.mobile_number, :length => 10)
+    = user.screen_name
+  %td
+    = user.mobile_number
   %td
     = user.date_of_birth
   %td
     = user.gender
   %td
-    = user.location
+    = user.city
   %td
     = user.looking_for
-
