@@ -39,7 +39,7 @@ ActiveRecord::Schema.define(:version => 20111029062409) do
 
   create_table "messages", :force => true do |t|
     t.string   "from"
-    t.string   "body"
+    t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
     t.datetime "created_at", :null => false
