@@ -16,7 +16,7 @@ class MessagesController < ApplicationController
     message.user.build_location(:country_code => Location.country_code(from)) unless message.user.location
     if message.save
       Resque.enqueue(MessageProcessor, message.id)
-      response_params = {:status => :created, :location => messages_path(message)}
+      response_params = {:status => :created, :location => message_path(message)}
     else
       response_params = {:status => :bad_request}
     end
