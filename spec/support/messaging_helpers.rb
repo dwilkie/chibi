@@ -23,7 +23,9 @@ module MessagingHelpers
     VCR.use_cassette(options[:cassette], options[:vcr_options]) do
       with_resque do
         post messages_path,
-        {:from => options[:from], :body => options[:body]},
+        {
+          :message => {:from => options[:from], :body => options[:body]}
+        },
         {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
           ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"]
         )}
