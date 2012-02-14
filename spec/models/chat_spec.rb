@@ -29,7 +29,7 @@ describe Chat do
   end
 
   let(:active_chat_with_inactivity) do
-    create(:active_chat_with_inactivity)
+    create(:active_chat_with_inactivity, :user => user, :friend => friend)
   end
 
   let(:reply_to_user) do
@@ -275,7 +275,7 @@ describe Chat do
       end
     end
 
-    context "passing 11 minutes" do
+    context "passing 11.minutes" do
       it "should return active chats which have been inactive for more than 11 minutes" do
         subject.class.with_inactivity(11.minutes).should == []
       end
@@ -284,22 +284,68 @@ describe Chat do
 
   describe ".end_inactive" do
     before do
-      chat
-      unique_active_chat
-      active_chat_with_inactivity
-    end
-
-    it "should deactivate the chat with inactivity" do
-
       chat.should_not be_active
       unique_active_chat.should be_active
       active_chat_with_inactivity.should be_active
+    end
 
-      subject.class.end_inactive
-
+    after do
       chat.should_not be_active
       unique_active_chat.should be_active
-      active_chat_with_inactivity.should_not be_active
+    end
+
+    context "passing no options" do
+      before do
+        subject.class.end_inactive
+      end
+
+      it "should deactivate active chats with more than 10 minutes of inactivity" do
+        active_chat_with_inactivity.should_not be_active
+      end
+
+      it "should not notify the users that their chat has ended" do
+        reply_to_user.should be_nil
+        reply_to_friend.should be_nil
+      end
+    end
+
+    context "passing :inactivity_period => 11.minutes" do
+      before do
+        subject.class.end_inactive(:inactivity_period => 11.minutes)
+      end
+
+      it "should deactivate active chats with more than 11 minutes of inactivity" do
+        active_chat_with_inactivity.should be_active
+      end
+    end
+
+    context "passing :notify => true" do
+      before do
+        subject.class.end_inactive(:notify => true)
+      end
+
+      it "should notify both users that their chat has ended" do
+        reply_to(user, active_chat_with_inactivity).body.should == spec_translate(
+          :anonymous_chat_has_ended, user.locale
+        )
+        reply_to(friend, active_chat_with_inactivity).body.should == spec_translate(
+          :anonymous_chat_has_ended, friend.locale
+        )
+      end
+    end
+
+    context "passing any other options" do
+      let(:other_options) { { :option_1 => :something, :option_2 => :something_else } }
+
+      before do
+        subject.class.stub_chain(:with_inactivity, :find_each).and_yield(active_chat_with_inactivity)
+        active_chat_with_inactivity.stub(:deactivate!)
+      end
+
+      it "should pass the options onto #deactivate!" do
+        active_chat_with_inactivity.should_receive(:deactivate!).with(other_options)
+        subject.class.end_inactive({:inactivity_period => 10.minutes}.merge(other_options))
+      end
     end
   end
 end

@@ -10,17 +10,19 @@ class Chat < ActiveRecord::Base
   alias_attribute :initiator, :user
 
   # a chat with inactivity, is an active chat with no activity in the past inactivity_period minutes
-  def self.with_inactivity(inactivity_period = 10.minutes)
+  def self.with_inactivity(inactivity_period = nil)
+    inactivity_period ||= 10.minutes
+
     joins(:user).where(
-      "users.active_chat_id = chats.id"
+      "users.active_chat_id = #{table_name}.id"
     ).joins(:friend).where(
-      "friends_chats.active_chat_id = chats.id"
-    ).where("chats.updated_at < ?", inactivity_period.ago)
+      "friends_chats.active_chat_id = #{table_name}.id"
+    ).where("#{table_name}.updated_at < ?", inactivity_period.ago)
   end
 
-  def self.end_inactive
-    with_inactivity.find_each do |chat|
-      chat.deactivate!
+  def self.end_inactive(options = {})
+    with_inactivity(options.delete(:inactivity_period)).find_each do |chat|
+      chat.deactivate!(options)
     end
   end
 
