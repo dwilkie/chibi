@@ -6,7 +6,8 @@ class CreateChats < ActiveRecord::Migration
       t.timestamps
     end
 
-    add_index :chats, [:user_id, :friend_id], :unique => true
+    add_index :chats, :user_id
+    add_index :chats, :friend_id
+    add_index :chats, :updated_at
   end
 end
-

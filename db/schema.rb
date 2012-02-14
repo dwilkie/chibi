@@ -20,7 +20,9 @@ ActiveRecord::Schema.define(:version => 20111029062409) do
     t.datetime "updated_at", :null => false
   end
 
-  add_index "chats", ["user_id", "friend_id"], :name => "index_chats_on_user_id_and_friend_id", :unique => true
+  add_index "chats", ["friend_id"], :name => "index_chats_on_friend_id"
+  add_index "chats", ["updated_at"], :name => "index_chats_on_updated_at"
+  add_index "chats", ["user_id"], :name => "index_chats_on_user_id"
 
   create_table "locations", :force => true do |t|
     t.string   "city"
@@ -32,6 +34,9 @@ ActiveRecord::Schema.define(:version => 20111029062409) do
     t.datetime "updated_at",   :null => false
   end
 
+  add_index "locations", ["country_code"], :name => "index_locations_on_country_code"
+  add_index "locations", ["user_id"], :name => "index_locations_on_user_id"
+
   create_table "messages", :force => true do |t|
     t.string   "from"
     t.string   "body"
@@ -41,12 +46,14 @@ ActiveRecord::Schema.define(:version => 20111029062409) do
     t.datetime "updated_at", :null => false
   end
 
+  add_index "messages", ["chat_id"], :name => "index_messages_on_chat_id"
   add_index "messages", ["user_id"], :name => "index_messages_on_user_id"
 
   create_table "replies", :force => true do |t|
     t.string   "to"
     t.string   "body"
     t.boolean  "read",       :default => false
+    t.integer  "priority"
     t.integer  "user_id"
     t.integer  "chat_id"
     t.datetime "created_at",                    :null => false
@@ -54,6 +61,7 @@ ActiveRecord::Schema.define(:version => 20111029062409) do
   end
 
   add_index "replies", ["chat_id"], :name => "index_replies_on_chat_id"
+  add_index "replies", ["priority"], :name => "index_replies_on_priority"
   add_index "replies", ["read"], :name => "index_replies_on_read"
   add_index "replies", ["user_id"], :name => "index_replies_on_user_id"
 
@@ -71,6 +79,9 @@ ActiveRecord::Schema.define(:version => 20111029062409) do
   end
 
   add_index "users", ["active_chat_id"], :name => "index_users_on_active_chat_id"
+  add_index "users", ["date_of_birth"], :name => "index_users_on_date_of_birth"
+  add_index "users", ["gender"], :name => "index_users_on_gender"
+  add_index "users", ["looking_for"], :name => "index_users_on_looking_for"
   add_index "users", ["mobile_number"], :name => "index_users_on_mobile_number", :unique => true
   add_index "users", ["online"], :name => "index_users_on_online"
 

@@ -9,6 +9,6 @@ class CreateMessages < ActiveRecord::Migration
     end
 
     add_index :messages, :user_id
+    add_index :messages, :chat_id
   end
 end
-

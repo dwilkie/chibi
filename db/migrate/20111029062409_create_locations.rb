@@ -8,5 +8,8 @@ class CreateLocations < ActiveRecord::Migration
       t.references :user
       t.timestamps
     end
+
+    add_index :locations, :user_id
+    add_index :locations, :country_code
   end
 end

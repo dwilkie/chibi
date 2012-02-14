@@ -13,7 +13,10 @@ class CreateUsers < ActiveRecord::Migration
     end
 
     add_index :users, :mobile_number, :unique => true
-    add_index :users, :active_chat_id
+    add_index :users, :gender
+    add_index :users, :looking_for
+    add_index :users, :date_of_birth
     add_index :users, :online
+    add_index :users, :active_chat_id
   end
 end
