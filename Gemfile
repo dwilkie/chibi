@@ -11,6 +11,7 @@ gem "faker"
 gem "resque"
 gem "thin"
 gem "redis"
+gem "nuntium_api"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
