@@ -35,6 +35,12 @@ describe Reply do
       subject.send(method, *args)
       subject.destination.should == user.mobile_number
     end
+
+    it "should send the reply" do
+      VCR.use_cassette("nuntium", :erb => {:account => ENV["NUNTIUM_ACCOUNT"], :application => ENV["NUNTIUM_APPLICATION"], :password => ENV["NUNTIUM_PASSWORD"]}) do
+        subject.send(method, *args)
+      end
+    end
   end
 
   describe "factory" do
@@ -163,7 +169,7 @@ describe Reply do
     end
   end
 
-  describe "introduce" do
+  describe "#introduce" do
     it_should_behave_like "replying to a user" do
       let(:method) { :introduce }
       let(:args) { [partner] }

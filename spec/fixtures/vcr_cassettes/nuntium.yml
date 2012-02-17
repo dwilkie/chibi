@@ -1,0 +1,44 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://<%= account %>%2F<%= application %>:<%= password %>@nuntium.instedd.org/<%= account %>/<%= application %>/send_ao
+    body: to=sms%3A%2F%2F85512345678&body=hello
+    headers:
+      authorization:
+      - Basic ZHdpbGtpZS9jaGF0Ym94OmRhdGVtZTYyOTYyOQ==
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - text/html; charset=utf-8
+      transfer-encoding:
+      - chunked
+      connection:
+      - close
+      status:
+      - '200'
+      x-powered-by:
+      - Phusion Passenger (mod_rails/mod_rack) 3.0.9
+      x-ua-compatible:
+      - IE=Edge,chrome=1
+      x-nuntium-guid:
+      - 37859edd-3dd7-319e-0658-4c20b4e25b1c
+      x-runtime:
+      - '0.043719'
+      x-nuntium-token:
+      - 8a80f0b2-a446-5ffa-a2ac-2f42f43f0518
+      cache-control:
+      - no-cache
+      x-nuntium-id:
+      - '724931'
+      server:
+      - nginx/1.0.6 + Phusion Passenger 3.0.9 (mod_rails/mod_rack)
+    body: ! ' '
+    http_version: '1.1'
+  recorded_at: Fri, 17 Feb 2012 09:16:56 GMT
+recorded_with: VCR 2.0.0.rc1

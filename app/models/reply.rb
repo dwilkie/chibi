@@ -9,6 +9,8 @@ class Reply < ActiveRecord::Base
 
   before_validation :set_destination
 
+  after_create :deliver
+
   def body
     read_attribute(:body).to_s
   end
@@ -48,6 +50,11 @@ class Reply < ActiveRecord::Base
   end
 
   private
+
+  def deliver
+    nuntium = Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
+    nuntium.send_ao(:to => "sms://#{destination}", :body => body)
+  end
 
   def set_destination
     self.destination ||= user.try(:mobile_number)
