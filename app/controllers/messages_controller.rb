@@ -10,7 +10,7 @@ class MessagesController < ApplicationController
   end
 
   def create
-    message = Message.new(params[:message].try(:slice, :from, :body))
+    message = Message.new(params.slice(:from, :body))
     from = message.origin
     message.user = User.find_or_initialize_by_mobile_number(from)
     message.user.build_location(:country_code => Location.country_code(from)) unless message.user.location
