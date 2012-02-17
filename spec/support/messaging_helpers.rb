@@ -24,7 +24,7 @@ module MessagingHelpers
       with_resque do
         post messages_path,
         {
-          :message => {:from => options[:from], :body => options[:body]}
+          :from => options[:from], :body => options[:body]
         },
         {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
           ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"]
