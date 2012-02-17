@@ -242,8 +242,9 @@ class User < ActiveRecord::Base
     # only match users from the same country
     scope = scope.joins(:location).where(:locations => {:country_code => user.location.country_code})
 
-    # add group by clause so Postgres doesn't complain when ordering by chat count
-    scope = scope.group("\"#{table_name}\".\"id\"").group("locations.id")
+    # add group by clause for every column that is being selected
+    # so Postgres doesn't complain. This can be removed after upgrading to Postgres 9.1
+    scope = scope.group(self.all_columns).group(Location.all_columns)
 
     # order by distance
     scope.order(Location.distance_from_sql(user.location))
