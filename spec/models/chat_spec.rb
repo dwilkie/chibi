@@ -297,7 +297,7 @@ describe Chat do
 
     context "passing no options" do
       before do
-        subject.class.end_inactive
+        with_resque { subject.class.end_inactive }
       end
 
       it "should deactivate active chats with more than 10 minutes of inactivity" do
@@ -312,7 +312,7 @@ describe Chat do
 
     context "passing :inactivity_period => 11.minutes" do
       before do
-        subject.class.end_inactive(:inactivity_period => 11.minutes)
+        with_resque { subject.class.end_inactive(:inactivity_period => 11.minutes) }
       end
 
       it "should deactivate active chats with more than 11 minutes of inactivity" do
@@ -322,7 +322,7 @@ describe Chat do
 
     context "passing :notify => true" do
       before do
-        expect_message { subject.class.end_inactive(:notify => true) }
+        with_resque { expect_message { subject.class.end_inactive(:notify => true) } }
       end
 
       it "should notify both users that their chat has ended" do
@@ -339,13 +339,13 @@ describe Chat do
       let(:other_options) { { :option_1 => :something, :option_2 => :something_else } }
 
       before do
-        subject.class.stub_chain(:with_inactivity, :find_each).and_yield(active_chat_with_inactivity)
+        subject.class.stub(:find).and_return(active_chat_with_inactivity)
         active_chat_with_inactivity.stub(:deactivate!)
       end
 
       it "should pass the options onto #deactivate!" do
         active_chat_with_inactivity.should_receive(:deactivate!).with(other_options)
-        subject.class.end_inactive({:inactivity_period => 10.minutes}.merge(other_options))
+        with_resque { subject.class.end_inactive({:inactivity_period => 10.minutes}.merge(other_options)) }
       end
     end
   end

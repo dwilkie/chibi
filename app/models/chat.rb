@@ -22,7 +22,7 @@ class Chat < ActiveRecord::Base
 
   def self.end_inactive(options = {})
     with_inactivity(options.delete(:inactivity_period)).find_each do |chat|
-      chat.deactivate!(options)
+      Resque.enqueue(ChatDeactivator, chat.id, options)
     end
   end
 
