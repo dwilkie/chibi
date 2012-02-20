@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120220075640) do
+ActiveRecord::Schema.define(:version => 20120220131046) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -52,7 +52,6 @@ ActiveRecord::Schema.define(:version => 20120220075640) do
   create_table "replies", :force => true do |t|
     t.string   "to"
     t.string   "body"
-    t.integer  "priority"
     t.integer  "user_id"
     t.integer  "chat_id"
     t.datetime "created_at", :null => false
@@ -60,7 +59,6 @@ ActiveRecord::Schema.define(:version => 20120220075640) do
   end
 
   add_index "replies", ["chat_id"], :name => "index_replies_on_chat_id"
-  add_index "replies", ["priority"], :name => "index_replies_on_priority"
   add_index "replies", ["user_id"], :name => "index_replies_on_user_id"
 
   create_table "users", :force => true do |t|
