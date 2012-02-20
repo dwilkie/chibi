@@ -9,6 +9,19 @@ module MessagingHelpers
     post_message options
   end
 
+  def expect_message(&block)
+    VCR.use_cassette(
+      "nuntium",
+      :erb => {
+        :url => ENV["NUNTIUM_URL"],
+        :account => ENV["NUNTIUM_ACCOUNT"],
+        :application => ENV["NUNTIUM_APPLICATION"],
+        :password => ENV["NUNTIUM_PASSWORD"]
+      },
+      :allow_playback_repeats => true
+    ) { yield }
+  end
+
   private
 
   def post_message(options = {})
@@ -21,17 +34,19 @@ module MessagingHelpers
     end
 
     VCR.use_cassette(options[:cassette], options[:vcr_options]) do
-      with_resque do
-        post messages_path,
-        {
-          :from => options[:from], :body => options[:body]
-        },
-        {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
-          ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"]
-        )}
+      expect_message do
+        with_resque do
+          post messages_path,
+          {
+            :from => options[:from], :body => options[:body]
+          },
+          {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
+            ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"]
+          )}
 
-        response.location.should == message_path(Message.last)
-        response.status.should be(201)
+          response.location.should == message_path(Message.last)
+          response.status.should be(201)
+        end
       end
     end
   end

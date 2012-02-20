@@ -839,6 +839,7 @@ describe User do
   describe "#logout!" do
     include_context "replies"
     include TranslationHelpers
+    include MessagingHelpers
 
     let(:reply) { reply_to(user) }
     let(:reply_to_partner) { reply_to(friend, active_chat) }
@@ -861,7 +862,9 @@ describe User do
 
     context ":notify => true" do
       it "should notify the user that they are now offline" do
-        user.logout!(:notify => true)
+        expect_message do
+          user.logout!(:notify => true)
+        end
         reply.body.should == spec_translate(:anonymous_logged_out, user.locale)
       end
     end
@@ -885,7 +888,9 @@ describe User do
 
       context "passing :notify_chat_partner => true" do
         it "should notify the chat partner that their chat has ended" do
-          user.logout!(:notify_chat_partner => true)
+          expect_message do
+            user.logout!(:notify_chat_partner => true)
+          end
           reply_to_partner.body.should == spec_translate(
             :anonymous_chat_has_ended, friend.locale
           )

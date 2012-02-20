@@ -1,8 +1,12 @@
 ---
 http_interactions:
+
+<% uri = URI.parse(url) %>
+<% scheme = uri.scheme %>
+<% host = uri.host %>
 - request:
     method: post
-    uri: https://<%= account %>%2F<%= application %>:<%= password %>@nuntium.instedd.org/<%= account %>/<%= application %>/send_ao
+    uri: <%= scheme %>://<%= account %>%2F<%= application %>:<%= password %>@<%= host %>/<%= account %>/<%= application %>/send_ao
     body: to=sms%3A%2F%2F85512345678&body=hello
     headers:
       authorization:

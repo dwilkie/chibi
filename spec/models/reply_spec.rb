@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe Reply do
   include TranslationHelpers
+  include MessagingHelpers
 
   let(:user) { build(:user) }
 
@@ -16,7 +17,7 @@ describe Reply do
   def assert_reply(method, key, args = [], interpolations = [], test_users = nil)
     (test_users || local_users).each do |local_user|
       subject.user = local_user
-      subject.send(method, *args)
+      expect_message { subject.send(method, *args) }
       subject.body.should == spec_translate(key, local_user.locale, *interpolations)
     end
   end
@@ -24,22 +25,21 @@ describe Reply do
   shared_examples_for "replying to a user" do
     before do
       subject.user = user
+      expect_message do
+        subject.send(method, *args)
+      end
     end
 
     it "should persist the reply" do
-      subject.send(method, *args)
       subject.should be_persisted
     end
 
     it "should set the destination to the user's mobile number" do
-      subject.send(method, *args)
       subject.destination.should == user.mobile_number
     end
 
     it "should send the reply" do
-      VCR.use_cassette("nuntium", :erb => {:account => ENV["NUNTIUM_ACCOUNT"], :application => ENV["NUNTIUM_APPLICATION"], :password => ENV["NUNTIUM_PASSWORD"]}) do
-        subject.send(method, *args)
-      end
+      FakeWeb.last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao"
     end
   end
 

@@ -62,12 +62,14 @@ describe Message do
 
   describe "#process!" do
     include TranslationHelpers
+    include MessagingHelpers
+
     include_context "replies"
 
     shared_examples_for "starting a new chat" do
       context "given there is no match for this user" do
         before do
-          new_message.process!
+          expect_message { new_message.process! }
         end
 
         it "should reply saying there are no matches at this time" do
@@ -79,7 +81,7 @@ describe Message do
       context "given there is a match for this user" do
         before do
           user.stub(:match).and_return(new_friend)
-          new_message.process!
+          expect_message { new_message.process! }
         end
 
         it "should introduce the participants of the chat" do
@@ -95,7 +97,7 @@ describe Message do
 
     shared_examples_for "logging out the user" do
       before do
-        new_message.process!
+        expect_message { new_message.process! }
       end
 
       it "should logout the user and notify him that he is now offline" do
@@ -115,7 +117,7 @@ describe Message do
 
         shared_examples_for "notifying the user's partner" do
           before do
-            new_message.process!
+            expect_message { new_message.process! }
           end
 
           it "should notify the user's partner that the chat has ended and how to update their profile" do
@@ -152,7 +154,7 @@ describe Message do
         context "anything else but 'stop' or 'new'" do
           before do
             new_message.body = "hello"
-            new_message.process!
+            expect_message { new_message.process! }
           end
 
           it "should forward the message to the other chat participant" do
@@ -184,7 +186,7 @@ describe Message do
 
           it "should try to update the users profile from the message text" do
             user.should_receive(:update_profile).with("hello", :online => true)
-            new_message.process!
+            expect_message { new_message.process! }
           end
 
           context "and the user is offline" do
@@ -193,7 +195,7 @@ describe Message do
             before do
               new_message.body = ""
               new_message.user = offline_user
-              new_message.process!
+              expect_message { new_message.process! }
             end
 
             it "should login the user" do
