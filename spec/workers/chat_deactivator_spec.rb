@@ -17,7 +17,11 @@ describe ChatDeactivator do
     end
 
     it "should tell the chat to deactivate itself" do
-      chat.should_receive(:deactivate!).with(:some => :options)
+      chat.should_receive(:deactivate!) do |options|
+        options["some"].should == :options
+        options[:some].should == :options
+        options.should be_a(HashWithIndifferentAccess)
+      end
       subject.class.perform(1, :some => :options)
     end
   end

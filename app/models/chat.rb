@@ -50,20 +50,10 @@ class Chat < ActiveRecord::Base
   def deactivate!(options = {})
     active_users.clear
 
-    p "************"
-    p "deactivate!"
-    p "user:"
-    p user
-    p "friend:"
-    p friend
-    p "options"
-    p options
-
     if options[:notify]
       notify = (options[:notify] == user || options[:notify] == friend) ? [options[:notify]] : [user, friend]
       reply_chat_has_ended(*notify)
     end
-    p "ending deactivate!"
   end
 
   def forward_message(reference_user, message)
