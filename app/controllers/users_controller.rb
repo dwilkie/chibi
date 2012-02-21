@@ -5,4 +5,10 @@ class UsersController < ApplicationController
     @user_count = User.count
     @users = User.page params[:page]
   end
+
+  def destroy
+    @user = User.find(params[:id])
+    @user.destroy
+    redirect_to :action => :index
+  end
 end
