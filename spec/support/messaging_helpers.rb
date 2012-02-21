@@ -44,7 +44,6 @@ module MessagingHelpers
             ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"]
           )}
 
-          response.location.should == message_path(Message.last)
           response.status.should be(201)
         end
       end

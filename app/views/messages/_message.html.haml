@@ -1,7 +1,5 @@
-%tr{:class => cycle("odd", "even")}
+%tr{:id => "message_#{message_counter + 1}", :class => cycle("odd", "even")}
   %td
-    = message.from
+    = link_to message.from, user_path(message.user_id)
   %td
     = message.body
-  %td
-    = link_to message.user.screen_id, message.user

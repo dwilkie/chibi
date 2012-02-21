@@ -1,0 +1,7 @@
+%h2
+  = @user.screen_id
+%ul
+  %li
+    = link_to "messages", user_messages_path(@user)
+  %li
+    = link_to "replies", user_replies_path(@user)

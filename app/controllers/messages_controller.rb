@@ -5,8 +5,9 @@ class MessagesController < ApplicationController
   before_filter :authenticate_api, :only => :create
 
   def index
-    @message_count = Message.count
-    @messages = Message.includes(:user).order(:created_at).page params[:page]
+    messages = Message.filter_by(params)
+    @message_count = messages.count
+    @messages = messages.page params[:page]
   end
 
   def create
@@ -16,7 +17,7 @@ class MessagesController < ApplicationController
     message.user.build_location(:country_code => Location.country_code(from)) unless message.user.location
     if message.save
       Resque.enqueue(MessageProcessor, message.id)
-      response_params = {:status => :created, :location => message_path(message)}
+      response_params = {:status => :created}
     else
       response_params = {:status => :bad_request}
     end

@@ -9,6 +9,10 @@ class Message < ActiveRecord::Base
 
   alias_attribute :origin, :from
 
+  def self.filter_by(params = {})
+    scoped.where(params.slice(:user_id)).order(:created_at)
+  end
+
   def body
     read_attribute(:body).to_s
   end

@@ -43,6 +43,27 @@ describe Message do
     end
   end
 
+  describe ".filter_by" do
+    let(:another_message) { create(:message) }
+
+    before do
+      another_message
+      message
+    end
+
+    context "passing no params" do
+      it "should return all messages ordered by created at date" do
+        subject.class.filter_by.should == [another_message, message]
+      end
+    end
+
+    context ":user_id => 2" do
+      it "should return all messages with the given user id" do
+        subject.class.filter_by(:user_id => user.id).should == [message]
+      end
+    end
+  end
+
   describe "#origin" do
     it "should be an alias for the attribute '#from'" do
       subject.from = 123

@@ -1,0 +1,11 @@
+%h2
+  Replies
+  = "(#{@reply_count})"
+%table
+  %tr
+    %th
+      Destination
+    %th
+      Body
+  = render @replies
+= paginate @replies

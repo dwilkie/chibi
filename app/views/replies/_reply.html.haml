@@ -1,0 +1,5 @@
+%tr{:id => "reply_#{reply_counter + 1}", :class => cycle("odd", "even")}
+  %td
+    = link_to reply.destination, user_path(reply.user_id)
+  %td
+    = reply.body

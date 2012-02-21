@@ -1,4 +1,4 @@
-%tr{:class => cycle("odd", "even")}
+%tr{:id => "user_#{user_counter + 1}", :class => cycle("odd", "even")}
   %td
     = user.id
   %td
@@ -17,5 +17,7 @@
     = user.looking_for
   %td
     = user.online
+  %td
+    = link_to("show", user)
   %td
     = link_to("X", user, :method => :delete, :confirm => "Are you sure?")

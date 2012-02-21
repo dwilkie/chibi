@@ -13,6 +13,7 @@ describe Reply do
 
   let(:new_reply) { build(:reply, :user => user) }
   let(:partner) { build(:user_with_name) }
+  let(:reply) { create(:reply, :user => user) }
 
   def assert_reply(method, key, args = [], interpolations = [], test_users = nil)
     (test_users || local_users).each do |local_user|
@@ -82,6 +83,29 @@ describe Reply do
           new_reply.should be_valid
           new_reply.destination.should == 1234
         end
+      end
+    end
+  end
+
+  describe ".filter_by" do
+    let(:another_reply) { create(:reply) }
+
+    before do
+      expect_message do
+        another_reply
+        reply
+      end
+    end
+
+    context "passing no params" do
+      it "should return all replies ordered by created at date" do
+        subject.class.filter_by.should == [another_reply, reply]
+      end
+    end
+
+    context ":user_id => 2" do
+      it "should return all replies with the given user id" do
+        subject.class.filter_by(:user_id => user.id).should == [reply]
       end
     end
   end
