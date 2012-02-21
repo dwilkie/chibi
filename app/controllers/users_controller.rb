@@ -3,7 +3,7 @@ class UsersController < ApplicationController
 
   def index
     @user_count = User.count
-    @users = User.page params[:page]
+    @users = User.order(:created_at).page params[:page]
   end
 
   def destroy
