@@ -6,7 +6,7 @@ class MessagesController < ApplicationController
 
   def index
     @message_count = Message.count
-    @messages = Message.page params[:page]
+    @messages = Message.includes(:user).order(:created_at).page params[:page]
   end
 
   def create

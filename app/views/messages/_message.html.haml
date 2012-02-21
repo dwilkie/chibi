@@ -3,3 +3,5 @@
     = message.from
   %td
     = message.body
+  %td
+    = link_to message.user.screen_id, message.user
