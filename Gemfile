@@ -38,8 +38,6 @@ group :test, :development do
 end
 
 group :test do
-  # Pretty printed test output
-  gem 'turn', :require => false
   gem 'factory_girl'
   gem 'spork', :git => 'git://github.com/sporkrb/spork.git'
   gem 'fakeweb'
@@ -49,4 +47,6 @@ group :test do
   gem 'database_cleaner'
   gem 'timecop'
   gem 'resque_spec'
+  gem 'capybara'
+  gem 'launchy'
 end
