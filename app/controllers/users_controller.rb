@@ -1,6 +1,4 @@
 class UsersController < ApplicationController
-  before_filter :authenticate_admin
-
   def index
     @user_count = User.count
     @users = User.order(:created_at).page params[:page]
