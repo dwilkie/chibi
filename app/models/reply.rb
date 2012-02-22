@@ -57,7 +57,8 @@ class Reply < ActiveRecord::Base
 
   def deliver
     nuntium = Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
-    nuntium.send_ao(:to => "sms://#{destination}", :body => body)
+    # use an array so Nuntium sends a POST
+    nuntium.send_ao([{:to => "sms://#{destination}", :body => body}])
   end
 
   def set_destination

@@ -4,9 +4,9 @@ gem 'rails', '3.2.1'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
-gem "geocoder", :git => "git://github.com/alexreisner/geocoder.git"
+gem "geocoder"
 gem "phony"
-gem "countries", :git => "git://github.com/hexorx/countries.git", :require => 'iso3166'
+gem "countries", :require => 'iso3166'
 gem "faker"
 gem "resque"
 gem "thin"

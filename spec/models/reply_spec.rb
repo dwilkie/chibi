@@ -40,7 +40,7 @@ describe Reply do
     end
 
     it "should send the reply" do
-      FakeWeb.last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao"
+      FakeWeb.last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
     end
   end
 
