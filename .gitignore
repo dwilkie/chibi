@@ -5,5 +5,3 @@ tmp/
 .sass-cache/
 vendor/ruby
 *.swp
-solr/
-import_friends.rb
