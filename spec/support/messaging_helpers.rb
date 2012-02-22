@@ -37,14 +37,21 @@ module MessagingHelpers
       expect_message do
         with_resque do
           post messages_path,
-          {
-            :from => options[:from], :body => options[:body]
-          },
+          {:message => {
+            :from => options[:from],
+            :body => options[:body],
+            :guid => options[:guid] || "296cba84-c82f-49c0-a732-a9b09815fbe8",
+            :application => options[:application] || "chatbox",
+            :channel => options[:channel] || "test",
+            :to => options[:to] || "012456789",
+            :subject => options[:subject] || ""
+          }},
+
           {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
             ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"]
           )}
 
-          response.status.should be(201)
+          response.status.should be(options[:response] || 201)
         end
       end
     end

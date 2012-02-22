@@ -2,35 +2,22 @@ require 'spec_helper'
 
 describe User do
 
-  let(:user) do
-    create(:user)
-  end
-
-  let(:new_user) do
-    build(:user)
-  end
-
-  let(:cambodian) do
-    build(:cambodian)
-  end
-
-  let(:friend) do
-    create(:user)
-  end
-
-  let(:active_chat) do
-    create(:active_chat, :user => user, :friend => friend)
-  end
-
-  let(:offline_user) do
-    build(:offline_user)
-  end
-
+  let(:user) { create(:user) }
+  let(:new_user) { build(:user) }
+  let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
+  let(:cambodian) { build(:cambodian) }
+  let(:friend) { create(:user) }
+  let(:active_chat) { create(:active_chat, :user => user, :friend => friend) }
+  let(:offline_user) { build(:offline_user) }
   let(:user_with_complete_profile) { build(:user_with_complete_profile) }
 
   it "should not be valid without a mobile number" do
     new_user.mobile_number = nil
     new_user.should_not be_valid
+  end
+
+  it "should not be valid with an invalid mobile number e.g. a short code" do
+    user_with_invalid_mobile_number.should_not be_valid
   end
 
   it "should not be valid without a screen name" do
@@ -72,6 +59,25 @@ describe User do
       new_user.screen_name.should be_nil
       new_user.valid?
       new_user.screen_name.should be_present
+    end
+
+    context "when inititalizing a new user with a mobile number" do
+      context "if a the user does not yet have a location" do
+        it "should build a location and assign it to itself" do
+          new_location = subject.class.new(:mobile_number => new_user.mobile_number).location
+          new_location.country_code.should == new_user.location.country_code
+        end
+      end
+
+      context "if a user already has a location" do
+        it "not assign a new location to itself" do
+          location = subject.class.new(
+            :location => new_user.location, :mobile_number => new_user.mobile_number
+          ).location
+
+          location.should == new_user.location
+        end
+      end
     end
   end
 
@@ -574,7 +580,6 @@ describe User do
         offline_user.should be_online
       end
     end
-
   end
 
   describe "#match" do

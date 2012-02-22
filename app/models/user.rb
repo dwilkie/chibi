@@ -14,12 +14,14 @@ class User < ActiveRecord::Base
 
   belongs_to :active_chat, :class_name => "Chat"
 
-  validates :mobile_number, :presence => true, :uniqueness => true
+  validates :mobile_number, :presence => true, :uniqueness => true, :length => {:minimum => 9}
   validates :location, :screen_name, :presence => true
 
   before_validation(:on => :create) do
     self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
   end
+
+  after_initialize :assign_location
 
   delegate :city, :locale, :address, :address=, :locate!, :to => :location, :allow_nil => true
 
@@ -248,6 +250,10 @@ class User < ActiveRecord::Base
 
     # order by distance
     scope.order(Location.distance_from_sql(user.location))
+  end
+
+  def assign_location
+    build_location(:country_code => Location.country_code(mobile_number)) unless location.present?
   end
 
   def extract(info)

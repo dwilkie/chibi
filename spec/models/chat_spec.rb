@@ -344,7 +344,9 @@ describe Chat do
       end
 
       it "should pass the options onto #deactivate!" do
-        active_chat_with_inactivity.should_receive(:deactivate!).with(other_options)
+        active_chat_with_inactivity.should_receive(:deactivate!).with do |other_options|
+          other_options.should == HashWithIndifferentAccess.new(other_options)
+        end
         with_resque { subject.class.end_inactive({:inactivity_period => 10.minutes}.merge(other_options)) }
       end
     end

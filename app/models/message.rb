@@ -2,11 +2,12 @@ class Message < ActiveRecord::Base
   belongs_to :user
   belongs_to :chat, :touch => true
 
-  validates :user, :presence => true
+  validates :user, :associated => true, :presence => true
   validates :from, :presence => true
 
-  attr_accessible :from, :body
+  after_initialize :assign_to_user
 
+  attr_accessible :from, :body
   alias_attribute :origin, :from
 
   def self.filter_by(params = {})
@@ -38,6 +39,10 @@ class Message < ActiveRecord::Base
   end
 
   private
+
+  def assign_to_user
+    self.user = User.find_or_initialize_by_mobile_number(from)
+  end
 
   def user_wants_to_logout?
     body.strip.downcase == "stop"

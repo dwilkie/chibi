@@ -17,7 +17,7 @@ class Location < ActiveRecord::Base
   validates :country_code, :presence => true
 
   def self.country_code(mobile_number)
-    DIALING_CODES[Phony.split(mobile_number).first] if mobile_number
+    DIALING_CODES[Phony.split(mobile_number.to_i.to_s).first]
   end
 
   # long running task
@@ -30,11 +30,12 @@ class Location < ActiveRecord::Base
   end
 
   def country_code
-    read_attribute(:country_code).to_s.upcase
+    raw_country_code = read_attribute(:country_code)
+    raw_country_code.to_s.upcase if raw_country_code
   end
 
   def locale
-    country_code.downcase.to_sym
+    country_code.try(:downcase).try(:to_sym)
   end
 
   private

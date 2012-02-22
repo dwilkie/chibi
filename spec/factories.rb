@@ -90,6 +90,10 @@ FactoryGirl.define do
       online false
     end
 
+    factory :user_with_invalid_mobile_number do
+      sequence(:mobile_number, 8551234) {|n| n.to_s }
+    end
+
     factory :user_with_name do
       name "veronica"
 

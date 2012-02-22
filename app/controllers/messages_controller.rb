@@ -11,16 +11,13 @@ class MessagesController < ApplicationController
   end
 
   def create
-    message = Message.new(params.slice(:from, :body))
-    from = message.origin
-    message.user = User.find_or_initialize_by_mobile_number(from)
-    message.user.build_location(:country_code => Location.country_code(from)) unless message.user.location
+    message = Message.new(params[:message].slice(:from, :body))
     if message.save
       Resque.enqueue(MessageProcessor, message.id)
-      response_params = {:status => :created}
+      status = :created
     else
-      response_params = {:status => :bad_request}
+      status = :bad_request
     end
-    render({:nothing => true}.merge(response_params))
+    render(:nothing => true, :status => status)
   end
 end

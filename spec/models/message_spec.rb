@@ -3,6 +3,7 @@ require 'spec_helper'
 describe Message do
 
   let(:user) { build(:user) }
+  let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
   let(:friend) { build(:english) }
   let(:new_friend) { build(:cambodian) }
   let(:message) { create(:message, :user => user) }
@@ -17,6 +18,11 @@ describe Message do
 
   it "should not be valid without a user" do
     new_message.user = nil
+    new_message.should_not be_valid
+  end
+
+  it "should not be valid with an invalid user" do
+    new_message.user = user_with_invalid_mobile_number
     new_message.should_not be_valid
   end
 
@@ -39,6 +45,29 @@ describe Message do
         message.save
 
         chat.reload.updated_at.should > original_chat_timestamp
+      end
+    end
+  end
+
+  describe "callbacks" do
+    context "when inititalizing a new message with an origin" do
+      context "if a user with that number exists" do
+        before do
+          user.save
+        end
+
+        it "should find the user and assign it to itself" do
+          subject.class.new(:from => user.mobile_number).user.should == user
+        end
+      end
+
+      context "if a user with that number does not exist" do
+        it "should initialize a new user and assign it to itself" do
+          msg = subject.class.new(:from => user.mobile_number)
+          assigned_user = msg.user
+          assigned_user.should be_present
+          assigned_user.mobile_number.should == user.mobile_number
+        end
       end
     end
   end

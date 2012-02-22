@@ -9,13 +9,9 @@ describe "Messages" do
     include_context "existing users"
     include_context "replies"
 
-    let(:new_user) do
-      User.last
-    end
-
-    let(:new_location) do
-      Location.last
-    end
+    let(:new_user) { User.last }
+    let(:new_location) { Location.last }
+    let(:new_message) { Message.last }
 
     let(:my_number) { "8553243313" }
 
@@ -221,6 +217,26 @@ describe "Messages" do
               )
             end
           end
+        end
+      end
+    end
+
+    context "as an automated 5 digit short code" do
+
+      let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
+
+      context "when I text 'some notification'" do
+        before do
+          send_message(
+            :from => user_with_invalid_mobile_number.mobile_number,
+            :body => "some notification",
+            :response => 400
+          )
+        end
+
+        it "should not save or process the message" do
+          new_message.should be_nil
+          new_user.should be_nil
         end
       end
     end
