@@ -24,6 +24,12 @@
 
 ### Configuring Nuntium with Android
 
+Under "Applications" select "edit" then under "Custom HTTP POST format" insert the following:
+
+    message[from]=${from_without_protocol}&message[to]=${to_without_protocol}&message[subject]=${subject}&message[guid]=${guid}&message[application]=${application}&message[channel]=${channel}&message[body]=${body}
+
+
+<del>
 Under channels, add an AO Rule with the following Regexp:
 Condition: To regexp
 
@@ -32,3 +38,4 @@ Condition: To regexp
 Action: To =
 
     sms://0${to.1}
+</del>
