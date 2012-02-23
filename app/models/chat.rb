@@ -57,6 +57,7 @@ class Chat < ActiveRecord::Base
   end
 
   def forward_message(reference_user, message)
+    touch
     replies.build(:user => partner(reference_user)).forward_message(reference_user.screen_id, message)
   end
 

@@ -231,6 +231,14 @@ describe Chat do
       active_chat.replies.count.should == 1
       reply_to_friend.body.should == spec_translate(:forward_message, friend.locale, user.screen_id, "hello friend")
     end
+
+    it "should touch the chat" do
+      active_chat_with_inactivity
+      Timecop.freeze(Time.now) do
+        expect_message {active_chat_with_inactivity.forward_message(user, "hello friend") }
+        active_chat_with_inactivity.updated_at.should == Time.now
+      end
+    end
   end
 
   describe "#introduce_participants" do
