@@ -26,6 +26,10 @@ class Chat < ActiveRecord::Base
     end
   end
 
+  def self.filter_by(params = {})
+    scoped.order("created_at DESC")
+  end
+
   def activate!(options = {})
     self.friend ||= user.match
     active_users << user

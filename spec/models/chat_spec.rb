@@ -271,6 +271,17 @@ describe Chat do
     end
   end
 
+  describe ".filter_by" do
+    before do
+      chat
+      active_chat
+    end
+
+    it "should order the chats by latest created at" do
+      subject.class.filter_by.should == [active_chat, chat]
+    end
+  end
+
   describe ".with_inactivity" do
     before do
       active_chat_with_inactivity

@@ -1,0 +1,13 @@
+%h2
+  Chats
+  = "(#{@chat_count})"
+%table
+  %tr
+    %th
+      Created At
+    %th
+      Active?
+    %th
+    %th
+  = render @chats
+= paginate @chats

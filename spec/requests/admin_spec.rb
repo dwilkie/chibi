@@ -12,12 +12,16 @@ describe "Admin" do
   let(:reply) { expect_message { create(:reply, :user => user, :body => "Hello") } }
   let(:another_reply) { expect_message { create(:reply, :user => user, :body => "Goodbye") } }
 
+  let(:chat) { create(:chat, :user => user, :created_at => 10.minutes.ago) }
+  let(:another_chat) { create(:active_chat, :user => another_user, :friend => user, :created_at => 10.minutes.ago) }
+
   let(:message_from_another_user) { create(:message, :user => another_user) }
   let(:reply_to_another_user) {  expect_message { create(:reply, :user => another_user) } }
 
   let(:users) { [user, another_user] }
   let(:messages) { [message, another_message] }
   let(:replies) { [reply, another_reply] }
+  let(:chats) { [chat, another_chat] }
 
   context "as an admin" do
     before do
@@ -26,8 +30,9 @@ describe "Admin" do
       )
     end
 
-    def assert_index(resource_name)
+    def assert_index(resource_name, options = {})
       resources = send(resource_name.to_s.pluralize)
+      resources.reverse! if options[:reverse]
 
       page.should have_content resources.count
 
@@ -53,6 +58,60 @@ describe "Admin" do
     def assert_reply_show(reference_reply)
       page.should have_content reference_reply.body
       page.should have_content reference_reply.to
+    end
+
+    def assert_chat_show(reference_chat)
+      page.should have_content "10 minutes ago"
+      page.should have_content reference_chat.active?
+      page.should have_link("initiator")
+      page.should have_link("partner")
+    end
+
+    shared_examples_for "showing a user" do
+      it "should show me the user" do
+        page.current_path.should == user_path(reference_user)
+        page.should have_content reference_user.screen_id
+      end
+    end
+
+    context "given some chats" do
+      before do
+        chats
+      end
+
+      context "when I visit '/chats'" do
+        before do
+          visit chats_path
+        end
+
+        it "should show me a list of chats" do
+          assert_index :chat, :reverse => true
+        end
+
+        context "when I click on the 'initiator' link for one of the chats" do
+          before do
+            within("#chat_1") do
+              click_link("initiator")
+            end
+          end
+
+          it_should_behave_like "showing a user" do
+            let(:reference_user) { another_user }
+          end
+        end
+
+        context "when I click on the 'partner' link for one of the chats" do
+          before do
+            within("#chat_1") do
+              click_link("partner")
+            end
+          end
+
+          it_should_behave_like "showing a user" do
+            let(:reference_user) { user }
+          end
+        end
+      end
     end
 
     context "given some messages" do
@@ -119,20 +178,15 @@ describe "Admin" do
 
         context "when I click on 'show' for one of the users" do
 
-          shared_examples_for "showing a user" do
-            it "should show me the user" do
-              page.current_path.should == user_path(user)
-              page.should have_content user.screen_id
-            end
-          end
-
           before do
             within("#user_1") do
               click_link("show")
             end
           end
 
-          it_should_behave_like "showing a user"
+          it_should_behave_like "showing a user" do
+            let(:reference_user) { user }
+          end
 
           context "given they been sent some replies" do
             before do
@@ -156,7 +210,9 @@ describe "Admin" do
                   end
                 end
 
-                it_should_behave_like "showing a user"
+                it_should_behave_like "showing a user" do
+                  let(:reference_user) { user }
+                end
               end
             end
           end
@@ -183,7 +239,9 @@ describe "Admin" do
                   end
                 end
 
-                it_should_behave_like "showing a user"
+                it_should_behave_like "showing a user" do
+                  let(:reference_user) { user }
+                end
               end
             end
           end
