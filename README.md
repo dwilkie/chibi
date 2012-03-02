@@ -1,5 +1,11 @@
 # Chibi
 
+## Pull remote data to local database
+
+    curl -o latest.dump `heroku pgbackups:url`
+    pg_restore --verbose --clean --no-acl --no-owner -h localhost -U dave -d chibi_development latest.dump
+    rm latest.dump
+
 ## Usage
 
 ### Creating a message
@@ -27,15 +33,3 @@
 Under "Applications" select "edit" then under "Custom HTTP POST format" insert the following:
 
     message[from]=${from_without_protocol}&message[to]=${to_without_protocol}&message[subject]=${subject}&message[guid]=${guid}&message[application]=${application}&message[channel]=${channel}&message[body]=${body}
-
-
-<del>
-Under channels, add an AO Rule with the following Regexp:
-Condition: To regexp
-
-    sms://855(\d+)
-
-Action: To =
-
-    sms://0${to.1}
-</del>
