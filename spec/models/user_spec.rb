@@ -69,8 +69,16 @@ describe User do
         end
       end
 
+      context "if the user is already persisted" do
+        it "should not load the associated location to check if it exists" do
+          # Otherwise it will load every location when displaying a list of users
+          subject.class.any_instance.stub(:persisted?).and_return(true)
+          subject.class.new.location.should be_nil
+        end
+      end
+
       context "if a user already has a location" do
-        it "not assign a new location to itself" do
+        it "should not assign a new location to itself" do
           location = subject.class.new(
             :location => new_user.location, :mobile_number => new_user.mobile_number
           ).location
@@ -78,6 +86,21 @@ describe User do
           location.should == new_user.location
         end
       end
+    end
+  end
+
+  describe ".filter_by" do
+    before do
+      user
+      friend
+    end
+
+    it "should return all users ordered by latest created at date" do
+      subject.class.filter_by.should == [friend, user]
+    end
+
+    it "should include the user's location to avoid loading it for each user" do
+      subject.class.filter_by.includes_values.should == [:location]
     end
   end
 

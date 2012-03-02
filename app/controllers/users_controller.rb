@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   def index
     @user_count = User.count
-    @users = User.order(:created_at).page params[:page]
+    @users = User.filter_by(params).page params[:page]
   end
 
   def show

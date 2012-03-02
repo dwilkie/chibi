@@ -18,7 +18,7 @@ describe "Admin" do
   let(:message_from_another_user) { create(:message, :user => another_user) }
   let(:reply_to_another_user) {  expect_message { create(:reply, :user => another_user) } }
 
-  let(:users) { [user, another_user] }
+  let(:users) { [another_user, user] }
   let(:messages) { [message, another_message] }
   let(:replies) { [reply, another_reply] }
   let(:chats) { [chat, another_chat] }
@@ -141,7 +141,7 @@ describe "Admin" do
         end
 
         it "should show me a list of replies" do
-          assert_index :reply
+          assert_index :reply, :reverse => true
         end
       end
     end
@@ -157,7 +157,7 @@ describe "Admin" do
         end
 
         it "should show me a list of users" do
-          assert_index :user
+          assert_index :user, :reverse => true
         end
 
         context "when I click on 'X' for one of the users" do
@@ -167,7 +167,7 @@ describe "Admin" do
             end
           end
 
-          it "should delete the users" do
+          it "should delete the user" do
             within("#user_1") do
               page.should have_content another_user.id
             end
@@ -200,7 +200,7 @@ describe "Admin" do
               end
 
               it "should show me the replies sent to this user" do
-                assert_index :reply
+                assert_index :reply, :reverse => true
               end
 
               context "when I click on the mobile number for the reply" do

@@ -27,6 +27,10 @@ class User < ActiveRecord::Base
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :city, :gender, :looking_for]
 
+  def self.filter_by(params = {})
+    scoped.order("created_at DESC").includes(:location)
+  end
+
   def self.matches(user)
     # don't match the user being matched
     match_scope = scoped.where("\"#{table_name}\".\"id\" != ?", user.id)
@@ -253,7 +257,7 @@ class User < ActiveRecord::Base
   end
 
   def assign_location
-    build_location(:country_code => Location.country_code(mobile_number)) unless location.present?
+    build_location(:country_code => Location.country_code(mobile_number)) unless persisted? || location.present?
   end
 
   def extract(info)

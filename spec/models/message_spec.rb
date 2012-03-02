@@ -51,6 +51,16 @@ describe Message do
 
   describe "callbacks" do
     context "when inititalizing a new message with an origin" do
+
+      before do
+        subject # this is needed so we can call subject.class without re-calling after_initialize
+      end
+
+      it "should try to find or initialize the user with the mobile number" do
+        User.should_receive(:find_or_initialize_by_mobile_number).with(user.mobile_number)
+        subject.class.new(:from => user.mobile_number)
+      end
+
       context "if a user with that number exists" do
         before do
           user.save
@@ -67,6 +77,23 @@ describe Message do
           assigned_user = msg.user
           assigned_user.should be_present
           assigned_user.mobile_number.should == user.mobile_number
+        end
+      end
+
+      context "if the message already has an associated user" do
+        it "should not load the associated user to check if it exists" do
+          # Otherwise it will load every user when displaying a list of messages
+          subject.class.any_instance.stub(:user).and_return(mock_model(User))
+          subject.class.any_instance.stub(:user_id).and_return(nil)
+          User.stub(:find_or_initialize_by_mobile_number)
+          User.should_receive(:find_or_initialize_by_mobile_number)
+          subject.class.new
+        end
+
+        it "should not try to find the user associated with the message" do
+          message
+          User.should_not_receive(:find_or_initialize_by_mobile_number)
+          subject.class.find(message.id)
         end
       end
     end

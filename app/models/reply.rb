@@ -12,7 +12,7 @@ class Reply < ActiveRecord::Base
   after_create :deliver
 
   def self.filter_by(params = {})
-    scoped.where(params.slice(:user_id)).order(:created_at)
+    scoped.where(params.slice(:user_id)).order("created_at DESC")
   end
 
   def body

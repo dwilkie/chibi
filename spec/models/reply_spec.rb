@@ -98,8 +98,8 @@ describe Reply do
     end
 
     context "passing no params" do
-      it "should return all replies ordered by created at date" do
-        subject.class.filter_by.should == [another_reply, reply]
+      it "should return all replies ordered by latest created at date" do
+        subject.class.filter_by.should == [reply, another_reply]
       end
     end
 

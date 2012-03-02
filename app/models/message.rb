@@ -41,7 +41,7 @@ class Message < ActiveRecord::Base
   private
 
   def assign_to_user
-    self.user = User.find_or_initialize_by_mobile_number(from)
+    self.user = User.find_or_initialize_by_mobile_number(from) unless user_id.present?
   end
 
   def user_wants_to_logout?
