@@ -8,6 +8,7 @@ gem "geocoder"
 gem "phony"
 gem "countries", :require => 'iso3166'
 gem "faker"
+gem "hirefireapp"
 gem "resque"
 gem "thin"
 gem "redis"
