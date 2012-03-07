@@ -1,8 +1,8 @@
 class MessagesController < ApplicationController
   protect_from_forgery :except => :create
 
-  skip_before_filter :authenticate_admin, :only => :create
   before_filter :authenticate_api, :only => :create
+  before_filter :authenticate_admin, :except => :create
 
   def index
     messages = Message.filter_by(params)

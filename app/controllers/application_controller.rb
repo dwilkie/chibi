@@ -1,8 +1,6 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
-  before_filter :authenticate_admin
-
   protected
 
   # http_basic_authenticate_with cannot be overridden on a per controller basis
