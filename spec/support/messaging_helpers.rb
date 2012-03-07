@@ -1,4 +1,5 @@
 module MessagingHelpers
+  include AuthenticationHelpers
 
   def initiate_chat(user)
     load_users
@@ -47,9 +48,7 @@ module MessagingHelpers
             :subject => options[:subject] || ""
           }},
 
-          {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
-            ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"]
-          )}
+          authentication_params
 
           response.status.should be(options[:response] || 201)
         end
