@@ -3,7 +3,6 @@ require 'spec_helper'
 describe Message do
 
   let(:user) { build(:user) }
-  let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
   let(:friend) { build(:english) }
   let(:new_friend) { build(:cambodian) }
   let(:message) { create(:message, :user => user) }
@@ -16,87 +15,8 @@ describe Message do
     end
   end
 
-  it "should not be valid without a user" do
-    new_message.user = nil
-    new_message.should_not be_valid
-  end
-
-  it "should not be valid with an invalid user" do
-    new_message.user = user_with_invalid_mobile_number
-    new_message.should_not be_valid
-  end
-
-  it "should not be valid without a 'from'" do
-    new_message.from = nil
-    new_message.should_not be_valid
-  end
-
-  describe "associations" do
-    context "when saving a message with an associated chat" do
-      before do
-        chat
-        message
-      end
-
-      it "should touch the chat" do
-        original_chat_timestamp = chat.updated_at
-
-        message.chat = chat
-        message.save
-
-        chat.reload.updated_at.should > original_chat_timestamp
-      end
-    end
-  end
-
-  describe "callbacks" do
-    context "when inititalizing a new message with an origin" do
-
-      before do
-        subject # this is needed so we can call subject.class without re-calling after_initialize
-      end
-
-      it "should try to find or initialize the user with the mobile number" do
-        User.should_receive(:find_or_initialize_by_mobile_number).with(user.mobile_number)
-        subject.class.new(:from => user.mobile_number)
-      end
-
-      context "if a user with that number exists" do
-        before do
-          user.save
-        end
-
-        it "should find the user and assign it to itself" do
-          subject.class.new(:from => user.mobile_number).user.should == user
-        end
-      end
-
-      context "if a user with that number does not exist" do
-        it "should initialize a new user and assign it to itself" do
-          msg = subject.class.new(:from => user.mobile_number)
-          assigned_user = msg.user
-          assigned_user.should be_present
-          assigned_user.mobile_number.should == user.mobile_number
-        end
-      end
-
-      context "if the message already has an associated user" do
-        it "should not load the associated user to check if it exists" do
-          # Otherwise it will load every user when displaying a list of messages
-          subject.class.any_instance.stub(:user).and_return(mock_model(User))
-          subject.class.any_instance.stub(:user_id).and_return(nil)
-          User.stub(:find_or_initialize_by_mobile_number)
-          User.should_receive(:find_or_initialize_by_mobile_number)
-          subject.class.new
-        end
-
-        it "should not try to find the user associated with the message" do
-          message
-          User.should_not_receive(:find_or_initialize_by_mobile_number)
-          subject.class.find(message.id)
-        end
-      end
-    end
+  it_should_behave_like "communicable" do
+    let(:communicable_resource) { new_message }
   end
 
   describe ".filter_by" do
