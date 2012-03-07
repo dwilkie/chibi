@@ -4,6 +4,11 @@ FactoryGirl.define do
     from { user.mobile_number }
   end
 
+  factory :phone_call do
+    user
+    from { user.mobile_number }
+  end
+
   factory :reply do
     user
     to { user.mobile_number }
