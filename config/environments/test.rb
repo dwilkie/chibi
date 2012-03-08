@@ -39,7 +39,4 @@ Chibi::Application.configure do
 
   # Raise exception on mass assignment protection for Active Record models
   config.active_record.mass_assignment_sanitizer = :strict
-
-  # Override global setting so that errors are raised when the translation file is wrong
-  config.i18n.fallbacks = false
 end

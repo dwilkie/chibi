@@ -33,6 +33,8 @@ module Chibi
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
+    # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
+    # the I18n.default_locale when a translation can not be found)
     config.i18n.fallbacks = true
 
     # Configure the default encoding used in templates for Ruby 1.9.
