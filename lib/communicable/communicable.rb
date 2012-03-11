@@ -2,6 +2,8 @@ module Communicable
   extend ActiveSupport::Concern
 
   included do
+    attr_accessible :from
+
     belongs_to :user
     belongs_to :chat, :touch => true
 

@@ -1,7 +1,7 @@
 class Message < ActiveRecord::Base
   include Communicable
 
-  attr_accessible :from, :body
+  attr_accessible :body
   alias_attribute :origin, :from
 
   def self.filter_by(params = {})
