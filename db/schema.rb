@@ -73,8 +73,8 @@ ActiveRecord::Schema.define(:version => 20120307094401) do
 
   create_table "phone_calls", :force => true do |t|
     t.integer  "sid"
-    t.integer  "digits"
     t.string   "from"
+    t.string   "state"
     t.integer  "user_id"
     t.integer  "chat_id"
     t.datetime "created_at", :null => false
@@ -82,7 +82,8 @@ ActiveRecord::Schema.define(:version => 20120307094401) do
   end
 
   add_index "phone_calls", ["chat_id"], :name => "index_phone_calls_on_chat_id"
-  add_index "phone_calls", ["sid"], :name => "index_phone_calls_on_sid"
+  add_index "phone_calls", ["sid"], :name => "index_phone_calls_on_sid", :unique => true
+  add_index "phone_calls", ["state"], :name => "index_phone_calls_on_state"
   add_index "phone_calls", ["user_id"], :name => "index_phone_calls_on_user_id"
 
   create_table "replies", :force => true do |t|
