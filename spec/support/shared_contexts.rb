@@ -25,3 +25,40 @@ shared_context "replies" do
     replies_to(reference_user, reference_chat).last
   end
 end
+
+shared_context "twiml" do
+  def parse_twiml(xml)
+    full_response = Nokogiri::XML(xml) do |config|
+      config.options = Nokogiri::XML::ParseOptions::DEFAULT_XML | Nokogiri::XML::ParseOptions::NOBLANKS
+    end
+
+    full_response.xpath("/Response")
+  end
+
+  def assert_twiml(twiml_response, command, options = {}, &block)
+    index = options.delete(:index) || 0
+    content = options.delete(:content)
+
+    command_xpath = twiml_response.xpath(
+      "//#{command.to_s.capitalize}"
+    )
+
+    options.each do |attribute, value|
+      command_xpath[index].attributes[attribute.to_s].value.should == value.to_s
+    end
+
+    block_given? ? yield(command_xpath) : command_xpath[index].content.strip.should.should == content
+  end
+
+  def assert_play(twiml_response, path, options = {})
+    assert_twiml(twiml_response, :play, options.merge(:content => "https://s3.amazonaws.com/chibimp3/#{path}"))
+  end
+
+  def assert_gather(twiml_response, options = {}, &block)
+    assert_twiml(twiml_response, :gather, options, &block)
+  end
+
+  def assert_redirect(twiml_response, url, options = {})
+    assert_twiml(twiml_response, :redirect, options.merge(:content => url))
+  end
+end

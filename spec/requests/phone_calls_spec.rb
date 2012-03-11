@@ -1,23 +1,15 @@
 require 'spec_helper'
 
-describe "PhoneCalls", :focus do
+describe "PhoneCalls" do
 
   describe "POST /phone_calls.xml" do
     include PhoneCallHelpers
 
     include_context "existing users"
-
-    let(:new_phone_call) { build(:phone_call) }
+    include_context "twiml"
 
     let(:my_number) { "8553243313" }
-
-    let(:xml_response) do
-      full_response = Nokogiri::XML(response.body) do |config|
-        config.options = Nokogiri::XML::ParseOptions::DEFAULT_XML | Nokogiri::XML::ParseOptions::NOBLANKS
-      end
-
-      full_response.xpath("/Response")
-    end
+    let(:twiml_response) { parse_twiml(response.body) }
 
     def current_call(options = {})
       @call_sid ||= make_call(options)
@@ -25,41 +17,83 @@ describe "PhoneCalls", :focus do
 
     alias :call :current_call
 
+    def assert_redirect_to_current_url
+      assert_redirect(twiml_response, phone_calls_url)
+    end
+
+    def assert_ask_for_input(prompt)
+      assert_gather(twiml_response, :numDigits => 1) do |gather|
+        assert_play(gather, "kh/#{prompt}.mp3")
+      end
+      assert_redirect_to_current_url
+    end
+
+    def update_current_call_status(options = {})
+      options[:from] ||= my_number
+      options[:call_sid] ||= current_call
+      update_call_status(options)
+    end
+
     shared_examples_for "introducing me to chibi" do
-      it "should introduce me to Chibi" do
-        xml_response.xpath("//Play").first.content.strip.should == "https://s3.amazonaws.com/chibimp3/cowbell.mp3"
+      it "should introduce me to Chibi", :focus do
+        assert_play(twiml_response, "kh/welcome.mp3")
+        assert_redirect_to_current_url
       end
     end
 
-    context "as a new user" do
+    before do
+      load_users
+    end
 
+    context "as a new user" do
       context "when I call" do
         before do
-          call(:call_sid => new_phone_call.sid)
+          call(:from => my_number, :call_sid => build(:phone_call).sid)
         end
 
         it_should_behave_like "introducing me to chibi"
 
-        it "should ask me whether I am a guy or a girl" do
-          #assert_twiml(1, :play => )
-        end
-
-        context "given I press '1' for guy" do
+        context "after I hear the welcome message" do
           before do
-            update_call_status(:from => my_number, :call_sid => current_call, :digits => "1")
+            update_current_call_status
           end
 
-          it "should ask me whether I want to chat with a guy or a girl" do
-            pending
+          it "should ask me whether I am a guy or a girl" do
+            assert_ask_for_input(:ask_for_gender)
           end
 
-          context "given I press '2' for girl" do
+          context "if I press '1' for guy", :focus do
             before do
-              update_call_status(:from => my_number, :call_sid => current_call, :digits => "2")
+              update_current_call_status(:digits => 1)
             end
 
-            it "should connect me to a girl" do
-              pending
+            it "should ask me whether I want to chat with a guy or a girl" do
+              assert_ask_for_input(:ask_for_looking_for)
+            end
+
+            context "then if I press '2' for girl" do
+              before do
+                update_current_call_status(:digits => 2)
+              end
+
+              it "should offer me the menu" do
+                assert_ask_for_input(:offer_menu)
+              end
+
+              it "should connect me with a girl" do
+                pending
+                #assert_dial(mara.mobile_number, )
+              end
+            end
+
+            context "then if I press '1' for guy" do
+              before do
+                update_current_call_status(:digits => 1)
+              end
+
+              it "should connect me with a guy" do
+                pending
+              end
             end
           end
         end

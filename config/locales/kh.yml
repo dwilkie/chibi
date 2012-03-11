@@ -1,4 +1,5 @@
 kh:
+  play_path_prefix: "kh"
   activerecord:
     attributes:
       user:

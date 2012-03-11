@@ -7,6 +7,48 @@ FactoryGirl.define do
   factory :phone_call do
     user
     from { user.mobile_number }
+    sequence(:sid)
+
+    factory :welcoming_user_phone_call do
+      state "welcoming_user"
+
+      factory :welcoming_user_phone_call_from_user_with_known_gender do
+        association :user, :factory => :user_with_gender
+
+        factory :welcoming_user_phone_call_from_user_with_known_gender_and_looking_for_preference do
+          association :user, :factory => :user_with_gender_and_looking_for_preference
+        end
+      end
+    end
+
+    [:gender, :looking_for].each do |attribute|
+      [nil, :_in_menu].each do |context|
+        desired_state = "asking_for_#{attribute}#{context}"
+        parent_factory_name = "#{desired_state}_phone_call"
+        desired_user = context.present? ? :user_with_gender_and_looking_for_preference : :user
+
+        factory("#{parent_factory_name}".to_sym) do
+          state desired_state
+          association :user, :factory => desired_user
+
+          [:male, :female].each_with_index do |sex, index|
+            factory("#{parent_factory_name}_caller_answers_#{sex}") do
+              digits((index + 1).to_s)
+            end
+          end
+        end
+      end
+    end
+
+    factory :offering_menu_phone_call do
+      state "offering_menu"
+
+      association :user, :factory => :user_with_gender_and_looking_for_preference
+
+      factory :offering_menu_phone_call_caller_wants_menu do
+        digits "8"
+      end
+    end
   end
 
   factory :reply do
@@ -114,12 +156,24 @@ FactoryGirl.define do
       end
     end
 
+    factory :user_with_gender do
+      gender "f"
+
+      factory :user_with_gender_and_looking_for_preference do
+        looking_for "m"
+      end
+    end
+
     factory :cambodian do
       association :location, :factory => :cambodia
     end
 
     factory :english do
       association :location, :factory => :england
+    end
+
+    factory :american do
+      association :location, :factory => :united_states
     end
 
     # do not reorder these factories because the tests rely on
