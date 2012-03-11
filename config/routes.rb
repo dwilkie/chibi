@@ -2,7 +2,7 @@ Chibi::Application.routes.draw do
   resources :messages, :only => [:index, :create]
   resources :replies,  :only => :index
   resources :chats, :only => :index
-  resources :phone_calls, :only => :create
+  resources :phone_calls, :only => :create, :defaults => { :format => 'xml' }
 
   resources :users, :only => [:index, :destroy, :show] do
     resources :messages, :only => :index
