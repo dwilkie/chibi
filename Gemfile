@@ -13,6 +13,8 @@ gem "resque"
 gem "thin"
 gem "redis"
 gem "nuntium_api"
+gem "state_machine"
+gem "twilio-ruby"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
