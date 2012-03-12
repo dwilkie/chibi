@@ -17,6 +17,10 @@ class User < ActiveRecord::Base
   validates :mobile_number, :presence => true, :uniqueness => true, :length => {:minimum => 9}
   validates :location, :screen_name, :presence => true
 
+  validates :gender, :inclusion => {:in => ["m", "f"], :allow_nil => true}
+  validates :looking_for, :inclusion => {:in => ["m", "f", "e"], :allow_nil => true}
+  validates :age, :inclusion => {:in => 10..99, :allow_nil => true}
+
   before_validation(:on => :create) do
     self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
   end
@@ -74,6 +78,12 @@ class User < ActiveRecord::Base
     self.online = options[:online] || false
     extract(info)
     save
+  end
+
+  [:gender, :looking_for].each do |attribute|
+    define_method("#{attribute}=") do |value|
+      set_gender_related_attribute(attribute, value)
+    end
   end
 
   def female?
@@ -138,7 +148,7 @@ class User < ActiveRecord::Base
   end
 
   def match
-   self.class.matches(self).first
+    self.class.matches(self).first
   end
 
   private
@@ -258,6 +268,18 @@ class User < ActiveRecord::Base
 
   def assign_location
     build_location(:country_code => Location.country_code(mobile_number)) unless persisted? || location.present?
+  end
+
+  def set_gender_related_attribute(attribute, value)
+    value_as_integer = value.to_s.to_i
+
+    if value_as_integer == 1
+      value = "m"
+    elsif value_as_integer == 2
+      value = "f"
+    end
+
+    write_attribute(attribute, value)
   end
 
   def extract(info)

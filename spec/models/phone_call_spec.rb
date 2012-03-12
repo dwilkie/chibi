@@ -2,7 +2,7 @@ require 'spec_helper'
 
 include PhoneCallPromptStates::States
 
-describe PhoneCall, :focus do
+describe PhoneCall do
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
   let(:welcoming_user_phone_call) { build(:welcoming_user_phone_call) }
@@ -57,7 +57,7 @@ describe PhoneCall, :focus do
     end
   end
 
-  describe "#process!" do
+  describe "#process!", :focus do
 
     shared_examples_for "connecting the user with a friend" do
       it "should connect the user with a friend" do
@@ -126,31 +126,33 @@ describe PhoneCall, :focus do
       context "prompting for user input" do
         include PhoneCallPromptStates::GenderAnswers
 
+        def assert_attribute_updated_and_transition(phone_call, attribute, asserted_attribute_value, next_state)
+          caller = phone_call.user
+          caller_timestamp = caller.updated_at if caller.send(attribute) != asserted_attribute_value
+          phone_call.process!
+          caller.send(attribute).should == asserted_attribute_value
+          caller_timestamp ? caller.updated_at.should > caller_timestamp : caller.should(be_persisted)
+          phone_call.should send("be_#{next_state}")
+        end
+
         it "should transition to the correct state" do
-          with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag, prompt_state|
-
-            if attribute == :gender
-              next_action = :asking_for_looking_for
-              in_call_context = call_context
-            else
-              next_action = :offering_menu
-            end
-
+          with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag, prompt_state, next_state|
             # Test that transtion is cancelled because of an invalid selection
             phone_call = send(reference_phone_call_tag)
             phone_call.process!
             phone_call.should send("be_#{prompt_state}")
 
             # Test that the transition is correct and that the users info is updated
-            with_gender_answers(reference_phone_call_tag) do |sex, reference_phone_call_tag_with_gender|
-              phone_call = build(reference_phone_call_tag_with_gender)
-              asserted_attribute_value = sex.to_s.first
-              caller = phone_call.user
-              caller_timestamp = caller.updated_at if caller.send(attribute) != asserted_attribute_value
-              phone_call.process!
-              caller.send(attribute).should == asserted_attribute_value
-              caller_timestamp ? caller.updated_at.should > caller_timestamp : caller.should(be_persisted)
-              phone_call.should send("be_#{next_action}#{in_call_context}")
+            with_gender_answers(reference_phone_call_tag, attribute) do |sex, reference_phone_call_tag_with_gender|
+              assert_attribute_updated_and_transition(
+                build(reference_phone_call_tag_with_gender), attribute, sex.to_s.first, next_state
+              )
+            end
+
+            # Test age input
+            if attribute == :age
+              phone_call.digits = "24"
+              assert_attribute_updated_and_transition(phone_call, attribute, 24, next_state)
             end
           end
         end
@@ -158,8 +160,10 @@ describe PhoneCall, :focus do
 
       context "offering the menu to the user" do
         context "and the user says they want the menu" do
-          it_should_behave_like "asking the user for their gender", :_in_menu do
-            let(:reference_phone_call) { build(:offering_menu_phone_call_caller_wants_menu) }
+          it "should ask the user for their age" do
+            phone_call = build(:offering_menu_phone_call_caller_wants_menu)
+            phone_call.process!
+            phone_call.should be_asking_for_age_in_menu
           end
         end
 
@@ -172,7 +176,7 @@ describe PhoneCall, :focus do
     end
   end
 
-  describe "#to_twiml" do
+  describe "#to_twiml", :focus do
     include_context "twiml"
 
     let(:redirect_url) { "http://example.com/twiml" }
@@ -199,7 +203,7 @@ describe PhoneCall, :focus do
       user.location = original_location
     end
 
-    def assert_ask_for_input(prompt, phone_call)
+    def assert_ask_for_input(prompt, phone_call, twiml_options = {})
       filename = "#{prompt}.mp3"
       assert_play_languages(phone_call, filename)
 
@@ -207,7 +211,9 @@ describe PhoneCall, :focus do
       twiml = twiml_response(phone_call)
 
       assert_num_commands(twiml, 2)
-      assert_gather(twiml, :numDigits => 1) do |gather|
+
+      twiml_options[:numDigits] ||= 1
+      assert_gather(twiml, twiml_options) do |gather|
         assert_play(gather, "#{phone_call.user.locale}/#{filename}")
       end
       assert_redirect(twiml, redirect_url)
@@ -228,8 +234,9 @@ describe PhoneCall, :focus do
 
         context "prompting for user input" do
           it "should play the correct prompt" do
-            with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag|
-              assert_ask_for_input("ask_for_#{attribute}", send(reference_phone_call_tag))
+            with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag, prompt_state, next_state, twiml_options|
+              twiml_options ||= {}
+              assert_ask_for_input("ask_for_#{attribute}", send(reference_phone_call_tag), twiml_options)
             end
           end
         end

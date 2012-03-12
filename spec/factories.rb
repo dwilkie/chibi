@@ -36,7 +36,7 @@ FactoryGirl.define do
 
         extend PhoneCallPromptStates::GenderAnswers
 
-        with_gender_answers(factory_name) do |sex, factory_with_gender_answer, index|
+        with_gender_answers(factory_name, attribute) do |sex, factory_with_gender_answer, index|
           factory(factory_with_gender_answer) do
             digits((index + 1).to_s)
           end
@@ -143,6 +143,22 @@ FactoryGirl.define do
 
     factory :user_with_invalid_mobile_number do
       sequence(:mobile_number, 8551234) {|n| n.to_s }
+    end
+
+    factory :user_with_invalid_gender do
+      gender "e"
+    end
+
+    factory :user_with_invalid_looking_for_preference do
+      looking_for 3
+    end
+
+    factory :user_who_is_too_old do
+      age 100
+    end
+
+    factory :user_who_is_too_young do
+      age 9
     end
 
     factory :user_with_name do

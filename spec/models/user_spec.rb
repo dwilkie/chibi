@@ -4,7 +4,6 @@ describe User do
 
   let(:user) { create(:user) }
   let(:new_user) { build(:user) }
-  let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
   let(:cambodian) { build(:cambodian) }
   let(:friend) { create(:user) }
   let(:active_chat) { create(:active_chat, :user => user, :friend => friend) }
@@ -16,8 +15,21 @@ describe User do
     new_user.should_not be_valid
   end
 
+  it "should not be valid with an invalid gender" do
+    build(:user_with_invalid_gender).should_not be_valid
+  end
+
+  it "should not be valid with an invalid looking for preference" do
+    build(:user_with_invalid_looking_for_preference).should_not be_valid
+  end
+
+  it "should not be valid with an invalid age" do
+    build(:user_who_is_too_old).should_not be_valid
+    build(:user_who_is_too_young).should_not be_valid
+  end
+
   it "should not be valid with an invalid mobile number e.g. a short code" do
-    user_with_invalid_mobile_number.should_not be_valid
+    build(:user_with_invalid_mobile_number).should_not be_valid
   end
 
   it "should not be valid without a screen name" do
@@ -668,6 +680,43 @@ describe User do
       new_user.location.should_receive(:locate!)
       new_user.locate!
     end
+  end
+
+  shared_examples_for "setting a gender related attribute" do |attribute_reader|
+
+    attribute_writer = "#{attribute_reader}="
+
+    context "1" do
+      it "should be male" do
+        subject.send(attribute_writer, "1")
+        subject.send(attribute_reader).should == "m"
+      end
+    end
+
+    context "2" do
+      it "should be female" do
+        subject.send(attribute_writer, "2")
+        subject.send(attribute_reader).should == "f"
+      end
+    end
+
+    context "any other value" do
+      it "should respect the value" do
+        subject.send(attribute_writer, "3")
+        subject.send(attribute_reader).should == "3"
+
+        subject.send(attribute_writer, :m)
+        subject.send(attribute_reader).should == :m
+      end
+    end
+  end
+
+  describe "#gender=" do
+    it_should_behave_like "setting a gender related attribute", :gender
+  end
+
+  describe "#looking_for=" do
+    it_should_behave_like "setting a gender related attribute", :looking_for
   end
 
   describe "#female?" do
