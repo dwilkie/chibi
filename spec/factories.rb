@@ -1,10 +1,14 @@
+require "#{Rails.root}/spec/support/phone_call_prompt_states"
+
 FactoryGirl.define do
+
   factory :message do
     user
     from { user.mobile_number }
   end
 
   factory :phone_call do
+
     user
     from { user.mobile_number }
     sequence(:sid)
@@ -21,20 +25,20 @@ FactoryGirl.define do
       end
     end
 
-    [:gender, :looking_for].each do |attribute|
-      [nil, :_in_menu].each do |context|
-        desired_state = "asking_for_#{attribute}#{context}"
-        parent_factory_name = "#{desired_state}_phone_call"
-        desired_user = context.present? ? :user_with_gender_and_looking_for_preference : :user
+    extend PhoneCallPromptStates::States
 
-        factory("#{parent_factory_name}".to_sym) do
-          state desired_state
-          association :user, :factory => desired_user
+    with_phone_call_prompts do |attribute, call_context, factory_name, prompt_state|
+      desired_user = call_context.present? ? :user_with_gender_and_looking_for_preference : :user
 
-          [:male, :female].each_with_index do |sex, index|
-            factory("#{parent_factory_name}_caller_answers_#{sex}") do
-              digits((index + 1).to_s)
-            end
+      factory(factory_name) do
+        state prompt_state
+        association :user, :factory => desired_user
+
+        extend PhoneCallPromptStates::GenderAnswers
+
+        with_gender_answers(factory_name) do |sex, factory_with_gender_answer, index|
+          factory(factory_with_gender_answer) do
+            digits((index + 1).to_s)
           end
         end
       end

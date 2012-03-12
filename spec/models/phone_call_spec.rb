@@ -1,16 +1,17 @@
 require 'spec_helper'
 
-describe PhoneCall do
+include PhoneCallPromptStates::States
 
-  let(:user) { build(:user) }
+describe PhoneCall, :focus do
+  let(:phone_call) { create(:phone_call) }
+  let(:new_phone_call) { build(:phone_call) }
+  let(:welcoming_user_phone_call) { build(:welcoming_user_phone_call) }
 
-  let(:new_phone_call) { build(:phone_call, :user => user) }
-
-  let(:welcoming_user_phone_call) { build(:welcoming_user_phone_call, :user => user) }
-
-  phone_call_prompts do |attribute, call_context, reference_phone_call_tag|
+  with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag|
     let(reference_phone_call_tag) { build(reference_phone_call_tag) }
   end
+
+  let(:offering_menu_phone_call) { build(:offering_menu_phone_call) }
 
   describe "factory" do
     it "should be valid" do
@@ -123,8 +124,10 @@ describe PhoneCall do
       end
 
       context "prompting for user input" do
-        it "should transition to the correct state", :focus do
-          phone_call_prompts do |attribute, call_context, reference_phone_call_tag|
+        include PhoneCallPromptStates::GenderAnswers
+
+        it "should transition to the correct state" do
+          with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag, prompt_state|
 
             if attribute == :gender
               next_action = :asking_for_looking_for
@@ -133,14 +136,14 @@ describe PhoneCall do
               next_action = :offering_menu
             end
 
-            # Test that transtion is cancelled because of invalid data
+            # Test that transtion is cancelled because of an invalid selection
             phone_call = send(reference_phone_call_tag)
             phone_call.process!
-            phone_call.should send("be_asking_for_#{attribute}#{call_context}")
+            phone_call.should send("be_#{prompt_state}")
 
             # Test that the transition is correct and that the users info is updated
-            [:male, :female].each do |sex|
-              phone_call = build("#{reference_phone_call_tag}_caller_answers_#{sex}".to_sym)
+            with_gender_answers(reference_phone_call_tag) do |sex, reference_phone_call_tag_with_gender|
+              phone_call = build(reference_phone_call_tag_with_gender)
               asserted_attribute_value = sex.to_s.first
               caller = phone_call.user
               caller_timestamp = caller.updated_at if caller.send(attribute) != asserted_attribute_value
@@ -183,10 +186,8 @@ describe PhoneCall do
     end
 
     def assert_play_languages(phone_call, filename, options = {})
-      assert_play(twiml_response(phone_call), "#{user.locale}/#{filename}", options)
-
       user = phone_call.user
-
+      assert_play(twiml_response(phone_call), "#{user.locale}/#{filename}", options)
       original_location = user.location
       user.location = build(:united_states)
 
@@ -199,7 +200,7 @@ describe PhoneCall do
     end
 
     def assert_ask_for_input(prompt, phone_call)
-      filename = "ask_for_#{prompt}.mp3"
+      filename = "#{prompt}.mp3"
       assert_play_languages(phone_call, filename)
 
       phone_call.redirect_url = redirect_url
@@ -207,21 +208,13 @@ describe PhoneCall do
 
       assert_num_commands(twiml, 2)
       assert_gather(twiml, :numDigits => 1) do |gather|
-        assert_play(gather, "#{user.locale}/#{filename}")
+        assert_play(gather, "#{phone_call.user.locale}/#{filename}")
       end
       assert_redirect(twiml, redirect_url)
     end
 
     context "given the redirect url has been set" do
       context "and the phone call is" do
-
-        context "prompting for user input" do
-          it "should play the correct prompt" do
-            phone_call_prompts do |attribute, call_context, reference_phone_call_tag|
-              assert_ask_for_input(attribute, send(reference_phone_call_tag))
-            end
-          end
-        end
 
         context "welcoming the user" do
           it "should play the welcome message in the user's language" do
@@ -230,6 +223,20 @@ describe PhoneCall do
             twiml = twiml_response(welcoming_user_phone_call)
             assert_num_commands(twiml, 2)
             assert_redirect(twiml, redirect_url)
+          end
+        end
+
+        context "prompting for user input" do
+          it "should play the correct prompt" do
+            with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag|
+              assert_ask_for_input("ask_for_#{attribute}", send(reference_phone_call_tag))
+            end
+          end
+        end
+
+        context "offering the menu" do
+          it "should offer the menu" do
+            assert_ask_for_input(:offer_menu, offering_menu_phone_call)
           end
         end
       end

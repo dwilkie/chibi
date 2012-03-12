@@ -62,7 +62,7 @@ describe "PhoneCalls" do
             assert_ask_for_input(:ask_for_gender)
           end
 
-          context "if I press '1' for guy", :focus do
+          context "if I press answer that I am a 'guy'", :focus do
             before do
               update_current_call_status(:digits => 1)
             end
