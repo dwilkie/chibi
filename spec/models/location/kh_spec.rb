@@ -179,15 +179,9 @@ describe Location do
       }
     end
 
-    describe "#locate!" do
+    describe "#locate!", :focus do
       it "should determine the correct location and city from the address" do
         assert_locate!(:kh, address_examples)
-      end
-    end
-
-    describe ".country_code" do
-      it "should return the correct country code from a mobile number" do
-        assert_country_code(:kh, "85512234456")
       end
     end
   end

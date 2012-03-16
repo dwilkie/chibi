@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe User do
+  include MobilePhoneHelpers
 
   let(:user) { create(:user) }
   let(:new_user) { build(:user) }
@@ -75,9 +76,11 @@ describe User do
 
     context "when inititalizing a new user with a mobile number" do
       context "if a the user does not yet have a location" do
-        it "should build a location and assign it to itself" do
-          new_location = subject.class.new(:mobile_number => new_user.mobile_number).location
-          new_location.country_code.should == new_user.location.country_code
+        it "should build a location based off the mobile number and assign it to itself" do
+          with_users_from_different_countries do |country_code, prefix, country_name, factory_name|
+            new_location = subject.class.new(:mobile_number => build(factory_name).mobile_number).location
+            new_location.country_code.should == country_code
+          end
         end
       end
 
@@ -849,6 +852,15 @@ describe User do
     context "given the user is not in an active chat session" do
       it "should be false" do
         user.should_not be_currently_chatting
+      end
+    end
+  end
+
+  describe "#short_code" do
+    it "should return the correct short code for the given service provider" do
+      with_service_providers do |service_provider, prefix, short_code, factory_name|
+        new_user = subject.class.new(:mobile_number => build(factory_name).mobile_number)
+        new_user.short_code.should == short_code
       end
     end
   end

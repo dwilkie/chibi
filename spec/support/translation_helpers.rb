@@ -49,7 +49,9 @@ module TranslationHelpers
   def spec_translate(key, locale, *interpolations)
     translations = TRANSLATIONS[key]
     raise("Translation '#{key}' not found. Add it to #{__FILE__}") unless translations.present?
-    translation = translations[locale].dup
+    # special case:
+    # if the users locale is :gb test the default locale
+    translation = translations[locale == :gb ? :en : locale].dup
     interpolations.each_with_index do |interpolation, index|
       raise("Interpolation: '#{interpolation}' is missing inside '#{key}'") unless translation.include?("#[#{index}]")
       translation.gsub!("#[#{index}]", interpolation)

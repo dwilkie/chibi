@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 # see the individual specs for each location under spec/models/location
-describe Location do
+describe Location, :focus do
   include LocationHelpers
 
   let(:location) { build(:location) }
@@ -12,19 +12,17 @@ describe Location do
     end
   end
 
+  describe "callbacks" do
+    it "should always save the lowercased version of the country code" do
+      location.country_code = "KH"
+      location.save
+      location.reload.country_code.should == "kh"
+    end
+  end
+
   it "should not be valid without a country code" do
     location.country_code = nil
     location.should_not be_valid
-  end
-
-  describe ".country_code" do
-    it "should return nil if passed nil" do
-      subject.class.country_code(nil).should be_nil
-    end
-
-    it "should return nil if passed a string" do
-      subject.class.country_code("some string").should be_nil
-    end
   end
 
   describe "#locate!" do
@@ -60,9 +58,9 @@ describe Location do
   end
 
   describe "#country_code" do
-    it "should return an uppercase string of the country code" do
+    it "should return a lowercase string of the country code" do
       subject.country_code = :ab
-      subject.country_code.should == "AB"
+      subject.country_code.should == "ab"
     end
 
     it "should return nil if the country code is nil" do

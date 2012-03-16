@@ -61,4 +61,8 @@ shared_context "twiml" do
   def assert_redirect(twiml_response, url, options = {})
     assert_twiml(twiml_response, :redirect, options.merge(:content => url))
   end
+
+  def assert_dial(twiml_response, number, options = {})
+    assert_twiml(twiml_response, :dial, options.merge(:content => number))
+  end
 end

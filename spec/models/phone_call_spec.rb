@@ -57,7 +57,7 @@ describe PhoneCall do
     end
   end
 
-  describe "#process!", :focus do
+  describe "#process!" do
 
     shared_examples_for "connecting the user with a friend" do
       it "should connect the user with a friend" do
@@ -176,7 +176,7 @@ describe PhoneCall do
     end
   end
 
-  describe "#to_twiml", :focus do
+  describe "#to_twiml" do
     include_context "twiml"
 
     let(:redirect_url) { "http://example.com/twiml" }
@@ -244,6 +244,29 @@ describe PhoneCall do
         context "offering the menu" do
           it "should offer the menu" do
             assert_ask_for_input(:offer_menu, offering_menu_phone_call)
+          end
+        end
+
+        context "connecting user with a friend", :focus do
+          include_context "existing users"
+
+          before do
+            load_users
+          end
+
+          let(:connecting_user_with_friend_phone_call) do
+            build(:connecting_user_with_friend_phone_call, :user => dave)
+          end
+
+          it "should dial another user" do
+            twiml = twiml_response(connecting_user_with_friend_phone_call)
+            assert_dial(twiml, mara.mobile_number, :callerId => mara.short_code)
+          end
+
+          context "the matched user does not have a short code..." do
+            # this user cannot be dialed!!
+            # put this user offline if this is an expected result?
+            pending
           end
         end
       end

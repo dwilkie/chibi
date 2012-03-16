@@ -86,6 +86,10 @@ class User < ActiveRecord::Base
     end
   end
 
+  def short_code
+    SERVICE_PROVIDER_PREFIXES[locale.to_s][split_mobile_number[1][0..1]]
+  end
+
   def female?
     gender == 'f'
   end
@@ -256,7 +260,7 @@ class User < ActiveRecord::Base
 
   def self.filter_by_location(user, scope)
     # only match users from the same country
-    scope = scope.joins(:location).where(:locations => {:country_code => user.location.country_code})
+    scope = scope.joins(:location).where(:locations => {:country_code => user.locale})
 
     # add group by clause for every column that is being selected
     # so Postgres doesn't complain. This can be removed after upgrading to Postgres 9.1
@@ -267,7 +271,13 @@ class User < ActiveRecord::Base
   end
 
   def assign_location
-    build_location(:country_code => Location.country_code(mobile_number)) unless persisted? || location.present?
+    build_location(
+      :country_code => DIALING_CODES[split_mobile_number.first].try(:downcase)
+    ) unless persisted? || location.present?
+  end
+
+  def split_mobile_number
+    Phony.split(mobile_number.to_i.to_s)
   end
 
   def set_gender_related_attribute(attribute, value)

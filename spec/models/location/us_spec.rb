@@ -21,11 +21,5 @@ describe Location do
         assert_locate!(:us, address_examples)
       end
     end
-
-    describe ".country_code" do
-      it "should return the correct country code from a mobile number" do
-        assert_country_code(:us, "1415323456")
-      end
-    end
   end
 end

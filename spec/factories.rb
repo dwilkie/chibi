@@ -1,4 +1,5 @@
 require "#{Rails.root}/spec/support/phone_call_prompt_states"
+require "#{Rails.root}/spec/support/mobile_phone_helpers"
 
 FactoryGirl.define do
 
@@ -53,6 +54,10 @@ FactoryGirl.define do
         digits "8"
       end
     end
+
+    factory :connecting_user_with_friend_phone_call do
+      state "connecting_user_with_friend"
+    end
   end
 
   factory :reply do
@@ -78,10 +83,10 @@ FactoryGirl.define do
   end
 
   factory :location do
-    country_code "KH"
+    country_code "kh"
 
     factory :cambodia do
-      country_code "KH"
+      country_code "kh"
 
       factory :phnom_penh do
         city "Phnom Penh"
@@ -103,7 +108,7 @@ FactoryGirl.define do
     end
 
     factory :thailand do
-      country_code "TH"
+      country_code "th"
 
       factory :chiang_mai do
         city "Samoeng"
@@ -113,7 +118,7 @@ FactoryGirl.define do
     end
 
     factory :england do
-      country_code "EN"
+      country_code "gb"
 
       factory :london do
         city "London"
@@ -123,7 +128,7 @@ FactoryGirl.define do
     end
 
     factory :united_states do
-      country_code "US"
+      country_code "us"
 
       factory :new_york do
         city "New York"
@@ -134,6 +139,7 @@ FactoryGirl.define do
   end
 
   factory :user do
+
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
     location
 
@@ -184,16 +190,8 @@ FactoryGirl.define do
       end
     end
 
-    factory :cambodian do
-      association :location, :factory => :cambodia
-    end
-
-    factory :english do
-      association :location, :factory => :england
-    end
-
-    factory :american do
-      association :location, :factory => :united_states
+    factory :user_with_age do
+      age 23
     end
 
     # do not reorder these factories because the tests rely on
@@ -301,6 +299,21 @@ FactoryGirl.define do
       looking_for "e"
       age 29
       association :location, :factory => :chiang_mai
+    end
+  end
+
+  extend MobilePhoneHelpers
+
+  with_users_from_different_countries do |country_code, country_prefix, country_name, factory_name|
+    factory(factory_name, :class => User) do
+      sequence(:mobile_number) {|n| "#{country_prefix}00000000#{n}" }
+      association :location, :factory => country_name
+    end
+  end
+
+  with_service_providers do |service_provider, prefix, short_code, factory_name|
+    factory(factory_name, :class => User) do
+      sequence(:mobile_number) {|n| "#{prefix}000000#{n}" }
     end
   end
 end

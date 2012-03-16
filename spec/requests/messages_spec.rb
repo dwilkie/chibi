@@ -45,7 +45,7 @@ describe "Messages" do
       def assert_new_user
         new_user.mobile_number.should == my_number
         new_location.user.should == new_user
-        new_location.country_code.should == "KH"
+        new_location.country_code.should == "kh"
       end
 
       before do

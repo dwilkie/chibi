@@ -24,10 +24,4 @@ module LocationHelpers
       end
     end
   end
-
-  def assert_country_code(country_code, *examples)
-    examples.each do |example|
-      subject.class.country_code(example).should == country_code.to_s.upcase
-    end
-  end
 end

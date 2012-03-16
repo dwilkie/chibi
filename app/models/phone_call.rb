@@ -56,6 +56,12 @@ class PhoneCall < ActiveRecord::Base
       end
     end
 
+    state :connecting_user_with_friend do
+      def to_twiml
+        generate_twiml { |twiml| twiml.Dial(user.match.mobile_number, :callerId => user.short_code) }
+      end
+    end
+
     event :process! do
       transition :answered => :welcoming_user
       transition :welcoming_user => :asking_for_gender, :if => :ask_for_gender?

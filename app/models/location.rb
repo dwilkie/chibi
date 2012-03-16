@@ -1,12 +1,13 @@
 class Location < ActiveRecord::Base
   belongs_to :user
+  before_save :normalize_country_code
 
   attr_accessor :address
 
   geocoded_by :full_address
 
   reverse_geocoded_by :latitude, :longitude do |location, results|
-    if (result = results.first) && (result.country_code == location.country_code)
+    if (result = results.first) && (result.country_code.downcase == location.country_code)
       location.city = result.city
     else
       location.latitude = nil
@@ -15,10 +16,6 @@ class Location < ActiveRecord::Base
   end
 
   validates :country_code, :presence => true
-
-  def self.country_code(mobile_number)
-    DIALING_CODES[Phony.split(mobile_number.to_i.to_s).first]
-  end
 
   # long running task
   def locate!
@@ -29,19 +26,23 @@ class Location < ActiveRecord::Base
     end
   end
 
-  def country_code
-    raw_country_code = read_attribute(:country_code)
-    raw_country_code.to_s.upcase if raw_country_code
-  end
-
   def locale
     country_code.try(:downcase).try(:to_sym)
   end
 
+  def country_code
+    raw_country_code = read_attribute(:country_code)
+    raw_country_code.to_s.downcase if raw_country_code
+  end
+
   private
 
+  def normalize_country_code
+    self.country_code = country_code.downcase
+  end
+
   def country
-    ISO3166::Country[country_code]
+    ISO3166::Country[country_code.upcase]
   end
 
   def full_address
