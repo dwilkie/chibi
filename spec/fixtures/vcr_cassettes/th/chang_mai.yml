@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=chang+mai%2C+Thailand&language=en&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=chang+mai%2C+Thailand&language=en&sensor=false
     body: ''
     headers:
       accept:
@@ -52,7 +52,7 @@ http_interactions:
   recorded_at: Sat, 26 Nov 2011 09:54:55 GMT
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=18.7964642%2C98.6600586&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=18.7964642%2C98.6600586&sensor=false
     body: ''
     headers:
       accept:

@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=new+york%2C+United+States&language=en&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=new+york%2C+United+States&language=en&sensor=false
     body: ''
     headers:
       accept:
@@ -120,7 +120,7 @@ http_interactions:
   recorded_at: Thu, 24 Nov 2011 16:47:48 GMT
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=40.7143528%2C-74.00597309999999&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=40.7143528%2C-74.00597309999999&sensor=false
     body: ''
     headers:
       accept:

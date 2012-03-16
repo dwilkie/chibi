@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=JONG+ROK%2C+Cambodia&language=en&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=JONG+ROK%2C+Cambodia&language=en&sensor=false
     body: ''
     headers:
       accept:

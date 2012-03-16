@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=phnom+penh%2C+Cambodia&language=en&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=phnom+penh%2C+Cambodia&language=en&sensor=false
     body: ''
     headers:
       accept:
@@ -53,7 +53,7 @@ http_interactions:
   recorded_at: Thu, 24 Nov 2011 16:47:32 GMT
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=11.558831%2C104.917445&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=11.558831%2C104.917445&sensor=false
     body: ''
     headers:
       accept:

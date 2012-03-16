@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?address=siem+reab%2C+Cambodia&language=en&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=siem+reab%2C+Cambodia&language=en&sensor=false
     body: ''
     headers:
       accept:
@@ -57,7 +57,7 @@ http_interactions:
   recorded_at: Thu, 24 Nov 2011 16:47:36 GMT
 - request:
     method: get
-    uri: http://maps.googleapis.com:80/maps/api/geocode/json?language=en&latlng=13.3622222%2C103.8597222&sensor=false
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=13.3622222%2C103.8597222&sensor=false
     body: ''
     headers:
       accept:
