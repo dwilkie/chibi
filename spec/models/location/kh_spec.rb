@@ -179,7 +179,7 @@ describe Location do
       }
     end
 
-    describe "#locate!", :focus do
+    describe "#locate!" do
       it "should determine the correct location and city from the address" do
         assert_locate!(:kh, address_examples)
       end
