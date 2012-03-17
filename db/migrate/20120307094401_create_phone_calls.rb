@@ -1,7 +1,7 @@
 class CreatePhoneCalls < ActiveRecord::Migration
   def change
     create_table :phone_calls do |t|
-      t.integer    :sid
+      t.string     :sid
       t.string     :from
       t.string     :state
       t.references :user

@@ -81,7 +81,7 @@ ActiveRecord::Schema.define(:version => 20120317064849) do
   end
 
   create_table "phone_calls", :force => true do |t|
-    t.integer  "sid"
+    t.string   "sid"
     t.string   "from"
     t.string   "state"
     t.integer  "user_id"
