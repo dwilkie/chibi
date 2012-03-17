@@ -17,6 +17,16 @@ shared_examples_for "communicable" do
     communicable_resource.should_not be_valid
   end
 
+  describe "#from=" do
+    it "should sanitize the number" do
+      communicable_resource.from = "+1-3323-23345"
+      communicable_resource.from.should == "1332323345"
+
+      subject.from = nil
+      subject.from.should be_nil
+    end
+  end
+
   describe "callbacks" do
     context "when inititalizing with an origin" do
 

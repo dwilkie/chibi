@@ -12,6 +12,10 @@ module Communicable
     after_initialize :assign_to_user
   end
 
+  def from=(value)
+    write_attribute(:from, value.gsub(/\D/, "")) if value
+  end
+
   private
 
   def assign_to_user
