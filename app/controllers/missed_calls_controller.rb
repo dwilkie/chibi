@@ -5,10 +5,6 @@ class MissedCallsController < ApplicationController
   before_filter :authenticate_admin, :except => :create
 
   def create
-    Rails.logger.log Logger::INFO, message.subject #print the subject to the logs
-
-    # Do some other stuff with the mail message
-
     render :nothing => true, :status => 200 # a status of 404 would reject the mail
   end
 
