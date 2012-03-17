@@ -1,0 +1,43 @@
+class MissedCall < ActiveRecord::Base
+  include Communicable
+
+  attr_accessor :subject
+  attr_accessible :subject
+
+  def subject=(value)
+    @subject = value
+
+    raw_phone_number = subject.try(:match, /\d+/).try(:[], 0)
+    return unless raw_phone_number
+
+    phone_number_parts = Phony.split(raw_phone_number)
+    phone_number_parts[0] = default_country_code if phone_number_parts[0] == "0"
+    self.from = phone_number_parts.join
+  end
+
+  def return_call!(callback_url)
+    twilio_client.account.calls.create(
+      :from => twilio_outgoing_number,
+      :to => twilio_formatted(from),
+      :url => callback_url
+    )
+  end
+
+  private
+
+  def default_country_code
+    Phony.split(ENV['TWILIO_OUTGOING_NUMBER'])[0]
+  end
+
+  def twilio_formatted(number)
+    Phony.formatted(number, :format => :international, :spaces => "")
+  end
+
+  def twilio_outgoing_number
+    twilio_formatted(ENV['TWILIO_OUTGOING_NUMBER'])
+  end
+
+  def twilio_client
+    @client ||= Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
+  end
+end

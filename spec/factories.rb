@@ -8,6 +8,11 @@ FactoryGirl.define do
     from { user.mobile_number }
   end
 
+  factory :missed_call do
+    user
+    subject { "You have a missed call from 0#{Phony.split(user.mobile_number)[1]}" }
+  end
+
   factory :phone_call do
 
     user

@@ -1,7 +1,6 @@
 shared_examples_for "communicable" do
   let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
   let(:user) { build(:user) }
-  let(:chat) { create(:active_chat, :user => user) }
 
   it "should not be valid without a user" do
     communicable_resource.user = nil
@@ -16,24 +15,6 @@ shared_examples_for "communicable" do
   it "should not be valid without a 'from'" do
     communicable_resource.from = nil
     communicable_resource.should_not be_valid
-  end
-
-  describe "associations" do
-    context "when saving with an associated chat" do
-      before do
-        chat
-        communicable_resource.save
-      end
-
-      it "should touch the chat" do
-        original_chat_timestamp = chat.updated_at
-
-        communicable_resource.chat = chat
-        communicable_resource.save
-
-        chat.reload.updated_at.should > original_chat_timestamp
-      end
-    end
   end
 
   describe "callbacks" do
@@ -83,6 +64,27 @@ shared_examples_for "communicable" do
           subject.class.find(communicable_resource.id)
         end
       end
+    end
+  end
+end
+
+shared_examples_for "chatable" do
+  let(:chat) { create(:active_chat, :user => user) }
+  let(:user) { build(:user) }
+
+  context "when saving with an associated chat" do
+    before do
+      chat
+      chatable_resource.save
+    end
+
+    it "should touch the chat" do
+      original_chat_timestamp = chat.updated_at
+
+      chatable_resource.chat = chat
+      chatable_resource.save
+
+      chat.reload.updated_at.should > original_chat_timestamp
     end
   end
 end

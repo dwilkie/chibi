@@ -22,7 +22,7 @@ http_interactions:
       user-agent:
       - Ruby
       authorization:
-      - Basic ZHdpbGtpZS9jaGF0Ym94OmRhdGVtZTYyOTYyOQ==
+      - Basic <%= Base64.encode64("#{application}:#{password}").gsub(/\s/, "") %>
   response:
     status:
       code: 200

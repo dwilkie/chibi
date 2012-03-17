@@ -1,5 +1,6 @@
 class PhoneCall < ActiveRecord::Base
   include Communicable
+  include Communicable::Chatable
 
   module Digits
     MENU = 8

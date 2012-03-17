@@ -5,7 +5,14 @@ class MissedCallsController < ApplicationController
   before_filter :authenticate_admin, :except => :create
 
   def create
-    render :nothing => true, :status => 200 # a status of 404 would reject the mail
+    missed_call = MissedCall.new(params.slice(:subject))
+    if missed_call.save
+      Resque.enqueue(Dialer, missed_call.id, phone_calls_url)
+      status = :ok
+    else
+      status = :bad_request
+    end
+    render :nothing => true, :status => status
   end
 
   private

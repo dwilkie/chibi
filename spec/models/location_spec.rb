@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 # see the individual specs for each location under spec/models/location
-describe Location, :focus do
+describe Location do
   include LocationHelpers
 
   let(:location) { build(:location) }

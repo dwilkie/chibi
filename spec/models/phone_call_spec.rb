@@ -33,6 +33,10 @@ describe PhoneCall do
     let(:communicable_resource) { new_phone_call }
   end
 
+  it_should_behave_like "chatable" do
+    let(:chatable_resource) { new_phone_call }
+  end
+
   describe "#call_sid" do
     it "should be an alias for the attribute '#sid'" do
       subject.sid = 123
@@ -247,7 +251,7 @@ describe PhoneCall do
           end
         end
 
-        context "connecting user with a friend", :focus do
+        context "connecting user with a friend" do
           include_context "existing users"
 
           before do

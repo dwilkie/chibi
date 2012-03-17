@@ -19,6 +19,10 @@ describe Message do
     let(:communicable_resource) { new_message }
   end
 
+  it_should_behave_like "chatable" do
+    let(:chatable_resource) { new_message }
+  end
+
   describe ".filter_by" do
     let(:another_message) { create(:message) }
 

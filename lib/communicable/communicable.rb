@@ -5,7 +5,6 @@ module Communicable
     attr_accessible :from
 
     belongs_to :user
-    belongs_to :chat, :touch => true
 
     validates :user, :associated => true, :presence => true
     validates :from, :presence => true
@@ -17,5 +16,13 @@ module Communicable
 
   def assign_to_user
     self.user = User.find_or_initialize_by_mobile_number(from) unless user_id.present?
+  end
+
+  module Chatable
+    extend ActiveSupport::Concern
+
+    included do
+      belongs_to :chat, :touch => true
+    end
   end
 end

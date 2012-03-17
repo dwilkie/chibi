@@ -1,0 +1,44 @@
+<% response = "{\"sid\":\"CAda2057f87b964d729527ec841b484ac6\",\"date_created\":\"Sat,17 Mar 2012 11:37:41 +0000\",\"date_updated\":\"Sat, 17 Mar 2012 11:37:41 +0000\",\"parent_call_sid\":null,\"account_sid\":\"#{account_sid}\",\"to\":\"+#{to}\",\"to_formatted\":\"+#{to}\",\"from\":\"+#{from}\",\"from_formatted\":\"+#{from}\",\"phone_number_sid\":\"PNab3912e6e0a74d38a696e0171cffe78e\",\"status\":\"queued\",\"start_time\":null,\"end_time\":null,\"duration\":null,\"price\":null,\"direction\":\"outbound-api\",\"answered_by\":null,\"api_version\":\"2010-04-01\",\"annotation\":null,\"forwarded_from\":null,\"group_sid\":null,\"caller_name\":null,\"uri\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/CAda2057f87b964d729527ec841b484ac6.json\",\"subresource_uris\":{\"notifications\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/CAda2057f87b964d729527ec841b484ac6\/Notifications.json\",\"recordings\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/CAda2057f87b964d729527ec841b484ac6\/Recordings.json\"}}" %>
+
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://<%= account_sid %>:<%= auth_token %>@api.twilio.com/2010-04-01/Accounts/<%= account_sid %>/Calls.json
+    body:
+      encoding: US-ASCII
+      string: From=%2B<%= from %>&To=%2B<%= to %>&Url=<%= Rack::Utils.escape(callback_url) %>
+    headers:
+      accept:
+      - application/json
+      user-agent:
+      - twilio-ruby/3.5.1
+      authorization:
+      - Basic <%= Base64.encode64("#{account_sid}:#{auth_token}").gsub(/\s/, "") %>
+      content-type:
+      - application/x-www-form-urlencoded
+      connection:
+      - close
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      server:
+      - nginx
+      date:
+      - Sat, 17 Mar 2012 11:37:41 GMT
+      content-type:
+      - application/json
+      connection:
+      - close
+      etag:
+      - ''
+      content-length:
+      - '1016'
+    body:
+      encoding: US-ASCII
+      string: ! <%= response.to_json %>
+    http_version: '1.1'
+  recorded_at: Sat, 17 Mar 2012 11:37:53 GMT
+recorded_with: VCR 2.0.0
