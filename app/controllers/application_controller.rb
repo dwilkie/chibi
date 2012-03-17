@@ -15,6 +15,9 @@ class ApplicationController < ActionController::Base
   private
 
   def authenticate(username, password)
-    request_http_basic_authentication unless authenticate_with_http_basic {|u, p| u == username && p == password}
+    request_http_basic_authentication unless authenticate_with_http_basic do |u, p|
+      Rails.logger.log Logger::INFO, "incoming user: #{u}, incoming password: #{p}, username: #{username}, password: #{password}"
+      u == username && p == password
+    end
   end
 end
