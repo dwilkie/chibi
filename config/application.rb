@@ -48,5 +48,9 @@ module Chibi
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+
+    # heroku requires this to be false
+    # see: http://guides.rubyonrails.org/asset_pipeline.html#precompiling-assets
+    config.assets.initialize_on_precompile = false
   end
 end
