@@ -1,20 +1,19 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
-  protected
+  private
 
   # http_basic_authenticate_with cannot be overridden on a per controller basis
   def authenticate_admin
-    authenticate(ENV["HTTP_BASIC_AUTH_ADMIN_USER"], ENV["HTTP_BASIC_AUTH_ADMIN_PASSWORD"])
+    authenticate(:admin)
   end
 
-  def authenticate_api
-    authenticate(ENV["HTTP_BASIC_AUTH_USER"], ENV["HTTP_BASIC_AUTH_PASSWORD"])
+  def authenticate(resource)
+    authentication_key = "HTTP_BASIC_AUTH_#{resource.upcase}"
+    http_basic_authenticate(ENV["#{authentication_key}_USER"], ENV["#{authentication_key}_PASSWORD"])
   end
 
-  private
-
-  def authenticate(username, password)
+  def http_basic_authenticate(username, password)
     request_http_basic_authentication unless authenticate_with_http_basic {|u, p| u == username && p == password}
   end
 end

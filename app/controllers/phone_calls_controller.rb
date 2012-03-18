@@ -1,7 +1,7 @@
 class PhoneCallsController < ApplicationController
   protect_from_forgery :except => :create
 
-  before_filter :authenticate_api, :only => :create
+  before_filter :authenticate_phone_call, :only => :create
   before_filter :authenticate_admin, :except => :create
 
   def create
@@ -18,5 +18,11 @@ class PhoneCallsController < ApplicationController
     else
       render(:nothing => true, :status => :bad_request)
     end
+  end
+
+  private
+
+  def authenticate_phone_call
+    authenticate(:phone_call)
   end
 end

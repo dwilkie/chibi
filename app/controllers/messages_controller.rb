@@ -1,7 +1,7 @@
 class MessagesController < ApplicationController
   protect_from_forgery :except => :create
 
-  before_filter :authenticate_api, :only => :create
+  before_filter :authenticate_message, :only => :create
   before_filter :authenticate_admin, :except => :create
 
   def index
@@ -19,5 +19,11 @@ class MessagesController < ApplicationController
       status = :bad_request
     end
     render(:nothing => true, :status => status)
+  end
+
+  private
+
+  def authenticate_message
+    authenticate(:message)
   end
 end

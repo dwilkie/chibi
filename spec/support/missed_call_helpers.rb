@@ -37,7 +37,7 @@ module MissedCallHelpers
         :x_remote_ip => options[:x_remote_ip] || "208.113.175.8",
         :helo_domain => options[:helo_domain] || "smarty.dreamhost.com",
         :signature => options[:signature] || "d12ae6c85f3e136a69a5d678aea47101"
-      }, authentication_params(:cloudmailin)
+      }, authentication_params(:missed_call)
     end
 
     response.status.should be(options[:response] || 200)

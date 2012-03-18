@@ -48,7 +48,7 @@ module MessagingHelpers
             :subject => options[:subject] || ""
           }},
 
-          authentication_params
+          authentication_params(:message)
 
           response.status.should be(options[:response] || 201)
         end

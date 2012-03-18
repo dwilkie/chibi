@@ -1,11 +1,10 @@
 module AuthenticationHelpers
   private
 
-  def authentication_params(type = nil)
-    key_base = "HTTP_BASIC_AUTH"
-    key_base << "_#{type.to_s.upcase}" if type
+  def authentication_params(resource)
+    authentication_key = "HTTP_BASIC_AUTH_#{resource.to_s.upcase}"
     {'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
-      ENV["#{key_base}_USER"], ENV["#{key_base}_PASSWORD"]
+      ENV["#{authentication_key}_USER"], ENV["#{authentication_key}_PASSWORD"]
     )}
   end
 end

@@ -18,7 +18,7 @@ module PhoneCallHelpers
       :Channel => options[:channel] || "test",
       :Digits => options[:digits],
       :To => options[:to]
-    }, authentication_params
+    }, authentication_params(:phone_call)
 
     response.status.should be(options[:response] || 200)
     options[:call_sid]
