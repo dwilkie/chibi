@@ -86,7 +86,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def to=(value)
-    write_attribute(:from, value) if value.present?
+    self.from = value if value.present?
   end
 
   private

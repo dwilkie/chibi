@@ -58,17 +58,17 @@ describe PhoneCall do
     # phone calls should behave the same whether they were initiated by
     # the user or not
     it "should be an accessor that overrides #from if present" do
-      subject.from = "somebody"
-      subject.to = "somebody else"
-      subject.from.should == "somebody else"
+      subject.from = "+1-2345-2222"
+      subject.to = "+1-2345-3333"
+      subject.from.should == "123453333"
 
       subject.to = ""
-      subject.from.should == "somebody else"
+      subject.from.should == "123453333"
     end
 
     it "should be mass assignable" do
-      new_phone_call = subject.class.new(:from => "somebody", :to => "somebody else")
-      new_phone_call.from.should == "somebody else"
+      new_phone_call = subject.class.new(:from => "+1-2345-2222", :to => "+1-2345-3333")
+      new_phone_call.from.should == "123453333"
     end
   end
 

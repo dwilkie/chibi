@@ -13,7 +13,7 @@ shared_examples_for "communicable" do
   end
 
   it "should not be valid without a 'from'" do
-    communicable_resource.from = nil
+    communicable_resource.from = ""
     communicable_resource.should_not be_valid
   end
 
