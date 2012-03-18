@@ -7,7 +7,7 @@ class MissedCallsController < ApplicationController
   def create
     missed_call = MissedCall.new(params.slice(:subject))
     if missed_call.save
-      Resque.enqueue(Dialer, missed_call.id, phone_calls_url)
+      Resque.enqueue(Dialer, missed_call.id)
       status = :ok
     else
       status = :bad_request

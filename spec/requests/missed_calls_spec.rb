@@ -9,7 +9,7 @@ describe "Missed Calls" do
         context "and my call is missed" do
 
           it "should call me back" do
-            expect_call(:to => "855973243313", :callback_url => phone_calls_url) do
+            expect_call(:to => "855973243313") do
               missed_call(:number => "0973243313")
             end
           end

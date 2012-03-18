@@ -17,8 +17,8 @@ describe Dialer do
     end
 
     it "should tell the message to process itself" do
-      missed_call.should_receive(:return_call!).with("https://example.com/phone_calls.xml")
-      subject.class.perform(1, "https://example.com/phone_calls.xml")
+      missed_call.should_receive(:return_call!)
+      subject.class.perform(1)
     end
   end
 end

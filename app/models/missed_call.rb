@@ -15,11 +15,11 @@ class MissedCall < ActiveRecord::Base
     self.from = phone_number_parts.join
   end
 
-  def return_call!(callback_url)
+  def return_call!
     twilio_client.account.calls.create(
       :from => twilio_outgoing_number,
       :to => twilio_formatted(from),
-      :url => callback_url
+      :application_sid => ENV['TWILIO_APPLICATION_SID']
     )
   end
 

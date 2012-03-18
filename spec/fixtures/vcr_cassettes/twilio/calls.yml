@@ -7,7 +7,7 @@ http_interactions:
     uri: https://<%= account_sid %>:<%= auth_token %>@api.twilio.com/2010-04-01/Accounts/<%= account_sid %>/Calls.json
     body:
       encoding: US-ASCII
-      string: From=%2B<%= from %>&To=%2B<%= to %>&Url=<%= Rack::Utils.escape(callback_url) %>
+      string: From=%2B<%= from %>&To=%2B<%= to %>&ApplicationSid=<%= application_sid %>
     headers:
       accept:
       - application/json

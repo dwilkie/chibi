@@ -49,7 +49,7 @@ describe MissedCall do
 
     it "should return the missed call" do
       expect_call(:to => new_missed_call.from) do
-        new_missed_call.return_call!("http://example.com/phone_calls.xml")
+        new_missed_call.return_call!
       end
     end
   end

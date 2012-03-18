@@ -6,12 +6,12 @@ module MissedCallHelpers
   end
 
   def expect_call(options = {}, &block)
-    VCR.use_cassette("twilio/calls", :erb => {
+    VCR.use_cassette("twilio/calls", :match_requests_on => [:method, :uri, :body], :erb => {
       :account_sid => ENV['TWILIO_ACCOUNT_SID'],
       :auth_token =>  ENV['TWILIO_AUTH_TOKEN'],
       :from => ENV['TWILIO_OUTGOING_NUMBER'],
-      :to => options[:to],
-      :callback_url => options[:callback_url] || "http://example.com/phone_calls.xml"
+      :application_sid => ENV['TWILIO_APPLICATION_SID'],
+      :to => options[:to]
     }) do
       yield
     end
