@@ -27,8 +27,10 @@ class PhoneCall < ActiveRecord::Base
     end
   end
 
-  attr_accessor :redirect_url, :digits
+  attr_accessor :redirect_url, :digits, :to
   alias_attribute :call_sid, :sid
+
+  attr_accessible :to
 
   validates :sid, :presence => true, :uniqueness => true
 
@@ -81,6 +83,10 @@ class PhoneCall < ActiveRecord::Base
 
   def digits
     @digits.to_i
+  end
+
+  def to=(value)
+    write_attribute(:from, value) if value.present?
   end
 
   private

@@ -54,6 +54,24 @@ describe PhoneCall do
     end
   end
 
+  describe "#to" do
+    # phone calls should behave the same whether they were initiated by
+    # the user or not
+    it "should be an accessor that overrides #from if present" do
+      subject.from = "somebody"
+      subject.to = "somebody else"
+      subject.from.should == "somebody else"
+
+      subject.to = ""
+      subject.from.should == "somebody else"
+    end
+
+    it "should be mass assignable" do
+      new_phone_call = subject.class.new(:from => "somebody", :to => "somebody else")
+      new_phone_call.from.should == "somebody else"
+    end
+  end
+
   describe "#digits" do
     it "should be an accessor but return the set value as an integer" do
       subject.digits = "1234"

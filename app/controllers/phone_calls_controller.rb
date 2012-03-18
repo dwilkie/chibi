@@ -7,7 +7,7 @@ class PhoneCallsController < ApplicationController
   def create
     params.underscorify_keys!
 
-    phone_call = PhoneCall.find_or_initialize_by_sid(params[:call_sid], params.slice(:from))
+    phone_call = PhoneCall.find_or_initialize_by_sid(params[:call_sid], params.slice(:from, :to))
     if phone_call.save
       phone_call.redirect_url = request.url
       phone_call.digits = params[:digits]

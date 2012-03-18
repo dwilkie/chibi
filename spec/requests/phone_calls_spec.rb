@@ -42,6 +42,13 @@ describe "PhoneCalls" do
       end
     end
 
+    shared_examples_for "saving the phone call" do
+      it "should save the phone call" do
+        new_phone_call = PhoneCall.last
+        new_phone_call.from.should == from
+      end
+    end
+
     before do
       load_users
     end
@@ -139,9 +146,26 @@ describe "PhoneCalls" do
     end
 
     context "as a new user" do
+      context "when I am called", :focus do
+        context "and I answer" do
+          before do
+            call(:to => my_number)
+          end
+
+          it_should_behave_like "saving the phone call" do
+            let(:from) { my_number }
+          end
+
+        end
+      end
+
       context "when I call" do
         before do
-          call(:from => my_number, :call_sid => build(:phone_call).sid)
+          call(:from => my_number)
+        end
+
+        it_should_behave_like "saving the phone call" do
+          let(:from) { my_number }
         end
 
         it_should_behave_like "introducing me to chibi"
