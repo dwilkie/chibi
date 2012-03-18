@@ -4,6 +4,7 @@ class PhoneCall < ActiveRecord::Base
 
   module Digits
     MENU = 8
+    WANTS_NEW_FRIEND = 2
   end
 
   module PromptStates
@@ -39,7 +40,7 @@ class PhoneCall < ActiveRecord::Base
 
     state :welcoming_user do
       def to_twiml
-        generate_twiml { |twiml| twiml.Play play_url(:welcome) }
+        play(:welcome)
       end
     end
 
@@ -59,25 +60,51 @@ class PhoneCall < ActiveRecord::Base
       end
     end
 
-    state :connecting_user_with_friend do
+    state :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one do
+      def to_twiml
+        ask_for_input(:ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner)
+      end
+    end
+
+    state :telling_user_to_try_again_later do
+      def to_twiml
+        play(:tell_user_to_try_again_later, :hangup => true)
+      end
+    end
+
+    state :connecting_user_with_new_friend do
       def to_twiml
         generate_twiml { |twiml| twiml.Dial(user.match.mobile_number, :callerId => user.short_code) }
       end
     end
 
     event :process! do
-      transition :answered => :welcoming_user
-      transition :welcoming_user => :asking_for_gender, :if => :ask_for_gender?
-      transition [:welcoming_user, :asking_for_gender] => :asking_for_looking_for, :if => :ask_for_looking_for?
-      transition [:welcoming_user, :asking_for_gender, :asking_for_looking_for] => :offering_menu
+      transition(:answered => :welcoming_user)
+      transition(:welcoming_user => :asking_for_gender, :if => :ask_for_gender?)
+      transition([:welcoming_user, :asking_for_gender] => :asking_for_looking_for, :if => :ask_for_looking_for?)
+      transition([:welcoming_user, :asking_for_gender, :asking_for_looking_for] => :offering_menu)
 
       # Menu
-      transition :offering_menu => :asking_for_age_in_menu, :if => :wants_menu?
-      transition :asking_for_age_in_menu => :asking_for_gender_in_menu
-      transition :asking_for_gender_in_menu => :asking_for_looking_for_in_menu
-      transition :asking_for_looking_for_in_menu => :offering_menu
+      transition(:offering_menu => :asking_for_age_in_menu, :if => :wants_menu?)
+      transition(:asking_for_age_in_menu => :asking_for_gender_in_menu)
+      transition(:asking_for_gender_in_menu => :asking_for_looking_for_in_menu)
+      transition(:asking_for_looking_for_in_menu => :offering_menu)
 
-      transition :offering_menu => :connecting_user_with_friend
+      transition(
+        :offering_menu => :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one,
+        :if => :user_chatting?
+      )
+      transition(:offering_menu => :telling_user_to_try_again_later, :unless => :users_available?)
+      transition(:offering_menu => :connecting_user_with_new_friend)
+
+      transition(
+        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :connecting_user_with_new_friend,
+        :if => :wants_new_friend?
+      )
+
+      transition(
+        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :connecting_user_with_existing_friend
+      )
     end
   end
 
@@ -99,13 +126,29 @@ class PhoneCall < ActiveRecord::Base
     !user.looking_for?
   end
 
+  def user_chatting?
+    user.currently_chatting?
+  end
+
+  def users_available?
+    user.matches.any?
+  end
+
   def wants_menu?
     digits == Digits::MENU
+  end
+
+  def wants_new_friend?
+    digits == Digits::WANTS_NEW_FRIEND
   end
 
   def set_profile_from_digits(transition)
     user.send(transition.from.gsub("asking_for_", "").gsub("_in_menu", "") << "=", transition.object.digits)
     user.save
+  end
+
+  def play(file, options = {})
+    generate_twiml(options) { |twiml| twiml.Play play_url(file) }
   end
 
   def ask_for_input(prompt, options = {})

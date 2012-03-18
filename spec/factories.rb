@@ -1,4 +1,4 @@
-require "#{Rails.root}/spec/support/phone_call_prompt_states"
+require "#{Rails.root}/spec/support/phone_call_helpers"
 require "#{Rails.root}/spec/support/mobile_phone_helpers"
 
 FactoryGirl.define do
@@ -19,19 +19,36 @@ FactoryGirl.define do
     from { user.mobile_number }
     sequence(:sid)
 
-    factory :welcoming_user_phone_call do
-      state "welcoming_user"
+    extend PhoneCallHelpers::States
 
-      factory :welcoming_user_phone_call_from_user_with_known_gender do
-        association :user, :factory => :user_with_gender
+    with_phone_call_states do |phone_call_state, digit_sub_factories, factory_name|
+      factory(factory_name) do
+        state phone_call_state
 
-        factory :welcoming_user_phone_call_from_user_with_known_gender_and_looking_for_preference do
+        case phone_call_state
+        when "welcoming_user"
+          sub_factory_name = "#{factory_name}_from_user_with_known_gender".to_sym
+
+          factory(sub_factory_name) do
+            association :user, :factory => :user_with_gender
+
+            factory("#{sub_factory_name}_and_looking_for_preference".to_sym) do
+              association :user, :factory => :user_with_gender_and_looking_for_preference
+            end
+          end
+        when "offering_menu"
           association :user, :factory => :user_with_gender_and_looking_for_preference
+        end
+
+        digit_sub_factories.each do |sub_factory, factory_digits|
+          factory("#{factory_name}_#{sub_factory}") do
+            digits factory_digits
+          end
         end
       end
     end
 
-    extend PhoneCallPromptStates::States
+    extend PhoneCallHelpers::PromptStates
 
     with_phone_call_prompts do |attribute, call_context, factory_name, prompt_state|
       desired_user = call_context.present? ? :user_with_gender_and_looking_for_preference : :user
@@ -40,7 +57,7 @@ FactoryGirl.define do
         state prompt_state
         association :user, :factory => desired_user
 
-        extend PhoneCallPromptStates::GenderAnswers
+        extend PhoneCallHelpers::PromptStates::GenderAnswers
 
         with_gender_answers(factory_name, attribute) do |sex, factory_with_gender_answer, index|
           factory(factory_with_gender_answer) do
@@ -48,20 +65,6 @@ FactoryGirl.define do
           end
         end
       end
-    end
-
-    factory :offering_menu_phone_call do
-      state "offering_menu"
-
-      association :user, :factory => :user_with_gender_and_looking_for_preference
-
-      factory :offering_menu_phone_call_caller_wants_menu do
-        digits "8"
-      end
-    end
-
-    factory :connecting_user_with_friend_phone_call do
-      state "connecting_user_with_friend"
     end
   end
 

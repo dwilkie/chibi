@@ -9,7 +9,7 @@ class PhoneCallsController < ApplicationController
 
     phone_call = PhoneCall.find_or_initialize_by_sid(params[:call_sid], params.slice(:from, :to))
     if phone_call.save
-      phone_call.redirect_url = request.url
+      phone_call.redirect_url = current_authenticated_url
       phone_call.digits = params[:digits]
       phone_call.process!
       respond_to do |format|
@@ -25,4 +25,13 @@ class PhoneCallsController < ApplicationController
   def authenticate_phone_call
     authenticate(:phone_call)
   end
+
+  def current_authenticated_url
+    url = URI.parse(request.url)
+    user, password = ActionController::HttpAuthentication::Basic::user_name_and_password(request)
+    url.user = user
+    url.password = password
+    url.to_s
+  end
+
 end

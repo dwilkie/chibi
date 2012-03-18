@@ -620,6 +620,14 @@ describe User do
     end
   end
 
+  describe "#matches" do
+    it "should return all the matches for a user" do
+      subject.class.stub(:matches).with(subject).and_return([new_user])
+      subject.class.should_receive(:matches).with(subject)
+      subject.matches.should == [new_user]
+    end
+  end
+
   describe "#match" do
     it "should return the first match from .matches" do
       subject.class.stub(:matches).with(subject).and_return([new_user])

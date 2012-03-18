@@ -151,8 +151,12 @@ class User < ActiveRecord::Base
     replies.build.logout_or_end_chat(:logout => true) if options[:notify]
   end
 
+  def matches
+    self.class.matches(self)
+  end
+
   def match
-    self.class.matches(self).first
+    matches.first
   end
 
   private

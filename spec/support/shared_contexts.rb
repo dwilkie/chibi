@@ -51,7 +51,16 @@ shared_context "twiml" do
   end
 
   def assert_play(twiml_response, path, options = {})
+    options = options.dup
+    redirect_url = options.delete(:redirect_url)
+    hangup = options.delete(:hangup)
+
     assert_twiml(twiml_response, :play, options.merge(:content => "https://s3.amazonaws.com/chibimp3/#{path}"))
+    if redirect_url
+      assert_redirect(twiml_response, redirect_url, options)
+    elsif hangup
+      assert_hangup(twiml_response, options)
+    end
   end
 
   def assert_gather(twiml_response, options = {}, &block)
@@ -59,10 +68,26 @@ shared_context "twiml" do
   end
 
   def assert_redirect(twiml_response, url, options = {})
-    assert_twiml(twiml_response, :redirect, options.merge(:content => url))
+    assert_twiml(twiml_response, :redirect, options.merge(:content => authenticated_url(url)))
+  end
+
+  def assert_hangup(twiml_response, options = {})
+    assert_twiml(twiml_response, :hangup, options.merge(:content => ""))
   end
 
   def assert_dial(twiml_response, number, options = {})
     assert_twiml(twiml_response, :dial, options.merge(:content => number))
+  end
+
+  def authenticated_url(uri)
+    url = URI.parse(uri)
+    authentication_key = "HTTP_BASIC_AUTH_PHONE_CALL"
+    url.user = ENV["#{authentication_key}_USER"]
+    url.password = ENV["#{authentication_key}_PASSWORD"]
+    url.to_s
+  end
+
+  def filename_with_extension(filename)
+    "#{filename}.mp3"
   end
 end

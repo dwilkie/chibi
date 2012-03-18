@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-include PhoneCallPromptStates::States
+include PhoneCallHelpers::PromptStates
 
 describe PhoneCall do
   let(:phone_call) { create(:phone_call) }
@@ -81,13 +81,6 @@ describe PhoneCall do
 
   describe "#process!" do
 
-    shared_examples_for "connecting the user with a friend" do
-      it "should connect the user with a friend" do
-        reference_phone_call.process!
-        reference_phone_call.should be_connecting_user_with_friend
-      end
-    end
-
     shared_examples_for "asking the user for their gender" do |call_context|
       it "should ask the user for their gender" do
         reference_phone_call.process!
@@ -106,6 +99,13 @@ describe PhoneCall do
       it "should offer the user the menu" do
         reference_phone_call.process!
         reference_phone_call.should be_offering_menu
+      end
+    end
+
+    shared_examples_for "connecting the user with a new friend" do
+      it "should connect the user with a new friend" do
+        reference_phone_call.process!
+        reference_phone_call.should be_connecting_user_with_new_friend
       end
     end
 
@@ -146,7 +146,7 @@ describe PhoneCall do
       end
 
       context "prompting for user input" do
-        include PhoneCallPromptStates::GenderAnswers
+        include PhoneCallHelpers::PromptStates::GenderAnswers
 
         def assert_attribute_updated_and_transition(phone_call, attribute, asserted_attribute_value, next_state)
           caller = phone_call.user
@@ -189,9 +189,68 @@ describe PhoneCall do
           end
         end
 
-        context "and the user waits for timeout" do
-          it_should_behave_like "connecting the user with a friend" do
-            let(:reference_phone_call) { build(:offering_menu_phone_call) }
+        context "and the user holds the line" do
+          context "and they are already in a chat session with a friend" do
+            before do
+              create(:active_chat, :user => offering_menu_phone_call.user)
+            end
+
+            it "should ask them if they want to call their friend (again) or find a new one" do
+              offering_menu_phone_call.process!
+              offering_menu_phone_call.should be_asking_if_user_wants_to_find_a_new_friend_or_call_existing_one
+            end
+          end
+
+          context "and they are not currently in a chat session with a friend" do
+            context "but there are no other users online to chat with" do
+              it "should tell the user to try again later" do
+                offering_menu_phone_call.process!
+                offering_menu_phone_call.should be_telling_user_to_try_again_later
+              end
+            end
+
+            context "and there are other users online available to chat" do
+              before do
+                offering_menu_phone_call.user.stub(:matches).and_return([build(:user)])
+              end
+
+              it_should_behave_like "connecting the user with a new friend" do
+                let(:reference_phone_call) { offering_menu_phone_call }
+              end
+            end
+          end
+        end
+      end
+
+      context "asking_if_user_wants_to_find_a_new_friend_or_call_existing_one" do
+        factory_name = :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one_phone_call
+
+        shared_examples_for "connecting the user with his existing friend" do
+          it "should connect the user with his existing friend" do
+            reference_phone_call.process!
+            reference_phone_call.should be_connecting_user_with_existing_friend
+          end
+        end
+
+        context "and the user wants to call his existing friend" do
+          it_should_behave_like "connecting the user with his existing friend" do
+            let(:reference_phone_call) {
+              build("#{factory_name}_caller_wants_existing_friend".to_sym)
+            }
+          end
+        end
+
+        context "and the user wants to meet a new friend" do
+          it_should_behave_like "connecting the user with a new friend" do
+            let(:reference_phone_call) {
+              build("#{factory_name}_caller_wants_new_friend".to_sym)
+            }
+          end
+        end
+
+        context "and the user makes no choice" do
+          it_should_behave_like "connecting the user with his existing friend" do
+            let(:reference_phone_call) { build(factory_name) }
           end
         end
       end
@@ -201,19 +260,21 @@ describe PhoneCall do
   describe "#to_twiml" do
     include_context "twiml"
 
-    let(:redirect_url) { "http://example.com/twiml" }
+    let(:redirect_url) { authenticated_url("http://example.com/twiml") }
 
     def twiml_response(resource)
       parse_twiml(resource.to_twiml)
     end
 
-    def assert_num_commands(twiml, num_commands)
-      twiml.children.size.should == num_commands
-    end
-
     def assert_play_languages(phone_call, filename, options = {})
       user = phone_call.user
-      assert_play(twiml_response(phone_call), "#{user.locale}/#{filename}", options)
+      filename_with_extension = filename_with_extension(filename)
+
+      options[:redirect_url] ||= redirect_url unless options[:hangup]
+      phone_call.redirect_url = options[:redirect_url]
+
+      assert_play(twiml_response(phone_call), "#{user.locale}/#{filename_with_extension}", options)
+
       original_location = user.location
       user.location = build(:united_states)
 
@@ -221,24 +282,19 @@ describe PhoneCall do
         "choose a location with no translation to test the default locale"
       ) if I18n.available_locales.include?(user.locale)
 
-      assert_play(twiml_response(phone_call), "en/#{filename}", options)
+      assert_play(twiml_response(phone_call), "en/#{filename_with_extension}", options)
       user.location = original_location
     end
 
     def assert_ask_for_input(prompt, phone_call, twiml_options = {})
-      filename = "#{prompt}.mp3"
-      assert_play_languages(phone_call, filename)
-
-      phone_call.redirect_url = redirect_url
-      twiml = twiml_response(phone_call)
-
-      assert_num_commands(twiml, 2)
+      # automatically asserts redirect when calling with no options
+      assert_play_languages(phone_call, prompt)
+      filename_with_extension = filename_with_extension(prompt)
 
       twiml_options[:numDigits] ||= 1
-      assert_gather(twiml, twiml_options) do |gather|
-        assert_play(gather, "#{phone_call.user.locale}/#{filename}")
+      assert_gather(twiml_response(phone_call), twiml_options) do |gather|
+        assert_play(gather, "#{phone_call.user.locale}/#{filename_with_extension}")
       end
-      assert_redirect(twiml, redirect_url)
     end
 
     context "given the redirect url has been set" do
@@ -246,11 +302,7 @@ describe PhoneCall do
 
         context "welcoming the user" do
           it "should play the welcome message in the user's language" do
-            assert_play_languages(welcoming_user_phone_call, "welcome.mp3")
-            welcoming_user_phone_call.redirect_url = redirect_url
-            twiml = twiml_response(welcoming_user_phone_call)
-            assert_num_commands(twiml, 2)
-            assert_redirect(twiml, redirect_url)
+            assert_play_languages(welcoming_user_phone_call, :welcome)
           end
         end
 
@@ -266,6 +318,25 @@ describe PhoneCall do
         context "offering the menu" do
           it "should offer the menu" do
             assert_ask_for_input(:offer_menu, offering_menu_phone_call)
+          end
+        end
+
+        context "asking_if_user_wants_to_find_a_new_friend_or_call_existing_one" do
+          it "should ask the user if they want to find a new friend or call their existing chat partner" do
+            assert_ask_for_input(
+              :ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner,
+              build(:asking_if_user_wants_to_find_a_new_friend_or_call_existing_one_phone_call)
+            )
+          end
+        end
+
+        context "telling_user_to_try_again_later" do
+          it "should tell the user to try again later and hangup the call" do
+            assert_play_languages(
+              build(:telling_user_to_try_again_later_phone_call),
+              :tell_user_to_try_again_later,
+              :hangup => true
+            )
           end
         end
 

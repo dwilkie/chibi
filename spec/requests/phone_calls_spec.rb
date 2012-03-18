@@ -8,7 +8,6 @@ describe "PhoneCalls" do
     include_context "existing users"
     include_context "twiml"
 
-    let(:my_number) { "8553243313" }
     let(:twiml_response) { parse_twiml(response.body) }
 
     def current_call(options = {})
@@ -24,20 +23,19 @@ describe "PhoneCalls" do
     def assert_ask_for_input(prompt, twiml_options = {})
       twiml_options[:numDigits] ||= 1
       assert_gather(twiml_response, twiml_options) do |gather|
-        assert_play(gather, "kh/#{prompt}.mp3")
+        assert_play(gather, "kh/#{filename_with_extension(prompt)}")
       end
       assert_redirect_to_current_url
     end
 
     def update_current_call_status(options = {})
-      options[:from] ||= my_number
       options[:call_sid] ||= current_call
       update_call_status(options)
     end
 
     shared_examples_for "introducing me to chibi" do
       it "should introduce me to Chibi" do
-        assert_play(twiml_response, "kh/welcome.mp3")
+        assert_play(twiml_response, "kh/#{filename_with_extension(:welcome)}")
         assert_redirect_to_current_url
       end
     end
@@ -49,10 +47,6 @@ describe "PhoneCalls" do
       end
     end
 
-    before do
-      load_users
-    end
-
     context "as a user" do
       context "when I call" do
         context "and I am offered the menu" do
@@ -60,6 +54,22 @@ describe "PhoneCalls" do
 
           before do
             call(offering_menu_phone_call)
+          end
+
+          context "if I hold the line" do
+            context "but there are no matches for me" do
+              before do
+                update_current_call_status
+              end
+
+              it "should tell me to try again later and hangup" do
+                assert_play(
+                  twiml_response,
+                  "kh/#{filename_with_extension(:tell_user_to_try_again_later)}",
+                  :hangup => true
+                )
+              end
+            end
           end
 
           context "if I answer that I want the menu" do
@@ -146,7 +156,10 @@ describe "PhoneCalls" do
     end
 
     context "as a new user" do
-      context "when I am called", :focus do
+      let(:my_number) { "8553243313" }
+      let(:new_user) { User.where(:mobile_number => my_number).first }
+
+      context "when I am called" do
         context "and I answer" do
           before do
             call(:to => my_number)
@@ -186,6 +199,10 @@ describe "PhoneCalls" do
               )
             end
 
+            it "should save my preference" do
+              new_user.should be_male
+            end
+
             it "should ask me whether I want to chat with a guy or a girl" do
               assert_ask_for_input(:ask_for_looking_for)
             end
@@ -197,17 +214,25 @@ describe "PhoneCalls" do
                 )
               end
 
+              it "should save my preference" do
+                new_user.looking_for.should == "f"
+              end
+
               it "should offer me the menu" do
                 assert_ask_for_input(:offer_menu)
               end
 
               context "then if I don't want the menu" do
                 before do
+                  load_users
                   update_current_call_status
                 end
 
-                it "should connect me with a girl", :focus do
-                  assert_dial(twiml_response, mara.mobile_number)
+                context "and there is a girl online to talk with" do
+
+                  it "should connect me with her" do
+                    assert_dial(twiml_response, new_user.match.mobile_number)
+                  end
                 end
               end
             end
