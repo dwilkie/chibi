@@ -196,6 +196,12 @@ describe User do
     # Hanh has initiated more chat than Nok so he would have been matched before Nok, but
     # Hanh is offline so he is eliminated from the results anyway.
 
+    # Finally all of these users use mobile numbers which are not from a registered service provider
+    # We don't want to match these users with users that have mobile numbers which are from
+    # registered service providers. For example, say there are two registered service providers in Cambodia
+    # Smart and Mobitel. If a Metfone user contacts the app through the test gateway
+    # We don't want to match them with the Smart or Mobitel users, incase the test gateway is down or something.
+
     USER_MATCHES = {
       :alex => [:jamie],
       :jamie => [:alex],
@@ -239,16 +245,28 @@ describe User do
     end
 
     context "given there are other users" do
+      include_context "existing users"
+
       before do
         load_matches
+        users_from_registered_service_providers
       end
 
       it "should match the user with the best compatible match" do
         USER_MATCHES.each do |user, matches|
           results = subject.class.matches(send(user))
-          results.map { |match| match.name.to_sym }.should == matches
+          results.map { |match| match.name.try(:to_sym) || match.screen_name.to_sym }.should == matches
           results.each do |result|
             result.should_not be_readonly
+          end
+        end
+
+        users_from_registered_service_providers.each do |user_from_registered_service_provider|
+          results = subject.class.matches(user_from_registered_service_provider)
+          results.should_not be_empty
+
+          USER_MATCHES.each do |user_from_unregistered_service_provider, matches|
+            results.should_not include(send(user_from_unregistered_service_provider))
           end
         end
       end

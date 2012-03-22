@@ -64,6 +64,10 @@ class User < ActiveRecord::Base
     # exclude offline users
     match_scope = match_scope.where(:online => true)
 
+    # match users from registered service providers together
+    # and users from unregistered service providers together
+    match_scope = match_users_from_registered_service_providers(user, match_scope)
+
     # order first by location
     match_scope = filter_by_location(user, match_scope)
 
@@ -87,7 +91,7 @@ class User < ActiveRecord::Base
   end
 
   def short_code
-    SERVICE_PROVIDER_PREFIXES[locale.to_s][split_mobile_number[1][0..1]]
+    SERVICE_PROVIDER_PREFIXES[locale.to_s].try(:[], split_mobile_number[1][0..1])
   end
 
   def female?
@@ -274,14 +278,62 @@ class User < ActiveRecord::Base
     scope.order(Location.distance_from_sql(user.location))
   end
 
-  def assign_location
-    build_location(
-      :country_code => DIALING_CODES[split_mobile_number.first].try(:downcase)
-    ) unless persisted? || location.present?
+  def self.match_users_from_registered_service_providers(user, scope)
+    # skip this restriction if the user is from a country with no service providers
+    # another restriction says they can't be matched with users from other countries anyway
+    service_providers_in_users_location = SERVICE_PROVIDER_PREFIXES[user.locale.to_s]
+    return scope unless service_providers_in_users_location
+
+    # for the following examples '012' and '097' are prefixes of a registered service provider
+
+    # if the user being matched has a short code (i.e. there is a registered service provider for his number)
+    # match him with other users that have registered service providers. This prevents users
+    # who are coming through testing gateways being matched with users coming from registered service providers
+    # e.g. users.mobile_number LIKE 85512% OR users.mobile_number LIKE 85597%
+
+    # on the other hand if the user being matched has no short code
+    # (i.e. there is no registered service provider for his number)
+    # don't match him with users belong to a registered service provider
+    # e.g. users.mobile_number NOT LIKE 85512% OR users.mobile_number NOT LIKE 85597%
+
+    if user.short_code.present?
+      condition_sql = " OR "
+    else
+      negation_sql = "NOT "
+      condition_sql = " AND "
+    end
+
+    condition_statements = []
+    condition_values = []
+
+    service_providers_in_users_location.each do |prefix, short_code|
+      condition_statements << "\"#{table_name}\".\"mobile_number\" #{negation_sql}LIKE ?"
+      condition_values << "#{international_dialing_code(user.mobile_number)}#{prefix}%"
+    end
+
+    scope.where(condition_statements.join(condition_sql), *condition_values)
+  end
+
+  def self.split_mobile_number(number)
+    Phony.split(number.to_i.to_s)
+  end
+
+  def self.international_dialing_code(number)
+    split_mobile_number(number).first
+  end
+
+  def international_dialing_code
+    self.class.international_dialing_code(mobile_number)
   end
 
   def split_mobile_number
-    Phony.split(mobile_number.to_i.to_s)
+    self.class.split_mobile_number(mobile_number)
+  end
+
+  def assign_location
+    build_location(
+      :country_code => DIALING_CODES[international_dialing_code].try(:downcase)
+    ) unless persisted? || location.present?
   end
 
   def set_gender_related_attribute(attribute, value)
