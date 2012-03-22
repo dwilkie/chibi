@@ -1,4 +1,6 @@
 shared_context "existing users" do
+  include MobilePhoneHelpers
+
   USERS = [:dave, :nok, :mara, :alex, :joy]
 
   USERS.each do |user|
@@ -9,6 +11,14 @@ shared_context "existing users" do
     USERS.each do |user|
       send(user)
     end
+  end
+
+  let(:users_from_registered_service_providers) do
+    users = []
+    with_service_providers do |service_provider, prefix, short_code, factory_name|
+      users << User.create!(:mobile_number => build(factory_name).mobile_number)
+    end
+    users
   end
 end
 

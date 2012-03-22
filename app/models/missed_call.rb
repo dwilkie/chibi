@@ -1,5 +1,6 @@
 class MissedCall < ActiveRecord::Base
   include Communicable
+  include TwilioHelpers
 
   attr_accessor :subject
   attr_accessible :subject
@@ -27,14 +28,6 @@ class MissedCall < ActiveRecord::Base
 
   def default_country_code
     Phony.split(ENV['TWILIO_OUTGOING_NUMBER'])[0]
-  end
-
-  def twilio_formatted(number)
-    Phony.formatted(number, :format => :international, :spaces => "")
-  end
-
-  def twilio_outgoing_number
-    twilio_formatted(ENV['TWILIO_OUTGOING_NUMBER'])
   end
 
   def twilio_client

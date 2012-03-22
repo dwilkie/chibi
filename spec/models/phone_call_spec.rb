@@ -340,26 +340,37 @@ describe PhoneCall do
           end
         end
 
-        context "connecting user with a friend" do
+        context "connecting user with a new friend" do
           include_context "existing users"
 
           before do
             load_users
           end
 
-          let(:connecting_user_with_friend_phone_call) do
-            build(:connecting_user_with_friend_phone_call, :user => dave)
+          context "the matched user has a short code" do
+            before do
+              users_from_registered_service_providers
+            end
+
+            it "should dial a new friend and set the callerId to the new friends mobile operator short code" do
+              user = users_from_registered_service_providers.first
+              users_new_friend = user.match
+              twiml = twiml_response(build(:connecting_user_with_new_friend_phone_call, :user => user))
+              assert_dial(twiml, users_new_friend.mobile_number, :callerId => users_new_friend.short_code)
+            end
           end
 
-          it "should dial another user" do
-            twiml = twiml_response(connecting_user_with_friend_phone_call)
-            assert_dial(twiml, mara.mobile_number, :callerId => mara.short_code)
-          end
-
-          context "the matched user does not have a short code..." do
-            # this user cannot be dialed!!
-            # put this user offline if this is an expected result?
-            pending
+          context "the matched user does not have a short code" do
+            it "should dial a new friend and set the callerId to the Twilio number" do
+              twiml = twiml_response(build(:connecting_user_with_new_friend_phone_call, :user => dave))
+              assert_dial(
+                twiml,
+                dave.match.mobile_number,
+                :callerId => Phony.formatted(
+                  ENV['TWILIO_OUTGOING_NUMBER'], :format => :international, :spaces => ""
+                )
+              )
+            end
           end
         end
       end

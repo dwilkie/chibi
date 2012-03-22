@@ -1,6 +1,7 @@
 class PhoneCall < ActiveRecord::Base
   include Communicable
   include Communicable::Chatable
+  include TwilioHelpers
 
   module Digits
     MENU = 8
@@ -74,7 +75,9 @@ class PhoneCall < ActiveRecord::Base
 
     state :connecting_user_with_new_friend do
       def to_twiml
-        generate_twiml { |twiml| twiml.Dial(user.match.mobile_number, :callerId => user.short_code) }
+        generate_twiml do |twiml|
+          twiml.Dial(user.match.mobile_number, :callerId => user.short_code || twilio_outgoing_number)
+        end
       end
     end
 
