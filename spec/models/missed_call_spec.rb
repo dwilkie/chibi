@@ -21,26 +21,28 @@ describe MissedCall do
     end
   end
 
-  describe "#subject" do
-    it "should be an accessor" do
-      subject.subject = "subject"
-      subject.subject.should == "subject"
+  [:subject, :message].each do |attribute|
+    describe "##{attribute}" do
+      it "should be an accessor" do
+        subject.send("#{attribute}=", attribute)
+        subject.send(attribute).should == attribute
+      end
+
+      it "should be mass assignable" do
+        new_missed_call = subject.class.new(attribute => attribute)
+        new_missed_call.send(attribute).should == attribute
+      end
     end
 
-    it "should be mass assignable" do
-      new_missed_call = subject.class.new(:subject => "subject")
-      new_missed_call.subject.should == "subject"
-    end
-  end
-
-  describe "#subject=" do
-    it "should try extract the origin from the subject" do
-      subject.subject = "missed call from 012344566 today"
-      subject.from.should == "85512344566"
-      subject.subject = "missed call from 85512344500"
-      subject.from.should == "85512344500"
-      subject.subject = "blah +85512344556 blah blah "
-      subject.from.should == "85512344556"
+    describe "##{attribute}=" do
+      it "should try extract the origin from the #{attribute}" do
+        subject.send("#{attribute}=", "missed call from 012344566 today")
+        subject.from.should == "85512344566"
+        subject.send("#{attribute}=", "missed call from 85512344500")
+        subject.from.should == "85512344500"
+        subject.send("#{attribute}=", "blah +85512344556 blah blah ")
+        subject.from.should == "85512344556"
+      end
     end
   end
 

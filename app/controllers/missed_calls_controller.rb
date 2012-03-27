@@ -5,7 +5,7 @@ class MissedCallsController < ApplicationController
   before_filter :authenticate_admin, :except => :create
 
   def create
-    missed_call = MissedCall.new(params.slice(:subject))
+    missed_call = MissedCall.new(params.slice(:subject, :message))
     if missed_call.save
       Resque.enqueue(Dialer, missed_call.id)
       status = :ok

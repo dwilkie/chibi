@@ -3,7 +3,9 @@ class MissedCall < ActiveRecord::Base
   include TwilioHelpers
 
   attr_accessor :subject
-  attr_accessible :subject
+  attr_accessible :subject, :message
+
+  alias_attribute :message, :subject
 
   def subject=(value)
     @subject = value
