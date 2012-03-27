@@ -21,7 +21,7 @@ describe MissedCall do
     end
   end
 
-  [:subject, :message].each do |attribute|
+  [:subject, :plain].each do |attribute|
     describe "##{attribute}" do
       it "should be an accessor" do
         subject.send("#{attribute}=", attribute)
