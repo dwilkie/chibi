@@ -46,11 +46,11 @@ describe Message do
 
   describe "#origin" do
     it "should be an alias for the attribute '#from'" do
-      subject.from = 123
-      subject.origin.should == 123
+      subject.from = "123"
+      subject.origin.should == "123"
 
-      subject.origin = 456
-      subject.from.should == 456
+      subject.origin = "456"
+      subject.from.should == "456"
     end
   end
 
