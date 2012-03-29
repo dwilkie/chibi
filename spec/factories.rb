@@ -21,8 +21,11 @@ FactoryGirl.define do
 
     extend PhoneCallHelpers::States
 
-    with_phone_call_states do |phone_call_state, digit_sub_factories, factory_name|
-      factory(factory_name) do
+    with_phone_call_states do |factory_name, phone_call_state, next_state, sub_factories, parent|
+      factory_options = {}
+      factory_options.merge(:parent => parent) if parent
+
+      factory(factory_name, factory_options) do
         state phone_call_state
 
         case phone_call_state
@@ -38,30 +41,18 @@ FactoryGirl.define do
           end
         when "offering_menu"
           association :user, :factory => :user_with_gender_and_looking_for_preference
-        end
-
-        digit_sub_factories.each do |sub_factory, factory_digits|
-          factory("#{factory_name}_#{sub_factory}") do
-            digits factory_digits
+        when "finding_new_friend"
+          sub_factory_name = "#{factory_name}_friend_found".to_sym
+          factory(sub_factory_name) do
+            association :chat, :factory => :active_chat
+            user { chat.user }
           end
         end
-      end
-    end
 
-    extend PhoneCallHelpers::PromptStates
-
-    with_phone_call_prompts do |attribute, call_context, factory_name, prompt_state|
-      desired_user = call_context.present? ? :user_with_gender_and_looking_for_preference : :user
-
-      factory(factory_name) do
-        state prompt_state
-        association :user, :factory => desired_user
-
-        extend PhoneCallHelpers::PromptStates::GenderAnswers
-
-        with_gender_answers(factory_name, attribute) do |sex, factory_with_gender_answer, index|
-          factory(factory_with_gender_answer) do
-            digits((index + 1).to_s)
+        sub_factories.each do |sub_factory_name, substate_attributes|
+          attribute_value_pair = substate_attributes.values.first
+          factory(sub_factory_name) do
+            send(attribute_value_pair.keys.first, attribute_value_pair.values.first.to_s)
           end
         end
       end

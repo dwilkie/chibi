@@ -51,6 +51,11 @@ class Chat < ActiveRecord::Base
     end
   end
 
+  def activate(options = {})
+    activate!(options)
+    active?
+  end
+
   def deactivate!(options = {})
     active_users.clear
 

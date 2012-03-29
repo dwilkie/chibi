@@ -49,28 +49,26 @@ shared_context "twiml" do
     index = options.delete(:index) || 0
     content = options.delete(:content)
 
-    command_xpath = twiml_response.xpath(
-      "//#{command.to_s.capitalize}"
-    )
+    xpath = command_xpath(twiml_response, command)
 
     options.each do |attribute, value|
-      command_xpath[index].attributes[attribute.to_s].value.should == value.to_s
+      xpath[index].attributes[attribute.to_s].value.should == value.to_s
     end
 
-    block_given? ? yield(command_xpath) : command_xpath[index].content.strip.should.should == content
+    block_given? ? yield(xpath) : xpath[index].content.strip.should.should == content
+  end
+
+  def assert_no_twiml(twiml_response, command)
+    xpath = command_xpath(twiml_response, command)
+    xpath.should be_empty
+  end
+
+  def command_xpath(twiml_response, command)
+    twiml_response.xpath("//#{command.to_s.capitalize}")
   end
 
   def assert_play(twiml_response, path, options = {})
-    options = options.dup
-    redirect_url = options.delete(:redirect_url)
-    hangup = options.delete(:hangup)
-
     assert_twiml(twiml_response, :play, options.merge(:content => "https://s3.amazonaws.com/chibimp3/#{path}"))
-    if redirect_url
-      assert_redirect(twiml_response, redirect_url, options)
-    elsif hangup
-      assert_hangup(twiml_response, options)
-    end
   end
 
   def assert_gather(twiml_response, options = {}, &block)
@@ -81,12 +79,17 @@ shared_context "twiml" do
     assert_twiml(twiml_response, :redirect, options.merge(:content => authenticated_url(url)))
   end
 
+  def assert_no_redirect(twiml_response)
+    assert_no_twiml twiml_response, :redirect
+  end
+
   def assert_hangup(twiml_response, options = {})
     assert_twiml(twiml_response, :hangup, options.merge(:content => ""))
   end
 
-  def assert_dial(twiml_response, number, options = {})
-    assert_twiml(twiml_response, :dial, options.merge(:content => number))
+  def assert_dial(twiml_response, url, number, options = {})
+    assert_twiml(twiml_response, :dial, options.merge(:content => number, :action => authenticated_url(url)))
+    assert_no_redirect(twiml_response)
   end
 
   def authenticated_url(uri)

@@ -1,17 +1,15 @@
 require 'spec_helper'
 
+include PhoneCallHelpers::States
 include PhoneCallHelpers::PromptStates
 
 describe PhoneCall do
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
-  let(:welcoming_user_phone_call) { build(:welcoming_user_phone_call) }
 
   with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag|
     let(reference_phone_call_tag) { build(reference_phone_call_tag) }
   end
-
-  let(:offering_menu_phone_call) { build(:offering_menu_phone_call) }
 
   describe "factory" do
     it "should be valid" do
@@ -54,6 +52,20 @@ describe PhoneCall do
     end
   end
 
+  describe "#dial_status" do
+    it "should be an accessor" do
+      subject.dial_status = "some_status"
+      subject.dial_status.should == "some_status"
+    end
+  end
+
+  describe "#call_status" do
+    it "should be an accessor" do
+      subject.call_status = "some_call_status"
+      subject.call_status.should == "some_call_status"
+    end
+  end
+
   describe "#to" do
     # phone calls should behave the same whether they were initiated by
     # the user or not
@@ -80,6 +92,11 @@ describe PhoneCall do
   end
 
   describe "#process!" do
+    def assert_phone_call_can_be_completed(reference_phone_call)
+      reference_phone_call.call_status = "completed"
+      reference_phone_call.process!
+      reference_phone_call.should be_completed
+    end
 
     shared_examples_for "asking the user for their gender" do |call_context|
       it "should ask the user for their gender" do
@@ -102,20 +119,39 @@ describe PhoneCall do
       end
     end
 
+    shared_examples_for "finding a new friend" do
+      it "should find the user a new friend" do
+        reference_phone_call.process!
+        reference_phone_call.should be_finding_new_friend
+      end
+    end
+
     shared_examples_for "connecting the user with a new friend" do
-      it "should connect the user with a new friend" do
+      it "should connect the user with a his new friend" do
+        reference_phone_call.chat.should be_present
         reference_phone_call.process!
         reference_phone_call.should be_connecting_user_with_new_friend
       end
     end
 
-    context "the phone call is" do
-      context "answered" do
-        it "should welcome the user" do
-          new_phone_call.process!
-          new_phone_call.should be_welcoming_user
-        end
+    shared_examples_for "hanging up" do
+      it "should hang up the call" do
+        reference_phone_call.process!
+        reference_phone_call.should be_hanging_up
       end
+    end
+
+    it "should transition to the correct state", :focus do
+      with_phone_call_states do |factory_name, phone_call_state, next_state, sub_factories, parent|
+        assert_phone_call_can_be_completed(build(factory_name))
+
+        phone_call = build(factory_name)
+        phone_call.process!
+        phone_call.should send("be_#{next_state}")
+      end
+    end
+
+    context "the phone call is" do
 
       context "welcoming the user" do
         context "and the users gender is unknown" do
@@ -145,7 +181,7 @@ describe PhoneCall do
         end
       end
 
-      context "prompting for user input" do
+      context "prompting for user input", :focus do
         include PhoneCallHelpers::PromptStates::GenderAnswers
 
         def assert_attribute_updated_and_transition(phone_call, attribute, asserted_attribute_value, next_state)
@@ -176,6 +212,8 @@ describe PhoneCall do
               phone_call.digits = "24"
               assert_attribute_updated_and_transition(phone_call, attribute, 24, next_state)
             end
+
+            assert_phone_call_can_be_completed(build(reference_phone_call_tag))
           end
         end
       end
@@ -202,22 +240,25 @@ describe PhoneCall do
           end
 
           context "and they are not currently in a chat session with a friend" do
-            context "but there are no other users online to chat with" do
-              it "should tell the user to try again later" do
-                offering_menu_phone_call.process!
-                offering_menu_phone_call.should be_telling_user_to_try_again_later
-              end
+            it_should_behave_like "finding a new friend" do
+              let(:reference_phone_call) { offering_menu_phone_call }
             end
+          end
+        end
+      end
 
-            context "and there are other users online available to chat" do
-              before do
-                offering_menu_phone_call.user.stub(:matches).and_return([build(:user)])
-              end
+      context "finding_new_friend" do
+        factory_name = :finding_new_friend_phone_call
+        context "but there are no other users online to chat with" do
+          it "should tell the user to try again later" do
+            send(factory_name).process!
+            send(factory_name).should be_telling_user_to_try_again_later
+          end
+        end
 
-              it_should_behave_like "connecting the user with a new friend" do
-                let(:reference_phone_call) { offering_menu_phone_call }
-              end
-            end
+        context "and there are other users online available to chat" do
+          it_should_behave_like "connecting the user with a new friend" do
+            let(:reference_phone_call) { build("#{factory_name}_friend_found") }
           end
         end
       end
@@ -226,9 +267,30 @@ describe PhoneCall do
         factory_name = :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one_phone_call
 
         shared_examples_for "connecting the user with his existing friend" do
-          it "should connect the user with his existing friend" do
-            reference_phone_call.process!
-            reference_phone_call.should be_connecting_user_with_existing_friend
+
+          context "if the friend is still available to chat" do
+            let(:active_chat) { create(:active_chat, :user => reference_phone_call.user) }
+
+            before do
+              active_chat
+            end
+
+            it "should connect the user with his existing friend" do
+              reference_phone_call.process!
+              reference_phone_call.should be_connecting_user_with_existing_friend
+              reference_phone_call.chat.should == active_chat
+              active_chat.reload
+              active_chat.updated_at.should > active_chat.created_at
+            end
+          end
+
+          # this is a rare case but it could happen
+          # if the chat gets expired before the user makes a decision
+          context "if the friend is no longer available to chat" do
+            it "should tell the user that their friend is no longer available to chat" do
+              reference_phone_call.process!
+              reference_phone_call.should be_telling_user_their_friend_is_unavailable
+            end
           end
         end
 
@@ -241,7 +303,7 @@ describe PhoneCall do
         end
 
         context "and the user wants to meet a new friend" do
-          it_should_behave_like "connecting the user with a new friend" do
+          it_should_behave_like "finding a new friend" do
             let(:reference_phone_call) {
               build("#{factory_name}_caller_wants_new_friend".to_sym)
             }
@@ -254,6 +316,30 @@ describe PhoneCall do
           end
         end
       end
+
+      context "connecting_user_with_new_friend" do
+        factory_name = :connecting_user_with_new_friend_phone_call
+
+        context "if the call is answered" do
+          let(:phone_call) { build("#{factory_name}_dial_status_completed") }
+
+          it_should_behave_like "hanging up" do
+            let(:reference_phone_call) { phone_call }
+          end
+        end
+
+        context "if the call is not answered" do
+          it_should_behave_like "finding a new friend" do
+            let(:reference_phone_call) { build("#{factory_name}_dial_status_no_answer") }
+          end
+        end
+      end
+
+      context "hanging_up" do
+        it "should complete the call" do
+          assert_phone_call_can_be_completed(build(:hanging_up_phone_call))
+        end
+      end
     end
   end
 
@@ -263,17 +349,22 @@ describe PhoneCall do
     let(:redirect_url) { authenticated_url("http://example.com/twiml") }
 
     def twiml_response(resource)
+      resource.redirect_url = redirect_url
       parse_twiml(resource.to_twiml)
+    end
+
+    def assert_dial_to_redirect_url(twiml, number, options = {})
+      assert_dial(twiml, redirect_url, number, options)
     end
 
     def assert_play_languages(phone_call, filename, options = {})
       user = phone_call.user
       filename_with_extension = filename_with_extension(filename)
 
-      options[:redirect_url] ||= redirect_url unless options[:hangup]
-      phone_call.redirect_url = options[:redirect_url]
+      twiml = twiml_response(phone_call)
 
-      assert_play(twiml_response(phone_call), "#{user.locale}/#{filename_with_extension}", options)
+      assert_play(twiml, "#{user.locale}/#{filename_with_extension}", options)
+      assert_redirect(twiml, redirect_url, options)
 
       original_location = user.location
       user.location = build(:united_states)
@@ -287,7 +378,7 @@ describe PhoneCall do
     end
 
     def assert_ask_for_input(prompt, phone_call, twiml_options = {})
-      # automatically asserts redirect when calling with no options
+      # automatically asserts redirect
       assert_play_languages(phone_call, prompt)
       filename_with_extension = filename_with_extension(prompt)
 
@@ -321,7 +412,7 @@ describe PhoneCall do
           end
         end
 
-        context "asking_if_user_wants_to_find_a_new_friend_or_call_existing_one" do
+        context "asking if the user wants to find a new friend or call their existing one" do
           it "should ask the user if they want to find a new friend or call their existing chat partner" do
             assert_ask_for_input(
               :ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner,
@@ -330,46 +421,127 @@ describe PhoneCall do
           end
         end
 
-        context "telling_user_to_try_again_later" do
-          it "should tell the user to try again later and hangup the call" do
+        context "telling the user to try again later" do
+          it "should tell the user to try again later" do
             assert_play_languages(
-              build(:telling_user_to_try_again_later_phone_call),
-              :tell_user_to_try_again_later,
-              :hangup => true
+              send(:telling_user_to_try_again_later_phone_call),
+              :tell_user_to_try_again_later
             )
           end
         end
 
-        context "connecting user with a new friend" do
+        context "finding a new friend" do
+          it "should redirect" do
+            assert_redirect(twiml_response(finding_new_friend_phone_call), redirect_url)
+          end
+        end
+
+        context "hanging up" do
+          it "should hang up" do
+            assert_hangup(twiml_response(build(:hanging_up_phone_call)))
+          end
+        end
+
+        context "completed" do
+          it "should return nothing" do
+            build(:completed_phone_call).to_twiml.should be_nil
+          end
+        end
+
+        context "telling the user that their friend is unavailable to chat" do
+          it "should tell the user that their friend is unavailable to chat" do
+            assert_play_languages(
+              build(:telling_user_their_friend_is_unavailable_phone_call),
+              :tell_user_their_friend_is_unavailable
+            )
+          end
+        end
+
+        context "connecting the user" do
+          include PhoneCallHelpers::Twilio
+
           include_context "existing users"
 
-          before do
-            load_users
-          end
-
-          context "the matched user has a short code" do
+          context "with a new friend" do
             before do
-              users_from_registered_service_providers
+              load_users # without short codes
             end
 
-            it "should dial a new friend and set the callerId to the new friends mobile operator short code" do
-              user = users_from_registered_service_providers.first
-              users_new_friend = user.match
-              twiml = twiml_response(build(:connecting_user_with_new_friend_phone_call, :user => user))
-              assert_dial(twiml, users_new_friend.mobile_number, :callerId => users_new_friend.short_code)
+            context "who has a short code" do
+              before do
+                users_from_registered_service_providers
+              end
+
+              it "should dial a new friend and set the callerId to the new friends mobile operator short code" do
+                user = users_from_registered_service_providers.first
+                users_new_friend = user.match
+                twiml = twiml_response(build(:connecting_user_with_new_friend_phone_call, :user => user))
+                assert_dial_to_redirect_url(
+                  twiml, users_new_friend.mobile_number, :callerId => users_new_friend.short_code
+                )
+              end
+            end
+
+            context "who does not have a short code" do
+              it "should dial a new friend and set the callerId to the Twilio number" do
+                twiml = twiml_response(build(:connecting_user_with_new_friend_phone_call, :user => dave))
+                assert_dial_to_redirect_url(
+                  twiml,
+                  dave.match.mobile_number,
+                  :callerId => formatted_twilio_number
+                )
+              end
             end
           end
 
-          context "the matched user does not have a short code" do
-            it "should dial a new friend and set the callerId to the Twilio number" do
-              twiml = twiml_response(build(:connecting_user_with_new_friend_phone_call, :user => dave))
-              assert_dial(
-                twiml,
-                dave.match.mobile_number,
-                :callerId => Phony.formatted(
-                  ENV['TWILIO_OUTGOING_NUMBER'], :format => :international, :spaces => ""
+          context "with his existing friend" do
+
+            context "who has a short code" do
+              # scenario: John started a chat with Jane and is actively chatting
+              # Jane calls in so Jane is the dialer and John is the dialers friend
+              # John belongs to a mobile operator with a registered short code
+              let(:dialer) { users_from_registered_service_providers.first }
+              let(:dialers_friend) { users_from_registered_service_providers.last }
+              let(:active_chat) { create(:active_chat, :user => dialers_friend, :friend => dialer) }
+
+              before do
+                active_chat
+              end
+
+              it "should dial the friend and set the callerId to the friends mobile operator short code" do
+                twiml = twiml_response(
+                  build(:connecting_user_with_existing_friend_phone_call, :user => dialer, :chat => active_chat)
                 )
-              )
+
+                assert_dial_to_redirect_url(
+                  twiml, dialers_friend.mobile_number, :callerId => dialers_friend.short_code
+                )
+              end
+            end
+
+            context "who does not have a short code" do
+              # scenario: Andy started a chat with Kunthia and is actively chatting
+              # Andy calls in so Andy is the dialer and Kunthia is the dialers friend
+              # Kunthia does not belong to a mobile operator with a registered short code
+
+              let(:active_chat) { create(:active_chat) }
+
+              let(:dialer) { active_chat.user }
+              let(:dialers_friend) { active_chat.friend }
+
+              before do
+                active_chat
+              end
+
+              it "should dial the friend and set the callerId to Twilio number" do
+                twiml = twiml_response(
+                  build(:connecting_user_with_existing_friend_phone_call, :user => dialer, :chat => active_chat)
+                )
+
+                assert_dial_to_redirect_url(
+                  twiml, dialers_friend.mobile_number, :callerId => formatted_twilio_number
+                )
+              end
             end
           end
         end

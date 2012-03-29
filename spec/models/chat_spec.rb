@@ -71,6 +71,25 @@ describe Chat do
     end
   end
 
+  describe "#activate" do
+    before do
+      subject.stub(:activate!)
+    end
+
+    it "should pass the options to #activate!" do
+      subject.should_receive(:activate!).with({:some_option => "some option"})
+      subject.activate({:some_option => "some option"})
+    end
+
+    it "should return whether on not the chat is active" do
+      subject.stub(:active?).and_return(true)
+      subject.activate.should be_true
+
+      subject.stub(:active?).and_return(false)
+      subject.activate.should be_false
+    end
+  end
+
   describe "#activate!" do
     shared_examples_for "activating a chat" do
       it "should set the active users and save the chat" do

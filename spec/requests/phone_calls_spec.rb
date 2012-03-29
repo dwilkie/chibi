@@ -4,6 +4,7 @@ describe "PhoneCalls" do
 
   describe "POST /phone_calls.xml" do
     include PhoneCallHelpers
+    include PhoneCallHelpers::Twilio
 
     include_context "existing users"
     include_context "twiml"
@@ -18,6 +19,15 @@ describe "PhoneCalls" do
 
     def assert_redirect_to_current_url
       assert_redirect(twiml_response, phone_calls_url)
+    end
+
+    def assert_play_then_redirect_to_current_url(file)
+      assert_play(twiml_response, "kh/#{filename_with_extension(file)}")
+      assert_redirect_to_current_url
+    end
+
+    def assert_dial_to_current_url(number, options = {})
+      assert_dial(twiml_response, phone_calls_url, number, options)
     end
 
     def assert_ask_for_input(prompt, twiml_options = {})
@@ -35,8 +45,7 @@ describe "PhoneCalls" do
 
     shared_examples_for "introducing me to chibi" do
       it "should introduce me to Chibi" do
-        assert_play(twiml_response, "kh/#{filename_with_extension(:welcome)}")
-        assert_redirect_to_current_url
+        assert_play_then_redirect_to_current_url(:welcome)
       end
     end
 
@@ -44,6 +53,70 @@ describe "PhoneCalls" do
       it "should save the phone call" do
         new_phone_call = PhoneCall.last
         new_phone_call.from.should == from
+      end
+    end
+
+    context "as an existing user in a chat session" do
+      let(:active_chat) { create(:active_chat) }
+
+      context "when I call" do
+        context "and I am offered the menu" do
+
+          let(:offering_menu_phone_call) { create(:offering_menu_phone_call, :user => active_chat.user) }
+
+          before do
+            call(offering_menu_phone_call)
+          end
+
+          context "if I hold the line" do
+            before do
+              update_current_call_status
+            end
+
+            it "should ask me if I want to chat with my friend" do
+              assert_ask_for_input(
+                :ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner
+              )
+            end
+
+            context "and I hold the line again" do
+              context "and my friend is still available to chat" do
+                before do
+                  update_current_call_status
+                end
+
+                it "should connect me with my friend" do
+                  assert_dial_to_current_url(active_chat.friend.mobile_number, :callerId => formatted_twilio_number)
+                end
+              end
+
+              context "but my friend is no longer available to chat" do
+                before do
+                  active_chat.deactivate!
+                  update_current_call_status
+                end
+
+                it "should tell me that my friend is no longer available and to hold the line to find a new friend" do
+                  assert_play_then_redirect_to_current_url(:tell_user_their_friend_is_unavailable)
+                end
+
+                context "and I hold the line again" do
+                  before do
+                    load_users
+                    update_current_call_status
+                  end
+
+                  it "should connect me with a new friend" do
+                    assert_dial_to_current_url(
+                      offering_menu_phone_call.user.match.mobile_number,
+                      :callerId => formatted_twilio_number
+                    )
+                  end
+                end
+              end
+            end
+          end
+        end
       end
     end
 
@@ -62,12 +135,18 @@ describe "PhoneCalls" do
                 update_current_call_status
               end
 
-              it "should tell me to try again later and hangup" do
-                assert_play(
-                  twiml_response,
-                  "kh/#{filename_with_extension(:tell_user_to_try_again_later)}",
-                  :hangup => true
-                )
+              it "should tell me to try again later" do
+                assert_play_then_redirect_to_current_url(:tell_user_to_try_again_later)
+              end
+
+              context "if I keep holding the line" do
+                before do
+                  update_current_call_status
+                end
+
+                it "should hang up" do
+                  assert_hangup(twiml_response)
+                end
               end
             end
           end
@@ -222,16 +301,46 @@ describe "PhoneCalls" do
                 assert_ask_for_input(:offer_menu)
               end
 
-              context "then if I don't want the menu" do
+              context "and if I don't want the menu" do
                 before do
                   load_users
                   update_current_call_status
                 end
 
                 context "and there is a girl online to talk with" do
+                  let(:user_matches) { new_user.matches }
 
-                  it "should connect me with her" do
-                    assert_dial(twiml_response, new_user.match.mobile_number)
+                  it "should try to connect me with her" do
+                    assert_dial_to_current_url(user_matches[0].mobile_number)
+                  end
+
+                  context "if she answers", :focus do
+                    before do
+                      update_current_call_status(:dial_call_status => :completed)
+                    end
+
+                    it "should start a new chat session with her" do
+                      new_chat = new_user.active_chat
+                      new_chat.should be_present
+                      new_chat.partner(user).should == user_matches[0]
+                    end
+
+                    context "and hangs up first" do
+                      # change this later...
+                      it "should hang up" do
+                        assert_hangup(twiml_response)
+                      end
+                    end
+                  end
+
+                  context "but she does not answer" do
+                    before do
+                      update_current_call_status(:dial_call_status => :no_answer)
+                    end
+
+                    it "should try to connect me with another girl" do
+                      assert_dial_to_current_url(user_matches[1].mobile_number)
+                    end
                   end
                 end
               end
