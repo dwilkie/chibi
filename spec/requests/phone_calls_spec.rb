@@ -139,6 +139,16 @@ describe "PhoneCalls" do
             call(offering_menu_phone_call)
           end
 
+          context "if I hang up" do
+            before do
+              update_current_call_status(:call_status => :completed)
+            end
+
+            it "should complete the phone call" do
+              response.body.should be_empty
+            end
+          end
+
           context "if I hold the line" do
             before do
               update_current_call_status

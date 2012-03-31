@@ -11,6 +11,7 @@ class PhoneCallsController < ApplicationController
     if phone_call.save
       phone_call.redirect_url = current_authenticated_url
       phone_call.digits = params[:digits]
+      phone_call.call_status = params[:call_status]
       phone_call.dial_status = params[:dial_call_status]
       phone_call.process!
       respond_to do |format|

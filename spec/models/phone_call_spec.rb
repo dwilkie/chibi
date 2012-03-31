@@ -179,7 +179,7 @@ describe PhoneCall do
     end
 
     def assert_no_response(phone_call)
-      phone_call.to_twiml.should be_nil
+      phone_call.to_twiml.should be_empty
     end
 
     def assert_redirect_to_current_url(phone_call)

@@ -20,7 +20,8 @@ module PhoneCallHelpers
       :Channel => options[:channel] || "test",
       :Digits => options[:digits],
       :To => options[:to],
-      :DialCallStatus => options[:dial_call_status].try(:to_s).try(:dasherize)
+      :DialCallStatus => options[:dial_call_status].try(:to_s).try(:dasherize),
+      :CallStatus => options[:call_status].try(:to_s).try(:dasherize)
     }, authentication_params(:phone_call)
 
     response.status.should be(options[:response] || 200)

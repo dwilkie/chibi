@@ -45,6 +45,7 @@ class PhoneCall < ActiveRecord::Base
 
     state :answered do
       def to_twiml
+        nil.to_s
       end
     end
 
@@ -113,6 +114,7 @@ class PhoneCall < ActiveRecord::Base
 
     state :completed do
       def to_twiml
+        nil.to_s
       end
     end
 
