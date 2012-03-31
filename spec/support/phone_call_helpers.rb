@@ -34,55 +34,7 @@ module PhoneCallHelpers
   end
 
   module States
-    PHONE_CALL_STATES = [
-      {:answered => :welcoming_user},
-      {:welcoming_user => :asking_for_gender},
-      {:asking_for_gender => {:asking_for_gender => {
-        :state_contexts => [nil, :_in_menu],
-        :substates => {:digits => {
-          :caller_answers_male => {:asking_for_looking_for => "1"},
-          :caller_answers_female => {:asking_for_looking_for => "2"}
-        }}
-      }}},
-      {:asking_for_looking_for => {:asking_for_looking_for => {
-        :state_contexts => [nil, :_in_menu],
-        :substates => {:digits => {
-          :caller_answers_male => {:offering_menu => "1"},
-          :caller_answers_female => {:offering_menu => "2"}
-        }}
-      }}},
-      :asking_for_age_in_menu,
-      {:offering_menu => {:finding_new_friend => {
-        :substates => {:digits => {
-          :caller_wants_menu => {:offer_menu => "8"}
-        }}
-      }}},
-      {:asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => {
-        :telling_user_their_friend_is_unavailable => {
-        :substates => {:digits => {
-          :caller_wants_existing_friend => {
-            :connecting_user_with_existing_friend => "1"
-          },
-          :caller_wants_new_friend => {
-            :connecting_user_with_new_friend => "2"
-          }
-        }}
-      }}},
-      {:finding_new_friend => :telling_user_to_try_again_later},
-      {:connecting_user_with_new_friend => {
-        :connecting_user_with_new_friend => {
-          :substates => {:dial_status => {
-            :completed => :completed
-          }},
-          :parent => :finding_new_friend_friend_found
-        }
-      }},
-      {:telling_user_to_try_again_later => :hanging_up},
-      :connecting_user_with_existing_friend,
-      {:telling_user_their_friend_is_unavailable => :connecting_user_with_new_friend},
-      :hanging_up,
-      :completed
-    ]
+    PHONE_CALL_STATES = YAML.load_file(File.join(File.dirname(__FILE__), 'phone_call_states.yaml'))
 
     def with_phone_call_states(&block)
       PHONE_CALL_STATES.each do |phone_call_state|
@@ -92,9 +44,10 @@ module PhoneCallHelpers
           if state_properties.is_a?(Hash)
             next_state = state_properties.keys.first
             state_properties = state_properties[next_state]
-            state_contexts = state_properties[:state_contexts]
-            substates = state_properties[:substates]
-            parent = state_properties[:parent]
+            manditory = state_properties["manditory"]
+            contextual_substate_next_states = state_properties["contextual_substate_next_states"]
+            substates = state_properties["substates"]
+            parent = state_properties["parent"]
           else
             next_state = state_properties
           end
@@ -103,7 +56,7 @@ module PhoneCallHelpers
         end
 
         substates ||= {}
-        state_contexts ||= [nil]
+        state_contexts = manditory ? [nil, :_in_menu] : [nil]
 
         state_contexts.each do |state_context|
           contextual_state = "#{state}#{state_context}"
@@ -112,75 +65,48 @@ module PhoneCallHelpers
           substate_attribute_values = {}
 
           substates.each do |substate_method, substate_examples|
+
             substate_examples.each do |substate_key, next_state_and_value|
 
               if next_state_and_value.is_a?(Hash)
-                substate_next_state = next_state_and_value.keys.first
-                substate_value = next_state_and_value[substate_next_state]
-                substate_suffix = substate_key
+                substate_expectations = next_state_and_value["expectations"]
+
+                if next_state_and_value["parent"]
+                  substate_parent = true
+                  substate_next_state = substate_key
+                  substate_suffix = substate_method
+                else
+                  substate_next_state_without_context = next_state_and_value.keys.first
+                  if contextual_substate_next_states
+                    substate_next_state = "#{substate_next_state_without_context}#{state_context}"
+                  else
+                    substate_next_state = substate_next_state_without_context
+                  end
+
+                  substate_value = next_state_and_value[substate_next_state_without_context]
+                  substate_suffix = substate_key
+                end
               else
-                substate_next_state = next_state_and_value
-                substate_suffix = "#{substate_method}_#{substate_key}"
+                substate_next_state = substate_key
+                substate_value = next_state_and_value
+                substate_suffix = "#{substate_method}_#{next_state_and_value}"
               end
 
-              attribute_values = {substate_method => (substate_value || substate_key)}
+              if substate_parent
+                attribute_values = next_state_and_value
+              else
+                attribute_values = {substate_method => [substate_value].flatten}
+              end
+
+              next_state_attributes = {"factory" => attribute_values}
+              next_state_attributes.merge!("expectations" => substate_expectations) if substate_expectations
+
               substate_name = "#{base_factory_name}_#{substate_suffix}"
-              substate_attribute_values[substate_name] = {substate_next_state.to_s => attribute_values}
+              substate_attribute_values[substate_name] = {substate_next_state.to_s => next_state_attributes}
             end
           end
 
           yield(base_factory_name, contextual_state, contextual_next_state, substate_attribute_values, parent)
-        end
-      end
-    end
-  end
-
-  module PromptStates
-    USER_INPUTS = {
-      :gender => {
-        :manditory => true,
-        :accepts_answers_relating_to_gender => true,
-        :next_state => {
-          :contextual => true,
-          :name => :asking_for_looking_for
-        }
-      },
-
-      :looking_for => {
-        :manditory => true,
-        :accepts_answers_relating_to_gender => true,
-        :next_state => {
-          :name => :offering_menu
-        }
-      },
-
-      :age => {
-        :next_state => {
-          :contextual => true,
-          :name => :asking_for_gender
-        },
-        :twiml_options => {:numDigits => 2}
-      }
-    }
-
-    def with_phone_call_prompts(&block)
-
-      USER_INPUTS.each do |attribute, options|
-        next_state = options[:next_state]
-        call_contexts = [:_in_menu]
-        call_contexts << nil if options[:manditory]
-        call_contexts.each do |call_context|
-          prompt_state = "asking_for_#{attribute}#{call_context}"
-          next_state_name = next_state[:contextual] ? "#{next_state[:name]}#{call_context}" : next_state[:name]
-          yield(attribute, call_context, "#{prompt_state}_phone_call".to_sym, prompt_state, next_state_name, options[:twiml_options])
-        end
-      end
-    end
-
-    module GenderAnswers
-      def with_gender_answers(phone_call_tag, attribute, &block)
-        [:male, :female].each_with_index do |sex, index|
-          yield(sex, "#{phone_call_tag}_caller_answers_#{sex}".to_sym, index) if USER_INPUTS[attribute][:accepts_answers_relating_to_gender]
         end
       end
     end

@@ -19,40 +19,31 @@ FactoryGirl.define do
     from { user.mobile_number }
     sequence(:sid)
 
+    factory :phone_call_with_active_chat do
+      association :chat, :factory => :active_chat
+      user { chat.user }
+    end
+
     extend PhoneCallHelpers::States
 
     with_phone_call_states do |factory_name, phone_call_state, next_state, sub_factories, parent|
       factory_options = {}
-      factory_options.merge(:parent => parent) if parent
+      factory_options.merge!(:parent => parent) if parent
 
       factory(factory_name, factory_options) do
         state phone_call_state
 
-        case phone_call_state
-        when "welcoming_user"
-          sub_factory_name = "#{factory_name}_from_user_with_known_gender".to_sym
-
-          factory(sub_factory_name) do
-            association :user, :factory => :user_with_gender
-
-            factory("#{sub_factory_name}_and_looking_for_preference".to_sym) do
-              association :user, :factory => :user_with_gender_and_looking_for_preference
-            end
-          end
-        when "offering_menu"
-          association :user, :factory => :user_with_gender_and_looking_for_preference
-        when "finding_new_friend"
-          sub_factory_name = "#{factory_name}_friend_found".to_sym
-          factory(sub_factory_name) do
-            association :chat, :factory => :active_chat
-            user { chat.user }
-          end
-        end
-
         sub_factories.each do |sub_factory_name, substate_attributes|
-          attribute_value_pair = substate_attributes.values.first
-          factory(sub_factory_name) do
-            send(attribute_value_pair.keys.first, attribute_value_pair.values.first.to_s)
+          attribute_value_pair = substate_attributes.values.first["factory"]
+          substate_parent = attribute_value_pair["parent"]
+          sub_factory_options = {}
+          sub_factory_options.merge!(:parent => substate_parent) if substate_parent
+          factory(sub_factory_name, sub_factory_options) do
+            if substate_parent
+              state phone_call_state
+            else
+              send(attribute_value_pair.keys.first, *attribute_value_pair.values.first)
+            end
           end
         end
       end
