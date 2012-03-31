@@ -3,6 +3,11 @@ require 'spork'
 Spork.prefork do
   # This file is copied to spec/ when you run 'rails generate rspec:install'
   ENV["RAILS_ENV"] ||= 'test'
+
+  # Prevent main application to eager_load in the prefork block (do not load files in autoload_paths)
+  require 'rails/application'
+  Spork.trap_method(Rails::Application, :eager_load!)
+
   require File.expand_path("../../config/environment", __FILE__)
   require 'rspec/rails'
 end
@@ -11,7 +16,8 @@ Spork.each_run do
   # Requires supporting ruby files with custom matchers and macros, etc,
   # in spec/support/ and its subdirectories.
 
-  Dir[Rails.root.join("app/**/*.rb")].each { |f| load f }
+  # Reloading each model causes callbacks to be run twice!
+  #Dir[Rails.root.join("app/**/*.rb")].each { |f| load f }
   Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 
   RSpec.configure do |config|
