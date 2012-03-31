@@ -43,6 +43,11 @@ class PhoneCall < ActiveRecord::Base
   state_machine :initial => :answered do
     extend PromptStates
 
+    state :answered do
+      def to_twiml
+      end
+    end
+
     state :welcoming_user do
       def to_twiml
         play(:welcome)
@@ -86,15 +91,9 @@ class PhoneCall < ActiveRecord::Base
 
     before_transition any => :finding_new_friend, :do => :create_chat_session
 
-    state :connecting_user_with_new_friend do
-      def to_twiml
-        dial(user.match)
-      end
-    end
+    before_transition any => :connecting_user_with_friend, :do => :set_or_update_current_chat
 
-    before_transition any => :connecting_user_with_existing_friend, :do => :set_or_update_current_chat
-
-    state :connecting_user_with_existing_friend do
+    state :connecting_user_with_friend do
       def to_twiml
         dial(chat.partner(user))
       end
@@ -145,7 +144,7 @@ class PhoneCall < ActiveRecord::Base
       transition(:offering_menu => :finding_new_friend)
 
       # connect him with his new friend
-      transition(:finding_new_friend => :connecting_user_with_new_friend, :if => :friend_available?)
+      transition(:finding_new_friend => :connecting_user_with_friend, :if => :friend_available?)
 
       # tell him to try again later (no friend available)
       transition(:finding_new_friend => :telling_user_to_try_again_later)
@@ -154,12 +153,12 @@ class PhoneCall < ActiveRecord::Base
       transition(:telling_user_to_try_again_later => :hanging_up)
 
       transition(
-        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :connecting_user_with_new_friend,
+        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :finding_new_friend,
         :if => :wants_new_friend?
       )
 
       transition(
-        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :connecting_user_with_existing_friend,
+        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :connecting_user_with_friend,
         :if => :user_chatting?
       )
 
@@ -167,9 +166,9 @@ class PhoneCall < ActiveRecord::Base
         :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :telling_user_their_friend_is_unavailable
       )
 
-      transition(:telling_user_their_friend_is_unavailable => :connecting_user_with_new_friend)
+      transition(:telling_user_their_friend_is_unavailable => :finding_new_friend)
 
-      transition(:connecting_user_with_new_friend => :hanging_up, :if => :connected?)
+      transition(:connecting_user_with_friend => :hanging_up, :if => :connected?)
     end
   end
 

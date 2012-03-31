@@ -48,6 +48,7 @@ module PhoneCallHelpers
             contextual_substate_next_states = state_properties["contextual_substate_next_states"]
             substates = state_properties["substates"]
             parent = state_properties["parent"]
+            twiml_expectation = state_properties["twiml_expectation"]
           else
             next_state = state_properties
           end
@@ -106,7 +107,7 @@ module PhoneCallHelpers
             end
           end
 
-          yield(base_factory_name, contextual_state, contextual_next_state, substate_attribute_values, parent)
+          yield(base_factory_name, twiml_expectation, contextual_state, contextual_next_state, substate_attribute_values, parent)
         end
       end
     end

@@ -103,8 +103,8 @@ describe PhoneCall do
       end
     end
 
-    it "should transition to the correct state", :focus do
-      with_phone_call_states do |factory_name, phone_call_state, next_state, sub_factories|
+    it "should transition to the correct state" do
+      with_phone_call_states do |factory_name, twiml_expectation, phone_call_state, next_state, sub_factories|
         assert_phone_call_can_be_completed(build(factory_name))
 
         phone_call = build(factory_name)
@@ -126,7 +126,10 @@ describe PhoneCall do
   end
 
   describe "#to_twiml" do
+    include PhoneCallHelpers::Twilio
+
     include_context "twiml"
+    include_context "existing users"
 
     let(:redirect_url) { authenticated_url("http://example.com/twiml") }
 
@@ -135,8 +138,13 @@ describe PhoneCall do
       parse_twiml(resource.to_twiml)
     end
 
-    def assert_dial_to_redirect_url(twiml, number, options = {})
-      assert_dial(twiml, redirect_url, number, options)
+    def assert_dial_to_redirect_url(phone_call, options = {})
+      twiml_options = options.dup
+      user_to_dial = phone_call.chat.partner(phone_call.user)
+      number_to_dial = user_to_dial.mobile_number
+
+      twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? formatted_twilio_number : user_to_dial.short_code
+      assert_dial(twiml_response(phone_call), redirect_url, number_to_dial, twiml_options)
     end
 
     def assert_play_languages(phone_call, filename, options = {})
@@ -159,173 +167,61 @@ describe PhoneCall do
       user.location = original_location
     end
 
-    def assert_ask_for_input(prompt, phone_call, twiml_options = {})
+    def assert_ask_for_input(phone_call, prompt, twiml_options = {})
       # automatically asserts redirect
       assert_play_languages(phone_call, prompt)
       filename_with_extension = filename_with_extension(prompt)
 
-      twiml_options[:numDigits] ||= 1
+      twiml_options["numDigits"] ||= 1
       assert_gather(twiml_response(phone_call), twiml_options) do |gather|
         assert_play(gather, "#{phone_call.user.locale}/#{filename_with_extension}")
       end
     end
 
+    def assert_no_response(phone_call)
+      phone_call.to_twiml.should be_nil
+    end
+
+    def assert_redirect_to_current_url(phone_call)
+      assert_redirect(twiml_response(phone_call), redirect_url)
+    end
+
+    def assert_hangup_current_call(phone_call)
+      assert_hangup(twiml_response(phone_call))
+    end
+
+    def assert_dial_friend(phone_call)
+      # load some users
+      load_users
+      users_from_registered_service_providers
+
+      # assert dial from the twilio number for users from a service provider without short code
+      assert_dial_to_redirect_url(phone_call, :twilio_number => true)
+
+      # assert dial from the user's friend's short code for users from registered service provider
+      phone_call.chat = create(
+        :active_chat, :user => phone_call.user, :friend => users_from_registered_service_providers.first
+      )
+
+      assert_dial_to_redirect_url(phone_call)
+    end
+
+    def assert_twiml_response(phone_call, expectation)
+      if expectation.is_a?(Hash)
+        assertion_method = expectation.keys.first
+        assertion_args = expectation.values
+        assertion_args = assertion_args.first.flatten if assertion_args.first.is_a?(Hash)
+      else
+        assertion_method = expectation
+      end
+      assertion_args ||= []
+      send("assert_#{assertion_method}", phone_call, *assertion_args)
+    end
+
     context "given the redirect url has been set" do
-      context "and the phone call is" do
-
-        context "welcoming the user" do
-          it "should play the welcome message in the user's language" do
-            assert_play_languages(welcoming_user_phone_call, :welcome)
-          end
-        end
-
-        context "prompting for user input" do
-          it "should play the correct prompt" do
-            with_phone_call_prompts do |attribute, call_context, reference_phone_call_tag, prompt_state, next_state, twiml_options|
-              twiml_options ||= {}
-              assert_ask_for_input("ask_for_#{attribute}", send(reference_phone_call_tag), twiml_options)
-            end
-          end
-        end
-
-        context "offering the menu" do
-          it "should offer the menu" do
-            assert_ask_for_input(:offer_menu, offering_menu_phone_call)
-          end
-        end
-
-        context "asking if the user wants to find a new friend or call their existing one" do
-          it "should ask the user if they want to find a new friend or call their existing chat partner" do
-            assert_ask_for_input(
-              :ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner,
-              build(:asking_if_user_wants_to_find_a_new_friend_or_call_existing_one_phone_call)
-            )
-          end
-        end
-
-        context "telling the user to try again later" do
-          it "should tell the user to try again later" do
-            assert_play_languages(
-              send(:telling_user_to_try_again_later_phone_call),
-              :tell_user_to_try_again_later
-            )
-          end
-        end
-
-        context "finding a new friend" do
-          it "should redirect" do
-            assert_redirect(twiml_response(finding_new_friend_phone_call), redirect_url)
-          end
-        end
-
-        context "hanging up" do
-          it "should hang up" do
-            assert_hangup(twiml_response(build(:hanging_up_phone_call)))
-          end
-        end
-
-        context "completed" do
-          it "should return nothing" do
-            build(:completed_phone_call).to_twiml.should be_nil
-          end
-        end
-
-        context "telling the user that their friend is unavailable to chat" do
-          it "should tell the user that their friend is unavailable to chat" do
-            assert_play_languages(
-              build(:telling_user_their_friend_is_unavailable_phone_call),
-              :tell_user_their_friend_is_unavailable
-            )
-          end
-        end
-
-        context "connecting the user" do
-          include PhoneCallHelpers::Twilio
-
-          include_context "existing users"
-
-          context "with a new friend" do
-            before do
-              load_users # without short codes
-            end
-
-            context "who has a short code" do
-              before do
-                users_from_registered_service_providers
-              end
-
-              it "should dial a new friend and set the callerId to the new friends mobile operator short code" do
-                user = users_from_registered_service_providers.first
-                users_new_friend = user.match
-                twiml = twiml_response(build(:connecting_user_with_new_friend_phone_call, :user => user))
-                assert_dial_to_redirect_url(
-                  twiml, users_new_friend.mobile_number, :callerId => users_new_friend.short_code
-                )
-              end
-            end
-
-            context "who does not have a short code" do
-              it "should dial a new friend and set the callerId to the Twilio number" do
-                twiml = twiml_response(build(:connecting_user_with_new_friend_phone_call, :user => dave))
-                assert_dial_to_redirect_url(
-                  twiml,
-                  dave.match.mobile_number,
-                  :callerId => formatted_twilio_number
-                )
-              end
-            end
-          end
-
-          context "with his existing friend" do
-
-            context "who has a short code" do
-              # scenario: John started a chat with Jane and is actively chatting
-              # Jane calls in so Jane is the dialer and John is the dialers friend
-              # John belongs to a mobile operator with a registered short code
-              let(:dialer) { users_from_registered_service_providers.first }
-              let(:dialers_friend) { users_from_registered_service_providers.last }
-              let(:active_chat) { create(:active_chat, :user => dialers_friend, :friend => dialer) }
-
-              before do
-                active_chat
-              end
-
-              it "should dial the friend and set the callerId to the friends mobile operator short code" do
-                twiml = twiml_response(
-                  build(:connecting_user_with_existing_friend_phone_call, :user => dialer, :chat => active_chat)
-                )
-
-                assert_dial_to_redirect_url(
-                  twiml, dialers_friend.mobile_number, :callerId => dialers_friend.short_code
-                )
-              end
-            end
-
-            context "who does not have a short code" do
-              # scenario: Andy started a chat with Kunthia and is actively chatting
-              # Andy calls in so Andy is the dialer and Kunthia is the dialers friend
-              # Kunthia does not belong to a mobile operator with a registered short code
-
-              let(:active_chat) { create(:active_chat) }
-
-              let(:dialer) { active_chat.user }
-              let(:dialers_friend) { active_chat.friend }
-
-              before do
-                active_chat
-              end
-
-              it "should dial the friend and set the callerId to Twilio number" do
-                twiml = twiml_response(
-                  build(:connecting_user_with_existing_friend_phone_call, :user => dialer, :chat => active_chat)
-                )
-
-                assert_dial_to_redirect_url(
-                  twiml, dialers_friend.mobile_number, :callerId => formatted_twilio_number
-                )
-              end
-            end
-          end
+      it "should return the correct twiml", :focus do
+        with_phone_call_states do |factory_name, expectation|
+          assert_twiml_response(build(factory_name), expectation)
         end
       end
     end

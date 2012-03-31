@@ -26,7 +26,7 @@ FactoryGirl.define do
 
     extend PhoneCallHelpers::States
 
-    with_phone_call_states do |factory_name, phone_call_state, next_state, sub_factories, parent|
+    with_phone_call_states do |factory_name, twiml_expectation, phone_call_state, next_state, sub_factories, parent|
       factory_options = {}
       factory_options.merge!(:parent => parent) if parent
 
