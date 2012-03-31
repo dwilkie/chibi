@@ -219,7 +219,7 @@ describe PhoneCall do
     end
 
     context "given the redirect url has been set" do
-      it "should return the correct twiml", :focus do
+      it "should return the correct twiml" do
         with_phone_call_states do |factory_name, expectation|
           assert_twiml_response(build(factory_name), expectation)
         end

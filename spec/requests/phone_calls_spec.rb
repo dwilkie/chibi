@@ -101,16 +101,26 @@ describe "PhoneCalls" do
                 end
 
                 context "and I hold the line again" do
+
+                  let(:new_friend) { offering_menu_phone_call.reload.user.match }
+
                   before do
                     load_users
+                    new_friend
                     update_current_call_status
                   end
 
-                  it "should connect me with a new friend" do
-                    assert_dial_to_current_url(
-                      offering_menu_phone_call.user.match.mobile_number,
-                      :callerId => formatted_twilio_number
-                    )
+                  context "and a friend is found for me" do
+                    before do
+                      update_current_call_status
+                    end
+
+                    it "should connect me with a new friend" do
+                      assert_dial_to_current_url(
+                        new_friend.mobile_number,
+                        :callerId => formatted_twilio_number
+                      )
+                    end
                   end
                 end
               end
@@ -130,6 +140,14 @@ describe "PhoneCalls" do
           end
 
           context "if I hold the line" do
+            before do
+              update_current_call_status
+            end
+
+            it "should try to find me a match" do
+              assert_redirect_to_current_url
+            end
+
             context "but there are no matches for me" do
               before do
                 update_current_call_status
@@ -287,6 +305,7 @@ describe "PhoneCalls" do
             end
 
             context "then if I answer that I want to chat with a girl" do
+
               before do
                 update_current_call_status(
                   :digits =>  build(:asking_for_looking_for_phone_call_caller_answers_female).digits
@@ -302,27 +321,28 @@ describe "PhoneCalls" do
               end
 
               context "and if I don't want the menu" do
+
+                let(:friends) { new_user.matches.all }
+
                 before do
                   load_users
+                  friends
                   update_current_call_status
                 end
 
                 context "and there is a girl online to talk with" do
-                  let(:user_matches) { new_user.matches }
 
-                  it "should try to connect me with her" do
-                    assert_dial_to_current_url(user_matches[0].mobile_number)
+                  before do
+                    update_current_call_status
                   end
 
-                  context "if she answers", :focus do
+                  it "should try to connect me with her" do
+                    assert_dial_to_current_url(friends[0].mobile_number)
+                  end
+
+                  context "if she answers" do
                     before do
                       update_current_call_status(:dial_call_status => :completed)
-                    end
-
-                    it "should start a new chat session with her" do
-                      new_chat = new_user.active_chat
-                      new_chat.should be_present
-                      new_chat.partner(user).should == user_matches[0]
                     end
 
                     context "and hangs up first" do
@@ -339,7 +359,8 @@ describe "PhoneCalls" do
                     end
 
                     it "should try to connect me with another girl" do
-                      assert_dial_to_current_url(user_matches[1].mobile_number)
+                      pending
+                      assert_dial_to_current_url(friends[1].mobile_number)
                     end
                   end
                 end
