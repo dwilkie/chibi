@@ -112,7 +112,7 @@ describe "Messages" do
             alex.reload
           end
 
-          it "should update my profile and connect me with a match" do
+          it "should update my profile and connect me with a new friend" do
             alex.name.should == "alex"
             alex.age.should == 23
             alex.gender.should == "f"

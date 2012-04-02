@@ -5,13 +5,13 @@
         greeting = "Hi"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
-        notification = "#{options[:friends_screen_name]} wants 2 chat with u! Send #{options[:friends_screen_name]} a msg now or reply with 'new' 2 chat with someone new"
+        notification = "#{options[:friends_screen_name]} wants 2 chat with u! Send #{options[:friends_screen_name]} a msg now or reply with 'new' 2 meet someone new"
 
         greeting << "! " << notification
       },
 
       :could_not_start_new_chat => lambda {|key, options|
-        "Sorry we can't find a match for u at this time. We'll let u know when someone comes online"
+        "Sorry we can't find a friend for u at this time. We'll let u know when someone comes online"
       },
 
       :logged_out_or_chat_has_ended => lambda {|key, options|
@@ -32,7 +32,7 @@
           notification << "Send us a txt 2 "
         end
 
-        notification << "chat with someone new"
+        notification << "meet someone new"
         notification << ". Txt 'stop' 2 go offline" unless options[:logged_out]
         notification
       }

@@ -26,12 +26,12 @@
           end
 
           notification << translated_missing_attributes.to_sentence(:locale => :kh)
-          notification << " d3 update profile & rok mit tmey teat"
+          notification << " derm-bei update profile & rok mit tmey teat"
         else
-          notification << "Sorsay avey moy d3 rok mit tmey teat"
+          notification << "Sorsay avey moy derm-bei rok mit tmey teat"
         end
 
-        notification << ". Sorsay 'stop' d3 jaak jenh" unless options[:logged_out]
+        notification << ". Sorsay 'stop' derm-bei jaak jenh" unless options[:logged_out]
         notification
       }
     }
