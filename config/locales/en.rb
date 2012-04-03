@@ -1,21 +1,28 @@
 {
   :en => {
     :replies => {
+
+      :welcome => lambda {|key, options|
+        "Welcome to Chibi! We'll help you meet a new friend! At any time you can write 'en' to read English or 'stop' to go offline"
+      },
+
       :new_chat_started => lambda {|key, options|
         greeting = "Hi"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
-        notification = "#{options[:friends_screen_name]} wants 2 chat with u! Send #{options[:friends_screen_name]} a msg now or reply with 'new' 2 meet someone new"
+        instructions = "Send #{options[:friends_screen_name]} a msg now by replying to this message"
 
-        greeting << "! " << notification
+        notification = options[:to_initiator] ? "We have found a new friend for you! " : "#{options[:friends_screen_name]} wants to chat with u! "
+
+        greeting << "! " << notification << instructions
       },
 
       :could_not_start_new_chat => lambda {|key, options|
-        "Sorry we can't find a friend for u at this time. We'll let u know when someone comes online"
+        "Sorry we can't find a friend for you at this time. We'll let you know when someone comes online"
       },
 
       :logged_out_or_chat_has_ended => lambda {|key, options|
-        notification = options[:logged_out] ? "U r now offline. " : "Ur chat session has ended. "
+        notification = options[:friends_screen_name] ? "#{options[:friends_screen_name]} not replying? " : "You are now offline. "
 
         if options[:missing_profile_attributes].any?
           notification << "Txt us "
@@ -27,14 +34,12 @@
           end
 
           notification << translated_missing_attributes.to_sentence(:locale => :en)
-          notification << " 2 update ur profile & "
+          notification << " to "
         else
-          notification << "Send us a txt 2 "
+          notification << "Txt 'new' to"
         end
 
         notification << "meet someone new"
-        notification << ". Txt 'stop' 2 go offline" unless options[:logged_out]
-        notification
       }
     }
   }

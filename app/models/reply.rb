@@ -19,11 +19,11 @@ class Reply < ActiveRecord::Base
     read_attribute(:body).to_s
   end
 
-  def logout_or_end_chat(options = {})
+  def logout_or_end_chat(partner = nil)
     self.body = I18n.t(
       "replies.logged_out_or_chat_has_ended",
+      :friends_screen_name => partner.try(:screen_id),
       :missing_profile_attributes => user.missing_profile_attributes,
-      :logged_out => options[:logout],
       :locale => user.locale
     )
     save
@@ -43,13 +43,19 @@ class Reply < ActiveRecord::Base
     save
   end
 
-  def introduce(partner)
+  def introduce(partner, to_initiator)
     self.body = I18n.t(
       "replies.new_chat_started",
       :users_name => user.name,
       :friends_screen_name => partner.screen_id,
+      :to_initiator => to_initiator,
       :locale => user.locale
     )
+    save
+  end
+
+  def welcome
+    self.body = I18n.t("replies.welcome", :locale => user.locale)
     save
   end
 

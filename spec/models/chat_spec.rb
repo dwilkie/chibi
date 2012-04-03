@@ -104,7 +104,7 @@ describe Chat do
         it "should introduce the new chat participants" do
           expect_message { reference_chat.activate!(:notify => true) }
           reply_to(user, reference_chat).body.should == spec_translate(
-            :anonymous_new_chat_started, user.locale, friend.screen_id
+            :anonymous_new_friend_found, user.locale, friend.screen_id
           )
 
           reply_to(friend, reference_chat).body.should == spec_translate(
@@ -139,7 +139,7 @@ describe Chat do
         it "should notify the current chat partner the chat has ended" do
           expect_message { new_chat.activate!(:notify => true) }
           reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
-            :anonymous_chat_has_ended, current_chat_partner.locale
+            :anonymous_chat_has_ended, current_chat_partner.locale, user.screen_id
           )
           reply_to(user, current_active_chat).should be_nil
         end
@@ -227,17 +227,17 @@ describe Chat do
     end
 
     context ":notify => true" do
-      it "should notify both active users the the chat has ended" do
+      it "should inform both active users how to find a new friend" do
         expect_message { active_chat.deactivate!(:notify => true) }
-        reply_to_user.body.should == spec_translate(:anonymous_chat_has_ended, user.locale)
-        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale)
+        reply_to_user.body.should == spec_translate(:anonymous_chat_has_ended, user.locale, friend.screen_id)
+        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale, user.screen_id)
       end
     end
 
     context ":notify => #<User...>" do
-      it "should notify the user specified that the chat has ended" do
+      it "should inform the user specified how to find a new friend" do
         expect_message { active_chat.deactivate!(:notify => friend) }
-        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale)
+        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale, user.screen_id)
         reply_to_user.should be_nil
       end
     end
@@ -264,7 +264,7 @@ describe Chat do
     it "should send an introduction to both participants" do
       expect_message { active_chat.introduce_participants }
 
-      reply_to_user.body.should == spec_translate(:anonymous_new_chat_started, user.locale, friend.screen_id)
+      reply_to_user.body.should == spec_translate(:anonymous_new_friend_found, user.locale, friend.screen_id)
       reply_to_friend.body.should == spec_translate(:anonymous_new_chat_started, friend.locale, user.screen_id)
     end
   end
@@ -365,10 +365,10 @@ describe Chat do
 
       it "should notify both users that their chat has ended" do
         reply_to(user, active_chat_with_inactivity).body.should == spec_translate(
-          :anonymous_chat_has_ended, user.locale
+          :anonymous_chat_has_ended, user.locale, friend.screen_id
         )
         reply_to(friend, active_chat_with_inactivity).body.should == spec_translate(
-          :anonymous_chat_has_ended, friend.locale
+          :anonymous_chat_has_ended, friend.locale, user.screen_id
         )
       end
     end

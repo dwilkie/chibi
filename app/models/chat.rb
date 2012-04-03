@@ -72,7 +72,9 @@ class Chat < ActiveRecord::Base
 
   def introduce_participants
     [user, friend].each do |reference_user|
-      replies.build(:user => reference_user).introduce(partner(reference_user))
+      replies.build(:user => reference_user).introduce(
+        partner(reference_user), reference_user == user
+      )
     end
   end
 
@@ -88,7 +90,7 @@ class Chat < ActiveRecord::Base
 
   def reply_chat_has_ended(*destination_users)
     destination_users.each do |destination_user|
-      replies.build(:user => destination_user).logout_or_end_chat
+      replies.build(:user => destination_user).logout_or_end_chat(partner(destination_user))
     end
   end
 end

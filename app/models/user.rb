@@ -29,7 +29,7 @@ class User < ActiveRecord::Base
 
   delegate :city, :locale, :address, :address=, :locate!, :to => :location, :allow_nil => true
 
-  PROFILE_ATTRIBUTES = [:name, :date_of_birth, :city, :gender, :looking_for]
+  PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
 
   def self.filter_by(params = {})
     scoped.order("created_at DESC").includes(:location)
@@ -139,6 +139,10 @@ class User < ActiveRecord::Base
     active_chat_id?
   end
 
+  def first_message?
+    messages.count == 1
+  end
+
   def screen_id
     sn = name || screen_name
     sn + id.to_s if sn
@@ -152,7 +156,11 @@ class User < ActiveRecord::Base
     end
 
     update_attributes!(:online => false)
-    replies.build.logout_or_end_chat(:logout => true) if options[:notify]
+    replies.build.logout_or_end_chat if options[:notify]
+  end
+
+  def welcome!
+    replies.build.welcome
   end
 
   def matches

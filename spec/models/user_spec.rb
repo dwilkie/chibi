@@ -669,9 +669,21 @@ describe User do
     end
   end
 
+  describe "#first_message?" do
+    it "should return true only if the user has one message" do
+      user.first_message?.should be_false
+
+      create(:message, :user => user)
+      user.first_message?.should be_true
+
+      create(:message, :user => user)
+      user.first_message?.should be_false
+    end
+  end
+
   describe "#missing_profile_attributes" do
     it "should return the missing attributes of the user" do
-      subject.missing_profile_attributes.should == [:name, :date_of_birth, :city, :gender, :looking_for]
+      subject.missing_profile_attributes.should == [:name, :date_of_birth, :gender, :city, :looking_for]
       user_with_complete_profile.missing_profile_attributes.should == []
 
       user_with_complete_profile.date_of_birth = nil
@@ -1007,11 +1019,24 @@ describe User do
             user.logout!(:notify_chat_partner => true)
           end
           reply_to_partner.body.should == spec_translate(
-            :anonymous_chat_has_ended, friend.locale
+            :anonymous_chat_has_ended, friend.locale, user.screen_id
           )
           reply.should be_nil
         end
       end
+    end
+  end
+
+  describe "#welcome!" do
+    include_context "replies"
+    include TranslationHelpers
+    include MessagingHelpers
+
+    it "should welcome the user" do
+      expect_message do
+        user.welcome!
+      end
+      reply_to(user).body.should == spec_translate(:welcome, user.locale)
     end
   end
 end

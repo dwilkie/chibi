@@ -59,11 +59,17 @@ describe "Messages" do
             send_message(:from => my_number, :body => "hello")
           end
 
-          it "should start a chat between an existing anonymous user and myself and notify both of us" do
+          it "should welcome me and start a chat between myself an existing anonymous user" do
             assert_new_user
 
-            reply_to(new_user).body.should == spec_translate(
-              :anonymous_new_chat_started, new_user.locale, alex.screen_id
+            replies = replies_to(new_user)
+
+            replies.first.body.should == spec_translate(
+              :welcome, new_user.locale
+            )
+
+            replies.last.body.should == spec_translate(
+              :anonymous_new_friend_found, new_user.locale, alex.screen_id
             )
 
             reply_to(alex).body.should == spec_translate(
@@ -88,8 +94,14 @@ describe "Messages" do
             new_user.looking_for.should == "f"
             new_user.gender.should == "m"
 
-            reply_to(new_user).body.should == spec_translate(
-              :personalized_new_chat_started, new_user.locale, new_user.name.capitalize, joy.screen_id
+            replies = replies_to(new_user)
+
+            replies.first.body.should == spec_translate(
+              :welcome, new_user.locale
+            )
+
+            replies.last.body.should == spec_translate(
+              :personalized_new_friend_found, new_user.locale, new_user.name.capitalize, joy.screen_id
             )
 
             reply_to(joy).body.should == spec_translate(
@@ -119,7 +131,7 @@ describe "Messages" do
             alex.looking_for.should == "m"
 
             reply_to(alex).body.should == spec_translate(
-              :personalized_new_chat_started, alex.locale, alex.name.capitalize, dave.screen_id
+              :personalized_new_friend_found, alex.locale, alex.name.capitalize, dave.screen_id
             )
 
             reply_to(dave).body.should == spec_translate(
@@ -144,7 +156,7 @@ describe "Messages" do
 
             it "should end my current chat and start a new one" do
               reply_to(dave).body.should == spec_translate(
-                :personalized_new_chat_started,
+                :personalized_new_friend_found,
                 dave.locale, dave.name.capitalize, mara.screen_id,
               )
             end
@@ -183,7 +195,7 @@ describe "Messages" do
           shared_examples_for "ending my current chat" do
             it "should end my current chat and give me instructions on how to start a new one" do
               reply_to(dave).body.should == spec_translate(
-                :chat_has_ended, dave.locale
+                :chat_has_ended, dave.locale, joy.screen_id
               )
             end
           end

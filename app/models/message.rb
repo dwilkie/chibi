@@ -19,6 +19,8 @@ class Message < ActiveRecord::Base
       return
     end
 
+    user.welcome! if user.first_message?
+
     start_new_chat = true
 
     if user.currently_chatting?

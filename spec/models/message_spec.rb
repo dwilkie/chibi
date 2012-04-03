@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Message do
+describe Message, :focus do
 
   let(:user) { build(:user) }
   let(:friend) { build(:english) }
@@ -87,7 +87,7 @@ describe Message do
 
         it "should introduce the participants of the chat" do
           reply_to(user, new_message.chat).body.should == spec_translate(
-            :anonymous_new_chat_started, user.locale, new_friend.screen_id
+            :anonymous_new_friend_found, user.locale, new_friend.screen_id
           )
           reply_to(new_friend, new_message.chat).body.should == spec_translate(
             :anonymous_new_chat_started, new_friend.locale, user.screen_id
@@ -125,7 +125,7 @@ describe Message do
             replies_to(friend, chat).count.should == 1
 
             reply_to(friend, chat).body.should == spec_translate(
-              :anonymous_chat_has_ended, friend.locale
+              :anonymous_chat_has_ended, friend.locale, user.screen_id
             )
 
             friend.reload
@@ -181,6 +181,20 @@ describe Message do
           before do
             new_message.body = "hello"
             user.stub(:update_profile)
+          end
+
+          context "given this is the user's first message" do
+            before do
+              new_message.save
+            end
+
+            it "should welcome the user" do
+              expect_message { new_message.process! }
+
+              replies_to(user).first.body.should == spec_translate(
+                :welcome, user.locale
+              )
+            end
           end
 
           it_should_behave_like "starting a new chat"

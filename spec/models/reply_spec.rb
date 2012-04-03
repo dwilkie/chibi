@@ -134,15 +134,15 @@ describe Reply do
       let(:args) { [] }
     end
 
-    context "passing no options" do
-      it "should tell the user that their chat has ended" do
-        assert_reply(:logout_or_end_chat, :anonymous_chat_has_ended)
+    context "passing partner" do
+      it "should inform the user how to find a new friend" do
+        assert_reply(:logout_or_end_chat, :anonymous_chat_has_ended, [partner], [partner.screen_id])
       end
     end
 
-    context ":logout => true" do
+    context "passing no partner" do
       it "should tell the user that they have been logged out" do
-        assert_reply(:logout_or_end_chat, :anonymous_logged_out, [{:logout => true}])
+        assert_reply(:logout_or_end_chat, :anonymous_logged_out)
       end
 
       context "given an english user is only missing their sexual preference" do
@@ -156,7 +156,7 @@ describe Reply do
           assert_reply(
             :logout_or_end_chat,
             :only_missing_sexual_preference_logged_out,
-            [{:logout => true}],
+            [],
             [],
             [english_user_only_missing_sexual_preference]
           )
@@ -196,13 +196,34 @@ describe Reply do
   describe "#introduce" do
     it_should_behave_like "replying to a user" do
       let(:method) { :introduce }
-      let(:args) { [partner] }
+      let(:args) { [partner, true] }
     end
 
-    it "should tell the user that someone is interested in chatting with them" do
-      assert_reply(
-        :introduce, :anonymous_new_chat_started, [partner], [partner.screen_id]
-      )
+    context "for the chat initiator" do
+      it "should tell her that we have found a friend for her" do
+        assert_reply(
+          :introduce, :anonymous_new_friend_found, [partner, true], [partner.screen_id]
+        )
+      end
+    end
+
+    context "for the chat partner" do
+      it "should tell him that someone is interested in chatting with him" do
+        assert_reply(
+          :introduce, :anonymous_new_chat_started, [partner, false], [partner.screen_id]
+        )
+      end
+    end
+  end
+
+  describe "#welcome" do
+    it_should_behave_like "replying to a user" do
+      let(:method) { :welcome }
+      let(:args) { [] }
+    end
+
+    it "should welcome the user" do
+      assert_reply(:welcome, :welcome)
     end
   end
 end
