@@ -53,22 +53,44 @@ FactoryGirl.define do
   factory :reply do
     user
     to { user.mobile_number }
+
+    factory :delivered_reply do
+      delivered_at { Time.now }
+    end
   end
 
   factory :chat do
     association :user, :factory => :user
     association :friend, :factory => :user
-  end
 
-  factory :active_chat, :parent => :chat do
-    after_create do |chat|
-      chat.active_users << chat.user
-      chat.active_users << chat.friend
-      chat.save
+    # a chat where only the friend is active
+    factory :active_chat_with_single_friend do
+      after_create do |chat|
+        chat.active_users << chat.friend
+      end
     end
 
-    factory :active_chat_with_inactivity do
-      updated_at { 10.minutes.ago }
+    # a chat where only the initator is active
+    factory :active_chat_with_single_user do
+      after_create do |chat|
+        chat.active_users << chat.user
+        chat.save
+      end
+
+      factory :active_chat_with_single_user_with_inactivity do
+        updated_at { 10.minutes.ago }
+      end
+
+      factory :active_chat do
+        after_create do |chat|
+          chat.active_users << chat.friend
+          chat.save
+        end
+
+        factory :active_chat_with_inactivity do
+          updated_at { 10.minutes.ago }
+        end
+      end
     end
   end
 

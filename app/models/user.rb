@@ -135,6 +135,10 @@ class User < ActiveRecord::Base
     self.date_of_birth = value.nil? ? value : value.years.ago.utc
   end
 
+  def available?
+    online? && !currently_chatting?
+  end
+
   def currently_chatting?
     active_chat_id?
   end
@@ -156,11 +160,11 @@ class User < ActiveRecord::Base
     end
 
     update_attributes!(:online => false)
-    replies.build.logout_or_end_chat if options[:notify]
+    replies.build.logout! if options[:notify]
   end
 
   def welcome!
-    replies.build.welcome
+    replies.build.welcome!
   end
 
   def matches

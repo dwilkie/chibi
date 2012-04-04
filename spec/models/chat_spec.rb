@@ -33,6 +33,18 @@ describe Chat do
     create(:active_chat_with_inactivity, :user => user, :friend => friend)
   end
 
+  let(:active_chat_with_single_user) do
+    create(:active_chat_with_single_user, :user => user, :friend => friend)
+  end
+
+  let(:active_chat_with_single_friend) do
+    create(:active_chat_with_single_friend, :user => user, :friend => friend)
+  end
+
+  let(:active_chat_with_single_user_with_inactivity) do
+    create(:active_chat_with_single_user_with_inactivity)
+  end
+
   let(:reply_to_user) do
     reply_to(user, active_chat)
   end
@@ -218,17 +230,126 @@ describe Chat do
     end
   end
 
+  describe "#reactivate!" do
+    context "the chat is already active" do
+      it "should touch the chat" do
+        active_chat
+        time_updated = active_chat.updated_at
+        active_chat.reactivate!
+        active_chat.updated_at.should > time_updated
+        active_chat.should be_active
+      end
+    end
+
+    context "the chat is not active" do
+      it "should reactivate the chat" do
+        new_chat.should_not be_active
+        new_chat.reactivate!
+        new_chat.should be_active
+        new_chat.should be_persisted
+      end
+
+      context "and there are undelivered messages" do
+        let(:reply) { create(:reply, :chat => chat) }
+
+        it "should deliver the replies" do
+          reply.should_not be_delivered
+          expect_message { chat.reactivate! }
+          reply.reload.should be_delivered
+        end
+      end
+    end
+  end
+
   describe "#deactivate!" do
-    it "should clear the active users" do
-      active_chat.deactivate!
+
+    def assert_active_users_cleared
       active_chat.active_users.should be_empty
       active_chat.should_not be_active
-      active_chat.replies.should be_empty
+    end
+
+    context "passing :active_user => #<User...>" do
+      it "should only deactivate the chat for the given user" do
+        # so that they are available to chat with someone else
+        active_chat.deactivate!(:active_user => user)
+        active_chat.active_users.should == [friend]
+      end
+    end
+
+    context "passing :active_user => true" do
+      context "given there are no replies for this chat" do
+        before do
+          active_chat.deactivate!(:active_user => true)
+        end
+
+        it "should deactivate the chat for both users" do
+          active_chat.active_users.should be_empty
+          active_chat.should_not be_active
+        end
+      end
+
+      context "given there are replies for this chat" do
+        before do
+          create(:delivered_reply, :chat => active_chat, :user => user)
+        end
+
+        context "and the last reply was to the user" do
+          before do
+            active_chat.deactivate!(:active_user => true)
+          end
+
+          it "should deactivate the chat for the friend" do
+            active_chat.active_users.should == [user]
+          end
+        end
+
+        context "and the last reply was to the friend" do
+          before do
+            rep = create(:delivered_reply, :chat => active_chat, :user => friend)
+            active_chat.deactivate!(:active_user => true)
+          end
+
+          it "should deactivate the chat for the user" do
+            active_chat.active_users.should == [friend]
+          end
+        end
+      end
+    end
+
+    context "given there are undelivered messages for the deactivated users" do
+      def assert_chat_reactivation(user, users_old_relationship)
+        # create an old chat
+        users_old_chat = send("active_chat_with_single_#{users_old_relationship}")
+
+        # create an undelivered reply to the old chat
+        message_from_old_friend = create(:reply, :user => user, :chat => users_old_chat, :body => "Hi buddy")
+
+        # activate a new chat for the user
+        chat_to_deactivate = create(:active_chat, :user => user)
+
+        # deactivate the new chat
+        expect_message { chat_to_deactivate.deactivate!(:notify => true) }
+
+        # assert the delivery of the message from the old friend
+        message_from_old_friend.reload.should be_delivered
+
+        # assert that the old chat has been reactivated
+        users_old_chat.reload
+        users_old_chat.should be_active
+
+        reply_to(user).body.should == "Hi buddy"
+      end
+
+      it "should deliver the messages and reactivate the chats" do
+        assert_chat_reactivation(user, :friend)
+        assert_chat_reactivation(friend, :user)
+      end
     end
 
     context ":notify => true" do
       it "should inform both active users how to find a new friend" do
         expect_message { active_chat.deactivate!(:notify => true) }
+        assert_active_users_cleared
         reply_to_user.body.should == spec_translate(:anonymous_chat_has_ended, user.locale, friend.screen_id)
         reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale, user.screen_id)
       end
@@ -237,25 +358,63 @@ describe Chat do
     context ":notify => #<User...>" do
       it "should inform the user specified how to find a new friend" do
         expect_message { active_chat.deactivate!(:notify => friend) }
+        assert_active_users_cleared
         reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale, user.screen_id)
         reply_to_user.should be_nil
+      end
+    end
+
+    context "passing no options" do
+      it "should clear the active users" do
+        active_chat.deactivate!
+        assert_active_users_cleared
       end
     end
   end
 
   describe "#forward_message" do
-    it "should foward the message to the chat partner" do
-      expect_message { active_chat.forward_message(user, "hello friend") }
+    let(:message) { "hello" }
 
-      active_chat.replies.count.should == 1
-      reply_to_friend.body.should == spec_translate(:forward_message, friend.locale, user.screen_id, "hello friend")
+    def assert_forward_message_to(recipient, originator, chat_session, message, delivered = true)
+      reply = reply_to(recipient, chat_session)
+      reply.body.should == spec_translate(
+        :forward_message, recipient.locale, originator.screen_id, message
+      )
+      if delivered
+        recipient.active_chat.should == chat_session
+        originator.active_chat.should == chat_session
+        reply.should be_delivered
+      else
+        reply.should_not be_delivered
+      end
     end
 
-    it "should touch the chat" do
-      active_chat_with_inactivity
-      Timecop.freeze(Time.now) do
-        expect_message {active_chat_with_inactivity.forward_message(user, "hello friend") }
-        active_chat_with_inactivity.updated_at.should == Time.now
+    context "given the friend is available to chat" do
+      it "should forward the message to the friend and put the friend in the active chat" do
+        time_updated = active_chat_with_single_user.updated_at
+        expect_message { active_chat_with_single_user.forward_message(user, message) }
+        assert_forward_message_to(friend, user, active_chat_with_single_user, message)
+        active_chat_with_single_user.updated_at.should > time_updated
+      end
+    end
+
+    context "given the friend is unavailable to chat" do
+      def assert_unavailable_notification_to(recipient_name, unavailable_user)
+        # create a new active chat for the unavailable user so they're unavailable
+        create(:active_chat, :user => unavailable_user)
+
+        recipient = send(recipient_name)
+        chat_session = send("active_chat_with_single_#{recipient_name}")
+        expect_message { chat_session.forward_message(recipient, message) }
+        reply_to(recipient).body.should == spec_translate(
+          :friend_unavailable, recipient.locale, unavailable_user.screen_id
+        )
+        assert_forward_message_to(unavailable_user, recipient, chat_session, message, false)
+      end
+
+      it "inform the sender and save the message for sending later" do
+        assert_unavailable_notification_to(:user, friend)
+        assert_unavailable_notification_to(:friend, user)
       end
     end
   end
@@ -306,6 +465,7 @@ describe Chat do
       active_chat_with_inactivity
       unique_active_chat
       chat
+      active_chat_with_single_user_with_inactivity
     end
 
     context "passing no options" do

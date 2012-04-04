@@ -669,6 +669,15 @@ describe User do
     end
   end
 
+  describe "#available?" do
+    it "should only return true if the user is online and not currently chatting" do
+      user.should be_available
+      offline_user.should_not be_available
+      active_chat
+      user.should_not be_available
+    end
+  end
+
   describe "#first_message?" do
     it "should return true only if the user has one message" do
       user.first_message?.should be_false

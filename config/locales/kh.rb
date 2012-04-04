@@ -21,24 +21,36 @@
         "Som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
       },
 
-      :logged_out_or_chat_has_ended => lambda {|key, options|
-        notification = options[:friends_screen_name] ? "#{options[:friends_screen_name]} min chleuy torb te? " : "Pel nis nek jaak jenh haey. "
+      :how_to_start_a_new_chat => lambda {|key, options|
 
-        if options[:missing_profile_attributes].any?
-          notification << "Pjeur "
+        default_instructions = "Sorsay 'new' "
+
+        case options[:action]
+        when :logout
+          notification = "Pel nis nek jaak jenh haey. "
+        when :no_answer
+          notification = "#{options[:friends_screen_name]} min chleuy torb te? "
+        when :friend_unavailable
+          notification = "Som-tos pel nis #{options[:friends_screen_name]} min tom-nae te. "
+          instructions = default_instructions
+        end
+
+        if !instructions && options[:missing_profile_attributes].any?
+          instructions = "Pjeur "
 
           translated_missing_attributes = []
           options[:missing_profile_attributes].each do |attribute|
             translated_missing_attributes << User.human_attribute_name(attribute, :locale => :kh).downcase
           end
 
-          notification << translated_missing_attributes.to_sentence(:locale => :kh)
-          notification << " "
+          instructions << translated_missing_attributes.to_sentence(:locale => :kh)
+          instructions << " "
         else
-          notification << "Sorsay 'new' "
+          instructions ||= default_instructions
         end
 
-        notification << "derm-bei rok mit tmey teat"
+        instructions << "derm-bei rok mit tmey teat"
+        notification << instructions
       }
     }
   }

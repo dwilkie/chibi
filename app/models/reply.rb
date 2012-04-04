@@ -9,33 +9,45 @@ class Reply < ActiveRecord::Base
 
   before_validation :set_destination
 
-  after_create :deliver
-
   def self.filter_by(params = {})
     scoped.where(params.slice(:user_id)).order("created_at DESC")
+  end
+
+  def self.delivered
+    scoped.where("delivered_at IS NOT NULL")
+  end
+
+  def self.undelivered
+    scoped.where(:delivered_at => nil)
   end
 
   def body
     read_attribute(:body).to_s
   end
 
-  def logout_or_end_chat(partner = nil)
-    self.body = I18n.t(
-      "replies.logged_out_or_chat_has_ended",
-      :friends_screen_name => partner.try(:screen_id),
-      :missing_profile_attributes => user.missing_profile_attributes,
-      :locale => user.locale
-    )
-    save
+  def delivered?
+    delivered_at.present?
   end
 
-  def explain_chat_could_not_be_started
+  def logout!
+    explain_how_to_start_a_new_chat!(:logout)
+  end
+
+  def end_chat!(partner)
+    explain_how_to_start_a_new_chat!(:no_answer, partner)
+  end
+
+  def explain_chat_could_not_be_started!
     self.body = I18n.t(
       "replies.could_not_start_new_chat",
       :users_name => user.name,
       :locale => user.locale
     )
-    save
+    deliver!
+  end
+
+  def explain_friend_is_unavailable!(partner)
+    explain_how_to_start_a_new_chat!(:friend_unavailable, partner)
   end
 
   def forward_message(from, message)
@@ -43,7 +55,12 @@ class Reply < ActiveRecord::Base
     save
   end
 
-  def introduce(partner, to_initiator)
+  def forward_message!(from, message)
+    forward_message(from, message)
+    deliver!
+  end
+
+  def introduce!(partner, to_initiator)
     self.body = I18n.t(
       "replies.new_chat_started",
       :users_name => user.name,
@@ -51,23 +68,36 @@ class Reply < ActiveRecord::Base
       :to_initiator => to_initiator,
       :locale => user.locale
     )
-    save
+    deliver!
   end
 
-  def welcome
+  def welcome!
     self.body = I18n.t("replies.welcome", :locale => user.locale)
-    save
+    deliver!
   end
 
-  private
-
-  def deliver
+  def deliver!
+    self.delivered_at = Time.now
+    save
     nuntium = Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
     # use an array so Nuntium sends a POST
     nuntium.send_ao([{:to => "sms://#{destination}", :body => body}])
   end
 
+  private
+
   def set_destination
     self.destination ||= user.try(:mobile_number)
+  end
+
+  def explain_how_to_start_a_new_chat!(action, partner = nil)
+    self.body = I18n.t(
+      "replies.how_to_start_a_new_chat",
+      :action => action,
+      :friends_screen_name => partner.try(:screen_id),
+      :missing_profile_attributes => user.missing_profile_attributes,
+      :locale => user.locale
+    )
+    deliver!
   end
 end

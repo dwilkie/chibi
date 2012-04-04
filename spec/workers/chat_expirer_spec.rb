@@ -14,7 +14,7 @@ describe ChatExpirer do
     end
 
     it "should tell the message to process itself" do
-      Chat.should_receive(:end_inactive).with(:notify => true)
+      Chat.should_receive(:end_inactive).with(:notify => true, :active_user => true)
       subject.class.perform
     end
   end

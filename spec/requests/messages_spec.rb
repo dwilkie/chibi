@@ -148,6 +148,100 @@ describe "Messages" do
           initiate_chat(dave)
         end
 
+        context "and my friend doesn't reply to me" do
+          before do
+            dave.reload.active_chat.deactivate!(:active_user => true)
+          end
+
+          context "and I text" do
+            context "'hello'" do
+              before do
+                send_message(:from => dave.mobile_number, :body => "hello")
+              end
+
+              it "should find me a new friend" do
+                reply_to(dave).body.should == spec_translate(
+                  :personalized_new_friend_found,
+                  dave.locale, dave.name.capitalize, mara.screen_id,
+                )
+              end
+
+              context "and later my old friend texts 'Hi Dave'" do
+
+                context "and I am available" do
+
+                  before do
+                    dave.reload.active_chat.deactivate!(:active_user => true)
+                    send_message(:from => joy.mobile_number, :body => "Hi Dave")
+                  end
+
+                  it "should send the message to me" do
+                    reply_to(dave).body.should == spec_translate(
+                      :forward_message, dave.locale, joy.screen_id, "Hi Dave"
+                    )
+                  end
+
+                  context "if I then reply with 'Hi Joy'" do
+                    before do
+                      send_message(:from => dave.mobile_number, :body => "Hi Joy")
+                    end
+
+                    it "should send the message to my old friend" do
+                      reply_to(joy).body.should == spec_translate(
+                        :forward_message, joy.locale, dave.screen_id, "Hi Joy"
+                      )
+                    end
+                  end
+                end
+
+                context "and I am not currently available" do
+                  before do
+                    send_message(:from => joy.mobile_number, :body => "Hi Dave")
+                  end
+
+                  it "should notify my old friend that I am currently unavailable" do
+                    reply_to(joy).body.should == spec_translate(
+                      :friend_unavailable, joy.locale, dave.screen_id
+                    )
+
+                    reply_to_dave = reply_to(dave)
+                    reply_to_dave.body.should == spec_translate(
+                      :forward_message, dave.locale, joy.screen_id, "Hi Dave"
+                    )
+                    reply_to_dave.should_not be_delivered
+                  end
+
+                  context "and I send another message" do
+                    before do
+                      send_message(:from => dave.mobile_number, :body => "Hi Mara")
+                    end
+
+                    it "should send the message to my new friend" do
+                      reply_to(mara).body.should == spec_translate(
+                        :forward_message, mara.locale, dave.screen_id, "Hi Mara"
+                      )
+                    end
+                  end
+
+                  context "when I later become available" do
+                    before do
+                      expect_message { dave.reload.active_chat.deactivate!(:active_user => true) }
+                    end
+
+                    it "should send me the message that my old friend previously sent" do
+                      reply = reply_to(dave)
+                      reply.body.should == spec_translate(
+                        :forward_message, dave.locale, joy.screen_id, "Hi Dave"
+                      )
+                      reply.should be_delivered
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+
         context "and I text" do
           context "'new'" do
             before do

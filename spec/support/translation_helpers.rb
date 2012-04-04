@@ -5,6 +5,11 @@ module TranslationHelpers
       :kh => "Som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
     },
 
+    :friend_unavailable => {
+      :en => "Sorry #[0] is currently unavailable. Txt 'new' to meet someone new",
+      :kh => "Som-tos pel nis #[0] min tom-nae te. Sorsay 'new' derm-bei rok mit tmey teat"
+    },
+
     :welcome => {
       :en => "Welcome to Chibi! We'll help you meet a new friend! At any time you can write 'en' to read English or 'stop' to go offline",
       :kh => "Som sva-kom mok kan Chibi! Yerng chuay nek rok mit tmey! At any time you can write 'en' to read English, 'kh' to read Khmer or 'stop' to go offline"

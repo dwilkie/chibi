@@ -15,32 +15,29 @@ describe Reply do
   let(:partner) { build(:user_with_name) }
   let(:reply) { create(:reply, :user => user) }
 
-  def assert_reply(method, key, args = [], interpolations = [], test_users = nil)
-    (test_users || local_users).each do |local_user|
-      subject.user = local_user
-      expect_message { subject.send(method, *args) }
-      subject.body.should == spec_translate(key, local_user.locale, *interpolations)
+  def assert_persisted_and_delivered(reply, mobile_number, options = {})
+    options[:deliver] = true unless options[:deliver] == false
+    reply.should be_persisted
+    reply.destination.should == mobile_number
+    last_request = FakeWeb.last_request
+    if options[:deliver]
+      last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
+      JSON.parse(last_request.body).first["body"].should == reply.body
+      reply.should be_delivered
+    else
+      reply.should_not be_delivered
     end
   end
 
-  shared_examples_for "replying to a user" do
-    before do
-      subject.user = user
-      expect_message do
-        subject.send(method, *args)
-      end
-    end
-
-    it "should persist the reply" do
-      subject.should be_persisted
-    end
-
-    it "should set the destination to the user's mobile number" do
-      subject.destination.should == user.mobile_number
-    end
-
-    it "should send the reply" do
-      FakeWeb.last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
+  def assert_reply(method, key, options = {})
+    options[:args] ||= []
+    options[:interpolations] || []
+    (options[:test_users] || local_users).each do |local_user|
+      reply = subject.class.new
+      reply.user = local_user
+      expect_message { reply.send(method, *options[:args]) }
+      reply.body.should == spec_translate(key, local_user.locale, *options[:interpolations])
+      assert_persisted_and_delivered(reply, local_user.mobile_number, options)
     end
   end
 
@@ -110,6 +107,32 @@ describe Reply do
     end
   end
 
+  describe ".undelivered" do
+    let(:delivered_reply) { create(:delivered_reply) }
+
+    before do
+      reply
+      delivered_reply
+    end
+
+    it "should return only the undelivered replies" do
+      subject.class.undelivered.should == [reply]
+    end
+  end
+
+  describe ".delivered" do
+    let(:delivered_reply) { create(:delivered_reply) }
+
+    before do
+      reply
+      delivered_reply
+    end
+
+    it "should return only the delivered replies" do
+      subject.class.delivered.should == [delivered_reply]
+    end
+  end
+
   describe "#body" do
     it "should return an empty string if it is nil" do
       subject.body = nil
@@ -128,81 +151,92 @@ describe Reply do
     end
   end
 
-  describe "#logout_or_end_chat" do
-    it_should_behave_like "replying to a user" do
-      let(:method) { :logout_or_end_chat }
-      let(:args) { [] }
-    end
-
-    context "passing partner" do
-      it "should inform the user how to find a new friend" do
-        assert_reply(:logout_or_end_chat, :anonymous_chat_has_ended, [partner], [partner.screen_id])
-      end
-    end
-
-    context "passing no partner" do
-      it "should tell the user that they have been logged out" do
-        assert_reply(:logout_or_end_chat, :anonymous_logged_out)
-      end
-
-      context "given an english user is only missing their sexual preference" do
-        # special case
-
-        let(:english_user_only_missing_sexual_preference) do
-          build(:english_user_with_complete_profile, :looking_for => nil)
-        end
-
-        it "should tell them to text in the gender they're seeking" do
-          assert_reply(
-            :logout_or_end_chat,
-            :only_missing_sexual_preference_logged_out,
-            [],
-            [],
-            [english_user_only_missing_sexual_preference]
-          )
-        end
-      end
+  describe "#delivered?" do
+    it "should return true if the message has been delivered" do
+      reply.should_not be_delivered
+      expect_message { reply.deliver! }
+      reply.should be_delivered
     end
   end
 
-  describe "#explain_chat_could_not_be_started" do
-    it_should_behave_like "replying to a user" do
-      let(:method) { :explain_chat_could_not_be_started }
-      let(:args) { [] }
-    end
-
-    it "should tell the user that their chat could not be started at this time" do
-      assert_reply(:explain_chat_could_not_be_started, :could_not_start_new_chat)
+  describe "#deliver!" do
+    it "should deliver the message" do
+      expect_message { new_reply.deliver! }
+      assert_persisted_and_delivered(new_reply, user.mobile_number)
     end
   end
 
-  describe "#forward_message" do
-    before do
-      subject.user = user
-    end
-
-    it_should_behave_like "replying to a user" do
-      let(:method) { :forward_message }
-      let(:args) { ["mike", "hi how r u doing"] }
-    end
-
-    it "should show the message in a chat context" do
+  describe "#end_chat!" do
+    it "should inform the user how to find a new friend" do
       assert_reply(
-        :forward_message, :forward_message, ["mike", "hi how r u doing"], ["mike", "hi how r u doing"]
+        :end_chat!, :anonymous_chat_has_ended, :args => [partner], :interpolations => [partner.screen_id]
       )
     end
   end
 
-  describe "#introduce" do
-    it_should_behave_like "replying to a user" do
-      let(:method) { :introduce }
-      let(:args) { [partner, true] }
+  describe "#logout!" do
+    it "should confirm the user that they have been logged out and explain how to find a new friend" do
+      assert_reply(:logout!, :anonymous_logged_out)
     end
+
+    context "given an english user is only missing their sexual preference" do
+      # special case
+
+      let(:english_user_only_missing_sexual_preference) do
+        build(:english_user_with_complete_profile, :looking_for => nil)
+      end
+
+      it "should tell them to text in the gender they're seeking" do
+        assert_reply(
+          :logout!,
+          :only_missing_sexual_preference_logged_out,
+          :test_users => [english_user_only_missing_sexual_preference]
+        )
+      end
+    end
+  end
+
+  describe "#explain_chat_could_not_be_started!" do
+    it "should tell the user that their chat could not be started at this time" do
+      assert_reply(:explain_chat_could_not_be_started!, :could_not_start_new_chat)
+    end
+  end
+
+  describe "#explain_friend_is_unavailable!" do
+    it "should inform the user that their friend is unavailable and explain how to meet a new friend" do
+      assert_reply(
+        :explain_friend_is_unavailable!, :friend_unavailable,
+        :args => [partner], :interpolations => [partner.screen_id]
+      )
+    end
+  end
+
+  describe "#forward_message" do
+    it "should show the message in a chat context but not deliver the message" do
+      assert_reply(
+        :forward_message, :forward_message,
+        :args => ["mike", "hi how r u doing"], :interpolations => ["mike", "hi how r u doing"],
+        :deliver => false
+      )
+    end
+  end
+
+  describe "#forward_message!" do
+    it "should deliver the forwarded message" do
+      assert_reply(
+        :forward_message!, :forward_message,
+        :args => ["mike", "hi how r u doing"], :interpolations => ["mike", "hi how r u doing"],
+      )
+    end
+  end
+
+  describe "#introduce!" do
 
     context "for the chat initiator" do
       it "should tell her that we have found a friend for her" do
         assert_reply(
-          :introduce, :anonymous_new_friend_found, [partner, true], [partner.screen_id]
+          :introduce!, :anonymous_new_friend_found,
+          :args => [partner, true], :interpolations => [partner.screen_id]
         )
       end
     end
@@ -210,20 +244,16 @@ describe Reply do
     context "for the chat partner" do
       it "should tell him that someone is interested in chatting with him" do
         assert_reply(
-          :introduce, :anonymous_new_chat_started, [partner, false], [partner.screen_id]
+          :introduce!, :anonymous_new_chat_started,
+          :args => [partner, false], :interpolations => [partner.screen_id]
         )
       end
     end
   end
 
-  describe "#welcome" do
-    it_should_behave_like "replying to a user" do
-      let(:method) { :welcome }
-      let(:args) { [] }
-    end
-
+  describe "#welcome!" do
     it "should welcome the user" do
-      assert_reply(:welcome, :welcome)
+      assert_reply(:welcome!, :welcome)
     end
   end
 end

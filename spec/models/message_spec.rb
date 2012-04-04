@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Message, :focus do
+describe Message do
 
   let(:user) { build(:user) }
   let(:friend) { build(:english) }

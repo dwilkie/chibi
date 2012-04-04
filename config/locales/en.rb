@@ -21,25 +21,37 @@
         "Sorry we can't find a friend for you at this time. We'll let you know when someone comes online"
       },
 
-      :logged_out_or_chat_has_ended => lambda {|key, options|
-        notification = options[:friends_screen_name] ? "#{options[:friends_screen_name]} not replying? " : "You are now offline. "
+      :how_to_start_a_new_chat => lambda {|key, options|
 
-        if options[:missing_profile_attributes].any?
-          notification << "Txt us "
-          options[:missing_profile_attributes].first == :looking_for ? notification << "the " : notification << "ur "
+        default_instructions = "Txt 'new' to "
+
+        case options[:action]
+        when :logout
+          notification = "You are now offline. "
+        when :no_answer
+          notification = "#{options[:friends_screen_name]} not replying? "
+        when :friend_unavailable
+          notification = "Sorry #{options[:friends_screen_name]} is currently unavailable. "
+          instructions = default_instructions
+        end
+
+        if !instructions && options[:missing_profile_attributes].any?
+          instructions = "Txt us "
+          options[:missing_profile_attributes].first == :looking_for ? instructions << "the " : instructions << "ur "
 
           translated_missing_attributes = []
           options[:missing_profile_attributes].each do |attribute|
             translated_missing_attributes << User.human_attribute_name(attribute, :locale => :en).downcase
           end
 
-          notification << translated_missing_attributes.to_sentence(:locale => :en)
-          notification << " to "
+          instructions << translated_missing_attributes.to_sentence(:locale => :en)
+          instructions << " to "
         else
-          notification << "Txt 'new' to"
+          instructions ||= default_instructions
         end
 
-        notification << "meet someone new"
+        instructions << "meet someone new"
+        notification << instructions
       }
     }
   }

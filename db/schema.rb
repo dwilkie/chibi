@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120317064849) do
+ActiveRecord::Schema.define(:version => 20120403174513) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -23,12 +23,6 @@ ActiveRecord::Schema.define(:version => 20120317064849) do
   add_index "chats", ["friend_id"], :name => "index_chats_on_friend_id"
   add_index "chats", ["updated_at"], :name => "index_chats_on_updated_at"
   add_index "chats", ["user_id"], :name => "index_chats_on_user_id"
-
-  create_table "interests", :force => true do |t|
-    t.string   "description"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
 
   create_table "locations", :force => true do |t|
     t.string   "city"
@@ -64,22 +58,6 @@ ActiveRecord::Schema.define(:version => 20120317064849) do
 
   add_index "missed_calls", ["user_id"], :name => "index_missed_calls_on_user_id"
 
-  create_table "mo_messages", :force => true do |t|
-    t.string   "from"
-    t.string   "body"
-    t.string   "guid"
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "mt_messages", :force => true do |t|
-    t.string   "body"
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "phone_calls", :force => true do |t|
     t.string   "sid"
     t.string   "from"
@@ -100,19 +78,13 @@ ActiveRecord::Schema.define(:version => 20120317064849) do
     t.string   "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+    t.datetime "delivered_at"
   end
 
   add_index "replies", ["chat_id"], :name => "index_replies_on_chat_id"
   add_index "replies", ["user_id"], :name => "index_replies_on_user_id"
-
-  create_table "user_interests", :force => true do |t|
-    t.integer  "user_id"
-    t.integer  "interest_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
 
   create_table "users", :force => true do |t|
     t.string   "mobile_number"
