@@ -168,15 +168,20 @@ describe Reply do
 
   describe "#end_chat!" do
     it "should inform the user how to find a new friend" do
-      assert_reply(
-        :end_chat!, :anonymous_chat_has_ended, :args => [partner], :interpolations => [partner.screen_id]
-      )
+      method = :end_chat!
+      args = [partner]
+      interpolations = [partner.screen_id]
+
+      assert_reply(method, :anonymous_chat_has_ended, :args => args, :interpolations => interpolations)
+      args << {:skip_update_profile_instructions => true}
+      assert_reply(method, :chat_has_ended, :args => args, :interpolations => interpolations)
     end
   end
 
   describe "#logout!" do
     it "should confirm the user that they have been logged out and explain how to find a new friend" do
       assert_reply(:logout!, :anonymous_logged_out)
+      assert_reply(:logout!, :logged_out_from_chat, :args => [partner], :interpolations => [partner.screen_id])
     end
 
     context "given an english user is only missing their sexual preference" do

@@ -136,29 +136,30 @@ describe Chat do
 
     context "given the user is currently in another chat" do
       let(:current_chat_partner) { create(:user) }
-      let(:current_active_chat)  { create(:active_chat, :user => user, :friend => current_chat_partner) }
+      let(:current_active_chat) { create(:active_chat, :user => user, :friend => current_chat_partner) }
 
       before do
         current_active_chat
       end
 
-      it "should deactivate the other chat" do
+      it "should deactivate the other chat for the new user but leave the partner active" do
         new_chat.activate!
         current_active_chat.should_not be_active
+        current_active_chat.reload.active_users.should == [current_chat_partner]
       end
 
       context "passing :notify => true" do
-        it "should notify the current chat partner the chat has ended" do
+        it "should inform the current chat partner how to find a new friend" do
           expect_message { new_chat.activate!(:notify => true) }
           reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
-            :anonymous_chat_has_ended, current_chat_partner.locale, user.screen_id
+            :chat_has_ended, current_chat_partner.locale, user.screen_id
           )
           reply_to(user, current_active_chat).should be_nil
         end
       end
 
       context "passing no options" do
-        it "should not notify the current chat partner the chat has ended" do
+        it "should not inform the current chat partner how to find a new friend" do
           new_chat.activate!
           reply_to(current_chat_partner, current_active_chat).should be_nil
         end
@@ -268,11 +269,21 @@ describe Chat do
       active_chat.should_not be_active
     end
 
-    context "passing :active_user => #<User...>" do
-      it "should only deactivate the chat for the given user" do
+    context "passing :active_user => #<User...A>" do
+      it "should only deactivate the chat for User...B" do
         # so that they are available to chat with someone else
         active_chat.deactivate!(:active_user => user)
         active_chat.active_users.should == [friend]
+      end
+
+      context ":notify => #<User...B>" do
+        it "should inform User B how to start a new chat" do
+          expect_message { active_chat.deactivate!(:active_user => user, :notify => friend) }
+          reply_to_friend.body.should == spec_translate(
+            :chat_has_ended, friend.locale, user.screen_id
+          )
+          reply_to_user.should be_nil
+        end
       end
     end
 
@@ -314,35 +325,71 @@ describe Chat do
           end
         end
       end
-    end
 
-    context "given there are undelivered messages for the deactivated users" do
-      def assert_chat_reactivation(user, users_old_relationship)
-        # create an old chat
-        users_old_chat = send("active_chat_with_single_#{users_old_relationship}")
+      context "given there are undelivered messages for the deactivated users" do
+        def setup_chat_reactivation_scenario(user, users_old_relationship)
+          # create an old chat
+          users_old_chat = send("active_chat_with_single_#{users_old_relationship}")
 
-        # create an undelivered reply to the old chat
-        message_from_old_friend = create(:reply, :user => user, :chat => users_old_chat, :body => "Hi buddy")
+          # create an undelivered reply to the old chat
+          message_from_old_friend = create(:reply, :user => user, :chat => users_old_chat, :body => "Hi buddy")
 
-        # activate a new chat for the user
-        chat_to_deactivate = create(:active_chat, :user => user)
+          # activate a new chat for the user
+          chat_to_deactivate = create(:active_chat, :user => user)
+          [users_old_chat, message_from_old_friend, chat_to_deactivate]
+        end
 
-        # deactivate the new chat
-        expect_message { chat_to_deactivate.deactivate!(:notify => true) }
+        def assert_chat_reactivated(user, users_old_relationship, args = {})
 
-        # assert the delivery of the message from the old friend
-        message_from_old_friend.reload.should be_delivered
+          users_old_chat, message_from_old_friend, chat_to_deactivate = setup_chat_reactivation_scenario(
+            user, users_old_relationship
+          )
 
-        # assert that the old chat has been reactivated
-        users_old_chat.reload
-        users_old_chat.should be_active
+          # deactivate the new chat
+          expect_message { chat_to_deactivate.deactivate!(args.merge(:notify => true)) }
 
-        reply_to(user).body.should == "Hi buddy"
-      end
+          # assert the delivery of the message from the old friend
+          message_from_old_friend.reload.should be_delivered
 
-      it "should deliver the messages and reactivate the chats" do
-        assert_chat_reactivation(user, :friend)
-        assert_chat_reactivation(friend, :user)
+          # assert that the old chat has been reactivated
+          users_old_chat.reload
+          users_old_chat.should be_active
+
+          reply_to(user).body.should == "Hi buddy"
+        end
+
+        def assert_chat_not_reactivated(user, users_old_relationship, args = {})
+          users_old_chat, message_from_old_friend, chat_to_deactivate = setup_chat_reactivation_scenario(
+            user, users_old_relationship
+          )
+
+          chat_to_deactivate.deactivate!(args.merge(:reactivate_previous_chat => false))
+
+          # assert the delivery of the message from the old friend
+          message_from_old_friend.reload.should_not be_delivered
+
+          # assert that the old chat has been reactivated
+          users_old_chat.reload
+          users_old_chat.should_not be_active
+        end
+
+        def assert_chat_reactivation(activate)
+          assertion = "_not" unless activate
+          send("assert_chat#{assertion}_reactivated", user, :friend, :active_user => true)
+          send("assert_chat#{assertion}_reactivated", user, :friend, :active_user => user)
+          send("assert_chat#{assertion}_reactivated", friend, :user, :active_user => friend)
+          send("assert_chat#{assertion}_reactivated", friend, :user, :active_user => true)
+        end
+
+        it "should deliver the messages and reactivate the chats" do
+          assert_chat_reactivation(true)
+        end
+
+        context "passing :reactivate_previous_chat => false" do
+          it "should not deliver any messages or reactivate the chats" do
+            assert_chat_reactivation(false)
+          end
+        end
       end
     end
 

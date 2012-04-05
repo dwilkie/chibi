@@ -28,6 +28,7 @@
         case options[:action]
         when :logout
           notification = "Pel nis nek jaak jenh haey. "
+          instructions = "Pjeur sa derm-bei chat jea-moy #{options[:friends_screen_name]} m-dong teat reu #{default_instructions.downcase}" if options[:friends_screen_name]
         when :no_answer
           notification = "#{options[:friends_screen_name]} min chleuy torb te? "
         when :friend_unavailable
@@ -35,7 +36,7 @@
           instructions = default_instructions
         end
 
-        if !instructions && options[:missing_profile_attributes].any?
+        if !instructions && options[:missing_profile_attributes].try(:any?)
           instructions = "Pjeur "
 
           translated_missing_attributes = []

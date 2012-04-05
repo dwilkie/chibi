@@ -38,7 +38,9 @@ class Chat < ActiveRecord::Base
     if user.currently_chatting?
       current_chat = user.active_chat
       current_partner = current_chat.partner(user) if options[:notify]
-      current_chat.deactivate!(:notify => current_partner)
+      current_chat.deactivate!(
+        :active_user => user, :notify => current_partner, :reactivate_previous_chat => false
+      )
     end
 
     if friend.present?
@@ -57,28 +59,28 @@ class Chat < ActiveRecord::Base
   end
 
   def deactivate!(options = {})
-    active_user = options[:active_user]
+    # reactivate previous chats by default
+    options[:reactivate_previous_chat] = true unless options[:reactivate_previous_chat] == false
 
-    user_to_remain_in_chat = ((active_user == user || active_user == friend) ? partner(active_user) : user_with_inactivity) if options[:active_user]
-
-    if user_to_remain_in_chat
-      self.active_users = [user_to_remain_in_chat]
-      users_to_leave_chat = [partner(user_to_remain_in_chat)]
-    else
-      active_users.clear
-      users_to_leave_chat = [user, friend]
+    # find the user to remain in this chat if any
+    if active_user = options[:active_user]
+      user_to_remain_in_chat = in_this_chat?(active_user) ? partner(active_user) : user_with_inactivity
     end
 
-    users_to_notify = []
+    # find the users to leave this chat
+    users_to_leave_chat = set_active_users(user_to_remain_in_chat)
 
-    users_to_leave_chat.each do |user_to_leave_chat|
-      chat_to_reactivate = self.class.with_undelivered_messages_for(user_to_leave_chat).first
-      chat_to_reactivate ? chat_to_reactivate.reactivate! : users_to_notify << user_to_leave_chat
-    end
+    # find the users to notify about this change
+    users_to_notify = options[:reactivate_previous_chat] ? reactivate_expired_chats(users_to_leave_chat) : users_to_leave_chat
 
-    if options[:notify]
-      notify = (options[:notify] == user || options[:notify] == friend) ? [options[:notify]] : users_to_notify
-      reply_chat_has_ended(*notify)
+    # notify the users skipping the instructions to update the users profile if
+    # they still remain activated in this chat
+    if notify = options[:notify]
+      notify = in_this_chat?(notify) ? [notify] : users_to_notify
+
+      reply_chat_was_deactivated!(
+        *notify, :skip_update_profile_instructions => notify.include?(user_to_remain_in_chat)
+      )
     end
   end
 
@@ -125,13 +127,39 @@ class Chat < ActiveRecord::Base
 
   private
 
+  def reactivate_expired_chats(users)
+    users_to_notify = []
+
+    users.each do |user|
+      chat_to_reactivate = self.class.with_undelivered_messages_for(user).first
+      chat_to_reactivate ? chat_to_reactivate.reactivate! : users_to_notify << user
+    end
+    users_to_notify
+  end
+
+  def in_this_chat?(reference_user)
+    reference_user == user || reference_user == friend
+  end
+
+  def set_active_users(user_to_remain_in_chat = nil)
+    if user_to_remain_in_chat
+      self.active_users = [user_to_remain_in_chat]
+      users_to_leave_chat = [partner(user_to_remain_in_chat)]
+    else
+      active_users.clear
+      users_to_leave_chat = [user, friend]
+    end
+    users_to_leave_chat
+  end
+
   def self.with_undelivered_messages_for(user)
     scoped.includes(:replies).where(:replies => {:delivered_at => nil, :user_id => user.id})
   end
 
-  def reply_chat_has_ended(*destination_users)
+  def reply_chat_was_deactivated!(*destination_users)
+    options = destination_users.extract_options!
     destination_users.each do |destination_user|
-      replies.build(:user => destination_user).end_chat!(partner(destination_user))
+      replies.build(:user => destination_user).end_chat!(partner(destination_user), options)
     end
   end
 

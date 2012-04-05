@@ -28,6 +28,7 @@
         case options[:action]
         when :logout
           notification = "You are now offline. "
+          instructions = "Chat with #{options[:friends_screen_name]} again by replying to this message or #{default_instructions.downcase}" if options[:friends_screen_name]
         when :no_answer
           notification = "#{options[:friends_screen_name]} not replying? "
         when :friend_unavailable
@@ -35,7 +36,7 @@
           instructions = default_instructions
         end
 
-        if !instructions && options[:missing_profile_attributes].any?
+        if !instructions && options[:missing_profile_attributes].try(:any?)
           instructions = "Txt us "
           options[:missing_profile_attributes].first == :looking_for ? instructions << "the " : instructions << "ur "
 

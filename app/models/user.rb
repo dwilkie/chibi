@@ -156,11 +156,11 @@ class User < ActiveRecord::Base
     if currently_chatting?
       partner = active_chat.partner(self)
       notify = partner if options[:notify_chat_partner]
-      active_chat.deactivate!(:notify => notify)
+      active_chat.deactivate!(:active_user => partner, :notify => notify)
     end
 
     update_attributes!(:online => false)
-    replies.build.logout! if options[:notify]
+    replies.build.logout!(partner) if options[:notify]
   end
 
   def welcome!

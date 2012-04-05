@@ -45,9 +45,9 @@ module TranslationHelpers
       :kh => "#[0] min chleuy torb te? Sorsay 'new' derm-bei rok mit tmey teat"
     },
 
-    :logged_out => {
-      :en => "You are now offline. Txt 'new' to meet someone new",
-      :kh => "Pel nis nek jaak jenh haey. Sorsay 'new' derm-bei rok mit tmey teat"
+    :logged_out_from_chat => {
+      :en => "You are now offline. Chat with #[0] again by replying to this message or txt 'new' to meet someone new",
+      :kh => "Pel nis nek jaak jenh haey. Pjeur sa derm-bei chat jea-moy #[0] m-dong teat reu sorsay 'new' derm-bei rok mit tmey teat"
     },
 
     :anonymous_logged_out => {
@@ -55,9 +55,14 @@ module TranslationHelpers
       :kh => "Pel nis nek jaak jenh haey. Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
     },
 
+    :logged_out => {
+      :en => "You are now offline. Txt 'new' to meet someone new",
+      :kh => "Pel nis nek jaak jenh haey. Sorsay 'new' derm-bei rok mit tmey"
+    },
+
     :only_missing_sexual_preference_logged_out => {
       :en => "You are now offline. Txt us the gender ur seeking to meet someone new",
-      :kh => "Pel nis nek jaak jenh haey. Pjeur phet del nek rok derm-bei jong rok mit tmey teat"
+      :kh => "Pel nis nek jaak jenh haey. Pjeur phet del nek jong rok derm-bei rok mit tmey teat"
     },
 
     :forward_message => {

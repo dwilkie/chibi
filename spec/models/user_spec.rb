@@ -997,7 +997,7 @@ describe User do
     end
 
     context ":notify => true" do
-      it "should notify the user that they are now offline" do
+      it "should notify the user that they are now offline and inform him how to meet someone new" do
         expect_message do
           user.logout!(:notify => true)
         end
@@ -1016,10 +1016,19 @@ describe User do
 
         user.logout!
 
-        user.reload.should_not be_currently_chatting
+        user.reload.should be_currently_chatting
         friend.reload
         friend.should_not be_currently_chatting
         friend.should be_online
+      end
+
+      context "passing :notify => true" do
+        it "should notify the user that they are now offline and inform them how to chat again" do
+          expect_message do
+            user.logout!(:notify => true)
+          end
+          reply.body.should == spec_translate(:logged_out_from_chat, user.locale, friend.screen_id)
+        end
       end
 
       context "passing :notify_chat_partner => true" do

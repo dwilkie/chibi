@@ -96,29 +96,22 @@ describe Message do
       end
     end
 
-    shared_examples_for "logging out the user" do
-      before do
-        expect_message { new_message.process! }
-      end
-
-      it "should logout the user and notify him that he is now offline" do
-        reply_to(user).body.should == spec_translate(:anonymous_logged_out, user.locale)
-        user.reload
-        user.should_not be_currently_chatting
-        user.should_not be_online
-      end
-    end
-
     context "given the user is currently chatting" do
       before do
         chat
       end
 
       context "and the message body is" do
-
-        shared_examples_for "notifying the user's partner" do
+        context "'stop'" do
           before do
+            new_message.body = "stop"
             expect_message { new_message.process! }
+          end
+
+          it "should logout the user and notify him that he is now offline" do
+            reply_to(user).body.should == spec_translate(:logged_out_from_chat, user.locale, friend.screen_id)
+            user.should be_currently_chatting
+            user.should_not be_online
           end
 
           it "should notify the user's partner that the chat has ended and how to update their profile" do
@@ -134,22 +127,25 @@ describe Message do
           end
         end
 
-        context "'stop'" do
-          before do
-            new_message.body = "stop"
-          end
-
-          it_should_behave_like "logging out the user"
-          it_should_behave_like "notifying the user's partner"
-        end
-
         context "'new'" do
           before do
             new_message.body = "new"
+            expect_message { new_message.process! }
           end
 
           it_should_behave_like "starting a new chat"
-          it_should_behave_like "notifying the user's partner"
+
+          it "should inform the user's partner how find a new friend" do
+            replies_to(friend, chat).count.should == 1
+
+            reply_to(friend, chat).body.should == spec_translate(
+              :chat_has_ended, friend.locale, user.screen_id
+            )
+
+            friend.reload
+            friend.should be_currently_chatting
+            friend.should be_online
+          end
         end
 
         context "anything else but 'stop' or 'new'" do
@@ -172,9 +168,13 @@ describe Message do
         context "'stop'" do
           before do
             new_message.body = "stop"
+            expect_message { new_message.process! }
           end
 
-          it_should_behave_like "logging out the user"
+          it "should logout the user and notify him that he is now offline" do
+            reply_to(user).body.should == spec_translate(:anonymous_logged_out, user.locale)
+            user.should_not be_online
+          end
         end
 
         context "anything else but 'stop'" do

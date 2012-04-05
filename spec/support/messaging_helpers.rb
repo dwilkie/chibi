@@ -34,6 +34,8 @@ module MessagingHelpers
       options[:vcr_options] ||= { :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)] }
     end
 
+    options[:from] = options[:from].mobile_number if options[:from].is_a?(User)
+
     VCR.use_cassette(options[:cassette], options[:vcr_options]) do
       expect_message do
         with_resque do

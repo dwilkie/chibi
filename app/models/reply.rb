@@ -29,12 +29,12 @@ class Reply < ActiveRecord::Base
     delivered_at.present?
   end
 
-  def logout!
-    explain_how_to_start_a_new_chat!(:logout)
+  def logout!(partner = nil)
+    explain_how_to_start_a_new_chat!(:logout, :partner => partner)
   end
 
-  def end_chat!(partner)
-    explain_how_to_start_a_new_chat!(:no_answer, partner)
+  def end_chat!(partner, options = {})
+    explain_how_to_start_a_new_chat!(:no_answer, options.merge(:partner => partner))
   end
 
   def explain_chat_could_not_be_started!
@@ -47,7 +47,7 @@ class Reply < ActiveRecord::Base
   end
 
   def explain_friend_is_unavailable!(partner)
-    explain_how_to_start_a_new_chat!(:friend_unavailable, partner)
+    explain_how_to_start_a_new_chat!(:friend_unavailable, :partner => partner)
   end
 
   def forward_message(from, message)
@@ -90,12 +90,13 @@ class Reply < ActiveRecord::Base
     self.destination ||= user.try(:mobile_number)
   end
 
-  def explain_how_to_start_a_new_chat!(action, partner = nil)
+  def explain_how_to_start_a_new_chat!(action, options = {})
+    missing_profile_attributes = user.missing_profile_attributes unless options[:skip_update_profile_instructions]
     self.body = I18n.t(
       "replies.how_to_start_a_new_chat",
       :action => action,
-      :friends_screen_name => partner.try(:screen_id),
-      :missing_profile_attributes => user.missing_profile_attributes,
+      :friends_screen_name => options[:partner].try(:screen_id),
+      :missing_profile_attributes => missing_profile_attributes,
       :locale => user.locale
     )
     deliver!
