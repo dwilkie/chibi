@@ -260,7 +260,7 @@ describe "Messages" do
 
               it "should tell me that there are no girls currently available" do
                 reply_to(dave).body.should == spec_translate(
-                  :could_not_find_a_girl, dave.locale
+                  :could_not_find_a_friend, dave.locale
                 )
               end
             end

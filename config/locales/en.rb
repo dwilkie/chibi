@@ -32,20 +32,10 @@
           notification = "Sorry #{options[:friends_screen_name]} is currently unavailable. "
           instructions = default_instructions
         when :could_not_find_a_friend
-          case options[:looking_for]
-          when "m"
-            looking_for = "boy"
-          when "f"
-            looking_for = "girl"
-          else
-            looking_for = "friend"
-            relative_pronoun_prefix = "some"
-          end
-
-          notification = "Sorry we can't find a #{looking_for} for you at this time. "
+          notification = "Sorry we can't find a friend for you at this time. "
           default_instructions = ""
           default_instructions_outcome = "to try again"
-          custom_or_no_instructions_outcome = "We'll let you know when #{relative_pronoun_prefix}one comes online"
+          custom_or_no_instructions_outcome = "We'll let you know when someone comes online"
         end
 
         if !instructions && options[:missing_profile_attributes].try(:any?)

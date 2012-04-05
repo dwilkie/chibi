@@ -92,7 +92,6 @@ class Reply < ActiveRecord::Base
       :action => action,
       :friends_screen_name => options[:partner].try(:screen_id),
       :missing_profile_attributes => missing_profile_attributes,
-      :looking_for => user.looking_for,
       :locale => user.locale
     )
     deliver!

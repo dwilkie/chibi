@@ -1,15 +1,5 @@
 module TranslationHelpers
   TRANSLATIONS = {
-    :could_not_find_a_girl => {
-      :en => "Sorry we can't find a girl for you at this time. We'll let you know when one comes online",
-      :kh => "Som-tos pel nis min mean srey tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean srey tom-nae"
-    },
-
-    :could_not_find_a_boy => {
-      :en => "Sorry we can't find a boy for you at this time. We'll let you know when one comes online",
-      :kh => "Som-tos pel nis min mean bros tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean bros tom-nae"
-    },
-
     :could_not_find_a_friend => {
       :en => "Sorry we can't find a friend for you at this time. We'll let you know when someone comes online",
       :kh => "Som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"

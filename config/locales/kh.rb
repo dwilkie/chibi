@@ -32,19 +32,10 @@
           notification = "Som-tos pel nis #{options[:friends_screen_name]} min tom-nae te. "
           instructions = default_instructions
         when :could_not_find_a_friend
-          case options[:looking_for]
-          when "m"
-            looking_for = "bros"
-          when "f"
-            looking_for = "srey"
-          else
-            looking_for = "nek"
-          end
-
-          notification = "Som-tos pel nis min mean #{looking_for} tom-nae te. "
+          notification = "Som-tos pel nis min mean nek tom-nae te. "
           default_instructions = ""
           default_instructions_outcome = "derm-bei pjea-yeam m-dong teat"
-          custom_or_no_instructions_outcome = "Yerng neng pjeur tov nek m-dong teat nov pel mean #{looking_for} tom-nae"
+          custom_or_no_instructions_outcome = "Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
         end
 
         if !instructions && options[:missing_profile_attributes].try(:any?)
