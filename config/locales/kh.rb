@@ -17,13 +17,10 @@
         greeting << "! " << notification << instructions
       },
 
-      :could_not_start_new_chat => lambda {|key, options|
-        "Som-tos pel nis min mean nek tom-nae te. Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
-      },
-
       :how_to_start_a_new_chat => lambda {|key, options|
 
         default_instructions = "Sorsay 'new' "
+        default_outcome = "derm-bei rok mit tmey teat"
 
         case options[:action]
         when :logout
@@ -34,6 +31,20 @@
         when :friend_unavailable
           notification = "Som-tos pel nis #{options[:friends_screen_name]} min tom-nae te. "
           instructions = default_instructions
+        when :could_not_find_a_friend
+          case options[:looking_for]
+          when "m"
+            looking_for = "bros"
+          when "f"
+            looking_for = "srey"
+          else
+            looking_for = "nek"
+          end
+
+          notification = "Som-tos pel nis min mean #{looking_for} tom-nae te. "
+          default_instructions = ""
+          default_instructions_outcome = "derm-bei pjea-yeam m-dong teat"
+          custom_or_no_instructions_outcome = "Yerng neng pjeur tov nek m-dong teat nov pel mean #{looking_for} tom-nae"
         end
 
         if !instructions && options[:missing_profile_attributes].try(:any?)
@@ -46,12 +57,15 @@
 
           instructions << translated_missing_attributes.to_sentence(:locale => :kh)
           instructions << " "
+
+          outcome = default_instructions_outcome
         else
           instructions ||= default_instructions
+          outcome = custom_or_no_instructions_outcome
         end
 
-        instructions << "derm-bei rok mit tmey teat"
-        notification << instructions
+        outcome ||= default_outcome
+        notification << instructions << outcome
       }
     }
   }

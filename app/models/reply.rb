@@ -37,13 +37,8 @@ class Reply < ActiveRecord::Base
     explain_how_to_start_a_new_chat!(:no_answer, options.merge(:partner => partner))
   end
 
-  def explain_chat_could_not_be_started!
-    self.body = I18n.t(
-      "replies.could_not_start_new_chat",
-      :users_name => user.name,
-      :locale => user.locale
-    )
-    deliver!
+  def explain_could_not_find_a_friend!
+    explain_how_to_start_a_new_chat!(:could_not_find_a_friend)
   end
 
   def explain_friend_is_unavailable!(partner)
@@ -97,6 +92,7 @@ class Reply < ActiveRecord::Base
       :action => action,
       :friends_screen_name => options[:partner].try(:screen_id),
       :missing_profile_attributes => missing_profile_attributes,
+      :looking_for => user.looking_for,
       :locale => user.locale
     )
     deliver!

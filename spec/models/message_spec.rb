@@ -74,7 +74,7 @@ describe Message do
         end
 
         it "should reply saying there are no matches at this time" do
-          reply_to(user).body.should == spec_translate(:could_not_start_new_chat, user.locale)
+          reply_to(user).body.should == spec_translate(:anonymous_could_not_find_a_friend, user.locale)
           user.reload.should_not be_currently_chatting
         end
       end

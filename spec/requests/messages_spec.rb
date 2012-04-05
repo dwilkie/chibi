@@ -24,7 +24,7 @@ describe "Messages" do
             end
 
             it "should reply telling me that there are no matches at this time" do
-              reply_to(new_user).body.should == spec_translate(:could_not_start_new_chat, new_user.locale)
+              reply_to(new_user).body.should == spec_translate(:anonymous_could_not_find_a_friend, new_user.locale)
             end
           end
         end
@@ -252,6 +252,18 @@ describe "Messages" do
             end
 
             it_should_behave_like "finding me a new friend"
+
+            context "and I text 'new' again" do
+              before do
+                send_message(:from => dave, :body => "new")
+              end
+
+              it "should tell me that there are no girls currently available" do
+                reply_to(dave).body.should == spec_translate(
+                  :could_not_find_a_girl, dave.locale
+                )
+              end
+            end
           end
 
           context "'stop'" do

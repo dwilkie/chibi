@@ -49,7 +49,7 @@ class Chat < ActiveRecord::Base
     else
       replies.build(
         :user => user
-      ).explain_chat_could_not_be_started! if options[:notify] && options[:notify_no_match] != false
+      ).explain_could_not_find_a_friend! if options[:notify] && options[:notify_no_match] != false
     end
   end
 

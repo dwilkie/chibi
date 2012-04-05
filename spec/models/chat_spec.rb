@@ -208,7 +208,7 @@ describe Chat do
         context "passing :notify => true" do
           it "should notify the user that there are no matches at this time" do
             expect_message { subject.activate!(:notify => true) }
-            reply_to(user).body.should == spec_translate(:could_not_start_new_chat, user.locale)
+            reply_to(user).body.should == spec_translate(:anonymous_could_not_find_a_friend, user.locale)
           end
 
           context "with :notify_no_match => false" do

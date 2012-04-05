@@ -17,13 +17,10 @@
         greeting << "! " << notification << instructions
       },
 
-      :could_not_start_new_chat => lambda {|key, options|
-        "Sorry we can't find a friend for you at this time. We'll let you know when someone comes online"
-      },
-
       :how_to_start_a_new_chat => lambda {|key, options|
 
-        default_instructions = "Txt 'new' to "
+        default_instructions = "Txt 'new' "
+        default_outcome = "to meet someone new"
 
         case options[:action]
         when :logout
@@ -34,6 +31,21 @@
         when :friend_unavailable
           notification = "Sorry #{options[:friends_screen_name]} is currently unavailable. "
           instructions = default_instructions
+        when :could_not_find_a_friend
+          case options[:looking_for]
+          when "m"
+            looking_for = "boy"
+          when "f"
+            looking_for = "girl"
+          else
+            looking_for = "friend"
+            relative_pronoun_prefix = "some"
+          end
+
+          notification = "Sorry we can't find a #{looking_for} for you at this time. "
+          default_instructions = ""
+          default_instructions_outcome = "to try again"
+          custom_or_no_instructions_outcome = "We'll let you know when #{relative_pronoun_prefix}one comes online"
         end
 
         if !instructions && options[:missing_profile_attributes].try(:any?)
@@ -46,13 +58,16 @@
           end
 
           instructions << translated_missing_attributes.to_sentence(:locale => :en)
-          instructions << " to "
+          instructions << " "
+
+          outcome = default_instructions_outcome
         else
           instructions ||= default_instructions
+          outcome = custom_or_no_instructions_outcome
         end
 
-        instructions << "meet someone new"
-        notification << instructions
+        outcome ||= default_outcome
+        notification << instructions << outcome
       }
     }
   }

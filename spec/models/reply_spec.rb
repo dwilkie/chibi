@@ -201,9 +201,22 @@ describe Reply do
     end
   end
 
-  describe "#explain_chat_could_not_be_started!" do
+  describe "#explain_could_not_find_a_friend!" do
     it "should tell the user that their chat could not be started at this time" do
-      assert_reply(:explain_chat_could_not_be_started!, :could_not_start_new_chat)
+      assert_reply(:explain_could_not_find_a_friend!, :anonymous_could_not_find_a_friend)
+
+      local_users.each do |local_user|
+        test_user = build(:user_with_complete_profile)
+        test_user.location.country_code = local_user.location.country_code
+        {:boy => "m", :girl => "f", :friend => "e"}.each do |looking_for, user_attribute|
+          test_user.looking_for = user_attribute
+          assert_reply(
+            :explain_could_not_find_a_friend!,
+            "could_not_find_a_#{looking_for}".to_sym,
+            :test_users => [test_user]
+          )
+        end
+      end
     end
   end
 
