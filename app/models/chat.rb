@@ -3,6 +3,7 @@ class Chat < ActiveRecord::Base
   belongs_to :friend, :class_name => 'User'
 
   has_many :active_users, :class_name => 'User', :foreign_key => "active_chat_id"
+  has_many :messages
   has_many :replies
 
   validates :user, :friend, :presence => true
@@ -27,7 +28,17 @@ class Chat < ActiveRecord::Base
   end
 
   def self.filter_by(params = {})
-    scoped.order("created_at DESC")
+    scoped.select(
+      "#{table_name}.*, COUNT(messages.id) AS messages_count, COUNT(replies.id) AS replies_count"
+    ).joins(
+      "LEFT OUTER JOIN messages ON messages.chat_id = #{table_name}.id"
+    ).joins(
+      "LEFT OUTER JOIN replies ON replies.chat_id = #{table_name}.id"
+    ).includes(
+      :user, :friend, :active_users
+    ).group(all_columns).order(
+      "#{table_name}.created_at DESC"
+    )
   end
 
   def activate!(options = {})
@@ -119,6 +130,11 @@ class Chat < ActiveRecord::Base
 
   def active?
     active_users.size >= 2
+  end
+
+  def inactive_user
+    active_users = self.active_users
+    active_users.first if active_users.size == 1
   end
 
   def partner(reference_user)

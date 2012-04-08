@@ -3,3 +3,5 @@
     = link_to reply.destination, user_path(reply.user_id)
   %td
     = reply.body
+  %td
+    = reply.delivered? ? "#{time_ago_in_words(reply.delivered_at)} ago" : "pending"

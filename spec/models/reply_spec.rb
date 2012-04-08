@@ -95,27 +95,8 @@ describe Reply do
     end
   end
 
-  describe ".filter_by" do
-    let(:another_reply) { create(:reply) }
-
-    before do
-      expect_message do
-        another_reply
-        reply
-      end
-    end
-
-    context "passing no params" do
-      it "should return all replies ordered by latest created at date" do
-        subject.class.filter_by.should == [reply, another_reply]
-      end
-    end
-
-    context ":user_id => 2" do
-      it "should return all replies with the given user id" do
-        subject.class.filter_by(:user_id => user.id).should == [reply]
-      end
-    end
+  it_should_behave_like "chatable" do
+    let(:chatable_resource) { reply }
   end
 
   describe ".undelivered" do

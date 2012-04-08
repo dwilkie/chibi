@@ -1,3 +1,6 @@
+CHATABLE_RESOURCES = [:messages, :replies]
+USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
+
 shared_examples_for "communicable" do
   let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
   let(:user) { build(:user) }
@@ -79,6 +82,7 @@ shared_examples_for "communicable" do
 end
 
 shared_examples_for "chatable" do
+
   let(:chat) { create(:active_chat, :user => user) }
   let(:user) { build(:user) }
 
@@ -95,6 +99,32 @@ shared_examples_for "chatable" do
       chatable_resource.save
 
       chat.reload.updated_at.should > original_chat_timestamp
+    end
+  end
+
+  describe ".filter_by" do
+    let(:another_chatable_resource) { create(chatable_resource.class.to_s.underscore.to_sym, :chat => chat) }
+
+    before do
+      another_chatable_resource
+    end
+
+    context "passing no params" do
+      it "should return all chatable resources ordered by latest created at date" do
+        subject.class.filter_by.should == [another_chatable_resource, chatable_resource]
+      end
+    end
+
+    context ":user_id => 2" do
+      it "should return all chatable resources with the given user id" do
+        subject.class.filter_by(:user_id => chatable_resource.user.id).should == [chatable_resource]
+      end
+    end
+
+    context ":chat_id => 2" do
+      it "should return all messages with the given chat id" do
+        subject.class.filter_by(:chat_id => chat.id).should == [another_chatable_resource]
+      end
     end
   end
 end

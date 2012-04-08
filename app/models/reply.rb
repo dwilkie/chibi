@@ -1,17 +1,13 @@
 class Reply < ActiveRecord::Base
-  belongs_to :user
-  belongs_to :chat
+  include Communicable::Chatable
 
+  belongs_to :user
   validates :user, :presence => true
   validates :to, :presence => true
 
   alias_attribute :destination, :to
 
   before_validation :set_destination
-
-  def self.filter_by(params = {})
-    scoped.where(params.slice(:user_id)).order("created_at DESC")
-  end
 
   def self.delivered
     scoped.where("delivered_at IS NOT NULL")

@@ -419,6 +419,15 @@ describe Chat do
     end
   end
 
+  describe "#inactive_user" do
+    it "should return the active user if he is the only active user in the chat" do
+      active_chat_with_single_user.inactive_user.should == active_chat_with_single_user.user
+      active_chat_with_single_friend.inactive_user.should == active_chat_with_single_friend.friend
+      active_chat.inactive_user.should be_nil
+      chat.inactive_user.should be_nil
+    end
+  end
+
   describe "#forward_message" do
     let(:message) { "hello" }
 
@@ -504,6 +513,15 @@ describe Chat do
 
     it "should order the chats by latest created at" do
       subject.class.filter_by.should == [active_chat, chat]
+    end
+
+    it "should include users, friends, active users messages_count and replies_count" do
+      relation = subject.class.filter_by
+      relation.includes_values.should == [:user, :friend, :active_users]
+      relation.select_values.first.split(", ")[1..-1].should == [
+        "COUNT(messages.id) AS messages_count",
+        "COUNT(replies.id) AS replies_count"
+      ]
     end
   end
 

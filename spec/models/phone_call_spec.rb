@@ -27,7 +27,7 @@ describe PhoneCall do
   end
 
   it_should_behave_like "chatable" do
-    let(:chatable_resource) { new_phone_call }
+    let(:chatable_resource) { phone_call }
   end
 
   describe "#call_sid" do

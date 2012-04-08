@@ -28,5 +28,11 @@ module Communicable
     included do
       belongs_to :chat, :touch => true
     end
+
+    module ClassMethods
+      def filter_by(params = {})
+        scoped.where(params.slice(:user_id, :chat_id)).order("created_at DESC")
+      end
+    end
   end
 end

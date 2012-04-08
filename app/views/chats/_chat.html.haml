@@ -4,7 +4,13 @@
     ago
   %td
     = chat.active?
-  %td
-    = link_to "initiator", user_path(chat.user_id)
-  %td
-    = link_to "partner", user_path(chat.friend_id)
+  %td#user
+    = chat_user_link(chat, :user)
+  %td#friend
+    = chat_user_link(chat, :friend)
+  %td#inactive_user
+    = chat_user_link(chat, :inactive_user)
+  %td#messages
+    = chatable_link(chat, :messages)
+  %td#replies
+    = chatable_link(chat, :replies)

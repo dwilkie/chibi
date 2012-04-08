@@ -36,6 +36,10 @@ Chibi::Application.configure do
   # Use a different logger for distributed setups
   # config.logger = SyslogLogger.new
 
+  # show sql statements in Heroku log
+  # http://stackoverflow.com/questions/6427096/heroku-see-params-and-sql-activity-in-logs
+  config.logger = Logger.new(STDOUT)
+
   # Use a different cache store in production
   # config.cache_store = :mem_cache_store
 
