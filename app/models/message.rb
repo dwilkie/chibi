@@ -14,12 +14,14 @@ class Message < ActiveRecord::Base
   end
 
   def process!
-    if user_wants_to_logout?
+    if user.first_message?
+      user.welcome!
+    elsif user_wants_to_logout?
       user.logout!(:notify => true, :notify_chat_partner => true)
       return
+    elsif user.update_locale!(normalized_body, :notify => true)
+      return
     end
-
-    user.welcome! if user.first_message?
 
     start_new_chat = true
 
@@ -29,7 +31,7 @@ class Message < ActiveRecord::Base
         start_new_chat = false
       end
     else
-      user.update_profile(body, :online => true)
+      user.update_profile(normalized_body, :online => true)
     end
 
     build_chat(:user => user).activate!(:notify => true) if start_new_chat
@@ -38,10 +40,14 @@ class Message < ActiveRecord::Base
   private
 
   def user_wants_to_logout?
-    body.strip.downcase == "stop"
+    normalized_body == "stop"
   end
 
   def user_wants_to_chat_with_someone_new?
-    body.strip.downcase == "new"
+    normalized_body == "new"
+  end
+
+  def normalized_body
+    @normalized_body ||= body.strip.downcase
   end
 end

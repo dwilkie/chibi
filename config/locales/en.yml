@@ -3,6 +3,7 @@
 
 en:
   play_path_prefix: "en"
+  language: English
   activerecord:
     attributes:
       user:

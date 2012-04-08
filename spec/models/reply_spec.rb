@@ -14,15 +14,14 @@ describe Reply do
   let(:new_reply) { build(:reply, :user => user) }
   let(:partner) { build(:user_with_name) }
   let(:reply) { create(:reply, :user => user) }
+  let(:delivered_reply) { create(:delivered_reply) }
 
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
     options[:deliver] = true unless options[:deliver] == false
     reply.should be_persisted
     reply.destination.should == mobile_number
-    last_request = FakeWeb.last_request
     if options[:deliver]
-      last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
-      JSON.parse(last_request.body).first["body"].should == reply.body
+      assert_deliver(reply.body)
       reply.should be_delivered
     else
       reply.should_not be_delivered
@@ -33,11 +32,23 @@ describe Reply do
     options[:args] ||= []
     options[:interpolations] || []
     (options[:test_users] || local_users).each do |local_user|
-      reply = subject.class.new
-      reply.user = local_user
-      expect_message { reply.send(method, *options[:args]) }
-      reply.body.should == spec_translate(key, local_user.locale, *options[:interpolations])
-      assert_persisted_and_delivered(reply, local_user.mobile_number, options)
+      users_default_locale = local_user.country_code.to_sym
+      {:en => users_default_locale, users_default_locale => :en}.each do |user_locale, alternate_locale|
+        reply = subject.class.new
+        local_user.locale = user_locale
+        user_country_code = local_user.country_code
+        reply.user = local_user
+        expect_message { reply.send(method, *options[:args]) }
+        reply.body.should == spec_translate(key, [user_locale, user_country_code], *options[:interpolations])
+        if options[:no_alternate_translation]
+          reply.locale.should be_nil
+          reply.alternate_translation.should be_nil
+        else
+          reply.locale.should == local_user.locale
+          reply.alternate_translation.should == spec_translate(key, [alternate_locale, user_country_code], *options[:interpolations])
+        end
+        assert_persisted_and_delivered(reply, local_user.mobile_number, options)
+      end
     end
   end
 
@@ -108,8 +119,6 @@ describe Reply do
   end
 
   describe ".undelivered" do
-    let(:delivered_reply) { create(:delivered_reply) }
-
     before do
       reply
       delivered_reply
@@ -121,8 +130,6 @@ describe Reply do
   end
 
   describe ".delivered" do
-    let(:delivered_reply) { create(:delivered_reply) }
-
     before do
       reply
       delivered_reply
@@ -130,6 +137,20 @@ describe Reply do
 
     it "should return only the delivered replies" do
       subject.class.delivered.should == [delivered_reply]
+    end
+  end
+
+  describe ".last_delivered" do
+    let(:another_delivered_reply) { create(:delivered_reply) }
+
+    before do
+      delivered_reply
+      another_delivered_reply
+      reply
+    end
+
+    it "should return the last delivered reply" do
+      subject.class.last_delivered.should == another_delivered_reply
     end
   end
 
@@ -142,12 +163,19 @@ describe Reply do
 
   describe "#destination" do
     it "should be an alias for the attribute '#to'" do
-
       subject.destination = 123
       subject.to.should == 123
 
       subject.to = 456
       subject.destination.should == 456
+    end
+  end
+
+  describe "#locale" do
+    it "should return a lowercase symbol of the locale if set" do
+      subject.locale.should be_nil
+      subject.locale = :EN
+      subject.locale.should == :en
     end
   end
 
@@ -163,6 +191,42 @@ describe Reply do
     it "should deliver the message" do
       expect_message { new_reply.deliver! }
       assert_persisted_and_delivered(new_reply, user.mobile_number)
+    end
+  end
+
+  describe "#deliver_alternate_translation!" do
+    def assert_deliver_alternate_translation(factory_name, options = {})
+      deliver = options.delete(:deliver)
+      reply = build(factory_name, options)
+
+      if deliver
+        expect_message { reply.deliver_alternate_translation! }
+        assert_deliver(reply.send(deliver))
+      else
+        # will raise an error if it delivers because the message is not expected
+        reply.deliver_alternate_translation!
+      end
+    end
+
+    it "should deliver the alternate translation based off the users locale if available" do
+      # assert no deliver for reply without alternate translation
+      assert_deliver_alternate_translation(:delivered_reply)
+
+      # assert no delivery for a reply with an alternate translation but no locale
+      assert_deliver_alternate_translation(:delivered_reply_with_alternate_translation_no_locale)
+
+      # assert no delivery for a reply with an alternate translation that has not been delivered yet
+      assert_deliver_alternate_translation(:reply_with_alternate_translation)
+
+      # assert delivery of the body for a delivered reply with an alternate translation
+      # when the user's locale is the same as the original delivered reply
+      assert_deliver_alternate_translation(:delivered_reply_with_alternate_translation, :deliver => :body)
+
+      # assert delivery of the alternate translation for a delivered reply with an alternate translation
+      # when the user's locale is different from the original delivered reply
+      assert_deliver_alternate_translation(
+        :delivered_reply_with_alternate_translation, :deliver => :alternate_translation, :locale => "en"
+      )
     end
   end
 
@@ -221,7 +285,7 @@ describe Reply do
       assert_reply(
         :forward_message, :forward_message,
         :args => ["mike", "hi how r u doing"], :interpolations => ["mike", "hi how r u doing"],
-        :deliver => false
+        :deliver => false, :no_alternate_translation => true
       )
     end
   end
@@ -231,6 +295,7 @@ describe Reply do
       assert_reply(
         :forward_message!, :forward_message,
         :args => ["mike", "hi how r u doing"], :interpolations => ["mike", "hi how r u doing"],
+        :no_alternate_translation => true
       )
     end
   end

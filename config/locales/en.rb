@@ -3,7 +3,16 @@
     :replies => {
 
       :welcome => lambda {|key, options|
-        "Welcome to Chibi! We'll help you meet a new friend! At any time you can write 'en' to read English or 'stop' to go offline"
+        notification = "Welcome to Chibi! We'll help you meet a new friend! At any time you can write "
+
+        default_locale = I18n.t("play_path_prefix", :locale => options[:default_locale])
+
+        unless default_locale == "en"
+          default_language = I18n.t("language", :locale => options[:default_locale])
+          notification << "'#{default_locale}' to read #{default_language}, 'en' to read English or "
+        end
+
+        notification << "'stop' to go offline"
       },
 
       :new_chat_started => lambda {|key, options|

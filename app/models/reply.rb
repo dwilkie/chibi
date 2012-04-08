@@ -17,12 +17,21 @@ class Reply < ActiveRecord::Base
     scoped.where("delivered_at IS NOT NULL")
   end
 
+  def self.last_delivered
+    scoped.delivered.order(:delivered_at).last
+  end
+
   def self.undelivered
     scoped.where(:delivered_at => nil)
   end
 
   def body
     read_attribute(:body).to_s
+  end
+
+  def locale
+    raw_locale = read_attribute(:locale)
+    raw_locale.to_s.downcase.to_sym if raw_locale
   end
 
   def delivered?
@@ -56,30 +65,48 @@ class Reply < ActiveRecord::Base
   end
 
   def introduce!(partner, to_initiator)
-    self.body = I18n.t(
+    translate(
       "replies.new_chat_started",
       :users_name => user.name,
       :friends_screen_name => partner.screen_id,
-      :to_initiator => to_initiator,
-      :locale => user.locale
+      :to_initiator => to_initiator
     )
     deliver!
   end
 
   def welcome!
-    self.body = I18n.t("replies.welcome", :locale => user.locale)
+    translate("replies.welcome", :default_locale => user.country_code.to_sym)
     deliver!
+  end
+
+  def deliver_alternate_translation!
+    if delivered? && alternate_translation? && locale?
+      delivery = locale == user.locale ? body : alternate_translation
+      perform_delivery!(delivery)
+    end
   end
 
   def deliver!
     self.delivered_at = Time.now
     save
-    nuntium = Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
-    # use an array so Nuntium sends a POST
-    nuntium.send_ao([{:to => "sms://#{destination}", :body => body}])
+    perform_delivery!(body)
   end
 
   private
+
+  def translate(key, interpolations = {})
+    user_locale = user.locale
+    users_default_locale = user.country_code.to_sym
+
+    # if the user's locale == their default locale
+    # the alternate translation locale will be nil
+    # I18n will therefore automatically drop back to English
+    alternate_translation_locale = users_default_locale unless user_locale == users_default_locale
+
+    self.locale = user_locale
+    self.body = I18n.t(key, interpolations.merge(:locale => user_locale))
+    self.alternate_translation = I18n.t(key, interpolations.merge(:locale => alternate_translation_locale))
+  end
 
   def set_destination
     self.destination ||= user.try(:mobile_number)
@@ -87,13 +114,18 @@ class Reply < ActiveRecord::Base
 
   def explain_how_to_start_a_new_chat!(action, options = {})
     missing_profile_attributes = user.missing_profile_attributes unless options[:skip_update_profile_instructions]
-    self.body = I18n.t(
+    translate(
       "replies.how_to_start_a_new_chat",
       :action => action,
       :friends_screen_name => options[:partner].try(:screen_id),
-      :missing_profile_attributes => missing_profile_attributes,
-      :locale => user.locale
+      :missing_profile_attributes => missing_profile_attributes
     )
     deliver!
+  end
+
+  def perform_delivery!(message)
+    nuntium = Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
+    # use an array so Nuntium sends a POST
+    nuntium.send_ao([{:to => "sms://#{destination}", :body => message}])
   end
 end

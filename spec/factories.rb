@@ -54,6 +54,22 @@ FactoryGirl.define do
     user
     to { user.mobile_number }
 
+    factory :reply_with_locale do
+      locale { user.locale }
+
+      factory :reply_with_alternate_translation do
+        alternate_translation "alternate translation"
+
+        factory :delivered_reply_with_alternate_translation do
+          delivered_at { Time.now }
+
+          factory :delivered_reply_with_alternate_translation_no_locale do
+            locale nil
+          end
+        end
+      end
+    end
+
     factory :delivered_reply do
       delivered_at { Time.now }
     end

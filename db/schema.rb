@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120403174513) do
+ActiveRecord::Schema.define(:version => 20120406143544) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -26,12 +26,12 @@ ActiveRecord::Schema.define(:version => 20120403174513) do
 
   create_table "locations", :force => true do |t|
     t.string   "city"
-    t.string   "country_code"
+    t.string   "country_code", :limit => 2
     t.float    "latitude"
     t.float    "longitude"
     t.integer  "user_id"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
   end
 
   add_index "locations", ["country_code"], :name => "index_locations_on_country_code"
@@ -75,12 +75,14 @@ ActiveRecord::Schema.define(:version => 20120403174513) do
 
   create_table "replies", :force => true do |t|
     t.string   "to"
-    t.string   "body"
+    t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
     t.datetime "delivered_at"
+    t.text     "alternate_translation"
+    t.string   "locale",                :limit => 2
   end
 
   add_index "replies", ["chat_id"], :name => "index_replies_on_chat_id"
@@ -97,6 +99,7 @@ ActiveRecord::Schema.define(:version => 20120403174513) do
     t.integer  "active_chat_id"
     t.datetime "created_at",                                    :null => false
     t.datetime "updated_at",                                    :null => false
+    t.string   "locale",         :limit => 2
   end
 
   add_index "users", ["active_chat_id"], :name => "index_users_on_active_chat_id"

@@ -16,8 +16,11 @@ module TranslationHelpers
     },
 
     :welcome => {
-      :en => "Welcome to Chibi! We'll help you meet a new friend! At any time you can write 'en' to read English or 'stop' to go offline",
-      :kh => "Som sva-kom mok kan Chibi! Yerng chuay nek rok mit tmey! At any time you can write 'en' to read English, 'kh' to read Khmer or 'stop' to go offline"
+      :en => {
+        :en => "Welcome to Chibi! We'll help you meet a new friend! At any time you can write 'stop' to go offline",
+        :kh => "Welcome to Chibi! We'll help you meet a new friend! At any time you can write 'kh' to read Khmer, 'en' to read English or 'stop' to go offline",
+      },
+      :kh => "Som sva-kom mok kan Chibi! Yerng chuay nek rok mit tmey! At any time you can write 'en' to read English, 'kh' to read Khmer or 'stop' to go offline",
     },
 
     :anonymous_new_friend_found => {
@@ -81,7 +84,15 @@ module TranslationHelpers
     raise("Translation '#{key}' not found. Add it to #{__FILE__}") unless translations.present?
     # special case:
     # if the users locale is :gb test the default locale
-    translation = translations[locale == :gb ? :en : locale].dup
+    sub_locales = []
+    [locale].flatten.each do |sub_locale|
+      sub_locale.to_sym == :gb ? sub_locales << :en : sub_locales << sub_locale.to_sym
+    end
+
+    translation = translations[sub_locales.first]
+    translation = translation[sub_locales.last] if translation.is_a?(Hash)
+    translation = translation.dup
+
     interpolations.each_with_index do |interpolation, index|
       raise("Interpolation: '#{interpolation}' is missing inside '#{key}'") unless translation.include?("#[#{index}]")
       translation.gsub!("#[#{index}]", interpolation)

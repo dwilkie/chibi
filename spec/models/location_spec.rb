@@ -59,23 +59,12 @@ describe Location do
 
   describe "#country_code" do
     it "should return a lowercase string of the country code" do
-      subject.country_code = :ab
+      subject.country_code = :AB
       subject.country_code.should == "ab"
     end
 
     it "should return nil if the country code is nil" do
       subject.country_code.should be_nil
-    end
-  end
-
-  describe "#locale" do
-    it "should return a lowercase symbol of the country code" do
-      subject.country_code = "AB"
-      subject.locale.should == :ab
-    end
-
-    it "should return nil if the country code is nil" do
-      subject.locale.should be_nil
     end
   end
 end

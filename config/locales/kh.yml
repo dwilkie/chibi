@@ -1,5 +1,6 @@
 kh:
   play_path_prefix: "kh"
+  language: Khmer
   activerecord:
     attributes:
       user:

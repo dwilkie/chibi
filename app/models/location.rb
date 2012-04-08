@@ -26,10 +26,6 @@ class Location < ActiveRecord::Base
     end
   end
 
-  def locale
-    country_code.try(:downcase).try(:to_sym)
-  end
-
   def country_code
     raw_country_code = read_attribute(:country_code)
     raw_country_code.to_s.downcase if raw_country_code

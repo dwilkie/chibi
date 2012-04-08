@@ -70,7 +70,7 @@ describe Message do
     shared_examples_for "starting a new chat" do
       context "given there is no match for this user" do
         before do
-          expect_message { new_message.process! }
+          expect_message { message.process! }
         end
 
         it "should reply saying there are no matches at this time" do
@@ -82,30 +82,63 @@ describe Message do
       context "given there is a match for this user" do
         before do
           user.stub(:match).and_return(new_friend)
-          expect_message { new_message.process! }
+          expect_message { message.process! }
         end
 
         it "should introduce the participants of the chat" do
-          reply_to(user, new_message.chat).body.should == spec_translate(
+          reply_to(user, message.chat).body.should == spec_translate(
             :anonymous_new_friend_found, user.locale, new_friend.screen_id
           )
-          reply_to(new_friend, new_message.chat).body.should == spec_translate(
+          reply_to(new_friend, message.chat).body.should == spec_translate(
             :anonymous_new_chat_started, new_friend.locale, user.screen_id
           )
         end
       end
     end
 
+    shared_examples_for "updating the user's locale" do
+      def assert_update_locale(body, asserted_locale, expect_reply)
+        user.locale.should_not == :en
+        message.body = body
+
+        last_reply = create(:delivered_reply_with_alternate_translation, :user => user)
+
+        if expect_reply
+          expect_message { message.process! }
+          assert_deliver(last_reply.alternate_translation)
+        else
+          message.process!
+        end
+        user.locale.should == asserted_locale
+      end
+
+      context "if the message body is same as the user's current locale" do
+        it "should not update the user's locale nor resend the last reply" do
+          assert_update_locale(user.locale.to_s, user.locale, false)
+        end
+      end
+
+      context "if the message body is different from the user's current locale and is valid" do
+        it "should update the user's locale and resend the last reply in the new locale" do
+          assert_update_locale("en", :en, true)
+        end
+      end
+    end
+
     context "given the user is currently chatting" do
       before do
+        create(:message, :user => user)
         chat
       end
 
+      it_should_behave_like "updating the user's locale"
+
       context "and the message body is" do
+
         context "'stop'" do
           before do
-            new_message.body = "stop"
-            expect_message { new_message.process! }
+            message.body = "stop"
+            expect_message { message.process! }
           end
 
           it "should logout the user and notify him that he is now offline" do
@@ -129,8 +162,8 @@ describe Message do
 
         context "'new'" do
           before do
-            new_message.body = "new"
-            expect_message { new_message.process! }
+            message.body = "new"
+            expect_message { message.process! }
           end
 
           it_should_behave_like "starting a new chat"
@@ -150,8 +183,8 @@ describe Message do
 
         context "anything else but 'stop' or 'new'" do
           before do
-            new_message.body = "hello"
-            expect_message { new_message.process! }
+            message.body = "hello"
+            expect_message { message.process! }
           end
 
           it "should forward the message to the other chat participant" do
@@ -163,58 +196,77 @@ describe Message do
       end
     end
 
-    context "and the user is not currently chatting" do
-      context "and the message body is" do
-        context "'stop'" do
-          before do
-            new_message.body = "stop"
-            expect_message { new_message.process! }
-          end
+    context "given the user is not currently chatting" do
 
-          it "should logout the user and notify him that he is now offline" do
-            reply_to(user).body.should == spec_translate(:anonymous_logged_out, user.locale)
-            user.should_not be_online
-          end
+      context "and this is the user's first message" do
+        def assert_welcome(body)
+          message = create(:message, :user => user, :body => body)
+          user.should_receive(:update_profile).with(body, :online => true)
+          expect_message { message.process! }
+
+          replies_to(user).first.body.should == spec_translate(
+            :welcome, [user.locale, user.country_code]
+          )
         end
 
-        context "anything else but 'stop'" do
-          before do
-            new_message.body = "hello"
-            user.stub(:update_profile)
-          end
+        before do
+          user.stub(:update_profile)
+        end
 
-          context "given this is the user's first message" do
+        it "should welcome the user even if they text 'stop'" do
+          assert_welcome("stop")
+        end
+
+        it "should welcome the user even if they try to update their locale" do
+          assert_welcome("en")
+        end
+      end
+
+      context "and this is not the user's first message" do
+        before do
+          create(:message, :user => user)
+        end
+
+        it_should_behave_like "updating the user's locale"
+
+        context "and the message body is" do
+          context "'stop'" do
             before do
-              new_message.save
+              message.body = "stop"
+              expect_message { message.process! }
             end
 
-            it "should welcome the user" do
-              expect_message { new_message.process! }
-
-              replies_to(user).first.body.should == spec_translate(
-                :welcome, user.locale
-              )
+            it "should logout the user and notify him that he is now offline" do
+              reply_to(user).body.should == spec_translate(:anonymous_logged_out, user.locale)
+              user.should_not be_online
             end
           end
 
-          it_should_behave_like "starting a new chat"
-
-          it "should try to update the users profile from the message text" do
-            user.should_receive(:update_profile).with("hello", :online => true)
-            expect_message { new_message.process! }
-          end
-
-          context "and the user is offline" do
-            let(:offline_user) { build(:offline_user) }
-
+          context "anything else but 'stop'" do
             before do
-              new_message.body = ""
-              new_message.user = offline_user
-              expect_message { new_message.process! }
+              message.body = "hello"
+              user.stub(:update_profile)
             end
 
-            it "should login the user" do
-              offline_user.reload.should be_online
+            it_should_behave_like "starting a new chat"
+
+            it "should try to update the users profile from the message text" do
+              user.should_receive(:update_profile).with("hello", :online => true)
+              expect_message { message.process! }
+            end
+
+            context "and the user is offline" do
+              let(:offline_user) { build(:offline_user) }
+
+              before do
+                message.body = ""
+                message.user = offline_user
+                expect_message { message.process! }
+              end
+
+              it "should login the user" do
+                offline_user.reload.should be_online
+              end
             end
           end
         end

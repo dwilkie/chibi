@@ -164,6 +164,6 @@ class Chat < ActiveRecord::Base
   end
 
   def user_with_inactivity
-    replies.delivered.order(:created_at).last.try(:user)
+    replies.last_delivered.try(:user)
   end
 end

@@ -28,16 +28,6 @@ describe "Messages" do
             end
           end
         end
-
-        context "'stop'" do
-          before do
-            send_message(:from => my_number, :body => "stop")
-          end
-
-          it "should log me out and tell me how to log in again" do
-            reply_to(new_user).body.should == spec_translate(:anonymous_logged_out, new_user.locale)
-          end
-        end
       end
     end
 
@@ -54,18 +44,14 @@ describe "Messages" do
 
       context "when I text" do
 
-        context "'hello'" do
-          before do
-            send_message(:from => my_number, :body => "hello")
-          end
-
+        shared_examples_for "welcoming me" do
           it "should welcome me and start a chat between myself an existing anonymous user" do
             assert_new_user
 
             replies = replies_to(new_user)
 
             replies.first.body.should == spec_translate(
-              :welcome, new_user.locale
+              :welcome, [new_user.locale, new_user.country_code]
             )
 
             replies.last.body.should == spec_translate(
@@ -76,6 +62,61 @@ describe "Messages" do
               :personalized_new_chat_started, alex.locale, alex.name.capitalize, new_user.screen_id
             )
           end
+        end
+
+        context "'hello'" do
+          before do
+            send_message(:from => my_number, :body => "hello")
+          end
+
+          it_should_behave_like "welcoming me"
+
+          context "then I text 'en'" do
+            before do
+              send_message(:from => my_number, :body => "en")
+            end
+
+            it "should resend the last message to me in English" do
+              assert_deliver(
+                spec_translate(:anonymous_new_friend_found, :en, alex.screen_id)
+              )
+              new_user.locale.should == :en
+            end
+
+            context "then I text 'kh'" do
+              before do
+                send_message(:from => my_number, :body => "kh")
+              end
+
+              it "should resend the last message to me in Khmer" do
+                assert_deliver(
+                  spec_translate(:anonymous_new_friend_found, :kh, alex.screen_id)
+                )
+                new_user.locale.should == :kh
+              end
+            end
+
+            context "then I text 'th'" do
+              before do
+                send_message(:from => my_number, :body => "th")
+              end
+
+              it "should send 'th' to my friend" do
+                reply_to(alex).body.should == spec_translate(
+                  :forward_message, alex.locale, new_user.screen_id, "th"
+                )
+                new_user.locale.should == :en
+              end
+            end
+          end
+        end
+
+        context "'stop'" do
+          before do
+            send_message(:from => my_number, :body => "stop")
+          end
+
+          it_should_behave_like "welcoming me"
         end
 
         context "'knyom map pros 27 pp jong rok met srey'" do
@@ -97,7 +138,7 @@ describe "Messages" do
             replies = replies_to(new_user)
 
             replies.first.body.should == spec_translate(
-              :welcome, new_user.locale
+              :welcome, [new_user.locale, new_user.country_code]
             )
 
             replies.last.body.should == spec_translate(
@@ -297,6 +338,10 @@ describe "Messages" do
         end
 
         context "and my partner texts" do
+          before do
+            # joy is already registered so she must have sent one message
+            send_message(:from => joy, :body => "hello")
+          end
 
           shared_examples_for "ending my current chat" do
             it "should end my current chat and give me instructions on how to start a new one" do

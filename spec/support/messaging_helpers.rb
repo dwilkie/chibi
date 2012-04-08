@@ -23,6 +23,12 @@ module MessagingHelpers
     ) { yield }
   end
 
+  def assert_deliver(body)
+    last_request = FakeWeb.last_request
+    last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
+    JSON.parse(last_request.body).first["body"].should == body
+  end
+
   private
 
   def post_message(options = {})

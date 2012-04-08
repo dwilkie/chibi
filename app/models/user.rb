@@ -27,9 +27,10 @@ class User < ActiveRecord::Base
 
   after_initialize :assign_location
 
-  delegate :city, :locale, :address, :address=, :locate!, :to => :location, :allow_nil => true
+  delegate :city, :country_code, :address, :address=, :locate!, :to => :location, :allow_nil => true
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
+  DEFAULT_ALTERNATE_LOCALE = "en"
 
   def self.filter_by(params = {})
     scoped.order("created_at DESC").includes(:location)
@@ -90,8 +91,13 @@ class User < ActiveRecord::Base
     end
   end
 
+  def locale
+    raw_locale = read_attribute(:locale)
+    raw_locale ? raw_locale.to_s.downcase.to_sym : country_code.to_sym
+  end
+
   def short_code
-    SERVICE_PROVIDER_PREFIXES[locale.to_s].try(:[], split_mobile_number[1][0..1])
+    SERVICE_PROVIDER_PREFIXES[country_code].try(:[], split_mobile_number[1][0..1])
   end
 
   def female?
@@ -165,6 +171,18 @@ class User < ActiveRecord::Base
 
   def welcome!
     replies.build.welcome!
+  end
+
+  def update_locale!(locale, options = {})
+    updating_to_same_locale = (locale.to_s.to_sym == self.locale)
+
+    if (locale == DEFAULT_ALTERNATE_LOCALE || locale == country_code) && !updating_to_same_locale
+      update_successful = update_attributes!(:locale => locale)
+      replies.last_delivered.try(:deliver_alternate_translation!) if options[:notify]
+      update_successful
+    else
+      updating_to_same_locale
+    end
   end
 
   def matches
@@ -280,7 +298,7 @@ class User < ActiveRecord::Base
 
   def self.filter_by_location(user, scope)
     # only match users from the same country
-    scope = scope.joins(:location).where(:locations => {:country_code => user.locale})
+    scope = scope.joins(:location).where(:locations => {:country_code => user.country_code})
 
     # add group by clause for every column that is being selected
     # so Postgres doesn't complain. This can be removed after upgrading to Postgres 9.1
@@ -293,7 +311,7 @@ class User < ActiveRecord::Base
   def self.match_users_from_registered_service_providers(user, scope)
     # skip this restriction if the user is from a country with no service providers
     # another restriction says they can't be matched with users from other countries anyway
-    service_providers_in_users_location = SERVICE_PROVIDER_PREFIXES[user.locale.to_s]
+    service_providers_in_users_location = SERVICE_PROVIDER_PREFIXES[user.country_code]
     return scope unless service_providers_in_users_location
 
     # for the following examples '012' and '097' are prefixes of a registered service provider
@@ -497,7 +515,7 @@ class User < ActiveRecord::Base
     all_keywords = []
     keys.each do |key|
       english_keywords = USER_PROFILE_KEYWORDS["en"][key.to_s]
-      localized_keywords = USER_PROFILE_KEYWORDS.try(:[], location.locale.to_s).try(:[], key.to_s)
+      localized_keywords = USER_PROFILE_KEYWORDS.try(:[], country_code).try(:[], key.to_s)
       all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
     end
    "(#{all_keywords.join('|')})"

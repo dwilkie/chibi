@@ -2,6 +2,9 @@ require 'spec_helper'
 
 describe User do
   include MobilePhoneHelpers
+  include TranslationHelpers
+  include MessagingHelpers
+  include_context "replies"
 
   let(:user) { create(:user) }
   let(:new_user) { build(:user) }
@@ -700,6 +703,21 @@ describe User do
     end
   end
 
+  describe "#locale" do
+    it "should return a lowercase symbol of the locale" do
+      subject.locale = :EN
+      subject.locale.should == :en
+    end
+
+    context "if the locale is nil" do
+      it "should delegate to #country_code and convert it to a symbol" do
+        user.locale = nil
+        user.country_code.should be_present
+        user.locale.should == user.country_code.to_sym
+      end
+    end
+  end
+
   describe "#city" do
     it "should delegate to location" do
       subject.city.should be_nil
@@ -707,10 +725,10 @@ describe User do
     end
   end
 
-  describe "#locale" do
+  describe "#country_code" do
     it "should delegate to location" do
-      subject.locale.should be_nil
-      user.locale.should be_present
+      subject.country_code.should be_nil
+      user.country_code.should be_present
     end
   end
 
@@ -879,7 +897,7 @@ describe User do
         subject.age = nil
       end
 
-      it "should set the user' date of birth to nil" do
+      it "should set the user's date of birth to nil" do
         subject.date_of_birth.should be_nil
       end
     end
@@ -973,10 +991,6 @@ describe User do
   end
 
   describe "#logout!" do
-    include_context "replies"
-    include TranslationHelpers
-    include MessagingHelpers
-
     let(:reply) { reply_to(user) }
     let(:reply_to_partner) { reply_to(friend, active_chat) }
 
@@ -1046,15 +1060,78 @@ describe User do
   end
 
   describe "#welcome!" do
-    include_context "replies"
-    include TranslationHelpers
-    include MessagingHelpers
-
     it "should welcome the user" do
       expect_message do
         user.welcome!
       end
-      reply_to(user).body.should == spec_translate(:welcome, user.locale)
+      reply_to(user).body.should == spec_translate(:welcome, [user.locale, user.country_code])
+    end
+  end
+
+  describe "#update_locale!" do
+
+    def setup_redelivery_scenario(subject, options = {})
+      body = "something"
+
+      # create a delivered reply with an alternate translation
+      # to test that this reply is redelivered with the alternative translation
+      delivered_reply_with_alternate_translation = create(
+        :delivered_reply_with_alternate_translation, :user => subject, :body => body
+      )
+
+      # create an undelivered reply with an alternate translation to test
+      # that this reply should not be redelivered when updating the locale
+      create(:reply_with_alternate_translation, :user => subject, :body => body)
+
+      # create another delivered reply without an alternate translation
+      # to test that no resend is performed when updating the locale when the last
+      # reply has no alternate translation
+      delivered_reply = create(
+        :delivered_reply, :user => subject, :body => body
+      ) if options[:later_no_alternate_translation_reply]
+
+      delivered_reply || delivered_reply_with_alternate_translation
+    end
+
+    def assert_update_locale(with_locale, options = {})
+      options[:success] = true unless options[:success] == false
+      success = options.delete(:success)
+      assert_notify = options.delete(:assert_notify)
+      later_no_alternate_translation_reply = options.delete(:later_no_alternate_translation_reply)
+
+      subject = create(:user)
+
+      reply_to_redeliver = setup_redelivery_scenario(
+        subject, :later_no_alternate_translation_reply => later_no_alternate_translation_reply
+      ) if options[:notify]
+
+      if assert_notify
+        expect_message { subject.update_locale!(with_locale, options).should send("be_#{success}") }
+        assert_deliver(reply_to_redeliver.alternate_translation)
+      else
+        # this will raise an error if a reply is delivered
+        subject.update_locale!(with_locale, options).should send("be_#{success}")
+      end
+
+      subject.reload # ensure changes are saved
+      success ? subject.locale.should == with_locale.downcase.to_sym : subject.locale.should == subject.country_code.to_sym
+    end
+
+    it "should only update the locale of the user for valid locales" do
+      assert_update_locale("en")
+      assert_update_locale(new_user.country_code)
+      assert_update_locale("us", :success => false)
+      assert_update_locale("hi im tom what are you doing", :success => false)
+    end
+
+    context "passing :notify" do
+      it "should try to resend the last message in the new locale only if :notify => true" do
+        assert_update_locale("en", :notify => true, :assert_notify => true)
+        assert_update_locale(new_user.country_code, :notify => true, :assert_notify => false)
+        assert_update_locale(
+          "en", :notify => true, :assert_notify => false, :later_no_alternate_translation_reply => true
+        )
+      end
     end
   end
 end
