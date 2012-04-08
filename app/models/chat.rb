@@ -34,11 +34,17 @@ class Chat < ActiveRecord::Base
       "LEFT OUTER JOIN messages ON messages.chat_id = #{table_name}.id"
     ).joins(
       "LEFT OUTER JOIN replies ON replies.chat_id = #{table_name}.id"
+    ).filter_params(
+      params
     ).includes(
       :user, :friend, :active_users
     ).group(all_columns).order(
       "#{table_name}.created_at DESC"
     )
+  end
+
+  def self.filter_by_count(params = {})
+    filter_params(params).count
   end
 
   def activate!(options = {})
@@ -143,6 +149,14 @@ class Chat < ActiveRecord::Base
 
   private
 
+  def self.with_undelivered_messages_for(user)
+    scoped.includes(:replies).where(:replies => {:delivered_at => nil, :user_id => user.id})
+  end
+
+  def self.filter_params(params = {})
+    scoped.where(params.slice(:user_id))
+  end
+
   def reactivate_expired_chats(users)
     users_to_notify = []
 
@@ -166,10 +180,6 @@ class Chat < ActiveRecord::Base
       users_to_leave_chat = [user, friend]
     end
     users_to_leave_chat
-  end
-
-  def self.with_undelivered_messages_for(user)
-    scoped.includes(:replies).where(:replies => {:delivered_at => nil, :user_id => user.id})
   end
 
   def reply_chat_was_deactivated!(*destination_users)

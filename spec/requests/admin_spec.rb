@@ -40,10 +40,13 @@ describe "Admin" do
 
     def assert_index(resource_name, *resources)
       options = resources.extract_options!
-      resources = send(resource_name.to_s.pluralize) if resources.empty?
+      resources_name = resource_name.to_s.pluralize
+      resources = send(resources_name) if resources.empty?
       resources.reverse! if options[:reverse]
 
-      page.should have_content resources.count
+      page.find(
+        "#total_#{resources_name}"
+      ).text.gsub(/\s/, "").should == "#{resources_name.capitalize}(#{resources.count})"
 
       resources.each_with_index do |resource, index|
         within("##{resource_name}_#{index + 1}") do

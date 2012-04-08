@@ -506,13 +506,14 @@ describe Chat do
   end
 
   describe ".filter_by" do
+
     before do
       chat
-      active_chat
+      unique_active_chat
     end
 
     it "should order the chats by latest created at" do
-      subject.class.filter_by.should == [active_chat, chat]
+      subject.class.filter_by.should == [unique_active_chat, chat]
     end
 
     it "should include users, friends, active users messages_count and replies_count" do
@@ -522,6 +523,30 @@ describe Chat do
         "COUNT(messages.id) AS messages_count",
         "COUNT(replies.id) AS replies_count"
       ]
+    end
+
+    context ":user_id => 2" do
+      it "should return all chats with the given user id" do
+        subject.class.filter_by(:user_id => chat.user_id).should == [chat]
+      end
+    end
+  end
+
+  describe ".filter_by_count" do
+
+    before do
+      chat
+      unique_active_chat
+    end
+
+    it "should return the total number of chats" do
+      subject.class.filter_by_count.should == 2
+    end
+
+    context ":user_id => 2" do
+      it "should return the count of the chats with the given user id" do
+        subject.class.filter_by_count(:user_id => chat.user_id).should == 1
+      end
     end
   end
 
