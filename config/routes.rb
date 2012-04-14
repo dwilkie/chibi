@@ -14,5 +14,5 @@ Chibi::Application.routes.draw do
     resources :replies, :only => :index
   end
 
-  mount Resque::Server.new, :at => "/resque"
+  mount Resque::Server, :at => "/resque"
 end
