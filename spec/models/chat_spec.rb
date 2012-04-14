@@ -429,12 +429,13 @@ describe Chat do
   end
 
   describe "#forward_message" do
-    let(:message) { "hello" }
+    let(:message) { create(:message, :body => "hello") }
 
     def assert_forward_message_to(recipient, originator, chat_session, message, delivered = true)
+      chat_session.reload.messages.should == [message]
       reply = reply_to(recipient, chat_session)
       reply.body.should == spec_translate(
-        :forward_message, recipient.locale, originator.screen_id, message
+        :forward_message, recipient.locale, originator.screen_id, message.body
       )
       if delivered
         recipient.active_chat.should == chat_session
@@ -468,7 +469,7 @@ describe Chat do
         assert_forward_message_to(unavailable_user, recipient, chat_session, message, false)
       end
 
-      it "inform the sender and save the message for sending later" do
+      it "should inform the sender and save the message for sending later" do
         assert_unavailable_notification_to(:user, friend)
         assert_unavailable_notification_to(:friend, user)
       end

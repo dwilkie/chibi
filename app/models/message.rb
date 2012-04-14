@@ -23,10 +23,7 @@ class Message < ActiveRecord::Base
 
     if user.currently_chatting?
       unless user_wants_to_chat_with_someone_new?
-        active_chat = user.active_chat
-        self.chat = active_chat
-        save
-        active_chat.forward_message(user, body)
+        user.active_chat.forward_message(user, self)
         start_new_chat = false
       end
     else
