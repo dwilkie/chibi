@@ -166,7 +166,10 @@ describe Message do
             expect_message { message.process! }
           end
 
-          it "should forward the message to the other chat participant" do
+          it "should forward the message to the other chat participant and save the message in the chat" do
+            # reload message to make sure it's saved
+            message.reload.chat.should == chat
+
             reply_to(friend, chat).body.should == spec_translate(
               :forward_message, friend.locale, user.screen_id, "hello"
             )
