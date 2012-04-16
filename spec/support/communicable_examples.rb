@@ -1,4 +1,4 @@
-CHATABLE_RESOURCES = [:messages, :replies]
+CHATABLE_RESOURCES = [:messages, :replies, :phone_calls]
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
 shared_examples_for "communicable" do

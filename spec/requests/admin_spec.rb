@@ -8,20 +8,24 @@ describe "Admin" do
 
   let(:message) { create(:message, :user => user, :body => "Hello", :chat => chat) }
   let(:another_message) { create(:message, :user => user, :body => "Goodbye", :chat => another_chat) }
+  let(:message_from_another_user) { create(:message, :user => another_user) }
 
   let(:reply) { expect_message { create(:delivered_reply, :user => user, :body => "Hello", :chat => chat) } }
   let(:another_reply) { expect_message { create(:reply, :user => user, :body => "Goodbye", :chat => another_chat) } }
+  let(:reply_to_another_user) {  expect_message { create(:reply, :user => another_user) } }
 
   let(:chat) { create(:active_chat_with_single_user, :created_at => 10.minutes.ago) }
   let(:another_chat) { create(:active_chat, :user => another_user, :friend => user, :created_at => 10.minutes.ago) }
 
-  let(:message_from_another_user) { create(:message, :user => another_user) }
-  let(:reply_to_another_user) {  expect_message { create(:reply, :user => another_user) } }
+  let(:phone_call) { create(:phone_call, :user => user, :chat => chat) }
+  let(:another_phone_call) { create(:phone_call, :user => user, :chat => another_chat) }
+  let(:phone_call_from_another_user) { create(:phone_call, :user => another_user) }
 
   let(:users) { [another_user, user] }
   let(:messages) { [message, another_message] }
   let(:replies) { [reply, another_reply] }
   let(:chats) { [chat, another_chat] }
+  let(:phone_calls) { [phone_call, another_phone_call] }
 
   context "as an admin" do
     before do
@@ -38,6 +42,10 @@ describe "Admin" do
       assert_index :reply, *resources, :reverse => true
     end
 
+    def assert_phone_call_index(*resources)
+      assert_index :phone_call, *resources, :reverse => true
+    end
+
     def assert_index(resource_name, *resources)
       options = resources.extract_options!
       resources_name = resource_name.to_s.pluralize
@@ -46,7 +54,7 @@ describe "Admin" do
 
       page.find(
         "#total_#{resources_name}"
-      ).text.gsub(/\s/, "").should == "#{resources_name.capitalize}(#{resources.count})"
+      ).text.gsub(/\s/, "").should == "#{resources_name.titleize.gsub(/\s/, "")}(#{resources.count})"
 
       resources.each_with_index do |resource, index|
         within("##{resource_name}_#{index + 1}") do
@@ -76,6 +84,14 @@ describe "Admin" do
       else
         page.should have_content "pending"
       end
+    end
+
+    def assert_phone_call_show(reference_phone_call)
+      page.should have_link(
+        reference_phone_call.from,
+        :href => user_path(reference_phone_call.user_id)
+      )
+      page.should have_content reference_phone_call.state.humanize
     end
 
     def assert_chat_show(reference_chat)
@@ -127,6 +143,7 @@ describe "Admin" do
         chats
         messages
         replies
+        phone_calls
       end
 
       context "when I visit '/chats'" do
@@ -199,6 +216,22 @@ describe "Admin" do
 
         it "should show me a list of replies" do
           assert_reply_index
+        end
+      end
+    end
+
+    context "given some phone calls", :focus do
+      before do
+        phone_calls
+      end
+
+      context "when I visit '/phone_calls'" do
+        before do
+          visit phone_calls_path
+        end
+
+        it "should show me a list of phone calls" do
+          assert_phone_call_index
         end
       end
     end

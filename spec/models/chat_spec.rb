@@ -233,11 +233,11 @@ describe Chat do
 
   describe "#reactivate!" do
     context "the chat is already active" do
-      it "should touch the chat" do
+      it "should not update the chat" do
         active_chat
         time_updated = active_chat.updated_at
         active_chat.reactivate!
-        active_chat.updated_at.should > time_updated
+        active_chat.updated_at.should == time_updated
         active_chat.should be_active
       end
     end
@@ -517,12 +517,13 @@ describe Chat do
       subject.class.filter_by.should == [unique_active_chat, chat]
     end
 
-    it "should include users, friends, active users messages_count and replies_count" do
+    it "should include users, friends, active users messages_count, replies_count & phone_calls_count" do
       relation = subject.class.filter_by
       relation.includes_values.should == [:user, :friend, :active_users]
-      relation.select_values.first.split(", ")[1..-1].should == [
+      relation.select_values.first.split(/\,\s+/)[1..-1].should == [
         "COUNT(messages.id) AS messages_count",
-        "COUNT(replies.id) AS replies_count"
+        "COUNT(replies.id) AS replies_count",
+        "COUNT(phone_calls.id) AS phone_calls_count"
       ]
     end
 

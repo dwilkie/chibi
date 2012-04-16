@@ -1,6 +1,4 @@
-%h2#total_replies
-  Replies
-  = "(#{@reply_count})"
+= heading_with_count(:replies, @reply_count)
 %table
   %tr
     %th

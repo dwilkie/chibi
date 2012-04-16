@@ -1,0 +1,9 @@
+= heading_with_count(:phone_calls, @phone_call_count)
+%table
+  %tr
+    %th
+      From
+    %th
+      State
+  = render @phone_calls
+= paginate @phone_calls

@@ -4,6 +4,12 @@ class PhoneCallsController < ApplicationController
   before_filter :authenticate_phone_call, :only => :create
   before_filter :authenticate_admin, :except => :create
 
+  def index
+    phone_calls = PhoneCall.filter_by(params)
+    @phone_call_count = phone_calls.count
+    @phone_calls = phone_calls.page params[:page]
+  end
+
   def create
     params.underscorify_keys!
 

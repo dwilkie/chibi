@@ -1,6 +1,4 @@
-%h2#total_chats
-  Chats
-  = "(#{@chat_count})"
+= heading_with_count(:chats, @chat_count)
 %table
   %tr
     %th
@@ -17,5 +15,7 @@
       Messages
     %th
       Replies
+    %th
+      Phone Calls
   = render @chats
 = paginate @chats

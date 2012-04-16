@@ -17,8 +17,12 @@ describe "PhoneCalls" do
 
     alias :call :current_call
 
+    def phone_call_callback_url
+      phone_calls_url(:format => :xml)
+    end
+
     def assert_redirect_to_current_url
-      assert_redirect(twiml_response, phone_calls_url)
+      assert_redirect(twiml_response, phone_call_callback_url)
     end
 
     def assert_play_then_redirect_to_current_url(file)
@@ -27,7 +31,7 @@ describe "PhoneCalls" do
     end
 
     def assert_dial_to_current_url(number, options = {})
-      assert_dial(twiml_response, phone_calls_url, number, options)
+      assert_dial(twiml_response, phone_call_callback_url, number, options)
     end
 
     def assert_ask_for_input(prompt, twiml_options = {})

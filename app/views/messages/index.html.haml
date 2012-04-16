@@ -1,6 +1,4 @@
-%h2#total_messages
-  Messages
-  = "(#{@message_count})"
+= heading_with_count(:messages, @message_count)
 %table
   %tr
     %th

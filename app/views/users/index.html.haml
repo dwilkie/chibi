@@ -1,6 +1,4 @@
-%h2#total_users
-  Users
-  = "(#{@user_count})"
+= heading_with_count(:users, @user_count)
 %table
   %tr
     %th
