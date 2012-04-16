@@ -80,13 +80,19 @@ describe "Admin" do
       page.should have_content reference_reply.body
       page.should have_content reference_reply.to
       if reference_reply.delivered?
-        page.should have_content "less than a minute ago"
+        page.should have_content time_ago_in_words
       else
         page.should have_content "pending"
       end
     end
 
+    def time_ago_in_words(created_at = nil)
+      minutes_ago = ((Time.now - created_at.to_i.minutes.ago) / 60).round
+      minutes_ago.zero? ? "less than a minute ago" : "#{minutes_ago} minutes ago"
+    end
+
     def assert_phone_call_show(reference_phone_call)
+      page.should have_content time_ago_in_words
       page.should have_link(
         reference_phone_call.from,
         :href => user_path(reference_phone_call.user_id)
@@ -95,7 +101,7 @@ describe "Admin" do
     end
 
     def assert_chat_show(reference_chat)
-      page.should have_content "10 minutes ago"
+      page.should have_content time_ago_in_words(10)
       page.should have_content reference_chat.active?
 
       CHATABLE_RESOURCES.each do |chatable_resources|
@@ -220,7 +226,7 @@ describe "Admin" do
       end
     end
 
-    context "given some phone calls", :focus do
+    context "given some phone calls" do
       before do
         phone_calls
       end

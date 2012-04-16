@@ -1,5 +1,8 @@
 %tr{:id => "phone_call_#{phone_call_counter + 1}", :class => cycle("odd", "even")}
   %td
+    = time_ago_in_words(phone_call.created_at)
+    ago
+  %td
     = link_to phone_call.from, user_path(phone_call.user_id)
   %td
     = phone_call.state.humanize
