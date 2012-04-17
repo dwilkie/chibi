@@ -521,9 +521,9 @@ describe Chat do
       relation = subject.class.filter_by
       relation.includes_values.should == [:user, :friend, :active_users]
       relation.select_values.first.split(/\,\s+/)[1..-1].should == [
-        "COUNT(messages.id) AS messages_count",
-        "COUNT(replies.id) AS replies_count",
-        "COUNT(phone_calls.id) AS phone_calls_count"
+        "COUNT(DISTINCT(messages.id)) AS messages_count",
+        "COUNT(DISTINCT(replies.id)) AS replies_count",
+        "COUNT(DISTINCT(phone_calls.id)) AS phone_calls_count"
       ]
     end
 

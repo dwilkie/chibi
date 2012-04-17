@@ -31,9 +31,9 @@ class Chat < ActiveRecord::Base
   def self.filter_by(params = {})
     scoped.select(
       "#{table_name}.*,
-      COUNT(messages.id) AS messages_count,
-      COUNT(replies.id) AS replies_count,
-      COUNT(phone_calls.id) AS phone_calls_count",
+      COUNT(DISTINCT(messages.id)) AS messages_count,
+      COUNT(DISTINCT(replies.id)) AS replies_count,
+      COUNT(DISTINCT(phone_calls.id)) AS phone_calls_count",
     ).joins(
       "LEFT OUTER JOIN messages ON messages.chat_id = #{table_name}.id"
     ).joins(
