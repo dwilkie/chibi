@@ -128,3 +128,62 @@ shared_examples_for "chatable" do
     end
   end
 end
+
+shared_examples_for "filtering with chatable resources" do
+
+  def assert_respond_to_chatable_resources_counts(result)
+    result.messages_count.should == "0"
+    result.replies_count.should == "0"
+    result.phone_calls_count.should == "0"
+  end
+
+  before do
+    resources
+  end
+
+  describe ".filter_by" do
+    it "should order by latest created at" do
+      subject.class.filter_by.should == resources.reverse
+    end
+
+    it "should include a count of the chatable resources associations" do
+      relation = subject.class.filter_by
+      relation.select_values.first.split(/\,\s+/)[1..-1].should == [
+        "COUNT(DISTINCT(messages.id)) AS messages_count",
+        "COUNT(DISTINCT(replies.id)) AS replies_count",
+        "COUNT(DISTINCT(phone_calls.id)) AS phone_calls_count"
+      ]
+
+      expected_table_name = subject.class.table_name
+      expected_join_column = "#{expected_table_name.singularize}_id"
+
+      relation.joins_values.each do |left_outer_join|
+        join_extraction = left_outer_join.match(/(\w+)\s*\=\s*(\w+)/)
+        join_extraction[1].should == expected_join_column
+        table_name = expected_table_name
+      end
+    end
+
+    it "should include counts for the chatable resources" do
+      assert_respond_to_chatable_resources_counts(subject.class.filter_by.first)
+    end
+  end
+
+  describe ".filter_by_count" do
+    it "should return the total number of resources" do
+      subject.class.filter_by_count.should == resources.count
+    end
+  end
+
+  describe ".find_with_chatable_resources_counts" do
+    it "should behave like .find but the result should respond to counts for chatable resources" do
+      assert_respond_to_chatable_resources_counts(
+        subject.class.find_with_chatable_resources_counts(resources.first.id)
+      )
+
+      expect {
+        subject.class.find_with_chatable_resources_counts(0)
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
+end

@@ -7,25 +7,24 @@ describe "Admin" do
   let(:another_user) { create(:user) }
 
   let(:message) { create(:message, :user => user, :body => "Hello", :chat => chat) }
-  let(:another_message) { create(:message, :user => user, :body => "Goodbye", :chat => another_chat) }
-  let(:message_from_another_user) { create(:message, :user => another_user) }
+  let(:another_message) { create(:message, :user => another_user, :body => "Goodbye", :chat => another_chat) }
 
-  let(:reply) { expect_message { create(:delivered_reply, :user => user, :body => "Hello", :chat => chat) } }
-  let(:another_reply) { expect_message { create(:reply, :user => user, :body => "Goodbye", :chat => another_chat) } }
-  let(:reply_to_another_user) {  expect_message { create(:reply, :user => another_user) } }
+  let(:reply) { create(:delivered_reply, :user => user, :body => "Hello", :chat => chat) }
+  let(:another_reply) { create(:reply, :user => another_user, :body => "Goodbye", :chat => another_chat) }
 
-  let(:chat) { create(:active_chat_with_single_user, :created_at => 10.minutes.ago) }
-  let(:another_chat) { create(:active_chat, :user => another_user, :friend => user, :created_at => 10.minutes.ago) }
+  let(:chat) { create(:active_chat_with_single_user, :user => user, :friend => another_user, :created_at => 10.minutes.ago) }
+  let(:another_chat) { create(:chat, :user => another_user, :friend => user, :created_at => 10.minutes.ago) }
 
   let(:phone_call) { create(:phone_call, :user => user, :chat => chat) }
-  let(:another_phone_call) { create(:phone_call, :user => user, :chat => another_chat) }
-  let(:phone_call_from_another_user) { create(:phone_call, :user => another_user) }
+  let(:another_phone_call) { create(:phone_call, :user => another_user, :chat => another_chat) }
 
   let(:users) { [another_user, user] }
   let(:messages) { [message, another_message] }
   let(:replies) { [reply, another_reply] }
-  let(:chats) { [chat, another_chat] }
+  let(:chats) { [another_chat, chat] }
   let(:phone_calls) { [phone_call, another_phone_call] }
+
+  let(:chatable_resources) { [messages, replies, phone_calls] }
 
   context "as an admin" do
     before do
@@ -64,11 +63,20 @@ describe "Admin" do
     end
 
     def assert_user_show(reference_user)
-      page.should have_content reference_user.id
-      page.should have_content reference_user.screen_name
-      page.should have_content reference_user.online
-      page.should have_content reference_user.mobile_number
-      page.should have_content reference_user.locale
+      page.should have_css "#id", :text => reference_user.id.to_s
+      page.should have_css "#name", :text => reference_user.name
+      page.should have_css "#screen_name", :text => reference_user.screen_name
+      page.should have_css "#date_of_birth", :text => reference_user.date_of_birth
+      page.should have_css "#gender", :text => reference_user.gender
+      page.should have_css "#city", :text => reference_user.city
+      page.should have_css "#looking_for", :text => reference_user.looking_for
+      page.should have_css "#online", :text => reference_user.online.to_s
+      page.should have_css "#locale", :text => reference_user.locale
+      within "#mobile_number" do
+        page.should have_link reference_user.mobile_number, :href => user_path(reference_user)
+      end
+
+      assert_chatable_resources_counts(reference_user)
     end
 
     def assert_message_show(reference_message)
@@ -104,22 +112,7 @@ describe "Admin" do
       page.should have_content time_ago_in_words(10)
       page.should have_content reference_chat.active?
 
-      CHATABLE_RESOURCES.each do |chatable_resources|
-        within("##{chatable_resources}") do
-          chatable_resources_count = reference_chat.send(chatable_resources).count
-          chatable_resources_link = chatable_resources_count.to_s
-
-          if chatable_resources_count.zero?
-            page.should have_no_link(chatable_resources_link)
-            page.should have_content(chatable_resources_link)
-          else
-            page.should have_link(
-              chatable_resources_link,
-              :href => send("chat_#{chatable_resources}_path", reference_chat)
-            )
-          end
-        end
-      end
+      assert_chatable_resources_counts(reference_chat)
 
       USER_TYPES_IN_CHAT.each do |user_type|
         within("##{user_type}") do
@@ -133,23 +126,48 @@ describe "Admin" do
       end
     end
 
-    def assert_show_user(reference_user)
-      page.current_path.should == user_path(reference_user)
-      page.should have_content reference_user.screen_id
+    def assert_chatable_resources_counts(resource)
+      CHATABLE_RESOURCES.each do |chatable_resources|
+        within("##{chatable_resources}") do
+          chatable_resources_count = resource.send(chatable_resources).count
+          chatable_resources_link = chatable_resources_count.to_s
+
+          if chatable_resources_count.zero?
+            page.should have_no_link(chatable_resources_link)
+            page.should have_content(chatable_resources_link)
+          else
+            page.should have_link(
+              chatable_resources_link,
+              :href => send("#{resource.class.to_s.underscore}_#{chatable_resources}_path", resource)
+            )
+          end
+        end
+      end
     end
 
-    shared_examples_for "showing a user" do
-      it "should show me the user" do
-        assert_show_user(reference_user)
+    def assert_show_user(reference_user)
+      page.current_path.should == user_path(reference_user)
+      assert_user_show(reference_user)
+    end
+
+    def assert_navigate_to_chatable_resource(resource_name)
+      resources_name = resource_name.to_s.pluralize
+      CHATABLE_RESOURCES.each do |chatable_resources|
+        visit send("#{resources_name}_path")
+
+        within("##{resource_name}_1 ##{chatable_resources}") do
+          click_link(send(resource_name).send(chatable_resources).count.to_s)
+        end
+
+        chatable_resource = chatable_resources.to_s.singularize
+        send("assert_#{chatable_resource}_index", send(chatable_resource))
       end
     end
 
     context "given some chats" do
       before do
         chats
-        messages
-        replies
-        phone_calls
+        chatable_resources
       end
 
       context "when I visit '/chats'" do
@@ -168,7 +186,7 @@ describe "Admin" do
 
               user_resource = chat.send(user_type)
 
-              within("#chat_2 ##{user_type}") do
+              within("#chat_1 ##{user_type}") do
                 click_link(user_resource.screen_id)
               end
 
@@ -179,16 +197,7 @@ describe "Admin" do
 
         context "when I click on the number of chatable resources for one of the chats" do
           it "should show me a list of the chatable resources" do
-            CHATABLE_RESOURCES.each do |chatable_resources|
-              visit chats_path
-
-              within("#chat_1 ##{chatable_resources}") do
-                click_link(another_chat.send(chatable_resources).count.to_s)
-              end
-
-              chatable_resource = chatable_resources.to_s.singularize
-              send("assert_#{chatable_resource}_index", send("another_#{chatable_resource}"))
-            end
+            assert_navigate_to_chatable_resource(:chat)
           end
         end
       end
@@ -245,6 +254,7 @@ describe "Admin" do
     context "given some users" do
       before do
         users
+        chatable_resources
       end
 
       context "when I visit '/users'" do
@@ -272,74 +282,21 @@ describe "Admin" do
           end
         end
 
-        context "when I click on 'show' for one of the users" do
+        context "when I click on the number of chatable resources for one of the users" do
+          it "should show me a list of the chatable resources" do
+            assert_navigate_to_chatable_resource(:user)
+          end
+        end
 
+        context "when I click on the mobile number for one of the users" do
           before do
             within("#user_1") do
-              click_link("show")
+              click_link(user.mobile_number)
             end
           end
 
-          it_should_behave_like "showing a user" do
-            let(:reference_user) { user }
-          end
-
-          context "given they been sent some replies" do
-            before do
-              replies
-              reply_to_another_user
-            end
-
-            context "when I click 'replies'" do
-              before do
-                click_link("replies")
-              end
-
-              it "should show me the replies sent to this user" do
-                assert_reply_index
-              end
-
-              context "when I click on the mobile number for the reply" do
-                before do
-                  within("#reply_1") do
-                    click_link(reply.to)
-                  end
-                end
-
-                it_should_behave_like "showing a user" do
-                  let(:reference_user) { user }
-                end
-              end
-            end
-          end
-
-          context "given they have sent some messages" do
-            before do
-              messages
-              message_from_another_user
-            end
-
-            context "when I click 'messages'" do
-              before do
-                click_link("messages")
-              end
-
-              it "should show me the messages from this user" do
-                assert_message_index
-              end
-
-              context "when I click on the mobile number for the message" do
-                before do
-                  within("#message_1") do
-                    click_link(message.from)
-                  end
-                end
-
-                it_should_behave_like "showing a user" do
-                  let(:reference_user) { user }
-                end
-              end
-            end
+          it "should show me the user" do
+            assert_show_user(user)
           end
         end
       end

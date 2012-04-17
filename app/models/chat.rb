@@ -1,11 +1,10 @@
 class Chat < ActiveRecord::Base
+  include Communicable::HasChatableResources
+
   belongs_to :user
   belongs_to :friend, :class_name => 'User'
 
   has_many :active_users, :class_name => 'User', :foreign_key => "active_chat_id"
-  has_many :messages
-  has_many :replies
-  has_many :phone_calls
 
   validates :user, :friend, :presence => true
 
@@ -29,28 +28,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.filter_by(params = {})
-    scoped.select(
-      "#{table_name}.*,
-      COUNT(DISTINCT(messages.id)) AS messages_count,
-      COUNT(DISTINCT(replies.id)) AS replies_count,
-      COUNT(DISTINCT(phone_calls.id)) AS phone_calls_count",
-    ).joins(
-      "LEFT OUTER JOIN messages ON messages.chat_id = #{table_name}.id"
-    ).joins(
-      "LEFT OUTER JOIN replies ON replies.chat_id = #{table_name}.id"
-    ).joins(
-      "LEFT OUTER JOIN phone_calls ON phone_calls.chat_id = #{table_name}.id"
-    ).filter_params(
-      params
-    ).includes(
-      :user, :friend, :active_users
-    ).group(all_columns).order(
-      "#{table_name}.created_at DESC"
-    )
-  end
-
-  def self.filter_by_count(params = {})
-    filter_params(params).count
+    chatable_resources_scope.filter_params(params).includes(:user, :friend, :active_users)
   end
 
   def activate!(options = {})
@@ -162,7 +140,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.filter_params(params = {})
-    scoped.where(params.slice(:user_id))
+    super.where(params.slice(:user_id))
   end
 
   def reactivate_expired_chats(users)

@@ -16,6 +16,7 @@ Chibi::Application.routes.draw do
   resources :users, :only => [:index, :destroy, :show] do
     resources :messages, :only => :index
     resources :replies, :only => :index
+    resources :phone_calls, :only => :index
   end
 
   mount Resque::Server, :at => "/resque"

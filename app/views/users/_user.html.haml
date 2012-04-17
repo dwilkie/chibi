@@ -1,25 +1,24 @@
 %tr{:id => "user_#{user_counter + 1}", :class => cycle("odd", "even")}
-  %td
+  %td#id
     = user.id
-  %td
+  %td#name
     = user.name
-  %td
+  %td#screen_name
     = user.screen_name
-  %td
-    = user.mobile_number
-  %td
+  %td#mobile_number
+    = link_to(user.mobile_number, user_path(user))
+  %td#date_of_birth
     = user.date_of_birth
-  %td
+  %td#gender
     = user.gender
-  %td
+  %td#city
     = user.city
-  %td
+  %td#looking_for
     = user.looking_for
-  %td
+  %td#online
     = user.online
-  %td
+  %td#locale
     = user.locale
-  %td
-    = link_to("show", user)
+  = render :partial => "shared/chatable_resources_table_content", :locals => { :resource => user }
   %td
     = link_to("X", user, :method => :delete, :confirm => "Are you sure?")

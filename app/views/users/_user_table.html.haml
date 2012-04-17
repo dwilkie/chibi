@@ -1,0 +1,26 @@
+%table
+  %tr
+    %th
+      id
+    %th
+      Name
+    %th
+      Screen Name
+    %th
+      Mobile Number
+    %th
+      DOB
+    %th
+      Gender
+    %th
+      Location
+    %th
+      Looking For
+    %th
+      Online
+    %th
+      Locale
+    = render "shared/chatable_resources_table_headers"
+  = render users
+- unless users.is_a?(Array)
+  = paginate users

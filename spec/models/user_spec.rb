@@ -107,16 +107,11 @@ describe User do
     end
   end
 
+  it_should_behave_like "filtering with chatable resources" do
+    let(:resources) { [user, friend] }
+  end
+
   describe ".filter_by" do
-    before do
-      user
-      friend
-    end
-
-    it "should return all users ordered by latest created at date" do
-      subject.class.filter_by.should == [friend, user]
-    end
-
     it "should include the user's location to avoid loading it for each user" do
       subject.class.filter_by.includes_values.should == [:location]
     end

@@ -1,25 +1,2 @@
 = heading_with_count(:users, @user_count)
-%table
-  %tr
-    %th
-      id
-    %th
-      Name
-    %th
-      Screen Name
-    %th
-      Mobile Number
-    %th
-      DOB
-    %th
-      Gender
-    %th
-      Location
-    %th
-      Looking For
-    %th
-      Online
-    %th
-      Locale
-  = render @users
-= paginate @users
+= render :partial => "user_table", :locals => { :users => @users }

@@ -2,12 +2,12 @@ class UsersController < ApplicationController
   before_filter :authenticate_admin
 
   def index
-    @user_count = User.count
+    @user_count = User.filter_by_count(params)
     @users = User.filter_by(params).page params[:page]
   end
 
   def show
-    @user = User.find(params[:id])
+    @user = User.find_with_chatable_resources_counts(params[:id])
   end
 
   def destroy

@@ -1,8 +1,7 @@
 class User < ActiveRecord::Base
-  has_one :location, :autosave => true
+  include Communicable::HasChatableResources
 
-  has_many :messages
-  has_many :replies
+  has_one :location, :autosave => true
 
   # describes initiated chats i.e. chat initiated by user
   has_many :chats
@@ -33,7 +32,7 @@ class User < ActiveRecord::Base
   DEFAULT_ALTERNATE_LOCALE = "en"
 
   def self.filter_by(params = {})
-    scoped.order("created_at DESC").includes(:location)
+    super.includes(:location)
   end
 
   def self.matches(user)

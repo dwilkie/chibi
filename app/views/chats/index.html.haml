@@ -11,11 +11,6 @@
       Friend
     %th
       Inactive User
-    %th
-      Messages
-    %th
-      Replies
-    %th
-      Phone Calls
+    = render "shared/chatable_resources_table_headers"
   = render @chats
 = paginate @chats

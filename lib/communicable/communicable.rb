@@ -35,4 +35,55 @@ module Communicable
       end
     end
   end
+
+  module HasChatableResources
+    extend ActiveSupport::Concern
+
+    included do
+      has_many :messages
+      has_many :replies
+      has_many :phone_calls
+    end
+
+    module ClassMethods
+      def filter_by(params = {})
+        chatable_resources_scope
+      end
+
+      def filter_by_count(params = {})
+        filter_params(params).count
+      end
+
+      def find_with_chatable_resources_counts(id)
+        result = chatable_resources_scope.where(:id => id).first
+        raise ActiveRecord::RecordNotFound unless result.present?
+        result
+      end
+
+      private
+
+      def chatable_resources_scope
+        joins_column_name = "#{table_name.singularize}_id"
+
+        scoped.select(
+          "#{table_name}.*,
+          COUNT(DISTINCT(messages.id)) AS messages_count,
+          COUNT(DISTINCT(replies.id)) AS replies_count,
+          COUNT(DISTINCT(phone_calls.id)) AS phone_calls_count",
+        ).joins(
+          "LEFT OUTER JOIN messages ON messages.#{joins_column_name} = #{table_name}.id"
+        ).joins(
+          "LEFT OUTER JOIN replies ON replies.#{joins_column_name} = #{table_name}.id"
+        ).joins(
+          "LEFT OUTER JOIN phone_calls ON phone_calls.#{joins_column_name} = #{table_name}.id"
+        ).group(all_columns).order(
+          "#{table_name}.created_at DESC"
+        )
+      end
+
+      def filter_params(params = {})
+        scoped
+      end
+    end
+  end
 end

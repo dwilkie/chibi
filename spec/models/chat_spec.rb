@@ -506,28 +506,21 @@ describe Chat do
     end
   end
 
+  it_should_behave_like "filtering with chatable resources" do
+    let(:resources) { [chat, unique_active_chat] }
+  end
+
   describe ".filter_by" do
-
-    before do
-      chat
-      unique_active_chat
-    end
-
-    it "should order the chats by latest created at" do
-      subject.class.filter_by.should == [unique_active_chat, chat]
-    end
-
-    it "should include users, friends, active users messages_count, replies_count & phone_calls_count" do
-      relation = subject.class.filter_by
-      relation.includes_values.should == [:user, :friend, :active_users]
-      relation.select_values.first.split(/\,\s+/)[1..-1].should == [
-        "COUNT(DISTINCT(messages.id)) AS messages_count",
-        "COUNT(DISTINCT(replies.id)) AS replies_count",
-        "COUNT(DISTINCT(phone_calls.id)) AS phone_calls_count"
-      ]
+    it "should include users, friends & active users to avoid loading them for each user" do
+      subject.class.filter_by.includes_values.should == [:user, :friend, :active_users]
     end
 
     context ":user_id => 2" do
+      before do
+        chat
+        unique_active_chat
+      end
+
       it "should return all chats with the given user id" do
         subject.class.filter_by(:user_id => chat.user_id).should == [chat]
       end
@@ -535,17 +528,12 @@ describe Chat do
   end
 
   describe ".filter_by_count" do
-
-    before do
-      chat
-      unique_active_chat
-    end
-
-    it "should return the total number of chats" do
-      subject.class.filter_by_count.should == 2
-    end
-
     context ":user_id => 2" do
+      before do
+        chat
+        unique_active_chat
+      end
+
       it "should return the count of the chats with the given user id" do
         subject.class.filter_by_count(:user_id => chat.user_id).should == 1
       end
