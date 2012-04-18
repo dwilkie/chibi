@@ -626,14 +626,6 @@ describe User do
         )
       end
     end
-
-    context ":online => true" do
-      it "should put the user online" do
-        offline_user.should_not be_online
-        offline_user.update_profile("", :online => true)
-        offline_user.should be_online
-      end
-    end
   end
 
   describe "#matches" do
@@ -985,11 +977,25 @@ describe User do
     end
   end
 
+  describe "#login!" do
+    it "should put the user online" do
+      offline_user.should_not be_online
+      offline_user.login!
+      offline_user.should be_online
+
+      # test that we simply return for user's who are already online
+      duplicate_user = build(:user, :mobile_number => offline_user.mobile_number)
+      duplicate_user.should be_online
+      duplicate_user.login!
+      duplicate_user.should be_online
+    end
+  end
+
   describe "#logout!" do
     let(:reply) { reply_to(user) }
     let(:reply_to_partner) { reply_to(friend, active_chat) }
 
-    it "should mark the user as offline" do
+    it "should put the user offline" do
       user.logout!
       user.should_not be_online
     end

@@ -80,8 +80,7 @@ class User < ActiveRecord::Base
     match_scope.readonly(false)
   end
 
-  def update_profile(info, options = {})
-    self.online = options[:online] || false
+  def update_profile(info)
     extract(info)
     save
   end
@@ -157,6 +156,10 @@ class User < ActiveRecord::Base
   def screen_id
     sn = name || screen_name
     sn + id.to_s if sn
+  end
+
+  def login!
+    update_attributes!(:online => true) unless online?
   end
 
   def logout!(options = {})

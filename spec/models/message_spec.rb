@@ -104,6 +104,22 @@ describe Message do
       end
     end
 
+    context "given the message body is anything other than 'stop'" do
+      let(:offline_user) { create(:offline_user) }
+      let(:message_from_offline_user) { create(:message, :user => offline_user) }
+
+      before do
+        create(:message, :user => offline_user)
+        message_from_offline_user
+      end
+
+      it "should put the user online" do
+        offline_user.should_not be_online
+        expect_message { message_from_offline_user.process! }
+        offline_user.should be_online
+      end
+    end
+
     context "given the user is currently chatting" do
       before do
         create(:message, :user => user)
@@ -183,7 +199,7 @@ describe Message do
       context "and this is the user's first message" do
         def assert_welcome(body)
           message = create(:message, :user => user, :body => body)
-          user.should_receive(:update_profile).with(body, :online => true)
+          user.should_receive(:update_profile).with(body)
           expect_message { message.process! }
 
           replies_to(user).first.body.should == spec_translate(
@@ -233,7 +249,7 @@ describe Message do
             it_should_behave_like "starting a new chat"
 
             it "should try to update the users profile from the message text" do
-              user.should_receive(:update_profile).with("hello", :online => true)
+              user.should_receive(:update_profile).with("hello")
               expect_message { message.process! }
             end
 

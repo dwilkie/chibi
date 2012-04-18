@@ -19,6 +19,19 @@ describe "Messages" do
 
     context "as a user" do
       context "when I text" do
+        context "given I am offline" do
+          let(:offline_user) { create(:offline_user) }
+
+          before do
+            create(:message, :user => offline_user)
+            send_message(:from => offline_user, :body => "en")
+          end
+
+          it "should put me online" do
+            offline_user.reload.should be_online
+          end
+        end
+
         context "'hello'" do
           context "given there are no matches for me" do
             before do

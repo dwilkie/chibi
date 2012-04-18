@@ -12,6 +12,8 @@ class Message < ActiveRecord::Base
   end
 
   def process!
+    user.login!
+
     if user.first_message?
       user.welcome!
     elsif user_wants_to_logout?
@@ -29,7 +31,7 @@ class Message < ActiveRecord::Base
         start_new_chat = false
       end
     else
-      user.update_profile(normalized_body, :online => true)
+      user.update_profile(normalized_body)
     end
 
     build_chat(:user => user).activate!(:notify => true) if start_new_chat
