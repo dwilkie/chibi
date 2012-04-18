@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'spec_helper'
 
 describe "Messages" do
@@ -24,7 +26,9 @@ describe "Messages" do
             end
 
             it "should reply telling me that there are no matches at this time" do
-              reply_to(new_user).body.should == spec_translate(:anonymous_could_not_find_a_friend, new_user.locale)
+              reply_to(new_user).body.should == spec_translate(
+                :anonymous_could_not_find_a_friend, new_user.locale
+              )
             end
           end
         end
@@ -62,6 +66,14 @@ describe "Messages" do
               :personalized_new_chat_started, alex.locale, alex.name.capitalize, new_user.screen_id
             )
           end
+        end
+
+        context "'ខ្ងុំចង់ដីង អ្នកជានរណា'" do
+          before do
+            send_message(:from => my_number, :body => "ខ្ងុំចង់ដីង អ្នកជានរណា")
+          end
+
+          it_should_behave_like "welcoming me"
         end
 
         context "'hello'" do

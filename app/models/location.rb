@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Location < ActiveRecord::Base
   belongs_to :user
   before_save :normalize_country_code

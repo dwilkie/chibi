@@ -175,6 +175,12 @@ describe Location do
           :expected_city => "Koh Kong",
           :expected_latitude => 11.61666670,
           :expected_longitude => 102.98333330
+        },
+
+        "ខ្ងុំចង់ដីង អ្នកជានរណា" => {
+          :expected_city => nil,
+          :expected_latitude => nil,
+          :expected_longitude => nil
         }
       }
     end
