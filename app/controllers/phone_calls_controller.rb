@@ -11,15 +11,7 @@ class PhoneCallsController < ApplicationController
   end
 
   def create
-    params.underscorify_keys!
-
-    phone_call = PhoneCall.find_or_initialize_by_sid(params[:call_sid], params.slice(:from, :to))
-    if phone_call.save
-      phone_call.redirect_url = current_authenticated_url
-      phone_call.digits = params[:digits]
-      phone_call.call_status = params[:call_status]
-      phone_call.dial_status = params[:dial_call_status]
-      phone_call.process!
+    if phone_call = PhoneCall.find_or_create_and_process_by(params, current_authenticated_url)
       respond_to do |format|
         format.xml { render :xml => phone_call.to_twiml }
       end

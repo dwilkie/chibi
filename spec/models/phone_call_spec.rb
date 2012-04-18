@@ -86,6 +86,48 @@ describe PhoneCall do
     end
   end
 
+  describe "#login_user!" do
+    let(:phone_call_from_offline_user) { create(:phone_call_from_offline_user) }
+
+    it "should delegate to user#login!" do
+      phone_call_from_offline_user.login_user!
+      phone_call_from_offline_user.user.should be_online
+    end
+  end
+
+  describe ".find_or_create_and_process_by" do
+    include PhoneCallHelpers
+
+    def sample_params(options = {})
+      options[:digits] ||= 1
+      params = {}
+      call_params(options).each do |key, value|
+        params[key] = value || key.to_s.underscore.dasherize
+      end
+      params
+    end
+
+    it "should find or create the phone call and process it returning the phone call if valid" do
+      params = sample_params
+
+      subject.class.stub(:find_or_initialize_by_sid).and_return(phone_call)
+
+      phone_call.should_receive(:login_user!)
+      phone_call.should_receive(:process!)
+      subject.class.find_or_create_and_process_by(params.dup, "http://example.com").should == phone_call
+
+      phone_call.redirect_url.should == "http://example.com"
+      phone_call.digits.should == params[:Digits].to_i
+      phone_call.call_status.should == params[:CallStatus]
+      phone_call.dial_status.should == params[:DialCallStatus]
+
+      subject.should_not_receive(:login_user!)
+      subject.should_not_receive(:process!)
+      subject.class.stub(:find_or_initialize_by_sid).and_return(subject)
+      subject.class.find_or_create_and_process_by(params.dup, "http://example.com").should be_nil
+    end
+  end
+
   describe "#process!" do
     def assert_phone_call_can_be_completed(reference_phone_call)
       reference_phone_call.call_status = "completed"

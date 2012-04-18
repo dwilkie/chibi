@@ -9,11 +9,7 @@ module PhoneCallHelpers
 
   alias :update_call_status :make_call
 
-  private
-
-  def post_phone_call(options = {})
-    options[:call_sid] ||= build(:phone_call).sid
-    post phone_calls_path(:format => :xml),
+  def call_params(options = {})
     {
       :From => options[:from],
       :CallSid => options[:call_sid],
@@ -22,7 +18,16 @@ module PhoneCallHelpers
       :To => options[:to],
       :DialCallStatus => options[:dial_call_status].try(:to_s).try(:dasherize),
       :CallStatus => options[:call_status].try(:to_s).try(:dasherize)
-    }, authentication_params(:phone_call)
+    }
+  end
+
+  private
+
+  def post_phone_call(options = {})
+    options[:call_sid] ||= build(:phone_call).sid
+    options[:from] = options[:from].mobile_number if options[:from].is_a?(User)
+
+    post phone_calls_path(:format => :xml), call_params(options), authentication_params(:phone_call)
 
     response.status.should be(options[:response] || 200)
     options[:call_sid]

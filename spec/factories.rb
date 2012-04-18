@@ -19,6 +19,10 @@ FactoryGirl.define do
     from { user.mobile_number }
     sequence(:sid)
 
+    factory :phone_call_from_offline_user do
+      association :user, :factory => :offline_user
+    end
+
     factory :phone_call_with_active_chat do
       association :chat, :factory => :active_chat
       user { chat.user }

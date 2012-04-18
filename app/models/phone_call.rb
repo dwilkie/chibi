@@ -174,12 +174,32 @@ class PhoneCall < ActiveRecord::Base
     end
   end
 
+  def self.find_or_create_and_process_by(params, redirect_url)
+    params.underscorify_keys!
+
+    phone_call = self.find_or_initialize_by_sid(params[:call_sid], params.slice(:from, :to))
+
+    if phone_call.valid?
+      phone_call.login_user!
+      phone_call.redirect_url = redirect_url
+      phone_call.digits = params[:digits]
+      phone_call.call_status = params[:call_status]
+      phone_call.dial_status = params[:dial_call_status]
+      phone_call.process!
+      phone_call
+    end
+  end
+
   def digits
     @digits.to_i
   end
 
   def to=(value)
     self.from = value if value.present?
+  end
+
+  def login_user!
+    user.login!
   end
 
   private

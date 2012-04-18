@@ -136,6 +136,18 @@ describe "PhoneCalls" do
 
     context "as a user" do
       context "when I call" do
+        context "and I am offline" do
+          let(:offline_user) { create(:offline_user) }
+
+          before do
+            call(:from => offline_user)
+          end
+
+          it "should put me online" do
+            offline_user.reload.should be_online
+          end
+        end
+
         context "and I am offered the menu" do
           let(:offering_menu_phone_call) { create(:offering_menu_phone_call) }
 
