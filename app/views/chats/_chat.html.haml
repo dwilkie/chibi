@@ -10,4 +10,4 @@
     = chat_user_link(chat, :friend)
   %td#inactive_user
     = chat_user_link(chat, :inactive_user)
-  = render :partial => "shared/chatable_resources_table_content", :locals => { :resource => chat }
+  = chatable_links(chat)

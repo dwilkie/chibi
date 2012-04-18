@@ -19,6 +19,6 @@
     = user.online
   %td#locale
     = user.locale
-  = render :partial => "shared/chatable_resources_table_content", :locals => { :resource => user }
+  = chatable_links(user)
   %td
     = link_to("X", user, :method => :delete, :confirm => "Are you sure?")

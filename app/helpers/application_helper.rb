@@ -1,8 +1,21 @@
 module ApplicationHelper
-  def chatable_link(resource, chatable_resources_name)
+  def chatable_links(resource)
     resource_name = resource.class.to_s.underscore
-    chatable_resource_count = resource.send("#{chatable_resources_name}_count").to_i
-    chatable_resource_count.zero? ? chatable_resource_count : link_to(chatable_resource_count, send("#{resource_name}_#{chatable_resources_name}_path", resource))
+    capture_haml do
+      [:messages, :replies, :phone_calls].each do |chatable_resources|
+        chatable_resource_count = resource.send("#{chatable_resources}_count").to_i
+        if chatable_resource_count.zero?
+          content = chatable_resource_count
+        else
+          content = link_to(
+            chatable_resource_count, send("#{resource_name}_#{chatable_resources}_path", resource)
+          )
+        end
+        haml_tag :td, :id => chatable_resources do
+          haml_concat content
+        end
+      end
+    end
   end
 
   def heading_with_count(resources, count)
