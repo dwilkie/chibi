@@ -1,0 +1,44 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=%E1%9E%81%E1%9F%92%E1%9E%84%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%84%E1%9F%8B%E1%9E%8A%E1%9E%B8%E1%9E%84+%E1%9E%A2%E1%9F%92%E1%9E%93%E1%9E%80%E1%9E%87%E1%9E%B6%E1%9E%93%E1%9E%9A%E1%9E%8E%E1%9E%B6%2C+Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      accept:
+      - ! '*/*'
+      user-agent:
+      - Ruby
+      connection:
+      - close
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Wed, 18 Apr 2012 17:54:13 GMT
+      expires:
+      - Thu, 19 Apr 2012 17:54:13 GMT
+      cache-control:
+      - public, max-age=86400
+      server:
+      - mafe
+      x-xss-protection:
+      - 1; mode=block
+      x-frame-options:
+      - SAMEORIGIN
+      connection:
+      - close
+    body:
+      encoding: US-ASCII
+      string: ! "{\n   \"results\" : [],\n   \"status\" : \"ZERO_RESULTS\"\n}\n"
+    http_version: '1.1'
+  recorded_at: Wed, 18 Apr 2012 17:54:08 GMT
+recorded_with: VCR 2.0.0
