@@ -155,22 +155,12 @@ describe "PhoneCalls" do
             call(offering_menu_phone_call)
           end
 
-          context "if I hang up" do
-            before do
-              update_current_call_status(:call_status => :completed)
-            end
-
-            it "should complete the phone call" do
-              response.body.should be_empty
-            end
-          end
-
           context "if I hold the line" do
             before do
               update_current_call_status
             end
 
-            it "should try to find me a match" do
+            it "should try to find me a friend" do
               assert_redirect_to_current_url
             end
 
@@ -367,14 +357,23 @@ describe "PhoneCalls" do
                   end
 
                   context "if she answers" do
-                    before do
-                      update_current_call_status(:dial_call_status => :completed)
-                    end
-
                     context "and hangs up first" do
-                      # change this later...
-                      it "should hang up" do
-                        assert_hangup(twiml_response)
+                      before do
+                        update_current_call_status(:dial_call_status => :completed)
+                      end
+
+                      it "should tell me that my chat has ended" do
+                        assert_play_then_redirect_to_current_url(:tell_user_their_chat_has_ended)
+                      end
+
+                      context "and I hold the line" do
+                        before do
+                          update_current_call_status
+                        end
+
+                        it "should offer me the menu" do
+                          assert_ask_for_input(:offer_menu)
+                        end
                       end
                     end
                   end
@@ -384,22 +383,21 @@ describe "PhoneCalls" do
                       update_current_call_status(:dial_call_status => :no_answer)
                     end
 
-                    it "should try to connect me with another girl" do
-                      pending
-                      assert_dial_to_current_url(friends[1].mobile_number)
+                    it "should find me a new friend" do
+                      assert_redirect_to_current_url
+                    end
+
+                    context "and I hold the line" do
+                      before do
+                        update_current_call_status
+                      end
+
+                      it "should connnect me with my new friend" do
+                        assert_dial_to_current_url(friends[1].mobile_number)
+                      end
                     end
                   end
                 end
-              end
-            end
-
-            context "then if I press '1' for guy" do
-              before do
-                update_current_call_status(:digits => 1)
-              end
-
-              it "should connect me with a guy" do
-                pending
               end
             end
           end

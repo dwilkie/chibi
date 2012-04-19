@@ -133,6 +133,12 @@ describe PhoneCall do
       reference_phone_call.call_status = "completed"
       reference_phone_call.process!
       reference_phone_call.should be_completed
+
+      # assert chat is expired for caller
+      if chat = reference_phone_call.chat
+        chat.should_not be_active
+        chat.active_users.should_not include(phone_call.user)
+      end
     end
 
     def assert_phone_call_attributes(resource, expectations)

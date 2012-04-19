@@ -98,23 +98,24 @@
           connecting_user_with_friend:
             parent: phone_call_with_active_chat
 - connecting_user_with_friend:
-    connecting_user_with_friend:
+    finding_new_friend:
       twiml_expectation: dial_friend
       substates:
         dial_status:
-          hanging_up: completed
+          telling_user_their_chat_has_ended: completed
       parent: finding_new_friend_phone_call_friend_found
+- telling_user_their_chat_has_ended:
+    offering_menu:
+      twiml_expectation:
+        play_languages: tell_user_their_chat_has_ended
 - telling_user_to_try_again_later:
-    hanging_up:
+    completed:
       twiml_expectation:
         play_languages: tell_user_to_try_again_later
 - telling_user_their_friend_is_unavailable:
     finding_new_friend:
       twiml_expectation:
         play_languages: tell_user_their_friend_is_unavailable
-- hanging_up:
-    hanging_up:
-      twiml_expectation: hangup_current_call
 - completed:
     completed:
-      twiml_expectation: no_response
+      twiml_expectation: hangup_current_call

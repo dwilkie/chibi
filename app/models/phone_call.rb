@@ -91,12 +91,18 @@ class PhoneCall < ActiveRecord::Base
     end
 
     before_transition any => :finding_new_friend, :do => :create_chat_session
-
     before_transition any => :connecting_user_with_friend, :do => :set_or_update_current_chat
+    before_transition any => :completed, :do => :deactivate_chat_for_user
 
     state :connecting_user_with_friend do
       def to_twiml
         dial(chat.partner(user))
+      end
+    end
+
+    state :telling_user_their_chat_has_ended do
+      def to_twiml
+        play(:tell_user_their_chat_has_ended)
       end
     end
 
@@ -106,15 +112,9 @@ class PhoneCall < ActiveRecord::Base
       end
     end
 
-    state :hanging_up do
-      def to_twiml
-        hangup
-      end
-    end
-
     state :completed do
       def to_twiml
-        nil.to_s
+        hangup
       end
     end
 
@@ -151,26 +151,37 @@ class PhoneCall < ActiveRecord::Base
       # tell him to try again later (no friend available)
       transition(:finding_new_friend => :telling_user_to_try_again_later)
 
-      # hang up
-      transition(:telling_user_to_try_again_later => :hanging_up)
+      # complete call
+      transition(:telling_user_to_try_again_later => :completed)
 
+      # find a new friend for him
       transition(
         :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :finding_new_friend,
         :if => :wants_new_friend?
       )
 
+      # connect him with his existing friend
       transition(
         :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :connecting_user_with_friend,
         :if => :user_chatting?
       )
 
+      # tell him his friend is unavailable
       transition(
         :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :telling_user_their_friend_is_unavailable
       )
 
+      # find him a new friend
       transition(:telling_user_their_friend_is_unavailable => :finding_new_friend)
 
-      transition(:connecting_user_with_friend => :hanging_up, :if => :connected?)
+      # tell him his chat has ended
+      transition(:connecting_user_with_friend => :telling_user_their_chat_has_ended, :if => :connected?)
+
+      # find him a new friend
+      transition(:connecting_user_with_friend => :finding_new_friend)
+
+      # offer him the menu
+      transition(:telling_user_their_chat_has_ended => :offering_menu)
     end
   end
 
@@ -246,6 +257,10 @@ class PhoneCall < ActiveRecord::Base
 
   def set_or_update_current_chat
     self.chat ||= user.active_chat
+  end
+
+  def deactivate_chat_for_user
+    chat.deactivate!(:active_user => user) if chat.present?
   end
 
   def play(file, options = {})
