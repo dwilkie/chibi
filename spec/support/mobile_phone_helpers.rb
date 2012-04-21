@@ -7,7 +7,7 @@ module MobilePhoneHelpers
       :service_providers => {
         :smart => {
           :prefixes => ["10", "69", "70", "86", "93", "98"],
-          :short_code => "7112"
+          :short_code => "2442"
         }
       }
     },
