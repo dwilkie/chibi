@@ -5,6 +5,7 @@ class PhoneCall < ActiveRecord::Base
 
   module Digits
     MENU = 8
+    WANTS_EXISTING_FRIEND = 1
     WANTS_NEW_FRIEND = 2
   end
 
@@ -71,6 +72,11 @@ class PhoneCall < ActiveRecord::Base
         ask_for_input(:offer_menu)
       end
     end
+
+    before_transition(
+      :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => any,
+      :do => :check_user_preference_for_finding_a_new_friend_or_calling_existing_one
+    )
 
     state :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one do
       def to_twiml
@@ -163,7 +169,7 @@ class PhoneCall < ActiveRecord::Base
       # connect him with his existing friend
       transition(
         :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :connecting_user_with_friend,
-        :if => :user_chatting?
+        :if => :wants_existing_friend?
       )
 
       # tell him his friend is unavailable
@@ -237,6 +243,10 @@ class PhoneCall < ActiveRecord::Base
     digits == Digits::WANTS_NEW_FRIEND
   end
 
+  def wants_existing_friend?
+    digits == Digits::WANTS_EXISTING_FRIEND
+  end
+
   def connected?
     dial_status == CallStatuses::COMPLETED
   end
@@ -261,6 +271,11 @@ class PhoneCall < ActiveRecord::Base
 
   def deactivate_chat_for_user
     chat.deactivate!(:active_user => user) if chat.present?
+  end
+
+  def check_user_preference_for_finding_a_new_friend_or_calling_existing_one
+    return if complete?
+    wants_existing_friend? || wants_new_friend? || !user_chatting?
   end
 
   def play(file, options = {})

@@ -77,7 +77,7 @@
             parent: phone_call_with_active_chat
       parent: welcoming_user_phone_call_from_user_with_known_gender_and_looking_for_preference
 - asking_if_user_wants_to_find_a_new_friend_or_call_existing_one:
-    connecting_user_with_friend:
+    asking_if_user_wants_to_find_a_new_friend_or_call_existing_one:
       twiml_expectation:
         ask_for_input: ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner
       substates:

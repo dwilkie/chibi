@@ -89,8 +89,10 @@ describe "PhoneCalls" do
                   update_current_call_status
                 end
 
-                it "should connect me with my friend" do
-                  assert_dial_to_current_url(active_chat.friend.mobile_number, :callerId => formatted_twilio_number)
+                it "should ask me again if I want to chat with my friend" do
+                  assert_ask_for_input(
+                    :ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner
+                  )
                 end
               end
 
