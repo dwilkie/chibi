@@ -2,23 +2,16 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  close_session:
-    - bye
-    - goodbye
-  my_name_is:
-    - my name is
-  i_am:
-    - i am
-    - "i'm"
-    - im
+  name:
+    - "(?:my name is|i am|i'm|im)\\s*(?!\\bat\\b|\\bin\\b|\\ba\\b|\\b\\w+ing\\b)(\\b\\w+\\b)"
   years_old:
     - years old
     - yo
   girlfriend:
-    - girlfriend
+    - '(?:meet|find|chat|have|talk).+(?:girl|woman)'
+    - 'girl\s?friend'
     - gf
     - friend girl
-    - girl friend
   girl:
     - f
     - female
@@ -26,10 +19,10 @@ en:
     - girl
     - woman
   boyfriend:
-    - boyfriend
+    - '(?:meet|find|chat|have|talk).+(?:boy|guy|man)'
+    - 'boy\s?friend'
     - bf
     - friend boy
-    - boy friend
   boy:
     - "(?<!')m"
     - male
@@ -38,32 +31,19 @@ en:
     - guy
     - man
   friend:
-    - friend
-    - friends
+    - 'friends?'
 kh:
-  my_name_is:
-    - chhmous
-  i_am:
-    - kjom
-    - nhom
-    - nyom
-    - knhom
-    - knyom
+  name:
+    - '(?:chh?mou?s)\s*(\b\w+\b)'
   years_old:
     - chnam
   girlfriend:
-    - met srey
-    - mit srey
+    - 'm(?:i|e)t srey'
   could_mean_girl_or_girlfriend:
     - srey
   boyfriend:
-    - met bros
-    - met pros
-    - mit bros
-    - mit pros
+    - 'm(?:i|e)t (?:p|b)ros'
   could_mean_boy_or_boyfriend:
-    - bros
-    - pros
+    - '(?:b|p)ros'
   friend:
-    - mit
-    - met
+    - 'm(?:i|e)t'

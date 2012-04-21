@@ -383,14 +383,48 @@ class User < ActiveRecord::Base
   end
 
   def extract(info)
+    return if name_given?(info)
+
     stripped_info = info.dup
 
     profile_complete = profile_complete?
 
-    extract_gender_and_looking_for(stripped_info, profile_complete)
-    extract_date_of_birth(stripped_info, profile_complete)
-    extract_name(stripped_info, profile_complete)
+    unless profile_complete || missing_only?(:name)
+      first_word = strip_match!(stripped_info, /\w+/, :only_first => true).try(:[], 0)
+      extract_profile_without_location(stripped_info, profile_complete)
+
+      if missing_only?(:name) || (missing_only?(:name, :city) && changed?)
+        self.name = first_word
+        extract_location(stripped_info, profile_complete)
+        return
+      else
+        discard_changes
+      end
+    end
+
+    extract_profile(info, profile_complete)
+  end
+
+  def extract_profile(info, profile_complete)
+    stripped_info = info.dup
+
+    extract_profile_without_location(stripped_info, profile_complete)
     extract_location(stripped_info, profile_complete)
+  end
+
+  def extract_profile_without_location(info, profile_complete)
+    extract_gender_and_looking_for(info, profile_complete)
+    extract_date_of_birth(info, profile_complete)
+    extract_name(info, profile_complete)
+  end
+
+  def name_given?(info)
+    if missing_only?(:name)
+      message_words = info.split(/\s+/)
+      if message_words.count == 1
+        self.name = message_words.first
+      end
+    end
   end
 
   def extract_gender_and_looking_for(info, force_update)
@@ -406,13 +440,13 @@ class User < ActiveRecord::Base
   end
 
   def extract_name(info, force_update)
-    match = strip_match!(info, /#{profile_keywords(:my_name_is)}\s*(\b\w+\b)/i).try(:[], 2)
-    match = strip_match!(info, /#{profile_keywords(:i_am)}\s*(\b\w+\b)/i).try(:[], 2) unless match
+    matches = strip_match!(info, /#{profile_keywords(:name)}/i)
+    match = matches.try(:[], 2) || matches.try(:[], 1)
     self.name = match.downcase if match && (force_update || name.nil?)
   end
 
   def extract_location(info, force_update)
-    if force_update || !location.city?
+    if force_update || city.nil?
       self.address = info
       locate!
     end
@@ -491,14 +525,14 @@ class User < ActiveRecord::Base
   def includes_gender?(info, options)
     strip_match!(
       info,
-      /#{profile_keywords(:i_am)}?\s*\b#{profile_keywords(:could_mean_boy_or_boyfriend, :boy, :could_mean_girl_or_girlfriend, :girl)}\b/i,
+      /\b#{profile_keywords(:could_mean_boy_or_boyfriend, :boy, :could_mean_girl_or_girlfriend, :girl)}\b/i,
       options
     )
   end
 
   def info_suggests_from?(sex, info, options)
     could_mean = "could_mean_#{sex}_or_#{sex}friend"
-    strip_match!(info, /#{profile_keywords(:i_am)}?\s*\b#{profile_keywords(sex, could_mean)}\b/i, options)
+    strip_match!(info, /\b#{profile_keywords(sex, could_mean)}\b/i, options)
   end
 
   def info_suggests_from_girl?(info, options = {})
@@ -522,6 +556,18 @@ class User < ActiveRecord::Base
       localized_keywords = USER_PROFILE_KEYWORDS.try(:[], country_code).try(:[], key.to_s)
       all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
     end
-   "(#{all_keywords.join('|')})"
+   "(?:#{all_keywords.join('|')})"
+  end
+
+  def missing_only?(*attributes)
+    missing_profile_attributes == attributes
+  end
+
+  def discard_changes
+    changes.each do |attribute, change|
+      if PROFILE_ATTRIBUTES.include?(attribute.to_sym)
+        self.send("#{attribute}=", change.first)
+      end
+    end
   end
 end

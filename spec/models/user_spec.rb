@@ -288,12 +288,14 @@ describe User do
         :girl_looking_for_a_girl => ["f looking for a girl for relationship", "girl seeking girl", "f seeking woman"],
         :guy_looking_for_a_friend => ["m looking for a friend to hang out with", "guy seeking friend"],
         :girl_looking_for_a_friend => ["f looking for a friend to go shopping with", "girl seeking friend"],
-        :guy_named_frank => ["im frank man", "i'm frank male", "i am frank guy"],
+        :guy_named_frank => ["im frank man", "i'm frank male", "i am frank guy", "my name is frank guy"],
         :girl_named_mara => ["im mara f", "i'm mara girl", "i am mara woman"],
         :"23_year_old" => ["im 23 years old", "23yo", "23 yo", "blah 23 badfa"],
         :phnom_penhian => ["from phnom penh"],
         :mara_25_pp_wants_friend => ["hi im mara 25 pp looking for friends"],
-        :davo_28_guy_wants_bf => ["hi my name is davo male 28 looking for friends"]
+        :davo_28_guy_wants_bf => ["hi my name is davo male 28 looking for friends"],
+        :sr_wants_girl => ["im in sr want to meet girl"],
+        :kunthia_23_sr_girl_wants_boy => ["kunthia 23 girl sr want to meet boy"]
       },
 
       :kh => {
@@ -308,19 +310,21 @@ describe User do
         :girl_looking_for_a_girl => ["nhom srey jong mian bumak srey sa-at"],
         :guy_looking_for_a_friend => ["nhom pros jong rok met sabai", "bros jong rok mit leng sms", "pros rok met funny"],
         :girl_looking_for_a_friend => ["nhom srey jong rok met sabai", "srey jong rok mit leng sms", "srey rok met cute"],
-        :guy_named_frank => ["kjom frank pros", "nhom frank bros", "nyom frank pros", "knhom frank pros", "knyom frank bros"],
-        :girl_named_mara => ["kjom mara srey", "nhom mara srey", "nyom mara srey", "knhom mara srey", "knyom mara srey"],
+        :guy_named_frank => ["kyom pros chmous frank", "chhmos frank jia bros", "nyom chhmous frank pros"],
+        :girl_named_mara => ["kjom chmos mara srey", "chhmous mara srey", "chmos mara srey", "knhom chmous mara srey", "knyom chmos mara srey"],
         :"23_year_old" => ["kjom 23chnam", "23 chnam", "23", "dsakle 23dadsa"],
         :phnom_penhian => ["mok pi phnum penh" ,"mok pi pp"],
-        :mara_25_pp_wants_friend => ["kjom mara 25 pp jong ban met"],
-        :davo_28_guy_wants_friend => ["kjom chhmous davo bros 28 rok met srolanh ped doch knea"]
+        :mara_25_pp_wants_friend => ["kjom chhmos mara 25 pp jong ban met"],
+        :davo_28_guy_wants_friend => ["kjom chhmous davo bros 28 rok met srolanh ped doch knea"],
+        :sr_wants_girl => ["khnom nov sr jong rok met srey"],
+        :kunthia_23_sr_girl_wants_boy => ["kunthia 23 srey sr jong rok met bros"]
       }
     }
 
     def keywords(*keys)
       options = keys.extract_options!
       options[:user] ||= user
-      options[:country_code] ||= options[:user].location.country_code
+      options[:country_code] ||= options[:user].country_code
       all_keywords = []
       keys.each do |key|
         english_keywords = KEYWORDS[:en][key]
@@ -333,22 +337,21 @@ describe User do
     def registration_examples(examples, options)
       examples.each do |info|
         assert_user_attributes(info, options)
-        assert_user_attributes(info.upcase, options)# if info.present?
       end
     end
 
     def assert_user_attributes(info, options)
       user_attributes = [:gender, :looking_for, :name, :age]
 
-      options[:user] ||= new_user
+      user = options[:user] || build(:user)
 
-      options[:user].gender = options[:gender] ? options[:gender].to_s[0] : nil
-      options[:user].looking_for = options[:looking_for] ? options[:looking_for].to_s[0] : nil
-      options[:user].name = options[:name]
-      options[:user].age = options[:age]
-      options[:user].location.city = options[:city]
+      user.gender = options[:gender] ? options[:gender].to_s[0] : nil
+      user.looking_for = options[:looking_for] ? options[:looking_for].to_s[0] : nil
+      user.name = options[:name]
+      user.age = options[:age]
+      user.location.city = options[:city]
 
-      options[:user].stub(:save)
+      user.save
 
       vcr_options = options[:vcr] || {}
 
@@ -364,15 +367,15 @@ describe User do
 
       Timecop.freeze(Time.now) do
         VCR.use_cassette(cassette, match_requests_on.merge(:erb => true)) do
-          options[:user].update_profile(info)
+          user.update_profile(info)
         end
       end
 
-      options[:expected_gender] ? options[:user].should(send("be_#{options[:expected_gender]}")) : options[:user].gender.should(be_nil)
-      options[:expected_looking_for] ? options[:user].looking_for.should(eq(options[:expected_looking_for].to_s[0])) : options[:user].looking_for.should(be_nil)
-      options[:expected_city] ? options[:user].location.city.should(eq(options[:expected_city])) : options[:user].location.city.should(be_nil)
-      options[:expected_name] ? options[:user].name.should(eq(options[:expected_name])) : options[:user].name.should(be_nil)
-      options[:expected_age] ? options[:user].age.should(eq(options[:expected_age])) : options[:user].age.should(be_nil)
+      options[:expected_gender] ? user.should(send("be_#{options[:expected_gender]}")) : user.gender.should(be_nil)
+      options[:expected_looking_for] ? user.looking_for.should(eq(options[:expected_looking_for].to_s[0])) : user.looking_for.should(be_nil)
+      options[:expected_city] ? user.location.city.should(eq(options[:expected_city])) : user.location.city.should(be_nil)
+      options[:expected_name] ? user.name.should(eq(options[:expected_name])) : user.name.should(be_nil)
+      options[:expected_age] ? user.age.should(eq(options[:expected_age])) : user.age.should(be_nil)
     end
 
     def assert_looking_for(options = {})
@@ -418,6 +421,26 @@ describe User do
     it "should save the record" do
       new_user.update_profile("")
       new_user.should be_persisted
+    end
+
+    context "for users with only one missing attribute" do
+      it "should update their profile correctly" do
+
+        registration_examples(
+          ["Dave"],
+          :user => user_with_complete_profile,
+          :name => nil,
+          :expected_name => "Dave",
+          :gender => :male,
+          :expected_gender => :male,
+          :looking_for => :female,
+          :expected_looking_for => :female,
+          :age => 45,
+          :expected_age => 45,
+          :city => "Phnom Penh",
+          :expected_city => "Phnom Penh"
+        )
+      end
     end
 
     context "for users with a missing gender or sexual preference" do
@@ -609,20 +632,38 @@ describe User do
 
         # Phnom Penhian
         registration_examples(
-          keywords(:phnom_penhian, :country_code => :kh),
-          :user => cambodian,
+          keywords(:phnom_penhian),
           :expected_city => "Phnom Penh",
           :vcr => {:expect_results => true}
         )
 
         # mara 25 phnom penh wants friend
         registration_examples(
-          keywords(:mara_25_pp_wants_friend, :country_code => :kh),
+          keywords(:mara_25_pp_wants_friend),
           :expected_age => 25,
           :expected_city => "Phnom Penh",
           :expected_name => "mara",
           :expected_looking_for => :either,
           :vcr => {:expect_results => true}
+        )
+
+        # someone from siem reap wants to meet a girl
+        registration_examples(
+          keywords(:sr_wants_girl),
+          :expected_city => "Siem Reap",
+          :expected_looking_for => :female,
+          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
+        )
+
+        # kunthia 23 siem reap girl wants boy
+        registration_examples(
+          keywords(:kunthia_23_sr_girl_wants_boy),
+          :expected_age => 23,
+          :expected_gender => :female,
+          :expected_city => "Siem Reap",
+          :expected_name => "kunthia",
+          :expected_looking_for => :male,
+          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
         )
       end
     end

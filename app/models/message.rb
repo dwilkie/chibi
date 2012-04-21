@@ -25,13 +25,13 @@ class Message < ActiveRecord::Base
 
     start_new_chat = true
 
-    if user.currently_chatting?
-      unless user_wants_to_chat_with_someone_new?
+    unless user_wants_to_chat_with_someone_new?
+      if user.currently_chatting?
         user.active_chat.forward_message(user, self)
         start_new_chat = false
+      else
+        user.update_profile(normalized_body)
       end
-    else
-      user.update_profile(normalized_body)
     end
 
     build_chat(:user => user).activate!(:notify => true) if start_new_chat
