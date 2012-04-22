@@ -315,7 +315,7 @@ class PhoneCall < ActiveRecord::Base
   alias redirect generate_twiml
 
   def play_url(filename)
-    "https://s3.amazonaws.com/chibimp3/#{play_path_prefix}/#{filename}.mp3?version=new"
+    "https://s3.amazonaws.com/chibimp3/#{play_path_prefix}/#{filename}.mp3"
   end
 
   def play_path_prefix
