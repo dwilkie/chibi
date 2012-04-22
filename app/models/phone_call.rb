@@ -299,16 +299,13 @@ class PhoneCall < ActiveRecord::Base
   def ask_for_input(prompt, options = {})
     options[:numDigits] ||= 1
     generate_twiml do |twiml|
-      twiml.Gather(options) { |gather| gather.Play play_url(prompt) }
+      twiml.Gather(options.merge(:timeout => 20)) { |gather| gather.Play play_url(prompt) }
     end
   end
 
   def generate_twiml(options = {}, &block)
     response = Twilio::TwiML::Response.new do |twiml|
       yield twiml if block_given?
-      url = URI.parse(redirect_url)
-      url.query = "redirect=true"
-      redirect_url = url.to_s
       twiml.Redirect(redirect_url) unless options[:redirect] == false
     end
 
