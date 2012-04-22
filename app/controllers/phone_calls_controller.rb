@@ -12,6 +12,7 @@ class PhoneCallsController < ApplicationController
 
   def create
     if phone_call = PhoneCall.find_or_create_and_process_by(params, current_authenticated_url)
+      p phone_call.to_twiml
       respond_to do |format|
         format.xml { render :xml => phone_call.to_twiml }
       end

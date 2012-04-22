@@ -275,7 +275,6 @@ class PhoneCall < ActiveRecord::Base
 
   def check_user_preference_for_finding_a_new_friend_or_calling_existing_one
     return if complete?
-    p digits
     wants_existing_friend? || wants_new_friend? || !user_chatting?
   end
 
