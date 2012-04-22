@@ -306,6 +306,9 @@ class PhoneCall < ActiveRecord::Base
   def generate_twiml(options = {}, &block)
     response = Twilio::TwiML::Response.new do |twiml|
       yield twiml if block_given?
+      url = URI.parse(redirect_url)
+      url.query = "redirect=true"
+      redirect_url = url.to_s
       twiml.Redirect(redirect_url) unless options[:redirect] == false
     end
 
