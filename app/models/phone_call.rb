@@ -299,7 +299,7 @@ class PhoneCall < ActiveRecord::Base
   def ask_for_input(prompt, options = {})
     options[:numDigits] ||= 1
     generate_twiml do |twiml|
-      twiml.Gather(options.merge(:action => redirect_url)) { |gather| gather.Play play_url(prompt) }
+      twiml.Gather(options) { |gather| gather.Play play_url(prompt) }
     end
   end
 
