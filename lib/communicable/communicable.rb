@@ -4,7 +4,7 @@ module Communicable
   included do
     attr_accessible :from
 
-    belongs_to :user
+    belongs_to :user, :touch => true
 
     validates :user, :associated => true, :presence => true
     validates :from, :presence => true
