@@ -174,9 +174,10 @@ describe User do
     # Harriet is currently already chatting with Eva both of them could only be matched with Mara.
     # These matches should however never take place because they're in a chat session so they can't be searching.
 
-    # Hanh with Michael and View
+    # Hanh with View and Michael
     # All three guys live in Chiang Mai, Thailand. Michael is bi and View is gay so either are a match.
-    # Both of them are in the free age zone, but michael has initiated more chats, so he is matched first
+    # Both of them are in the free age zone, but even though Michael has initiated more chats, View is matched
+    # first because he was chatting more recently than Michael.
 
     # View with Nobody :(
     # View has previously chatted with Michael and Hanh is offline, so nobody is matched
@@ -213,7 +214,7 @@ describe User do
       :luke => [:mara, :joy],
       :harriet => [:mara],
       :eva => [:mara],
-      :hanh => [:michael, :view],
+      :hanh => [:view, :michael],
       :view => [],
       :mara => [:luke, :dave, :paul],
       :michael => [:nok]

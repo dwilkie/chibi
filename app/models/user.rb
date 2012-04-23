@@ -70,7 +70,10 @@ class User < ActiveRecord::Base
     # and users from unregistered service providers together
     match_scope = match_users_from_registered_service_providers(user, match_scope)
 
-    # order first by location
+    # order first by recent activity
+    match_scope = order_by_recent_activity(user, match_scope)
+
+    # then by location
     match_scope = filter_by_location(user, match_scope)
 
     # then by age difference and number of initiated chats
@@ -279,6 +282,43 @@ class User < ActiveRecord::Base
     out_of_range_clause = "WHEN #{out_of_range_case} THEN #{abs_age_diff_in_years} + 100" if out_of_range_case
 
     order_sql = user.date_of_birth? ? "CASE WHEN #{age_bearing_case} THEN (POWER(#{abs_age_diff_in_years} - #{AGE_BEARING_CUTOFF} + 1, 2)) * 1.0/#{chat_factor} #{out_of_range_clause} ELSE 1.0/#{chat_factor} END" : "1.0/#{chat_factor}"
+
+    scope.order(order_sql)
+  end
+
+
+  # the smallest period in hours of user inactivity
+  SMALLEST_INACTIVITY_PERIOD = 0.25
+
+  # Orders users by recent activity in time periods
+  # For example a user with 1 minute inactivity gets
+  # the same order value as a person with 14 minutes inactivity
+
+  # ordering is as follows:
+
+  # 0 for updated_at > 0.25 hours ago
+  # 1 for updated_at > 0.50 hours ago
+  # 2 for updated_at > 1 hour ago
+  # 3 for updated_at > 2 hours ago
+  # 4 for updated_at > 4 hours ago
+  # 5 for updated_at <= 4 hours ago
+
+  def self.order_by_recent_activity(user, scope)
+    inactivity_period = SMALLEST_INACTIVITY_PERIOD
+    inactivity_scope = self
+
+    5.times do
+      inactivity_scope = inactivity_scope.where("#{table_name}.updated_at > ?", inactivity_period.hours.ago)
+      inactivity_period *= 2
+    end
+
+    order_sql = []
+
+    inactivity_scope.where_values.each_with_index do |sql, index|
+      order_sql << "WHEN (#{sql}) THEN #{index}"
+    end
+
+    order_sql = "CASE " << order_sql.join(" ") << " ELSE 5 END"
 
     scope.order(order_sql)
   end

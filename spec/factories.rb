@@ -330,6 +330,7 @@ FactoryGirl.define do
       gender "m"
       looking_for "e"
       age 29
+      updated_at 15.minutes.ago
       association :location, :factory => :chiang_mai
     end
   end
