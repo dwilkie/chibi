@@ -300,6 +300,7 @@ class PhoneCall < ActiveRecord::Base
     options[:numDigits] ||= 1
     generate_twiml do |twiml|
       twiml.Gather(options) { |gather| gather.Play play_url(prompt) }
+      twiml.Say("Sorry I didn't hear anything")
     end
   end
 
