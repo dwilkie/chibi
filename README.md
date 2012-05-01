@@ -28,8 +28,49 @@
 
 ## Configuration
 
-### Configuring Nuntium with Android
+## Nuntium
+
+### Postback
 
 Under "Applications" select "edit" then under "Custom HTTP POST format" insert the following:
 
     message[from]=${from_without_protocol}&message[to]=${to_without_protocol}&message[subject]=${subject}&message[guid]=${guid}&message[application]=${application}&message[channel]=${channel}&message[body]=${body}
+
+### AO Rules
+
+*Application* AO rules are needed for channel routing. Use the follwing rules. See [The Nuntium Wiki](https://bitbucket.org/instedd/nuntium/wiki/AOMessageRouting) for more details.
+
+<table>
+  <tr>
+    <th>Condition Field</th>
+    <th>Condition Type</th>
+    <th>Condition Value</th>
+    <th>Action Field</th>
+    <th>Action Value</th>
+    <th>Stop</th>
+  </tr>
+  <tr>
+    <td>To</td>
+    <td>Regexp</td>
+    <td>sms://855(?:10|69|70|86|93|98)\d+</td>
+    <td>suggested_channel</td>
+    <td>smart</td>
+    <td>checked</td>
+  </tr>
+  <tr>
+    <td>To</td>
+    <td>Regexp</td>
+    <td>sms://(?:1|44)\d+</td>
+    <td>suggested_channel</td>
+    <td>twilio</td>
+    <td>checked</td>
+  </tr>
+  <tr>
+    <td>To</td>
+    <td>Regexp</td>
+    <td>sms://\d+</td>
+    <td>suggested_channel</td>
+    <td>test</td>
+    <td>checked</td>
+  </tr>
+</table>
