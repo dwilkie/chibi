@@ -78,7 +78,7 @@ describe PhoneCall do
 
       # test no override for a 'to' which is a twilio number
       subject.from = "+1-2345-2222"
-      formatted_twilio_numbers.each do |number|
+      twilio_numbers.each do |number|
         subject.to = number
         subject.from.should == "123452222"
       end

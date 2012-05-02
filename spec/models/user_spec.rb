@@ -752,13 +752,13 @@ describe User do
 
     it "should return the correct twilio number for the user" do
       subject.mobile_number = "85512323348"
-      subject.twilio_number.should == formatted_twilio_number(:default => false)
+      subject.twilio_number.should == twilio_number(:default => false)
 
       subject.mobile_number = "61413455442"
-      subject.twilio_number.should == formatted_twilio_number
+      subject.twilio_number.should == twilio_number
 
       subject.mobile_number = "12345678906"
-      subject.twilio_number.should == formatted_twilio_number
+      subject.twilio_number.should == twilio_number
     end
   end
 

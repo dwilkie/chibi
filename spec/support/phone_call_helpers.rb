@@ -34,12 +34,12 @@ module PhoneCallHelpers
   end
 
   module Twilio
-    def formatted_twilio_number(options = {})
-      twilio_numbers = formatted_twilio_numbers(options)
+    def twilio_number(options = {})
+      twilio_numbers = twilio_numbers(options)
       options[:default] == false ? twilio_numbers.last : twilio_numbers.first
     end
 
-    def formatted_twilio_numbers(options = {})
+    def twilio_numbers(options = {})
       twilio_numbers = ENV['TWILIO_OUTGOING_NUMBERS'].split(":")
       return twilio_numbers if options[:formatted] == false
 

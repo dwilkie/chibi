@@ -1,15 +1,19 @@
+require File.dirname(__FILE__) << '/phone_call_helpers'
+
 module MissedCallHelpers
   include AuthenticationHelpers
+  include PhoneCallHelpers::Twilio
 
   def missed_call(options = {})
     post_missed_call options
   end
 
   def expect_call(options = {}, &block)
+    twilio_number
     VCR.use_cassette("twilio/calls", :match_requests_on => [:method, :uri, :body], :erb => {
       :account_sid => ENV['TWILIO_ACCOUNT_SID'],
       :auth_token =>  ENV['TWILIO_AUTH_TOKEN'],
-      :from => ENV['TWILIO_OUTGOING_NUMBER'],
+      :from => twilio_number(:formatted => false),
       :application_sid => ENV['TWILIO_APPLICATION_SID'],
       :to => options[:to]
     }) do
