@@ -747,6 +747,21 @@ describe User do
     end
   end
 
+  describe "#twilio_number" do
+    include PhoneCallHelpers::Twilio
+
+    it "should return the correct twilio number for the user" do
+      subject.mobile_number = "85512323348"
+      subject.twilio_number.should == formatted_twilio_number(:default => false)
+
+      subject.mobile_number = "61413455442"
+      subject.twilio_number.should == formatted_twilio_number
+
+      subject.mobile_number = "12345678906"
+      subject.twilio_number.should == formatted_twilio_number
+    end
+  end
+
   describe "#city" do
     it "should delegate to location" do
       subject.city.should be_nil

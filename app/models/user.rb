@@ -2,6 +2,7 @@
 
 class User < ActiveRecord::Base
   include Communicable::HasChatableResources
+  include TwilioHelpers
 
   has_one :location, :autosave => true
 
@@ -101,6 +102,10 @@ class User < ActiveRecord::Base
 
   def short_code
     SERVICE_PROVIDER_PREFIXES[country_code].try(:[], split_mobile_number[1][0..1])
+  end
+
+  def twilio_number
+    twilio_outgoing_number(:for => split_mobile_number)
   end
 
   def female?

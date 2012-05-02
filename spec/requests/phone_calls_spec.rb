@@ -124,7 +124,7 @@ describe "PhoneCalls" do
                     it "should connect me with a new friend" do
                       assert_dial_to_current_url(
                         new_friend.mobile_number,
-                        :callerId => formatted_twilio_number
+                        :callerId => new_friend.twilio_number
                       )
                     end
                   end

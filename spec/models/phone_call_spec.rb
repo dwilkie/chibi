@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 include PhoneCallHelpers::States
+include PhoneCallHelpers::Twilio
 
 describe PhoneCall do
   let(:phone_call) { create(:phone_call) }
@@ -64,13 +65,23 @@ describe PhoneCall do
   describe "#to" do
     # phone calls should behave the same whether they were initiated by
     # the user or not
-    it "should be an accessor that overrides #from if present" do
+    it "should be an accessor that overrides #from if present but if #to is a twilio number" do
+
+      # test override
       subject.from = "+1-2345-2222"
       subject.to = "+1-2345-3333"
       subject.from.should == "123453333"
 
+      # test no override for blank 'to'
       subject.to = ""
       subject.from.should == "123453333"
+
+      # test no override for a 'to' which is a twilio number
+      subject.from = "+1-2345-2222"
+      formatted_twilio_numbers.each do |number|
+        subject.to = number
+        subject.from.should == "123452222"
+      end
     end
 
     it "should be mass assignable" do
@@ -174,7 +185,6 @@ describe PhoneCall do
   end
 
   describe "#to_twiml" do
-    include PhoneCallHelpers::Twilio
 
     include_context "twiml"
     include_context "existing users"
@@ -191,7 +201,7 @@ describe PhoneCall do
       user_to_dial = phone_call.chat.partner(phone_call.user)
       number_to_dial = user_to_dial.mobile_number
 
-      twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? formatted_twilio_number : user_to_dial.short_code
+      twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? user_to_dial.twilio_number : user_to_dial.short_code
       assert_dial(twiml_response(phone_call), redirect_url, number_to_dial, twiml_options)
     end
 

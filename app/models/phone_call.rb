@@ -212,7 +212,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def to=(value)
-    self.from = value if value.present?
+    self.from = value if value.present? && !twilio_number?(value)
   end
 
   def login_user!
@@ -290,7 +290,7 @@ class PhoneCall < ActiveRecord::Base
     generate_twiml(:redirect => false) do |twiml|
       twiml.Dial(
         user_to_dial.mobile_number,
-        :callerId => user_to_dial.short_code || twilio_outgoing_number,
+        :callerId => user_to_dial.short_code || user_to_dial.twilio_number,
         :action => redirect_url
       )
     end
