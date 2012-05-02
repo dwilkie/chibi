@@ -26,6 +26,7 @@ module PhoneCallHelpers
   def post_phone_call(options = {})
     options[:call_sid] ||= build(:phone_call).sid
     options[:from] = options[:from].mobile_number if options[:from].is_a?(User)
+    options[:to] ||= twilio_number
 
     post phone_calls_path(:format => :xml), call_params(options), authentication_params(:phone_call)
 
