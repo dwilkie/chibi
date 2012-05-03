@@ -433,6 +433,7 @@ class User < ActiveRecord::Base
     stripped_info = info.dup
 
     profile_complete = profile_complete?
+    extract_name(stripped_info, profile_complete)
 
     unless profile_complete || missing_only?(:name)
       first_word = strip_match!(stripped_info, /\w+/, :only_first => true).try(:[], 0)
