@@ -95,6 +95,9 @@ GEM
     jquery-rails (2.0.2)
       railties (>= 3.2.0, < 5.0)
       thor (~> 0.14)
+    jquery-ui-rails (0.4.0)
+      jquery-rails
+      railties (>= 3.1.0)
     json (1.7.0)
     jwt (0.1.4)
       json (>= 1.2.4)
@@ -245,6 +248,7 @@ DEPENDENCIES
   haml
   hirefireapp
   jquery-rails
+  jquery-ui-rails
   kaminari
   launchy
   nuntium_api

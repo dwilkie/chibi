@@ -34,7 +34,7 @@ body, h1, h2, h3, h3, h4, h5, h6, p, ul, ol, li, form, input, img, blockquote, c
 
 /* - -- --- ---- ----- MAIN LAYOUT ----- ---- --- -- - */
 
-body{
+body, .number{
   font: 15px DroidSansRegular,arial;
   color: #141414;
   background: url(bg.jpg) repeat #7bb6da;
@@ -150,7 +150,6 @@ ul.slider li{
 ul.slider li img{
   display: block;
   width: 140px;
-  height: 85px;
   padding: 8px;
   margin: 0 0 5px 3px;
   background: #fff;
@@ -266,9 +265,8 @@ ul.faq li.clear{
 
 ul.faq li img{
   display: block;
-  float: left;
+  float: right;
   width: 140px;
-  height: 85px;
   padding: 8px;
   margin: 0 5px 5px 3px;
   background: #fff;
@@ -325,11 +323,6 @@ ul.faq li img{
   color: #fff;
   text-shadow: 0 1px 0 rgba(0,0,0,0.3);
   text-align: center;
-}
-
-#footer a{
-  text-decoration: underline;
-  color: #fff;
 }
 
 .social{
@@ -571,4 +564,8 @@ p.error-code {
 .page-center {
   margin-left: 40%;
   margin-right: 40%;
+}
+
+.number {
+  font-size: 200%;
 }

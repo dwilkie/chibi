@@ -1,71 +1,9 @@
 $(document).ready(function(){
 
-  //---------------------------
-  // Initialize FancyBox
-  //---------------------------
-  $(".lightbox").fancybox({
-    'speedIn'    :  600,
-    'speedOut'    :  200
-  });
 
-  //---------------------------
-  // Twitter widget
-  //---------------------------
-  if( $("#twitter").length ){
-
-    // Translate the timeago plugin
-    jQuery.timeago.settings.strings = {
-      suffixAgo: "ago",
-      suffixFromNow: "from now",
-      seconds: "Less than a minute",
-      minute: "About a minute",
-      minutes: "%d minutes",
-      hour: "About an hour",
-      hours: "About %d hours",
-      day: "A day",
-      days: "%d days",
-      month: "About a month",
-      months: "%d months",
-      year: "About a year",
-      years: "%d years"
-    };
-
-    var yourTwitterUsername = "mtdsgn"; //Insert your twitter username
-
-    $.ajax({
-      url : "http://twitter.com/statuses/user_timeline/"+yourTwitterUsername+".json?callback=?",
-      dataType : "json",
-      timeout: 15000,
-
-      success : function(data){
-        var time = data[0].created_at,
-          text = data[0].text,
-          id = data[0].id_str,
-          twitterDiv = $("#twitter").find("div");
-
-        time = time.replace(/(\+\S+) (.*)/, '$2');
-        time = $.timeago( new Date( Date.parse( time ) ) );
-
-        text = text.replace(/((https?|s?ftp|ssh)\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!])/g, function(url){
-                return '<a href="'+url+'" target="_blank">'+url+'</a>'});
-        text = text.replace(/@(\w+)/g, function(url){
-                return '<a href="http://www.twitter.com/'+url.substring(1)+'" target="_blank">'+url+'</a>'});
-        text = text.replace(/#(\w+)/g, function(url){
-                return '<a href="http://twitter.com/#!/search?q=%23'+url.substring(1)+'" target="_blank">'+url+'</a>'});
-        text = "<a href='http://twitter.com/"+yourTwitterUsername+"/status/"+id+"' class='status'>" +time+ "</a> " + text;
-        twitterDiv.html(text);
-        // Adjust width for older browsers
-        twitterDiv.css({ display: "inline"});
-        twitterDiv.width( twitterDiv.width() );
-        twitterDiv.css({ display: "block"});
-      },
-
-      error : function(){
-        $("#twitter").find("div").html("There was an error connecting to your Twitter account");
-      }
-    });
-
-  }
+  $(".highlight_number").click( function(){
+    $(".number").effect("highlight", {}, 5000);
+  } );
 
   //---------------------------
   // Content Slider
@@ -127,28 +65,5 @@ $(document).ready(function(){
 
       }
     }
-
   }
-
-  //---------------------------
-  // Autofilling forms using placeholders
-  //---------------------------
-  if( !supports_placeholder() ){
-    // If your browser does not support placeholders
-    $("input[type=text], textarea").each(function(){
-      $(this).val($(this).attr('placeholder'));
-    }).focus(function(){
-      if($(this).val() == $(this).attr('placeholder')) { $(this).val(""); }
-    }).blur(function(){
-      if($(this).val() == "") { $(this).val($(this).attr('placeholder')); }
-    });
-  }
-
-  // Test placeholder support
-  function supports_placeholder() {
-    var i = document.createElement('input');
-    return 'placeholder' in i;
-  }
-
 });
-

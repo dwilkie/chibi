@@ -6,5 +6,5 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require jquery.effects.highlight
 //= require_tree .
-
