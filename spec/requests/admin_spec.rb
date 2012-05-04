@@ -26,11 +26,24 @@ describe "Admin" do
 
   let(:chatable_resources) { [messages, replies, phone_calls] }
 
+  def authorize
+    page.driver.browser.basic_authorize(
+      ENV["HTTP_BASIC_AUTH_ADMIN_USER"], ENV["HTTP_BASIC_AUTH_ADMIN_PASSWORD"]
+    )
+  end
+
+  context "without the username and password" do
+    it "should deny me access" do
+      [overview_path, users_path, chats_path, phone_calls_path, messages_path, replies_path].each do |path|
+        visit path
+        page.body.should have_content "Access denied"
+      end
+    end
+  end
+
   context "as an admin" do
     before do
-      page.driver.browser.basic_authorize(
-        ENV["HTTP_BASIC_AUTH_ADMIN_USER"], ENV["HTTP_BASIC_AUTH_ADMIN_PASSWORD"]
-      )
+      authorize
     end
 
     def assert_message_index(*resources)
@@ -161,6 +174,42 @@ describe "Admin" do
 
         chatable_resource = chatable_resources.to_s.singularize
         send("assert_#{chatable_resource}_index", send(chatable_resource))
+      end
+    end
+
+    context "when I visit '/overview'" do
+      let(:message_from_last_month) { create(:message_from_last_month, :user => user) }
+      let(:reply_from_last_month) { create(:reply_from_last_month, :user => user) }
+      let(:user_from_last_month) { create(:user_from_last_month) }
+
+      before do
+        messages
+        message_from_last_month
+        replies
+        reply_from_last_month
+        users
+        user_from_last_month
+        visit overview_path
+      end
+
+      it "should show me an overview of Chibi" do
+        within "#this_month" do
+          within "#total_messages" do
+            page.should have_link "#{messages.count} messages", :href => messages_path
+          end
+
+          within "#total_replies" do
+            page.should have_link "#{replies.count} replies", :href => replies_path
+          end
+
+          within "#total_users" do
+            page.should have_link "#{users.count} new users", :href => users_path
+          end
+
+          within "#total_revenue" do
+            page.should have_content "$0.015"
+          end
+        end
       end
     end
 

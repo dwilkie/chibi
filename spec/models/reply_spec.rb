@@ -58,6 +58,8 @@ describe Reply do
     end
   end
 
+  it_should_behave_like "analyzable"
+
   it "should not be valid without a user" do
     new_reply.user = nil
     new_reply.should_not be_valid

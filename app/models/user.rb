@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 class User < ActiveRecord::Base
+  include Analyzable
   include Communicable::HasChatableResources
   include TwilioHelpers
 

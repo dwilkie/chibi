@@ -15,6 +15,8 @@ describe Message do
     end
   end
 
+  it_should_behave_like "analyzable"
+
   it_should_behave_like "communicable" do
     let(:communicable_resource) { new_message }
   end

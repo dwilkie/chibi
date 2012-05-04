@@ -3,6 +3,7 @@
 class Message < ActiveRecord::Base
   include Communicable
   include Communicable::Chatable
+  include Analyzable
 
   attr_accessible :body
   alias_attribute :origin, :from

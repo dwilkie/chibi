@@ -7,6 +7,8 @@ Chibi::Application.routes.draw do
 
   resources :missed_calls, :only => :create
 
+  resource :overview, :only => :show
+
   resources :chats, :only => :index do
     resources :messages, :only => :index
     resources :replies, :only => :index

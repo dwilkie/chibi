@@ -107,6 +107,8 @@ describe User do
     end
   end
 
+  it_should_behave_like "analyzable"
+
   it_should_behave_like "filtering with chatable resources" do
     let(:resources) { [user, friend] }
   end

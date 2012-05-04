@@ -3,9 +3,17 @@ require "#{Rails.root}/spec/support/mobile_phone_helpers"
 
 FactoryGirl.define do
 
+  trait :from_last_month do
+    created_at {1.month.ago}
+  end
+
   factory :message do
     user
     from { user.mobile_number }
+
+    factory :message_from_last_month do
+      from_last_month
+    end
   end
 
   factory :missed_call do
@@ -57,6 +65,10 @@ FactoryGirl.define do
   factory :reply do
     user
     to { user.mobile_number }
+
+    factory :reply_from_last_month do
+      from_last_month
+    end
 
     factory :reply_with_locale do
       locale { user.locale }
@@ -174,6 +186,10 @@ FactoryGirl.define do
 
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
     location
+
+    factory :user_from_last_month do
+      from_last_month
+    end
 
     factory :offline_user do
       online false

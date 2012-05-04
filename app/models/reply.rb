@@ -1,5 +1,6 @@
 class Reply < ActiveRecord::Base
   include Communicable::Chatable
+  include Analyzable
 
   belongs_to :user
   validates :user, :presence => true
