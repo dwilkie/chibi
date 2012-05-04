@@ -1,8 +1,12 @@
 $(document).ready(function(){
 
 
-  $(".highlight_number").click( function(){
-    $(".number").effect("highlight", {}, 5000);
+  $(".highlight_try_it").click( function(){
+    $(".try_it").effect("highlight", {}, 5000);
+  } );
+
+  $(".highlight_chibi").click( function(){
+    $(".chibi").effect("highlight", {}, 5000);
   } );
 
   //---------------------------
