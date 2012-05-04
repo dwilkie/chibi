@@ -297,7 +297,8 @@ describe User do
         :davo_28_guy_wants_bf => ["hi my name is davo male 28 looking for friends"],
         :sr_wants_girl => ["im in sr want to meet girl"],
         :kunthia_23_sr_girl_wants_boy => ["kunthia 23 girl sr want to meet boy"],
-        :tongleehey => ["i'm tongleehey 29 man from pp want to meet girl"]
+        :tongleehey => ["i'm tongleehey 29 man from pp want to meet girl"],
+        :find_me_a_girl => ["find me a girl!"]
       },
 
       :kh => {
@@ -320,7 +321,8 @@ describe User do
         :davo_28_guy_wants_friend => ["kjom chhmous davo bros 28 rok met srolanh ped doch knea"],
         :sr_wants_girl => ["khnom nov sr jong rok met srey"],
         :kunthia_23_sr_girl_wants_boy => ["kunthia 23 srey sr jong rok met bros"],
-        :tongleehey => ["knyom chhmous tongleehey 29 pros mok pi pp jong rok met srey"]
+        :tongleehey => ["knyom chhmous tongleehey 29 pros mok pi pp jong rok met srey"],
+        :find_me_a_girl => ["rok met srey oy nyom!"]
       }
     }
 
@@ -678,6 +680,12 @@ describe User do
           :expected_name => "tongleehey",
           :expected_looking_for => :female,
           :vcr => {:expect_results => true}
+        )
+
+        # find me a girl!
+        registration_examples(
+          keywords(:find_me_a_girl),
+          :expected_looking_for => :female
         )
       end
     end
