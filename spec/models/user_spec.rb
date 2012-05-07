@@ -319,7 +319,8 @@ describe User do
         :kunthia_23_sr_girl_wants_boy => ["kunthia 23 girl sr want to meet boy"],
         :tongleehey => ["i'm tongleehey 29 man from pp want to meet girl"],
         :find_me_a_girl => ["find me a girl!"],
-        :vanna_kampong_thom => ["I'm vanna 26 guy from kampong thom Want to find a girl."]
+        :vanna_kampong_thom => ["I'm vanna 26 guy from kampong thom Want to find a girl."],
+        :veasna => ["im veasna , 30 years , from kandal provice , want to find a girl, men ket pi ayu , del  men brokan vannak .....'chib'"]
       },
 
       :kh => {
@@ -343,7 +344,8 @@ describe User do
         :sr_wants_girl => ["khnom nov sr jong rok met srey"],
         :kunthia_23_sr_girl_wants_boy => ["kunthia 23 srey sr jong rok met bros"],
         :tongleehey => ["knyom chhmous tongleehey 29 pros mok pi pp jong rok met srey"],
-        :find_me_a_girl => ["rok met srey oy nyom!"]
+        :find_me_a_girl => ["rok met srey oy nyom!"],
+        :veasna => ["nhom chhmuos veasna , ayu 30 years , mok pi kandal provice , jong rok met srey 1neak , men ket pi ayu , del  men brokan vannak .....'chib'"]
       }
     }
 
@@ -719,6 +721,17 @@ describe User do
           :expected_looking_for => :female,
           :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
         )
+
+        # veasna 30 years from kandal want a girl
+        registration_examples(
+          keywords(:veasna),
+          :expected_name => "veasna",
+          :expected_age => 30,
+          :expected_city => "S'ang",
+          :expected_looking_for => :female,
+          :vcr => {:expect_results => true, :cassette => "kh/kandaal"}
+        )
+
       end
     end
   end

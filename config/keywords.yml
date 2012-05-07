@@ -34,7 +34,7 @@ en:
     - 'friends?'
 kh:
   name:
-    - '(?:chh?mou?s)\s*(\b\w+\b)'
+    - '(?:chh?mu?ou?s)\s*(\b\w+\b)'
   years_old:
     - chnam
   girlfriend:
