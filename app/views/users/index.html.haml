@@ -1,2 +1,9 @@
-= heading_with_count(:users, @user_count)
-= render :partial => "user_table", :locals => { :users => @users }
+= heading_with_count(:users, @user_overview.total_users)
+%ul#overview
+  %li#available_users
+    = link_to pluralize(@user_overview.total_available_users, "available user"), users_path(:available => true)
+  %li#available_males
+    = link_to pluralize(@user_overview.total_available_males, "available guy"), users_path(:available => true, :gender => "m")
+  %li#available_females
+    = link_to pluralize(@user_overview.total_available_females, "available girl"), users_path(:available => true, :gender => "f")
+= render :partial => "user_table", :locals => { :users => @user_overview.paginated_users }

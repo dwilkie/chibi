@@ -195,6 +195,14 @@ FactoryGirl.define do
       online false
     end
 
+    factory :male_user do
+      gender "m"
+    end
+
+    factory :female_user do
+      gender "f"
+    end
+
     factory :user_with_invalid_mobile_number do
       sequence(:mobile_number, 8551234) {|n| n.to_s }
     end

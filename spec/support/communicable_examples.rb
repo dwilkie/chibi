@@ -187,6 +187,12 @@ shared_examples_for "filtering with chatable resources" do
     end
   end
 
+  describe ".filter_params" do
+    it "should return the total number of resources" do
+      subject.class.filter_params.should == subject.class.scoped
+    end
+  end
+
   describe ".find_with_chatable_resources_counts" do
     it "should behave like .find but the result should respond to counts for chatable resources" do
       assert_respond_to_chatable_resources_counts(

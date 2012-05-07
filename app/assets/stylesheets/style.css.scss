@@ -569,3 +569,22 @@ p.error-code {
 .number {
   font-size: 200%;
 }
+
+ul#overview {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+ul#overview li{
+  display: inline;
+}
+
+ul#overview li:after {
+  content: " | ";
+
+}
+
+ul#overview li:last-child:after {
+  content: "";
+}

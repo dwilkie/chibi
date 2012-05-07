@@ -3,8 +3,8 @@ require 'spec_helper'
 describe "Admin" do
   include MessagingHelpers
 
-  let(:user) { create(:user) }
-  let(:another_user) { create(:user) }
+  let(:user) { create(:male_user) }
+  let(:another_user) { create(:female_user) }
 
   let(:message) { create(:message, :user => user, :body => "Hello", :chat => chat) }
   let(:another_message) { create(:message, :user => another_user, :body => "Goodbye", :chat => another_chat) }
@@ -58,6 +58,28 @@ describe "Admin" do
       assert_index :phone_call, *resources, :reverse => true
     end
 
+    def assert_user_index(*resources)
+      assert_index :user, *resources, :reverse => true
+
+      within "#overview" do
+        within "#available_users" do
+          page.should have_link "1 available user", :href => users_path(:available => true)
+        end
+
+        within "#available_males" do
+          page.should have_link "0 available guys", :href => users_path(:available => true, :gender => "m")
+        end
+
+        within "#available_females" do
+          page.should have_link "1 available girl", :href => users_path(:available => true, :gender => "f")
+        end
+      end
+    end
+
+    def total_resources_id(resources_name)
+      "#total_#{resources_name}"
+    end
+
     def assert_index(resource_name, *resources)
       options = resources.extract_options!
       resources_name = resource_name.to_s.pluralize
@@ -65,7 +87,7 @@ describe "Admin" do
       resources.reverse! if options[:reverse]
 
       page.find(
-        "#total_#{resources_name}"
+        total_resources_id(resources_name)
       ).text.gsub(/\s/, "").should == "#{resources_name.titleize.gsub(/\s/, "")}(#{resources.count})"
 
       resources.each_with_index do |resource, index|
@@ -95,6 +117,7 @@ describe "Admin" do
     def assert_message_show(reference_message)
       page.should have_content reference_message.body
       page.should have_content reference_message.from
+      page.should have_content time_ago_in_words
     end
 
     def assert_reply_show(reference_reply)
@@ -312,7 +335,34 @@ describe "Admin" do
         end
 
         it "should show me a list of users" do
-          assert_index :user, :reverse => true
+          assert_user_index
+        end
+
+        def assert_show_only_available_users
+          {"user" => 1, "girl" => 1, "guys" => 0}.each do |user_type, count|
+            visit users_path
+
+            click_link("#{count} available #{user_type}")
+
+            within total_resources_id(:users) do
+              page.should have_content count.to_s
+            end
+
+            if count.zero?
+              page.should have_no_css "#user_1"
+            else
+              within "#user_1" do
+                page.should have_content another_user.id
+              end
+              page.should have_no_css "#user_2"
+            end
+          end
+        end
+
+        context "when I click the links for the available users" do
+          it "should show me only the available users" do
+            assert_show_only_available_users
+          end
         end
 
         context "when I click on 'X' for one of the users" do

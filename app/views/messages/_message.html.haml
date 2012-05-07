@@ -3,3 +3,6 @@
     = link_to message.from, user_path(message.user_id)
   %td
     = message.body
+  %td
+    = time_ago_in_words(message.created_at)
+    ago

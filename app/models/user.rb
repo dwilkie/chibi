@@ -36,7 +36,13 @@ class User < ActiveRecord::Base
   DEFAULT_ALTERNATE_LOCALE = "en"
 
   def self.filter_by(params = {})
-    super.includes(:location)
+    super(params).includes(:location)
+  end
+
+  def self.filter_params(params = {})
+    scope = super.where(params.slice(:gender))
+    scope = exclude_unavailable(scope) if params[:available]
+    scope
   end
 
   def self.matches(user)
@@ -62,11 +68,8 @@ class User < ActiveRecord::Base
     # exclude existing friends
     match_scope = exclude_existing_friends(user, match_scope)
 
-    # exclude currently chatting users
-    match_scope = match_scope.where(:active_chat_id => nil)
-
-    # exclude offline users
-    match_scope = match_scope.where(:online => true)
+    # only include available users
+    match_scope = exclude_unavailable(match_scope)
 
     # match users from registered service providers together
     # and users from unregistered service providers together
@@ -392,6 +395,10 @@ class User < ActiveRecord::Base
     end
 
     scope.where(condition_statements.join(condition_sql), *condition_values)
+  end
+
+  def self.exclude_unavailable(scope)
+    scope.where(:active_chat_id => nil, :online => true)
   end
 
   def self.split_mobile_number(number)

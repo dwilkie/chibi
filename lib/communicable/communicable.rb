@@ -47,7 +47,7 @@ module Communicable
 
     module ClassMethods
       def filter_by(params = {})
-        chatable_resources_scope
+        chatable_resources_scope.filter_params(params)
       end
 
       def filter_by_count(params = {})
@@ -58,6 +58,10 @@ module Communicable
         result = chatable_resources_scope.where(:id => id).first
         raise ActiveRecord::RecordNotFound unless result.present?
         result
+      end
+
+      def filter_params(params = {})
+        scoped
       end
 
       private
@@ -79,10 +83,6 @@ module Communicable
         ).group(all_columns).order(
           "#{table_name}.created_at DESC"
         )
-      end
-
-      def filter_params(params = {})
-        scoped
       end
     end
   end

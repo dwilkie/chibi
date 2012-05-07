@@ -119,6 +119,24 @@ describe User do
     end
   end
 
+  describe ".filter_params" do
+    context "passing search params" do
+      it "should filter the users by the search params" do
+        male_user = create(:male_user)
+        female_user = create(:female_user)
+
+        user
+        offline_user.save
+        active_chat
+
+        subject.class.filter_params(:gender => "m").should == [male_user]
+        subject.class.filter_params(:gender => "f").should == [female_user]
+
+        subject.class.filter_params(:available => true).should == [male_user, female_user]
+      end
+    end
+  end
+
   describe ".matches" do
 
     # Match Explanations
