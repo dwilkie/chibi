@@ -207,7 +207,7 @@ describe "Admin" do
           end
 
           within "#total_revenue" do
-            page.should have_content "$0.015"
+            page.should have_content "$0.03"
           end
         end
       end
