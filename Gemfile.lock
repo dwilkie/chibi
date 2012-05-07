@@ -1,4 +1,11 @@
 GIT
+  remote: git://github.com/dwilkie/countries.git
+  revision: 71ca2cba76e50cc56adfd69e275ff544368a8746
+  specs:
+    countries (0.8.2)
+      currencies (>= 0.4.0)
+
+GIT
   remote: git://github.com/myronmarston/vcr.git
   revision: 9f688008c7643470628d616c6b9ccd2ce7f73677
   specs:
@@ -61,9 +68,6 @@ GEM
       execjs
     coffee-script-source (1.3.1)
     columnize (0.3.6)
-    countries (0.8.2)
-      currencies (= 0.4.0)
-      currencies (>= 0.2.0)
     currencies (0.4.0)
     daemons (1.1.8)
     database_cleaner (0.7.2)
@@ -237,7 +241,7 @@ PLATFORMS
 DEPENDENCIES
   capybara
   coffee-rails (~> 3.2.1)
-  countries
+  countries!
   database_cleaner
   factory_girl
   faker

@@ -300,7 +300,8 @@ describe User do
         :sr_wants_girl => ["im in sr want to meet girl"],
         :kunthia_23_sr_girl_wants_boy => ["kunthia 23 girl sr want to meet boy"],
         :tongleehey => ["i'm tongleehey 29 man from pp want to meet girl"],
-        :find_me_a_girl => ["find me a girl!"]
+        :find_me_a_girl => ["find me a girl!"],
+        :vanna_kampong_thom => ["I'm vanna 26 guy from kampong thom Want to find a girl."]
       },
 
       :kh => {
@@ -688,6 +689,17 @@ describe User do
         registration_examples(
           keywords(:find_me_a_girl),
           :expected_looking_for => :female
+        )
+
+        # I'm vanna 26 guy from kampong thom Want to find a girl.
+        registration_examples(
+          keywords(:vanna_kampong_thom),
+          :expected_name => "vanna",
+          :expected_gender => :male,
+          :expected_age => 26,
+          :expected_city => "Kampong Thom",
+          :expected_looking_for => :female,
+          :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
         )
       end
     end

@@ -6,7 +6,7 @@ gem 'pg'
 gem 'kaminari'
 gem "geocoder"
 gem "phony"
-gem "countries", :require => 'iso3166'
+gem "countries", :require => 'iso3166', :git => "git://github.com/dwilkie/countries.git"
 gem "faker"
 gem "hirefireapp"
 gem "resque"

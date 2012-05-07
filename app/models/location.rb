@@ -48,16 +48,13 @@ class Location < ActiveRecord::Base
   end
 
   def localize_address!
-    address_words.each do |address_word|
-      if local_address = subdivision_names[address_word]
-        self.address = local_address
+    normalized_address = address.downcase
+    subdivision_names.each do |subdivision_name, regexp|
+      if normalized_address =~ regexp
+        self.address = subdivision_name
         break
       end
     end
-  end
-
-  def address_words
-    address.downcase.split(/[^\p{Word}|\.]/)
   end
 
   def subdivision_names
@@ -65,12 +62,23 @@ class Location < ActiveRecord::Base
       @subdivision_names = {}
 
       country.subdivisions.values.each do |subdivision|
-        subdivision_name = subdivision["name"].gsub(/\[.+\]/, "").strip.downcase
-        other_names = [subdivision["names"]].flatten.map {|name| name.downcase}
-        other_names.each { |name| @subdivision_names[name] = subdivision_name }
+        subdivision_name = normalize_subdivision(subdivision["name"])
+        other_names = [subdivision["names"]].flatten.map { |name| normalize_subdivision(name) }
+        other_names << subdivision_name unless other_names.include?(subdivision_name)
+
+        other_names.map! do |name|
+          name.gsub!(".", "\\.")
+          name
+        end
+
+        @subdivision_names[subdivision_name] = /\b(?:#{other_names.join('|')})\b/
       end
     end
 
     @subdivision_names
+  end
+
+  def normalize_subdivision(name)
+    name.gsub(/\[.+\]/, "").strip.downcase
   end
 end
