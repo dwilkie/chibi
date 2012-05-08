@@ -26,7 +26,7 @@
       },
 
       :welcome => lambda {|key, options|
-        notification = "Welcome to Chibi! We'll help you meet a new friend! At any time you can write "
+        notification = "chibi: Welcome to Chibi! We'll help you meet a new friend! At any time you can write "
 
         default_locale = I18n.t("play_path_prefix", :locale => options[:default_locale])
 
@@ -39,7 +39,7 @@
       },
 
       :new_chat_started => lambda {|key, options|
-        greeting = "Hi"
+        greeting = "chibi: Hi"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
         greeting << "! " << "We have found a new friend for you! Send #{options[:friends_screen_name]} a msg now by replying to this message"
@@ -85,7 +85,7 @@
         end
 
         outcome ||= default_outcome
-        notification << instructions << outcome
+        "chibi: " << notification << instructions << outcome
       }
     }
   }
