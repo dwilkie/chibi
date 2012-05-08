@@ -132,7 +132,7 @@ describe User do
         subject.class.filter_params(:gender => "m").should == [male_user]
         subject.class.filter_params(:gender => "f").should == [female_user]
 
-        subject.class.filter_params(:available => true).should == [male_user, female_user]
+        subject.class.filter_params(:available => true).should =~ [male_user, female_user]
       end
     end
   end
