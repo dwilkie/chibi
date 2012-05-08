@@ -7,7 +7,7 @@ en:
   years_old:
     - "(?:years?(?: old)?|yo)"
   girlfriend:
-    - '(?:meet|find|chat|have|talk).+(?:girl|woman)'
+    - '(?:meet|find|chat|have|talk|looking for).+(?:girl|woman)'
     - 'girl\s?friend'
     - gf
     - friend girl
@@ -18,7 +18,7 @@ en:
     - girl
     - woman
   boyfriend:
-    - '(?:meet|find|chat|have|talk).+(?:boy|guy|man)'
+    - '(?:meet|find|chat|have|talk|looking for).+(?:boy|guy|man)'
     - 'boy\s?friend'
     - bf
     - friend boy
