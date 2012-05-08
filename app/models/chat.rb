@@ -10,19 +10,20 @@ class Chat < ActiveRecord::Base
 
   alias_attribute :initiator, :user
 
-  # a chat with inactivity, is an active chat with no activity in the past inactivity_period minutes
-  def self.with_inactivity(inactivity_period = nil)
-    inactivity_period ||= 10.minutes
+  # a chat with inactivity, is a fully active chat (which has two or more active users) or
+  # a partially active chat chat (which has one or more active users)
+  # with no activity in the past inactivity_period timeframe
+  def self.with_inactivity(options = {})
+    inactivity_period = options[:inactivity_period] || 10.minutes
 
-    joins(:user).where(
-      "users.active_chat_id = #{table_name}.id"
-    ).joins(:friend).where(
-      "friends_chats.active_chat_id = #{table_name}.id"
+    condition = options[:active] ? "AND" : "OR"
+    joins(:user).joins(:friend).where(
+      "users.active_chat_id = #{table_name}.id #{condition} friends_chats.active_chat_id = #{table_name}.id"
     ).where("#{table_name}.updated_at < ?", inactivity_period.ago)
   end
 
   def self.end_inactive(options = {})
-    with_inactivity(options.delete(:inactivity_period)).find_each do |chat|
+    with_inactivity(options).find_each do |chat|
       Resque.enqueue(ChatDeactivator, chat.id, options)
     end
   end

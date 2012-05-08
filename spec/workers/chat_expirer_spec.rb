@@ -14,8 +14,12 @@ describe ChatExpirer do
     end
 
     it "should tell the message to process itself" do
-      Chat.should_receive(:end_inactive).with(:notify => true, :active_user => true)
-      subject.class.perform
+      Chat.should_receive(:end_inactive) do |options|
+        options["some"].should == :options
+        options[:some].should == :options
+        options.should be_a(HashWithIndifferentAccess)
+      end
+      subject.class.perform(:some => :options)
     end
   end
 end
