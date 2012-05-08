@@ -267,7 +267,7 @@ describe Reply do
     it "should show the message in a chat context but not deliver the message" do
       assert_reply(
         :forward_message, :forward_message,
-        :args => ["mike", "hi how r u doing"], :interpolations => ["mike", "hi how r u doing"],
+        :args => [partner, "hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"],
         :deliver => false, :no_alternate_translation => true
       )
     end
@@ -277,14 +277,13 @@ describe Reply do
     it "should deliver the forwarded message" do
       assert_reply(
         :forward_message!, :forward_message,
-        :args => ["mike", "hi how r u doing"], :interpolations => ["mike", "hi how r u doing"],
+        :args => [partner, "hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"],
         :no_alternate_translation => true
       )
     end
   end
 
   describe "#introduce!" do
-
     context "for the chat initiator" do
       it "should tell her that we have found a friend for her" do
         assert_reply(
@@ -295,10 +294,12 @@ describe Reply do
     end
 
     context "for the chat partner" do
-      it "should tell him that someone is interested in chatting with him" do
+      it "should send a message imitating the initiator to maximize the chance the partner will reply" do
+        sample_greeting = I18n.t("replies.greetings").sample
+        I18n.stub(:t).and_return([sample_greeting])
         assert_reply(
-          :introduce!, :anonymous_new_chat_started,
-          :args => [partner, false], :interpolations => [partner.screen_id]
+          :introduce!, :forward_message,
+          :args => [partner, false], :interpolations => [partner.screen_id, sample_greeting]
         )
       end
     end

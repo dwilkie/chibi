@@ -33,16 +33,6 @@ module TranslationHelpers
       :kh => "Sousdey #[0]! Yerng ban rok mit tmey som-rab nek haey! Pjeur sa derm-bei chleuy torb tov #[1] ai-lov nis"
     },
 
-    :personalized_new_chat_started => {
-      :en => "Hi [0]! #[1] wants to chat with u! Send #[1] a msg now by replying to this message",
-      :kh => "Sousdey #[0]! #[1] jong chat jea-moy! Pjeur sa derm-bei chleuy torb tov #[1] ai-lov nis"
-    },
-
-    :anonymous_new_chat_started => {
-      :en => "Hi! #[0] wants to chat with u! Send #[0] a msg now by replying to this message",
-      :kh => "Sousdey! #[0] jong chat jea-moy! Pjeur sa derm-bei chleuy torb tov #[0] ai-lov nis"
-    },
-
     :anonymous_chat_has_ended => {
       :en => "#[0] not replying? Txt us ur name, age, sex, city & gender ur seeking to meet someone new",
       :kh => "#[0] min chleuy torb te? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
@@ -76,6 +66,11 @@ module TranslationHelpers
     :forward_message => {
       :en => "#[0]: #[1]",
       :kh => "#[0]: #[1]"
+    },
+
+    :forward_message_approx => {
+      :en => "#[0]: ",
+      :kh => "#[0]: "
     }
   }
 

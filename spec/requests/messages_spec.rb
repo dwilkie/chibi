@@ -75,9 +75,7 @@ describe "Messages" do
               :anonymous_new_friend_found, new_user.locale, alex.screen_id
             )
 
-            reply_to(alex).body.should == spec_translate(
-              :personalized_new_chat_started, alex.locale, alex.name.capitalize, new_user.screen_id
-            )
+            reply_to(alex).body.should =~ /^#{spec_translate(:forward_message_approx, alex.locale, new_user.screen_id)}/
           end
         end
 
@@ -170,9 +168,7 @@ describe "Messages" do
               :personalized_new_friend_found, new_user.locale, new_user.name.capitalize, joy.screen_id
             )
 
-            reply_to(joy).body.should == spec_translate(
-              :personalized_new_chat_started, joy.locale, joy.name.capitalize, new_user.screen_id
-            )
+            reply_to(joy).body.should =~ /^#{spec_translate(:forward_message_approx, joy.locale, new_user.screen_id)}/
           end
         end
       end
@@ -200,9 +196,7 @@ describe "Messages" do
               :personalized_new_friend_found, alex.locale, alex.name.capitalize, dave.screen_id
             )
 
-            reply_to(dave).body.should == spec_translate(
-              :personalized_new_chat_started, dave.locale, dave.name.capitalize, alex.screen_id
-            )
+            reply_to(dave).body.should =~ /^#{spec_translate(:forward_message_approx, dave.locale, alex.screen_id)}/
           end
         end
       end

@@ -2,6 +2,30 @@
   :kh => {
     :replies => {
 
+      :greetings => lambda {|key, options|
+
+        formatted_friends_name = " #{options[:friends_name].to_s.capitalize}" if options[:friends_name]
+
+        greetings = []
+
+        greeting_starters = ["Sousdey", "Hi"]
+        ice_breakers = ["Soksabay te?", "Kom-pong tver ey?", nil]
+        greeting_enders = ["Jong chat moy nyom ort?", "Jong leng sms ort?", nil]
+
+        greeting_starters.each do |greeting_starter|
+          ice_breakers.each do |ice_breaker|
+            ice_breaker = " #{ice_breaker}" if ice_breaker
+            greeting_enders.each do |greeting_ender|
+              greeting_ender = " #{greeting_ender}" if greeting_ender
+              greetings << "#{greeting_starter}!#{ice_breaker}#{greeting_ender}"
+              greetings << "#{greeting_starter}#{formatted_friends_name}!#{ice_breaker}#{greeting_ender}" if formatted_friends_name
+            end
+          end
+        end
+
+        greetings
+      },
+
       :welcome => lambda {|key, options|
         "Som sva-kom mok kan Chibi! Yerng chuay nek rok mit tmey! At any time you can write 'en' to read English, 'kh' to read Khmer or 'stop' to go offline"
       },
@@ -10,11 +34,7 @@
         greeting = "Sousdey"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
-        instructions = "Pjeur sa derm-bei chleuy torb tov #{options[:friends_screen_name]} ai-lov nis"
-
-        notification = options[:to_initiator] ? "Yerng ban rok mit tmey som-rab nek haey! " : "#{options[:friends_screen_name]} jong chat jea-moy! "
-
-        greeting << "! " << notification << instructions
+        greeting << "! " << "Yerng ban rok mit tmey som-rab nek haey! Pjeur sa derm-bei chleuy torb tov #{options[:friends_screen_name]} ai-lov nis"
       },
 
       :how_to_start_a_new_chat => lambda {|key, options|

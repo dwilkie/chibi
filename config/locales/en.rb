@@ -1,6 +1,29 @@
 {
   :en => {
     :replies => {
+      :greetings => lambda {|key, options|
+
+        formatted_friends_name = " #{options[:friends_name].to_s.capitalize}" if options[:friends_name]
+
+        greetings = []
+
+        greeting_starters = ["Hi", "Hey", "Hello"]
+        ice_breakers = ["How r u?", "What r u doing?", nil]
+        greeting_enders = ["Wanna chat with me?", nil]
+
+        greeting_starters.each do |greeting_starter|
+          ice_breakers.each do |ice_breaker|
+            ice_breaker = " #{ice_breaker}" if ice_breaker
+            greeting_enders.each do |greeting_ender|
+              greeting_ender = " #{greeting_ender}" if greeting_ender
+              greetings << "#{greeting_starter}!#{ice_breaker}#{greeting_ender}"
+              greetings << "#{greeting_starter}#{formatted_friends_name}!#{ice_breaker}#{greeting_ender}" if formatted_friends_name
+            end
+          end
+        end
+
+        greetings
+      },
 
       :welcome => lambda {|key, options|
         notification = "Welcome to Chibi! We'll help you meet a new friend! At any time you can write "
@@ -19,11 +42,7 @@
         greeting = "Hi"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
-        instructions = "Send #{options[:friends_screen_name]} a msg now by replying to this message"
-
-        notification = options[:to_initiator] ? "We have found a new friend for you! " : "#{options[:friends_screen_name]} wants to chat with u! "
-
-        greeting << "! " << notification << instructions
+        greeting << "! " << "We have found a new friend for you! Send #{options[:friends_screen_name]} a msg now by replying to this message"
       },
 
       :how_to_start_a_new_chat => lambda {|key, options|

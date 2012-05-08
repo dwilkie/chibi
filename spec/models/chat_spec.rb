@@ -119,9 +119,7 @@ describe Chat do
             :anonymous_new_friend_found, user.locale, friend.screen_id
           )
 
-          reply_to(friend, reference_chat).body.should == spec_translate(
-            :anonymous_new_chat_started, friend.locale, user.screen_id
-          )
+          reply_to(friend, reference_chat).body.should =~ /^#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
         end
       end
 
@@ -481,7 +479,7 @@ describe Chat do
       expect_message { active_chat.introduce_participants }
 
       reply_to_user.body.should == spec_translate(:anonymous_new_friend_found, user.locale, friend.screen_id)
-      reply_to_friend.body.should == spec_translate(:anonymous_new_chat_started, friend.locale, user.screen_id)
+      reply_to_friend.body.should =~ /^#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
     end
   end
 

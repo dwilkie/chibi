@@ -95,10 +95,10 @@ class Chat < ActiveRecord::Base
 
     if active? || chat_partner.available?
       reactivate!
-      reply_to_chat_partner.forward_message!(reference_user.screen_id, message_body)
+      reply_to_chat_partner.forward_message!(reference_user, message_body)
     else
       replies.build(:user => reference_user).explain_friend_is_unavailable!(chat_partner)
-      reply_to_chat_partner.forward_message(reference_user.screen_id, message_body)
+      reply_to_chat_partner.forward_message(reference_user, message_body)
     end
   end
 

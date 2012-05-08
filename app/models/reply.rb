@@ -52,7 +52,7 @@ class Reply < ActiveRecord::Base
   end
 
   def forward_message(from, message)
-    self.body = "#{from}: #{message}"
+    set_forward_message(from, message)
     save
   end
 
@@ -62,12 +62,19 @@ class Reply < ActiveRecord::Base
   end
 
   def introduce!(partner, to_initiator)
-    translate(
-      "replies.new_chat_started",
-      :users_name => user.name,
-      :friends_screen_name => partner.screen_id,
-      :to_initiator => to_initiator
-    )
+    if to_initiator
+      translate(
+        "replies.new_chat_started",
+        :users_name => user.name,
+        :friends_screen_name => partner.screen_id
+      )
+    else
+      translate(
+        "replies.greetings",
+        {:friends_name => user.name},
+        {:sample => true, :from => partner}
+      )
+    end
     deliver!
   end
 
@@ -91,7 +98,11 @@ class Reply < ActiveRecord::Base
 
   private
 
-  def translate(key, interpolations = {})
+  def set_forward_message(from, message, type = :body)
+    self.send("#{type}=", "#{from.screen_id}: #{message}")
+  end
+
+  def translate(key, interpolations = {}, options = {})
     user_locale = user.locale
     users_default_locale = user.country_code.to_sym
 
@@ -101,8 +112,20 @@ class Reply < ActiveRecord::Base
     alternate_translation_locale = users_default_locale unless user_locale == users_default_locale
 
     self.locale = user_locale
-    self.body = I18n.t(key, interpolations.merge(:locale => user_locale))
-    self.alternate_translation = I18n.t(key, interpolations.merge(:locale => alternate_translation_locale))
+    set_from_translation(key, user_locale, alternate_translation_locale, interpolations, options)
+  end
+
+  def set_from_translation(key, user_locale, alternate_translation_locale, interpolations = {}, options = {})
+    translation = I18n.t(key, interpolations.merge(:locale => user_locale))
+    alternate_translation = I18n.t(key, interpolations.merge(:locale => alternate_translation_locale))
+
+    if options[:sample]
+      set_forward_message(options[:from], translation.sample)
+      set_forward_message(options[:from], alternate_translation.sample, :alternate_translation)
+    else
+      self.body = translation
+      self.alternate_translation = alternate_translation
+    end
   end
 
   def set_destination

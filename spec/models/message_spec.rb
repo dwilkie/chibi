@@ -70,9 +70,7 @@ describe Message do
           reply_to(user, message.chat).body.should == spec_translate(
             :anonymous_new_friend_found, user.locale, new_friend.screen_id
           )
-          reply_to(new_friend, message.chat).body.should == spec_translate(
-            :anonymous_new_chat_started, new_friend.locale, user.screen_id
-          )
+          reply_to(new_friend, message.chat).body.should =~ /^#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
         end
       end
     end
