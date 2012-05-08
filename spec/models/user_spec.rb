@@ -305,6 +305,7 @@ describe User do
         localized_keywords = MessagingHelpers::EXAMPLES.try(:[], options[:country_code].to_s.downcase).try(:[], key) || []
         all_keywords |= (english_keywords | localized_keywords)
       end
+      raise "No keywords for #{keys} found!" if all_keywords.empty?
       all_keywords
     end
 
@@ -315,15 +316,20 @@ describe User do
     end
 
     def assert_user_attributes(info, options = {})
-      user_attributes = [:gender, :looking_for, :name, :age]
-
       user = options[:user] || build(:user)
 
-      user.gender = options[:gender] ? options[:gender].to_s[0] : nil
-      user.looking_for = options[:looking_for] ? options[:looking_for].to_s[0] : nil
-      user.name = options[:name]
-      user.age = options[:age]
-      user.location.city = options[:city]
+      [:name, :age].each do |attribute|
+        user.send("#{attribute}=", options.has_key?(attribute) ? options[attribute] : user.send(attribute))
+        options["expected_#{attribute}".to_sym] ||= user.send(attribute)
+      end
+
+      [:gender, :looking_for].each do |attribute|
+        user.send("#{attribute}=", options.has_key?(attribute) ? options[attribute].to_s[0] : user.send(attribute))
+        options["expected_#{attribute}".to_sym] ||= user.send(attribute)
+      end
+
+      user.location.city = options[:city] || user.city
+      options[:expected_city] ||= user.city
 
       user.save
 
@@ -345,11 +351,16 @@ describe User do
         end
       end
 
-      options[:expected_gender] ? user.should(send("be_#{options[:expected_gender]}")) : user.gender.should(be_nil)
-      options[:expected_looking_for] ? user.looking_for.should(eq(options[:expected_looking_for].to_s[0])) : user.looking_for.should(be_nil)
-      options[:expected_city] ? user.location.city.should(eq(options[:expected_city])) : user.location.city.should(be_nil)
-      options[:expected_name] ? user.name.should(eq(options[:expected_name])) : user.name.should(be_nil)
-      options[:expected_age] ? user.age.should(eq(options[:expected_age])) : user.age.should(be_nil)
+      [:gender, :looking_for].each do |attribute|
+        expected_attribute = options["expected_#{attribute}".to_sym]
+        expected_attribute = expected_attribute.to_s[0] if expected_attribute
+        user.send(attribute).should eq(expected_attribute)
+      end
+
+      [:name, :age, :city].each do |attribute|
+        expected_attribute = options["expected_#{attribute}".to_sym]
+        user.send(attribute).should eq(expected_attribute)
+      end
     end
 
     def assert_looking_for(options = {})
@@ -399,20 +410,35 @@ describe User do
 
     context "for users with only one missing attribute" do
       it "should update their profile correctly" do
-
         registration_examples(
           ["Dave"],
           :user => user_with_complete_profile,
           :name => nil,
-          :expected_name => "Dave",
+          :expected_name => "Dave"
+        )
+      end
+    end
+
+    context "for users with complete profiles" do
+      it "should update the profile with the new information" do
+        # im a girl
+        registration_examples(
+          keywords(:im_a_girl),
+          :user => user_with_complete_profile,
           :gender => :male,
-          :expected_gender => :male,
           :looking_for => :female,
-          :expected_looking_for => :female,
-          :age => 45,
-          :expected_age => 45,
-          :city => "Phnom Penh",
-          :expected_city => "Phnom Penh"
+          :expected_gender => :female,
+          :expected_looking_for => :female
+        )
+
+        # i want to find a girl
+        registration_examples(
+          keywords(:i_want_to_find_a_girl),
+          :user => user_with_complete_profile,
+          :looking_for => :male,
+          :gender => :female,
+          :expected_gender => :female,
+          :expected_looking_for => :female
         )
       end
     end

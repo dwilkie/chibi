@@ -483,7 +483,7 @@ class User < ActiveRecord::Base
 
   def extract_gender_and_looking_for(info, force_update)
     unless includes_gender_and_looking_for?(info)
-      extract_looking_for(info, :include_shared_gender_words => gender.present?)
+      extract_looking_for(info, :include_shared_gender_words => gender.present? && !force_update)
       extract_gender(info, force_update)
     end
   end
