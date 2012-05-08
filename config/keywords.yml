@@ -5,8 +5,7 @@ en:
   name:
     - "(?:my name is|i am|i'm|im)\\s*(?!\\bat\\b|\\bin\\b|\\ba\\b|\\b\\w+ing\\b)(\\b\\w+\\b)"
   years_old:
-    - years old
-    - yo
+    - "(?:years?(?: old)?|yo)"
   girlfriend:
     - '(?:meet|find|chat|have|talk).+(?:girl|woman)'
     - 'girl\s?friend'
@@ -36,7 +35,7 @@ kh:
   name:
     - '(?:chh?mu?ou?s)\s*(\b\w+\b)'
   years_old:
-    - chnam
+    - "(?:chnaa?m)"
   girlfriend:
     - 'm(?:i|e)t srey'
   could_mean_girl_or_girlfriend:

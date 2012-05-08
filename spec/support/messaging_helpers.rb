@@ -1,6 +1,8 @@
 module MessagingHelpers
   include AuthenticationHelpers
 
+  EXAMPLES = YAML.load_file(File.join(File.dirname(__FILE__), 'message_examples.yaml'))
+
   def initiate_chat(user)
     load_users
     post_message(:from => user.mobile_number, :body => "")

@@ -294,81 +294,27 @@ describe User do
 
   describe "#update_profile" do
 
-    KEYWORDS = {
-      :en => {
-        :boy => %w{m male},
-        :could_mean_boy_or_boyfriend => %w{boy guy man},
-        :girl => %w{f female},
-        :could_mean_girl_or_girlfriend => %w{girl woman},
-        :friend => %w{friend},
-        :girlfriend => ["girlfriend", "gf", "friend girl", "girl friend"],
-        :boyfriend => ["boyfriend", "bf", "friend boy", "boy friend"],
-        :guy_looking_for_a_girl => ["guy looking for a hot girl sexy", "man seeking woman", "m seeking woman hot"],
-        :girl_looking_for_a_guy => ["girl looking for a hot guy sporty", "woman seeking man", "f seeking guy hot"],
-        :guy_looking_for_a_guy => ["male looking for a guy to have fun with", "guy seeking guy", "m seeking man"],
-        :girl_looking_for_a_girl => ["f looking for a girl for relationship", "girl seeking girl", "f seeking woman"],
-        :guy_looking_for_a_friend => ["m looking for a friend to hang out with", "guy seeking friend"],
-        :girl_looking_for_a_friend => ["f looking for a friend to go shopping with", "girl seeking friend"],
-        :guy_named_frank => ["im frank man", "i'm frank male", "i am frank guy", "my name is frank guy"],
-        :girl_named_mara => ["im mara f", "i'm mara girl", "i am mara woman"],
-        :"23_year_old" => ["im 23 years old", "23yo", "23 yo", "blah 23 badfa"],
-        :phnom_penhian => ["from phnom penh"],
-        :mara_25_pp_wants_friend => ["hi im mara 25 pp looking for friends"],
-        :davo_28_guy_wants_bf => ["hi my name is davo male 28 looking for friends"],
-        :sr_wants_girl => ["im in sr want to meet girl"],
-        :kunthia_23_sr_girl_wants_boy => ["kunthia 23 girl sr want to meet boy"],
-        :tongleehey => ["i'm tongleehey 29 man from pp want to meet girl"],
-        :find_me_a_girl => ["find me a girl!"],
-        :vanna_kampong_thom => ["I'm vanna 26 guy from kampong thom Want to find a girl."],
-        :veasna => ["im veasna , 30 years , from kandal provice , want to find a girl, men ket pi ayu , del  men brokan vannak .....'chib'"]
-      },
-
-      :kh => {
-        :could_mean_boy_or_boyfriend => %w{pros bros},
-        :could_mean_girl_or_girlfriend => %w{srey},
-        :friend => %w{mit met},
-        :girlfriend => ["met srey", "mit srey"],
-        :boyfriend => ["met bros", "met pros", "mit bros", "mit pros"],
-        :guy_looking_for_a_girl => ["bros sa-at jong mian srey sa-at", "khnom pros jab srey"],
-        :girl_looking_for_a_guy => ["srey mao jong mian bros saat nas", "nhom srey jong mian pros hot"],
-        :guy_looking_for_a_guy => ["nhom bros jong rok mit bros", "pros jong mian bros hot", "pros jong pros"],
-        :girl_looking_for_a_girl => ["nhom srey jong mian bumak srey sa-at"],
-        :guy_looking_for_a_friend => ["nhom pros jong rok met sabai", "bros jong rok mit leng sms", "pros rok met funny"],
-        :girl_looking_for_a_friend => ["nhom srey jong rok met sabai", "srey jong rok mit leng sms", "srey rok met cute"],
-        :guy_named_frank => ["kyom pros chmous frank", "chhmos frank jia bros", "nyom chhmous frank pros"],
-        :girl_named_mara => ["kjom chmos mara srey", "chhmous mara srey", "chmos mara srey", "knhom chmous mara srey", "knyom chmos mara srey"],
-        :"23_year_old" => ["kjom 23chnam", "23 chnam", "23", "dsakle 23dadsa"],
-        :phnom_penhian => ["mok pi phnum penh" ,"mok pi pp"],
-        :mara_25_pp_wants_friend => ["kjom chhmos mara 25 pp jong ban met"],
-        :davo_28_guy_wants_friend => ["kjom chhmous davo bros 28 rok met srolanh ped doch knea"],
-        :sr_wants_girl => ["khnom nov sr jong rok met srey"],
-        :kunthia_23_sr_girl_wants_boy => ["kunthia 23 srey sr jong rok met bros"],
-        :tongleehey => ["knyom chhmous tongleehey 29 pros mok pi pp jong rok met srey"],
-        :find_me_a_girl => ["rok met srey oy nyom!"],
-        :veasna => ["nhom chhmuos veasna , ayu 30 years , mok pi kandal provice , jong rok met srey 1neak , men ket pi ayu , del  men brokan vannak .....'chib'"]
-      }
-    }
-
     def keywords(*keys)
       options = keys.extract_options!
       options[:user] ||= user
       options[:country_code] ||= options[:user].country_code
       all_keywords = []
       keys.each do |key|
-        english_keywords = KEYWORDS[:en][key]
-        localized_keywords = KEYWORDS.try(:[], options[:country_code].to_s.downcase.to_sym).try(:[], key)
-        all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
+        key = key.to_s
+        english_keywords = MessagingHelpers::EXAMPLES["en"].try(:[], key) || []
+        localized_keywords = MessagingHelpers::EXAMPLES.try(:[], options[:country_code].to_s.downcase).try(:[], key) || []
+        all_keywords |= (english_keywords | localized_keywords)
       end
       all_keywords
     end
 
-    def registration_examples(examples, options)
+    def registration_examples(examples, options = {})
       examples.each do |info|
         assert_user_attributes(info, options)
       end
     end
 
-    def assert_user_attributes(info, options)
+    def assert_user_attributes(info, options = {})
       user_attributes = [:gender, :looking_for, :name, :age]
 
       user = options[:user] || build(:user)
@@ -722,7 +668,7 @@ describe User do
           :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
         )
 
-        # veasna 30 years from kandal want a girl
+        # veasna: 30 years from kandal want a girl
         registration_examples(
           keywords(:veasna),
           :expected_name => "veasna",
@@ -732,6 +678,10 @@ describe User do
           :vcr => {:expect_results => true, :cassette => "kh/kandaal"}
         )
 
+        # sopheak: hello girl607 can u give me ur phone number ?
+        registration_examples(
+          keywords(:sopheak)
+        )
       end
     end
   end
