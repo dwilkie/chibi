@@ -134,8 +134,11 @@ describe Message do
             expect_message { message.process! }
           end
 
-          it "should logout the user and notify him that he is now offline" do
-            reply_to(user).body.should == spec_translate(:logged_out_from_chat, user.locale, friend.screen_id)
+          it "should logout the user but not notify him that he is now offline" do
+            reply_to(user).should be_nil
+            reply_to(friend).body.should == spec_translate(
+              :anonymous_chat_has_ended, friend.locale, user.screen_id
+            )
             user.should be_currently_chatting
             user.should_not be_online
           end
@@ -203,8 +206,8 @@ describe Message do
             expect_message { message.process! }
           end
 
-          it "should logout the user and notify him that he is now offline" do
-            reply_to(user).body.should == spec_translate(:anonymous_logged_out, user.locale)
+          it "should logout the user but not notify him that he is now offline" do
+            reply_to(user).should be_nil
             user.should_not be_online
           end
         end

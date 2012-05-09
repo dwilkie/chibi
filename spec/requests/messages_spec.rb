@@ -126,9 +126,7 @@ describe "Messages" do
           end
 
           it "should log me out" do
-            reply_to(new_user).body.should == spec_translate(
-              :anonymous_logged_out, new_user.locale
-            )
+            reply_to(new_user).should be_nil
           end
         end
 
@@ -301,8 +299,9 @@ describe "Messages" do
             end
 
             it "should log me out and notify my friend" do
-              reply_to(dave).body.should == spec_translate(
-                :logged_out_from_chat, dave.locale, joy.screen_id
+              reply_to(dave).should be_nil
+              reply_to(joy).body.should == spec_translate(
+                :chat_has_ended, joy.locale, dave.screen_id
               )
             end
           end

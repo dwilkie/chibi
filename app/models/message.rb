@@ -16,7 +16,7 @@ class Message < ActiveRecord::Base
     user.login!
 
     if user_wants_to_logout?
-      user.logout!(:notify => true, :notify_chat_partner => true)
+      user.logout!(:notify_chat_partner => true)
       return
     elsif user.update_locale!(normalized_body, :notify => true)
       return
