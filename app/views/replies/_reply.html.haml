@@ -1,7 +1,9 @@
-%tr{:id => "reply_#{reply_counter + 1}", :class => cycle("odd", "even")}
-  %td
-    = link_to reply.destination, user_path(reply.user_id)
-  %td
-    = reply.body
-  %td
-    = reply.delivered? ? "#{time_ago_in_words(reply.delivered_at)} ago" : "pending"
+%div{:id => "reply_#{reply_counter + 1}"}
+  .interaction_element
+    %p.meta-data
+      reply to:
+      = link_to reply.destination, user_path(reply.user_id)
+    %p
+      = reply.body
+    %p.meta-data
+      = reply.delivered? ? "#{time_ago_in_words(reply.delivered_at)} ago" : "pending"

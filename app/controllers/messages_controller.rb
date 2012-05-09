@@ -1,14 +1,7 @@
 class MessagesController < ApplicationController
   protect_from_forgery :except => :create
 
-  before_filter :authenticate_message, :only => :create
-  before_filter :authenticate_admin, :except => :create
-
-  def index
-    messages = Message.filter_by(params)
-    @message_count = messages.count
-    @messages = messages.page params[:page]
-  end
+  before_filter :authenticate_message
 
   def create
     message = Message.new(params[:message].slice(:from, :body))

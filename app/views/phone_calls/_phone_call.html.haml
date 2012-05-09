@@ -1,8 +1,10 @@
-%tr{:id => "phone_call_#{phone_call_counter + 1}", :class => cycle("odd", "even")}
-  %td
-    = time_ago_in_words(phone_call.created_at)
-    ago
-  %td
-    = link_to phone_call.from, user_path(phone_call.user_id)
-  %td
-    = phone_call.state.humanize
+%div{:id => "phone_call_#{phone_call_counter + 1}", :class => "even"}
+  .interaction_element
+    %p.meta-data
+      phone call from:
+      = link_to phone_call.from, user_path(phone_call.user_id)
+    %p
+      = phone_call.state.humanize
+    %p.meta-data
+      = time_ago_in_words(phone_call.created_at)
+      ago

@@ -1,8 +1,4 @@
-class UserOverview
-  def initialize(params = {})
-    @params = params
-  end
-
+class UserOverview < AbstractFilter
   def paginated_users
     User.filter_by(params).page params[:page]
   end
@@ -27,9 +23,5 @@ class UserOverview
 
   def available(filter_params = {})
     params.merge(:available => true).merge(filter_params)
-  end
-
-  def params
-    @params
   end
 end

@@ -8,7 +8,7 @@ module ApplicationHelper
           content = chatable_resource_count
         else
           content = link_to(
-            chatable_resource_count, send("#{resource_name}_#{chatable_resources}_path", resource)
+            chatable_resource_count, send("#{resource_name}_interaction_path", resource)
           )
         end
         haml_tag :td, :id => chatable_resources do

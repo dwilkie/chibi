@@ -1,8 +1,10 @@
-%tr{:id => "message_#{message_counter + 1}", :class => cycle("odd", "even")}
-  %td
-    = link_to message.from, user_path(message.user_id)
-  %td
-    = message.body
-  %td
-    = time_ago_in_words(message.created_at)
-    ago
+%div{:id => "message_#{message_counter + 1}", :class => "even"}
+  .interaction_element
+    %p.meta-data
+      message from:
+      = link_to message.from, user_path(message.user_id)
+    %p
+      = message.body
+    %p.meta-data
+      = time_ago_in_words(message.created_at)
+      ago

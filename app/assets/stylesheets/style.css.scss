@@ -553,7 +553,7 @@ td {
     padding: 0 0.5em;
   }
 
-tr.even {
+div.even, tr.even {
   background: rgba(130, 189, 0, 0.6);
 }
 
@@ -582,9 +582,18 @@ ul#overview li{
 
 ul#overview li:after {
   content: " | ";
-
 }
 
 ul#overview li:last-child:after {
   content: "";
+}
+
+.meta-data {
+  font-size: 12px;
+}
+
+#interaction .interaction_element {
+  margin: 0 0 15px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid #ccc;
 }

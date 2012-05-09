@@ -19,7 +19,7 @@ describe ApplicationHelper do
           output.should have_xpath(xpath, :text => expected_text)
         else
           output.should have_xpath(
-            "#{xpath}/a[@href='/#{resource_name.to_s.pluralize}/#{resource.id}/#{chatable_resources}']",
+            "#{xpath}/a[@href='/#{resource_name.to_s.pluralize}/#{resource.id}/interaction']",
             :text => expected_text
           )
         end

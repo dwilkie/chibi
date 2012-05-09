@@ -1,0 +1,5 @@
+#interaction
+  = heading_with_count(:messages, @interaction.total_messages)
+  = heading_with_count(:replies, @interaction.total_replies)
+  = heading_with_count(:phone_calls, @interaction.total_phone_calls)
+  = render @interaction.paginated_interactions

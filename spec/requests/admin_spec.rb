@@ -34,7 +34,7 @@ describe "Admin" do
 
   context "without the username and password" do
     it "should deny me access" do
-      [overview_path, users_path, chats_path, phone_calls_path, messages_path, replies_path].each do |path|
+      [overview_path, users_path, chats_path, interaction_path].each do |path|
         visit path
         page.body.should have_content "Access denied"
       end
@@ -44,18 +44,6 @@ describe "Admin" do
   context "as an admin" do
     before do
       authorize
-    end
-
-    def assert_message_index(*resources)
-      assert_index :message, *resources, :reverse => true
-    end
-
-    def assert_reply_index(*resources)
-      assert_index :reply, *resources, :reverse => true
-    end
-
-    def assert_phone_call_index(*resources)
-      assert_index :phone_call, *resources, :reverse => true
     end
 
     def assert_user_index(*resources)
@@ -74,6 +62,10 @@ describe "Admin" do
           page.should have_link "1 available girl", :href => users_path(:available => true, :gender => "f")
         end
       end
+    end
+
+    def assert_chat_index(*resources)
+      assert_index :chat, *resources, :reverse => true
     end
 
     def total_resources_id(resources_name)
@@ -97,6 +89,11 @@ describe "Admin" do
       end
     end
 
+    def assert_show_user(reference_user)
+      page.current_path.should == user_path(reference_user)
+      assert_user_show(reference_user)
+    end
+
     def assert_user_show(reference_user)
       page.should have_css "#id", :text => reference_user.id.to_s
       page.should have_css "#name", :text => reference_user.name
@@ -112,36 +109,6 @@ describe "Admin" do
       end
 
       assert_chatable_resources_counts(reference_user)
-    end
-
-    def assert_message_show(reference_message)
-      page.should have_content reference_message.body
-      page.should have_content reference_message.from
-      page.should have_content time_ago_in_words
-    end
-
-    def assert_reply_show(reference_reply)
-      page.should have_content reference_reply.body
-      page.should have_content reference_reply.to
-      if reference_reply.delivered?
-        page.should have_content time_ago_in_words
-      else
-        page.should have_content "pending"
-      end
-    end
-
-    def time_ago_in_words(created_at = nil)
-      minutes_ago = ((Time.now - created_at.to_i.minutes.ago) / 60).round
-      minutes_ago.zero? ? "less than a minute ago" : "#{minutes_ago} minutes ago"
-    end
-
-    def assert_phone_call_show(reference_phone_call)
-      page.should have_content time_ago_in_words
-      page.should have_link(
-        reference_phone_call.from,
-        :href => user_path(reference_phone_call.user_id)
-      )
-      page.should have_content reference_phone_call.state.humanize
     end
 
     def assert_chat_show(reference_chat)
@@ -162,6 +129,11 @@ describe "Admin" do
       end
     end
 
+    def time_ago_in_words(created_at = nil)
+      minutes_ago = ((Time.now - created_at.to_i.minutes.ago) / 60).round
+      minutes_ago.zero? ? "less than a minute ago" : "#{minutes_ago} minutes ago"
+    end
+
     def assert_chatable_resources_counts(resource)
       CHATABLE_RESOURCES.each do |chatable_resources|
         within("##{chatable_resources}") do
@@ -174,29 +146,58 @@ describe "Admin" do
           else
             page.should have_link(
               chatable_resources_link,
-              :href => send("#{resource.class.to_s.underscore}_#{chatable_resources}_path", resource)
+              :href => send("#{resource.class.to_s.underscore}_interaction_path", resource)
             )
           end
         end
       end
     end
 
-    def assert_show_user(reference_user)
-      page.current_path.should == user_path(reference_user)
-      assert_user_show(reference_user)
+    def assert_message_show(reference_message)
+      page.should have_content reference_message.body
+      page.should have_content reference_message.from
+      page.should have_content time_ago_in_words
     end
 
-    def assert_navigate_to_chatable_resource(resource_name)
+    def assert_reply_show(reference_reply)
+      page.should have_content reference_reply.body
+      page.should have_content reference_reply.to
+      if reference_reply.delivered?
+        page.should have_content time_ago_in_words
+      else
+        page.should have_content "pending"
+      end
+    end
+
+    def assert_phone_call_show(reference_phone_call)
+      page.should have_content time_ago_in_words
+      page.should have_link(
+        reference_phone_call.from,
+        :href => user_path(reference_phone_call.user_id)
+      )
+      page.should have_content reference_phone_call.state.humanize
+    end
+
+    def assert_show_interaction
+      [:phone_call, :reply, :message].each_with_index do |resource, index|
+        within "##{resource}_#{index + 1}" do
+          send("assert_#{resource}_show", send(resource))
+        end
+      end
+    end
+
+    def assert_navigate_to_interaction(resource_name)
       resources_name = resource_name.to_s.pluralize
+
       CHATABLE_RESOURCES.each do |chatable_resources|
+
         visit send("#{resources_name}_path")
 
         within("##{resource_name}_1 ##{chatable_resources}") do
           click_link(send(resource_name).send(chatable_resources).count.to_s)
         end
 
-        chatable_resource = chatable_resources.to_s.singularize
-        send("assert_#{chatable_resource}_index", send(chatable_resource))
+        assert_show_interaction
       end
     end
 
@@ -218,11 +219,11 @@ describe "Admin" do
       it "should show me an overview of Chibi" do
         within "#this_month" do
           within "#total_messages" do
-            page.should have_link "#{messages.count} messages", :href => messages_path
+            page.should have_link "#{messages.count} messages", :href => interaction_path
           end
 
           within "#total_replies" do
-            page.should have_link "#{replies.count} replies", :href => replies_path
+            page.should have_link "#{replies.count} replies", :href => interaction_path
           end
 
           within "#total_users" do
@@ -248,7 +249,7 @@ describe "Admin" do
         end
 
         it "should show me a list of chats" do
-          assert_index :chat, :reverse => true
+          assert_chat_index
         end
 
         context "when I click on screen id for one of the chat participants" do
@@ -268,57 +269,9 @@ describe "Admin" do
         end
 
         context "when I click on the number of chatable resources for one of the chats" do
-          it "should show me a list of the chatable resources" do
-            assert_navigate_to_chatable_resource(:chat)
+          it "should show me this user's interaction" do
+            assert_navigate_to_interaction(:chat)
           end
-        end
-      end
-    end
-
-    context "given some messages" do
-      before do
-        messages
-      end
-
-      context "when I visit '/messages'" do
-        before do
-          visit messages_path
-        end
-
-        it "should show me a list of messages" do
-          assert_message_index
-        end
-      end
-    end
-
-    context "given some replies" do
-      before do
-        replies
-      end
-
-      context "when I visit '/replies'" do
-        before do
-          visit replies_path
-        end
-
-        it "should show me a list of replies" do
-          assert_reply_index
-        end
-      end
-    end
-
-    context "given some phone calls" do
-      before do
-        phone_calls
-      end
-
-      context "when I visit '/phone_calls'" do
-        before do
-          visit phone_calls_path
-        end
-
-        it "should show me a list of phone calls" do
-          assert_phone_call_index
         end
       end
     end
@@ -382,8 +335,8 @@ describe "Admin" do
         end
 
         context "when I click on the number of chatable resources for one of the users" do
-          it "should show me a list of the chatable resources" do
-            assert_navigate_to_chatable_resource(:user)
+          it "should show me this user's interaction" do
+            assert_navigate_to_interaction(:user)
           end
         end
 

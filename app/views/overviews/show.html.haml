@@ -6,10 +6,10 @@
       = link_to pluralize(@overview.total_users_this_month, "new user"), users_path
   #total_messages
     %p
-      = link_to pluralize(@overview.total_messages_this_month, "message"), messages_path
+      = link_to pluralize(@overview.total_messages_this_month, "message"), interaction_path
   #total_replies
     %p
-      = link_to pluralize(@overview.total_replies_this_month, "reply"), replies_path
+      = link_to pluralize(@overview.total_replies_this_month, "reply"), interaction_path
   #total_revenue
     %p
       = number_to_currency(@overview.total_revenue_this_month)

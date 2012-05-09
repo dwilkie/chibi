@@ -1,8 +1,7 @@
 class MissedCallsController < ApplicationController
   protect_from_forgery :except => :create
 
-  before_filter :authenticate_missed_call, :only => :create
-  before_filter :authenticate_admin, :except => :create
+  before_filter :authenticate_missed_call
 
   def create
     missed_call = MissedCall.new(params.slice(:subject, :plain))

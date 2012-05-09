@@ -1,14 +1,7 @@
 class PhoneCallsController < ApplicationController
   protect_from_forgery :except => :create
 
-  before_filter :authenticate_phone_call, :only => :create
-  before_filter :authenticate_admin, :except => :create
-
-  def index
-    phone_calls = PhoneCall.filter_by(params)
-    @phone_call_count = phone_calls.count
-    @phone_calls = phone_calls.page params[:page]
-  end
+  before_filter :authenticate_phone_call
 
   def create
     if phone_call = PhoneCall.find_or_create_and_process_by(params, current_authenticated_url)
