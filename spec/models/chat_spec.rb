@@ -337,7 +337,7 @@ describe Chat do
       context "given there are undelivered messages for the deactivated users" do
         def setup_chat_reactivation_scenario(user, users_old_relationship)
           # create an old chat
-          users_old_chat = send("active_chat_with_single_#{users_old_relationship}")
+          users_old_chat = users_old_relationship.is_a?(subject.class) ? users_old_relationship : create(:chat, users_old_relationship => user)
 
           # create an undelivered reply to the old chat
           message_from_old_friend = create(:reply, :user => user, :chat => users_old_chat, :body => "Hi buddy")
@@ -371,7 +371,7 @@ describe Chat do
             user, users_old_relationship
           )
 
-          chat_to_deactivate.deactivate!(args.merge(:reactivate_previous_chat => false))
+          chat_to_deactivate.deactivate!({:reactivate_previous_chat => false}.merge(args))
 
           # assert the delivery of the message from the old friend
           message_from_old_friend.reload.should_not be_delivered
@@ -397,6 +397,26 @@ describe Chat do
           it "should not deliver any messages or reactivate the chats" do
             assert_chat_reactivation(false)
           end
+        end
+
+        it "should not reactivate the chat if the initator in the old chat is logged out" do
+          user.logout!
+          assert_chat_not_reactivated(friend, chat, :active_user => true, :reactivate_previous_chat => true)
+        end
+
+        it "should not reactivate the chat if the friend in the old chat is logged out" do
+          friend.logout!
+          assert_chat_not_reactivated(user, chat, :active_user => true, :reactivate_previous_chat => true)
+        end
+
+        it "should not reactivate the chat if the initiator in the old chat is chatting with somebody else" do
+          create(:active_chat, :user => user)
+          assert_chat_not_reactivated(friend, chat, :active_user => true, :reactivate_previous_chat => true)
+        end
+
+        it "should not reactivate the chat if the friend in the old chat is is chatting with somebody else" do
+          create(:active_chat, :friend => friend)
+          assert_chat_not_reactivated(user, chat, :active_user => true, :reactivate_previous_chat => true)
         end
       end
     end

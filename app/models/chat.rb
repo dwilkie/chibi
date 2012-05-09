@@ -129,7 +129,11 @@ class Chat < ActiveRecord::Base
   private
 
   def self.with_undelivered_messages_for(user)
-    scoped.includes(:replies).where(:replies => {:delivered_at => nil, :user_id => user.id})
+    scoped.includes(:replies).joins(:user).joins(:friend).where(
+      :users => {:active_chat_id => nil, :online => true}
+    ).where(:friends_chats => {:active_chat_id => nil, :online => true}).where(
+      :replies => {:delivered_at => nil, :user_id => user.id}
+    ).readonly(false)
   end
 
   def self.filter_params(params = {})
