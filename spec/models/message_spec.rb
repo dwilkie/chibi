@@ -196,75 +196,45 @@ describe Message do
 
     context "given the user is not currently chatting" do
 
-      context "and this is the user's first message" do
-        def assert_welcome(body)
-          message = create(:message, :user => user, :body => body)
-          user.should_receive(:update_profile).with(body)
-          expect_message { message.process! }
+      it_should_behave_like "updating the user's locale"
 
-          replies_to(user).first.body.should == spec_translate(
-            :welcome, [user.locale, user.country_code]
-          )
-        end
-
-        before do
-          user.stub(:update_profile)
-        end
-
-        it "should welcome the user even if they text 'stop'" do
-          assert_welcome("stop")
-        end
-
-        it "should welcome the user even if they try to update their locale" do
-          assert_welcome("en")
-        end
-      end
-
-      context "and this is not the user's first message" do
-        before do
-          create(:message, :user => user)
-        end
-
-        it_should_behave_like "updating the user's locale"
-
-        context "and the message body is" do
-          context "'stop'" do
-            before do
-              message.body = "stop"
-              expect_message { message.process! }
-            end
-
-            it "should logout the user and notify him that he is now offline" do
-              reply_to(user).body.should == spec_translate(:anonymous_logged_out, user.locale)
-              user.should_not be_online
-            end
+      context "and the message body is" do
+        context "'stop'" do
+          before do
+            message.body = "stop"
+            expect_message { message.process! }
           end
 
-          context "anything else but 'stop'" do
+          it "should logout the user and notify him that he is now offline" do
+            reply_to(user).body.should == spec_translate(:anonymous_logged_out, user.locale)
+            user.should_not be_online
+          end
+        end
+
+        context "anything else but 'stop'" do
+          before do
+            message.body = "hello"
+            user.stub(:update_profile)
+          end
+
+          it_should_behave_like "starting a new chat"
+
+          it "should try to update the users profile from the message text" do
+            user.should_receive(:update_profile).with("hello")
+            expect_message { message.process! }
+          end
+
+          context "and the user is offline" do
+            let(:offline_user) { build(:offline_user) }
+
             before do
-              message.body = "hello"
-              user.stub(:update_profile)
-            end
-
-            it_should_behave_like "starting a new chat"
-
-            it "should try to update the users profile from the message text" do
-              user.should_receive(:update_profile).with("hello")
+              message.body = ""
+              message.user = offline_user
               expect_message { message.process! }
             end
 
-            context "and the user is offline" do
-              let(:offline_user) { build(:offline_user) }
-
-              before do
-                message.body = ""
-                message.user = offline_user
-                expect_message { message.process! }
-              end
-
-              it "should login the user" do
-                offline_user.reload.should be_online
-              end
+            it "should login the user" do
+              offline_user.reload.should be_online
             end
           end
         end

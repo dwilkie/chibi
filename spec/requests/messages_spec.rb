@@ -40,9 +40,7 @@ describe "Messages" do
 
             it "should not reply to me just now as my request for a friend has been already registered" do
               # sending a message that nobody is available is annoying
-              reply_to(new_user).body.should == spec_translate(
-                :welcome, new_user.locale
-              )
+              reply_to(new_user).should be_nil
             end
           end
         end
@@ -63,16 +61,11 @@ describe "Messages" do
       context "when I text" do
 
         shared_examples_for "welcoming me" do
-          it "should welcome me and start a chat between myself an existing anonymous user" do
+          it "should start a chat between myself an existing anonymous user without welcoming me" do
+            # I just want to chat!
             assert_new_user
 
-            replies = replies_to(new_user)
-
-            replies.first.body.should == spec_translate(
-              :welcome, [new_user.locale, new_user.country_code]
-            )
-
-            replies.last.body.should == spec_translate(
+            reply_to(new_user).body.should == spec_translate(
               :anonymous_new_friend_found, new_user.locale, alex.screen_id
             )
 
@@ -140,7 +133,11 @@ describe "Messages" do
             send_message(:from => my_number, :body => "stop")
           end
 
-          it_should_behave_like "welcoming me"
+          it "should log me out" do
+            reply_to(new_user).body.should == spec_translate(
+              :anonymous_logged_out, new_user.locale
+            )
+          end
         end
 
         context "'map pros 27 pp jong rok met srey'" do
@@ -159,13 +156,7 @@ describe "Messages" do
             new_user.looking_for.should == "f"
             new_user.gender.should == "m"
 
-            replies = replies_to(new_user)
-
-            replies.first.body.should == spec_translate(
-              :welcome, [new_user.locale, new_user.country_code]
-            )
-
-            replies.last.body.should == spec_translate(
+            reply_to(new_user).body.should == spec_translate(
               :personalized_new_friend_found, new_user.locale, new_user.name.capitalize, joy.screen_id
             )
 

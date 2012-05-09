@@ -15,9 +15,7 @@ class Message < ActiveRecord::Base
   def process!
     user.login!
 
-    if user.first_message?
-      user.welcome!
-    elsif user_wants_to_logout?
+    if user_wants_to_logout?
       user.logout!(:notify => true, :notify_chat_partner => true)
       return
     elsif user.update_locale!(normalized_body, :notify => true)
