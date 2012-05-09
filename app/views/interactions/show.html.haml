@@ -1,5 +1,9 @@
 #interaction
-  = heading_with_count(:messages, @interaction.total_messages)
-  = heading_with_count(:replies, @interaction.total_replies)
-  = heading_with_count(:phone_calls, @interaction.total_phone_calls)
+  %ul#overview
+    %li
+      = pluralize(@interaction.total_messages, "message")
+    %li
+      = pluralize(@interaction.total_replies, "reply")
+    %li
+      = pluralize(@interaction.total_phone_calls, "phone call")
   = render @interaction.paginated_interactions
