@@ -54,8 +54,8 @@ describe Message do
           expect_message { message.process! }
         end
 
-        it "should reply saying there are no matches at this time" do
-          reply_to(user).body.should == spec_translate(:anonymous_could_not_find_a_friend, user.locale)
+        it "should not reply saying there are no matches at this time" do
+          reply_to(user).should be_nil
           user.reload.should_not be_currently_chatting
         end
       end

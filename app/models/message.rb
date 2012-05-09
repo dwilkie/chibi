@@ -35,7 +35,7 @@ class Message < ActiveRecord::Base
       end
     end
 
-    build_chat(:user => user).activate!(:notify => true) if start_new_chat
+    build_chat(:user => user).activate!(:notify => true, :notify_no_match => false) if start_new_chat
   end
 
   private

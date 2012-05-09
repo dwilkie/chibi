@@ -38,9 +38,10 @@ describe "Messages" do
               send_message(:from => my_number, :body => "hello")
             end
 
-            it "should reply telling me that there are no matches at this time" do
+            it "should not reply to me just now as my request for a friend has been already registered" do
+              # sending a message that nobody is available is annoying
               reply_to(new_user).body.should == spec_translate(
-                :anonymous_could_not_find_a_friend, new_user.locale
+                :welcome, new_user.locale
               )
             end
           end
@@ -318,8 +319,8 @@ describe "Messages" do
                 send_message(:from => dave, :body => "new")
               end
 
-              it "should tell me that there are no girls currently available" do
-                reply_to(dave).body.should == spec_translate(
+              it "should not tell me that there are no girls currently available" do
+                reply_to(dave).body.should_not == spec_translate(
                   :could_not_find_a_friend, dave.locale
                 )
               end
