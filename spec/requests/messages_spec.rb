@@ -61,13 +61,11 @@ describe "Messages" do
       context "when I text" do
 
         shared_examples_for "welcoming me" do
-          it "should start a chat between myself an existing anonymous user without welcoming me" do
+          it "should start a chat between myself an existing anonymous user without telling me anything" do
             # I just want to chat!
             assert_new_user
 
-            reply_to(new_user).body.should == spec_translate(
-              :anonymous_new_friend_found, new_user.locale, alex.screen_id
-            )
+            reply_to(new_user).should be_nil
 
             reply_to(alex).body.should =~ /^#{spec_translate(:forward_message_approx, alex.locale, new_user.screen_id)}/
           end
@@ -93,10 +91,7 @@ describe "Messages" do
               send_message(:from => my_number, :body => "en")
             end
 
-            it "should resend the last message to me in English" do
-              assert_deliver(
-                spec_translate(:anonymous_new_friend_found, :en, alex.screen_id)
-              )
+            it "should set my locale to English" do
               new_user.locale.should == :en
             end
 
@@ -105,10 +100,7 @@ describe "Messages" do
                 send_message(:from => my_number, :body => "kh")
               end
 
-              it "should resend the last message to me in Khmer" do
-                assert_deliver(
-                  spec_translate(:anonymous_new_friend_found, :kh, alex.screen_id)
-                )
+              it "should set my locale back to Khmer" do
                 new_user.locale.should == :kh
               end
             end
@@ -156,10 +148,7 @@ describe "Messages" do
             new_user.looking_for.should == "f"
             new_user.gender.should == "m"
 
-            reply_to(new_user).body.should == spec_translate(
-              :personalized_new_friend_found, new_user.locale, new_user.name.capitalize, joy.screen_id
-            )
-
+            reply_to(new_user).should be_nil
             reply_to(joy).body.should =~ /^#{spec_translate(:forward_message_approx, joy.locale, new_user.screen_id)}/
           end
         end
@@ -184,10 +173,7 @@ describe "Messages" do
             alex.gender.should == "f"
             alex.looking_for.should == "m"
 
-            reply_to(alex).body.should == spec_translate(
-              :personalized_new_friend_found, alex.locale, alex.name.capitalize, dave.screen_id
-            )
-
+            reply_to(alex).should be_nil
             reply_to(dave).body.should =~ /^#{spec_translate(:forward_message_approx, dave.locale, alex.screen_id)}/
           end
         end
@@ -196,13 +182,6 @@ describe "Messages" do
       context "given I am currently in a chat session" do
 
         shared_examples_for "finding me a new friend" do
-          it "should find me a new friend" do
-            reply_to(dave).body.should == spec_translate(
-              :personalized_new_friend_found,
-              dave.locale, dave.name.capitalize, mara.screen_id,
-            )
-          end
-
           context "and later my old friend texts 'Hi Dave'" do
             context "and I am available" do
               before do
@@ -311,9 +290,7 @@ describe "Messages" do
               end
 
               it "should not tell me that there are no girls currently available" do
-                reply_to(dave).body.should_not == spec_translate(
-                  :could_not_find_a_friend, dave.locale
-                )
+                reply_to(dave).should be_nil
               end
             end
           end

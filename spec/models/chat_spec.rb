@@ -113,13 +113,23 @@ describe Chat do
       end
 
       context "passing :notify => true" do
-        it "should introduce the new chat participants" do
+        it "should introduce only the chat partner" do
           expect_message { reference_chat.activate!(:notify => true) }
-          reply_to(user, reference_chat).body.should == spec_translate(
-            :anonymous_new_friend_found, user.locale, friend.screen_id
-          )
 
+          reply_to(user, reference_chat).should be_nil
           reply_to(friend, reference_chat).body.should =~ /^#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
+        end
+
+        context "and :notify_initator => true" do
+          it "should introduce the initiator as well" do
+            expect_message { reference_chat.activate!(:notify => true, :notify_initiator => true) }
+
+            reply_to(friend, reference_chat).body.should =~ /^#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
+
+            reply_to(user, reference_chat).body.should == spec_translate(
+              :anonymous_new_friend_found, user.locale, friend.screen_id
+            )
+          end
         end
       end
 
@@ -471,15 +481,6 @@ describe Chat do
         assert_unavailable_notification_to(:user, friend)
         assert_unavailable_notification_to(:friend, user)
       end
-    end
-  end
-
-  describe "#introduce_participants" do
-    it "should send an introduction to both participants" do
-      expect_message { active_chat.introduce_participants }
-
-      reply_to_user.body.should == spec_translate(:anonymous_new_friend_found, user.locale, friend.screen_id)
-      reply_to_friend.body.should =~ /^#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
     end
   end
 

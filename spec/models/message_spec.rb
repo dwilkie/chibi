@@ -66,10 +66,8 @@ describe Message do
           expect_message { message.process! }
         end
 
-        it "should introduce the participants of the chat" do
-          reply_to(user, message.chat).body.should == spec_translate(
-            :anonymous_new_friend_found, user.locale, new_friend.screen_id
-          )
+        it "should introduce only the chat partner" do
+          reply_to(user, message.chat).should be_nil
           reply_to(new_friend, message.chat).body.should =~ /^#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
         end
       end

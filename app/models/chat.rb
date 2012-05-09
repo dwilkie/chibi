@@ -47,7 +47,7 @@ class Chat < ActiveRecord::Base
 
     if friend.present?
       save!
-      introduce_participants if options[:notify]
+      introduce_participants(options[:notify_initiator]) if options[:notify]
     else
       replies.build(
         :user => user
@@ -102,14 +102,6 @@ class Chat < ActiveRecord::Base
     end
   end
 
-  def introduce_participants
-    [user, friend].each do |reference_user|
-      replies.build(:user => reference_user).introduce!(
-        partner(reference_user), reference_user == user
-      )
-    end
-  end
-
   def reactivate!
     return if active?
 
@@ -142,6 +134,16 @@ class Chat < ActiveRecord::Base
 
   def self.filter_params(params = {})
     super.where(params.slice(:user_id))
+  end
+
+  def introduce_participants(notify_initiator = false)
+    users_to_notify = [friend]
+    users_to_notify << user if notify_initiator
+    users_to_notify.each do |reference_user|
+      replies.build(:user => reference_user).introduce!(
+        partner(reference_user), reference_user == user
+      )
+    end
   end
 
   def reactivate_expired_chats(users)
