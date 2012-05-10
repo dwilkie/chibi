@@ -55,7 +55,7 @@
           notification = "You are now offline. "
           instructions = "Chat with #{options[:friends_screen_name]} again by replying to this message or #{default_instructions.downcase}" if options[:friends_screen_name]
         when :no_answer
-          notification = "Nobody chatting? "
+          notification = "Want to meet a new friend? "
         when :friend_unavailable
           notification = "Sorry #{options[:friends_screen_name]} is currently unavailable. "
           instructions = default_instructions
@@ -67,7 +67,7 @@
         end
 
         if !instructions && options[:missing_profile_attributes].try(:any?)
-          instructions = "Txt us "
+          instructions = "Txt "
           options[:missing_profile_attributes].first == :looking_for ? instructions << "the " : instructions << "ur "
 
           translated_missing_attributes = []

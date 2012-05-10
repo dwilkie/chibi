@@ -6,7 +6,7 @@ module TranslationHelpers
     },
 
     :anonymous_could_not_find_a_friend => {
-      :en => "Sorry we can't find a friend for you at this time. Txt us ur name, age, sex, city & gender ur seeking to try again",
+      :en => "Sorry we can't find a friend for you at this time. Txt ur name, age, sex, city & gender ur seeking to try again",
       :kh => "Som-tos pel nis min mean nek tom-nae te. Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei pjea-yeam m-dong teat"
     },
 
@@ -34,13 +34,13 @@ module TranslationHelpers
     },
 
     :anonymous_chat_has_ended => {
-      :en => "Nobody chatting? Txt us ur name, age, sex, city & gender ur seeking to meet someone new",
-      :kh => "Kmean nor-na chat te? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
+      :en => "Want to meet a new friend? Txt ur name, age, sex, city & gender ur seeking to meet someone new",
+      :kh => "Jong rok mit tmey? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
     },
 
     :chat_has_ended => {
-      :en => "Nobody chatting? Txt 'new' to meet someone new",
-      :kh => "Kmean nor-na chat te? Sorsay 'new' derm-bei rok mit tmey teat"
+      :en => "Want to meet a new friend? Txt 'new' to meet someone new",
+      :kh => "Jong rok mit tmey? Sorsay 'new' derm-bei rok mit tmey teat"
     },
 
     :logged_out_from_chat => {
@@ -49,7 +49,7 @@ module TranslationHelpers
     },
 
     :anonymous_logged_out => {
-      :en => "You are now offline. Txt us ur name, age, sex, city & gender ur seeking to meet someone new",
+      :en => "You are now offline. Txt ur name, age, sex, city & gender ur seeking to meet someone new",
       :kh => "Pel nis nek jaak jenh haey. Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
     },
 
@@ -59,7 +59,7 @@ module TranslationHelpers
     },
 
     :only_missing_sexual_preference_logged_out => {
-      :en => "You are now offline. Txt us the gender ur seeking to meet someone new",
+      :en => "You are now offline. Txt the gender ur seeking to meet someone new",
       :kh => "Pel nis nek jaak jenh haey. Pjeur phet del nek jong rok derm-bei rok mit tmey teat"
     },
 

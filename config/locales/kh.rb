@@ -47,7 +47,7 @@
           notification = "Pel nis nek jaak jenh haey. "
           instructions = "Pjeur sa derm-bei chat jea-moy #{options[:friends_screen_name]} m-dong teat reu #{default_instructions.downcase}" if options[:friends_screen_name]
         when :no_answer
-          notification = "Kmean nor-na chat te? "
+          notification = "Jong rok mit tmey? "
         when :friend_unavailable
           notification = "Som-tos pel nis #{options[:friends_screen_name]} min tom-nae te. "
           instructions = default_instructions
