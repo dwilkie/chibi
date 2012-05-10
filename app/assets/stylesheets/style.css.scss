@@ -592,8 +592,14 @@ ul#overview li:last-child:after {
   font-size: 12px;
 }
 
-#interaction .interaction_element {
+.offset-right {
+  clear: both;
+  float: right;
+}
+
+#interaction .interaction-element {
   margin: 0 0 15px 0;
   padding: 8px 0;
   border-bottom: 1px solid #ccc;
+  width: 45%;
 }

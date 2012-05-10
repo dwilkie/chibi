@@ -185,7 +185,7 @@ describe "Admin" do
         page.should have_content "1 phone call"
       end
 
-      [:reply].each_with_index do |resource, index|
+      [:phone_call, :reply, :message].each_with_index do |resource, index|
         within "##{resource}_#{index + 1}" do
           send("assert_#{resource}_show", send(resource))
         end

@@ -48,8 +48,8 @@ describe Interaction do
       another_reply
     end
 
-    it "should return the paginated interactions (for now just show replies)" do
-      subject.paginated_interactions.should == [another_reply, reply]
+    it "should return the paginated interactions" do
+      subject.paginated_interactions.should == [another_reply, phone_call, reply, message]
     end
   end
 end
