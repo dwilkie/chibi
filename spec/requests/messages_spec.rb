@@ -207,14 +207,20 @@ describe "Messages" do
             end
 
             context "and I am not available" do
+              # A new match for Joy
+              let(:con) { create(:con) }
+
               before do
+                con
                 send_message(:from => joy, :body => "Hi Dave")
               end
 
-              it "should notify my old friend that I am unavailable" do
-                reply_to(joy).body.should == spec_translate(
+              it "should find a new friend for my old friend" do
+                reply_to(joy).body.should_not == spec_translate(
                   :friend_unavailable, joy.locale, dave.screen_id
                 )
+
+                reply_to(con).body.should =~ /^#{spec_translate(:forward_message_approx, con.locale, joy.screen_id)}/
 
                 reply_to_dave = reply_to(dave)
                 reply_to_dave.body.should == spec_translate(
@@ -236,16 +242,33 @@ describe "Messages" do
               end
 
               context "when I later become available" do
-                before do
-                  expect_message { dave.reload.active_chat.deactivate!(:active_user => true) }
+                context "but my old friend is now currently chatting" do
+                  before do
+                    expect_message { dave.reload.active_chat.deactivate!(:active_user => true) }
+                  end
+
+                  it "should not send the message that my friend previously sent" do
+                    reply = reply_to(dave)
+                    reply.body.should == spec_translate(
+                      :forward_message, dave.locale, joy.screen_id, "Hi Dave"
+                    )
+                    reply.should_not be_delivered
+                  end
                 end
 
-                it "should send me the message that my old friend previously sent" do
-                  reply = reply_to(dave)
-                  reply.body.should == spec_translate(
-                    :forward_message, dave.locale, joy.screen_id, "Hi Dave"
-                  )
-                  reply.should be_delivered
+                context "and my old friend is also available" do
+                  before do
+                    joy.reload.active_chat.deactivate!
+                    expect_message { dave.reload.active_chat.deactivate!(:active_user => true) }
+                  end
+
+                  it "should send me the message that my old friend previously sent" do
+                    reply = reply_to(dave)
+                    reply.body.should == spec_translate(
+                      :forward_message, dave.locale, joy.screen_id, "Hi Dave"
+                    )
+                    reply.should be_delivered
+                  end
                 end
               end
             end

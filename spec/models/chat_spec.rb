@@ -484,22 +484,33 @@ describe Chat do
     end
 
     context "given the friend is unavailable to chat" do
-      def assert_unavailable_notification_to(recipient_name, unavailable_user)
+      def assert_new_friend_for_sender(recipient_name, unavailable_user)
         # create a new active chat for the unavailable user so they're unavailable
         create(:active_chat, :user => unavailable_user)
 
         recipient = send(recipient_name)
         chat_session = send("active_chat_with_single_#{recipient_name}")
+
+        recipient.reload.active_chat.should == chat_session
+
         expect_message { chat_session.forward_message(recipient, message) }
-        reply_to(recipient).body.should == spec_translate(
+
+        new_chat = recipient.reload.active_chat
+        new_chat.should_not == chat_session
+
+        if new_friend = new_chat.try(:friend)
+          reply_to(new_chat.friend).body.should=~ /^#{spec_translate(:forward_message_approx, new_friend.locale, recipient.screen_id)}/
+        end
+
+        reply_to(recipient).try(:body).should_not == spec_translate(
           :friend_unavailable, recipient.locale, unavailable_user.screen_id
         )
         assert_forward_message_to(unavailable_user, recipient, chat_session, message, false)
       end
 
-      it "should inform the sender and save the message for sending later" do
-        assert_unavailable_notification_to(:user, friend)
-        assert_unavailable_notification_to(:friend, user)
+      it "should save the message for sending later and find a new friend for the sender" do
+        assert_new_friend_for_sender(:user, friend)
+        assert_new_friend_for_sender(:friend, user)
       end
     end
   end
