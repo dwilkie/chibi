@@ -1056,21 +1056,21 @@ describe User do
     context "the user has a name" do
       let(:user_with_name) { create(:user, :name => "sok", :id => 69) }
 
-      it "should return a combination of the user's name and id" do
-        user_with_name.screen_id.should == "sok69"
+      it "should return the user's name" do
+        user_with_name.screen_id.should == "Sok"
       end
     end
 
     context "the user has no name" do
       let(:user_without_name) { create(:user, :id => 88) }
 
-      it "should return a combination of the screen name and id" do
-        user_without_name.screen_id.should == "#{user_without_name.screen_name}88"
+      it "should return the user's screen name" do
+        user_without_name.screen_id.should == "#{user_without_name.screen_name.capitalize}"
       end
     end
 
     context "the user has not yet been validated" do
-      it "should return a combination of the screen name and 0" do
+      it "should return nil" do
         subject.screen_id.should be_nil
       end
     end

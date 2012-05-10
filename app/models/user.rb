@@ -166,8 +166,7 @@ class User < ActiveRecord::Base
   end
 
   def screen_id
-    sn = name || screen_name
-    sn + id.to_s if sn
+    (name || screen_name).try(:capitalize)
   end
 
   def login!
