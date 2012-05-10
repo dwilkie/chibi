@@ -39,17 +39,17 @@ describe Interaction do
   end
 
   describe "#paginated_interactions" do
-    let(:another_message) { create(:message) }
+    let(:another_reply) { create(:reply) }
 
     before do
       message
       reply
       phone_call
-      another_message
+      another_reply
     end
 
-    it "should return the paginated messages" do
-      subject.paginated_interactions.should == [another_message, phone_call, reply, message]
+    it "should return the paginated interactions (for now just show replies)" do
+      subject.paginated_interactions.should == [another_reply, reply]
     end
   end
 end

@@ -12,7 +12,7 @@ class Interaction < AbstractFilter
   end
 
   def paginated_interactions
-    @paginated_interactions ||= (paginated(:message) | paginated(:reply) | paginated(:phone_call)).sort_by(&:updated_at).reverse
+    @paginated_interactions ||= paginated(:reply)
   end
 
   private
