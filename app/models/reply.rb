@@ -40,7 +40,7 @@ class Reply < ActiveRecord::Base
   end
 
   def end_chat!(partner, options = {})
-    explain_how_to_start_a_new_chat!(:no_answer, options.merge(:partner => partner))
+    explain_how_to_start_a_new_chat!(:no_answer, options)
   end
 
   def explain_could_not_find_a_friend!

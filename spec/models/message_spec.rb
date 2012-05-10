@@ -137,7 +137,7 @@ describe Message do
           it "should logout the user but not notify him that he is now offline" do
             reply_to(user).should be_nil
             reply_to(friend).body.should == spec_translate(
-              :anonymous_chat_has_ended, friend.locale, user.screen_id
+              :anonymous_chat_has_ended, friend.locale
             )
             user.should be_currently_chatting
             user.should_not be_online
@@ -147,7 +147,7 @@ describe Message do
             replies_to(friend, chat).count.should == 1
 
             reply_to(friend, chat).body.should == spec_translate(
-              :anonymous_chat_has_ended, friend.locale, user.screen_id
+              :anonymous_chat_has_ended, friend.locale
             )
 
             friend.reload
@@ -168,7 +168,7 @@ describe Message do
             replies_to(friend, chat).count.should == 1
 
             reply_to(friend, chat).body.should == spec_translate(
-              :chat_has_ended, friend.locale, user.screen_id
+              :chat_has_ended, friend.locale
             )
 
             friend.reload

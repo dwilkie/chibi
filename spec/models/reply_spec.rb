@@ -217,7 +217,7 @@ describe Reply do
     it "should inform the user how to find a new friend" do
       method = :end_chat!
       args = [partner]
-      interpolations = [partner.screen_id]
+      interpolations = []
 
       assert_reply(method, :anonymous_chat_has_ended, :args => args, :interpolations => interpolations)
       args << {:skip_update_profile_instructions => true}

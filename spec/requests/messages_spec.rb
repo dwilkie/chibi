@@ -324,7 +324,7 @@ describe "Messages" do
             it "should log me out and notify my friend" do
               reply_to(dave).should be_nil
               reply_to(joy).body.should == spec_translate(
-                :chat_has_ended, joy.locale, dave.screen_id
+                :chat_has_ended, joy.locale
               )
             end
           end
@@ -356,7 +356,7 @@ describe "Messages" do
           shared_examples_for "ending my current chat" do
             it "should end my current chat and give me instructions on how to start a new one" do
               reply_to(dave).body.should == spec_translate(
-                :chat_has_ended, dave.locale, joy.screen_id
+                :chat_has_ended, dave.locale
               )
             end
           end

@@ -1151,7 +1151,7 @@ describe User do
             user.logout!(:notify_chat_partner => true)
           end
           reply_to_partner.body.should == spec_translate(
-            :anonymous_chat_has_ended, friend.locale, user.screen_id
+            :anonymous_chat_has_ended, friend.locale
           )
           reply.should be_nil
         end

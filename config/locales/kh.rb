@@ -27,11 +27,11 @@
       },
 
       :welcome => lambda {|key, options|
-        "chibi: Som sva-kom mok kan Chibi! Yerng chuay nek rok mit tmey! At any time you can write 'en' to read English, 'kh' to read Khmer or 'stop' to go offline"
+        "Som sva-kom mok kan Chibi! Yerng chuay nek rok mit tmey! At any time you can write 'en' to read English, 'kh' to read Khmer or 'stop' to go offline"
       },
 
       :new_chat_started => lambda {|key, options|
-        greeting = "chibi: Sousdey"
+        greeting = "Sousdey"
         greeting << " #{options[:users_name].capitalize}" if options[:users_name]
 
         greeting << "! " << "Yerng ban rok mit tmey som-rab nek haey! Pjeur sa derm-bei chleuy torb tov #{options[:friends_screen_name]} ai-lov nis"
@@ -47,7 +47,7 @@
           notification = "Pel nis nek jaak jenh haey. "
           instructions = "Pjeur sa derm-bei chat jea-moy #{options[:friends_screen_name]} m-dong teat reu #{default_instructions.downcase}" if options[:friends_screen_name]
         when :no_answer
-          notification = "#{options[:friends_screen_name]} min chleuy torb te? "
+          notification = "Kmean nor-na chat te? "
         when :friend_unavailable
           notification = "Som-tos pel nis #{options[:friends_screen_name]} min tom-nae te. "
           instructions = default_instructions
@@ -76,7 +76,7 @@
         end
 
         outcome ||= default_outcome
-        "chibi: " << notification << instructions << outcome
+        notification << instructions << outcome
       }
     }
   }
