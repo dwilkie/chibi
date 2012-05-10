@@ -337,7 +337,7 @@ describe Chat do
       context "given there are undelivered messages for the deactivated users" do
         def setup_chat_reactivation_scenario(user, users_old_relationship)
           # create an old chat
-          users_old_chat = users_old_relationship.is_a?(subject.class) ? users_old_relationship : create(:chat, users_old_relationship => user)
+          users_old_chat = users_old_relationship.is_a?(subject.class) ? users_old_relationship : send("active_chat_with_single_#{users_old_relationship}")
 
           # create an undelivered reply to the old chat
           message_from_old_friend = create(:reply, :user => user, :chat => users_old_chat, :body => "Hi buddy")

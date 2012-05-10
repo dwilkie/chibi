@@ -129,9 +129,15 @@ class Chat < ActiveRecord::Base
   private
 
   def self.with_undelivered_messages_for(user)
-    scoped.includes(:replies).joins(:user).joins(:friend).where(
-      :users => {:active_chat_id => nil, :online => true}
-    ).where(:friends_chats => {:active_chat_id => nil, :online => true}).where(
+    # return chats that have undelivered messages and the chat participants
+    # are available to chat again
+    scoped.joins(:user).joins(:friend).where(
+      "users.active_chat_id IS NULL OR users.active_chat_id = #{table_name}.id"
+    ).where(
+      :users => {:online => true}
+    ).where(
+      "friends_chats.active_chat_id IS NULL OR friends_chats.active_chat_id =  #{table_name}.id"
+    ).where(:friends_chats => {:online => true}).includes(:replies).where(
       :replies => {:delivered_at => nil, :user_id => user.id}
     ).readonly(false)
   end
