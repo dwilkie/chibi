@@ -2,27 +2,7 @@
   :en => {
     :replies => {
       :greetings => lambda {|key, options|
-
-        formatted_friends_name = " #{options[:friends_name].to_s.capitalize}" if options[:friends_name]
-
-        greetings = []
-
-        greeting_starters = ["Hi", "Hey", "Hello"]
-        ice_breakers = ["How r u?", "What r u doing?", nil]
-        greeting_enders = ["Wanna chat with me?", nil]
-
-        greeting_starters.each do |greeting_starter|
-          ice_breakers.each do |ice_breaker|
-            ice_breaker = " #{ice_breaker}" if ice_breaker
-            greeting_enders.each do |greeting_ender|
-              greeting_ender = " #{greeting_ender}" if greeting_ender
-              greetings << "#{greeting_starter}!#{ice_breaker}#{greeting_ender}"
-              greetings << "#{greeting_starter}#{formatted_friends_name}!#{ice_breaker}#{greeting_ender}" if formatted_friends_name
-            end
-          end
-        end
-
-        greetings
+        ["Hi!", "Hey!", "Hello!"]
       },
 
       :welcome => lambda {|key, options|
