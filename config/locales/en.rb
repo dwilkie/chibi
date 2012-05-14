@@ -2,7 +2,7 @@
   :en => {
     :replies => {
       :greetings => lambda {|key, options|
-        ["Hi!", "Hey!", "Hello!"]
+        ["Hi!", "Hey!"]
       },
 
       :welcome => lambda {|key, options|

@@ -3,7 +3,7 @@
     :replies => {
 
       :greetings => lambda {|key, options|
-        ["Sousdey!", "Hi!", "Hello!"]
+        ["Sousdey!", "Hi!"]
       },
 
       :welcome => lambda {|key, options|
