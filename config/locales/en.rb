@@ -35,7 +35,7 @@
           notification = "You are now offline. "
           instructions = "Chat with #{options[:friends_screen_name]} again by replying to this message or #{default_instructions.downcase}" if options[:friends_screen_name]
         when :no_answer
-          notification = "Want to meet a new friend? "
+          notification = "INFO: Want to chat with someone new? "
         when :friend_unavailable
           notification = "Sorry #{options[:friends_screen_name]} is currently unavailable. "
           instructions = default_instructions

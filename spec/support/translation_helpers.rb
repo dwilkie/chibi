@@ -34,13 +34,13 @@ module TranslationHelpers
     },
 
     :anonymous_chat_has_ended => {
-      :en => "Want to meet a new friend? Txt ur name, age, sex, city & gender ur seeking to meet someone new",
-      :kh => "Jong rok mit tmey? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
+      :en => "INFO: Want to chat with someone new? Txt ur name, age, sex, city & gender ur seeking to meet someone new",
+      :kh => "INFO: Jong chat jea-moy mit tmey? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
     },
 
     :chat_has_ended => {
-      :en => "Want to meet a new friend? Txt 'new' to meet someone new",
-      :kh => "Jong rok mit tmey? Sorsay 'new' derm-bei rok mit tmey teat"
+      :en => "INFO: Want to chat with someone new? Txt 'new' to meet someone new",
+      :kh => "INFO: Jong chat jea-moy mit tmey? Sorsay 'new' derm-bei rok mit tmey teat"
     },
 
     :logged_out_from_chat => {
