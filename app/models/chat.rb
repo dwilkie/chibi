@@ -32,9 +32,19 @@ class Chat < ActiveRecord::Base
     chatable_resources_scope.filter_params(params).includes(:user, :friend, :active_users)
   end
 
+  def self.activate_multiple!(user, options = {})
+    num_new_chats = options[:count] || 5
+
+    # do this at least once in order to deactivate any existing chats
+    initialize_and_activate_for_friend!(user, nil, options)
+    user.matches.limit(num_new_chats - 1).each do |friend|
+      initialize_and_activate_for_friend!(user, friend, options)
+    end
+  end
+
   def activate!(options = {})
     self.friend ||= user.match
-    active_users << user
+    active_users << user unless options[:activate_user] == false
     active_users << friend if friend
 
     if user.currently_chatting?
@@ -101,7 +111,7 @@ class Chat < ActiveRecord::Base
       # remove the sender of the message from current chat
       deactivate!
       # start a new chat for the sender of the message
-      self.class.new(:user => reference_user.reload).activate!(:notify => true, :notify_no_match => false)
+      self.class.activate_multiple!(reference_user.reload, :notify => true, :notify_no_match => false)
     end
   end
 
@@ -130,6 +140,10 @@ class Chat < ActiveRecord::Base
   end
 
   private
+
+  def self.initialize_and_activate_for_friend!(user, friend = nil, options = {})
+    new(:user => user, :friend => friend).activate!(options.merge(:activate_user => false))
+  end
 
   def self.with_undelivered_messages_for(user)
     # return chats that have undelivered messages and the chat participants

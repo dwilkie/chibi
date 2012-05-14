@@ -33,7 +33,7 @@ class Message < ActiveRecord::Base
       end
     end
 
-    build_chat(:user => user).activate!(:notify => true, :notify_no_match => false) if start_new_chat
+    Chat.activate_multiple!(user, :notify => true, :notify_no_match => false) if start_new_chat
   end
 
   private

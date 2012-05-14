@@ -112,6 +112,16 @@ describe Chat do
         friend.active_chat.should == reference_chat
       end
 
+      context "passing :activate_user => false" do
+        it "should only activate the chat for the friend" do
+          reference_chat.activate!(:activate_user => false)
+          reference_chat.should_not be_active
+          reference_chat.should be_persisted
+          user.active_chat.should be_nil
+          friend.active_chat.should == reference_chat
+        end
+      end
+
       context "passing :notify => true" do
         it "should introduce only the chat partner" do
           expect_message { reference_chat.activate!(:notify => true) }
@@ -508,7 +518,7 @@ describe Chat do
         assert_forward_message_to(unavailable_user, recipient, chat_session, message, false)
       end
 
-      it "should save the message for sending later and find a new friend for the sender" do
+      it "should save the message for sending later and find new friends for the sender" do
         assert_new_friend_for_sender(:user, friend)
         assert_new_friend_for_sender(:friend, user)
       end
@@ -533,6 +543,50 @@ describe Chat do
 
       subject.user = user
       subject.initiator.should == user
+    end
+  end
+
+  describe ".activate_multiple" do
+    before do
+      create_list(:user, 10)
+    end
+
+    def with_new_chats(&block)
+      subject.class.all.each do |chat|
+        yield chat
+      end
+    end
+
+    context "passing no options" do
+      it "should create 5 new chats for the user" do
+        subject.class.activate_multiple!(friend)
+        subject.class.count.should == 5
+        friend.reload.active_chat.should be_nil
+
+        with_new_chats do |chat|
+          chat.user.should == friend
+          chat.active_users.should == [chat.friend]
+        end
+      end
+    end
+
+    context "passing :count => 7" do
+      it "should create 7 new chats for the user" do
+        subject.class.activate_multiple!(friend, :count => 7)
+        subject.class.count.should == 7
+      end
+    end
+
+    context "passing :notify => true" do
+      it "should notify the all the new friends" do
+        expect_message { subject.class.activate_multiple!(friend, :notify => true) }
+        reply_to(friend).should be_nil
+
+        with_new_chats do |chat|
+          new_friend = chat.friend
+          reply_to(new_friend).body.should =~ /^#{spec_translate(:forward_message_approx, new_friend.locale, friend.screen_id)}/
+        end
+      end
     end
   end
 
