@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/dwilkie/countries.git
-  revision: 71ca2cba76e50cc56adfd69e275ff544368a8746
+  revision: 2ad9b92bd539910e0e2e06227ac17a0fa214e7e9
   specs:
     countries (0.8.2)
       currencies (>= 0.4.0)
