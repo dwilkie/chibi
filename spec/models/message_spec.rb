@@ -136,20 +136,13 @@ describe Message do
 
           it "should logout the user but not notify him that he is now offline" do
             reply_to(user).should be_nil
-            reply_to(friend).body.should == spec_translate(
-              :anonymous_chat_has_ended, friend.locale
-            )
+            reply_to(friend).should be_nil
             user.should be_currently_chatting
             user.should_not be_online
           end
 
-          it "should notify the user's partner that the chat has ended and how to update their profile" do
-            replies_to(friend, chat).count.should == 1
-
-            reply_to(friend, chat).body.should == spec_translate(
-              :anonymous_chat_has_ended, friend.locale
-            )
-
+          it "should not inform the user's partner how to update their profile" do
+            reply_to(friend, chat).should be_nil
             friend.reload
             friend.should_not be_currently_chatting
             friend.should be_online
@@ -164,13 +157,8 @@ describe Message do
 
           it_should_behave_like "starting a new chat"
 
-          it "should inform the user's partner how find a new friend" do
-            replies_to(friend, chat).count.should == 1
-
-            reply_to(friend, chat).body.should == spec_translate(
-              :chat_has_ended, friend.locale
-            )
-
+          it "should not inform the user's partner how find a new friend" do
+            reply_to(friend, chat).should be_nil
             friend.reload
             friend.should be_currently_chatting
             friend.should be_online

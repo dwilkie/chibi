@@ -49,7 +49,7 @@ class Chat < ActiveRecord::Base
 
     if user.currently_chatting?
       current_chat = user.active_chat
-      current_partner = current_chat.partner(user) if options[:notify]
+      current_partner = current_chat.partner(user) if options[:notify] && options[:notify_previous_partner]
       current_chat.deactivate!(
         :active_user => user, :notify => current_partner, :reactivate_previous_chat => false
       )

@@ -316,12 +316,12 @@ describe "Messages" do
               send_message(:from => dave, :body => "stop")
             end
 
-            it "should log me out and notify my friend" do
+            it "should log me out but not notify my friend" do
               reply_to(dave).body.should_not == spec_translate(
                 :logged_out_from_chat, dave.locale, joy.screen_id
               )
 
-              reply_to(joy).body.should == spec_translate(
+              reply_to(joy).body.should_not == spec_translate(
                 :chat_has_ended, joy.locale
               )
             end
@@ -352,8 +352,8 @@ describe "Messages" do
           end
 
           shared_examples_for "ending my current chat" do
-            it "should end my current chat and give me instructions on how to start a new one" do
-              reply_to(dave).body.should == spec_translate(
+            it "should end my current chat but not give me instructions on how to start a new one" do
+              reply_to(dave).body.should_not == spec_translate(
                 :chat_has_ended, dave.locale
               )
             end

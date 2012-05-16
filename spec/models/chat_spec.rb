@@ -167,12 +167,19 @@ describe Chat do
       end
 
       context "passing :notify => true" do
-        it "should inform the current chat partner how to find a new friend" do
+        it "should not inform the previous chat partner how to find a new friend" do
           expect_message { new_chat.activate!(:notify => true) }
-          reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
-            :chat_has_ended, current_chat_partner.locale
-          )
+          reply_to(current_chat_partner, current_active_chat).should be_nil
           reply_to(user, current_active_chat).should be_nil
+        end
+
+        context "and :notify_previous_partner => true" do
+          it "should inform the previous chat partner how to find a new friend" do
+            expect_message { new_chat.activate!(:notify => true, :notify_previous_partner => true) }
+            reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
+              :chat_has_ended, current_chat_partner.locale
+            )
+          end
         end
       end
 
