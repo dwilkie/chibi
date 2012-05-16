@@ -327,19 +327,22 @@ describe "Messages" do
             end
           end
 
-          context "'Hi knyom sok 27 nov kt want 2 chat with me? 012 232 234'" do
+          context "'Hi nyom chhmous sok 27 nov kt want 2 chat with me? 012 232 234'" do
             before do
-              send_message(:from => dave, :body => "Hi knyom sok 27 nov kt want 2 chat with me? 012 232 234")
+              send_message(
+                :from => dave, :body => "Hi nyom chhmous sok 27 nov kt want 2 chat with me? 012 232 234",
+                :location => true, :cassette => "kh/kampong_thum"
+              )
               dave.reload
             end
 
-            it "should forward my message to my chat partner" do
-              dave.name.should_not == "sok"
-              dave.age.should_not == 27
-              dave.location.city.should_not == "Kampong Thom"
+            it "should forward my message to my chat partner and update my profile" do
+              dave.name.should == "sok"
+              dave.age.should == 27
+              dave.location.city.should == "Kampong Thom"
               dave.mobile_number.should_not == "012232234"
               reply_to(joy).body.should == spec_translate(
-                :forward_message, joy.locale, dave.screen_id, "Hi knyom sok 27 nov kt want 2 chat with me? 012 232 234"
+                :forward_message, joy.locale, dave.screen_id, "Hi nyom chhmous sok 27 nov kt want 2 chat with me? 012 232 234"
               )
             end
           end

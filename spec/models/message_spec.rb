@@ -168,7 +168,7 @@ describe Message do
         context "anything else but 'stop' or 'new'" do
           before do
             message.body = "hello"
-            expect_message { message.process! }
+            expect_locate { expect_message { message.process! } }
           end
 
           it "should forward the message to the other chat participant and save the message in the chat" do
