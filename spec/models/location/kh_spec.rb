@@ -115,7 +115,7 @@ describe Location do
         },
 
         "krong kep" => {
-          :abbreviations => ["kep", "ke", "k.e"],
+          :abbreviations => ["kep"],
           :expected_city => "Kep",
           :expected_latitude => 10.51523510,
           :expected_longitude => 104.3326440
