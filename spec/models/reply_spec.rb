@@ -39,13 +39,24 @@ describe Reply do
         user_country_code = local_user.country_code
         reply.user = local_user
         expect_message { reply.send(method, *options[:args]) }
-        reply.body.should == spec_translate(key, [user_locale, user_country_code], *options[:interpolations])
+        asserted_reply = spec_translate(key, [user_locale, user_country_code], *options[:interpolations])
+        if options[:approx]
+          reply.body.should =~ /#{asserted_reply}/
+        else
+          reply.body.should == asserted_reply
+        end
+
         if options[:no_alternate_translation]
           reply.locale.should be_nil
           reply.alternate_translation.should be_nil
         else
           reply.locale.should == local_user.locale
-          reply.alternate_translation.should == spec_translate(key, [alternate_locale, user_country_code], *options[:interpolations])
+          asserted_alternate_translation = spec_translate(key, [alternate_locale, user_country_code], *options[:interpolations])
+          if options[:approx]
+            reply.alternate_translation.should =~ /#{asserted_alternate_translation}/
+          else
+            reply.alternate_translation.should == asserted_alternate_translation
+          end
         end
         assert_persisted_and_delivered(reply, local_user.mobile_number, options)
       end
@@ -56,6 +67,14 @@ describe Reply do
     it "should be valid" do
       new_reply.should be_valid
     end
+  end
+
+  it_should_behave_like "communicable" do
+    let(:communicable_resource) { reply }
+  end
+
+  it_should_behave_like "chatable" do
+    let(:chatable_resource) { reply }
   end
 
   it_should_behave_like "analyzable"
@@ -95,10 +114,6 @@ describe Reply do
         end
       end
     end
-  end
-
-  it_should_behave_like "chatable" do
-    let(:chatable_resource) { reply }
   end
 
   describe ".undelivered" do
@@ -245,6 +260,15 @@ describe Reply do
           :test_users => [english_user_only_missing_sexual_preference]
         )
       end
+    end
+  end
+
+  describe "#send_reminder!" do
+    it "should send the user a reminder on how to use the service" do
+      assert_reply(
+        :send_reminder!, :anonymous_reminder_approx,
+        :args => [], :approx => true
+      )
     end
   end
 

@@ -2,6 +2,7 @@
 
 class Message < ActiveRecord::Base
   include Communicable
+  include Communicable::FromUser
   include Communicable::Chatable
   include Analyzable
 

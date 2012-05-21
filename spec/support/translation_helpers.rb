@@ -71,6 +71,16 @@ module TranslationHelpers
     :forward_message_approx => {
       :en => "#[0]: ",
       :kh => "#[0]: "
+    },
+
+    :anonymous_reminder_approx => {
+      :en => "Txt ur name, age, sex, city & gender ur seeking",
+      :kh => "Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok"
+    },
+
+    :reminder_approx => {
+      :en => "Txt 'new' to",
+      :kh => "Sorsay 'new' derm-bei"
     }
   }
 

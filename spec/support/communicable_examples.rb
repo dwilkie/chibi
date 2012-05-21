@@ -1,7 +1,28 @@
-CHATABLE_RESOURCES = [:messages, :replies, :phone_calls]
+COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
 shared_examples_for "communicable" do
+  describe ".users_latest" do
+    # this is a helper method to be used as part of another query
+
+    def unescape_first(values)
+      values.first.gsub(/[\\"]/, "")
+    end
+
+    it "should select the created at time of the most recent communicable resource" do
+      communicable_resource_klass = communicable_resource.class
+      table_name = communicable_resource_klass.table_name
+      relation = communicable_resource_klass.users_latest
+
+      unescape_first(relation.select_values).should == "#{table_name}.created_at"
+      unescape_first(relation.where_values).should == "#{table_name}.user_id = users.id"
+      unescape_first(relation.order_values).should == "#{table_name}.created_at DESC"
+      relation.limit_value.should == 1
+    end
+  end
+end
+
+shared_examples_for "communicable from user" do
   let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
   let(:user) { build(:user) }
 
@@ -31,7 +52,6 @@ shared_examples_for "communicable" do
   end
 
   describe "callbacks" do
-
     context "when saving" do
       before do
         communicable_resource.save
@@ -94,7 +114,6 @@ shared_examples_for "communicable" do
 end
 
 shared_examples_for "chatable" do
-
   let(:chat) { create(:active_chat, :user => user) }
   let(:user) { build(:user) }
 
@@ -141,9 +160,8 @@ shared_examples_for "chatable" do
   end
 end
 
-shared_examples_for "filtering with chatable resources" do
-
-  def assert_respond_to_chatable_resources_counts(result)
+shared_examples_for "filtering with communicable resources" do
+  def assert_respond_to_communicable_resources_counts(result)
     result.messages_count.should == "0"
     result.replies_count.should == "0"
     result.phone_calls_count.should == "0"
@@ -158,7 +176,7 @@ shared_examples_for "filtering with chatable resources" do
       subject.class.filter_by.should == resources.reverse
     end
 
-    it "should include a count of the chatable resources associations" do
+    it "should include a count of the communicable resources associations" do
       relation = subject.class.filter_by
       relation.select_values.first.split(/\,\s+/)[1..-1].should == [
         "COUNT(DISTINCT(messages.id)) AS messages_count",
@@ -176,8 +194,8 @@ shared_examples_for "filtering with chatable resources" do
       end
     end
 
-    it "should include counts for the chatable resources" do
-      assert_respond_to_chatable_resources_counts(subject.class.filter_by.first)
+    it "should include counts for the communicable resources" do
+      assert_respond_to_communicable_resources_counts(subject.class.filter_by.first)
     end
   end
 
@@ -193,14 +211,14 @@ shared_examples_for "filtering with chatable resources" do
     end
   end
 
-  describe ".find_with_chatable_resources_counts" do
-    it "should behave like .find but the result should respond to counts for chatable resources" do
-      assert_respond_to_chatable_resources_counts(
-        subject.class.find_with_chatable_resources_counts(resources.first.id)
+  describe ".find_with_communicable_resources_counts" do
+    it "should behave like .find but the result should respond to counts for communicable resources" do
+      assert_respond_to_communicable_resources_counts(
+        subject.class.find_with_communicable_resources_counts(resources.first.id)
       )
 
       expect {
-        subject.class.find_with_chatable_resources_counts(0)
+        subject.class.find_with_communicable_resources_counts(0)
       }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end

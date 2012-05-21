@@ -1,4 +1,5 @@
 class Reply < ActiveRecord::Base
+  include Communicable
   include Communicable::Chatable
   include Analyzable
 
@@ -76,6 +77,10 @@ class Reply < ActiveRecord::Base
       )
     end
     deliver!
+  end
+
+  def send_reminder!
+    explain_how_to_start_a_new_chat!(:reminder)
   end
 
   def welcome!

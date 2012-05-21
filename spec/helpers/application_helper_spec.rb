@@ -7,15 +7,14 @@ describe ApplicationHelper do
     helper.send :init_haml_helpers
   end
 
-  describe "#chatable_links" do
-
-    def assert_chatable_content(resource, resource_name)
-      CHATABLE_RESOURCES.each do |chatable_resources|
-        chatable_resources_count = resource.send(chatable_resources).count
-        output = helper.chatable_links(resource)
-        xpath = "//td[@id='#{chatable_resources}']"
-        expected_text = chatable_resources_count.to_s
-        if chatable_resources_count.zero?
+  describe "#communicable_links" do
+    def assert_communicable_content(resource, resource_name)
+      COMMUNICABLE_RESOURCES.each do |communicable_resources|
+        communicable_resources_count = resource.send(communicable_resources).count
+        output = helper.communicable_links(resource)
+        xpath = "//td[@id='#{communicable_resources}']"
+        expected_text = communicable_resources_count.to_s
+        if communicable_resources_count.zero?
           output.should have_xpath(xpath, :text => expected_text)
         else
           output.should have_xpath(
@@ -26,22 +25,22 @@ describe ApplicationHelper do
       end
     end
 
-    def assert_chatable_links(resource_class, resource_name)
+    def assert_communicable_links(resource_class, resource_name)
       reference_resource = resource_class.filter_by.first
-      assert_chatable_content(reference_resource, resource_name)
+      assert_communicable_content(reference_resource, resource_name)
       resource = create(resource_name)
-      CHATABLE_RESOURCES.each do |chatable_resources|
-        create(chatable_resources.to_s.singularize, resource_name => resource)
+      COMMUNICABLE_RESOURCES.each do |communicable_resources|
+        create(communicable_resources.to_s.singularize, resource_name => resource)
       end
       reference_resource = resource_class.filter_by.first
-      assert_chatable_content(reference_resource, resource_name)
+      assert_communicable_content(reference_resource, resource_name)
     end
 
-    it "should return a link for the chatable resource" do
+    it "should return a link for the communicable resource" do
       [User, Chat].each do |resource_class|
         resource_name = resource_class.to_s.underscore.to_sym
         create(resource_name)
-        assert_chatable_links(resource_class, resource_name)
+        assert_communicable_links(resource_class, resource_name)
       end
     end
   end

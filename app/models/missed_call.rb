@@ -1,5 +1,6 @@
 class MissedCall < ActiveRecord::Base
   include Communicable
+  include Communicable::FromUser
   include TwilioHelpers
 
   attr_accessor :subject

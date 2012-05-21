@@ -109,7 +109,7 @@ describe User do
 
   it_should_behave_like "analyzable"
 
-  it_should_behave_like "filtering with chatable resources" do
+  it_should_behave_like "filtering with communicable resources" do
     let(:resources) { [user, friend] }
   end
 
@@ -137,8 +137,47 @@ describe User do
     end
   end
 
-  describe ".matches" do
+  describe ".remind!" do
+    let(:user_without_recent_interaction) { create(:user_without_recent_interaction) }
+    let(:user_with_recent_interaction) { create(:user_with_recent_interaction) }
 
+    def reminders_to(reference_user)
+      replies_to(reference_user).where(:created_at => Time.now)
+    end
+
+    before do
+      user
+      user_without_recent_interaction
+      user_with_recent_interaction
+      Timecop.freeze(Time.now)
+    end
+
+    after do
+      Timecop.return
+    end
+
+    it "should only remind users without interaction in within the last 5 days" do
+      expect_message { subject.class.remind! }
+      # run it twice to check that we don't resend reminders
+      subject.class.remind!
+
+      [user, user_without_recent_interaction].each do |reference_user|
+        reminders_to(reference_user).count.should == 1
+        reply_to(reference_user).body.should =~ /#{spec_translate(:anonymous_reminder_approx, user.locale)}/
+      end
+
+      reminders_to(user_with_recent_interaction).should be_empty
+    end
+  end
+
+  describe "#remind!" do
+    it "should send a reminder to the user" do
+      expect_message { user.remind! }
+      reply_to(user).body.should =~ /#{spec_translate(:anonymous_reminder_approx, user.locale)}/
+    end
+  end
+
+  describe ".matches" do
     # Match Explanations
     # see spec/factories.rb for where users are defined
 

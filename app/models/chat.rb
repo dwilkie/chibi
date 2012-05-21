@@ -1,5 +1,5 @@
 class Chat < ActiveRecord::Base
-  include Communicable::HasChatableResources
+  include Communicable::HasCommunicableResources
 
   belongs_to :user
   belongs_to :friend, :class_name => 'User'
@@ -29,7 +29,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.filter_by(params = {})
-    chatable_resources_scope.filter_params(params).includes(:user, :friend, :active_users)
+    communicable_resources_scope.filter_params(params).includes(:user, :friend, :active_users)
   end
 
   def self.activate_multiple!(user, options = {})

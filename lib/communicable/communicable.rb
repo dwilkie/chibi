@@ -1,25 +1,43 @@
 module Communicable
   extend ActiveSupport::Concern
 
-  included do
-    attr_accessible :from
+  module ClassMethods
+    def users_latest
+      association_reflection = reflect_on_association(:user)
 
-    belongs_to :user, :touch => true
-
-    validates :user, :associated => true, :presence => true
-    validates :from, :presence => true
-
-    after_initialize :assign_to_user
+      select(
+        "\"#{table_name}\".\"created_at\""
+      ).where(
+        "\"#{table_name}\".\"#{association_reflection.foreign_key}\" = \"#{association_reflection.klass.table_name}\".\"id\""
+      ).order(
+        "\"#{table_name}\".\"created_at\" DESC"
+      ).limit(1)
+    end
   end
 
-  def from=(value)
-    write_attribute(:from, value.gsub(/\D/, "")) if value
-  end
+  module FromUser
+    extend ActiveSupport::Concern
 
-  private
+    included do
+      attr_accessible :from
 
-  def assign_to_user
-    self.user = User.find_or_initialize_by_mobile_number(from) unless user_id.present?
+      belongs_to :user, :touch => true
+
+      validates :user, :associated => true, :presence => true
+      validates :from, :presence => true
+
+      after_initialize :assign_to_user
+    end
+
+    def from=(value)
+      write_attribute(:from, value.gsub(/\D/, "")) if value
+    end
+
+    private
+
+    def assign_to_user
+      self.user = User.find_or_initialize_by_mobile_number(from) unless user_id.present?
+    end
   end
 
   module Chatable
@@ -36,26 +54,28 @@ module Communicable
     end
   end
 
-  module HasChatableResources
+  module HasCommunicableResources
     extend ActiveSupport::Concern
 
+    COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
+
     included do
-      has_many :messages
-      has_many :replies
-      has_many :phone_calls
+      COMMUNICABLE_RESOURCES.each do |communicable_resource|
+        has_many communicable_resource
+      end
     end
 
     module ClassMethods
       def filter_by(params = {})
-        chatable_resources_scope.filter_params(params)
+        communicable_resources_scope.filter_params(params)
       end
 
       def filter_by_count(params = {})
         filter_params(params).count
       end
 
-      def find_with_chatable_resources_counts(id)
-        result = chatable_resources_scope.where(:id => id).first
+      def find_with_communicable_resources_counts(id)
+        result = communicable_resources_scope.where(:id => id).first
         raise ActiveRecord::RecordNotFound unless result.present?
         result
       end
@@ -66,21 +86,18 @@ module Communicable
 
       private
 
-      def chatable_resources_scope
+      def communicable_resources_scope
         joins_column_name = "#{table_name.singularize}_id"
 
-        scoped.select(
-          "#{table_name}.*,
-          COUNT(DISTINCT(messages.id)) AS messages_count,
-          COUNT(DISTINCT(replies.id)) AS replies_count,
-          COUNT(DISTINCT(phone_calls.id)) AS phone_calls_count",
-        ).joins(
-          "LEFT OUTER JOIN messages ON messages.#{joins_column_name} = #{table_name}.id"
-        ).joins(
-          "LEFT OUTER JOIN replies ON replies.#{joins_column_name} = #{table_name}.id"
-        ).joins(
-          "LEFT OUTER JOIN phone_calls ON phone_calls.#{joins_column_name} = #{table_name}.id"
-        ).group(all_columns).order(
+        select_values = ["#{table_name}.*"]
+        joins_values = []
+
+        COMMUNICABLE_RESOURCES.each do |communicable_resource|
+          select_values << "COUNT(DISTINCT(#{communicable_resource}.id)) AS #{communicable_resource}_count"
+          joins_values << "LEFT OUTER JOIN #{communicable_resource} ON #{communicable_resource}.#{joins_column_name} = #{table_name}.id"
+        end
+
+        scoped.select(select_values.join(", ")).joins(joins_values.join(" ")).group(all_columns).order(
           "#{table_name}.created_at DESC"
         )
       end

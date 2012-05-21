@@ -597,7 +597,7 @@ describe Chat do
     end
   end
 
-  it_should_behave_like "filtering with chatable resources" do
+  it_should_behave_like "filtering with communicable resources" do
     let(:resources) { [chat, unique_active_chat] }
   end
 

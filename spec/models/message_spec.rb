@@ -21,6 +21,10 @@ describe Message do
     let(:communicable_resource) { new_message }
   end
 
+  it_should_behave_like "communicable from user" do
+    let(:communicable_resource) { new_message }
+  end
+
   it_should_behave_like "chatable" do
     let(:chatable_resource) { message }
   end

@@ -2,7 +2,7 @@
 
 class User < ActiveRecord::Base
   include Analyzable
-  include Communicable::HasChatableResources
+  include Communicable::HasCommunicableResources
   include TwilioHelpers
 
   has_one :location, :autosave => true
@@ -43,6 +43,18 @@ class User < ActiveRecord::Base
     scope = super.where(params.slice(:gender))
     scope = exclude_unavailable(scope) if params[:available]
     scope
+  end
+
+  def self.remind!(options = {})
+    inactivity_period = options[:inactivity_period] || 5.days
+    limit = options[:limit] || 100
+    since = inactivity_period.ago
+
+    users_to_remind = without_recent_interaction(since).where(:online => true).limit(limit)
+
+    users_to_remind.each do |user_to_remind|
+      user_to_remind.remind!
+    end
   end
 
   def self.matches(user)
@@ -167,6 +179,10 @@ class User < ActiveRecord::Base
 
   def screen_id
     (name || screen_name).try(:capitalize)
+  end
+
+  def remind!
+    replies.build.send_reminder!
   end
 
   def login!
@@ -394,6 +410,19 @@ class User < ActiveRecord::Base
     end
 
     scope.where(condition_statements.join(condition_sql), *condition_values)
+  end
+
+  def self.without_recent_interaction(since)
+    where_values = []
+
+    scope = scoped
+
+    COMMUNICABLE_RESOURCES.each do |communicable_resource|
+      sub_statement = reflect_on_association(communicable_resource).klass.users_latest.to_sql
+      scope = scope.where("(#{sub_statement}) < ? OR (#{sub_statement}) IS NULL", since)
+    end
+
+    scope
   end
 
   def self.exclude_unavailable(scope)

@@ -27,6 +27,10 @@ describe PhoneCall do
     let(:communicable_resource) { new_phone_call }
   end
 
+  it_should_behave_like "communicable from user" do
+    let(:communicable_resource) { new_phone_call }
+  end
+
   it_should_behave_like "chatable" do
     let(:chatable_resource) { phone_call }
   end

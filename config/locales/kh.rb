@@ -1,7 +1,6 @@
 {
   :kh => {
     :replies => {
-
       :greetings => lambda {|key, options|
         ["Sousdey!", "Hi!"]
       },
@@ -36,6 +35,11 @@
           default_instructions = ""
           default_instructions_outcome = "derm-bei pjea-yeam m-dong teat"
           custom_or_no_instructions_outcome = "Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
+        when :reminder
+          greeting = I18n.t("replies.greetings", :locale => :kh).sample
+          opener = ["Jong rok mit tmey?", "Jong leng sms?"].sample
+          notification = "#{greeting} #{opener} "
+          default_instructions_outcome = custom_or_no_instructions_outcome = ["derm-bei rok mit tmey", "derm-bei chaab-pderm", "derm-bei pjea-yeam", "derm-bei sak-lbong"].sample
         end
 
         if !instructions && options[:missing_profile_attributes].try(:any?)

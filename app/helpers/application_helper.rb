@@ -1,17 +1,17 @@
 module ApplicationHelper
-  def chatable_links(resource)
+  def communicable_links(resource)
     resource_name = resource.class.to_s.underscore
     capture_haml do
-      [:messages, :replies, :phone_calls].each do |chatable_resources|
-        chatable_resource_count = resource.send("#{chatable_resources}_count").to_i
-        if chatable_resource_count.zero?
-          content = chatable_resource_count
+      resource.class::COMMUNICABLE_RESOURCES.each do |communicable_resources|
+        communicable_resource_count = resource.send("#{communicable_resources}_count").to_i
+        if communicable_resource_count.zero?
+          content = communicable_resource_count
         else
           content = link_to(
-            chatable_resource_count, send("#{resource_name}_interaction_path", resource)
+            communicable_resource_count, send("#{resource_name}_interaction_path", resource)
           )
         end
-        haml_tag :td, :id => chatable_resources do
+        haml_tag :td, :id => communicable_resources do
           haml_concat content
         end
       end

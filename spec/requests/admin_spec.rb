@@ -24,7 +24,7 @@ describe "Admin" do
   let(:chats) { [another_chat, chat] }
   let(:phone_calls) { [phone_call, another_phone_call] }
 
-  let(:chatable_resources) { [messages, replies, phone_calls] }
+  let(:communicable_resources) { [messages, replies, phone_calls] }
 
   def authorize
     page.driver.browser.basic_authorize(
@@ -108,14 +108,14 @@ describe "Admin" do
         page.should have_link reference_user.mobile_number, :href => user_path(reference_user)
       end
 
-      assert_chatable_resources_counts(reference_user)
+      assert_communicable_resources_counts(reference_user)
     end
 
     def assert_chat_show(reference_chat)
       page.should have_content time_ago_in_words(10)
       page.should have_content reference_chat.active?
 
-      assert_chatable_resources_counts(reference_chat)
+      assert_communicable_resources_counts(reference_chat)
 
       USER_TYPES_IN_CHAT.each do |user_type|
         within("##{user_type}") do
@@ -134,18 +134,18 @@ describe "Admin" do
       minutes_ago.zero? ? "less than a minute ago" : "#{minutes_ago} minutes ago"
     end
 
-    def assert_chatable_resources_counts(resource)
-      CHATABLE_RESOURCES.each do |chatable_resources|
-        within("##{chatable_resources}") do
-          chatable_resources_count = resource.send(chatable_resources).count
-          chatable_resources_link = chatable_resources_count.to_s
+    def assert_communicable_resources_counts(resource)
+      COMMUNICABLE_RESOURCES.each do |communicable_resources|
+        within("##{communicable_resources}") do
+          communicable_resources_count = resource.send(communicable_resources).count
+          communicable_resources_link = communicable_resources_count.to_s
 
-          if chatable_resources_count.zero?
-            page.should have_no_link(chatable_resources_link)
-            page.should have_content(chatable_resources_link)
+          if communicable_resources_count.zero?
+            page.should have_no_link(communicable_resources_link)
+            page.should have_content(communicable_resources_link)
           else
             page.should have_link(
-              chatable_resources_link,
+              communicable_resources_link,
               :href => send("#{resource.class.to_s.underscore}_interaction_path", resource)
             )
           end
@@ -195,12 +195,12 @@ describe "Admin" do
     def assert_navigate_to_interaction(resource_name)
       resources_name = resource_name.to_s.pluralize
 
-      CHATABLE_RESOURCES.each do |chatable_resources|
+      COMMUNICABLE_RESOURCES.each do |communicable_resources|
 
         visit send("#{resources_name}_path")
 
-        within("##{resource_name}_1 ##{chatable_resources}") do
-          click_link(send(resource_name).send(chatable_resources).count.to_s)
+        within("##{resource_name}_1 ##{communicable_resources}") do
+          click_link(send(resource_name).send(communicable_resources).count.to_s)
         end
 
         assert_show_interaction
@@ -246,7 +246,7 @@ describe "Admin" do
     context "given some chats" do
       before do
         chats
-        chatable_resources
+        communicable_resources
       end
 
       context "when I visit '/chats'" do
@@ -274,7 +274,7 @@ describe "Admin" do
           end
         end
 
-        context "when I click on the number of chatable resources for one of the chats" do
+        context "when I click on the number of communicable resources for one of the chats" do
           it "should show me this user's interaction" do
             assert_navigate_to_interaction(:chat)
           end
@@ -285,7 +285,7 @@ describe "Admin" do
     context "given some users" do
       before do
         users
-        chatable_resources
+        communicable_resources
       end
 
       context "when I visit '/users'" do
@@ -340,7 +340,7 @@ describe "Admin" do
           end
         end
 
-        context "when I click on the number of chatable resources for one of the users" do
+        context "when I click on the number of communicable resources for one of the users" do
           it "should show me this user's interaction" do
             assert_navigate_to_interaction(:user)
           end
