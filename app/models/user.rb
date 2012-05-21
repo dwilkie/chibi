@@ -517,7 +517,7 @@ class User < ActiveRecord::Base
   end
 
   def extract_date_of_birth(info, force_update)
-    match = strip_match!(info, /(?<!\d)(\d{2})(?!\d)\s*#{profile_keywords(:years_old)}?/i).try(:[], 1)
+    match = strip_match!(info, /(?<!\d(?:\s|\-)|\d)(\d{2})(?!\d|\s+\d)\s*#{profile_keywords(:years_old)}?/i).try(:[], 1)
     self.age = match.to_i if match && (force_update || date_of_birth.nil?)
   end
 

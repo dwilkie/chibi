@@ -332,7 +332,6 @@ describe User do
   end
 
   describe "#update_profile" do
-
     def keywords(*keys)
       options = keys.extract_options!
       options[:user] ||= user
@@ -746,6 +745,27 @@ describe User do
         # sopheak: hello girl607 can u give me ur phone number ?
         registration_examples(
           keywords(:sopheak)
+        )
+
+        # i'm ok, i'm fine, i'm 5 etc
+        registration_examples(
+          keywords(:im_something_other_than_a_name)
+        )
+
+        # my name veayo 21 female from pp want to find friend bõy and gril. Can call or sms.
+        registration_examples(
+          keywords(:veayo),
+          :expected_name => "veayo",
+          :expected_age => 21,
+          :expected_city => "Phnom Penh",
+          :expected_looking_for => :either,
+          :expected_gender => :female,
+          :vcr => {:expect_results => true}
+        )
+
+        # 070 83 85 48, 070-83-85-48
+        registration_examples(
+          keywords(:telephone_number)
         )
       end
     end
