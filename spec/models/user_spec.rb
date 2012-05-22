@@ -767,6 +767,13 @@ describe User do
         registration_examples(
           keywords(:telephone_number)
         )
+
+        # hi . name me vannak . a yu nhom 19 chnam
+        registration_examples(
+          keywords(:vannak),
+          :expected_name => "vannak",
+          :expected_age => 19
+        )
       end
     end
   end
