@@ -1,8 +1,9 @@
 %tr{:id => "chat_#{chat_counter + 1}", :class => cycle("odd", "even")}
-  %td
-    = time_ago_in_words(chat.created_at)
-    ago
-  %td
+  %td#id
+    = chat.id
+  %td#created_at
+    = "#{time_ago_in_words(chat.created_at)} ago"
+  %td#active
     = chat.active?
   %td#user
     = chat_user_link(chat, :user)

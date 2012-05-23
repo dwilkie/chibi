@@ -112,8 +112,9 @@ describe "Admin" do
     end
 
     def assert_chat_show(reference_chat)
-      page.should have_content time_ago_in_words(10)
-      page.should have_content reference_chat.active?
+      page.should have_css "#id", :text => reference_chat.id.to_s
+      page.should have_css "#active", :text => reference_chat.active?
+      page.should have_css "#created_at", :text => time_ago_in_words(10)
 
       assert_communicable_resources_counts(reference_chat)
 
