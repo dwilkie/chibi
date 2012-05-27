@@ -16,7 +16,7 @@ describe Dialer do
       MissedCall.stub(:find).and_return(missed_call)
     end
 
-    it "should tell the message to process itself" do
+    it "should return the call" do
       missed_call.should_receive(:return_call!)
       subject.class.perform(1)
     end

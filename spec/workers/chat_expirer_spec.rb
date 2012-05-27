@@ -13,7 +13,7 @@ describe ChatExpirer do
       Chat.stub(:end_inactive)
     end
 
-    it "should tell the message to process itself" do
+    it "should end inactive chats" do
       Chat.should_receive(:end_inactive) do |options|
         options["some"].should == :options
         options[:some].should == :options
