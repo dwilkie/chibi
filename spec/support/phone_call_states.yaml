@@ -3,42 +3,53 @@
     welcoming_user:
       twiml_expectation: no_response
 - welcoming_user:
-    asking_for_gender:
+    offering_menu:
       twiml_expectation:
         play_languages: welcome
+- offering_menu:
+    finding_new_friend:
+      twiml_expectation:
+        ask_for_input: offer_menu
       substates:
-        association:
-          from_user_with_known_gender:
-            ask_for_looking_for:
-              - :user
-              - :factory: :user_with_gender
-          from_user_with_known_gender_and_looking_for_preference:
-            offering_menu:
-              - :user
-              - :factory: :user_with_gender_and_looking_for_preference
-- asking_for_gender:
-    asking_for_gender:
+        digits:
+          caller_wants_menu:
+            asking_for_age_in_menu: '8'
+        already_in_chat:
+          connecting_user_with_friend:
+            parent: phone_call_with_active_chat
+- asking_for_age_in_menu:
+    asking_for_gender_in_menu:
+      twiml_expectation:
+        ask_for_input:
+          ask_for_age:
+            numDigits: 2
+      substates:
+        digits:
+          caller_is_24_years_old:
+            asking_for_gender_in_menu: '24'
+            expectations:
+              user:
+                age: 24
+- asking_for_gender_in_menu:
+    asking_for_looking_for_in_menu:
       twiml_expectation:
         ask_for_input: ask_for_gender
-      manditory: true
-      contextual_substate_next_states: true
       substates:
         digits:
           caller_answers_male:
-            asking_for_looking_for: '1'
+            asking_for_looking_for_in_menu: '1'
             expectations:
               user:
                 gender: m
           caller_answers_female:
-            asking_for_looking_for: '2'
+            asking_for_looking_for_in_menu: '2'
             expectations:
               user:
                 gender: f
-- asking_for_looking_for:
-    asking_for_looking_for:
+- asking_for_looking_for_in_menu:
+    offering_menu:
       twiml_expectation:
         ask_for_input: ask_for_looking_for
-      manditory: true
       substates:
         digits:
           caller_answers_male:
@@ -51,45 +62,6 @@
             expectations:
               user:
                 looking_for: f
-- asking_for_age_in_menu:
-    asking_for_age_in_menu:
-      twiml_expectation:
-        ask_for_input:
-          ask_for_age:
-            numDigits: 2
-      substates:
-        digits:
-          caller_is_24_years_old:
-            asking_for_gender_in_menu: '24'
-            expectations:
-              user:
-                age: 24
-- offering_menu:
-    finding_new_friend:
-      twiml_expectation:
-        ask_for_input: offer_menu
-      substates:
-        digits:
-          caller_wants_menu:
-            asking_for_age_in_menu: '8'
-        already_in_chat:
-          asking_if_user_wants_to_find_a_new_friend_or_call_existing_one:
-            parent: phone_call_with_active_chat
-      parent: welcoming_user_phone_call_from_user_with_known_gender_and_looking_for_preference
-- asking_if_user_wants_to_find_a_new_friend_or_call_existing_one:
-    asking_if_user_wants_to_find_a_new_friend_or_call_existing_one:
-      twiml_expectation:
-        ask_for_input: ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner
-      substates:
-        digits:
-          caller_wants_existing_friend:
-            connecting_user_with_friend: '1'
-          caller_wants_new_friend:
-            finding_new_friend: '2'
-        friend_no_longer_available:
-          telling_user_their_friend_is_unavailable:
-            parent: phone_call
-      parent: phone_call_with_active_chat
 - finding_new_friend:
     telling_user_to_try_again_later:
       twiml_expectation: redirect_to_current_url
@@ -112,10 +84,6 @@
     completed:
       twiml_expectation:
         play_languages: tell_user_to_try_again_later
-- telling_user_their_friend_is_unavailable:
-    finding_new_friend:
-      twiml_expectation:
-        play_languages: tell_user_their_friend_is_unavailable
 - completed:
     completed:
       twiml_expectation: hangup_current_call

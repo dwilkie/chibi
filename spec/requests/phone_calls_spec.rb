@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "PhoneCalls" do
+describe "PhoneCalls", :focus do
 
   describe "POST /phone_calls.xml" do
     include PhoneCallHelpers
@@ -77,59 +77,8 @@ describe "PhoneCalls" do
               update_current_call_status
             end
 
-            it "should ask me if I want to chat with my friend" do
-              assert_ask_for_input(
-                :ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner
-              )
-            end
-
-            context "and I hold the line again" do
-              context "and my friend is still available to chat" do
-                before do
-                  update_current_call_status
-                end
-
-                it "should ask me again if I want to chat with my friend" do
-                  assert_ask_for_input(
-                    :ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner
-                  )
-                end
-              end
-
-              context "but my friend is no longer available to chat" do
-                before do
-                  active_chat.deactivate!
-                  update_current_call_status
-                end
-
-                it "should tell me that my friend is no longer available and to hold the line to find a new friend" do
-                  assert_play_then_redirect_to_current_url(:tell_user_their_friend_is_unavailable)
-                end
-
-                context "and I hold the line again" do
-
-                  let(:new_friend) { offering_menu_phone_call.reload.user.match }
-
-                  before do
-                    load_users
-                    new_friend
-                    update_current_call_status
-                  end
-
-                  context "and a friend is found for me" do
-                    before do
-                      update_current_call_status
-                    end
-
-                    it "should connect me with a new friend" do
-                      assert_dial_to_current_url(
-                        new_friend.mobile_number,
-                        :callerId => new_friend.twilio_number
-                      )
-                    end
-                  end
-                end
-              end
+            it "should connect me with my friend" do
+              assert_dial_to_current_url(active_chat.friend.mobile_number)
             end
           end
         end
@@ -203,7 +152,7 @@ describe "PhoneCalls" do
                 update_current_call_status(:digits => build(:user_with_age).age)
               end
 
-              it "should ask me if I am male of female" do
+              it "should save my preference and ask me if I am male of female" do
                 assert_ask_for_input(:ask_for_gender)
               end
 
@@ -214,7 +163,7 @@ describe "PhoneCalls" do
                   )
                 end
 
-                it "should ask me if I want to chat with a male or female" do
+                it "should ask me if I want to chat with a boy or a girl" do
                   assert_ask_for_input(:ask_for_looking_for)
                 end
 
@@ -237,8 +186,8 @@ describe "PhoneCalls" do
                     )
                   end
 
-                  it "should ask me again for my looking for preference" do
-                    assert_ask_for_input(:ask_for_looking_for)
+                  it "should ignore my input and offer me the menu" do
+                    assert_ask_for_input(:offer_menu)
                   end
                 end
               end
@@ -250,8 +199,8 @@ describe "PhoneCalls" do
                   )
                 end
 
-                it "should ask me again for my gender" do
-                  assert_ask_for_input(:ask_for_gender)
+                it "should ignore my input and ask me if I want to chat with a boy or a girl" do
+                  assert_ask_for_input(:ask_for_looking_for)
                 end
               end
             end
@@ -261,8 +210,8 @@ describe "PhoneCalls" do
                 update_current_call_status(:digits => build(:user_who_is_too_young).age)
               end
 
-              it "should ask me again for my age" do
-                assert_ask_for_input(:ask_for_age, :numDigits => 2)
+              it "should ignore my input and ask me for my gender" do
+                assert_ask_for_input(:ask_for_gender)
               end
             end
           end
@@ -283,7 +232,6 @@ describe "PhoneCalls" do
           it_should_behave_like "saving the phone call" do
             let(:from) { my_number }
           end
-
         end
       end
 
@@ -303,101 +251,67 @@ describe "PhoneCalls" do
             update_current_call_status
           end
 
-          it "should ask me whether I am a guy or a girl" do
-            assert_ask_for_input(:ask_for_gender)
+          it "should offer me the menu" do
+            assert_ask_for_input(:offer_menu)
           end
 
-          context "if I answer that I am a guy" do
+          context "if I hold the line" do
+            let(:friends) { new_user.matches.all }
+
             before do
-              update_current_call_status(
-                :digits => build(:asking_for_gender_phone_call_caller_answers_male).digits
-              )
+              load_users
+              friends
+              update_current_call_status
             end
 
-            it "should save my preference" do
-              new_user.should be_male
-            end
-
-            it "should ask me whether I want to chat with a guy or a girl" do
-              assert_ask_for_input(:ask_for_looking_for)
-            end
-
-            context "then if I answer that I want to chat with a girl" do
+            context "and there is a girl online to talk with" do
 
               before do
-                update_current_call_status(
-                  :digits =>  build(:asking_for_looking_for_phone_call_caller_answers_female).digits
-                )
+                update_current_call_status
               end
 
-              it "should save my preference" do
-                new_user.looking_for.should == "f"
+              it "should try to connect me with her" do
+                assert_dial_to_current_url(friends[0].mobile_number)
               end
 
-              it "should offer me the menu" do
-                assert_ask_for_input(:offer_menu)
+              context "if she answers" do
+                context "and hangs up first" do
+                  before do
+                    update_current_call_status(:dial_call_status => :completed)
+                  end
+
+                  it "should tell me that my chat has ended" do
+                    assert_play_then_redirect_to_current_url(:tell_user_their_chat_has_ended)
+                  end
+
+                  context "and I hold the line" do
+                    before do
+                      update_current_call_status
+                    end
+
+                    it "should offer me the menu" do
+                      assert_ask_for_input(:offer_menu)
+                    end
+                  end
+                end
               end
 
-              context "and if I don't want the menu" do
-
-                let(:friends) { new_user.matches.all }
-
+              context "but she does not answer" do
                 before do
-                  load_users
-                  friends
-                  update_current_call_status
+                  update_current_call_status(:dial_call_status => :no_answer)
                 end
 
-                context "and there is a girl online to talk with" do
+                it "should find me a new friend" do
+                  assert_redirect_to_current_url
+                end
 
+                context "and I hold the line" do
                   before do
                     update_current_call_status
                   end
 
-                  it "should try to connect me with her" do
-                    assert_dial_to_current_url(friends[0].mobile_number)
-                  end
-
-                  context "if she answers" do
-                    context "and hangs up first" do
-                      before do
-                        update_current_call_status(:dial_call_status => :completed)
-                      end
-
-                      it "should tell me that my chat has ended" do
-                        assert_play_then_redirect_to_current_url(:tell_user_their_chat_has_ended)
-                      end
-
-                      context "and I hold the line" do
-                        before do
-                          update_current_call_status
-                        end
-
-                        it "should offer me the menu" do
-                          assert_ask_for_input(:offer_menu)
-                        end
-                      end
-                    end
-                  end
-
-                  context "but she does not answer" do
-                    before do
-                      update_current_call_status(:dial_call_status => :no_answer)
-                    end
-
-                    it "should find me a new friend" do
-                      assert_redirect_to_current_url
-                    end
-
-                    context "and I hold the line" do
-                      before do
-                        update_current_call_status
-                      end
-
-                      it "should connnect me with my new friend" do
-                        assert_dial_to_current_url(friends[1].mobile_number)
-                      end
-                    end
+                  it "should connnect me with my new friend" do
+                    assert_dial_to_current_url(friends[1].mobile_number)
                   end
                 end
               end

@@ -6,8 +6,6 @@ class PhoneCall < ActiveRecord::Base
 
   module Digits
     MENU = 8
-    WANTS_EXISTING_FRIEND = 1
-    WANTS_NEW_FRIEND = 2
   end
 
   module CallStatuses
@@ -17,8 +15,8 @@ class PhoneCall < ActiveRecord::Base
   module PromptStates
 
     USER_INPUTS = {
-      :gender => {:manditory => true},
-      :looking_for => {:manditory => true},
+      :gender => {:manditory => false},
+      :looking_for => {:manditory => false},
       :age => {:numDigits => 2}
     }
 
@@ -74,17 +72,6 @@ class PhoneCall < ActiveRecord::Base
       end
     end
 
-    before_transition(
-      :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => any,
-      :do => :check_user_preference_for_finding_a_new_friend_or_calling_existing_one
-    )
-
-    state :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one do
-      def to_twiml
-        ask_for_input(:ask_if_they_want_to_find_a_new_friend_or_call_existing_chat_partner)
-      end
-    end
-
     state :finding_new_friend do
       def to_twiml
         redirect
@@ -113,12 +100,6 @@ class PhoneCall < ActiveRecord::Base
       end
     end
 
-    state :telling_user_their_friend_is_unavailable do
-      def to_twiml
-        play(:tell_user_their_friend_is_unavailable)
-      end
-    end
-
     state :completed do
       def to_twiml
         hangup
@@ -132,10 +113,8 @@ class PhoneCall < ActiveRecord::Base
       # welcome the user
       transition(:answered => :welcoming_user)
 
-      # ask him for any required attributes
-      transition(:welcoming_user => :asking_for_gender, :if => :ask_for_gender?)
-      transition([:welcoming_user, :asking_for_gender] => :asking_for_looking_for, :if => :ask_for_looking_for?)
-      transition([:welcoming_user, :asking_for_gender, :asking_for_looking_for] => :offering_menu)
+      # offer him the menu
+      transition(:welcoming_user => :offering_menu)
 
       # offer him the menu for more options
       transition(:offering_menu => :asking_for_age_in_menu, :if => :wants_menu?)
@@ -143,9 +122,9 @@ class PhoneCall < ActiveRecord::Base
       transition(:asking_for_gender_in_menu => :asking_for_looking_for_in_menu)
       transition(:asking_for_looking_for_in_menu => :offering_menu)
 
-      # ask him if he wants to chat with his existing friend
+      # connect him with his existing friend
       transition(
-        :offering_menu => :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one,
+        :offering_menu => :connecting_user_with_friend,
         :if => :user_chatting?
       )
 
@@ -160,26 +139,6 @@ class PhoneCall < ActiveRecord::Base
 
       # complete call
       transition(:telling_user_to_try_again_later => :completed)
-
-      # find a new friend for him
-      transition(
-        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :finding_new_friend,
-        :if => :wants_new_friend?
-      )
-
-      # connect him with his existing friend
-      transition(
-        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :connecting_user_with_friend,
-        :if => :wants_existing_friend?
-      )
-
-      # tell him his friend is unavailable
-      transition(
-        :asking_if_user_wants_to_find_a_new_friend_or_call_existing_one => :telling_user_their_friend_is_unavailable
-      )
-
-      # find him a new friend
-      transition(:telling_user_their_friend_is_unavailable => :finding_new_friend)
 
       # tell him his chat has ended
       transition(:connecting_user_with_friend => :telling_user_their_chat_has_ended, :if => :connected?)
@@ -222,14 +181,6 @@ class PhoneCall < ActiveRecord::Base
 
   private
 
-  def ask_for_gender?
-    !user.gender?
-  end
-
-  def ask_for_looking_for?
-    !user.looking_for?
-  end
-
   def user_chatting?
     chat.present? || user.currently_chatting?
   end
@@ -238,14 +189,6 @@ class PhoneCall < ActiveRecord::Base
 
   def wants_menu?
     digits == Digits::MENU
-  end
-
-  def wants_new_friend?
-    digits == Digits::WANTS_NEW_FRIEND
-  end
-
-  def wants_existing_friend?
-    digits == Digits::WANTS_EXISTING_FRIEND
   end
 
   def connected?
@@ -263,7 +206,7 @@ class PhoneCall < ActiveRecord::Base
   def set_profile_from_digits(transition)
     return if complete?
     user.send(transition.from.gsub("asking_for_", "").gsub("_in_menu", "") << "=", transition.object.digits)
-    user.save
+    user.reload unless user.save
   end
 
   def set_or_update_current_chat
@@ -272,11 +215,6 @@ class PhoneCall < ActiveRecord::Base
 
   def deactivate_chat_for_user
     chat.deactivate!(:active_user => user) if chat.present?
-  end
-
-  def check_user_preference_for_finding_a_new_friend_or_calling_existing_one
-    return if complete?
-    wants_existing_friend? || wants_new_friend? || !user_chatting?
   end
 
   def play(file, options = {})
@@ -322,5 +260,4 @@ class PhoneCall < ActiveRecord::Base
   def play_path_prefix
     I18n.t(:play_path_prefix, :locale => user.locale)
   end
-
 end

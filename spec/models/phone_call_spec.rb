@@ -168,9 +168,9 @@ describe PhoneCall do
 
     it "should transition to the correct state" do
       with_phone_call_states do |factory_name, twiml_expectation, phone_call_state, next_state, sub_factories|
-        assert_phone_call_can_be_completed(build(factory_name))
+        assert_phone_call_can_be_completed(create(factory_name))
 
-        phone_call = build(factory_name)
+        phone_call = create(factory_name)
         phone_call.process!
         phone_call.should send("be_#{next_state}")
 
@@ -189,7 +189,6 @@ describe PhoneCall do
   end
 
   describe "#to_twiml" do
-
     include_context "twiml"
     include_context "existing users"
 
