@@ -774,6 +774,11 @@ describe User do
           :expected_name => "vannak",
           :expected_age => 19
         )
+
+        # boy or girl
+        registration_examples(
+          keywords(:boy_or_girl)
+        )
       end
     end
   end

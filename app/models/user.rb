@@ -517,12 +517,12 @@ class User < ActiveRecord::Base
   end
 
   def extract_date_of_birth(info, force_update)
-    match = strip_match!(info, /(?<!\d(?:\s|\-)|\d)(\d{2})(?!\d|\s+\d)\s*#{profile_keywords(:years_old)}?/i).try(:[], 1)
+    match = strip_match!(info, /(?<!\d(?:\s|\-)|\d)(\d{2})(?!\d|\s+\d)\s*#{profile_keywords(:years_old)}?/).try(:[], 1)
     self.age = match.to_i if match && (force_update || date_of_birth.nil?)
   end
 
   def extract_name(info, force_update)
-    matches = strip_match!(info, /#{profile_keywords(:name)}/i)
+    matches = strip_match!(info, /#{profile_keywords(:name)}/)
     match = matches.try(:[], 2) || matches.try(:[], 1)
     self.name = match.downcase if match && (force_update || name.nil?)
   end
@@ -540,10 +540,12 @@ class User < ActiveRecord::Base
       if wants = determine_looking_for(tmp_info, :use_only_shared_gender_words => true)
         # we have the sex and looking for already so remove all references to
         # gender and looking for from the message
-        determine_gender(info, :only_first => true)
-        determine_looking_for(info, :include_shared_gender_words => true)
-        self.gender = sex
-        self.looking_for = wants
+        unless gender_question?(info)
+          determine_gender(info, :only_first => true)
+          determine_looking_for(info, :include_shared_gender_words => true)
+          self.gender = sex
+          self.looking_for = wants
+        end
         info = tmp_info
       end
     end
@@ -583,11 +585,11 @@ class User < ActiveRecord::Base
     could_mean = "could_mean_#{sex}_or_#{looking_for}"
 
     if options[:include_shared_gender_words]
-      regexp = /\b#{profile_keywords(could_mean, looking_for)}\b/i
+      regexp = /\b#{profile_keywords(could_mean, looking_for)}\b/
     elsif options[:use_only_shared_gender_words]
-      regexp = /\b#{profile_keywords(could_mean)}\b/i
+      regexp = /\b#{profile_keywords(could_mean)}\b/
     else
-      regexp = /\b#{profile_keywords(looking_for)}\b/i
+      regexp = /\b#{profile_keywords(looking_for)}\b/
     end
     strip_match!(info, regexp)
   end
@@ -601,20 +603,24 @@ class User < ActiveRecord::Base
   end
 
   def info_suggests_looking_for_friend?(info)
-    strip_match!(info, /\b#{profile_keywords(:friend)}\b/i)
+    strip_match!(info, /\b#{profile_keywords(:friend)}\b/)
   end
 
   def includes_gender?(info, options)
-    strip_match!(
-      info,
-      /\b#{profile_keywords(:could_mean_boy_or_boyfriend, :boy, :could_mean_girl_or_girlfriend, :girl)}\b/i,
-      options
-    )
+    strip_match!(info, /\b#{gender_keywords}\b/, options)
+  end
+
+  def gender_question?(info)
+    strip_match!(info, /\b#{gender_keywords}\s*or\s*#{gender_keywords}\b/)
+  end
+
+  def gender_keywords
+    profile_keywords(:could_mean_boy_or_boyfriend, :boy, :could_mean_girl_or_girlfriend, :girl)
   end
 
   def info_suggests_from?(sex, info, options)
     could_mean = "could_mean_#{sex}_or_#{sex}friend"
-    strip_match!(info, /\b#{profile_keywords(sex, could_mean)}\b/i, options)
+    strip_match!(info, /\b#{profile_keywords(sex, could_mean)}\b/, options)
   end
 
   def info_suggests_from_girl?(info, options = {})
