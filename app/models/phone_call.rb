@@ -182,7 +182,7 @@ class PhoneCall < ActiveRecord::Base
   private
 
   def user_chatting?
-    chat.present? || user.currently_chatting?
+    chat.present? || (user.currently_chatting? && user.active_chat.partner(user).available?(user.active_chat))
   end
 
   alias friend_available? user_chatting?

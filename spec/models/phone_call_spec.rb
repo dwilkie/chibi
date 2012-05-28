@@ -178,7 +178,7 @@ describe PhoneCall do
           next_sub_factory_state = sub_factory_attributes.keys.first
           expectations = sub_factory_attributes.values.first["expectations"] || {}
 
-          phone_call = build(sub_factory_name)
+          phone_call = create(sub_factory_name)
           phone_call.process!
           phone_call.should send("be_#{next_sub_factory_state}")
 

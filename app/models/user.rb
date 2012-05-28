@@ -165,8 +165,8 @@ class User < ActiveRecord::Base
     self.date_of_birth = value.nil? ? value : value.years.ago.utc
   end
 
-  def available?
-    online? && !currently_chatting?
+  def available?(in_chat = nil)
+    online? && (!currently_chatting? || active_chat == in_chat)
   end
 
   def currently_chatting?

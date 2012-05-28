@@ -36,6 +36,14 @@ FactoryGirl.define do
       user { chat.user }
     end
 
+    factory :phone_call_to_unavailable_user do
+      before_create do |phone_call|
+        chat = FactoryGirl.create(:active_chat_with_single_user)
+        FactoryGirl.create(:active_chat, :user => chat.friend)
+        phone_call.user = chat.user
+      end
+    end
+
     extend PhoneCallHelpers::States
 
     with_phone_call_states do |factory_name, twiml_expectation, phone_call_state, next_state, sub_factories, parent|

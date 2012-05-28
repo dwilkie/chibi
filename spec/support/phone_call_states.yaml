@@ -17,6 +17,9 @@
         already_in_chat:
           connecting_user_with_friend:
             parent: phone_call_with_active_chat
+        to_unavailable_user:
+          finding_new_friend:
+            parent: phone_call_to_unavailable_user
 - asking_for_age_in_menu:
     asking_for_gender_in_menu:
       twiml_expectation:
