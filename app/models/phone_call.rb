@@ -4,6 +4,11 @@ class PhoneCall < ActiveRecord::Base
   include Communicable::Chatable
   include TwilioHelpers
 
+  # the maximum length of a US phone number
+  # without the country code
+  # note: this is only used to determine whether Twilio added an extra 1 or not
+  MAX_LOCAL_NUMBER_LENGTH = 10
+
   module Digits
     MENU = 8
   end
@@ -173,6 +178,22 @@ class PhoneCall < ActiveRecord::Base
 
   def to=(value)
     self.from = value if value.present? && !twilio_number?(value)
+  end
+
+  def from=(value)
+    # this method is overriden because Twilio adds
+    # random 1's to the start of phone numbers
+    if value
+      # remove non digits
+      value.gsub!(/\D/, "")
+
+      if value.first == "1"
+        # remove all leading ones
+        non_us_number = value.gsub(/\A1+/, "")
+        value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
+      end
+    end
+    super value
   end
 
   def login_user!

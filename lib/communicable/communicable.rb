@@ -30,7 +30,9 @@ module Communicable
     end
 
     def from=(value)
-      write_attribute(:from, value.gsub(/\D/, "")) if value
+      # remove any non-digits then replace multiple leading ones
+      # to produce a more valid looking E.164 number
+      write_attribute(:from, value.gsub(/\D/, "").gsub(/\A1+/, "1")) if value
     end
 
     private

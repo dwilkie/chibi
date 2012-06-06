@@ -94,6 +94,46 @@ describe PhoneCall do
     end
   end
 
+  describe "#from=" do
+    it "should ignore leading 1's generated from Twilio" do
+      # double leading 1 (Cambodia)
+      subject.from = "+1185512808814"
+      subject.from.should == "85512808814"
+
+      # single leading 1 (Cambodia)
+      subject.from = "+185512808814"
+      subject.from.should == "85512808814"
+
+      # no leading 1 (Cambodia)
+      subject.from = "+85512808814"
+      subject.from.should == "85512808814"
+
+      # single leading 1 (Thai)
+      subject.from = "+166814417695"
+      subject.from.should == "66814417695"
+
+      # no leading 1 (Thai)
+      subject.from = "+66814417695"
+      subject.from.should == "66814417695"
+
+      # single leading 1 (Australia)
+      subject.from = "+161412345678"
+      subject.from.should == "61412345678"
+
+      # no leading 1 (Australia)
+      subject.from = "+61412345678"
+      subject.from.should == "61412345678"
+
+      # test normal US number
+      subject.from = "+17378742833"
+      subject.from.should == "17378742833"
+
+      # test Twilio number
+      subject.from = "+14156926280"
+      subject.from.should == "14156926280"
+    end
+  end
+
   describe "#digits" do
     it "should be an accessor but return the set value as an integer" do
       subject.digits = "1234"

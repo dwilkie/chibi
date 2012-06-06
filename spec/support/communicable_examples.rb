@@ -42,8 +42,8 @@ shared_examples_for "communicable from user" do
   end
 
   describe "#from=" do
-    it "should sanitize the number" do
-      communicable_resource.from = "+1-3323-23345"
+    it "should sanitize the number and remove multiple leading ones" do
+      communicable_resource.from = "+1111-3323-23345"
       communicable_resource.from.should == "1332323345"
 
       subject.from = nil
