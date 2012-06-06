@@ -1,4 +1,14 @@
 GIT
+  remote: git://github.com/defunkt/resque.git
+  revision: 2e67d04b72dfbfda8ce62aa47fb678097cc27206
+  specs:
+    resque (1.20.0)
+      multi_json (~> 1.0)
+      redis-namespace (~> 1.0.2)
+      sinatra (>= 0.9.2)
+      vegas (~> 0.1.2)
+
+GIT
   remote: git://github.com/dwilkie/countries.git
   revision: 2ad9b92bd539910e0e2e06227ac17a0fa214e7e9
   specs:
@@ -7,7 +17,7 @@ GIT
 
 GIT
   remote: git://github.com/myronmarston/vcr.git
-  revision: e1e0b62c4ec15ce534b825dacc1f570da6727412
+  revision: 2deeb50c5426cc334349eb5d154d1036fe00b60c
   specs:
     vcr (2.2.0)
 
@@ -70,7 +80,7 @@ GEM
     columnize (0.3.6)
     currencies (0.4.0)
     daemons (1.1.8)
-    database_cleaner (0.7.2)
+    database_cleaner (0.8.0)
     diff-lcs (1.1.3)
     erubis (2.7.0)
     eventmachine (0.12.10)
@@ -83,13 +93,13 @@ GEM
     fakeweb (1.3.0)
     ffi (1.0.11)
     geocoder (1.1.1)
-    guard (1.0.3)
-      ffi (>= 0.5.0)
+    guard (1.1.1)
+      listen (>= 0.4.2)
       thor (>= 0.14.6)
-    guard-rspec (0.7.3)
-      guard (>= 0.10.0)
-    guard-spork (0.8.0)
-      guard (>= 0.10.0)
+    guard-rspec (1.0.0)
+      guard (>= 1.1)
+    guard-spork (1.0.0)
+      guard (>= 1.0.0)
       spork (>= 0.8.4)
     haml (3.1.6)
     hike (1.2.1)
@@ -99,7 +109,7 @@ GEM
     jquery-rails (2.0.2)
       railties (>= 3.2.0, < 5.0)
       thor (~> 0.14)
-    jquery-ui-rails (0.4.1)
+    jquery-ui-rails (0.5.0)
       jquery-rails
       railties (>= 3.1.0)
     json (1.7.3)
@@ -115,6 +125,10 @@ GEM
       addressable
     linecache19 (0.5.13)
       ruby_core_source (>= 0.1.4)
+    listen (0.4.2)
+      rb-fchange (~> 0.0.5)
+      rb-fsevent (~> 0.9.1)
+      rb-inotify (~> 0.8.8)
     mail (2.4.4)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
@@ -126,7 +140,7 @@ GEM
       json
       rest-client
     pg (0.13.2)
-    phony (1.7.1)
+    phony (1.7.4)
     polyglot (0.3.3)
     rack (1.4.1)
     rack-cache (1.2)
@@ -153,18 +167,18 @@ GEM
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
     rake (0.9.2.2)
+    rb-fchange (0.0.5)
+      ffi
+    rb-fsevent (0.9.1)
+    rb-inotify (0.8.8)
+      ffi (>= 0.5.0)
     rdoc (3.12)
       json (~> 1.4)
-    redis (3.0.0)
-    redis-namespace (1.2.0)
-      redis (~> 3.0.0)
-    resque (1.8.2)
-      redis
-      redis-namespace
-      sinatra (>= 0.9.2)
-      vegas (>= 0.1.2)
-    resque_spec (0.5.1)
-      resque (>= 1.6.0)
+    redis (2.2.2)
+    redis-namespace (1.0.3)
+      redis (< 3.0.0)
+    resque_spec (0.12.1)
+      resque (>= 1.19.0)
       rspec (>= 2.5.0)
     rest-client (1.6.7)
       mime-types (>= 1.16)
@@ -197,7 +211,7 @@ GEM
       railties (~> 3.2.0)
       sass (>= 3.1.10)
       tilt (~> 1.3)
-    selenium-webdriver (2.22.1)
+    selenium-webdriver (2.22.2)
       childprocess (>= 0.2.5)
       ffi (~> 1.0)
       libwebsocket (~> 0.1.3)
@@ -260,7 +274,7 @@ DEPENDENCIES
   phony
   rails (= 3.2.5)
   redis
-  resque
+  resque!
   resque_spec
   rspec-rails
   ruby-debug19
