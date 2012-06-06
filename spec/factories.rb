@@ -18,7 +18,7 @@ FactoryGirl.define do
 
   factory :missed_call do
     user
-    subject { "You have a missed call from 0#{Phony.split(user.mobile_number)[1]}" }
+    subject { "You have a missed call from 0#{user.local_number}" }
   end
 
   factory :phone_call do
@@ -37,7 +37,7 @@ FactoryGirl.define do
     end
 
     factory :phone_call_to_unavailable_user do
-      before_create do |phone_call|
+      before(:create) do |phone_call|
         chat = FactoryGirl.create(:active_chat_with_single_user)
         FactoryGirl.create(:active_chat, :user => chat.friend)
         phone_call.user = chat.user
@@ -105,14 +105,14 @@ FactoryGirl.define do
 
     # a chat where only the friend is active
     factory :active_chat_with_single_friend do
-      after_create do |chat|
+      after(:create) do |chat|
         chat.active_users << chat.friend
       end
     end
 
     # a chat where only the initator is active
     factory :active_chat_with_single_user do
-      after_create do |chat|
+      after(:create) do |chat|
         chat.active_users << chat.user
         chat.save
       end
@@ -122,7 +122,7 @@ FactoryGirl.define do
       end
 
       factory :active_chat do
-        after_create do |chat|
+        after(:create) do |chat|
           chat.active_users << chat.friend
           chat.save
         end
@@ -196,7 +196,7 @@ FactoryGirl.define do
     location
 
     factory :user_with_recent_interaction do
-      after_create do |user|
+      after(:create) do |user|
         FactoryGirl.create(:phone_call, :user => user)
         FactoryGirl.create(:message, :user => user)
         FactoryGirl.create(:reply, :user => user)
@@ -204,7 +204,7 @@ FactoryGirl.define do
     end
 
     factory :user_without_recent_interaction do
-      after_create do |user|
+      after(:create) do |user|
         FactoryGirl.create(:phone_call, :user => user, :created_at => 5.days.ago)
         FactoryGirl.create(:message, :user => user, :created_at => 5.days.ago)
         FactoryGirl.create(:reply, :user => user, :created_at => 5.days.ago)

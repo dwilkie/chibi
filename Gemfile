@@ -1,10 +1,10 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.3'
+gem 'rails', '3.2.5'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
-gem "geocoder"
+gem "geocoder", "1.1.1"
 gem "phony"
 gem "countries", :require => 'iso3166', :git => "git://github.com/dwilkie/countries.git"
 gem "faker"

@@ -117,7 +117,13 @@ class User < ActiveRecord::Base
   end
 
   def short_code
-    SERVICE_PROVIDER_PREFIXES[country_code].try(:[], split_mobile_number[1][0..1])
+    SERVICE_PROVIDER_PREFIXES[country_code].try(:[], number_prefix)
+  end
+
+  def local_number
+    split_number = split_mobile_number
+    split_number.shift
+    split_number.join
   end
 
   def twilio_number
@@ -443,6 +449,10 @@ class User < ActiveRecord::Base
 
   def split_mobile_number
     self.class.split_mobile_number(mobile_number)
+  end
+
+  def number_prefix
+    local_number[0..1]
   end
 
   def assign_location
