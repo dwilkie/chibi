@@ -123,7 +123,7 @@ describe Location do
 
         "krong pailin" => {
           :abbreviations => ["pl", "p.l", "pailin"],
-          :expected_city => "Sala Krau",
+          :expected_city => "Pailin",
           :expected_latitude => 12.90929620,
           :expected_longitude => 102.66755750
         },

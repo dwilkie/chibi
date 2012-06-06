@@ -779,6 +779,16 @@ describe User do
         registration_examples(
           keywords(:boy_or_girl)
         )
+
+        # hi ! my name vanny.i'm 17 yearold.i'm boy.I live in pailin. thank q... o:)
+        registration_examples(
+          keywords(:vanny),
+          :expected_name => "vanny",
+          :expected_age => 17,
+          :expected_city => "Pailin",
+          :expected_gender => :male,
+          :vcr => {:expect_results => true, :cassette => "kh/krong_pailin"}
+        )
       end
     end
   end

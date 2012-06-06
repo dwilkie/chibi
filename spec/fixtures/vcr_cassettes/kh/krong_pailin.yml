@@ -3,7 +3,9 @@ http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?address=krong+pailin%2C+Cambodia&language=en&sensor=false
-    body: ''
+    body:
+      encoding: US-ASCII
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
@@ -21,9 +23,9 @@ http_interactions:
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Mon, 12 Dec 2011 17:32:20 GMT
+      - Wed, 06 Jun 2012 13:56:10 GMT
       expires:
-      - Tue, 13 Dec 2011 17:32:20 GMT
+      - Thu, 07 Jun 2012 13:56:10 GMT
       cache-control:
       - public, max-age=86400
       server:
@@ -34,30 +36,34 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Krong Pailin\",\n               \"short_name\"
-      : \"Krong Pailin\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Krong Pailin, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 13.1145750,\n
-      \                 \"lng\" : 102.7521210\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 12.666190,\n                  \"lng\" : 102.4856410\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 12.90929620,\n               \"lng\" : 102.66755750\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 13.08325090,\n                  \"lng\" : 102.92367630\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 12.73522040,\n                  \"lng\" : 102.41143870\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: US-ASCII
+      string: ! "{\n   \"results\" : [\n      {\n         \"address_components\" :
+        [\n            {\n               \"long_name\" : \"Krong Pailin\",\n               \"short_name\"
+        : \"Krong Pailin\",\n               \"types\" : [ \"administrative_area_level_1\",
+        \"political\" ]\n            },\n            {\n               \"long_name\"
+        : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+        : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+        : \"Krong Pailin, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+        : {\n               \"northeast\" : {\n                  \"lat\" : 13.1145750,\n
+        \                 \"lng\" : 102.7521210\n               },\n               \"southwest\"
+        : {\n                  \"lat\" : 12.666190,\n                  \"lng\" : 102.4856410\n
+        \              }\n            },\n            \"location\" : {\n               \"lat\"
+        : 12.90929620,\n               \"lng\" : 102.66755750\n            },\n            \"location_type\"
+        : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+        : {\n                  \"lat\" : 13.08325090,\n                  \"lng\" :
+        102.92367630\n               },\n               \"southwest\" : {\n                  \"lat\"
+        : 12.73522040,\n                  \"lng\" : 102.41143870\n               }\n
+        \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
+        \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
     http_version: '1.1'
-  recorded_at: Mon, 12 Dec 2011 17:32:21 GMT
+  recorded_at: Wed, 06 Jun 2012 13:56:10 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=12.9092962%2C102.6675575&sensor=false
-    body: ''
+    body:
+      encoding: US-ASCII
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
@@ -75,9 +81,9 @@ http_interactions:
       content-type:
       - application/json; charset=UTF-8
       date:
-      - Mon, 12 Dec 2011 17:32:21 GMT
+      - Wed, 06 Jun 2012 13:56:11 GMT
       expires:
-      - Tue, 13 Dec 2011 17:32:21 GMT
+      - Thu, 07 Jun 2012 13:56:11 GMT
       cache-control:
       - public, max-age=86400
       server:
@@ -88,79 +94,85 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"57\",\n               \"short_name\"
-      : \"57\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Sala Krau\",\n               \"short_name\"
-      : \"Sala Krau\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Krong Pailin\",\n               \"short_name\" : \"Krong Pailin\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"57, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.93563790,\n                  \"lng\" : 102.53031580\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.93125930,\n
-      \                 \"lng\" : 102.52511130\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.93403360,\n               \"lng\"
-      : 102.52703880\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.93563790,\n                  \"lng\" : 102.53031580\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.93125930,\n
-      \                 \"lng\" : 102.52511130\n               }\n            }\n
-      \        },\n         \"types\" : [ \"route\" ]\n      },\n      {\n         \"address_components\"
-      : [\n            {\n               \"long_name\" : \"Pailin\",\n               \"short_name\"
-      : \"Pailin\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Krong Pailin\",\n               \"short_name\" : \"Krong Pailin\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Pailin, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.92342410,\n                  \"lng\" : 102.76130680\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.66613210,\n
-      \                 \"lng\" : 102.50192640\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.8190380,\n               \"lng\"
-      : 102.66755750\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.92342410,\n                  \"lng\" : 102.76130680\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.66613210,\n
-      \                 \"lng\" : 102.50192640\n               }\n            }\n
-      \        },\n         \"types\" : [ \"administrative_area_level_2\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Krong Pailin\",\n               \"short_name\" : \"Krong Pailin\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Krong Pailin, Cambodia\",\n
-      \        \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 13.1145750,\n                  \"lng\" : 102.7521210\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 12.666190,\n                  \"lng\" : 102.4856410\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.90929620,\n               \"lng\"
-      : 102.66755750\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 13.1145750,\n                  \"lng\" : 102.7521210\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.666190,\n                  \"lng\"
-      : 102.4856410\n               }\n            }\n         },\n         \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n      },\n      {\n         \"address_components\"
-      : [\n            {\n               \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 14.6901790,\n                  \"lng\" : 107.6276870\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 9.283249899999999,\n
-      \                 \"lng\" : 102.3335420\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.5656790,\n               \"lng\"
-      : 104.9909630\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 14.6901790,\n                  \"lng\" : 107.6276870\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 9.283249899999999,\n
-      \                 \"lng\" : 102.3335420\n               }\n            }\n         },\n
-      \        \"types\" : [ \"country\", \"political\" ]\n      }\n   ],\n   \"status\"
-      : \"OK\"\n}\n"
+    body:
+      encoding: US-ASCII
+      string: ! "{\n   \"results\" : [\n      {\n         \"address_components\" :
+        [\n            {\n               \"long_name\" : \"57\",\n               \"short_name\"
+        : \"57\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
+        \              \"long_name\" : \"Pailin\",\n               \"short_name\"
+        : \"Pailin\",\n               \"types\" : [ \"locality\", \"political\" ]\n
+        \           },\n            {\n               \"long_name\" : \"Pailin\",\n
+        \              \"short_name\" : \"Pailin\",\n               \"types\" : [
+        \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
+        \              \"long_name\" : \"Krong Pailin\",\n               \"short_name\"
+        : \"Krong Pailin\",\n               \"types\" : [ \"administrative_area_level_1\",
+        \"political\" ]\n            },\n            {\n               \"long_name\"
+        : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+        : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+        : \"57, Pailin, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+        : {\n               \"northeast\" : {\n                  \"lat\" : 12.86858140,\n
+        \                 \"lng\" : 102.58822380\n               },\n               \"southwest\"
+        : {\n                  \"lat\" : 12.86776530,\n                  \"lng\" :
+        102.58789660\n               }\n            },\n            \"location\" :
+        {\n               \"lat\" : 12.86817340,\n               \"lng\" : 102.58806020\n
+        \           },\n            \"location_type\" : \"APPROXIMATE\",\n            \"viewport\"
+        : {\n               \"northeast\" : {\n                  \"lat\" : 12.86952233029150,\n
+        \                 \"lng\" : 102.5894091802915\n               },\n               \"southwest\"
+        : {\n                  \"lat\" : 12.86682436970850,\n                  \"lng\"
+        : 102.5867112197085\n               }\n            }\n         },\n         \"types\"
+        : [ \"route\" ]\n      },\n      {\n         \"address_components\" : [\n
+        \           {\n               \"long_name\" : \"Pailin\",\n               \"short_name\"
+        : \"Pailin\",\n               \"types\" : [ \"administrative_area_level_2\",
+        \"political\" ]\n            },\n            {\n               \"long_name\"
+        : \"Krong Pailin\",\n               \"short_name\" : \"Krong Pailin\",\n               \"types\"
+        : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
+        \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
+        : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+        \        ],\n         \"formatted_address\" : \"Pailin, Cambodia\",\n         \"geometry\"
+        : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+        : 12.92342410,\n                  \"lng\" : 102.76130680\n               },\n
+        \              \"southwest\" : {\n                  \"lat\" : 12.66613210,\n
+        \                 \"lng\" : 102.50192640\n               }\n            },\n
+        \           \"location\" : {\n               \"lat\" : 12.8190380,\n               \"lng\"
+        : 102.66755750\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+        \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+        : 12.92342410,\n                  \"lng\" : 102.76130680\n               },\n
+        \              \"southwest\" : {\n                  \"lat\" : 12.66613210,\n
+        \                 \"lng\" : 102.50192640\n               }\n            }\n
+        \        },\n         \"types\" : [ \"administrative_area_level_2\", \"political\"
+        ]\n      },\n      {\n         \"address_components\" : [\n            {\n
+        \              \"long_name\" : \"Krong Pailin\",\n               \"short_name\"
+        : \"Krong Pailin\",\n               \"types\" : [ \"administrative_area_level_1\",
+        \"political\" ]\n            },\n            {\n               \"long_name\"
+        : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
+        : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
+        : \"Krong Pailin, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
+        : {\n               \"northeast\" : {\n                  \"lat\" : 13.1145750,\n
+        \                 \"lng\" : 102.7521210\n               },\n               \"southwest\"
+        : {\n                  \"lat\" : 12.666190,\n                  \"lng\" : 102.4856410\n
+        \              }\n            },\n            \"location\" : {\n               \"lat\"
+        : 12.90929620,\n               \"lng\" : 102.66755750\n            },\n            \"location_type\"
+        : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
+        : {\n                  \"lat\" : 13.1145750,\n                  \"lng\" :
+        102.7521210\n               },\n               \"southwest\" : {\n                  \"lat\"
+        : 12.666190,\n                  \"lng\" : 102.4856410\n               }\n
+        \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
+        \"political\" ]\n      },\n      {\n         \"address_components\" : [\n
+        \           {\n               \"long_name\" : \"Cambodia\",\n               \"short_name\"
+        : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
+        \        ],\n         \"formatted_address\" : \"Cambodia\",\n         \"geometry\"
+        : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
+        : 14.6901790,\n                  \"lng\" : 107.6276870\n               },\n
+        \              \"southwest\" : {\n                  \"lat\" : 9.283249899999999,\n
+        \                 \"lng\" : 102.3335420\n               }\n            },\n
+        \           \"location\" : {\n               \"lat\" : 12.5656790,\n               \"lng\"
+        : 104.9909630\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
+        \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
+        : 14.6901790,\n                  \"lng\" : 107.6276870\n               },\n
+        \              \"southwest\" : {\n                  \"lat\" : 9.283249899999999,\n
+        \                 \"lng\" : 102.3335420\n               }\n            }\n
+        \        },\n         \"types\" : [ \"country\", \"political\" ]\n      }\n
+        \  ],\n   \"status\" : \"OK\"\n}\n"
     http_version: '1.1'
-  recorded_at: Mon, 12 Dec 2011 17:32:22 GMT
-recorded_with: VCR 2.0.0.rc1
+  recorded_at: Wed, 06 Jun 2012 13:56:11 GMT
+recorded_with: VCR 2.2.0
