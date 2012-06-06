@@ -41,7 +41,7 @@ describe UserOverview do
       stub_filter_params
     end
 
-    it "return the total number of available males" do
+    it "return the total number of available females" do
       User.should_receive(:filter_params).with(hash_including(:available => true, :gender => "f"))
       subject.total_available_females.should == 5
     end
