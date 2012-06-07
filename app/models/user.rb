@@ -617,11 +617,11 @@ class User < ActiveRecord::Base
   end
 
   def includes_gender?(info, options)
-    strip_match!(info, /\b#{gender_keywords}\b/, options)
+    strip_match!(info, /(?:m|i'm)?\s*a?\b#{gender_keywords}\b/, options)
   end
 
   def gender_question?(info)
-    strip_match!(info, /\b#{gender_keywords}\s*or\s*#{gender_keywords}\b/)
+    strip_match!(info, /\b#{gender_keywords}\s*(?<!f)or\s*#{gender_keywords}\b/)
   end
 
   def gender_keywords
