@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe UserOverview do
-
   let(:params) { { :page => "1" } }
   let(:subject) { UserOverview.new(params) }
   let(:users) { mock(ActiveRecord::Relation, :count => 5).as_null_object }
