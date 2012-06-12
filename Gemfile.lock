@@ -115,7 +115,7 @@ GEM
       addressable
     linecache19 (0.5.13)
       ruby_core_source (>= 0.1.4)
-    listen (0.4.2)
+    listen (0.4.4)
       rb-fchange (~> 0.0.5)
       rb-fsevent (~> 0.9.1)
       rb-inotify (~> 0.8.8)
