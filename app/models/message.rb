@@ -29,7 +29,7 @@ class Message < ActiveRecord::Base
       user.update_profile(normalized_body)
 
       if user.currently_chatting?
-        user.active_chat.forward_message(user, self)
+        user.active_chat.forward_message(self)
         start_new_chat = false
       end
     end

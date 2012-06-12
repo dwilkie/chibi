@@ -96,7 +96,8 @@ class Chat < ActiveRecord::Base
     end
   end
 
-  def forward_message(reference_user, message)
+  def forward_message(message)
+    reference_user = message.user
     chat_partner = partner(reference_user)
     reply_to_chat_partner = replies.build(:user => chat_partner)
 

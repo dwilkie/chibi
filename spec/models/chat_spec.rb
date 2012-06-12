@@ -474,7 +474,11 @@ describe Chat do
   end
 
   describe "#forward_message" do
-    let(:message) { create(:message, :body => "hello") }
+    def create_message(user)
+      create(:message, :user => user, :body => "hello")
+    end
+
+    let(:message) { create_message(user) }
 
     def assert_forward_message_to(recipient, originator, chat_session, message, delivered = true)
       chat_session.reload.messages.should == [message]
@@ -494,7 +498,7 @@ describe Chat do
     context "given the friend is available to chat" do
       it "should forward the message to the friend and put the friend in the active chat" do
         time_updated = active_chat_with_single_user.updated_at
-        expect_message { active_chat_with_single_user.forward_message(user, message) }
+        expect_message { active_chat_with_single_user.forward_message(message) }
         assert_forward_message_to(friend, user, active_chat_with_single_user, message)
         active_chat_with_single_user.updated_at.should > time_updated
       end
@@ -508,9 +512,11 @@ describe Chat do
         recipient = send(recipient_name)
         chat_session = send("active_chat_with_single_#{recipient_name}")
 
+        message = create_message(recipient)
+
         recipient.reload.active_chat.should == chat_session
 
-        expect_message { chat_session.forward_message(recipient, message) }
+        expect_message { chat_session.forward_message(message) }
 
         new_chat = recipient.reload.active_chat
         new_chat.should_not == chat_session
