@@ -288,17 +288,31 @@ describe Chat do
   end
 
   describe "#deactivate!" do
-
     def assert_active_users_cleared
       active_chat.active_users.should be_empty
       active_chat.should_not be_active
     end
 
     context "passing :active_user => #<User...A>" do
-      it "should only deactivate the chat for User...B" do
-        # so that they are available to chat with someone else
-        active_chat.deactivate!(:active_user => user)
-        active_chat.active_users.should == [friend]
+      context "and #<User...B> is not currently chatting with #<User...C>" do
+        it "should only deactivate the chat for #<User...A> and leave #<User...B> active" do
+          # so that they are available to chat with someone else
+          active_chat.deactivate!(:active_user => user)
+          active_chat.active_users.should == [friend]
+        end
+      end
+
+      context "but #<User...B> is now currently chatting with #<User...C>" do
+        before do
+          active_chat_with_single_user
+          create(:active_chat, :user => friend)
+        end
+
+        it "should deactivate the chat for both #<User...A> and #<User...B>" do
+          # so that they are available to chat with someone else
+          active_chat_with_single_user.deactivate!(:active_user => user)
+          active_chat_with_single_user.active_users.should == []
+        end
       end
 
       context ":notify => #<User...B>" do

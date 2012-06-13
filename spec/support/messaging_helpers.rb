@@ -44,6 +44,10 @@ module MessagingHelpers
     VCR.use_cassette(options[:cassette], options[:vcr_options]) { yield }
   end
 
+  def non_introducable_examples
+    ["", "new"]
+  end
+
   private
 
   def post_message(options = {})

@@ -62,7 +62,7 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
-  def introduce!(partner, to_initiator)
+  def introduce!(partner, to_initiator, introduction = nil)
     if to_initiator
       translate(
         "replies.new_chat_started",
@@ -70,11 +70,15 @@ class Reply < ActiveRecord::Base
         :friends_screen_name => partner.screen_id
       )
     else
-      translate(
-        "replies.greetings",
-        {:friends_name => user.name},
-        {:sample => true, :from => partner}
-      )
+      if introduction
+        set_forward_message(partner, introduction)
+      else
+        translate(
+          "replies.greetings",
+          {:friends_name => user.name},
+          {:sample => true, :from => partner}
+        )
+      end
     end
     deliver!
   end

@@ -57,7 +57,7 @@ class Chat < ActiveRecord::Base
 
     if friend.present?
       save!
-      introduce_participants(options[:notify_initiator]) if options[:notify]
+      introduce_participants(options) if options[:notify]
     else
       replies.build(
         :user => user
@@ -164,12 +164,12 @@ class Chat < ActiveRecord::Base
     super.where(params.slice(:user_id))
   end
 
-  def introduce_participants(notify_initiator = false)
+  def introduce_participants(options = {})
     users_to_notify = [friend]
-    users_to_notify << user if notify_initiator
+    users_to_notify << user if options[:notify_initiator]
     users_to_notify.each do |reference_user|
       replies.build(:user => reference_user).introduce!(
-        partner(reference_user), reference_user == user
+        partner(reference_user), reference_user == user, options[:introduction]
       )
     end
   end
@@ -189,7 +189,7 @@ class Chat < ActiveRecord::Base
   end
 
   def set_active_users(user_to_remain_in_chat = nil)
-    if user_to_remain_in_chat
+    if user_to_remain_in_chat && user_to_remain_in_chat.active_chat == self
       self.active_users = [user_to_remain_in_chat]
       users_to_leave_chat = [partner(user_to_remain_in_chat)]
     else

@@ -318,13 +318,26 @@ describe Reply do
     end
 
     context "for the chat partner" do
-      it "should send a message imitating the initiator to maximize the chance the partner will reply" do
-        sample_greeting = I18n.t("replies.greetings").sample
-        I18n.stub(:t).and_return([sample_greeting])
-        assert_reply(
-          :introduce!, :forward_message,
-          :args => [partner, false], :interpolations => [partner.screen_id, sample_greeting]
-        )
+      context "with no introduction" do
+        it "should imitate the user by sending a fake greeting to the new chat partner" do
+          sample_greeting = I18n.t("replies.greetings").sample
+          I18n.stub(:t).and_return([sample_greeting])
+
+          assert_reply(
+            :introduce!, :forward_message,
+            :args => [partner, false], :interpolations => [partner.screen_id, sample_greeting]
+          )
+        end
+      end
+
+      context "with an introduction" do
+        it "should send the introduction to the new chat partner" do
+          assert_reply(
+            :introduce!, :forward_message,
+            :args => [partner, false, "Hello Bobby"], :interpolations => [partner.screen_id, "Hello Bobby"],
+            :no_alternate_translation => true
+          )
+        end
       end
     end
   end

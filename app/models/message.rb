@@ -34,7 +34,11 @@ class Message < ActiveRecord::Base
       end
     end
 
-    Chat.activate_multiple!(user, :notify => true, :notify_no_match => false) if start_new_chat
+    introduction = body if introducable?
+
+    Chat.activate_multiple!(
+      user, :notify => true, :notify_no_match => false, :introduction => introduction
+    ) if start_new_chat
   end
 
   private
@@ -49,5 +53,9 @@ class Message < ActiveRecord::Base
 
   def normalized_body
     @normalized_body ||= body.strip.downcase
+  end
+
+  def introducable?
+    normalized_body.present? && !user_wants_to_chat_with_someone_new?
   end
 end

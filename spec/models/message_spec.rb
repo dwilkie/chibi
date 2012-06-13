@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Message do
-
   let(:user) { build(:user) }
   let(:friend) { build(:english) }
   let(:new_friend) { build(:cambodian) }
@@ -52,6 +51,10 @@ describe Message do
 
     include_context "replies"
 
+    def stub_match_for_user
+      user.stub(:match).and_return(new_friend)
+    end
+
     shared_examples_for "starting a new chat" do
       context "given there is no match for this user" do
         before do
@@ -66,13 +69,21 @@ describe Message do
 
       context "given there is a match for this user" do
         before do
-          user.stub(:match).and_return(new_friend)
+          stub_match_for_user
           expect_message { message.process! }
         end
 
-        it "should introduce only the chat partner" do
+        it "should not introduce the match to the partner" do
           reply_to(user, message.chat).should be_nil
-          reply_to(new_friend, message.chat).body.should =~ /^#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
+        end
+
+        it "should introduce the user to the match" do
+          reply = reply_to(new_friend, message.chat).body
+          if imitate_user
+            reply.should =~ /^#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
+          else
+            reply.should == spec_translate(:forward_message, new_friend.locale, user.screen_id, message.body)
+          end
         end
       end
     end
@@ -131,7 +142,6 @@ describe Message do
       it_should_behave_like "updating the user's locale"
 
       context "and the message body is" do
-
         context "'stop'" do
           before do
             message.body = "stop"
@@ -159,7 +169,9 @@ describe Message do
             expect_message { message.process! }
           end
 
-          it_should_behave_like "starting a new chat"
+          it_should_behave_like "starting a new chat" do
+            let(:imitate_user) { true }
+          end
 
           it "should not inform the user's partner how find a new friend" do
             reply_to(friend, chat).should be_nil
@@ -204,13 +216,31 @@ describe Message do
           end
         end
 
+        context "not introducable" do
+          context "and a match is found for the user" do
+            before do
+              stub_match_for_user
+            end
+
+            it "should introduce the user to the match by imitating the user" do
+              non_introducable_examples.each do |example|
+                message = build(:message, :user => user, :body => example.upcase)
+                expect_message  { message.process! }
+                reply_to(new_friend).body.should =~ /^#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
+              end
+            end
+          end
+        end
+
         context "anything else but 'stop'" do
           before do
             message.body = "hello"
             user.stub(:update_profile)
           end
 
-          it_should_behave_like "starting a new chat"
+          it_should_behave_like "starting a new chat" do
+            let(:imitate_user) { false }
+          end
 
           it "should try to update the users profile from the message text" do
             user.should_receive(:update_profile).with("hello")
