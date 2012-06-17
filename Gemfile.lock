@@ -162,6 +162,7 @@ GEM
     rb-fsevent (0.9.1)
     rb-inotify (0.8.8)
       ffi (>= 0.5.0)
+    rb-readline (0.4.2)
     rdoc (3.12)
       json (~> 1.4)
     redis (2.2.2)
@@ -268,6 +269,7 @@ DEPENDENCIES
   pg
   phony
   rails (= 3.2.5)
+  rb-readline
   redis
   resque
   resque_spec
