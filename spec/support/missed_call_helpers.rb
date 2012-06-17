@@ -9,7 +9,6 @@ module MissedCallHelpers
   end
 
   def expect_call(options = {}, &block)
-    twilio_number
     VCR.use_cassette("twilio/calls", :match_requests_on => [:method, :uri, :body], :erb => {
       :account_sid => ENV['TWILIO_ACCOUNT_SID'],
       :auth_token =>  ENV['TWILIO_AUTH_TOKEN'],
