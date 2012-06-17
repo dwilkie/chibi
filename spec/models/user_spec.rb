@@ -203,16 +203,17 @@ describe User do
     # but they are gay so she also can't be matched with either of them. Michael is a guy from Thailand
     # who looking for either a guy or a girl so Michael matches with Nok.
 
-    # Joy with Con, Dave, Paul and Luke:
-    # Joy is a straight female in Cambodia. Con, Dave and Luke are straight males also in Cambodia.
+    # Joy with Dave, Con, Paul and Luke:
+    # Joy is a straight female in Cambodia. Dave, Con, Paul and Luke are straight males also in Cambodia.
     # Dave is two years older than Joy, Con is 10 years older, Paul 12 years older and Luke is 2 years younger.
-    # Even though Joy is closer in age to Dave, Con matches before Dave because Con has initiated more
-    # chats and he is still just in the free age zone (up to 10 years older) where age difference doesn't really
-    # matter. Paul has also initiated more chats than Dave but he is just outside the free age zone
-    # and the age difference is starting to be a concern. In this case Dave matches higher even though he
-    # has initiated less chats than Paul. If Paul intiates more chats however,
-    # he can still overtake Dave, but the larger the age gap (over 10 years) the more chats you have to initiate
-    # to keep in touch with the young ones. Luke has initiated more chats than Con, Dave and Paul
+    # Even though Joy is closer in age to Dave, Con is still within the free age zone
+    # (up to 10 years older) where age difference doesn't really matter. Dave only matches before Con
+    # because he is closer to Joy, in Phnom Penh but Con is in Siem Reap. Dave, Con and Paul have
+    # all initiated the same amount of chats. but Paul is just outside the free age zone
+    # and the age difference is starting to be a concern. If Paul intiates more chats however,
+    # he can still overtake Dave and Con, but the larger the age gap (over 10 years) the more
+    # chats you have to initiate cto keep in touch with the young ones.
+    # Luke has initiated more chats than Con, Dave and Paul
     # but he matches last because he is 2 years younger than Joy.
     # We are assuming that Joy being a female is looking for an older guy.
 
@@ -266,7 +267,7 @@ describe User do
       :chamroune => [:pauline],
       :pauline => [:chamroune],
       :nok => [:michael],
-      :joy => [:con, :dave, :paul, :luke],
+      :joy => [:dave, :con, :paul, :luke],
       :dave => [:mara, :joy],
       :con => [:joy],
       :paul => [:joy, :mara],
@@ -291,6 +292,7 @@ describe User do
       # create some chats
       create(:active_chat, :user => eva,        :friend => harriet)
       create(:chat,        :user => michael,    :friend => view)
+      create(:chat,        :user => dave,       :friend => harriet)
       create(:chat,        :user => con,        :friend => mara)
       create(:chat,        :user => mara,       :friend => nok)
       create(:chat,        :user => hanh,       :friend => nok)

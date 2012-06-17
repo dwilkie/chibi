@@ -90,11 +90,11 @@ class User < ActiveRecord::Base
     # order first by recent activity
     match_scope = order_by_recent_activity(user, match_scope)
 
-    # then by location
-    match_scope = filter_by_location(user, match_scope)
-
     # then by age difference and number of initiated chats
     match_scope = order_by_age_difference_and_initiated_chats(user, match_scope)
+
+    # then by location
+    match_scope = filter_by_location(user, match_scope)
 
     # make sure the records are not read only
     match_scope.readonly(false)

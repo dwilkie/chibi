@@ -323,6 +323,7 @@ FactoryGirl.define do
       factory :con do
         name "con"
         age 37
+        association :location, :factory => :siem_reap
       end
 
       factory :paul do
