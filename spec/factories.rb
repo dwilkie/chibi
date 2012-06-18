@@ -284,6 +284,7 @@ FactoryGirl.define do
 
     factory :jamie do
       name "jamie"
+      updated_at { 15.minutes.ago }
     end
 
     # user with unknown gender
@@ -324,11 +325,13 @@ FactoryGirl.define do
         name "con"
         age 37
         association :location, :factory => :siem_reap
+        updated_at { 15.minutes.ago }
       end
 
       factory :paul do
         name "paul"
         age 39
+        updated_at { 30.minutes.ago }
       end
 
       factory :luke do

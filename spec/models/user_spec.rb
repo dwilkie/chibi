@@ -178,78 +178,89 @@ describe User do
   end
 
   describe ".matches" do
-    # Match Explanations
+    # User Descriptions
     # see spec/factories.rb for where users are defined
 
-    # Alex and Jamie:
-    # Alex and Jamie have not specified their gender or what gender they are looking for.
-    # We don't want to initiate a chat with other users who have already specified this info
-    # because the other user may not be interesed in the gender of Jamie or Alex.
-    # There are no other users in this situation so they only match with each other.
+    # Alex has an empty profile
+    # Jamie has an empty profile last seen 15 minutes ago
+    # Joy is a straight 27 year old female in Phnom Penh
+    # Mara is a bisexual 25 year old female in Phnom Penh
+    # Pauline is a female
+    # Chamroune is looking for a female
+    # Dave is a straight 28 year old male in Phnom Penh
+    # Luke is a straight 25 year old male in Phnom Penh with 2 initiated chats
+    # Con is a straight 37 year old male in Siem Reap last seen 15 minutes ago
+    # Paul is a straight 39 year old male in Phnom Penh last seen 30 minutes ago
+    # Harriet is a lesbian from Battambang
+    # Eva is a lesbian from Siem Reap
 
-    # Chamroune and Pauline:
-    # Chamroune is looking for a female, but his/her gender is unknown. Similarly to Alex and Jamie,
-    # we don't want to just match Chamroune with any female, incase that female is not looking for
-    # the gender of Chamroune. Pauline on the other hand is a female,
-    # but she has not yet specified what gender she is looking for.
-    # In this match Chamroune will be happy because he will be chatting with a female and Pauline can't complain
-    # if she is not looking for Chamroune's gender because she hasn't specified what she's looking for.
-    # Furthermore, other users who have specified their gender should not be matched with Pauline incase,
-    # pauline isn't interested in their gender.
+    # Match Explanations
 
-    # Nok with Michael:
-    # Nok is a female looking for a male. Dave is a male, looking for a female, but she can't be matched him
-    # because Dave is in Cambodia and Nok is in Thailand. Hanh and View are both guys in Thailand
+    # Alex has not specified his/her gender or what gender he/she is seeking.
+    # This is by far the most common case for new users.
+    # Since we don't have any information about the user, assume they're a straight male.
+    # This is because a straight male would be more disappointed if he got another guy then
+    # if a straight girl got another girl. Joy is a straight female,
+    # so she matches first. Mara is a bisexual female so she matches second.
+    # Pauline is female so she matches third. It's unknown about Jamie's gender or sexual preference
+    # but he or she is still a possbile match. Luke is matched next because he has initiated
+    # the most chats and was seen in the last 15 minutes followed by Dave who was also seen in the last
+    # 15 minutes, followed by Con who chatted more recently than Paul. It's important to note
+    # that we don't want to eliminate the guys from the search because
+    # they are also potential matches for females
+
+    # Jamie gets the similar results as alex
+
+    # Chamroune is looking for a female so all males are eliminated from the match.
+    # Also we assume that because Chamroune is looking for a female that he is male. Which
+    # is why Joy matches first in this case. Alex was seen more recently than Jamie so he or she is
+    # matched before Jamie
+
+    # Pauline is female so user who are looking for males eliminated from the match.
+    # Also we assume that beccause Pauline is a female she is looking for a male.
+    # Which is why to boys match before the girls in this case. Luke has initiated more chats
+    # than the other boys so he matches first. Mara also matches here because even though she is female
+    # she is bisexual and Pauline might be intersted too.
+
+    # Nok is a straight female. There are other straight males but they are not in Thailand
+    # so she can't be matched with them. Hanh and View are both males from Thailand
     # but they are gay so she also can't be matched with either of them. Michael is a guy from Thailand
-    # who looking for either a guy or a girl so Michael matches with Nok.
+    # who is bisexual so Michael matches with Nok.
 
-    # Joy with Dave, Con, Paul and Luke:
-    # Joy is a straight female in Cambodia. Dave, Con, Paul and Luke are straight males also in Cambodia.
-    # Dave is two years older than Joy, Con is 10 years older, Paul 12 years older and Luke is 2 years younger.
-    # Even though Joy is closer in age to Dave, Con is still within the free age zone
-    # (up to 10 years older) where age difference doesn't really matter. Dave only matches before Con
-    # because he is closer to Joy, in Phnom Penh but Con is in Siem Reap. Dave, Con and Paul have
-    # all initiated the same amount of chats. but Paul is just outside the free age zone
-    # and the age difference is starting to be a concern. If Paul intiates more chats however,
-    # he can still overtake Dave and Con, but the larger the age gap (over 10 years) the more
-    # chats you have to initiate cto keep in touch with the young ones.
-    # Luke has initiated more chats than Con, Dave and Paul
-    # but he matches last because he is 2 years younger than Joy.
-    # We are assuming that Joy being a female is looking for an older guy.
+    # Joy is a straight female in Cambodia, so she matches with all the straight males first.
+    # Dave and Luke were both seen in the last 15 minutes but Dave matches before Luke
+    # because his is older than Joy by 2 years where as Luke is 2 years younger. Con and Paul have
+    # initiated the same amount of chats but Con matches first because he is closer in age to Joy.
+    # Chamroune is included because he is looking for a female, and we assume he's a male
+    # Alex and Jamie are included last
 
-    # Dave with Mara and Joy
-    # Dave is in Cambodia looking for a female. Harriet, Eva, Mara and Joy are all females in Cambodia however
-    # Harriet and Eva are gay, so they are ruled out. Mara is bi and Joy is straight so both are matches.
-    # Although Joy is closer in age to Dave than Mara, Mara matches first because she has initiated more chats.
+    # Dave is a straight male in Cambodia. Harriet, Eva, Mara and Joy are all females in Cambodia however
+    # Harriet and Eva are lesbian, so they are ruled out. Mara is bisexual and Joy is straight so Joy
+    # matches before Mara. Similarly, Mara matches before Pauline because Paulines preferred gender
+    # unknown. Again alex and Jamie are matched last
 
-    # Con with Joy
-    # Joy and Mara both match, but Con has already chatted with Mara, so Joy is Con's match
+    # Con is a straight male from Cambodia, but he has already chatted with Mara, so Con matches
+    # with Pauline then Alex and Jamie similar to the previous example
 
-    # Paul with Joy and Mara
-    # Joy and Mara are both younger girls but fall outside of the free age zone. Joy is 12 years younger than
-    # Paul while Mara is 14 years younger. Even though Mara has initiated more chats than Joy, Joy is still matched
-    # before Mara. Mara would have to initiate 3 times as many chats as Joy for her to be match before Joy
+    # Paul and Luke's matches are similar to Dave's match (not sure if it should be for Luke though)
 
-    # Harriet and Eva with Mara
-    # Harriet is currently already chatting with Eva both of them could only be matched with Mara.
-    # These matches should however never take place because they're in a chat session so they can't be searching.
+    # Harriet is a lesbian so she can only be matched with females. Straight females are also
+    # eliminated from the result. This leaves Eva who is also a lesbian,
+    # Mara who is bisexual, Pauline who is a female
+    # and Chamroune who is looking for a female and Alex and Jamie
+    # Eva is is currently chatting so she is eliminated from the match
 
-    # Hanh with View and Michael
-    # All three guys live in Chiang Mai, Thailand. Michael is bi and View is gay so either are a match.
-    # Both of them are in the free age zone, but even though Michael has initiated more chats, View is matched
-    # first because he was chatting more recently than Michael.
+    # Eva gets the same results as Harriet
 
-    # View with Nobody :(
+    # Hanh is gay and lives in Thailand. Michael is bisexual and View is gay so View matches first
+
     # View has previously chatted with Michael and Hanh is offline, so nobody is matched
 
-    # Mara with Luke, Dave and Paul
-    # Mara is bi, so she could match with either, Dave, Con, Paul, Luke, Harriet or Eva who are all in Cambodia.
-    # However Eva and Harriet are currently chatting and Mara has already chatted with Con, so that leaves
-    # Dave, Luke and Paul. Luke and Dave are both within the free age zone so Luke matches before Dave,
-    # because he has initiated more chats. Paul has also initiated more chats than Dave but he falls outside
-    # the free age zone, so Dave is matched before him.
+    # Mara is bisexual, so she could match with any straight guys, lesbians or other bisexuals
+    # However Eva and Harriet are currently chatting and Mara has already chatted with Con so they're
+    # all eliminated from the match. Luke, Dave and Paul match before Pauline because their full profile
+    # is known.
 
-    # Michael with Nok
     # Michael has previously chatted with View which leaves Nok and Hanh. Even though Nok hasn't specified
     # her age yet, we give her the benifit of the doubt and assume she's in the free age zone.
     # Hanh has initiated more chat than Nok so he would have been matched before Nok, but
@@ -257,26 +268,27 @@ describe User do
 
     # Finally all of these users use mobile numbers which are not from a registered service provider
     # We don't want to match these users with users that have mobile numbers which are from
-    # registered service providers. For example, say there are two registered service providers in Cambodia
-    # Smart and Mobitel. If a Metfone user contacts the app through the test gateway
-    # We don't want to match them with the Smart or Mobitel users, incase the test gateway is down or something.
+    # registered service providers. For example, say there are two registered service providers
+    # in Cambodia Smart and Mobitel. If a Metfone user contacts the app through the test gateway
+    # We don't want to match them with the Smart or Mobitel users,
+    # incase the test gateway is down or something.
 
     USER_MATCHES = {
-      :alex => [:jamie],
-      :jamie => [:alex],
-      :chamroune => [:pauline],
-      :pauline => [:chamroune],
+      :alex => [:joy, :mara, :pauline, :jamie, :chamroune, :luke, :dave, :con, :paul],
+      :jamie => [:joy, :mara, :pauline, :alex, :chamroune, :luke, :dave, :con, :paul],
+      :chamroune => [:joy, :mara, :pauline, :alex, :jamie],
+      :pauline => [:luke, :dave, :con, :paul, :chamroune, :alex, :jamie, :mara],
       :nok => [:michael],
-      :joy => [:dave, :con, :paul, :luke],
-      :dave => [:mara, :joy],
-      :con => [:joy],
-      :paul => [:joy, :mara],
-      :luke => [:mara, :joy],
-      :harriet => [:mara],
-      :eva => [:mara],
+      :joy => [:dave, :luke, :con, :paul, :chamroune, :alex, :jamie],
+      :dave => [:joy, :mara, :pauline, :alex, :jamie],
+      :con => [:joy, :pauline, :alex, :jamie],
+      :paul => [:joy, :mara, :pauline, :alex, :jamie],
+      :luke => [:joy, :mara, :pauline, :alex, :jamie],
+      :harriet => [:mara, :pauline, :chamroune, :alex, :jamie],
+      :eva => [:mara, :pauline, :chamroune, :alex, :jamie],
       :hanh => [:view, :michael],
       :view => [],
-      :mara => [:luke, :dave, :paul],
+      :mara => [:luke, :dave, :paul, :pauline, :chamroune, :alex, :jamie],
       :michael => [:nok]
     }
 
@@ -988,6 +1000,192 @@ describe User do
     context "gender is not set" do
       it "should be false" do
         subject.should_not be_female
+      end
+    end
+  end
+
+  describe "#opposite_gender" do
+    context "gender is 'f'" do
+      before do
+        subject.gender = "f"
+      end
+
+      it "should == 'm'" do
+        subject.opposite_gender.should == "m"
+      end
+    end
+
+    context "gender is 'm'" do
+      before do
+        subject.gender = "m"
+      end
+
+      it "should == 'f'" do
+        subject.opposite_gender.should == "f"
+      end
+    end
+
+    context "gender is not set" do
+      it "should be nil" do
+        subject.opposite_gender.should be_nil
+      end
+    end
+  end
+
+  describe "#opposite_looking_for" do
+    context "looking for is 'f'" do
+      before do
+        subject.looking_for = "f"
+      end
+
+      it "should == 'm'" do
+        subject.opposite_looking_for.should == "m"
+      end
+    end
+
+    context "looking for is 'm'" do
+      before do
+        subject.looking_for = "m"
+      end
+
+      it "should == 'f'" do
+        subject.opposite_looking_for.should == "f"
+      end
+    end
+
+    context "looking for is 'e'" do
+      before do
+        subject.looking_for = "e"
+      end
+
+      it "should be nil" do
+        subject.opposite_looking_for.should be_nil
+      end
+    end
+
+    context "looking for is not set" do
+      it "should be nil" do
+        subject.opposite_looking_for.should be_nil
+      end
+    end
+  end
+
+  describe "#probable_gender" do
+    context "gender is unknown" do
+      context "and looking for is unknown" do
+        it "should == 'm' (assume the user is a straight male)" do
+          subject.probable_gender.should == "m"
+        end
+      end
+
+      context "and looking for is either" do
+        before do
+          subject.looking_for = "e"
+        end
+
+        it "should == ['m', 'f'] (could be either male or female)" do
+          subject.probable_gender.should == ["m", "f"]
+        end
+      end
+
+      context "and looking for is male" do
+        before do
+          subject.looking_for = "m"
+        end
+
+        it "should == 'f' (assume the user is straight)" do
+          subject.probable_gender.should == "f"
+        end
+      end
+
+      context "and looking for is female" do
+        before do
+          subject.looking_for = "f"
+        end
+
+        it "should == 'm' (assume the user is straight)" do
+          subject.probable_gender.should == "m"
+        end
+      end
+    end
+
+    context "gender is male" do
+      before do
+        subject.gender = "m"
+      end
+
+      it "should == 'm'" do
+        subject.probable_gender.should == "m"
+      end
+    end
+
+    context "gender is female" do
+      before do
+        subject.gender = "f"
+      end
+
+      it "should == 'f'" do
+        subject.probable_gender.should == "f"
+      end
+    end
+  end
+
+  describe "#probable_looking_for" do
+    context "looking for is unknown" do
+      context "and gender is unknown" do
+        it "should == 'f' (assume the user is a straight male)" do
+          subject.probable_looking_for.should == "f"
+        end
+      end
+
+      context "and gender is male" do
+        before do
+          subject.gender = "m"
+        end
+
+        it "should == 'f' (assume the user is straight)" do
+          subject.probable_looking_for.should == "f"
+        end
+      end
+
+      context "and gender is female" do
+        before do
+          subject.gender = "f"
+        end
+
+        it "should == 'm' (assume the user is straight)" do
+          subject.probable_looking_for.should == "m"
+        end
+      end
+    end
+
+    context "looking for a male" do
+      before do
+        subject.looking_for = "m"
+      end
+
+      it "should == 'm'" do
+        subject.probable_looking_for.should == "m"
+      end
+    end
+
+    context "looking for a female" do
+      before do
+        subject.looking_for = "f"
+      end
+
+      it "should == 'f'" do
+        subject.probable_looking_for.should == "f"
+      end
+    end
+
+    context "looking for either" do
+      before do
+        subject.looking_for = "e"
+      end
+
+      it "should == ['m', 'f']" do
+        subject.probable_looking_for.should == ["m", "f"]
       end
     end
   end

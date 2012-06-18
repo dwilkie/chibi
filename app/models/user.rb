@@ -5,6 +5,14 @@ class User < ActiveRecord::Base
   include Communicable::HasCommunicableResources
   include TwilioHelpers
 
+  PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
+  DEFAULT_ALTERNATE_LOCALE = "en"
+  MALE = "m"
+  FEMALE = "f"
+  BISEXUAL = "e"
+  PROBABLE_GENDER = MALE
+  PROBABLE_LOOKING_FOR = FEMALE
+
   has_one :location, :autosave => true
 
   # describes initiated chats i.e. chat initiated by user
@@ -20,8 +28,8 @@ class User < ActiveRecord::Base
   validates :mobile_number, :presence => true, :uniqueness => true, :length => {:minimum => 9}
   validates :location, :screen_name, :presence => true
 
-  validates :gender, :inclusion => {:in => ["m", "f"], :allow_nil => true}
-  validates :looking_for, :inclusion => {:in => ["m", "f", "e"], :allow_nil => true}
+  validates :gender, :inclusion => {:in => [MALE, FEMALE], :allow_nil => true}
+  validates :looking_for, :inclusion => {:in => [MALE, FEMALE, BISEXUAL], :allow_nil => true}
   validates :age, :inclusion => {:in => 10..99, :allow_nil => true}
 
   before_validation(:on => :create) do
@@ -31,9 +39,6 @@ class User < ActiveRecord::Base
   after_initialize :assign_location
 
   delegate :city, :country_code, :address, :address=, :locate!, :to => :location, :allow_nil => true
-
-  PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
-  DEFAULT_ALTERNATE_LOCALE = "en"
 
   def self.filter_by(params = {})
     super(params).includes(:location)
@@ -59,23 +64,17 @@ class User < ActiveRecord::Base
 
   def self.matches(user)
     # don't match the user being matched
-    match_scope = scoped.where("\"#{table_name}\".\"id\" != ?", user.id)
+    match_scope = not_scope(scoped, :id => user.id, :include_nil => false)
 
-    # if the user's gender is unknown and their looking for preference
-    # is also unknown, only match them with other users that are
-    # in the same situation
-    if !user.gender? && !user.looking_for?
-      match_scope = match_scope.where(:gender => nil, :looking_for => nil)
-    else
-      # if the user's gender is known, match him/her with other users
-      # that are looking for his/her gender or other users that explicitly indifferent
-      match_scope = user.gender? ? match_scope.where("\"#{table_name}\".\"looking_for\" = ? OR \"#{table_name}\".\"looking_for\" = ?", user.gender, "e") : match_scope.where(:gender => user.looking_for, :looking_for => nil)
+    # If the user is a male don't match him with users looking for females
+    # If the user is female, don't match her with users looking for males
+    opposite_gender = user.opposite_gender
+    match_scope = not_scope(match_scope, :looking_for => opposite_gender) if opposite_gender.present?
 
-      # if the user is indifferent about the gender they are seeking
-      # match them with either males or females (but not unknowns) otherwise
-      # match them with the gender they are seeking
-      match_scope = user.looking_for == "e" ? match_scope.where("\"#{table_name}\".\"gender\" IS NOT NULL") : match_scope.where(:gender => user.looking_for)
-    end
+    # If the user looking for a male don't match them with females
+    # If the user is looking for a female don't match them with males
+    opposite_looking_for = user.opposite_looking_for
+    match_scope = not_scope(match_scope, :gender => opposite_looking_for) if opposite_looking_for.present?
 
     # exclude existing friends
     match_scope = exclude_existing_friends(user, match_scope)
@@ -87,7 +86,13 @@ class User < ActiveRecord::Base
     # and users from unregistered service providers together
     match_scope = match_users_from_registered_service_providers(user, match_scope)
 
-    # order first by recent activity
+    # order first by the user's probable preferred gender
+    match_scope = order_by_preferred(:gender, user, match_scope)
+
+    # then by preferred looking for preference
+    match_scope = order_by_preferred(:looking_for, user, match_scope, BISEXUAL)
+
+    # then by recent activity
     match_scope = order_by_recent_activity(user, match_scope)
 
     # then by age difference and number of initiated chats
@@ -138,8 +143,32 @@ class User < ActiveRecord::Base
     gender == 'm'
   end
 
+  def opposite_gender
+    if male?
+      FEMALE
+    elsif female?
+      MALE
+    end
+  end
+
+  def opposite_looking_for
+    if looking_for_male?
+      FEMALE
+    elsif looking_for_female?
+      MALE
+    end
+  end
+
+  def probable_gender
+    gender.present? ? gender : (bisexual? ? [MALE, FEMALE] : (opposite_looking_for || PROBABLE_GENDER))
+  end
+
+  def probable_looking_for
+    looking_for.present? ? (bisexual? ? [MALE, FEMALE] : looking_for) : (opposite_gender || PROBABLE_LOOKING_FOR)
+  end
+
   def hetrosexual?
-    (gender == 'm' && looking_for == 'f') || (gender == 'f' && looking_for == 'm')
+    (male? && looking_for_female?) || (female? && looking_for_male?)
   end
 
   def profile_complete?
@@ -232,6 +261,30 @@ class User < ActiveRecord::Base
 
   private
 
+  def self.order_by_preferred(preferred_attribute, user, scope, secondary_preferences = [])
+    complimentary_attribute = preferred_attribute == :gender ? :looking_for : :gender
+    probable_complimentary_values = [user.send("probable_#{complimentary_attribute}")].flatten
+
+    preferred_value_scope = self
+    sql = []
+
+    probable_complimentary_values.each do |complimentary_value|
+      sql << "#{quoted_attribute(preferred_attribute)} = ?"
+    end
+
+    preferred_value_scope = preferred_value_scope.where(
+      "#{sql.join(" OR ")}", *probable_complimentary_values
+    )
+
+    secondary_values = [secondary_preferences, nil].flatten
+
+    secondary_values.each do |secondary_value|
+      preferred_value_scope = preferred_value_scope.where(preferred_attribute => secondary_value)
+    end
+
+    order_by_case(scope, preferred_value_scope, secondary_values.count + 1)
+  end
+
   # the age difference where the user's age becomes a factor in the ordering of results
   AGE_BEARING_CUTOFF = 10
 
@@ -316,9 +369,11 @@ class User < ActiveRecord::Base
     scope.order(order_sql)
   end
 
-
   # the smallest period in hours of user inactivity
   SMALLEST_INACTIVITY_PERIOD = 0.25
+
+  # the number of inactivity periods
+  NUM_INACTIVITY_PERIODS = 5
 
   # Orders users by recent activity in time periods
   # For example a user with 1 minute inactivity gets
@@ -337,20 +392,12 @@ class User < ActiveRecord::Base
     inactivity_period = SMALLEST_INACTIVITY_PERIOD
     inactivity_scope = self
 
-    5.times do
+    NUM_INACTIVITY_PERIODS.times do
       inactivity_scope = inactivity_scope.where("#{table_name}.updated_at > ?", inactivity_period.hours.ago)
       inactivity_period *= 2
     end
 
-    order_sql = []
-
-    inactivity_scope.where_values.each_with_index do |sql, index|
-      order_sql << "WHEN (#{sql}) THEN #{index}"
-    end
-
-    order_sql = "CASE " << order_sql.join(" ") << " ELSE 5 END"
-
-    scope.order(order_sql)
+    order_by_case(scope, inactivity_scope, NUM_INACTIVITY_PERIODS)
   end
 
   def self.exclude_existing_friends(user, scope)
@@ -380,6 +427,15 @@ class User < ActiveRecord::Base
 
     # order by distance
     scope.order(Location.distance_from_sql(user.location))
+  end
+
+  def self.not_scope(scope, options)
+    include_nil = options.delete(:include_nil)
+    attribute = options.keys.first
+    quoted_attribute = quoted_attribute(attribute)
+    not_sql = "#{quoted_attribute} != ?"
+    not_sql << " OR #{quoted_attribute} IS NULL" unless include_nil == false
+    scope.where(not_sql, options[attribute])
   end
 
   def self.match_users_from_registered_service_providers(user, scope)
@@ -443,6 +499,23 @@ class User < ActiveRecord::Base
     split_mobile_number(number).first
   end
 
+  def self.quoted_attribute(attribute)
+    "\"#{table_name}\".\"#{attribute}\""
+  end
+
+  def self.order_by_case(scope, conditions_scope, else_value)
+    order_sql = []
+
+    conditions_scope.where_values.each_with_index do |sql, index|
+      sql = sql.to_sql if sql.respond_to?(:to_sql)
+      order_sql << "WHEN (#{sql}) THEN #{index}"
+    end
+
+    order_sql = "CASE " << order_sql.join(" ") << " ELSE #{else_value} END"
+
+    scope.order(order_sql)
+  end
+
   def international_dialing_code
     self.class.international_dialing_code(mobile_number)
   end
@@ -465,12 +538,24 @@ class User < ActiveRecord::Base
     value_as_integer = value.to_s.to_i
 
     if value_as_integer == 1
-      value = "m"
+      value = MALE
     elsif value_as_integer == 2
-      value = "f"
+      value = FEMALE
     end
 
     write_attribute(attribute, value)
+  end
+
+  def looking_for_male?
+    looking_for == MALE
+  end
+
+  def looking_for_female?
+    looking_for == FEMALE
+  end
+
+  def bisexual?
+    looking_for == BISEXUAL
   end
 
   def extract(info)
@@ -573,20 +658,20 @@ class User < ActiveRecord::Base
 
   def determine_looking_for(info, options = {})
     if info_suggests_looking_for_girl?(info, options)
-      "f"
+      FEMALE
     elsif info_suggests_looking_for_boy?(info, options)
-      "m"
+      MALE
     elsif !options[:use_only_shared_gender_words] && info_suggests_looking_for_friend?(info)
-      "e"
+      BISEXUAL
     end
   end
 
   def determine_gender(info, options = {})
     text = options[:only_first] ? includes_gender?(info, options).try(:[], 0).to_s : info
     if info_suggests_from_girl?(text, options)
-      "f"
+      FEMALE
     elsif info_suggests_from_boy?(text, options)
-      "m"
+      MALE
     end
   end
 
