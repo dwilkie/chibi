@@ -56,6 +56,6 @@ class Message < ActiveRecord::Base
   end
 
   def introducable?
-    normalized_body.present? && !user_wants_to_chat_with_someone_new?
+    false
   end
 end

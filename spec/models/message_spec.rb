@@ -239,7 +239,7 @@ describe Message do
           end
 
           it_should_behave_like "starting a new chat" do
-            let(:imitate_user) { false }
+            let(:imitate_user) { true }
           end
 
           it "should try to update the users profile from the message text" do
