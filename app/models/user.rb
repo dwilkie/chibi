@@ -86,21 +86,23 @@ class User < ActiveRecord::Base
     # and users from unregistered service providers together
     match_scope = match_users_from_registered_service_providers(user, match_scope)
 
-    # match first by the users preferred gender (looking for) then by their gender
-    # unless they are bisexual or have specified their gender and not their preferred gender (looking for)
-    # in which case match by their gender first and then their probable looking for
-    # e.g. If a user with an unknown gender is seeking a female then it should match with females
-    # on the other hand if the user is female but their preferred gender (looking for)
-    # is unknown it should match with other users looking for females
-
-    preferred_match_order_clauses = [:gender, [:looking_for, BISEXUAL]]
-    preferred_match_order_clauses.reverse! if user.bisexual? || (user.gender.present? && user.looking_for.nil?)
-
-    preferred_match_order_clauses.each do |order_clause|
-      order_clause = [order_clause].flatten
-      attribute = order_clause[0]
-      secondary_attributes = order_clause[1] || []
-      match_scope = order_by_preferred(attribute, user, match_scope, secondary_attributes)
+    if user.bisexual?
+      # he/she doesn't care about the other user's gender so don't order by it
+      match_scope = order_by_preferred(
+        :looking_for, user, match_scope, :other => BISEXUAL, :preferred => true
+      )
+    else
+      # order by the user's preferred gender first unless its unknown in which case order first
+      # by users who's preferred gender is the user's gender
+      preferred_attributes = [
+        {:gender => {}}, {:looking_for => {:other => BISEXUAL, :preferred => user.bisexual?}}
+      ]
+      preferred_attributes.reverse! if user.looking_for.nil? && user.gender.present?
+      preferred_attributes.each do |preferred_attribute|
+        attribute = preferred_attribute.keys.first
+        options = preferred_attribute[attribute]
+        match_scope = order_by_preferred(attribute, user, match_scope, options)
+      end
     end
 
     # then by recent activity
@@ -175,11 +177,11 @@ class User < ActiveRecord::Base
   end
 
   def probable_gender
-    gender.present? ? gender : (bisexual? ? [MALE, FEMALE] : (opposite_looking_for || PROBABLE_GENDER))
+    gender.present? ? gender : (opposite_looking_for || PROBABLE_GENDER)
   end
 
   def probable_looking_for
-    looking_for.present? ? (bisexual? ? [MALE, FEMALE] : looking_for) : (opposite_gender || PROBABLE_LOOKING_FOR)
+    looking_for.present? ? looking_for : (opposite_gender || PROBABLE_LOOKING_FOR)
   end
 
   def hetrosexual?
@@ -276,28 +278,22 @@ class User < ActiveRecord::Base
 
   private
 
-  def self.order_by_preferred(preferred_attribute, user, scope, secondary_preferences = [])
+  def self.order_by_preferred(preferred_attribute, user, scope, options = {})
     complimentary_attribute = preferred_attribute == :gender ? :looking_for : :gender
-    probable_complimentary_values = [user.send("probable_#{complimentary_attribute}")].flatten
+    probable_complimentary_value = user.send("probable_#{complimentary_attribute}")
+
+    preferred_values = [probable_complimentary_value]
+    preferred_values << options[:other] if options[:other]
+    preferred_values.reverse! if options[:preferred]
+    preferred_values << nil
 
     preferred_value_scope = self
-    sql = []
 
-    probable_complimentary_values.each do |complimentary_value|
-      sql << "#{quoted_attribute(preferred_attribute)} = ?"
+    preferred_values.each do |preferred_value|
+      preferred_value_scope = preferred_value_scope.where(preferred_attribute => preferred_value)
     end
 
-    preferred_value_scope = preferred_value_scope.where(
-      "#{sql.join(" OR ")}", *probable_complimentary_values
-    )
-
-    secondary_values = [secondary_preferences, nil].flatten
-
-    secondary_values.each do |secondary_value|
-      preferred_value_scope = preferred_value_scope.where(preferred_attribute => secondary_value)
-    end
-
-    order_by_case(scope, preferred_value_scope, secondary_values.count + 1)
+    order_by_case(scope, preferred_value_scope, preferred_values.count)
   end
 
   # the age difference where the user's age becomes a factor in the ordering of results

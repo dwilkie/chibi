@@ -259,12 +259,16 @@ describe User do
 
     # View has previously chatted with Michael and Hanh is offline, so nobody is matched
 
-    # Mara is bisexual, so she could match with any straight guys, lesbians or other bisexuals
-    # However Eva and Harriet are currently chatting and Mara has already chatted with Con so they're
-    # all eliminated from the match. Luke, Dave and Paul match before Pauline because their full profile
-    # is known.
+    # Mara is bisexual, so she doesn't care about the gender she gets. Therefore the only
+    # thing that is important is that she is matched with others that are seeking her gender.
+    # Also she would be probably be most happy if she was matched with other bisexuals, so Reasmey
+    # matches first. Luke, Dave, Chamroune and Paul are all seeking females so they match next.
+    # Eva and Harriet are currently chatting and Mara has already chatted with Con so they're
+    # all eliminated from the match. Luke, Dave and Paul match before Pauline because it's unknown
+    # whether pauline is searching for a guy or a girl.
 
-    # Reaskmey is bisexual but his/her gender is unknown.
+    # Reaskmey is bisexual but his/her gender is unknown. Mara matches first because she is also
+    # bisexual. Then we assume that Reaksmey is a male so people seeking males are matched next.
 
     # Michael has previously chatted with View which leaves Nok and Hanh. Even though Nok hasn't specified
     # her age yet, we give her the benifit of the doubt and assume she's in the free age zone.
@@ -282,7 +286,7 @@ describe User do
       :alex => [:joy, :mara, :pauline, :reaksmey, :jamie, :chamroune, :luke, :dave, :con, :paul],
       :jamie => [:joy, :mara, :pauline, :reaksmey, :alex, :chamroune, :luke, :dave, :con, :paul],
       :chamroune => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
-      :pauline => [:luke, :dave, :con, :paul, :chamroune, :reaksmey, :mara, :alex, :jamie],
+      :pauline => [:luke, :dave, :con, :paul, :chamroune, :mara, :alex, :jamie],
       :nok => [:michael],
       :joy => [:dave, :luke, :con, :paul, :chamroune, :reaksmey, :alex, :jamie],
       :dave => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
@@ -293,9 +297,9 @@ describe User do
       :eva => [:mara, :pauline, :chamroune, :reaksmey, :alex, :jamie],
       :hanh => [:view, :michael],
       :view => [],
-      :mara => [:luke, :dave, :paul, :pauline, :chamroune, :reaksmey, :alex, :jamie],
+      :mara => [:reaksmey, :luke, :dave, :chamroune, :paul, :pauline, :alex, :jamie],
       :michael => [:nok],
-      :reaksmey => [:joy, :mara, :pauline, :luke, :dave, :con, :paul, :chamroune, :alex, :jamie]
+      :reaksmey => [:mara, :joy, :alex, :jamie, :luke, :dave, :chamroune, :con, :paul]
     }
 
     USER_MATCHES.each do |user, matches|
@@ -317,6 +321,7 @@ describe User do
       create(:chat,        :user => luke,       :friend => nok)
       create(:chat,        :user => luke,       :friend => hanh)
       create(:chat,        :user => paul,       :friend => nok)
+      create(:chat,        :user => pauline,    :friend => reaksmey)
 
       # logout hanh
       hanh.logout!
@@ -1089,8 +1094,8 @@ describe User do
           subject.looking_for = "e"
         end
 
-        it "should == ['m', 'f'] (could be either male or female)" do
-          subject.probable_gender.should == ["m", "f"]
+        it "should == 'm' (assume the user is a bi male)" do
+          subject.probable_gender.should == "m"
         end
       end
 
@@ -1190,8 +1195,8 @@ describe User do
         subject.looking_for = "e"
       end
 
-      it "should == ['m', 'f']" do
-        subject.probable_looking_for.should == ["m", "f"]
+      it "should == 'e'" do
+        subject.probable_looking_for.should == "e"
       end
     end
   end
