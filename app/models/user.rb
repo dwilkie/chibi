@@ -86,11 +86,22 @@ class User < ActiveRecord::Base
     # and users from unregistered service providers together
     match_scope = match_users_from_registered_service_providers(user, match_scope)
 
-    # order first by the user's probable preferred gender
-    match_scope = order_by_preferred(:gender, user, match_scope)
+    # match first by the users preferred gender (looking for) then by their gender
+    # unless they are bisexual or have specified their gender and not their preferred gender (looking for)
+    # in which case match by their gender first and then their probable looking for
+    # e.g. If a user with an unknown gender is seeking a female then it should match with females
+    # on the other hand if the user is female but their preferred gender (looking for)
+    # is unknown it should match with other users looking for females
 
-    # then by preferred looking for preference
-    match_scope = order_by_preferred(:looking_for, user, match_scope, BISEXUAL)
+    preferred_match_order_clauses = [:gender, [:looking_for, BISEXUAL]]
+    preferred_match_order_clauses.reverse! if user.bisexual? || (user.gender.present? && user.looking_for.nil?)
+
+    preferred_match_order_clauses.each do |order_clause|
+      order_clause = [order_clause].flatten
+      attribute = order_clause[0]
+      secondary_attributes = order_clause[1] || []
+      match_scope = order_by_preferred(attribute, user, match_scope, secondary_attributes)
+    end
 
     # then by recent activity
     match_scope = order_by_recent_activity(user, match_scope)
@@ -141,6 +152,10 @@ class User < ActiveRecord::Base
 
   def male?
     gender == 'm'
+  end
+
+  def bisexual?
+    looking_for == BISEXUAL
   end
 
   def opposite_gender
@@ -552,10 +567,6 @@ class User < ActiveRecord::Base
 
   def looking_for_female?
     looking_for == FEMALE
-  end
-
-  def bisexual?
-    looking_for == BISEXUAL
   end
 
   def extract(info)

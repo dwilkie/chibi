@@ -193,21 +193,23 @@ describe User do
     # Paul is a straight 39 year old male in Phnom Penh last seen 30 minutes ago
     # Harriet is a lesbian from Battambang
     # Eva is a lesbian from Siem Reap
+    # Reaksmey is bisexual last seen 15 minutes ago
 
     # Match Explanations
 
-    # Alex has not specified his/her gender or what gender he/she is seeking.
+    # Alex has not specified his/her gender or his/her preferred gender (looking for).
     # This is by far the most common case for new users.
     # Since we don't have any information about the user, assume they're a straight male.
     # This is because a straight male would be more disappointed if he got another guy then
     # if a straight girl got another girl. Joy is a straight female,
     # so she matches first. Mara is a bisexual female so she matches second.
-    # Pauline is female so she matches third. It's unknown about Jamie's gender or sexual preference
-    # but he or she is still a possbile match. Luke is matched next because he has initiated
+    # Pauline is female so she matches third.
+    # Reaksmey is bisexual but his gender is unknown so he/she matches before Jamie whos gender
+    # and sexual preference remain unknown. Luke is matched next because he has initiated
     # the most chats and was seen in the last 15 minutes followed by Dave who was also seen in the last
     # 15 minutes, followed by Con who chatted more recently than Paul. It's important to note
     # that we don't want to eliminate the guys from the search because
-    # they are also potential matches for females
+    # they are potential matches for straight females
 
     # Jamie gets the similar results as alex
 
@@ -216,11 +218,12 @@ describe User do
     # is why Joy matches first in this case. Alex was seen more recently than Jamie so he or she is
     # matched before Jamie
 
-    # Pauline is female so user who are looking for males eliminated from the match.
-    # Also we assume that beccause Pauline is a female she is looking for a male.
-    # Which is why to boys match before the girls in this case. Luke has initiated more chats
-    # than the other boys so he matches first. Mara also matches here because even though she is female
-    # she is bisexual and Pauline might be intersted too.
+    # Pauline is female so users who are looking for males eliminated from the match.
+    # Also we assume that because Pauline is a female she is looking for a male.
+    # Which is why the boys match before the girls. Similarly, Reaksmey matches before Mara
+    # because of we are assuming that Pauline is straight and therefore would not be interested
+    # in Mara, so even though Reaksmey's gender is unknown it's still more likely a match.
+    # Luke has initiated more chats than the other boys so he matches first.
 
     # Nok is a straight female. There are other straight males but they are not in Thailand
     # so she can't be matched with them. Hanh and View are both males from Thailand
@@ -261,6 +264,8 @@ describe User do
     # all eliminated from the match. Luke, Dave and Paul match before Pauline because their full profile
     # is known.
 
+    # Reaskmey is bisexual but his/her gender is unknown.
+
     # Michael has previously chatted with View which leaves Nok and Hanh. Even though Nok hasn't specified
     # her age yet, we give her the benifit of the doubt and assume she's in the free age zone.
     # Hanh has initiated more chat than Nok so he would have been matched before Nok, but
@@ -274,22 +279,23 @@ describe User do
     # incase the test gateway is down or something.
 
     USER_MATCHES = {
-      :alex => [:joy, :mara, :pauline, :jamie, :chamroune, :luke, :dave, :con, :paul],
-      :jamie => [:joy, :mara, :pauline, :alex, :chamroune, :luke, :dave, :con, :paul],
-      :chamroune => [:joy, :mara, :pauline, :alex, :jamie],
-      :pauline => [:luke, :dave, :con, :paul, :chamroune, :alex, :jamie, :mara],
+      :alex => [:joy, :mara, :pauline, :reaksmey, :jamie, :chamroune, :luke, :dave, :con, :paul],
+      :jamie => [:joy, :mara, :pauline, :reaksmey, :alex, :chamroune, :luke, :dave, :con, :paul],
+      :chamroune => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
+      :pauline => [:luke, :dave, :con, :paul, :chamroune, :reaksmey, :mara, :alex, :jamie],
       :nok => [:michael],
-      :joy => [:dave, :luke, :con, :paul, :chamroune, :alex, :jamie],
-      :dave => [:joy, :mara, :pauline, :alex, :jamie],
-      :con => [:joy, :pauline, :alex, :jamie],
-      :paul => [:joy, :mara, :pauline, :alex, :jamie],
-      :luke => [:joy, :mara, :pauline, :alex, :jamie],
-      :harriet => [:mara, :pauline, :chamroune, :alex, :jamie],
-      :eva => [:mara, :pauline, :chamroune, :alex, :jamie],
+      :joy => [:dave, :luke, :con, :paul, :chamroune, :reaksmey, :alex, :jamie],
+      :dave => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
+      :con => [:joy, :pauline, :reaksmey, :alex, :jamie],
+      :paul => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
+      :luke => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
+      :harriet => [:mara, :pauline, :chamroune, :reaksmey, :alex, :jamie],
+      :eva => [:mara, :pauline, :chamroune, :reaksmey, :alex, :jamie],
       :hanh => [:view, :michael],
       :view => [],
-      :mara => [:luke, :dave, :paul, :pauline, :chamroune, :alex, :jamie],
-      :michael => [:nok]
+      :mara => [:luke, :dave, :paul, :pauline, :chamroune, :reaksmey, :alex, :jamie],
+      :michael => [:nok],
+      :reaksmey => [:joy, :mara, :pauline, :luke, :dave, :con, :paul, :chamroune, :alex, :jamie]
     }
 
     USER_MATCHES.each do |user, matches|
@@ -1187,6 +1193,19 @@ describe User do
       it "should == ['m', 'f']" do
         subject.probable_looking_for.should == ["m", "f"]
       end
+    end
+  end
+
+  describe "#bisexual?" do
+    it "should be true only if the user is explicitly bisexual" do
+      subject.should_not be_bisexual
+
+      subject.looking_for = "e"
+      subject.should be_bisexual
+
+      subject.gender = "m"
+      subject.looking_for = "m"
+      subject.should_not be_bisexual
     end
   end
 
