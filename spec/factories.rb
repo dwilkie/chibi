@@ -293,6 +293,13 @@ FactoryGirl.define do
       looking_for "f"
     end
 
+    # bisexual with unknown gender
+    factory :reaksmey do
+      name "reaksmey"
+      looking_for "e"
+      updated_at { 15.minutes.ago }
+    end
+
     # user with unknown looking for preference
     factory :pauline do
       name "pauline"
