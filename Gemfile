@@ -38,7 +38,7 @@ gem 'jquery-rails'
 
 group :test, :development do
   gem 'rspec-rails'
-  gem 'ruby-debug19', :require => 'ruby-debug'
+  gem 'debugger'
   gem 'rb-readline'
 end
 
