@@ -1,7 +1,6 @@
 ---
 en:
   boy:
-  - m
   - male
   could_mean_boy_or_boyfriend:
   - boy
@@ -28,7 +27,6 @@ en:
   guy_looking_for_a_girl:
   - guy looking for a hot girl sexy
   - man seeking woman
-  - m seeking woman hot
   girl_looking_for_a_guy:
   - girl looking for a hot guy sporty
   - woman seeking man
@@ -37,13 +35,12 @@ en:
   guy_looking_for_a_guy:
   - male looking for a guy to have fun with
   - guy seeking guy
-  - m seeking man
   girl_looking_for_a_girl:
   - f looking for a girl for relationship
   - girl seeking girl
   - f seeking woman
   guy_looking_for_a_friend:
-  - m looking for a friend to hang out with
+  - man looking for a friend to hang out with
   - guy seeking friend
   girl_looking_for_a_friend:
   - f looking for a friend to go shopping with
@@ -108,6 +105,8 @@ en:
   - girl or boy
   vanny:
   - "hi ! my name vanny.i'm 17 yearold.i'm boy.I live in pailin. thank q... o:)"
+  not_a_man_from_siem_reap:
+  - "live in siem reap n u . m 093208006"
 kh:
   could_mean_boy_or_boyfriend:
   - pros

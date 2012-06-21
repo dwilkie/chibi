@@ -814,6 +814,14 @@ describe User do
           :expected_gender => :male,
           :vcr => {:expect_results => true, :cassette => "kh/krong_pailin"}
         )
+
+        # live in siem reap n u . m 093208006
+        registration_examples(
+          keywords(:not_a_man_from_siem_reap),
+          :expected_city => "Siem Reap",
+          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
+        )
+
       end
     end
   end

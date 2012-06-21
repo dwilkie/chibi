@@ -23,7 +23,6 @@ en:
     - bf
     - friend boy
   boy:
-    - "(?<!')m"
     - male
   could_mean_boy_or_boyfriend:
     - boy
