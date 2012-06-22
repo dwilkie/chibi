@@ -68,11 +68,6 @@ module TranslationHelpers
       :kh => "#[0]: #[1]"
     },
 
-    :forward_message_approx => {
-      :en => "#[0]: ",
-      :kh => "#[0]: "
-    },
-
     :anonymous_reminder_approx => {
       :en => "Txt ur name, age, sex, city & gender ur seeking",
       :kh => "Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok"
@@ -81,6 +76,21 @@ module TranslationHelpers
     :reminder_approx => {
       :en => "Txt 'new' to",
       :kh => "Sorsay 'new' derm-bei"
+    },
+
+    :greeting_from_unknown_gender => {
+      :en => "#[0]: Hi",
+      :kh => "#[0]: Sousdey"
+    },
+
+    :greeting_from_male => {
+      :en => "#[0]: Hi",
+      :kh => "#[0]: Sousdey bart"
+    },
+
+    :greeting_from_female => {
+      :en => "#[0]: Hi",
+      :kh => "#[0]: Sousdey ja"
     }
   }
 

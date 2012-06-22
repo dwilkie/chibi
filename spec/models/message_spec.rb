@@ -80,7 +80,7 @@ describe Message do
         it "should introduce the user to the match" do
           reply = reply_to(new_friend, message.chat).body
           if imitate_user
-            reply.should =~ /^#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
+            reply.should == spec_translate(:greeting_from_unknown_gender, new_friend.locale, user.screen_id)
           else
             reply.should == spec_translate(:forward_message, new_friend.locale, user.screen_id, message.body)
           end
@@ -226,7 +226,7 @@ describe Message do
               non_introducable_examples.each do |example|
                 message = build(:message, :user => user, :body => example.upcase)
                 expect_message  { message.process! }
-                reply_to(new_friend).body.should =~ /^#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
+                reply_to(new_friend).body.should == spec_translate(:greeting_from_unknown_gender, new_friend.locale, user.screen_id)
               end
             end
           end

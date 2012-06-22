@@ -67,7 +67,7 @@ describe "Messages" do
 
             reply_to(new_user).should be_nil
 
-            reply_to(alex).body.should =~ /^#{spec_translate(:forward_message_approx, alex.locale, new_user.screen_id)}/
+            reply_to(alex).body.should == spec_translate(:greeting_from_unknown_gender, alex.locale, new_user.screen_id)
           end
         end
 
@@ -144,7 +144,7 @@ describe "Messages" do
             new_user.gender.should == "m"
 
             reply_to(new_user).should be_nil
-            reply_to(joy).body.should =~ /^#{spec_translate(:forward_message_approx, joy.locale, new_user.screen_id)}/
+            reply_to(joy).body.should == spec_translate(:greeting_from_male, joy.locale, new_user.screen_id)
           end
         end
       end
@@ -169,7 +169,7 @@ describe "Messages" do
             alex.looking_for.should == "m"
 
             reply_to(alex).should be_nil
-            reply_to(dave).body.should =~ /^#{spec_translate(:forward_message_approx, dave.locale, alex.screen_id)}/
+            reply_to(dave).body.should == spec_translate(:greeting_from_female, dave.locale, alex.screen_id)
           end
         end
       end
@@ -237,7 +237,7 @@ describe "Messages" do
               :friend_unavailable, mara.locale, dave.screen_id
             )
 
-            reply_to(luke).body.should =~ /^#{spec_translate(:forward_message_approx, luke.locale, mara.screen_id)}/
+            reply_to(luke).body.should == spec_translate(:greeting_from_female, luke.locale, mara.screen_id)
 
             reply_to_dave = reply_to(dave)
             reply_to_dave.body.should == spec_translate(

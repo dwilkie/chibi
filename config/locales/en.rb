@@ -1,8 +1,8 @@
 {
   :en => {
     :replies => {
-      :greetings => lambda {|key, options|
-        ["Hi!", "Hey!"]
+      :greeting => lambda {|key, options|
+        "Hi"
       },
 
       :welcome => lambda {|key, options|
@@ -45,7 +45,7 @@
           default_instructions_outcome = "to try again"
           custom_or_no_instructions_outcome = "We'll let you know when someone comes online"
         when :reminder
-          greeting = I18n.t("replies.greetings", :locale => :en).sample
+          greeting = I18n.t("replies.greeting", :locale => :en)
           opener = ["Want to meet a new friend?", "Wanna chat?"].sample
           notification = "#{greeting} #{opener} "
           default_instructions_outcome = custom_or_no_instructions_outcome = ["to find a new friend", "to start", "to try"].sample

@@ -320,12 +320,10 @@ describe Reply do
     context "for the chat partner" do
       context "with no introduction" do
         it "should imitate the user by sending a fake greeting to the new chat partner" do
-          sample_greeting = I18n.t("replies.greetings").sample
-          I18n.stub(:t).and_return([sample_greeting])
-
           assert_reply(
-            :introduce!, :forward_message,
-            :args => [partner, false], :interpolations => [partner.screen_id, sample_greeting]
+            :introduce!, :greeting_from_unknown_gender,
+            :args => [partner, false], :interpolations => [partner.screen_id],
+            :no_alternate_translation => true
           )
         end
       end
