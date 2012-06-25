@@ -8,4 +8,9 @@ namespace :chats do
   task :terminate_inactive => :environment do
     Resque.enqueue(ChatExpirer, :inactivity_period => 24.hours)
   end
+
+  desc "Reactivates stagnant chats which have pending messages"
+  task :reactivate_stagnant => :environment do
+    Resque.enqueue(ChatReactivator)
+  end
 end
