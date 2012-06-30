@@ -678,6 +678,30 @@ describe Chat do
     end
   end
 
+  describe ".reactivate_stagnant!" do
+    let(:chat_with_pending_messages) { create(:chat, :user => user) }
+    let(:pending_reply) { create(:reply, :user => user, :chat => chat_with_pending_messages) }
+
+    before do
+      pending_reply
+      chat_with_pending_messages
+    end
+
+    it "should reactivate stagnant chats" do
+      chat_with_pending_messages.should_not be_active
+      with_resque { expect_message { subject.class.reactivate_stagnant! } }
+      chat_with_pending_messages.reload.should be_active
+      pending_reply.reload.should be_delivered
+    end
+
+    it "should not reactivate stagnant chats if the users are not available" do
+      active_chat
+      with_resque { subject.class.reactivate_stagnant! }
+      chat_with_pending_messages.reload.should_not be_active
+      pending_reply.reload.should_not be_delivered
+    end
+  end
+
   describe ".end_inactive" do
     before do
       chat.should_not be_active

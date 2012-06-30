@@ -28,6 +28,12 @@ class Chat < ActiveRecord::Base
     end
   end
 
+  def self.reactivate_stagnant!
+    with_undelivered_messages.find_each do |chat|
+      Resque.enqueue(ChatReactivator, chat.id)
+    end
+  end
+
   def self.filter_by(params = {})
     communicable_resources_scope.filter_params(params).includes(:user, :friend, :active_users)
   end
@@ -146,18 +152,24 @@ class Chat < ActiveRecord::Base
     new(:user => user, :friend => friend).activate!(options.merge(:activate_user => false))
   end
 
-  def self.with_undelivered_messages_for(user)
+  def self.with_undelivered_messages
     # return chats that have undelivered messages and the chat participants
     # are available to chat again
-    scoped.joins(:user).joins(:friend).where(
+    scoped.joins(:user).joins(:friend).joins(:replies).where(
       "users.active_chat_id IS NULL OR users.active_chat_id = #{table_name}.id"
     ).where(
       :users => {:online => true}
     ).where(
-      "friends_chats.active_chat_id IS NULL OR friends_chats.active_chat_id =  #{table_name}.id"
-    ).where(:friends_chats => {:online => true}).includes(:replies).where(
-      :replies => {:delivered_at => nil, :user_id => user.id}
-    ).readonly(false)
+      "friends_chats.active_chat_id IS NULL OR friends_chats.active_chat_id = #{table_name}.id"
+    ).where(
+      :friends_chats => {:online => true}
+    ).where(
+      :replies => {:delivered_at => nil}
+    ).includes(:replies).readonly(false)
+  end
+
+  def self.with_undelivered_messages_for(user)
+    with_undelivered_messages.where(:replies => {:user_id => user.id})
   end
 
   def self.filter_params(params = {})
