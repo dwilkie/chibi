@@ -2,7 +2,7 @@
   :en => {
     :replies => {
       :greeting => lambda {|key, options|
-        "Hi"
+        "Hi! I want to find a friend to play SMS with me!"
       },
 
       :welcome => lambda {|key, options|

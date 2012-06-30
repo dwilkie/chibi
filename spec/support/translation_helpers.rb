@@ -79,18 +79,18 @@ module TranslationHelpers
     },
 
     :greeting_from_unknown_gender => {
-      :en => "#[0]: Hi",
-      :kh => "#[0]: Sousdey"
+      :en => "#[0]: Hi! I want to find a friend to play SMS with me!",
+      :kh => "#[0]: Sousdey! Nhom jong rok mit leng SMS!"
     },
 
     :greeting_from_male => {
-      :en => "#[0]: Hi",
-      :kh => "#[0]: Sousdey bart"
+      :en => "#[0]: Hi! I want to find a friend to play SMS with me!",
+      :kh => "#[0]: Sousdey bart! Nhom jong rok mit leng SMS!"
     },
 
     :greeting_from_female => {
-      :en => "#[0]: Hi",
-      :kh => "#[0]: Sousdey ja"
+      :en => "#[0]: Hi! I want to find a friend to play SMS with me!",
+      :kh => "#[0]: Sousdey ja! Nhom jong rok mit leng SMS!"
     }
   }
 

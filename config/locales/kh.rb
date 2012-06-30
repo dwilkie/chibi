@@ -7,7 +7,7 @@
         elsif options[:friend].try(:female?)
           greeting_suffix = " ja"
         end
-        "Sousdey#{greeting_suffix}"
+        "Sousdey#{greeting_suffix}! Nhom jong rok mit leng SMS!"
       },
 
       :welcome => lambda {|key, options|
