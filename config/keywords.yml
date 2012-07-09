@@ -37,10 +37,14 @@ kh:
     - "(?:chnaa?m)"
   girlfriend:
     - 'm(?:i|e)t srey'
+  girl:
+    - 'jas?'
   could_mean_girl_or_girlfriend:
     - srey
   boyfriend:
     - 'm(?:i|e)t (?:p|b)ros'
+  boy:
+    - 'bar?t'
   could_mean_boy_or_boyfriend:
     - '(?:b|p)ros'
   friend:
