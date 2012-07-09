@@ -38,7 +38,7 @@ kh:
   girlfriend:
     - 'm(?:i|e)t srey'
   girl:
-    - 'jas?'
+    - '(ch|j)as?'
   could_mean_girl_or_girlfriend:
     - srey
   boyfriend:
