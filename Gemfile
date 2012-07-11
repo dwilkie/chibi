@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.5'
+gem 'rails', '3.2.6'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -39,7 +39,6 @@ gem 'jquery-rails'
 group :test, :development do
   gem 'rspec-rails'
   gem 'debugger'
-  gem 'rb-readline'
 end
 
 group :test do
