@@ -7,11 +7,17 @@ describe Message do
   let(:message) { create(:message, :user => user) }
   let(:new_message) { build(:message, :user => user) }
   let(:chat) { create(:active_chat, :user => user, :friend => friend) }
+  let(:message_with_guid) { create(:message_with_guid, :user => user) }
 
   describe "factory" do
     it "should be valid" do
       new_message.should be_valid
     end
+  end
+
+  it "should not be valid with a duplicate a guid" do
+    new_message.guid = message_with_guid.guid
+    new_message.should_not be_valid
   end
 
   it_should_behave_like "analyzable"
@@ -26,6 +32,13 @@ describe Message do
 
   it_should_behave_like "chatable" do
     let(:chatable_resource) { message }
+  end
+
+  describe "#guid" do
+    it "should be mass assignable" do
+      message = subject.class.new(:guid => "1234")
+      message.guid.should == "1234"
+    end
   end
 
   describe "#origin" do

@@ -4,7 +4,7 @@ class MessagesController < ApplicationController
   before_filter :authenticate_message
 
   def create
-    message = Message.new(params[:message].slice(:from, :body))
+    message = Message.new(params[:message].slice(:from, :body, :guid))
     if message.save
       Resque.enqueue(MessageProcessor, message.id)
       status = :created

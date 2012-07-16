@@ -60,7 +60,7 @@ module MessagingHelpers
           {:message => {
             :from => options[:from],
             :body => options[:body],
-            :guid => options[:guid] || "296cba84-c82f-49c0-a732-a9b09815fbe8",
+            :guid => options[:guid] || generate(:guid),
             :application => options[:application] || "chatbox",
             :channel => options[:channel] || "test",
             :to => options[:to] || "012456789",

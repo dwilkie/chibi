@@ -414,5 +414,23 @@ describe "Messages" do
         end
       end
     end
+
+    context "as nuntium" do
+      context "when I post a duplicate to the server" do
+        let(:message_with_guid) { create(:message_with_guid) }
+
+        before do
+          send_message(
+            :from => message_with_guid.user,
+            :guid => message_with_guid.guid,
+            :response => 400
+          )
+        end
+
+        it "should not save or process the message" do
+          new_message.should == message_with_guid
+        end
+      end
+    end
   end
 end

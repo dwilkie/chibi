@@ -6,8 +6,10 @@ class Message < ActiveRecord::Base
   include Communicable::Chatable
   include Analyzable
 
-  attr_accessible :body
+  attr_accessible :body, :guid
   alias_attribute :origin, :from
+
+  validates :guid, :uniqueness => true, :allow_nil => true
 
   def body
     read_attribute(:body).to_s

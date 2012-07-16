@@ -7,12 +7,20 @@ FactoryGirl.define do
     created_at {1.month.ago}
   end
 
+  sequence :guid do |n|
+    "296cba84-c82f-49c0-a732-a9b09815fbe#{n}"
+  end
+
   factory :message do
     user
     from { user.mobile_number }
 
     factory :message_from_last_month do
       from_last_month
+    end
+
+    factory :message_with_guid do
+      guid
     end
   end
 
