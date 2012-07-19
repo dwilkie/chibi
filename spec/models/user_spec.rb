@@ -684,7 +684,7 @@ describe User do
 
         # davo 28 guy wants friend
         registration_examples(
-          keywords(:davo_28_guy_wants_bf),
+          keywords(:davo_28_guy_wants_friend),
           :expected_age => 28,
           :expected_name => "davo",
           :expected_gender => :male,
@@ -821,7 +821,6 @@ describe User do
           :expected_city => "Siem Reap",
           :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
         )
-
       end
     end
   end
