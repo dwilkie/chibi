@@ -821,6 +821,13 @@ describe User do
           :expected_city => "Siem Reap",
           :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
         )
+
+        # kimlong
+        registration_examples(
+          keywords(:kimlong),
+          :expected_name => "kimlong",
+          :expected_age => 17,
+        )
       end
     end
   end

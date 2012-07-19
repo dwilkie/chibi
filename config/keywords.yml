@@ -5,7 +5,7 @@ en:
   i_am:
     - "(?:i am|i'm|im)"
   name:
-    - "(?:(?:my )?name(?: is| me)?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bis\\b|\\bme\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
+    - "(?:(?:my )?names?(?:'s)?(?:\\s*(?:is|me))?(?:\\s*\\()?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bis\\b|\\bme\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
   years_old:
     - "(?:years?(?: old)?|yo|y)"
   girlfriend:
