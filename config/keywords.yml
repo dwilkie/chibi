@@ -15,10 +15,10 @@ en:
     - friend girl
   girl:
     - f
-    - female
   could_mean_girl_or_girlfriend:
     - girl
     - woman
+    - "fem(?:a|e)le"
   boyfriend:
     - '(?:meet|find|chat|have|talk|looking for).+(?:boy|guy|man)'
     - 'boy\s?friend'
