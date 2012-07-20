@@ -9,18 +9,18 @@ en:
   years_old:
     - "(?:years?(?: old)?|yo|y)"
   girlfriend:
-    - '(?:meet|find|chat|have|talk|looking for).+(?:girl|woman)'
-    - 'girl\s?friend'
-    - gf
-    - friend girl
+    - '(?:meet|find|chat|have|talk|need|looking for).+(?:gir?l|woman)'
+    - 'gir?l\s?friend'
+    - "gf"
+    - "friend gir?l"
   girl:
     - f
   could_mean_girl_or_girlfriend:
-    - girl
+    - "gir?l"
     - woman
     - "fem(?:a|e)le"
   boyfriend:
-    - '(?:meet|find|chat|have|talk|looking for).+(?:boy|guy|man)'
+    - '(?:meet|find|chat|have|talk|need|looking for).+(?:boy|guy|man)'
     - 'boy\s?friend'
     - bf
     - friend boy
@@ -31,7 +31,7 @@ en:
     - guy
     - man
   friend:
-    - '(?:(?:meet|find|chat|have|talk|looking for).+)?friends?'
+    - '(?:(?:meet|find|chat|have|talk|need|looking for).+)?friends?'
 kh:
   name:
     - '(?:chh?mu?ou?s)\s*(\b\w+\b)'
