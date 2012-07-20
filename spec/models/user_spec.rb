@@ -828,6 +828,17 @@ describe User do
           :expected_name => "kimlong",
           :expected_age => 17,
         )
+
+        # phearak
+        registration_examples(
+          keywords(:phearak),
+          :expected_name => "phearak",
+          :expected_age => 30,
+          :expected_city => "Phnom Penh",
+          :expected_gender => :male,
+          :expected_looking_for => :female,
+          :vcr => {:expect_results => true}
+        )
       end
     end
   end
