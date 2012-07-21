@@ -86,12 +86,14 @@ en:
   - im looking for a guy
   not_an_age:
   - "24 hours"
-  - "72 h"
+  - "24 h"
   - "48h"
   - "24hrs"
   - "want 70"
   - "60"
   - "69"
+  - "1.59m"
+  - "1m35cm"
   im_something_other_than_a_name:
   - "i'm fine"
   - "i'm ok"
