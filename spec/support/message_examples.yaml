@@ -2,6 +2,7 @@
 en:
   boy:
   - male
+  - "am boy"
   could_mean_boy_or_boyfriend:
   - boy
   - guy
@@ -73,7 +74,7 @@ en:
   sr_wants_girl:
   - im in sr want to meet girl
   kunthia_23_sr_girl_wants_boy:
-  - kunthia 23 girl sr want to meet boy
+  - "my name's kunthia 23 girl sr want to meet boy"
   tongleehey:
   - "i'm tongleehey 29 man from pp want to meet girl"
   find_me_a_girl:
@@ -150,8 +151,12 @@ en:
   - "my nane kimlong.i'm good and 17,i live in kompong cham provice."
   - "my name kimlong,i'm 17years old and i live in siem reap."
   - "hi name kimlong, nice to see u!i'm17 and u?"
+  - "my name kim7long, 17yo"
+  - "me name kimlong3 a yu 17"
   phearak:
   - "really! really..... i 1 2have a girlfriend nas... my name phearak, 30 y-old already, nowadays i'm stay as PP, i am a man. i 1 2seek a girlfriend cute... cute...."
+  makara:
+  - "name : makara age : 21year live : pp boy : finegirl number : 010524369"
 kh:
   girl:
   - ja
@@ -221,7 +226,7 @@ kh:
   sr_wants_girl:
   - khnom nov sr jong rok met srey
   kunthia_23_sr_girl_wants_boy:
-  - kunthia 23 srey sr jong rok met bros
+  - chhmous kunthia 23 srey sr jong rok met bros
   tongleehey:
   - knyom chhmous tongleehey 29 pros mok pi pp jong rok met srey
   find_me_a_girl:

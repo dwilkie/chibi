@@ -566,55 +566,19 @@ class User < ActiveRecord::Base
   end
 
   def extract(info)
-    return if name_given?(info)
-
     stripped_info = info.dup
-
     profile_complete = profile_complete?
+    extract_gender_and_looking_for(stripped_info, profile_complete)
+    extract_date_of_birth(stripped_info, profile_complete)
     extract_name(stripped_info, profile_complete)
-
-    unless profile_complete || missing_only?(:name)
-      first_word = strip_match!(stripped_info, /\w+/, :only_first => true).try(:[], 0)
-      extract_profile_without_location(stripped_info, profile_complete)
-
-      if missing_only?(:name) || (missing_only?(:name, :city) && changed?)
-        self.name = first_word
-        extract_location(stripped_info, profile_complete)
-        return
-      else
-        discard_changes
-      end
-    end
-
-    extract_profile(info, profile_complete)
-  end
-
-  def extract_profile(info, profile_complete)
-    stripped_info = info.dup
-
-    extract_profile_without_location(stripped_info, profile_complete)
     extract_location(stripped_info, profile_complete)
-  end
-
-  def extract_profile_without_location(info, profile_complete)
-    extract_gender_and_looking_for(info, profile_complete)
-    extract_date_of_birth(info, profile_complete)
-    extract_name(info, profile_complete)
-  end
-
-  def name_given?(info)
-    if missing_only?(:name)
-      message_words = info.split(/\s+/)
-      if message_words.count == 1
-        self.name = message_words.first
-      end
-    end
   end
 
   def extract_gender_and_looking_for(info, force_update)
     unless includes_gender_and_looking_for?(info)
+      extract_gender(info, :explicit_only => true)
       extract_looking_for(info, :include_shared_gender_words => gender.present? && !force_update)
-      extract_gender(info, force_update)
+      extract_gender(info)
     end
   end
 
@@ -626,7 +590,11 @@ class User < ActiveRecord::Base
   def extract_name(info, force_update)
     matches = strip_match!(info, /#{profile_keywords(:name)}/)
     match = matches.try(:[], 2) || matches.try(:[], 1)
-    self.name = match.downcase if match && (force_update || name.nil?)
+    if match
+      match.gsub!(/\d+/, "")
+      match.strip!
+      self.name = match.downcase if match.present? && (force_update || name.nil?)
+    end
   end
 
   def extract_location(info, force_update)
@@ -658,9 +626,9 @@ class User < ActiveRecord::Base
     self.looking_for = user_looking_for if user_looking_for
   end
 
-  def extract_gender(info, force_update)
-    sex = determine_gender(info)
-    self.gender = sex if sex && (gender.nil? || force_update)
+  def extract_gender(info, options = {})
+    sex = determine_gender(info, options)
+    self.gender = sex if sex
   end
 
   def determine_looking_for(info, options = {})
@@ -674,7 +642,7 @@ class User < ActiveRecord::Base
   end
 
   def determine_gender(info, options = {})
-    text = options[:only_first] ? includes_gender?(info, options).try(:[], 0).to_s : info
+    text = (options[:explicit_only] || options[:only_first]) ? includes_gender?(info, options).try(:[], 0).to_s : info
     if info_suggests_from_girl?(text, options)
       FEMALE
     elsif info_suggests_from_boy?(text, options)
@@ -709,7 +677,7 @@ class User < ActiveRecord::Base
   end
 
   def includes_gender?(info, options)
-    strip_match!(info, /(?:m|i'm)?\s*a?\b#{gender_keywords}\b/, options)
+    strip_match!(info, /(?:#{profile_keywords(:i_am)}\s+)#{options[:explicit_only] ? "" : "?"}#{gender_keywords}\b/, options)
   end
 
   def gender_question?(info)
@@ -751,13 +719,5 @@ class User < ActiveRecord::Base
 
   def missing_only?(*attributes)
     missing_profile_attributes == attributes
-  end
-
-  def discard_changes
-    changes.each do |attribute, change|
-      if PROFILE_ATTRIBUTES.include?(attribute.to_sym)
-        self.send("#{attribute}=", change.first)
-      end
-    end
   end
 end

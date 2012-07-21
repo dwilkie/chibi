@@ -127,11 +127,11 @@ describe "Messages" do
           end
         end
 
-        context "'map pros 27 pp jong rok met srey'" do
+        context "'chhmous map pros 27 pp jong rok met srey'" do
           before do
             # ensure that joy is the first match by increasing her initiated chat count
             create(:chat, :user => joy)
-            send_message(:from => my_number, :body => "map pros 27 pp jong rok met srey", :location => true)
+            send_message(:from => my_number, :body => "chhmous map pros 27 pp jong rok met srey", :location => true)
           end
 
           it "should save me as 'map' a 27 yo male from Phnom Penh and start a chat with a matching female" do

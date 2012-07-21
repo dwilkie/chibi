@@ -13,6 +13,7 @@ describe User do
   let(:active_chat) { create(:active_chat, :user => user, :friend => friend) }
   let(:offline_user) { build(:offline_user) }
   let(:user_with_complete_profile) { build(:user_with_complete_profile) }
+  let(:male_user) { create(:male_user) }
 
   it "should not be valid without a mobile number" do
     new_user.mobile_number = nil
@@ -79,7 +80,7 @@ describe User do
 
     context "when inititalizing a new user with a mobile number" do
       context "if a the user does not yet have a location" do
-        it "should build a location based off the mobile number and assign it to itself" do
+        it "should build a location from the mobile number and assign it to itself" do
           with_users_from_different_countries do |country_code, prefix, country_name, factory_name|
             new_location = subject.class.new(:mobile_number => build(factory_name).mobile_number).location
             new_location.country_code.should == country_code
@@ -471,17 +472,6 @@ describe User do
       new_user.should be_persisted
     end
 
-    context "for users with only one missing attribute" do
-      it "should update their profile correctly" do
-        registration_examples(
-          ["Dave"],
-          :user => user_with_complete_profile,
-          :name => nil,
-          :expected_name => "Dave"
-        )
-      end
-    end
-
     context "for users with complete profiles" do
       it "should update the profile with the new information" do
         # im a girl
@@ -506,8 +496,18 @@ describe User do
       end
     end
 
+    context "for users with a missing looking for preference" do
+      it "should determine the looking for preference from the info" do
+        registration_examples(
+          keywords(:boy),
+          :expected_gender => :male,
+          :user => male_user,
+        )
+      end
+    end
+
     context "for users with a missing gender or sexual preference" do
-      it "should determine the missing details based off the info" do
+      it "should determine the missing details from the info" do
         # a guy is texting
         assert_looking_for(
           :gender => :male,
@@ -839,6 +839,17 @@ describe User do
           keywords(:phearak),
           :expected_name => "phearak",
           :expected_age => 30,
+          :expected_city => "Phnom Penh",
+          :expected_gender => :male,
+          :expected_looking_for => :female,
+          :vcr => {:expect_results => true}
+        )
+
+        # name : makara age : 21year live : pp boy : finegirl number : 010524369
+        registration_examples(
+          keywords(:makara),
+          :expected_name => "makara",
+          :expected_age => 21,
           :expected_city => "Phnom Penh",
           :expected_gender => :male,
           :expected_looking_for => :female,
