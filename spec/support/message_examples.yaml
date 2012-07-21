@@ -84,6 +84,11 @@ en:
   - im a girl
   im_looking_for_a_guy:
   - im looking for a guy
+  not_an_age:
+  - "24 hours"
+  - "72 h"
+  - "48h"
+  - "24hrs"
   im_something_other_than_a_name:
   - "i'm fine"
   - "i'm ok"
@@ -98,6 +103,10 @@ en:
   - "i'm i"
   - "i'm year 2"
   - "i'm year old i live in bmc province"
+  - "wat your name and wat your phone number ho are you i don't no?"
+  - "oh where u live ? what ur name and how a u?"
+  - "oh welcome 24h. please your name and your number."
+  - "i'm ok and u ask . and where do u live .."
   veayo:
   - my name veayo 21 female from pp want to find friend bõy and gril. Can call or sms.
   telephone_number:
@@ -109,6 +118,7 @@ en:
   - boy or girl
   - girl or boy
   - "nice to be your friend. are you male or femele?"
+  - "u mele or femele"
   vanny:
   - "hi ! my name vanny.i'm 17 yearold.i'm boy.I live in pailin. thank q... o:)"
   not_a_man_from_siem_reap:
@@ -121,6 +131,14 @@ en:
   - "my name's kimlong . i'm 17years old. "
   - "my names kimlong . i'm 17years old. "
   - "my name is ( kimlong kalib), i'm 17y"
+  - "susdey! my name kimlong. i'm stay in phnom phenh. i'm 17y."
+  - "i'm kimlong,i'm 17 years old,i'm stay at sangkat steung mean chey,khan mean chey."
+  - "i'm kimlong, i'm stay at kgc,and u? And i'm 17, and u?"
+  - "yes my name is kimlong. I'm 17 years old and i live in battambong. All"
+  - "hi! i'm kimlong i'm 17 year and live battambong"
+  - "my nane kimlong.i'm good and 17,i live in kompong cham provice."
+  - "my name kimlong,i'm 17years old and i live in siem reap."
+  - "hi name kimlong, nice to see u!i'm17 and u?"
   phearak:
   - "really! really..... i 1 2have a girlfriend nas... my name phearak, 30 y-old already, nowadays i'm stay as PP, i am a man. i 1 2seek a girlfriend cute... cute...."
 kh:

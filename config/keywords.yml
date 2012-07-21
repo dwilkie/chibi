@@ -1,11 +1,8 @@
-# Sample localization file for English. Add more files in this directory for other locales.
-# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
-
 en:
   i_am:
     - "(?:i am|i'm|im)"
   name:
-    - "(?:(?:my )?names?(?:'s)?(?:\\s*(?:is|me))?(?:\\s*\\()?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bis\\b|\\bme\\b|\\byear\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
+    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|me))?(?:\\s*\\()?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bgood\\b|\\bis\\b|\\band\\b|\\bme\\b|\\byear\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
   girlfriend:
@@ -25,7 +22,7 @@ en:
     - bf
     - friend boy
   boy:
-    - male
+    - "m(?:a|e)le"
   could_mean_boy_or_boyfriend:
     - boy
     - guy

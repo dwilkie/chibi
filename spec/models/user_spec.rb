@@ -691,6 +691,11 @@ describe User do
           :expected_looking_for => :either
         )
 
+        # not an age
+        registration_examples(
+          keywords(:not_an_age)
+        )
+
         # put location based examples below here
 
         # Phnom Penhian
