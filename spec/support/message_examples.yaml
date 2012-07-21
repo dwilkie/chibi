@@ -62,6 +62,8 @@ en:
   - blah 23 badfa
   - "i'm 23 year old and"
   - "i'm 23y"
+  - "23y 54kg 1.59"
+  - "23,1.50m"
   phnom_penhian:
   - from phnom penh
   mara_25_pp_wants_friend:
@@ -94,6 +96,10 @@ en:
   - "69"
   - "1.59m"
   - "1m35cm"
+  - "1,45m"
+  - "23:59"
+  - "55 kg"
+  - "1.49m,54kg"
   im_something_other_than_a_name:
   - "i'm fine"
   - "i'm ok"
