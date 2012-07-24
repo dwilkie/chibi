@@ -31,7 +31,7 @@ en:
     - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*)?friends?'
 kh:
   name:
-    - '(?:chh?mu?ou?(?:r|s))\s*(\b\w+\b)'
+    - "(?:chh?mu?ou?(?:r|s))(?:\\s*(?:\\(|\\:))?\\s*(\\b\\w+\\b)"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:

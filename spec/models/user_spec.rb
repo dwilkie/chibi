@@ -855,6 +855,17 @@ describe User do
           :expected_looking_for => :female,
           :vcr => {:expect_results => true}
         )
+
+        # "i bat chhmos ( bros hai ) phet bros rous nov kampong cham a yu 20,mit bros"
+        registration_examples(
+          keywords(:hai),
+          :expected_name => "hai",
+          :expected_age => 20,
+          :expected_city => "Krouch Chhmar",
+          :expected_gender => :male,
+          :expected_looking_for => :male,
+          :vcr => {:expect_results => true, :cassette => "kh/kampong_chaam"}
+        )
       end
     end
   end
