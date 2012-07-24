@@ -15,7 +15,7 @@ en:
   could_mean_girl_or_girlfriend:
     - "gir?l"
     - woman
-    - "fem(?:a|e)le"
+    - "f(?:a|e)m(?:a|e)?le"
   boyfriend:
     - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*(?:boy|guy|man)'
     - 'boy\s?friend'
