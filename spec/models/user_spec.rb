@@ -588,7 +588,7 @@ describe User do
       end
     end
 
-    context "for new users", :focus do
+    context "for new users" do
       it "should try to determine as much as possible from the info provided" do
         # the info indicates a guy is texting
         registration_examples(
