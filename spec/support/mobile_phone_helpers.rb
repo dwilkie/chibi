@@ -8,6 +8,10 @@ module MobilePhoneHelpers
         :smart => {
           :prefixes => ["10", "69", "70", "86", "93", "98"],
           :short_code => "2442"
+        },
+        :beeline => {
+          :prefixes => ["60", "66", "67", "68", "90"],
+          :short_code => "2442"
         }
       }
     },
