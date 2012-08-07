@@ -1,12 +1,12 @@
 en:
   i_am:
-    - "(?:(?:i\\s*)?am|i'm|im)(?:\\s*(?:a))?"
+    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for )))(?:(?:i\\s*)?am|i'm|im|me(?:\\s*(?:a))?)"
   name:
     - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bgood\\b|\\bis\\b|\\band\\b|\\bme\\b|\\byear\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
   girlfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*(?:gir?l|woman)'
+    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*(?:(?<!(?:boy|guy|man) )(?:gir?l|woman)(?!\s*boy|guy|man))'
     - 'gir?l\s?friend'
     - "gf"
     - "friend gir?l"
@@ -17,7 +17,7 @@ en:
     - woman
     - "f(?:a|e)m(?:a|e)?le"
   boyfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*(?:boy|guy|man)'
+    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*(?:(?<!(?:girl |gil |woman ))(?:boy|guy|man)(?!\s*gir?l|woman))'
     - 'boy\s?friend'
     - bf
     - friend boy
@@ -26,22 +26,24 @@ en:
   could_mean_boy_or_boyfriend:
     - boy
     - guy
-    - man
+    - "man(?!\\?)"
   friend:
-    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*)?(?<!(?:your |ur ))friends?'
+    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*)?(?<!(?:your |ur ))fri(?:ends?)?'
 kh:
+  i_am:
+    - "(?:k?nhom)"
   name:
     - "(?:chh?mu?ou?(?:r|s))(?:\\s*(?:\\(|\\:))?\\s*(\\b\\w+\\b)"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
-    - '(?:(?:rok).+)?m(?:i|e)t (?:srey|gir?l)'
+    - '(?:(?:rok).+)?m(?:i|e)t (?:(?<!(?:boy |(?:p|b)ros ))(?:srey|gir?l)(?!\s*boy|(?:p|b)ros))'
   girl:
     - '(ch|j)as?'
   could_mean_girl_or_girlfriend:
     - srey
   boyfriend:
-    - '(?:(?:rok).+)?m(?:i|e)t (?:boy|(?:p|b)ros)'
+    - '(?:(?:rok).+)?m(?:i|e)t (?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l))'
   boy:
     - 'bar?t'
   could_mean_boy_or_boyfriend:
