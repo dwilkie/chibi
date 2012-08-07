@@ -484,6 +484,16 @@ describe User do
           :expected_looking_for => :female
         )
 
+        # im a boy
+        registration_examples(
+          keywords(:im_a_boy),
+          :user => user_with_complete_profile,
+          :gender => :male,
+          :looking_for => :female,
+          :expected_gender => :male,
+          :expected_looking_for => :female
+        )
+
         # im looking for a guy
         registration_examples(
           keywords(:im_looking_for_a_guy),

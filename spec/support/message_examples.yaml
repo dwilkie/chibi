@@ -52,6 +52,7 @@ en:
   - "i'm frank male"
   - i am frank guy
   - my name is frank guy
+  - "i live cambodia n u. pls tell me ur name my frank im boy. u m or f."
   girl_named_mara:
   - im mara f
   - "i'm mara girl"
@@ -88,6 +89,10 @@ en:
   - hello girl607 can u give me ur phone number ?
   im_a_girl:
   - im a girl
+  - "hello r u girl or boy im girl"
+  im_a_boy:
+  - "im a boy"
+  - "hello r u girl or boy im boy"
   im_looking_for_a_guy:
   - im looking for a guy
   not_an_age:
@@ -136,6 +141,7 @@ en:
   - girl or boy
   - "nice to be your friend. are you male or femele?"
   - "u mele or femele"
+  - "m or f"
   vanny:
   - "hi ! my name vanny.i'm 17 yearold.i'm boy.I live in pailin. thank q... o:)"
   not_a_man_from_siem_reap:
@@ -245,6 +251,8 @@ kh:
   im_a_girl:
   - nyom srey
   - ", phet : famle"
+  im_a_boy:
+  - ",,,nhom boy,,,"
   im_looking_for_a_guy:
   - nyom jong rok met pros
   hai:

@@ -576,6 +576,7 @@ class User < ActiveRecord::Base
 
   def extract_gender_and_looking_for(info, force_update)
     unless includes_gender_and_looking_for?(info)
+      gender_question?(info) # removes gender question
       extract_gender(info, :explicit_only => true)
       extract_looking_for(info, :include_shared_gender_words => gender.present? && !force_update)
       extract_gender(info)
@@ -615,10 +616,12 @@ class User < ActiveRecord::Base
           determine_looking_for(info, :include_shared_gender_words => true)
           self.gender = sex
           self.looking_for = wants
+          updated = true
         end
         info = tmp_info
       end
     end
+    updated
   end
 
   def extract_looking_for(info, options = {})
@@ -681,7 +684,7 @@ class User < ActiveRecord::Base
   end
 
   def gender_question?(info)
-    strip_match!(info, /\b#{gender_keywords}\s*(?<!f)or\s*#{gender_keywords}\b/)
+    strip_match!(info, /\b(?:#{gender_keywords}|m)\s*(?<!f)or\s*(?:#{gender_keywords}|m)\b/)
   end
 
   def gender_keywords

@@ -2,7 +2,7 @@ en:
   i_am:
     - "(?:(?:i\\s*)?am|i'm|im)(?:\\s*(?:a))?"
   name:
-    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|me))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bgood\\b|\\bis\\b|\\band\\b|\\bme\\b|\\byear\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
+    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bgood\\b|\\bis\\b|\\band\\b|\\bme\\b|\\byear\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
   girlfriend:
@@ -28,7 +28,7 @@ en:
     - guy
     - man
   friend:
-    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*)?friends?'
+    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*)?(?<!(?:your |ur ))friends?'
 kh:
   name:
     - "(?:chh?mu?ou?(?:r|s))(?:\\s*(?:\\(|\\:))?\\s*(\\b\\w+\\b)"
