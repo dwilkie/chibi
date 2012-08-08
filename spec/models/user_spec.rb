@@ -472,12 +472,16 @@ describe User do
       new_user.should be_persisted
     end
 
-    context "for users with complete profiles" do
+    context "for users with a gender and looking for preference" do
+      let(:user_with_gender_and_looking_for_preference) do
+        create(:user_with_gender_and_looking_for_preference)
+      end
+
       it "should update the profile with the new information" do
         # im a girl
         registration_examples(
           keywords(:im_a_girl),
-          :user => user_with_complete_profile,
+          :user => user_with_gender_and_looking_for_preference,
           :gender => :male,
           :looking_for => :female,
           :expected_gender => :female,
@@ -487,21 +491,31 @@ describe User do
         # im a boy
         registration_examples(
           keywords(:im_a_boy),
-          :user => user_with_complete_profile,
-          :gender => :male,
-          :looking_for => :female,
+          :user => user_with_gender_and_looking_for_preference,
+          :gender => :female,
+          :looking_for => :male,
           :expected_gender => :male,
-          :expected_looking_for => :female
+          :expected_looking_for => :male
         )
 
         # im looking for a guy
         registration_examples(
           keywords(:im_looking_for_a_guy),
-          :user => user_with_complete_profile,
+          :user => user_with_gender_and_looking_for_preference,
           :looking_for => :female,
           :gender => :female,
           :expected_gender => :female,
           :expected_looking_for => :male
+        )
+
+        # im looking for a girl
+        registration_examples(
+          keywords(:im_looking_for_a_girl),
+          :user => user_with_gender_and_looking_for_preference,
+          :looking_for => :male,
+          :gender => :female,
+          :expected_gender => :female,
+          :expected_looking_for => :female
         )
       end
     end
