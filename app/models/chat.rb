@@ -35,7 +35,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.filter_by(params = {})
-    communicable_resources_scope.filter_params(params).includes(:user, :friend, :active_users)
+    communicable_resources_scope.filter_params(params).includes(:user, :friend, :active_users).reorder("#{table_name}.updated_at DESC")
   end
 
   def self.activate_multiple!(user, options = {})
