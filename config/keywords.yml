@@ -37,13 +37,13 @@ kh:
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
-    - '(?:(?:rok).+)?m(?:i|e)t (?:(?<!(?:boy |(?:p|b)ros ))(?:srey|gir?l)(?!\s*boy|(?:p|b)ros))'
+    - '(?:(?:rok|m(?:i|e)t).+).*(?:(?<!(?:boy |(?:p|b)ros ))(?:srey|gir?l|\bf\b)(?!\s*boy|(?:p|b)ros))'
   girl:
     - '(ch|j)as?'
   could_mean_girl_or_girlfriend:
     - srey
   boyfriend:
-    - '(?:(?:rok).+)?m(?:i|e)t (?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l))'
+    - '(?:(?:rok|m(?:i|e)t).+).*(?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l|\bf\b))'
   boy:
     - 'bar?t'
   could_mean_boy_or_boyfriend:
