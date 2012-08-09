@@ -6,23 +6,23 @@ describe "Admin" do
   let(:user) { create(:male_user) }
   let(:another_user) { create(:female_user) }
 
-  let(:message) { create(:message, :user => user, :body => "Hello", :chat => chat) }
-  let(:another_message) { create(:message, :user => another_user, :body => "Goodbye", :chat => another_chat) }
-
-  let(:reply) { create(:delivered_reply, :user => user, :body => "Hello", :chat => chat) }
-  let(:another_reply) { create(:reply, :user => another_user, :body => "Goodbye", :chat => another_chat) }
-
   let(:chat) { create(:active_chat_with_single_user, :user => user, :friend => another_user, :created_at => 10.minutes.ago) }
   let(:another_chat) { create(:chat, :user => another_user, :friend => user, :created_at => 10.minutes.ago) }
 
-  let(:phone_call) { create(:phone_call, :user => user, :chat => chat) }
-  let(:another_phone_call) { create(:phone_call, :user => another_user, :chat => another_chat) }
+  let(:message) { create(:message, :user => another_user, :body => "Hello", :chat => another_chat) }
+  let(:another_message) { create(:message, :user => user, :body => "Goodbye", :chat => chat) }
+
+  let(:reply) { create(:delivered_reply, :user => another_user, :body => "Hello", :chat => another_chat) }
+  let(:another_reply) { create(:reply, :user => user, :body => "Goodbye", :chat => chat) }
+
+  let(:phone_call) { create(:phone_call, :user => another_user, :chat => another_chat) }
+  let(:another_phone_call) { create(:phone_call, :user => user, :chat => chat) }
 
   let(:users) { [another_user, user] }
   let(:messages) { [message, another_message] }
   let(:replies) { [reply, another_reply] }
-  let(:chats) { [another_chat, chat] }
   let(:phone_calls) { [phone_call, another_phone_call] }
+  let(:chats) { [another_chat, chat] }
 
   let(:communicable_resources) { [messages, replies, phone_calls] }
 
@@ -188,7 +188,7 @@ describe "Admin" do
 
       [:phone_call, :reply, :message].each_with_index do |resource, index|
         within "##{resource}_#{index + 1}" do
-          send("assert_#{resource}_show", send(resource))
+          send("assert_#{resource}_show", send("another_#{resource}"))
         end
       end
     end
