@@ -279,7 +279,7 @@ describe Reply do
   end
 
   describe "#explain_friend_is_unavailable!" do
-    it "should inform the user that their friend is unavailable and explain how to meet a new friend" do
+    it "should send a message from the friend saying that they're busy" do
       assert_reply(
         :explain_friend_is_unavailable!, :friend_unavailable,
         :args => [partner], :interpolations => [partner.screen_id]

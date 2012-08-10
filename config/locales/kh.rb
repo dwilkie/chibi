@@ -33,8 +33,9 @@
         when :no_answer
           notification = "INFO: Jong chat jea-moy mit tmey? "
         when :friend_unavailable
-          notification = "Som-tos pel nis #{options[:friends_screen_name]} min tom-nae te. "
-          instructions = default_instructions
+          notification = "#{options[:friends_screen_name]}: Sorry now I'm busy. I'll talk to you later na"
+          instructions = ""
+          default_outcome = ""
         when :could_not_find_a_friend
           notification = "Som-tos pel nis min mean nek tom-nae te. "
           default_instructions = ""

@@ -114,6 +114,7 @@ class Chat < ActiveRecord::Base
       reactivate!
       reply_to_chat_partner.forward_message!(reference_user, message_body)
     else
+      replies.build(:user => reference_user).explain_friend_is_unavailable!(chat_partner)
       reply_to_chat_partner.forward_message(reference_user, message_body)
       # remove the sender of the message from current chat
       deactivate!

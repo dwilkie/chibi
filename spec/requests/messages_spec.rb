@@ -232,8 +232,8 @@ describe "Messages" do
             send_message(:from => mara, :body => "Hi Dave")
           end
 
-          it "should find new friends that other person" do
-            reply_to(mara).body.should_not == spec_translate(
+          it "should send a message to the other user saying i'm busy and find new friends for him" do
+            reply_to(mara).body.should == spec_translate(
               :friend_unavailable, mara.locale, dave.screen_id
             )
 
