@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "PhoneCalls", :focus do
+describe "PhoneCalls" do
 
   describe "POST /phone_calls.xml" do
     include PhoneCallHelpers
