@@ -384,7 +384,7 @@ class User < ActiveRecord::Base
   SMALLEST_INACTIVITY_PERIOD = 0.25
 
   # the number of inactivity periods
-  NUM_INACTIVITY_PERIODS = 5
+  NUM_INACTIVITY_PERIODS = 11
 
   # Orders users by recent activity in time periods
   # For example a user with 1 minute inactivity gets
@@ -397,7 +397,13 @@ class User < ActiveRecord::Base
   # 2 for updated_at > 1 hour ago
   # 3 for updated_at > 2 hours ago
   # 4 for updated_at > 4 hours ago
-  # 5 for updated_at <= 4 hours ago
+  # 5 for updated_at > 8.hours.ago
+  # 6 for updated_at > 16.hours.ago
+  # 7 for updated_at > 32.hours.ago
+  # 8 for updated_at > 64.hours.ago
+  # 9 for updated_at > 128.hours.ago
+  # 10 for updated_at > 256.hours.ago
+  # 11 for updated_at <= 256 hours ago
 
   def self.order_by_recent_activity(user, scope)
     inactivity_period = SMALLEST_INACTIVITY_PERIOD
