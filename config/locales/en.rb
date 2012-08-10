@@ -37,7 +37,7 @@
         when :no_answer
           notification = "INFO: Want to chat with someone new? "
         when :friend_unavailable
-          notification = "#{options[:friends_screen_name]}: Sorry now I'm busy. I'll talk to you later"
+          notification = "#{options[:friends_screen_name]}: Sorry now I'm chatting with someone else. I'll chat with you later"
           instructions = ""
           default_outcome = ""
         when :could_not_find_a_friend

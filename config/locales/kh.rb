@@ -33,7 +33,7 @@
         when :no_answer
           notification = "INFO: Jong chat jea-moy mit tmey? "
         when :friend_unavailable
-          notification = "#{options[:friends_screen_name]}: Sorry now I'm busy. I'll talk to you later na"
+          notification = "#{options[:friends_screen_name]}: Sorry now I'm chatting with someone else na. I'll chat with you later"
           instructions = ""
           default_outcome = ""
         when :could_not_find_a_friend

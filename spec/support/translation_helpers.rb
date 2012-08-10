@@ -11,8 +11,8 @@ module TranslationHelpers
     },
 
     :friend_unavailable => {
-      :en => "#[0]: Sorry now I'm busy. I'll talk to you later",
-      :kh => "#[0]: Sorry now I'm busy. I'll talk to you later na"
+      :en => "#[0]: Sorry now I'm chatting with someone else. I'll chat with you later",
+      :kh => "#[0]: Sorry now I'm chatting with someone else na. I'll chat with you later"
     },
 
     :welcome => {
