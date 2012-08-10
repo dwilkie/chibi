@@ -179,6 +179,45 @@ describe User do
   end
 
   describe ".matches" do
+    # Matching algorithm explanation
+    # For the user (he = he OR she):
+
+    # Exclusions:
+
+    # 1. Don't match him with himself
+    # 2. Exclude users who are NOT looking for his gender
+    # 3. Exclude users who do not have his gender preference
+    # 4. Exclude users who he has already chatted with
+    # 5. Exclude users who are offline
+    # 6. If he's with a registered service provider, exclude
+    #    users who are not from registered service providers.
+    #    If he's NOT with a registered service provider, exclude
+    #    users who are from registered service providers
+
+    # Ordering
+
+    # 1. If his preferred gender is unknown, order by uses who prefer his gender.
+    #      a)
+    #        If his gender is known order by users who prefer his gender.
+    #        If his gender is also unknown assume he is MALE.
+    #      b)
+    #        Then order FEMALES first, followed by UNKNOWNS, followed by MALES.
+    #    If his preferred gender is known
+    #      a) Order by users who have his preferred gender
+    #      b)
+    #        If his gender is known then order by users who prefer his gender
+    #        If his gender is unknown then order users who prefer MALES first,
+    #        followed by UNKNOWNS, followed by FEMALES
+
+    # 2. Order by recent activity. Note: This should come AFTER ordering by gender and
+    #    preferred gender for 2 reasons. Firstly, in the common situation where he is matched
+    #    with another user who has not been chatting for a long period of time, given the inactive
+    #    user does not reply, he will still be ordered higher than other users because he has
+    #    a recent interaction. Secondly, it helps to remind users who are inactive.
+
+    # 3. Order by a combination of age difference and number of initiated chats
+    # 4. Order by location
+
     # User Descriptions
     # see spec/factories.rb for where users are defined
 
@@ -196,7 +235,7 @@ describe User do
     # Eva is a lesbian from Siem Reap
     # Reaksmey is bisexual last seen 15 minutes ago
 
-    # Match Explanations
+    # Individual Match Explanations
 
     # Alex has not specified his/her gender or his/her preferred gender (looking for).
     # This is by far the most common case for new users.
