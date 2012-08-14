@@ -55,7 +55,7 @@ class User < ActiveRecord::Base
     limit = options[:limit] || 100
     since = inactivity_period.ago
 
-    users_to_remind = without_recent_interaction(since).where(:online => true).limit(limit)
+    users_to_remind = without_recent_interaction(since).from_registered_service_providers.where(:online => true).limit(limit)
 
     users_to_remind.each do |user_to_remind|
       user_to_remind.remind!
@@ -453,6 +453,18 @@ class User < ActiveRecord::Base
     not_sql = "#{quoted_attribute} != ?"
     not_sql << " OR #{quoted_attribute} IS NULL" unless include_nil == false
     scope.where(not_sql, options[attribute])
+  end
+
+  def self.from_registered_service_providers
+    condition_statements = []
+    condition_values = []
+
+    SERVICE_PROVIDER_PREFIXES_WITH_INTERNATIONAL_DIALING_CODE.each do |prefix|
+      condition_statements << "\"#{table_name}\".\"mobile_number\" LIKE ?"
+      condition_values << "#{prefix}%"
+    end
+
+    scoped.where(condition_statements.join(" OR "), *condition_values)
   end
 
   def self.match_users_from_registered_service_providers(user, scope)

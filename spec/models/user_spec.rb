@@ -140,16 +140,23 @@ describe User do
 
   describe ".remind!" do
     let(:user_without_recent_interaction) { create(:user_without_recent_interaction) }
-    let(:user_with_recent_interaction) { create(:user_with_recent_interaction) }
+
+    let(:user_from_registered_service_provider_without_recent_interaction) do
+      create(:user_from_registered_service_provider_without_recent_interaction)
+    end
+
+    let(:user_from_registered_service_provider_with_recent_interaction) do
+      create(:user_from_registered_service_provider_with_recent_interaction)
+    end
 
     def reminders_to(reference_user)
       replies_to(reference_user).where(:created_at => Time.now)
     end
 
     before do
-      user
+      user_from_registered_service_provider_without_recent_interaction
+      user_from_registered_service_provider_with_recent_interaction
       user_without_recent_interaction
-      user_with_recent_interaction
       Timecop.freeze(Time.now)
     end
 
@@ -162,12 +169,13 @@ describe User do
       # run it twice to check that we don't resend reminders
       subject.class.remind!
 
-      [user, user_without_recent_interaction].each do |reference_user|
+      [user_from_registered_service_provider_without_recent_interaction].each do |reference_user|
         reminders_to(reference_user).count.should == 1
         reply_to(reference_user).body.should =~ /#{spec_translate(:anonymous_reminder_approx, user.locale)}/
       end
 
-      reminders_to(user_with_recent_interaction).should be_empty
+      reminders_to(user_from_registered_service_provider_with_recent_interaction).should be_empty
+      reminders_to(user_without_recent_interaction).should be_empty
     end
   end
 

@@ -6,6 +6,7 @@ ISO3166::Country.all.each do |name, country_code|
 end
 
 DIALING_CODES = dialing_codes
+REVERSE_DIALING_CODES = DIALING_CODES.invert
 
 service_provider_prefixes = {}
 
@@ -19,3 +20,14 @@ TSP::TelecomServiceProvider.all.each do |country_code, service_providers|
 end
 
 SERVICE_PROVIDER_PREFIXES = service_provider_prefixes
+
+service_provider_prefixes_with_international_dialing_code = []
+
+SERVICE_PROVIDER_PREFIXES.each do |country_code, prefixes|
+  international_dialing_code = REVERSE_DIALING_CODES[country_code.upcase]
+  prefixes.keys.each do |prefix|
+    service_provider_prefixes_with_international_dialing_code << international_dialing_code.to_s + prefix.to_s
+  end
+end
+
+SERVICE_PROVIDER_PREFIXES_WITH_INTERNATIONAL_DIALING_CODE = service_provider_prefixes_with_international_dialing_code

@@ -200,22 +200,34 @@ FactoryGirl.define do
 
   factory :user do
 
-    sequence(:mobile_number, 85597000000) {|n| n.to_s }
-    location
-
-    factory :user_with_recent_interaction do
-      after(:create) do |user|
-        FactoryGirl.create(:phone_call, :user => user)
-        FactoryGirl.create(:message, :user => user)
-        FactoryGirl.create(:reply, :user => user)
-      end
-    end
-
-    factory :user_without_recent_interaction do
+    trait :without_recent_interaction do
       after(:create) do |user|
         FactoryGirl.create(:phone_call, :user => user, :created_at => 5.days.ago)
         FactoryGirl.create(:message, :user => user, :created_at => 5.days.ago)
         FactoryGirl.create(:reply, :user => user, :created_at => 5.days.ago)
+      end
+    end
+
+    sequence(:mobile_number, 85597000000) {|n| n.to_s }
+    location
+
+    factory :user_without_recent_interaction do
+      without_recent_interaction
+    end
+
+    factory :user_from_registered_service_provider do
+      sequence(:mobile_number, 85510000000) {|n| n.to_s }
+
+      factory :user_from_registered_service_provider_with_recent_interaction do
+        after(:create) do |user|
+          FactoryGirl.create(:phone_call, :user => user)
+          FactoryGirl.create(:message, :user => user)
+          FactoryGirl.create(:reply, :user => user)
+        end
+      end
+
+      factory :user_from_registered_service_provider_without_recent_interaction do
+        without_recent_interaction
       end
     end
 
