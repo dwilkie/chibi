@@ -135,6 +135,7 @@ class Reply < ActiveRecord::Base
     translate(
       "replies.how_to_start_a_new_chat",
       :action => action,
+      :users_name => user.name,
       :friends_screen_name => options[:partner].try(:screen_id),
       :missing_profile_attributes => missing_profile_attributes
     )

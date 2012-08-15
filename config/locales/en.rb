@@ -27,34 +27,32 @@
 
       :how_to_start_a_new_chat => lambda {|key, options|
 
-        default_instructions = "Txt 'new' "
-        default_outcome = "to meet someone new"
+        default_instructions = "Reply with 'new' "
+        default_outcome = ""
 
         case options[:action]
         when :logout
           notification = "You are now offline. "
           instructions = "Chat with #{options[:friends_screen_name]} again by replying to this message or #{default_instructions.downcase}" if options[:friends_screen_name]
+          default_outcome = "to meet a new friend"
         when :no_answer
-          notification = "INFO: Want to chat with someone new? "
+          notification = "INFO: Want to meet a new friend? "
         when :friend_unavailable
           notification = "#{options[:friends_screen_name]}: Sorry now I'm chatting with someone else. I'll chat with you later"
           instructions = ""
-          default_outcome = ""
         when :could_not_find_a_friend
           notification = "Sorry we can't find a friend for you at this time. "
           default_instructions = ""
           default_instructions_outcome = "to try again"
           custom_or_no_instructions_outcome = "We'll let you know when someone comes online"
         when :reminder
-          greeting = I18n.t("replies.greeting", :locale => :en)
-          opener = ["Want to meet a new friend?", "Wanna chat?"].sample
-          notification = "#{greeting} #{opener} "
-          default_instructions_outcome = custom_or_no_instructions_outcome = ["to find a new friend", "to start", "to try"].sample
+          greeting = "Hi"
+          greeting << " #{options[:users_name].capitalize}" if options[:users_name]
+          notification = "#{greeting}! Want to meet a new friend? "
         end
 
         if !instructions && options[:missing_profile_attributes].try(:any?)
-          instructions = "Txt "
-          options[:missing_profile_attributes].first == :looking_for ? instructions << "the " : instructions << "ur "
+          instructions = "Reply with your "
 
           translated_missing_attributes = []
           options[:missing_profile_attributes].each do |attribute|
@@ -71,7 +69,7 @@
         end
 
         outcome ||= default_outcome
-        notification << instructions << outcome
+        (notification << instructions << outcome).strip
       }
     }
   }

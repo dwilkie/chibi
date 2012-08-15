@@ -9,7 +9,7 @@ en:
       user:
         date_of_birth: "age"
         gender: "sex"
-        looking_for: "gender ur seeking"
+        looking_for: "preferred gender"
   support:
     array:
       last_word_connector: ! ' & '

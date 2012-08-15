@@ -6,7 +6,7 @@ module TranslationHelpers
     },
 
     :anonymous_could_not_find_a_friend => {
-      :en => "Sorry we can't find a friend for you at this time. Txt ur name, age, sex, city & gender ur seeking to try again",
+      :en => "Sorry we can't find a friend for you at this time. Reply with your name, age, sex, city & preferred gender to try again",
       :kh => "Som-tos pel nis min mean nek tom-nae te. Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei pjea-yeam m-dong teat"
     },
 
@@ -34,32 +34,32 @@ module TranslationHelpers
     },
 
     :anonymous_chat_has_ended => {
-      :en => "INFO: Want to chat with someone new? Txt ur name, age, sex, city & gender ur seeking to meet someone new",
-      :kh => "INFO: Jong chat jea-moy mit tmey? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
+      :en => "INFO: Want to meet a new friend? Reply with your name, age, sex, city & preferred gender",
+      :kh => "INFO: Jong rok mit tmey? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok"
     },
 
     :chat_has_ended => {
-      :en => "INFO: Want to chat with someone new? Txt 'new' to meet someone new",
-      :kh => "INFO: Jong chat jea-moy mit tmey? Sorsay 'new' derm-bei rok mit tmey teat"
+      :en => "INFO: Want to meet a new friend? Reply with 'new'",
+      :kh => "INFO: Jong rok mit tmey? Sorsay 'new'"
     },
 
     :logged_out_from_chat => {
-      :en => "You are now offline. Chat with #[0] again by replying to this message or txt 'new' to meet someone new",
+      :en => "You are now offline. Chat with #[0] again by replying to this message or reply with 'new' to meet a new friend",
       :kh => "Pel nis nek jaak jenh haey. Pjeur sa derm-bei chat jea-moy #[0] m-dong teat reu sorsay 'new' derm-bei rok mit tmey teat"
     },
 
     :anonymous_logged_out => {
-      :en => "You are now offline. Txt ur name, age, sex, city & gender ur seeking to meet someone new",
+      :en => "You are now offline. Reply with your name, age, sex, city & preferred gender to meet a new friend",
       :kh => "Pel nis nek jaak jenh haey. Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok derm-bei rok mit tmey teat"
     },
 
     :logged_out => {
-      :en => "You are now offline. Txt 'new' to meet someone new",
+      :en => "You are now offline. Reply with 'new' to meet a new friend",
       :kh => "Pel nis nek jaak jenh haey. Sorsay 'new' derm-bei rok mit tmey"
     },
 
     :only_missing_sexual_preference_logged_out => {
-      :en => "You are now offline. Txt the gender ur seeking to meet someone new",
+      :en => "You are now offline. Reply with your preferred gender to meet a new friend",
       :kh => "Pel nis nek jaak jenh haey. Pjeur phet del nek jong rok derm-bei rok mit tmey teat"
     },
 
@@ -68,14 +68,14 @@ module TranslationHelpers
       :kh => "#[0]: #[1]"
     },
 
-    :anonymous_reminder_approx => {
-      :en => "Txt ur name, age, sex, city & gender ur seeking",
-      :kh => "Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok"
+    :anonymous_reminder => {
+      :en => "Hi! Want to meet a new friend? Reply with your name, age, sex, city & preferred gender",
+      :kh => "Sousdey! Jong rok mit tmey? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok"
     },
 
-    :reminder_approx => {
-      :en => "Txt 'new' to",
-      :kh => "Sorsay 'new' derm-bei"
+    :reminder => {
+      :en => "Hi #[0]! Want to meet a new friend? Reply with 'new'",
+      :kh => "Sousdey #[0]! Pjeur 'new'"
     },
 
     :greeting_from_unknown_gender => {

@@ -24,14 +24,15 @@
       :how_to_start_a_new_chat => lambda {|key, options|
 
         default_instructions = "Sorsay 'new' "
-        default_outcome = "derm-bei rok mit tmey teat"
+        default_outcome = ""
 
         case options[:action]
         when :logout
           notification = "Pel nis nek jaak jenh haey. "
           instructions = "Pjeur sa derm-bei chat jea-moy #{options[:friends_screen_name]} m-dong teat reu #{default_instructions.downcase}" if options[:friends_screen_name]
+          default_outcome = "derm-bei rok mit tmey teat"
         when :no_answer
-          notification = "INFO: Jong chat jea-moy mit tmey? "
+          notification = "INFO: Jong rok mit tmey? "
         when :friend_unavailable
           notification = "#{options[:friends_screen_name]}: Sorry now I'm chatting with someone else na. I'll chat with you later"
           instructions = ""
@@ -42,10 +43,10 @@
           default_instructions_outcome = "derm-bei pjea-yeam m-dong teat"
           custom_or_no_instructions_outcome = "Yerng neng pjeur tov nek m-dong teat nov pel mean nek tom-nae"
         when :reminder
-          greeting = I18n.t("replies.greeting", :locale => :kh)
-          opener = ["Jong rok mit tmey?", "Jong leng sms?"].sample
-          notification = "#{greeting} #{opener} "
-          default_instructions_outcome = custom_or_no_instructions_outcome = ["derm-bei rok mit tmey", "derm-bei chaab-pderm", "derm-bei pjea-yeam", "derm-bei sak-lbong"].sample
+          greeting = "Sousdey"
+          greeting << " #{options[:users_name].capitalize}" if options[:users_name]
+          notification = "#{greeting}! Jong rok mit tmey? "
+          default_outcome = ""
         end
 
         if !instructions && options[:missing_profile_attributes].try(:any?)
@@ -66,7 +67,7 @@
         end
 
         outcome ||= default_outcome
-        notification << instructions << outcome
+        (notification << instructions << outcome).strip
       }
     }
   }

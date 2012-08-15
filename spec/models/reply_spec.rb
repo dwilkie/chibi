@@ -253,7 +253,7 @@ describe Reply do
         build(:english_user_with_complete_profile, :looking_for => nil)
       end
 
-      it "should tell them to text in the gender they're seeking" do
+      it "should tell them to text their preferred gender" do
         assert_reply(
           :logout!,
           :only_missing_sexual_preference_logged_out,
@@ -266,8 +266,8 @@ describe Reply do
   describe "#send_reminder!" do
     it "should send the user a reminder on how to use the service" do
       assert_reply(
-        :send_reminder!, :anonymous_reminder_approx,
-        :args => [], :approx => true
+        :send_reminder!, :anonymous_reminder,
+        :args => []
       )
     end
   end

@@ -171,7 +171,9 @@ describe User do
 
       [user_from_registered_service_provider_without_recent_interaction].each do |reference_user|
         reminders_to(reference_user).count.should == 1
-        reply_to(reference_user).body.should =~ /#{spec_translate(:anonymous_reminder_approx, user.locale)}/
+        reply_to(reference_user).body.should == spec_translate(
+          :anonymous_reminder, user.locale
+        )
       end
 
       reminders_to(user_from_registered_service_provider_with_recent_interaction).should be_empty
@@ -182,7 +184,9 @@ describe User do
   describe "#remind!" do
     it "should send a reminder to the user" do
       expect_message { user.remind! }
-      reply_to(user).body.should =~ /#{spec_translate(:anonymous_reminder_approx, user.locale)}/
+      reply_to(user).body.should == spec_translate(
+        :anonymous_reminder, user.locale
+      )
     end
   end
 
