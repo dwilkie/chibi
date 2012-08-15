@@ -294,28 +294,33 @@ describe Chat do
       active_chat.should_not be_active
     end
 
-    it "should create new chats for the old users of this chat" do
-      new_partner_for_user = create(:english)
-      new_partner_for_friend = create(:user)
+    context "passing :activate_new_chats => true" do
+      let(:new_partner_for_user) { create(:english) }
+      let(:new_partner_for_friend) { create(:user) }
 
-      expect_message { active_chat.deactivate! }
-      assert_active_users_cleared
+      def assert_new_chat_created(reference_user, new_friend)
+        reference_user.reload
 
-      user.reload
-      friend.reload
+        new_chat = subject.class.where(:friend_id => new_friend).first
+        new_chat.user.should == reference_user
+        new_chat.friend.should == new_friend
+        new_chat.active_users.should == [new_friend]
 
-      new_users_chat = subject.class.where(:friend_id => new_partner_for_user).first
-      new_users_chat.user.should == user
-      new_users_chat.friend.should == new_partner_for_user
-      new_users_chat.active_users.should == [new_partner_for_user]
+        reference_user.should_not be_currently_chatting
+      end
 
-      new_partners_chat = subject.class.where(:friend_id => new_partner_for_friend).first
-      new_partners_chat.user.should == friend
-      new_partners_chat.friend.should == new_partner_for_friend
-      new_partners_chat.active_users.should == [new_partner_for_friend]
+      before do
+        new_partner_for_user
+        new_partner_for_friend
+      end
 
-      user.should_not be_currently_chatting
-      friend.should_not be_currently_chatting
+      it "should create new chats for the old users of this chat" do
+        expect_message { active_chat.deactivate!(:activate_new_chats => true) }
+        assert_active_users_cleared
+
+        assert_new_chat_created(user, new_partner_for_user)
+        assert_new_chat_created(friend, new_partner_for_friend)
+      end
     end
 
     context "passing :active_user => #<User...A>" do
@@ -427,9 +432,7 @@ describe Chat do
             user, users_old_relationship
           )
 
-          expect_message do
-            chat_to_deactivate.deactivate!({:reactivate_previous_chat => false}.merge(args))
-          end
+          chat_to_deactivate.deactivate!({:reactivate_previous_chat => false}.merge(args))
 
           # assert the delivery of the message from the old friend
           message_from_old_friend.reload.should_not be_delivered
@@ -744,7 +747,7 @@ describe Chat do
 
     context "passing no options" do
       before do
-        expect_message { with_resque { subject.class.end_inactive } }
+        with_resque { subject.class.end_inactive }
       end
 
       it "should deactivate chats with more than 10 minutes of inactivity" do
@@ -760,7 +763,7 @@ describe Chat do
 
     context "passing :active => true" do
       before do
-        expect_message { with_resque { subject.class.end_inactive(:active => true) } }
+        with_resque { subject.class.end_inactive(:active => true) }
       end
 
       it "should deactivate active chats with more than 10 minutes of inactivity" do

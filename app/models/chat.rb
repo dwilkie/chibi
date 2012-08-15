@@ -82,7 +82,7 @@ class Chat < ActiveRecord::Base
 
     # find the user to remain in this chat if any
     if active_user = options[:active_user]
-      user_to_remain_in_chat = in_this_chat?(active_user) ? partner(active_user) : user_with_inactivity
+      user_to_remain_in_chat = in_this_chat?(active_user) ? partner(active_user) : (inactive_user || user_with_inactivity)
     end
 
     # find the users to leave this chat
@@ -91,11 +91,13 @@ class Chat < ActiveRecord::Base
     # find the users to notify about this change
     users_to_notify = options[:reactivate_previous_chat] ? reactivate_expired_chats(users_to_leave_chat) : users_to_leave_chat
 
-    # create new chats for user who was deactivated from the chat.
-    users_to_leave_chat.each do |user|
-      self.class.activate_multiple!(
-        user, :notify => true, :notify_no_match => false
-      ) unless user.reload.currently_chatting?
+    if options[:activate_new_chats]
+      # create new chats for users who have been deactivated from the chat
+      users_to_leave_chat.each do |user|
+        self.class.activate_multiple!(
+          user, :notify => true, :notify_no_match => false
+        ) unless user.reload.currently_chatting?
+      end
     end
 
     # notify the users skipping the instructions to update the users profile if
