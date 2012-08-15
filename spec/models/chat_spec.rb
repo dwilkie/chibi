@@ -358,13 +358,27 @@ describe Chat do
 
     context "passing :active_user => true" do
       context "given there are no replies for this chat" do
-        before do
-          active_chat.deactivate!(:active_user => true)
+        context "and no inactive user" do
+          before do
+            active_chat.deactivate!(:active_user => true)
+          end
+
+          it "should deactivate the chat for both users" do
+            active_chat.active_users.should be_empty
+            active_chat.should_not be_active
+          end
         end
 
-        it "should deactivate the chat for both users" do
-          active_chat.active_users.should be_empty
-          active_chat.should_not be_active
+        context "but there is an inactive user" do
+          before do
+            active_chat_with_single_user.deactivate!(:active_user => true)
+          end
+
+          it "should only deactivate the chat for the active user" do
+            active_chat_with_single_user.active_users.should == [user]
+            active_chat_with_single_user.should_not be_active
+          end
+
         end
       end
 
