@@ -3,4 +3,9 @@ namespace :users do
   task :remind => :environment do
     Resque.enqueue(UserReminder, :limit => 500)
   end
+
+  desc "Finds new friends for users who are searching"
+  task :find_friends => :environment do
+    Resque.enqueue(FriendFinder)
+  end
 end

@@ -88,6 +88,12 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.find_friends(options = {})
+    scoped.where(:state => "searching_for_friend").find_each do |user|
+      Resque.enqueue(FriendMessenger, user.id, options)
+    end
+  end
+
   def self.matches(user)
     # don't match the user being matched
     match_scope = not_scope(scoped, :id => user.id, :include_nil => false)
@@ -172,6 +178,10 @@ class User < ActiveRecord::Base
 
   def twilio_number
     twilio_outgoing_number(:for => split_mobile_number)
+  end
+
+  def find_friends!(options = {})
+    Chat.activate_multiple!(self, options)
   end
 
   def female?

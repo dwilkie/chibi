@@ -16,6 +16,15 @@ describe User do
   let(:user_with_complete_profile) { build(:user_with_complete_profile) }
   let(:male_user) { create(:male_user) }
 
+  def assert_friend_found
+    user_searching_for_friend.reload
+    user.reload
+    user.should be_currently_chatting
+    user.active_chat.user.should == user_searching_for_friend
+    user_searching_for_friend.should_not be_currently_chatting
+    user_searching_for_friend.should be_searching_for_friend
+  end
+
   it "should not be valid without a mobile number" do
     new_user.mobile_number = nil
     new_user.should_not be_valid
@@ -144,6 +153,18 @@ describe User do
 
     it "should not return users who are offline" do
       subject.class.online.should == [user]
+    end
+  end
+
+  describe ".find_friends" do
+    before do
+      user_searching_for_friend
+      user
+    end
+
+    it "should only try and find friends for users who are looking for them" do
+      with_resque { subject.class.find_friends }
+      assert_friend_found
     end
   end
 
@@ -1683,6 +1704,18 @@ describe User do
         user.welcome!
       end
       reply_to(user).body.should == spec_translate(:welcome, [user.locale, user.country_code])
+    end
+  end
+
+  describe "#find_friends!" do
+    before do
+      user_searching_for_friend
+      user
+    end
+
+    it "should find friends for the user" do
+      user_searching_for_friend.find_friends!
+      assert_friend_found
     end
   end
 
