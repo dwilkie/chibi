@@ -7,6 +7,7 @@ describe User do
   include_context "replies"
 
   let(:user) { create(:user) }
+  let(:user_searching_for_friend) { create(:user_searching_for_friend) }
   let(:new_user) { build(:user) }
   let(:cambodian) { build(:cambodian) }
   let(:friend) { create(:user) }
@@ -72,6 +73,25 @@ describe User do
   end
 
   describe "callbacks" do
+    context "before save" do
+      context "if the user is currently chatting and also searching" do
+        let(:chat_with_user_searching_for_friend) do
+          create(:chat_with_user_searching_for_friend, :user => user_searching_for_friend)
+        end
+
+        let(:active_chat_with_user_searching_for_friend) do
+          create(:active_chat_with_user_searching_for_friend, :user => user_searching_for_friend)
+        end
+
+        it "should no longer be searching for a friend" do
+          chat_with_user_searching_for_friend
+          user_searching_for_friend.reload.should be_searching_for_friend
+          active_chat_with_user_searching_for_friend
+          user_searching_for_friend.reload.should_not be_searching_for_friend
+        end
+      end
+    end
+
     it "should generate a screen name before validation on create" do
       new_user.screen_name.should be_nil
       new_user.valid?
@@ -112,6 +132,19 @@ describe User do
 
   it_should_behave_like "filtering with communicable resources" do
     let(:resources) { [user, friend] }
+  end
+
+  describe ".online" do
+    let(:offline_user) { create(:offline_user) }
+
+    before do
+      offline_user
+      user
+    end
+
+    it "should not return users who are offline" do
+      subject.class.online.should == [user]
+    end
   end
 
   describe ".filter_by" do
@@ -976,6 +1009,14 @@ describe User do
     end
   end
 
+  describe "#online?" do
+    it "should only return false for offline users" do
+      offline_user.should_not be_online
+      user.should be_online
+      user_searching_for_friend.should be_online
+    end
+  end
+
   describe "#available?" do
     it "should only return true if the user is online and not currently chatting" do
       user.should be_available
@@ -1074,6 +1115,27 @@ describe User do
       new_user.location.stub(:locate!)
       new_user.location.should_receive(:locate!)
       new_user.locate!
+    end
+  end
+
+  describe "#search_for_friend!" do
+    context "given he is not currently chatting" do
+      it "should mark the user as searching for a friend" do
+        new_user.search_for_friend!.should be_nil
+        new_user.reload.should be_searching_for_friend
+        new_user.should be_persisted
+      end
+    end
+
+    context "given he is currently chatting" do
+      before do
+        active_chat
+      end
+
+      it "should not mark the user as searching for a friend" do
+        user.search_for_friend!.should be_nil
+        user.reload.should_not be_searching_for_friend
+      end
     end
   end
 

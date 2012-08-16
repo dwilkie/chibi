@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120716081604) do
+ActiveRecord::Schema.define(:version => 20120816071112) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -97,11 +97,11 @@ ActiveRecord::Schema.define(:version => 20120716081604) do
     t.date     "date_of_birth"
     t.string   "gender",         :limit => 1
     t.string   "looking_for",    :limit => 1
-    t.boolean  "online",                      :default => true, :null => false
     t.integer  "active_chat_id"
-    t.datetime "created_at",                                    :null => false
-    t.datetime "updated_at",                                    :null => false
+    t.datetime "created_at",                                        :null => false
+    t.datetime "updated_at",                                        :null => false
     t.string   "locale",         :limit => 2
+    t.string   "state",                       :default => "online", :null => false
   end
 
   add_index "users", ["active_chat_id"], :name => "index_users_on_active_chat_id"
@@ -109,6 +109,6 @@ ActiveRecord::Schema.define(:version => 20120716081604) do
   add_index "users", ["gender"], :name => "index_users_on_gender"
   add_index "users", ["looking_for"], :name => "index_users_on_looking_for"
   add_index "users", ["mobile_number"], :name => "index_users_on_mobile_number", :unique => true
-  add_index "users", ["online"], :name => "index_users_on_online"
+  add_index "users", ["state"], :name => "index_users_on_state"
 
 end

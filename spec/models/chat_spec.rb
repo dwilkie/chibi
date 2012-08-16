@@ -113,12 +113,22 @@ describe Chat do
       end
 
       context "passing :activate_user => false" do
-        it "should only activate the chat for the friend" do
+        before do
           reference_chat.activate!(:activate_user => false)
+        end
+
+        it "should only activate the chat for the friend" do
           reference_chat.should_not be_active
           reference_chat.should be_persisted
           user.active_chat.should be_nil
           friend.active_chat.should == reference_chat
+        end
+
+        context "the initiator" do
+          it "should be searching for friend" do
+            user.reload.should be_searching_for_friend
+            friend.reload.should_not be_searching_for_friend
+          end
         end
       end
 
@@ -144,8 +154,18 @@ describe Chat do
       end
 
       context "passing no options" do
+        before do
+          reference_chat.activate!
+        end
+
+        context "the initiator" do
+          it "should not be searching for a friend" do
+            reference_chat.user.reload.should_not be_searching_for_friend
+            reference_chat.friend.reload.should_not be_searching_for_friend
+          end
+        end
+
         it "should not introduce the new chat participants" do
-          expect_message { reference_chat.activate! }
           reply_to(user, reference_chat).should be_nil
           reply_to(friend, reference_chat).should be_nil
         end

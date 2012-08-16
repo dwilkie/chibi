@@ -36,9 +36,35 @@ class User < ActiveRecord::Base
     self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
   end
 
+  before_save :cancel_searching_for_friend_if_chatting
+
   after_initialize :assign_location
 
   delegate :city, :country_code, :address, :address=, :locate!, :to => :location, :allow_nil => true
+
+  state_machine :initial => :online do
+    state :offline, :searching_for_friend
+
+    event :login do
+      transition(:offline => :online)
+    end
+
+    event :logout do
+      transition(any => :offline)
+    end
+
+    event :search_for_friend do
+      transition(any => :searching_for_friend, :unless => lambda {|user| user.currently_chatting?})
+    end
+
+    event :cancel_searching_for_friend do
+      transition(:searching_for_friend => :online)
+    end
+  end
+
+  def self.online
+    scoped.where("\"#{table_name}\".\"state\" != ?", "offline")
+  end
 
   def self.filter_by(params = {})
     super(params).includes(:location)
@@ -55,7 +81,7 @@ class User < ActiveRecord::Base
     limit = options[:limit] || 100
     since = inactivity_period.ago
 
-    users_to_remind = without_recent_interaction(since).from_registered_service_providers.where(:online => true).limit(limit)
+    users_to_remind = without_recent_interaction(since).from_registered_service_providers.online.limit(limit)
 
     users_to_remind.each do |user_to_remind|
       user_to_remind.remind!
@@ -217,6 +243,10 @@ class User < ActiveRecord::Base
     self.date_of_birth = value.nil? ? value : value.years.ago.utc
   end
 
+  def online?
+    state != "offline"
+  end
+
   def available?(in_chat = nil)
     online? && (!currently_chatting? || active_chat == in_chat)
   end
@@ -238,7 +268,7 @@ class User < ActiveRecord::Base
   end
 
   def login!
-    update_attributes!(:online => true) unless online?
+    fire_events(:login)
   end
 
   def logout!(options = {})
@@ -248,12 +278,18 @@ class User < ActiveRecord::Base
       active_chat.deactivate!(:active_user => partner, :notify => notify)
     end
 
-    update_attributes!(:online => false)
+    fire_events(:logout)
+
     replies.build.logout!(partner) if options[:notify]
   end
 
   def welcome!
     replies.build.welcome!
+  end
+
+  def search_for_friend!
+    fire_events(:search_for_friend)
+    nil
   end
 
   def update_locale!(locale, options = {})
@@ -517,7 +553,7 @@ class User < ActiveRecord::Base
   end
 
   def self.exclude_unavailable(scope)
-    scope.where(:active_chat_id => nil, :online => true)
+    scope.where(:active_chat_id => nil).online
   end
 
   def self.split_mobile_number(number)
@@ -543,6 +579,11 @@ class User < ActiveRecord::Base
     order_sql = "CASE " << order_sql.join(" ") << " ELSE #{else_value} END"
 
     scope.order(order_sql)
+  end
+
+  def cancel_searching_for_friend_if_chatting
+    fire_events(:cancel_searching_for_friend) if currently_chatting?
+    nil
   end
 
   def international_dialing_code

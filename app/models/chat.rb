@@ -51,6 +51,7 @@ class Chat < ActiveRecord::Base
   def activate!(options = {})
     self.friend ||= user.match
     active_users << user unless options[:activate_user] == false
+
     active_users << friend if friend
 
     if user.currently_chatting?
@@ -69,6 +70,8 @@ class Chat < ActiveRecord::Base
         :user => user
       ).explain_could_not_find_a_friend! if options[:notify] && options[:notify_no_match] != false
     end
+
+    user.search_for_friend!
   end
 
   def activate(options = {})
@@ -168,11 +171,11 @@ class Chat < ActiveRecord::Base
     scoped.joins(:user).joins(:friend).joins(:replies).where(
       "users.active_chat_id IS NULL OR users.active_chat_id = #{table_name}.id"
     ).where(
-      :users => {:online => true}
+      "users.state != ?", "offline"
     ).where(
       "friends_chats.active_chat_id IS NULL OR friends_chats.active_chat_id = #{table_name}.id"
     ).where(
-      :friends_chats => {:online => true}
+      "friends_chats.state != ?", "offline"
     ).where(
       :replies => {:delivered_at => nil}
     ).includes(:replies).readonly(false)

@@ -118,6 +118,19 @@ FactoryGirl.define do
       end
     end
 
+    factory :chat_with_user_searching_for_friend do
+      association :user, :factory => :user_searching_for_friend
+
+      # this factory is used to assert that an active chat
+      # cannot exist with a searching user
+      factory :active_chat_with_user_searching_for_friend do
+        after(:create) do |chat|
+          chat.active_users << chat.user
+          chat.save
+        end
+      end
+    end
+
     # a chat where only the initator is active
     factory :active_chat_with_single_user do
       after(:create) do |chat|
@@ -211,6 +224,10 @@ FactoryGirl.define do
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
     location
 
+    factory :user_searching_for_friend do
+      state "searching_for_friend"
+    end
+
     factory :user_without_recent_interaction do
       without_recent_interaction
     end
@@ -236,7 +253,7 @@ FactoryGirl.define do
     end
 
     factory :offline_user do
-      online false
+      state "offline"
     end
 
     factory :male_user do

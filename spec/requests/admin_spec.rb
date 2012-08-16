@@ -102,7 +102,7 @@ describe "Admin" do
       page.should have_css "#gender", :text => reference_user.gender
       page.should have_css "#city", :text => reference_user.city
       page.should have_css "#looking_for", :text => reference_user.looking_for
-      page.should have_css "#online", :text => reference_user.online.to_s
+      page.should have_css "#online", :text => reference_user.online?.to_s
       page.should have_css "#locale", :text => reference_user.locale
       within "#mobile_number" do
         page.should have_link reference_user.mobile_number, :href => user_path(reference_user)
