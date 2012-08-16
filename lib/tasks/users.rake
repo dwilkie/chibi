@@ -6,6 +6,6 @@ namespace :users do
 
   desc "Finds new friends for users who are searching"
   task :find_friends => :environment do
-    Resque.enqueue(FriendFinder)
+    Resque.enqueue(FriendFinder, :notify => true, :notify_no_match => false)
   end
 end
