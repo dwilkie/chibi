@@ -603,7 +603,7 @@ describe Chat do
           reply_to(new_chat.friend).body.should == spec_translate(:greeting_from_unknown_gender, new_friend.locale, recipient.screen_id)
         end
 
-        reply_to(recipient).body.should == spec_translate(
+        reply_to(recipient).try(:body).should_not == spec_translate(
           :friend_unavailable, recipient.locale, unavailable_user.screen_id
         )
         assert_forward_message_to(unavailable_user, recipient, chat_session, message, false)
