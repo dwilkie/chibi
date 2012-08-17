@@ -2,7 +2,22 @@
   :en => {
     :replies => {
       :greeting => lambda {|key, options|
-        "Hi! I want to find a friend to play SMS with me!"
+        if options[:friend].try(:male?)
+          gender = "male"
+        elsif options[:friend].try(:female?)
+          gender = "female"
+        end
+
+        age = options[:friend].try(:age)
+        city = options[:friend].try(:city)
+
+        gender_intro = "a #{gender} " if gender
+        age_intro = "#{age} yo " if age
+        city_intro = "living in #{city} " if city
+
+        intro = "I'm #{gender_intro}#{age_intro}#{city_intro}. " if gender_intro || age_intro || city_intro
+
+        "Hi! I want to play SMS! #{intro}Write back NOW to chat with ME or write 'new' to meet a new friend"
       },
 
       :welcome => lambda {|key, options|

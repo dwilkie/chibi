@@ -7,7 +7,14 @@
         elsif options[:friend].try(:female?)
           greeting_suffix = " ja"
         end
-        "Sousdey#{greeting_suffix}! Nhom jong rok mit leng SMS!"
+
+        age = options[:friend].try(:age)
+        city = options[:friend].try(:city)
+
+        age_intro = "a yu #{age} " if age
+        city_intro = "nov #{city} " if city
+
+        "Sousdey#{greeting_suffix}! Nhom #{age_intro}#{city_intro}jong rok mit leng SMS! Write back NOW to chat with ME or write 'new' to meet a new friend"
       },
 
       :welcome => lambda {|key, options|

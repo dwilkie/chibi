@@ -144,7 +144,7 @@ describe "Messages" do
             new_user.gender.should == "m"
 
             reply_to(new_user).should be_nil
-            reply_to(joy).body.should == spec_translate(:greeting_from_male, joy.locale, new_user.screen_id)
+            reply_to(joy).body.should == spec_translate(:greeting_from_male_showing_full_profile, joy.locale, new_user.screen_id, "27", "Phnom Penh")
           end
         end
       end
@@ -169,7 +169,7 @@ describe "Messages" do
             alex.looking_for.should == "m"
 
             reply_to(alex).should be_nil
-            reply_to(dave).body.should == spec_translate(:greeting_from_female, dave.locale, alex.screen_id)
+            reply_to(dave).body.should == spec_translate(:greeting_from_female_showing_age, dave.locale, alex.screen_id, "23")
           end
         end
       end
@@ -237,7 +237,7 @@ describe "Messages" do
               :friend_unavailable, mara.locale, dave.screen_id
             )
 
-            reply_to(luke).body.should == spec_translate(:greeting_from_female, luke.locale, mara.screen_id)
+            reply_to(luke).body.should == spec_translate(:greeting_from_female_showing_full_profile, luke.locale, mara.screen_id, mara.age.to_s, mara.city)
 
             reply_to_dave = reply_to(dave)
             reply_to_dave.body.should == spec_translate(
