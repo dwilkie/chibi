@@ -176,21 +176,23 @@ describe Message do
           end
         end
 
-        context "'new'" do
-          before do
-            message.body = "new"
-            expect_message { message.process! }
-          end
+        ["new", "'new'", "\"new\""].each do |new_variation|
+          context "#{new_variation}" do
+            before do
+              message.body = new_variation
+              expect_message { message.process! }
+            end
 
-          it_should_behave_like "starting a new chat" do
-            let(:imitate_user) { true }
-          end
+            it_should_behave_like "starting a new chat" do
+              let(:imitate_user) { true }
+            end
 
-          it "should not inform the user's partner how find a new friend" do
-            reply_to(friend, chat).should be_nil
-            friend.reload
-            friend.should be_currently_chatting
-            friend.should be_online
+            it "should not inform the user's partner how find a new friend" do
+              reply_to(friend, chat).should be_nil
+              friend.reload
+              friend.should be_currently_chatting
+              friend.should be_online
+            end
           end
         end
 

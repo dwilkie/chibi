@@ -50,7 +50,7 @@ class Message < ActiveRecord::Base
   end
 
   def user_wants_to_chat_with_someone_new?
-    normalized_body == "new"
+    normalized_body.gsub(/["']/, "") == "new"
   end
 
   def normalized_body
