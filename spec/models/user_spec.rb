@@ -162,9 +162,25 @@ describe User do
       user
     end
 
-    it "should only try and find friends for users who are looking for them" do
-      with_resque { subject.class.find_friends }
-      assert_friend_found
+    context "passing no options" do
+      it "should only try and find friends for users who are looking for them" do
+        with_resque { subject.class.find_friends }
+        assert_friend_found
+      end
+    end
+
+    context "passing :between => 2..14" do
+      context "given the current time is not between 02:00 UTC and 14:00 UTC" do
+        it "should not try to find friends" do
+          pending
+        end
+      end
+
+      context "given the current time is between 02:00 UTC and 14:00 UTC" do
+        it "should try to find friends" do
+          pending
+        end
+      end
     end
   end
 

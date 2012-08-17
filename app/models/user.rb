@@ -89,8 +89,17 @@ class User < ActiveRecord::Base
   end
 
   def self.find_friends(options = {})
-    scoped.where(:state => "searching_for_friend").find_each do |user|
-      Resque.enqueue(FriendMessenger, user.id, options)
+    do_find = true
+
+    if between = options.delete(:between)
+      now = Time.now
+      do_find = (now >= time_at(between.min) && now <= time_at(between.max))
+    end
+
+    if do_find
+      scoped.where(:state => "searching_for_friend").find_each do |user|
+        Resque.enqueue(FriendMessenger, user.id, options)
+      end
     end
   end
 
@@ -576,6 +585,10 @@ class User < ActiveRecord::Base
 
   def self.quoted_attribute(attribute)
     "\"#{table_name}\".\"#{attribute}\""
+  end
+
+  def self.time_at(hour)
+    Time.new(Time.now.year, Time.now.month, Time.now.day, hour)
   end
 
   def self.order_by_case(scope, conditions_scope, else_value)
