@@ -25,6 +25,14 @@ describe User do
     user_searching_for_friend.should be_searching_for_friend
   end
 
+  def assert_friend_not_found
+    user_searching_for_friend.reload
+    user.reload
+    user.should_not be_currently_chatting
+    user_searching_for_friend.should_not be_currently_chatting
+    user_searching_for_friend.should be_searching_for_friend
+  end
+
   it "should not be valid without a mobile number" do
     new_user.mobile_number = nil
     new_user.should_not be_valid
@@ -172,13 +180,19 @@ describe User do
     context "passing :between => 2..14" do
       context "given the current time is not between 02:00 UTC and 14:00 UTC" do
         it "should not try to find friends" do
-          pending
+          Timecop.freeze(Time.new(2012, 1, 7, 1, 0, 0)) do
+            with_resque { subject.class.find_friends(:between => 2..14) }
+            assert_friend_not_found
+          end
         end
       end
 
       context "given the current time is between 02:00 UTC and 14:00 UTC" do
         it "should try to find friends" do
-          pending
+          Timecop.freeze(Time.new(2012, 1, 7, 2, 0, 0)) do
+            with_resque { subject.class.find_friends(:between => 2..14) }
+            assert_friend_found
+          end
         end
       end
     end
