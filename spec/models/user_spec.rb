@@ -200,7 +200,7 @@ describe User do
 
   describe ".filter_by" do
     it "should include the user's location to avoid loading it for each user" do
-      subject.class.filter_by.includes_values.should == [:location]
+      subject.class.filter_by.includes_values.should include(:location)
     end
   end
 

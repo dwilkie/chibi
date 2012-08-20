@@ -687,7 +687,7 @@ describe Chat do
 
   describe ".filter_by" do
     it "should include users, friends & active users to avoid loading them for each user" do
-      subject.class.filter_by.includes_values.should == [:user, :friend, :active_users]
+      subject.class.filter_by.includes_values.should include(:user, :friend, :active_users)
     end
 
     context ":user_id => 2" do

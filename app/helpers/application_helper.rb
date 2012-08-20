@@ -3,7 +3,7 @@ module ApplicationHelper
     resource_name = resource.class.to_s.underscore
     capture_haml do
       resource.class::COMMUNICABLE_RESOURCES.each do |communicable_resources|
-        communicable_resource_count = resource.send("#{communicable_resources}_count").to_i
+        communicable_resource_count = resource.send(communicable_resources).size.to_i
         if communicable_resource_count.zero?
           content = communicable_resource_count
         else

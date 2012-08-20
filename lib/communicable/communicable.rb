@@ -89,19 +89,7 @@ module Communicable
       private
 
       def communicable_resources_scope
-        joins_column_name = "#{table_name.singularize}_id"
-
-        select_values = ["#{table_name}.*"]
-        joins_values = []
-
-        COMMUNICABLE_RESOURCES.each do |communicable_resource|
-          select_values << "COUNT(DISTINCT(#{communicable_resource}.id)) AS #{communicable_resource}_count"
-          joins_values << "LEFT OUTER JOIN #{communicable_resource} ON #{communicable_resource}.#{joins_column_name} = #{table_name}.id"
-        end
-
-        scoped.select(select_values.join(", ")).joins(joins_values.join(" ")).group(all_columns).order(
-          "#{table_name}.created_at DESC"
-        )
+        scoped.includes(*COMMUNICABLE_RESOURCES).order("\"#{table_name}\".\"updated_at\" DESC")
       end
     end
   end
