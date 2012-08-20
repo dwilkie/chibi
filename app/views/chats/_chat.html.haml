@@ -3,6 +3,8 @@
     = chat.id
   %td#created_at
     = "#{time_ago_in_words(chat.created_at)} ago"
+  %td#updated_at
+    = "#{time_ago_in_words(chat.updated_at)} ago"
   %td#active
     = chat.active?
   %td#user

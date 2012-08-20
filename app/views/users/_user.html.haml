@@ -1,6 +1,10 @@
 %tr{:id => "user_#{user_counter + 1}", :class => cycle("odd", "even")}
   %td#id
     = user.id
+  %td#created_at
+    = "#{time_ago_in_words(user.created_at)} ago"
+  %td#updated_at
+    = "#{time_ago_in_words(user.updated_at)} ago"
   %td#name
     = user.name
   %td#screen_name
