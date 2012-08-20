@@ -79,23 +79,23 @@ module TranslationHelpers
     },
 
     :greeting_from_unknown_gender => {
-      :en => "#[0]: Hi! I want to play SMS! Write back NOW to chat with ME or write 'new' to meet a new friend",
-      :kh => "#[0]: Sousdey! Nhom jong rok mit leng SMS! Write back NOW to chat with ME or write 'new' to meet a new friend"
+      :en => "#[0]: Hi! I want to play SMS! Please write back to me now!",
+      :kh => "#[0]: Sousdey! Nhom jong rok mit leng SMS! Som chleuy tob vinh!"
     },
 
     :greeting_from_male_showing_full_profile => {
-      :en => "#[0]: Hi! I want to play SMS! I'm a male #[1] yo living in #[2]. Write back NOW to chat with ME or write 'new' to meet a new friend",
-      :kh => "#[0]: Sousdey bart! Nhom a yu #[1] nov #[2] jong rok mit leng SMS! Write back NOW to chat with ME or write 'new' to meet a new friend"
+      :en => "#[0]: Hi! I want to play SMS! I'm a male #[1] yo living in #[2]. Please write back to me now!",
+      :kh => "#[0]: Sousdey bart! Nhom a yu #[1] nov #[2] jong rok mit leng SMS! Som chleuy tob vinh!"
     },
 
     :greeting_from_female_showing_full_profile => {
-      :en => "#[0]: Hi! I want to play SMS! I'm a female #[1] yo living in #[2]. Write back NOW to chat with ME or write 'new' to meet a new friend",
-      :kh => "#[0]: Sousdey ja! Nhom a yu #[1] nov #[2] jong rok mit leng SMS! Write back NOW to chat with ME or write 'new' to meet a new friend"
+      :en => "#[0]: Hi! I want to play SMS! I'm a female #[1] yo living in #[2]. Please write back to me now!",
+      :kh => "#[0]: Sousdey ja! Nhom a yu #[1] nov #[2] jong rok mit leng SMS! Som chleuy tob vinh!"
     },
 
     :greeting_from_female_showing_age => {
-      :en => "#[0]: Hi! I want to play SMS! I'm a female #[1] yo. Write back NOW to chat with ME or write 'new' to meet a new friend",
-      :kh => "#[0]: Sousdey ja! Nhom a yu #[1] jong rok mit leng SMS! Write back NOW to chat with ME or write 'new' to meet a new friend"
+      :en => "#[0]: Hi! I want to play SMS! I'm a female #[1] yo. Please write back to me now!",
+      :kh => "#[0]: Sousdey ja! Nhom a yu #[1] jong rok mit leng SMS! Som chleuy tob vinh!"
     }
   }
 

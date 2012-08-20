@@ -17,7 +17,7 @@
 
         intro = "I'm #{gender_intro}#{age_intro}#{city_intro}. " if gender_intro || age_intro || city_intro
 
-        "Hi! I want to play SMS! #{intro}Write back NOW to chat with ME or write 'new' to meet a new friend"
+        "Hi! I want to play SMS! #{intro}Please write back to me now!"
       },
 
       :welcome => lambda {|key, options|

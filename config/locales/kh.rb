@@ -14,7 +14,7 @@
         age_intro = "a yu #{age} " if age
         city_intro = "nov #{city} " if city
 
-        "Sousdey#{greeting_suffix}! Nhom #{age_intro}#{city_intro}jong rok mit leng SMS! Write back NOW to chat with ME or write 'new' to meet a new friend"
+        "Sousdey#{greeting_suffix}! Nhom #{age_intro}#{city_intro}jong rok mit leng SMS! Som chleuy tob vinh!"
       },
 
       :welcome => lambda {|key, options|
