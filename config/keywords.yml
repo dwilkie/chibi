@@ -1,12 +1,12 @@
 en:
   i_am:
-    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for )))(?:(?:i\\s*)?(?:am|i'm|im|me)(?:\\s*(?:a))?)"
+    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for |searching | searchimg )))(?:(?:i\\s*)?(?:am|i'm|im|me)(?:\\s*(?:a))?)"
   name:
-    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bgood\\b|\\bfree\\b|\\bis\\b|\\band\\b|\\bme\\b|\\bplz\\b|\\bplease\\b|\\bsorry\\b|\\byear\\b|\\bnew\\b|\\bwelcome\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
+    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bgood\\b|\\bfree\\b|\\bis\\b|\\band\\b|\\bme\\b|\\bplz\\b|\\bplease\\b|\\bsorry\\b|\\byear\\b|\\bfacebook\\b|\\bnew\\b|\\bwelcome\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
   girlfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*(?:(?<!(?:boy|guy|man) )(?:gir?l|woman)(?!\s*boy|guy|man))'
+    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:gir?l|woman)(?!\s*boy|guy|man))'
     - 'gir?l\s?friend'
     - "gf"
     - "friend gir?l"
@@ -17,7 +17,7 @@ en:
     - woman
     - "f(?:a|e)m(?:a|e)?le"
   boyfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*(?:(?<!(?:girl |gil |woman ))(?:boy|guy|man)(?!\s*gir?l|woman))'
+    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:girl |gil |woman ))(?:boy|guy|man)(?!\s*gir?l|woman))'
     - 'boy\s?friend'
     - bf
     - friend boy
@@ -28,7 +28,7 @@ en:
     - guy
     - "man(?!\\?)"
   friend:
-    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for).*)?(?<!(?:your |ur ))fri(?:ends?)?'
+    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*)?(?<!(?:your |ur ))fri(?:ends?)?'
 kh:
   i_am:
     - "(?:k?n(?:h|y)(?:o|u)m)"
