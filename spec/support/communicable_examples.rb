@@ -161,41 +161,17 @@ shared_examples_for "chatable" do
 end
 
 shared_examples_for "filtering with communicable resources" do
-  def assert_respond_to_communicable_resources_counts(result)
-    result.messages_count.should == "0"
-    result.replies_count.should == "0"
-    result.phone_calls_count.should == "0"
-  end
-
   before do
     resources
   end
 
   describe ".filter_by" do
-    it "should order by latest created at" do
+    it "should order by latest updated at" do
       subject.class.filter_by.should == resources.reverse
     end
 
-    it "should include a count of the communicable resources associations" do
-      relation = subject.class.filter_by
-      relation.select_values.first.split(/\,\s+/)[1..-1].should == [
-        "COUNT(DISTINCT(messages.id)) AS messages_count",
-        "COUNT(DISTINCT(replies.id)) AS replies_count",
-        "COUNT(DISTINCT(phone_calls.id)) AS phone_calls_count"
-      ]
-
-      expected_table_name = subject.class.table_name
-      expected_join_column = "#{expected_table_name.singularize}_id"
-
-      relation.joins_values.each do |left_outer_join|
-        join_extraction = left_outer_join.match(/(\w+)\s*\=\s*(\w+)/)
-        join_extraction[1].should == expected_join_column
-        table_name = expected_table_name
-      end
-    end
-
-    it "should include counts for the communicable resources" do
-      assert_respond_to_communicable_resources_counts(subject.class.filter_by.first)
+    it "should include the communicable resources associations" do
+      subject.class.filter_by.includes_values.should include(:messages, :replies, :phone_calls)
     end
   end
 
@@ -211,14 +187,10 @@ shared_examples_for "filtering with communicable resources" do
     end
   end
 
-  describe ".find_with_communicable_resources_counts" do
-    it "should behave like .find but the result should respond to counts for communicable resources" do
-      assert_respond_to_communicable_resources_counts(
-        subject.class.find_with_communicable_resources_counts(resources.first.id)
-      )
-
+  describe ".find_with_communicable_resources" do
+    it "should behave like .find but the result should include the communicable resources" do
       expect {
-        subject.class.find_with_communicable_resources_counts(0)
+        subject.class.find_with_communicable_resources(0)
       }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end

@@ -76,7 +76,7 @@ module Communicable
         filter_params(params).count
       end
 
-      def find_with_communicable_resources_counts(id)
+      def find_with_communicable_resources(id)
         result = communicable_resources_scope.where(:id => id).first
         raise ActiveRecord::RecordNotFound unless result.present?
         result

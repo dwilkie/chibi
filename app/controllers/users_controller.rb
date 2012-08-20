@@ -6,7 +6,7 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = User.find_with_communicable_resources_counts(params[:id])
+    @user = User.find_with_communicable_resources(params[:id])
   end
 
   def destroy
