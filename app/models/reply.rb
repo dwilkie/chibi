@@ -101,6 +101,7 @@ class Reply < ActiveRecord::Base
   private
 
   def set_forward_message(from, message)
+    message.gsub!(/\A#{from.screen_id}\s*\:?\s*/i, "")
     self.body = "#{from.screen_id}: #{message}"
   end
 

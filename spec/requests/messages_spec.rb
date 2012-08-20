@@ -378,14 +378,14 @@ describe "Messages" do
             it_should_behave_like "ending my current chat"
           end
 
-          context "'Hi Dave, knyom sara bong nov na?'" do
+          context "'Sara: Hi Dave, knyom sara bong nov na?'" do
             before do
-              send_message(:from => joy, :body => "Hi Dave, knyom sara bong nov na?")
+              send_message(:from => joy, :body => "Sara: Hi Dave, knyom sara bong nov na?")
               joy.reload
             end
 
             it "should forward her message to me" do
-              joy.name.should_not == "sara"
+              joy.name.should == "sara"
               reply_to(dave).body.should == spec_translate(
                 :forward_message, dave.locale, joy.screen_id, "Hi Dave, knyom sara bong nov na?"
               )

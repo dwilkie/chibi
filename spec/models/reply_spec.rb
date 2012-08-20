@@ -291,7 +291,7 @@ describe Reply do
     it "should show the message in a chat context but not deliver the message" do
       assert_reply(
         :forward_message, :forward_message,
-        :args => [partner, "hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"],
+        :args => [partner, "#{partner.screen_id}: hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"],
         :deliver => false, :no_alternate_translation => true
       )
     end
@@ -301,7 +301,7 @@ describe Reply do
     it "should deliver the forwarded message" do
       assert_reply(
         :forward_message!, :forward_message,
-        :args => [partner, "hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"],
+        :args => [partner, "#{partner.screen_id.downcase}  :  hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"],
         :no_alternate_translation => true
       )
     end

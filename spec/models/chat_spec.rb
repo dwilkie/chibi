@@ -553,7 +553,7 @@ describe Chat do
 
   describe "#forward_message" do
     def create_message(user)
-      create(:message, :user => user, :body => "hello")
+      create(:message, :user => user, :body => "#{user.screen_id}: hello")
     end
 
     let(:message) { create_message(user) }
@@ -562,7 +562,7 @@ describe Chat do
       chat_session.reload.messages.should == [message]
       reply = reply_to(recipient, chat_session)
       reply.body.should == spec_translate(
-        :forward_message, recipient.locale, originator.screen_id, message.body
+        :forward_message, recipient.locale, originator.screen_id, "hello"
       )
       if delivered
         recipient.active_chat.should == chat_session
