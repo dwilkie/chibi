@@ -2,7 +2,7 @@ en:
   i_am:
     - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for )))(?:(?:i\\s*)?(?:am|i'm|im|me)(?:\\s*(?:a))?)"
   name:
-    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bgood\\b|\\bfree\\b|\\bis\\b|\\band\\b|\\bme\\b|\\bplz\\b|\\bplease\\b|\\bsorry\\b|\\byear\\b|\\bnew\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
+    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im)\\s*(?!\\bat\\b|\\bwhere\\b|\\bin\\b|\\ba\\b|\\bfine\\b|\\bstay\\b|\\bok\\b|\\bsimple\\b|\\bworship\\b|\\bnot\\b|\\bey\\b|\\bi\\b|\\bold\\b|\\blive\\b|\\boh\\b|\\bgood\\b|\\bfree\\b|\\bis\\b|\\band\\b|\\bme\\b|\\bplz\\b|\\bplease\\b|\\bsorry\\b|\\byear\\b|\\bnew\\b|\\bwelcome\\b|\\d+|\\b\\w+ing\\b)(\\b\\w+\\b)"
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
   girlfriend:
@@ -33,7 +33,7 @@ kh:
   i_am:
     - "(?:k?n(?:h|y)(?:o|u)m)"
   name:
-    - "(?:(?:(?:k?n(?:h|y)(?:o|u)m)\\s*(?:chh?mu?ou?(?:r|s)))|(?:(?:k?n(?:h|y)(?:o|u)m)|(?:chh?mu?ou?(?:r|s))))(?:\\s*(?:\\(|\\:))?\\s*(?!\\bjong\\b|\\bsoursdey\\b|\\bnov\\b)(\\b\\w+\\b)"
+    - "(?:(?:(?:k?n(?:h|y)(?:o|u)m)\\s*(?:chh?mu?ou?(?:r|s)))|(?:(?:k?n(?:h|y)(?:o|u)m)|(?:chh?mu?ou?(?:r|s))))(?:\\s*(?:\\(|\\:))?\\s*(?!\\bjong\\b|\\bsoursdey\\b|\\bnov\\b|\\ba\\b|\\bayu\\b|\\byu\\b)(\\b\\w+\\b)"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
