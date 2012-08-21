@@ -1069,11 +1069,42 @@ describe User do
   end
 
   describe "#available?" do
-    it "should only return true if the user is online and not currently chatting" do
-      user.should be_available
-      offline_user.should_not be_available
-      active_chat
-      user.should_not be_available
+    context "he is offline" do
+      it "should be false" do
+        offline_user.should_not be_available
+      end
+    end
+
+    context "he is online and not currently chatting" do
+      it "should be true" do
+        user.should be_available
+      end
+    end
+
+    context "he is currently chatting" do
+      context "and his chat is active" do
+        before do
+          active_chat
+        end
+
+        it "should be false" do
+          user.should_not be_available
+        end
+      end
+
+      context "but his chat is not active" do
+        let(:active_chat_with_single_friend) do
+          create(:active_chat_with_single_friend, :friend => user)
+        end
+
+        before do
+          active_chat_with_single_friend
+        end
+
+        it "should be true" do
+          user.should be_available
+        end
+      end
     end
 
     context "passing a chat" do

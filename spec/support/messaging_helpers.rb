@@ -3,10 +3,10 @@ module MessagingHelpers
 
   EXAMPLES = YAML.load_file(File.join(File.dirname(__FILE__), 'message_examples.yaml'))
 
-  def initiate_chat(user, friend)
+  def initiate_chat(user, friend = nil)
     load_users
     post_message(:from => user, :body => "")
-    post_message(:from => friend, :body => "")
+    post_message(:from => friend, :body => "") if friend
   end
 
   def send_message(options = {})

@@ -174,6 +174,34 @@ describe "Messages" do
         end
       end
 
+      context "given I search for a new friend" do
+        before do
+          initiate_chat(dave)
+        end
+
+        context "then pauline searches for a new friend" do
+          let(:pauline) { create(:pauline) }
+
+          before do
+            initiate_chat(pauline)
+          end
+
+          context "then mara texts 'Hi Dave'" do
+            before do
+              send_message(:from => mara, :body => "Hi Dave")
+            end
+
+            it "should forward mara's message to me" do
+              reply = reply_to(dave)
+              reply.body.should == spec_translate(
+                :forward_message, mara.locale, mara.screen_id, "Hi Dave"
+              )
+              reply.should be_delivered
+            end
+          end
+        end
+      end
+
       context "given I am currently in a chat session" do
         shared_examples_for "finding me a new friend" do
           context "and later another friend of mine of texts 'Hi Dave'" do
@@ -193,7 +221,7 @@ describe "Messages" do
                   send_message(:from => dave, :body => "Hi Mara")
                 end
 
-                it "should send the message to " do
+                it "should send the message to mara" do
                   reply_to(mara).body.should == spec_translate(
                     :forward_message, mara.locale, dave.screen_id, "Hi Mara"
                   )
