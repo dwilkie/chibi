@@ -22,10 +22,11 @@ class Location < ActiveRecord::Base
   # long running task
   def locate!
     if address.present? && country_code?
-      localize_address!
+      localized = localize_address!
       geocode
       reverse_geocode if latitude? && longitude? && (latitude_changed? || longitude_changed?)
     end
+    localized
   end
 
   def country_code
@@ -55,6 +56,7 @@ class Location < ActiveRecord::Base
         break
       end
     end
+    $~.try(:[], 0)
   end
 
   def subdivision_names

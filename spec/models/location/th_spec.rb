@@ -7,7 +7,7 @@ describe Location do
 
     let(:address_examples) do
       {
-        "chang mai" => {
+        "chiang mai" => {
           :expected_city => "Samoeng",
           :expected_latitude => 18.7964642,
           :expected_longitude => 98.6600586

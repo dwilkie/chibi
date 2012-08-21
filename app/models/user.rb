@@ -651,9 +651,9 @@ class User < ActiveRecord::Base
     stripped_info = info.dup
     profile_complete = profile_complete?
     extract_gender_and_looking_for(stripped_info, profile_complete)
-    extract_date_of_birth(stripped_info, profile_complete)
-    extract_name(stripped_info, profile_complete)
-    extract_location(stripped_info, profile_complete)
+    extract_date_of_birth(stripped_info)
+    extract_location(stripped_info)
+    extract_name(stripped_info)
   end
 
   def extract_gender_and_looking_for(info, force_update)
@@ -666,26 +666,25 @@ class User < ActiveRecord::Base
     end
   end
 
-  def extract_date_of_birth(info, force_update)
+  def extract_date_of_birth(info)
     match = strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?(?<!\d(?:\s|\-|\.|\:)|\d)(?!10|11|12)([1-5][0-9])(?!\s*(?:\d|h(?:o?u?rs?e?)?\b|cm\b|m\b|kg\b|(?:\:|\/)\d+))(?:\s*#{profile_keywords(:years_old)})?/).try(:[], 1)
-    self.age = match.to_i if match && (force_update || date_of_birth.nil?)
+    self.age = match.to_i if match
   end
 
-  def extract_name(info, force_update)
-    matches = strip_match!(info, /#{profile_keywords(:name)}/)
+  def extract_name(info)
+    matches = strip_match!(info, /#{profile_keywords(:name)}(?!\b#{profile_keywords(:banned_names)}\b)(\b\w+{2,}\b)/)
     match = matches.try(:[], 2) || matches.try(:[], 1)
     if match
       match.gsub!(/\d+/, "")
       match.strip!
-      self.name = match.downcase if match.present? && (force_update || name.nil?)
+      self.name = match.downcase if match.present?
     end
   end
 
-  def extract_location(info, force_update)
-    if force_update || city.nil?
-      self.address = info
-      locate!
-    end
+  def extract_location(info)
+    self.address = info
+    result = locate!
+    strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?#{result}/) if result
   end
 
   def includes_gender_and_looking_for?(info)

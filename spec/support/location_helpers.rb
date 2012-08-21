@@ -11,15 +11,22 @@ module LocationHelpers
         subject = build(:location)
         subject.country_code = country_code
         subject.address = sub_example
+        result = nil
 
         VCR.use_cassette("#{country_code}/#{address}") do
-          subject.locate!
+          result = subject.locate!
         end
 
         [:latitude, :longitude, :city].each do |attribute|
           expected = expectation["expected_#{attribute}".to_sym]
           actual = subject.send(attribute)
-          expected ? actual.should == expected : actual.should(be_nil)
+          if expected
+            actual.should == expected
+            result.should == sub_example.downcase
+          else
+            actual.should be_nil
+            result.should be_nil
+          end
         end
       end
     end
