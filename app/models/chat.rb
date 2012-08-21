@@ -166,18 +166,50 @@ class Chat < ActiveRecord::Base
 
   def self.with_undelivered_messages
     # return chats that have undelivered messages and the chat participants
-    # are available to chat again
-    scoped.joins(:user).joins(:friend).joins(:replies).where(
-      "users.active_chat_id IS NULL OR users.active_chat_id = #{table_name}.id"
-    ).where(
-      "users.state != ?", "offline"
-    ).where(
-      "friends_chats.active_chat_id IS NULL OR friends_chats.active_chat_id = #{table_name}.id"
-    ).where(
-      "friends_chats.state != ?", "offline"
+    # are available to chat
+
+    scoped.joins(
+      :user, :friend, :replies
+    ).participant_available(
+      :users
+    ).participant_available(
+      :friends_chats
     ).where(
       :replies => {:delivered_at => nil}
     ).includes(:replies).readonly(false)
+  end
+
+  def self.participant_available(participant)
+    scoped.where(
+      "#{participant}.active_chat_id IS NULL
+      OR #{participant}.active_chat_id = #{table_name}.id
+      OR (
+        SELECT #{table_name}.id FROM #{table_name} AS #{participant}_active_chat
+        INNER JOIN users AS #{participant}_active_chat_user
+        ON #{participant}_active_chat_user.id = #{participant}_active_chat.user_id
+        INNER JOIN users AS #{participant}_active_chat_friend
+        ON #{participant}_active_chat_friend.id = #{participant}_active_chat.friend_id
+        WHERE #{participant}_active_chat.id = #{participant}.active_chat_id
+        AND (
+          CASE WHEN (
+            #{participant}_active_chat_user.id = users.id
+          )
+          THEN (
+            #{participant}_active_chat_friend.active_chat_id IS NULL
+            OR #{participant}_active_chat_friend.active_chat_id != #{participant}_active_chat.id
+            OR #{participant}_active_chat_friend.state = 'offline'
+          )
+          ELSE (
+            #{participant}_active_chat_user.active_chat_id IS NULL
+            OR #{participant}_active_chat_user.active_chat_id != #{participant}_active_chat.id
+            OR #{participant}_active_chat_user.state = 'offline'
+          )
+          END
+        ) LIMIT 1
+      ) IS NOT NULL"
+    ).where(
+      "#{participant}.state != ?", "offline"
+    )
   end
 
   def self.with_undelivered_messages_for(user)

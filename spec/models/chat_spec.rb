@@ -743,26 +743,60 @@ describe Chat do
   end
 
   describe ".reactivate_stagnant!" do
-    let(:chat_with_pending_messages) { create(:chat, :user => user) }
-    let(:pending_reply) { create(:reply, :user => user, :chat => chat_with_pending_messages) }
+    context "with pending replies" do
 
-    before do
-      pending_reply
-      chat_with_pending_messages
-    end
+      def pending_reply(reference_chat)
+        create(:reply, :user => user, :chat => reference_chat)
+      end
 
-    it "should reactivate stagnant chats" do
-      chat_with_pending_messages.should_not be_active
-      with_resque { expect_message { subject.class.reactivate_stagnant! } }
-      chat_with_pending_messages.reload.should be_active
-      pending_reply.reload.should be_delivered
-    end
+      shared_examples_for "reactivating the chats" do
+        let(:reference_reply) { pending_reply(reference_chat) }
 
-    it "should not reactivate stagnant chats if the users are not available" do
-      active_chat
-      with_resque { subject.class.reactivate_stagnant! }
-      chat_with_pending_messages.reload.should_not be_active
-      pending_reply.reload.should_not be_delivered
+        before do
+          reference_reply
+          with_resque { expect_message { subject.class.reactivate_stagnant! }}
+        end
+
+        it "should be reactivated" do
+          reference_chat.reload.should be_active
+          reference_reply.reload.should be_delivered
+        end
+      end
+
+      context "where both the initiator and the friend are not currently chatting" do
+        it_should_behave_like "reactivating the chats" do
+          let(:reference_chat) { chat }
+        end
+      end
+
+      context "where the initiator is currently chatting" do
+        let(:chat_with_pending_messages) { create(:chat, :user => user) }
+
+        context "and his chat is active" do
+          let(:reference_reply) { pending_reply(chat_with_pending_messages) }
+
+          before do
+            reference_reply
+            active_chat
+          end
+
+          it "should not be reactivated" do
+            with_resque { subject.class.reactivate_stagnant! }
+            chat_with_pending_messages.reload.should_not be_active
+            reference_reply.reload.should_not be_delivered
+          end
+        end
+
+        context "but his chat is not active" do
+          before do
+            active_chat_with_single_user
+          end
+
+          it_should_behave_like "reactivating the chats" do
+            let(:reference_chat) { chat_with_pending_messages }
+          end
+        end
+      end
     end
   end
 
