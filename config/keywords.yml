@@ -44,6 +44,11 @@ en:
     - "age"
     - "study"
     - "work"
+    - "like"
+    - "teacher"
+    - "stop"
+    - "phone"
+    - '\d+(?:cm|kg)'
     - '\w+ing'
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
@@ -86,7 +91,8 @@ kh:
     - "cf"
     - "baa?n"
     - "ta"
-    - "men"
+    - "m(?:a|e|i)n"
+    - "rik"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
