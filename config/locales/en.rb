@@ -51,7 +51,7 @@
           instructions = "Chat with #{options[:friends_screen_name]} again by replying to this message or #{default_instructions.downcase}" if options[:friends_screen_name]
           default_outcome = "to meet a new friend"
         when :no_answer
-          notification = "INFO: Want to meet a new friend? "
+          notification = "Want to meet a new friend? "
         when :friend_unavailable
           notification = "#{options[:friends_screen_name]}: Sorry now I'm chatting with someone else. I'll chat with you later"
           instructions = ""

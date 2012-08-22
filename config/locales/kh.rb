@@ -39,7 +39,7 @@
           instructions = "Pjeur sa derm-bei chat jea-moy #{options[:friends_screen_name]} m-dong teat reu #{default_instructions.downcase}" if options[:friends_screen_name]
           default_outcome = "derm-bei rok mit tmey teat"
         when :no_answer
-          notification = "INFO: Jong rok mit tmey? "
+          notification = "Jong rok mit tmey? "
         when :friend_unavailable
           notification = "#{options[:friends_screen_name]}: Sorry now I'm chatting with someone else na. I'll chat with you later"
           instructions = ""

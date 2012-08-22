@@ -179,22 +179,22 @@ describe "Messages" do
           initiate_chat(dave)
         end
 
-        context "then pauline searches for a new friend" do
+        context "then Pauline searches for a new friend" do
           let(:pauline) { create(:pauline) }
 
           before do
             initiate_chat(pauline)
           end
 
-          context "then mara texts 'Hi Dave'" do
+          context "then Mara texts 'Hi Dave'" do
             before do
               send_message(:from => mara, :body => "Hi Dave")
             end
 
-            it "should forward mara's message to me" do
+            it "should forward Mara's message to me" do
               reply = reply_to(dave)
               reply.body.should == spec_translate(
-                :forward_message, mara.locale, mara.screen_id, "Hi Dave"
+                :forward_message, dave.locale, mara.screen_id, "Hi Dave"
               )
               reply.should be_delivered
             end
@@ -279,10 +279,44 @@ describe "Messages" do
               send_message(:from => dave, :body => "Hi Joy")
             end
 
-            it "should send the message to my current friend" do
-              reply_to(joy).body.should == spec_translate(
-                :forward_message, joy.locale, dave.screen_id, "Hi Joy"
-              )
+            shared_examples_for "forwarding the message" do
+              it "should send the message to my current friend" do
+                reply_to(joy).body.should == spec_translate(
+                  :forward_message, joy.locale, dave.screen_id, "Hi Joy"
+                )
+              end
+
+              it "should detect whether I want to meet a new friend" do
+                reply_to(dave).body.send(
+                  send_info_to_sender ? "should" : "should_not", eql(
+                    spec_translate(:chat_has_ended, dave.locale)
+                  )
+                )
+              end
+            end
+
+            it_should_behave_like "forwarding the message" do
+              let(:send_info_to_sender) { false }
+            end
+
+            context "and another" do
+              before do
+                send_message(:from => dave, :body => "Hi Joy")
+              end
+
+              it_should_behave_like "forwarding the message" do
+                let(:send_info_to_sender) { false }
+              end
+
+              context "and another" do
+                before do
+                  send_message(:from => dave, :body => "Hi Joy")
+                end
+
+                it_should_behave_like "forwarding the message" do
+                  let(:send_info_to_sender) { true }
+                end
+              end
             end
           end
 

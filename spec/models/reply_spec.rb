@@ -240,6 +240,12 @@ describe Reply do
     end
   end
 
+  describe "#instructions_for_new_chat!" do
+    it "should inform the user how to find a new friend" do
+      assert_reply(:instructions_for_new_chat!, :chat_has_ended)
+    end
+  end
+
   describe "#logout!" do
     it "should confirm the user that they have been logged out and explain how to find a new friend" do
       assert_reply(:logout!, :anonymous_logged_out)

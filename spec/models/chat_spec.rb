@@ -568,19 +568,32 @@ describe Chat do
   end
 
   describe "#forward_message" do
-    def create_message(user)
-      create(:message, :user => user, :body => "#{user.screen_id}: hello")
+    def create_message(user, chat = nil)
+      create(:message, :user => user, :body => "#{user.screen_id}: hello", :chat => chat)
     end
 
     let(:message) { create_message(user) }
 
-    def assert_forward_message_to(recipient, originator, chat_session, message, delivered = true)
-      chat_session.reload.messages.should == [message]
+    def assert_forward_message_to(recipient, originator, chat_session, message, options = {})
+      chat_session.reload.messages.should include(message)
       reply = reply_to(recipient, chat_session)
       reply.body.should == spec_translate(
         :forward_message, recipient.locale, originator.screen_id, "hello"
       )
-      if delivered
+
+      reply_to_originator = reply_to(originator)
+
+      if options[:send_originator_instructions]
+        reply_to_originator.body.should == spec_translate(
+          :chat_has_ended, originator.locale
+        )
+      else
+        reply_to_originator.try(:delivered?).should be_false
+      end
+
+      options[:delivered] = true unless options[:delivered] == false
+
+      if options[:delivered]
         recipient.active_chat.should == chat_session
         originator.active_chat.should == chat_session
         reply.should be_delivered
@@ -595,6 +608,34 @@ describe Chat do
         expect_message { active_chat_with_single_user.forward_message(message) }
         assert_forward_message_to(friend, user, active_chat_with_single_user, message)
         active_chat_with_single_user.updated_at.should > time_updated
+      end
+
+      context "and the originator has already sent one message" do
+        before do
+          create_message(user, active_chat_with_single_user)
+        end
+
+        it "should just forward the message" do
+          expect_message { active_chat_with_single_user.forward_message(message) }
+          assert_forward_message_to(friend, user, active_chat_with_single_user, message)
+        end
+
+        context "and the originator has already sent another message" do
+          before do
+            create_message(user, active_chat_with_single_user)
+          end
+
+          it "should forward the message and send instructions to the originator about how to start a new chat" do
+            expect_message do
+              active_chat_with_single_user.forward_message(message)
+            end
+
+            assert_forward_message_to(
+              friend, user, active_chat_with_single_user,
+              message, :send_originator_instructions => true
+            )
+          end
+        end
       end
     end
 
@@ -622,7 +663,9 @@ describe Chat do
         reply_to(recipient).try(:body).should_not == spec_translate(
           :friend_unavailable, recipient.locale, unavailable_user.screen_id
         )
-        assert_forward_message_to(unavailable_user, recipient, chat_session, message, false)
+        assert_forward_message_to(
+          unavailable_user, recipient, chat_session, message, :delivered => false
+        )
       end
 
       it "should save the message for sending later and find new friends for the sender" do

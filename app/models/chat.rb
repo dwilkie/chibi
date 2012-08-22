@@ -125,6 +125,7 @@ class Chat < ActiveRecord::Base
     if active? || chat_partner.available?
       reactivate!
       reply_to_chat_partner.forward_message!(reference_user, message_body)
+      replies.build(:user => reference_user).instructions_for_new_chat! if one_sided?
     else
       reply_to_chat_partner.forward_message(reference_user, message_body)
       # remove the sender of the message from current chat
@@ -220,6 +221,11 @@ class Chat < ActiveRecord::Base
 
   def self.filter_params(params = {})
     super.where(params.slice(:user_id))
+  end
+
+  def one_sided?(num_messages = 3)
+    last_messages = messages.order("created_at DESC").limit(num_messages).pluck(:user_id)
+    last_messages.uniq == [last_messages.first] if last_messages.count >= num_messages
   end
 
   def introduce_participants(options = {})

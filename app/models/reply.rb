@@ -44,6 +44,10 @@ class Reply < ActiveRecord::Base
     explain_how_to_start_a_new_chat!(:no_answer, options)
   end
 
+  def instructions_for_new_chat!
+    explain_how_to_start_a_new_chat!(:no_answer, :skip_update_profile_instructions => true)
+  end
+
   def explain_could_not_find_a_friend!
     explain_how_to_start_a_new_chat!(:could_not_find_a_friend)
   end
