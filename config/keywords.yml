@@ -42,6 +42,8 @@ en:
     - "grade"
     - "watch"
     - "age"
+    - "study"
+    - "work"
     - '\w+ing'
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
