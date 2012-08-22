@@ -48,6 +48,8 @@ en:
     - "teacher"
     - "stop"
     - "phone"
+    - "mr"
+    - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
     - '\w+ing'
   years_old:
