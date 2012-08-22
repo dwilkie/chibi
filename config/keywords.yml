@@ -41,6 +41,7 @@ en:
     - "play"
     - "grade"
     - "watch"
+    - "age"
     - '\w+ing'
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
@@ -52,7 +53,7 @@ en:
   girl:
     - f
   could_mean_girl_or_girlfriend:
-    - "gir?l"
+    - "g(?:i|r)(?:i|r)?l"
     - woman
     - "f(?:a|e)m(?:a|e)?le"
   boyfriend:
@@ -82,6 +83,8 @@ kh:
     - "leng"
     - "cf"
     - "baa?n"
+    - "ta"
+    - "men"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
