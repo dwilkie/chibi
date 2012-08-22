@@ -93,6 +93,7 @@ kh:
     - "ta"
     - "m(?:a|e|i)n"
     - "rik"
+    - "som"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
