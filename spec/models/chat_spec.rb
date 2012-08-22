@@ -288,20 +288,36 @@ describe Chat do
     end
 
     context "the chat is not active" do
-      it "should reactivate the chat" do
-        new_chat.should_not be_active
-        new_chat.reactivate!
-        new_chat.should be_active
-        new_chat.should be_persisted
+      context "and both chat partners are available" do
+        it "should reactivate the chat" do
+          new_chat.should_not be_active
+          new_chat.reactivate!
+          new_chat.should be_active
+          new_chat.should be_persisted
+        end
+
+        context "and there are undelivered messages" do
+          let(:reply) { create(:reply, :chat => chat) }
+
+          it "should deliver the replies" do
+            reply.should_not be_delivered
+            expect_message { chat.reactivate! }
+            reply.reload.should be_delivered
+          end
+        end
       end
 
-      context "and there are undelivered messages" do
-        let(:reply) { create(:reply, :chat => chat) }
+      context "but one or more of the chat partners is not available" do
+        let(:friends_new_chat) { create(:active_chat, :friend => friend) }
 
-        it "should deliver the replies" do
-          reply.should_not be_delivered
-          expect_message { chat.reactivate! }
-          reply.reload.should be_delivered
+        before do
+          active_chat_with_single_user
+          friends_new_chat
+        end
+
+        it "should not reactivate the chat" do
+          active_chat_with_single_user.reactivate!
+          active_chat_with_single_user.should_not be_active
         end
       end
     end

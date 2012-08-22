@@ -137,11 +137,13 @@ class Chat < ActiveRecord::Base
   def reactivate!
     return if active?
 
-    self.active_users = [user, friend]
-    save
+    if user.available? && friend.available?
+      self.active_users = [user, friend]
+      save
 
-    replies.undelivered.each do |undelivered_reply|
-      undelivered_reply.deliver!
+      replies.undelivered.each do |undelivered_reply|
+        undelivered_reply.deliver!
+      end
     end
   end
 
