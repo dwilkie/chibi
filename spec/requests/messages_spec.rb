@@ -15,7 +15,7 @@ describe "Messages" do
     let(:new_location) { Location.last }
     let(:new_message) { Message.last }
 
-    let(:my_number) { "8553243313" }
+    let(:my_number) { "855977123876" }
 
     context "as a user" do
       context "when I text" do

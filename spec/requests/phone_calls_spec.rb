@@ -220,7 +220,7 @@ describe "PhoneCalls" do
     end
 
     context "as a new user" do
-      let(:my_number) { "8553243313" }
+      let(:my_number) { "855977123876" }
       let(:new_user) { User.where(:mobile_number => my_number).first }
 
       context "when I am called" do
