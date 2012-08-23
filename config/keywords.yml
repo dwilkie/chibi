@@ -42,7 +42,7 @@ en:
     - "grade"
     - "watch"
     - "age"
-    - "stud(?:y|ent)"
+    - "stud(?:y|ent|ied)"
     - "work"
     - "like"
     - "teacher"
@@ -54,6 +54,7 @@ en:
     - "can"
     - "sleep"
     - "bored"
+    - "missed"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
     - '\w+ing'
