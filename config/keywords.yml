@@ -49,6 +49,7 @@ en:
     - "stop"
     - "phone"
     - "mr"
+    - "write"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
     - '\w+ing'
@@ -96,6 +97,7 @@ kh:
     - "m(?:a|e|i)n"
     - "rik"
     - "som"
+    - "ott?"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
