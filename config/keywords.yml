@@ -42,7 +42,7 @@ en:
     - "grade"
     - "watch"
     - "age"
-    - "study"
+    - "stud(?:y|ent)"
     - "work"
     - "like"
     - "teacher"
@@ -50,6 +50,7 @@ en:
     - "phone"
     - "mr"
     - "write"
+    - "the"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
     - '\w+ing'
