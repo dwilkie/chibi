@@ -23,7 +23,7 @@ en:
     - "and"
     - "me"
     - "plz"
-    - "please"
+    - "pleased?"
     - "sorry"
     - "year"
     - "single"
@@ -53,6 +53,7 @@ en:
     - "the"
     - "can"
     - "sleep"
+    - "bored"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
     - '\w+ing'
@@ -102,6 +103,7 @@ kh:
     - "som"
     - "ott?"
     - "kor"
+    - "soksabay"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
