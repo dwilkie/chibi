@@ -331,7 +331,10 @@ describe "Messages" do
           end
 
           context "and I send another message" do
+            let(:pauline) { create(:pauline) }
+
             before do
+              pauline
               send_message(:from => dave, :body => "Hi Joy")
             end
 
@@ -343,16 +346,20 @@ describe "Messages" do
               end
 
               it "should detect whether I want to meet a new friend" do
-                reply_to(dave).body.send(
-                  send_info_to_sender ? "should" : "should_not", eql(
-                    spec_translate(:chat_has_ended, dave.locale)
+                reply_to_pauline = reply_to(pauline)
+                if start_new_chat_for_sender
+                  reply_to_pauline.body.should == spec_translate(
+                    :greeting_from_male_showing_full_profile,
+                    pauline.locale, dave.screen_id, dave.age.to_s, dave.city
                   )
-                )
+                else
+                  reply_to_pauline.should be_nil
+                end
               end
             end
 
             it_should_behave_like "forwarding the message" do
-              let(:send_info_to_sender) { false }
+              let(:start_new_chat_for_sender) { false }
             end
 
             context "and another" do
@@ -361,7 +368,7 @@ describe "Messages" do
               end
 
               it_should_behave_like "forwarding the message" do
-                let(:send_info_to_sender) { false }
+                let(:start_new_chat_for_sender) { false }
               end
 
               context "and another" do
@@ -370,7 +377,7 @@ describe "Messages" do
                 end
 
                 it_should_behave_like "forwarding the message" do
-                  let(:send_info_to_sender) { true }
+                  let(:start_new_chat_for_sender) { true }
                 end
               end
             end

@@ -9,6 +9,10 @@ describe Chat do
     create(:english)
   end
 
+  let(:new_partner_for_user) do
+    create(:english)
+  end
+
   let(:friend) do
     create(:cambodian)
   end
@@ -338,7 +342,6 @@ describe Chat do
     end
 
     context "passing :activate_new_chats => true" do
-      let(:new_partner_for_user) { create(:english) }
       let(:new_partner_for_friend) { create(:user) }
 
       def assert_new_chat_created(reference_user, new_friend)
@@ -620,11 +623,14 @@ describe Chat do
       context "and the originator has already sent one message" do
         before do
           create_message(user, active_chat_with_single_user)
+          new_partner_for_user
         end
 
         it "should just forward the message" do
           expect_message { active_chat_with_single_user.forward_message(message) }
           assert_forward_message_to(friend, user, active_chat_with_single_user, message)
+          user.reload.should be_currently_chatting
+          new_partner_for_user.reload.should_not be_currently_chatting
         end
 
         context "and the originator has already sent another message" do
@@ -632,14 +638,16 @@ describe Chat do
             create_message(user, active_chat_with_single_user)
           end
 
-          it "should forward the message and send instructions to the originator about how to start a new chat" do
+          it "should forward the message and start a new chat for the originator" do
             expect_message do
               active_chat_with_single_user.forward_message(message)
             end
 
-            assert_forward_message_to(
-              friend, user, active_chat_with_single_user,
-              message, :send_originator_instructions => true
+            user.reload.should_not be_currently_chatting
+            new_partner_for_user.reload.should be_currently_chatting
+
+            reply_to(new_partner_for_user).body.should == spec_translate(
+              :greeting_from_unknown_gender, new_partner_for_user.locale, user.screen_id
             )
           end
         end

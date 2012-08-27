@@ -146,17 +146,26 @@ class Chat < ActiveRecord::Base
     self.messages << message
     message_body = message.body
 
+    chat_deactivation = {}
+
     if active? || chat_partner.available?
       reactivate!(:force => true)
       reply_to_chat_partner.forward_message!(reference_user, message_body)
-      replies.build(:user => reference_user).instructions_for_new_chat! if one_sided?
+      one_sided? ? chat_deactivation.merge!(:active_user => reference_user) : chat_deactivation = nil
     else
       reply_to_chat_partner.forward_message(reference_user, message_body)
-      # remove the sender of the message from current chat
-      deactivate!
-      # start a new chat for the sender of the message
-      self.class.activate_multiple!(reference_user.reload, :notify => true, :notify_no_match => false)
     end
+
+    if chat_deactivation
+      # remove the sender of the message from current chat
+      deactivate!(chat_deactivation)
+
+      # start a new chat for the sender of the message
+      self.class.activate_multiple!(
+        reference_user.reload, :notify => true, :notify_no_match => false
+      )
+    end
+
   end
 
   def reactivate!(options = {})
