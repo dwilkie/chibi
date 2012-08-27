@@ -60,6 +60,7 @@ en:
     - "know"
     - "fight"
     - "what"
+    - "wish"
     - "home(?:town)?"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
@@ -105,7 +106,7 @@ kh:
     - "cf"
     - "baa?n"
     - "ta"
-    - "m(?:a|e|i)n"
+    - "m(?:a|e|i)r?n"
     - "rik"
     - "som"
     - "or?tt?"
