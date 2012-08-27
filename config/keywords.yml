@@ -61,6 +61,8 @@ en:
     - "fight"
     - "what"
     - "wish"
+    - "hi"
+    - "hello"
     - "home(?:town)?"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
