@@ -64,6 +64,7 @@ en:
     - "hi"
     - "hello"
     - "home(?:town)?"
+    - "still?"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
     - '\w+ing'
