@@ -31,7 +31,6 @@ en:
     - "facebook"
     - "fb"
     - "verr?y"
-    - "very"
     - "new"
     - "just"
     - "welcome"
@@ -55,6 +54,13 @@ en:
     - "sleep"
     - "bored"
     - "missed"
+    - "name"
+    - "glade?"
+    - "or"
+    - "know"
+    - "fight"
+    - "what"
+    - "home(?:town)?"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
     - '\w+ing'
@@ -102,7 +108,7 @@ kh:
     - "m(?:a|e|i)n"
     - "rik"
     - "som"
-    - "ott?"
+    - "or?tt?"
     - "kor"
     - "soksabay"
   years_old:
