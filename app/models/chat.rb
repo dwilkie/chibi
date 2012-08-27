@@ -48,6 +48,30 @@ class Chat < ActiveRecord::Base
     end
   end
 
+  # returns a chat that this message is intended for
+  def self.intended_for(message, options = {})
+    options[:num_recent_chats] ||= 5
+
+    sender = message.user
+
+    recent_chats = where(
+      "user_id = ? OR friend_id = ?", sender.id, sender.id
+    ).order("created_at DESC").limit(options[:num_recent_chats]).includes(:user, :friend)
+
+    normalized_message = message.body.downcase
+    intended_chat = nil
+
+    recent_chats.each do |chat|
+      recent_partner = chat.partner(sender)
+      # avoid confusion with single letter named partners
+      if recent_partner.screen_id.length > 1 && normalized_message =~ /\b#{recent_partner.screen_id}\b/i
+        intended_chat = chat
+        break
+      end
+    end
+    intended_chat
+  end
+
   def activate!(options = {})
     self.friend ||= user.match
     active_users << user unless options[:activate_user] == false
@@ -123,7 +147,7 @@ class Chat < ActiveRecord::Base
     message_body = message.body
 
     if active? || chat_partner.available?
-      reactivate!
+      reactivate!(:force => true)
       reply_to_chat_partner.forward_message!(reference_user, message_body)
       replies.build(:user => reference_user).instructions_for_new_chat! if one_sided?
     else
@@ -135,10 +159,10 @@ class Chat < ActiveRecord::Base
     end
   end
 
-  def reactivate!
+  def reactivate!(options = {})
     return if active?
 
-    if user.available? && friend.available?
+    if options[:force] || (user.available? && friend.available?)
       self.active_users = [user, friend]
       save
 

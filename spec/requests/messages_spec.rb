@@ -198,6 +198,62 @@ describe "Messages" do
               )
               reply.should be_delivered
             end
+
+            context "then I text 'Hi how are you?'" do
+              before do
+                send_message(:from => dave, :body => "Hi how are you?")
+              end
+
+              it "should forward the message to Mara" do
+                reply = reply_to(mara)
+                reply.body.should == spec_translate(
+                  :forward_message, mara.locale, dave.screen_id, "Hi how are you?"
+                )
+                reply.should be_delivered
+              end
+            end
+
+            context "then I text 'Hi Pauline how are you?'" do
+              before do
+                send_message(:from => dave, :body => "Hi Pauline how are you?")
+              end
+
+              it "should forward the message to Pauline" do
+                reply = reply_to(pauline)
+                reply.body.should == spec_translate(
+                  :forward_message, pauline.locale, dave.screen_id, "Hi Pauline how are you?"
+                )
+                reply.should be_delivered
+              end
+
+              context "and Pauline texts 'Good thanks and you?'" do
+                before do
+                  send_message(:from => pauline, :body => "Good thanks and you?")
+                end
+
+                it "should forward the message to me" do
+                  reply = reply_to(dave)
+                  reply.body.should == spec_translate(
+                    :forward_message, dave.locale, pauline.screen_id, "Good thanks and you?"
+                  )
+                  reply.should be_delivered
+                end
+              end
+
+              context "and Mara texts 'Good thanks and you?'" do
+                before do
+                  send_message(:from => mara, :body => "Good thanks and you?")
+                end
+
+                it "should forward the message to me but not deliver it because I chose to chat with Pauline" do
+                  reply = reply_to(dave)
+                  reply.body.should == spec_translate(
+                    :forward_message, dave.locale, mara.screen_id, "Good thanks and you?"
+                  )
+                  reply.should_not be_delivered
+                end
+              end
+            end
           end
         end
       end

@@ -319,6 +319,13 @@ describe Chat do
           active_chat_with_single_user.reactivate!
           active_chat_with_single_user.should_not be_active
         end
+
+        context "passing :force => true" do
+          it "should reactivate the chat" do
+            active_chat_with_single_user.reactivate!(:force => true)
+            active_chat_with_single_user.should be_active
+          end
+        end
       end
     end
   end
@@ -742,6 +749,59 @@ describe Chat do
 
   it_should_behave_like "filtering with communicable resources" do
     let(:resources) { [chat, unique_active_chat] }
+  end
+
+  describe ".intended_for" do
+    let(:bob) { create(:user, :name => "bob") }
+    let(:dave) { create(:user, :name => "dave") }
+    let(:u) { create(:user, :name => "u") }
+
+    let(:chat_with_bob) { create(:chat, :user => user, :friend => bob) }
+    let(:chat_with_dave) { create(:chat, :user => dave, :friend => user) }
+    let(:chat_with_u) { create(:active_chat_with_single_user, :user => user, :friend => u) }
+
+    let(:message) { create(:message, :user => user) }
+
+    let(:messages_to_bob) { ["Hi bob! how are you today?", "Bob: How are you?"] }
+    let(:messages_to_dave) { ["How are you dave?", "Dave: Soksabai"] }
+    let(:messages_to_current_partner) { ["Hi! Welcome!", "Can I have your number?", "How are u", "im davey crocket", "i have a bobcat"] }
+
+    before do
+      chat_with_bob
+      chat_with_dave
+      active_chat
+      chat_with_u
+    end
+
+    it "should try to determine the chat in which the message is intended for" do
+      messages_to_bob.each do |bob_message|
+        message.body = bob_message
+        subject.class.intended_for(message).should == chat_with_bob
+      end
+
+      messages_to_dave.each do |dave_message|
+        message.body = dave_message
+        subject.class.intended_for(message).should == chat_with_dave
+      end
+
+      messages_to_current_partner.each do |current_partner_message|
+        message.body = current_partner_message
+        subject.class.intended_for(message).should be_nil
+      end
+    end
+
+    context "passing :num_recent_chats => 3" do
+      it "should only look at the previous 3 chats for intended recipients" do
+        messages_to_bob.each do |bob|
+          subject.class.intended_for(message, :num_recent_chats => 3).should be_nil
+        end
+
+        messages_to_dave.each do |dave_message|
+          message.body = dave_message
+          subject.class.intended_for(message, :num_recent_chats => 3).should == chat_with_dave
+        end
+      end
+    end
   end
 
   describe ".filter_by" do

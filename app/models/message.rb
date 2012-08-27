@@ -30,8 +30,10 @@ class Message < ActiveRecord::Base
     unless user_wants_to_chat_with_someone_new?
       user.update_profile(normalized_body)
 
-      if user.currently_chatting?
-        user.active_chat.forward_message(self)
+      chat_to_forward_message_to = Chat.intended_for(self) || user.active_chat
+
+      if chat_to_forward_message_to.present?
+        chat_to_forward_message_to.forward_message(self)
         start_new_chat = false
       end
     end

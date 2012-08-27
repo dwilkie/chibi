@@ -130,6 +130,28 @@ describe Message do
       end
     end
 
+    shared_examples_for "forwarding the message to a previous chat partner" do
+      context "if the message body contains the screen id of a recent previous chat partner" do
+        let(:bob) { create(:user, :name => "bob") }
+        let(:chat_with_bob) { create(:chat, :user => user, :friend => bob) }
+
+        before do
+          chat_with_bob
+          message.body = "Hi bob how are you?"
+        end
+
+        it "should forward the message to the previous chat partner" do
+          expect_locate { expect_message { message.process! } }
+
+          message.reload.chat.should == chat_with_bob
+
+          reply_to(bob, chat_with_bob).body.should == spec_translate(
+            :forward_message, bob.locale, user.screen_id, "Hi bob how are you?"
+          )
+        end
+      end
+    end
+
     context "given the message body is anything other than 'stop'" do
       let(:offline_user) { create(:offline_user) }
       let(:message_from_offline_user) { create(:message, :user => offline_user) }
@@ -153,6 +175,7 @@ describe Message do
       end
 
       it_should_behave_like "updating the user's locale"
+      it_should_behave_like "forwarding the message to a previous chat partner"
 
       context "and the message body is" do
         context "'stop'" do
@@ -217,6 +240,7 @@ describe Message do
     context "given the user is not currently chatting" do
 
       it_should_behave_like "updating the user's locale"
+      it_should_behave_like "forwarding the message to a previous chat partner"
 
       context "and the message body is" do
         context "'stop'" do
