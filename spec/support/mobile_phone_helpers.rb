@@ -6,7 +6,7 @@ module MobilePhoneHelpers
       :citizens => :cambodian,
       :service_providers => {
         :smart => {
-          :prefixes => ["10", "69", "70", "86", "93", "98"],
+          :prefixes => ["10", "69", "70", "86", "93", "96", "98"],
           :short_code => "2442"
         },
         :beeline => {
