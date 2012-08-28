@@ -134,9 +134,10 @@ describe Message do
       context "if the message body contains the screen id of a recent previous chat partner" do
         let(:bob) { create(:user, :name => "bob") }
         let(:chat_with_bob) { create(:chat, :user => user, :friend => bob) }
+        let(:reply_from_bob) { create(:reply, :user => user, :chat => chat_with_bob) }
 
         before do
-          chat_with_bob
+          reply_from_bob
           message.body = "Hi bob how are you?"
         end
 

@@ -779,11 +779,8 @@ describe Chat do
     let(:messages_to_current_partner) { ["Hi! Welcome!", "Can I have your number?", "How are u", "im davey crocket", "i have a bobcat", "Hi Chris how are you?"] }
 
     before do
-      chat_with_bob
-      chat_with_dave
-      active_chat
-      chat_with_chris
       reply_from_bob
+      active_chat
       reply_from_dave
       reply_to_chris
     end
