@@ -68,6 +68,12 @@ en:
     - "was"
     - "home(?:town)?"
     - "still?"
+    - "same"
+    - "over"
+    - "also"
+    - "reall?y"
+    - "off?"
+    - "(?:al)?ready"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
     - '\w+ing'
@@ -103,10 +109,10 @@ kh:
   name:
     - "(?:(?:(?:k?n(?:h|y)(?:o|u)m)\\s*(?:chh?mu?ou?(?:r|s)))|(?:(?:k?n(?:h|y)(?:o|u)m)|(?:chh?mu?ou?(?:r|s))))(?:\\s*name\\s*)?(?:\\s*(?:\\(|\\:))?\\s*"
   banned_names:
-    - "jong"
+    - "(?:ch|j)ong"
     - "soursdey"
     - "(?:n|d|t)ov"
-    - "a?y(?:o|u)k?"
+    - "(?:ah?)?y(?:o|u)k?"
     - "ey"
     - "leng"
     - "cf"
@@ -119,9 +125,8 @@ kh:
     - "kor"
     - "soksabay"
     - "mok"
-    - "aa?j"
-    - "reall?y"
-    - "of"
+    - "keang"
+    - "aa?c?(?:j|h)"
     - "av(?:e|a)y"
     - "phe(?:t|d)"
   years_old:
