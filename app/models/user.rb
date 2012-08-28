@@ -109,13 +109,13 @@ class User < ActiveRecord::Base
 
     # If the user is a male don't match him with users looking for females
     # If the user is female, don't match her with users looking for males
-    opposite_gender = user.opposite_gender
-    match_scope = not_scope(match_scope, :looking_for => opposite_gender) if opposite_gender.present?
+#    opposite_gender = user.opposite_gender
+#    match_scope = not_scope(match_scope, :looking_for => opposite_gender) if opposite_gender.present?
 
     # If the user looking for a male don't match them with females
     # If the user is looking for a female don't match them with males
-    opposite_looking_for = user.opposite_looking_for
-    match_scope = not_scope(match_scope, :gender => opposite_looking_for) if opposite_looking_for.present?
+#    opposite_looking_for = user.opposite_looking_for
+#    match_scope = not_scope(match_scope, :gender => opposite_looking_for) if opposite_looking_for.present?
 
     # exclude existing friends
     match_scope = exclude_existing_friends(user, match_scope)
@@ -126,6 +126,9 @@ class User < ActiveRecord::Base
     # match users from registered service providers together
     # and users from unregistered service providers together
     match_scope = match_users_from_registered_service_providers(user, match_scope)
+
+    # order first by recent activity
+    match_scope = order_by_recent_activity(user, match_scope)
 
     if user.bisexual?
       # he/she doesn't care about the other user's gender so don't order by it
@@ -145,9 +148,6 @@ class User < ActiveRecord::Base
         match_scope = order_by_preferred(attribute, user, match_scope, options)
       end
     end
-
-    # then by recent activity
-    match_scope = order_by_recent_activity(user, match_scope)
 
     # then by age difference and number of initiated chats
     match_scope = order_by_age_difference_and_initiated_chats(user, match_scope)
