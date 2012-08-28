@@ -111,7 +111,7 @@ kh:
     - "leng"
     - "cf"
     - "baa?n"
-    - "ta"
+    - "t(?:a|e)"
     - "m(?:a|e|i)(?:a|r)?n"
     - "rik"
     - "som"
@@ -120,6 +120,8 @@ kh:
     - "soksabay"
     - "mok"
     - "aa?j"
+    - "reall?y"
+    - "of"
     - "av(?:e|a)y"
     - "phe(?:t|d)"
   years_old:
