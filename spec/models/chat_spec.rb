@@ -762,23 +762,30 @@ describe Chat do
   describe ".intended_for" do
     let(:bob) { create(:user, :name => "bob") }
     let(:dave) { create(:user, :name => "dave") }
-    let(:u) { create(:user, :name => "u") }
+    let(:chris) { create(:user, :name => "chris") }
 
     let(:chat_with_bob) { create(:chat, :user => user, :friend => bob) }
-    let(:chat_with_dave) { create(:chat, :user => dave, :friend => user) }
-    let(:chat_with_u) { create(:active_chat_with_single_user, :user => user, :friend => u) }
+    let(:chat_with_dave) { create(:active_chat_with_single_user, :user => dave, :friend => user) }
+    let(:chat_with_chris) { create(:chat, :user => user, :friend => chris) }
+
+    let(:reply_from_bob) { create(:reply, :chat => chat_with_bob, :user => user) }
+    let(:reply_from_dave) { create(:reply, :chat => chat_with_dave, :user => user) }
+    let(:reply_to_chris) { create(:reply, :chat => chat_with_chris, :user => chris) }
 
     let(:message) { create(:message, :user => user) }
 
     let(:messages_to_bob) { ["Hi bob! how are you today?", "Bob: How are you?"] }
     let(:messages_to_dave) { ["How are you dave?", "Dave: Soksabai"] }
-    let(:messages_to_current_partner) { ["Hi! Welcome!", "Can I have your number?", "How are u", "im davey crocket", "i have a bobcat"] }
+    let(:messages_to_current_partner) { ["Hi! Welcome!", "Can I have your number?", "How are u", "im davey crocket", "i have a bobcat", "Hi Chris how are you?"] }
 
     before do
       chat_with_bob
       chat_with_dave
       active_chat
-      chat_with_u
+      chat_with_chris
+      reply_from_bob
+      reply_from_dave
+      reply_to_chris
     end
 
     it "should try to determine the chat in which the message is intended for" do
@@ -792,6 +799,10 @@ describe Chat do
         subject.class.intended_for(message).should == chat_with_dave
       end
 
+      # Note:
+      # Messages to Chris are ignored because our user has never received
+      # a message from Chris even though he has previously been in a chat with him
+      # e.g. if a chat was originated from Dave to Chris but Chris never replied
       messages_to_current_partner.each do |current_partner_message|
         message.body = current_partner_message
         subject.class.intended_for(message).should be_nil

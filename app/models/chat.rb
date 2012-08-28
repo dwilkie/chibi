@@ -55,16 +55,21 @@ class Chat < ActiveRecord::Base
     sender = message.user
 
     recent_chats = where(
-      "user_id = ? OR friend_id = ?", sender.id, sender.id
-    ).order("created_at DESC").limit(options[:num_recent_chats]).includes(:user, :friend)
+      "\"#{table_name}\".\"user_id\" = ? OR \"#{table_name}\".\"friend_id\" = ?",
+      sender.id, sender.id
+    ).where(
+      "(SELECT \"replies\".\"id\" FROM \"replies\"
+      WHERE (\"replies\".\"user_id\" = ?
+      AND \"replies\".\"chat_id\" = \"#{table_name}\".\"id\")
+      LIMIT 1) IS NOT NULL", sender.id
+    ).order("\"#{table_name}\".\"created_at\" DESC").limit(options[:num_recent_chats]).includes(:user, :friend)
 
     normalized_message = message.body.downcase
     intended_chat = nil
 
     recent_chats.each do |chat|
       recent_partner = chat.partner(sender)
-      # avoid confusion with single letter named partners
-      if recent_partner.screen_id.length > 1 && normalized_message =~ /\b#{recent_partner.screen_id}\b/i
+      if normalized_message =~ /\b#{recent_partner.screen_id}\b/i
         intended_chat = chat
         break
       end
