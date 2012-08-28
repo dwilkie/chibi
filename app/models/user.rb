@@ -109,13 +109,13 @@ class User < ActiveRecord::Base
 
     # If the user is a male don't match him with users looking for females
     # If the user is female, don't match her with users looking for males
-#    opposite_gender = user.opposite_gender
-#    match_scope = not_scope(match_scope, :looking_for => opposite_gender) if opposite_gender.present?
+    opposite_gender = user.opposite_gender
+    match_scope = not_scope(match_scope, :looking_for => opposite_gender) if opposite_gender.present?
 
     # If the user looking for a male don't match them with females
     # If the user is looking for a female don't match them with males
-#    opposite_looking_for = user.opposite_looking_for
-#    match_scope = not_scope(match_scope, :gender => opposite_looking_for) if opposite_looking_for.present?
+    opposite_looking_for = user.opposite_looking_for
+    match_scope = not_scope(match_scope, :gender => opposite_looking_for) if opposite_looking_for.present?
 
     # exclude existing friends
     match_scope = exclude_existing_friends(user, match_scope)
