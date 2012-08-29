@@ -2,19 +2,41 @@
   :kh => {
     :replies => {
       :greeting => lambda {|key, options|
-        if options[:friend].try(:male?)
-          greeting_suffix = " bart"
-        elsif options[:friend].try(:female?)
-          greeting_suffix = " ja"
-        end
 
-        age = options[:friend].try(:age)
-        city = options[:friend].try(:city)
+        sender = options[:friend]
+        recipient = options[:recipient]
 
-        age_intro = "a yu #{age} " if age
-        city_intro = "nov #{city} " if city
+        sender_name = " #{sender.screen_id}" if sender.try(:name)
+        recipient_name = " #{recipient.screen_id}" if recipient.try(:name)
 
-        "Sousdey#{greeting_suffix}! Nhom #{age_intro}#{city_intro}jong rok mit leng SMS! Som chleuy tob vinh!"
+        i_ams = ["Nhom", "Knhom", "Nhum", "Nhom chhmous", "I am", "I'm", "m", "My name"]
+        i_am = i_ams.sample
+
+        sender_intro = " #{i_am}#{sender_name}" if sender_name
+
+        greetings = ["Sousdey", "Hi", "Hello"]
+        greeting = greetings.sample
+
+        greeting_punctuations = ["!", ","]
+        greeting_punctuation = greeting_punctuations.sample
+
+        recipient_starter = "#{greeting}#{recipient_name}#{greeting_punctuation}"
+
+        introductions = [
+          "#{recipient_starter} Soksabay te?#{sender_intro}",
+          "#{recipient_starter} Nhom rikreay nas del ban skal.",
+          "#{recipient_starter} Nek leng sms chea moy nhom te?",
+          "#{recipient_starter} Nhom jorng skoul nek ban te?",
+          "Oh can i make friend with you#{recipient_name}?",
+          "#{recipient_starter} Nhom#{sender_name} jong rok met leng SMS! Som chleuy tob vinh!",
+          "#{recipient_starter} Jong chat chea moy nhom ot?",
+          "#{greeting}#{greeting_punctuation}#{sender_intro} sousdey#{recipient_name} how a u 2 day?",
+          "#{recipient_starter} how a you doing now?#{sender_intro}",
+          "#{recipient_starter}#{sender_intro}",
+          "I want to make friend with ok te#{recipient_name}?"
+        ]
+
+        introductions.sample.strip
       },
 
       :welcome => lambda {|key, options|

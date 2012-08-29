@@ -74,7 +74,7 @@ class Reply < ActiveRecord::Base
         :friends_screen_name => partner.screen_id
       )
     else
-      introduction ||= default_translation("replies.greeting", user.locale, :friend => partner)
+      introduction ||= default_translation("replies.greeting", user.locale, :friend => partner, :recipient => user)
       set_forward_message(partner, introduction)
     end
     deliver!

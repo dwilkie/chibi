@@ -327,9 +327,9 @@ describe Reply do
       context "with no introduction" do
         it "should imitate the user by sending a fake greeting to the new chat partner" do
           assert_reply(
-            :introduce!, :greeting_from_unknown_gender,
+            :introduce!, :forward_message_approx,
             :args => [partner, false], :interpolations => [partner.screen_id],
-            :no_alternate_translation => true
+            :no_alternate_translation => true, :approx => true
           )
         end
       end

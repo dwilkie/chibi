@@ -68,6 +68,11 @@ module TranslationHelpers
       :kh => "#[0]: #[1]"
     },
 
+    :forward_message_approx => {
+      :en => "#[0]: ",
+      :kh => "#[0]: "
+    },
+
     :anonymous_reminder => {
       :en => "Hi! Want to meet a new friend? Reply with your name, age, sex, city & preferred gender",
       :kh => "Sousdey! Jong rok mit tmey? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok"
@@ -76,26 +81,6 @@ module TranslationHelpers
     :reminder => {
       :en => "Hi #[0]! Want to meet a new friend? Reply with 'new'",
       :kh => "Sousdey #[0]! Pjeur 'new'"
-    },
-
-    :greeting_from_unknown_gender => {
-      :en => "#[0]: Hi! I want to play SMS! Please write back to me now!",
-      :kh => "#[0]: Sousdey! Nhom jong rok mit leng SMS! Som chleuy tob vinh!"
-    },
-
-    :greeting_from_male_showing_full_profile => {
-      :en => "#[0]: Hi! I want to play SMS! I'm a male #[1] yo living in #[2]. Please write back to me now!",
-      :kh => "#[0]: Sousdey bart! Nhom a yu #[1] nov #[2] jong rok mit leng SMS! Som chleuy tob vinh!"
-    },
-
-    :greeting_from_female_showing_full_profile => {
-      :en => "#[0]: Hi! I want to play SMS! I'm a female #[1] yo living in #[2]. Please write back to me now!",
-      :kh => "#[0]: Sousdey ja! Nhom a yu #[1] nov #[2] jong rok mit leng SMS! Som chleuy tob vinh!"
-    },
-
-    :greeting_from_female_showing_age => {
-      :en => "#[0]: Hi! I want to play SMS! I'm a female #[1] yo. Please write back to me now!",
-      :kh => "#[0]: Sousdey ja! Nhom a yu #[1] jong rok mit leng SMS! Som chleuy tob vinh!"
     }
   }
 

@@ -141,14 +141,14 @@ describe Chat do
           expect_message { reference_chat.activate!(:notify => true) }
 
           reply_to(user, reference_chat).should be_nil
-          reply_to(friend, reference_chat).body.should == spec_translate(:greeting_from_unknown_gender, friend.locale, user.screen_id)
+          reply_to(friend, reference_chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
         end
 
         context "and :notify_initator => true" do
           it "should introduce the initiator as well" do
             expect_message { reference_chat.activate!(:notify => true, :notify_initiator => true) }
 
-            reply_to(friend, reference_chat).body.should == spec_translate(:greeting_from_unknown_gender, friend.locale, user.screen_id)
+            reply_to(friend, reference_chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
 
             reply_to(user, reference_chat).body.should == spec_translate(
               :anonymous_new_friend_found, user.locale, friend.screen_id
@@ -646,9 +646,7 @@ describe Chat do
             user.reload.should_not be_currently_chatting
             new_partner_for_user.reload.should be_currently_chatting
 
-            reply_to(new_partner_for_user).body.should == spec_translate(
-              :greeting_from_unknown_gender, new_partner_for_user.locale, user.screen_id
-            )
+            reply_to(new_partner_for_user).body.should =~ /#{spec_translate(:forward_message_approx, new_partner_for_user.locale, user.screen_id)}/
           end
         end
       end
@@ -672,7 +670,7 @@ describe Chat do
         new_chat.should_not == chat_session
 
         if new_friend = new_chat.try(:friend)
-          reply_to(new_chat.friend).body.should == spec_translate(:greeting_from_unknown_gender, new_friend.locale, recipient.screen_id)
+          reply_to(new_chat.friend).body.should =~ /#{spec_translate(:forward_message_approx, new_friend.locale, recipient.screen_id)}/
         end
 
         reply_to(recipient).try(:body).should_not == spec_translate(
@@ -749,7 +747,7 @@ describe Chat do
 
         with_new_chats do |chat|
           new_friend = chat.friend
-          reply_to(new_friend).body.should == spec_translate(:greeting_from_unknown_gender, new_friend.locale, friend.screen_id)
+          reply_to(new_friend).body.should =~ /#{spec_translate(:forward_message_approx, new_friend.locale, friend.screen_id)}/
         end
       end
     end

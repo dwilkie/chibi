@@ -67,7 +67,7 @@ describe "Messages" do
 
             reply_to(new_user).should be_nil
 
-            reply_to(alex).body.should == spec_translate(:greeting_from_unknown_gender, alex.locale, new_user.screen_id)
+            reply_to(alex).body.should =~ /#{spec_translate(:forward_message_approx, alex.locale, new_user.screen_id)}/
           end
         end
 
@@ -144,7 +144,7 @@ describe "Messages" do
             new_user.gender.should == "m"
 
             reply_to(new_user).should be_nil
-            reply_to(joy).body.should == spec_translate(:greeting_from_male_showing_full_profile, joy.locale, new_user.screen_id, "27", "Phnom Penh")
+            reply_to(joy).body.should =~ /#{spec_translate(:forward_message_approx, joy.locale, new_user.screen_id)}/
           end
         end
       end
@@ -169,7 +169,7 @@ describe "Messages" do
             alex.looking_for.should == "m"
 
             reply_to(alex).should be_nil
-            reply_to(dave).body.should == spec_translate(:greeting_from_female_showing_age, dave.locale, alex.screen_id, "23")
+            reply_to(dave).body.should =~ /#{spec_translate(:forward_message_approx, dave.locale, alex.screen_id)}/
           end
         end
       end
@@ -321,7 +321,7 @@ describe "Messages" do
               :friend_unavailable, mara.locale, dave.screen_id
             )
 
-            reply_to(luke).body.should == spec_translate(:greeting_from_female_showing_full_profile, luke.locale, mara.screen_id, mara.age.to_s, mara.city)
+            reply_to(luke).body.should =~ /#{spec_translate(:forward_message_approx, luke.locale, mara.screen_id)}/
 
             reply_to_dave = reply_to(dave)
             reply_to_dave.body.should == spec_translate(
@@ -348,10 +348,7 @@ describe "Messages" do
               it "should detect whether I want to meet a new friend" do
                 reply_to_pauline = reply_to(pauline)
                 if start_new_chat_for_sender
-                  reply_to_pauline.body.should == spec_translate(
-                    :greeting_from_male_showing_full_profile,
-                    pauline.locale, dave.screen_id, dave.age.to_s, dave.city
-                  )
+                  reply_to_pauline.body.should =~ /#{spec_translate(:forward_message_approx, pauline.locale, dave.screen_id)}/
                 else
                   reply_to_pauline.should be_nil
                 end
