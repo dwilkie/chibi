@@ -78,6 +78,7 @@ en:
     - "happ?y"
     - "yes"
     - "top"
+    - "need"
     - "(?:w|v)ill"
     - "request"
     - "(?:yo)?ur"
@@ -118,7 +119,7 @@ kh:
     - "(?:(?:(?:k?n(?:h|y)(?:o|u)m)\\s*(?:chh?mu?ou?(?:r|s)))|(?:(?:k?n(?:h|y)(?:o|u)m)|(?:chh?mu?ou?(?:r|s))))(?:\\s*name\\s*)?(?:\\s*(?:\\(|\\:))?\\s*"
   banned_names:
     - "(?:ch|j)or?ng"
-    - "soursdey"
+    - "sour?sd(?:a|e)y"
     - "(?:n|d|t)ov"
     - "(?:ah?)?y(?:o|u)k?"
     - "e(?:i|y)"
