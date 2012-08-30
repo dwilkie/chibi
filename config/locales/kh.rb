@@ -33,7 +33,8 @@
           "#{greeting}#{greeting_punctuation}#{sender_intro} sousdey#{recipient_name} how a u 2 day?",
           "#{recipient_starter} how a you doing now?#{sender_intro}",
           "#{recipient_starter}#{sender_intro}",
-          "I want to make friend with ok te#{recipient_name}?"
+          "I want to make friend with ok te#{recipient_name}?",
+          "#{recipient_starter} Do ey neng fri ? H a u 2day?"
         ]
 
         introductions.sample.strip
