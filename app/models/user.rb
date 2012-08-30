@@ -127,9 +127,6 @@ class User < ActiveRecord::Base
     # and users from unregistered service providers together
     match_scope = match_users_from_registered_service_providers(user, match_scope)
 
-    # order first by recent activity
-    match_scope = order_by_recent_activity(user, match_scope)
-
     if user.bisexual?
       # he/she doesn't care about the other user's gender so don't order by it
       match_scope = order_by_preferred(
@@ -148,6 +145,9 @@ class User < ActiveRecord::Base
         match_scope = order_by_preferred(attribute, user, match_scope, options)
       end
     end
+
+    # then by recent activity
+    match_scope = order_by_recent_activity(user, match_scope)
 
     # then by age difference and number of initiated chats
     match_scope = order_by_age_difference_and_initiated_chats(user, match_scope)
