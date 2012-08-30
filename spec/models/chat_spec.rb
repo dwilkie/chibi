@@ -773,7 +773,7 @@ describe Chat do
     let(:message) { create(:message, :user => user) }
 
     let(:messages_to_bob) { ["Hi bob! how are you today?", "Bob: How are you?"] }
-    let(:messages_to_dave) { ["How are you dave?", "Dave: Soksabai"] }
+    let(:messages_to_dave) { ["How are you dave?", "Dave: Soksabai", "Chheng: Dave: suosdey nhom chheng nov kean sviy nhom jong ban lek nak"] }
     let(:messages_to_current_partner) { ["Hi! Welcome!", "Can I have your number?", "How are u", "im davey crocket", "i have a bobcat", "Hi Chris how are you?"] }
 
     before do
