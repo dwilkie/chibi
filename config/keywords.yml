@@ -81,6 +81,7 @@ en:
     - "top"
     - "need"
     - "s?he"
+    - "sex"
     - "(?:w|v)ill"
     - "request"
     - "(?:yo)?ur"
@@ -134,13 +135,14 @@ kh:
     - "som"
     - "or?tt?"
     - "kor"
-    - "soksabay"
+    - "soksabay(?:te)?"
     - "mok"
     - "keang"
     - "aa?c?(?:j|h)"
     - "av(?:e|a)y"
     - "phe(?:t|d)"
     - "chh?mou?(:r|s)"
+    - "chear"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:

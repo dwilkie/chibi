@@ -672,7 +672,7 @@ class User < ActiveRecord::Base
   end
 
   def extract_name(info)
-    matches = strip_match!(info, /#{profile_keywords(:name)}(?!\b#{profile_keywords(:banned_names)}\b)(\b\w+{2,}\b)/)
+    matches = strip_match!(info, /#{profile_keywords(:name)}(?!\b#{profile_keywords(:banned_names)}\b)(\b[a-z]{2,}\b)/)
     match = matches.try(:[], 2) || matches.try(:[], 1)
     if match
       match.gsub!(/\d+/, "")
@@ -766,7 +766,7 @@ class User < ActiveRecord::Base
   end
 
   def gender_question?(info)
-    strip_match!(info, /\b(?:#{gender_keywords}|m)\s*(?<!f)(?:or|a?nd?)\s*(?:#{gender_keywords}|m)\b/)
+    strip_match!(info, /\b(?:#{gender_keywords}|m)\s*(?<!f)(?:or|a?nd?|r(?:e|u)y?)\s*(?:#{gender_keywords}|m)\b/)
   end
 
   def gender_keywords
