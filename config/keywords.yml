@@ -4,7 +4,7 @@ en:
   name:
     - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im|\\bm\\b)\\s*"
   banned_names:
-    - "at"
+    - "e?at"
     - "from"
     - "where"
     - "in"
@@ -36,7 +36,7 @@ en:
     - "just"
     - "welcome"
     - "so"
-    - "want"
+    - "wa(?:i|n)t"
     - "sms"
     - "play"
     - "grade"
@@ -73,12 +73,14 @@ en:
     - "over"
     - "also"
     - "reall?y"
-    - "off?"
+    - "(?:i|o)ff?"
     - "by"
+    - "only"
     - "happ?y"
     - "yes"
     - "top"
     - "need"
+    - "s?he"
     - "(?:w|v)ill"
     - "request"
     - "(?:yo)?ur"
@@ -138,6 +140,7 @@ kh:
     - "aa?c?(?:j|h)"
     - "av(?:e|a)y"
     - "phe(?:t|d)"
+    - "chh?mou?(:r|s)"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
