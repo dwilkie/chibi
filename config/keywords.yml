@@ -6,7 +6,6 @@ en:
   banned_names:
     - "e?at"
     - "from"
-    - "where"
     - "l?ate"
     - "in"
     - "fin(?:d|e)d?"
@@ -66,6 +65,10 @@ en:
     - "know"
     - "fight"
     - "what"
+    - "who"
+    - "where"
+    - "why"
+    - "how"
     - "wish"
     - "hi"
     - "hello"
@@ -158,6 +161,9 @@ kh:
     - "douch"
     - "ngoy"
     - "nah?"
+    - "(?:j|ch)bas"
+    - "(?:k?n(?:h|y)(?:o|u)m)"
+    - "ch(?:leu|oul)y"
     - "beeline"
     - "smart"
   years_old:
