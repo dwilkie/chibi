@@ -78,9 +78,7 @@ class User < ActiveRecord::Base
       ).where_values.first
     end
 
-    scoped.joins(:location).where(banned_name_conditions.join(" OR ")).find_each do |user|
-      user.update_column(:name, nil)
-    end
+    scoped.joins(:location).update_all("name = NULL", banned_name_conditions.join(" OR "))
   end
 
   def self.online
