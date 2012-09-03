@@ -164,6 +164,30 @@ describe User do
     end
   end
 
+  describe ".purge_invalid_names!" do
+    let(:thai_with_invalid_english_name) { create(:thai, :name => "want") }
+    let(:thai_with_invalid_cambodian_name) { create(:thai, :name => "jong") }
+    let(:cambodian_with_invalid_cambodian_name) { create(:cambodian, :name => "jong") }
+    let(:cambodian_with_valid_cambodian_name) { create(:cambodian, :name => "abajongbab") }
+
+    before do
+      thai_with_invalid_english_name
+      thai_with_invalid_cambodian_name
+      cambodian_with_invalid_cambodian_name
+      cambodian_with_valid_cambodian_name
+    end
+
+    context "passing no options" do
+      it "should purge the all invalid english names and invalid names for the users country" do
+        with_resque { subject.class.purge_invalid_names! }
+        thai_with_invalid_english_name.reload.name.should be_nil
+        thai_with_invalid_cambodian_name.reload.name.should be_present
+        cambodian_with_invalid_cambodian_name.reload.name.should be_nil
+        cambodian_with_valid_cambodian_name.reload.name.should be_present
+      end
+    end
+  end
+
   describe ".find_friends" do
     before do
       user_searching_for_friend

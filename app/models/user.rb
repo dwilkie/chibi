@@ -62,6 +62,27 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.purge_invalid_names!(options = {})
+    name_attribute = quoted_attribute(:name)
+    banned_name_conditions = [
+      where("#{name_attribute} ~ ?", "(?:^#{profile_keywords(:banned_names)}$)").where_values.first
+    ]
+
+    available_locales = I18n.available_locales.dup
+    available_locales.delete(:en)
+
+    available_locales.each do |locale|
+      locale_banned_names = "(?:^#{profile_keywords(:banned_names, :locale => locale, :en => false)}$)"
+      banned_name_conditions << where(
+        "(\"locations\".\"country_code\" = ? AND #{name_attribute} ~ ?)", locale, locale_banned_names
+      ).where_values.first
+    end
+
+    scoped.joins(:location).where(banned_name_conditions.join(" OR ")).find_each do |user|
+      user.update_column(:name, nil)
+    end
+  end
+
   def self.online
     scoped.where("\"#{table_name}\".\"state\" != ?", "offline")
   end
@@ -604,6 +625,25 @@ class User < ActiveRecord::Base
     scope.order(order_sql)
   end
 
+  def self.profile_keywords(*keys)
+    options = keys.extract_options!
+    options[:en] = true unless (options[:en] == false && options[:locale].present?)
+
+    locales = []
+    locales << :en if options[:en]
+    locales << options[:locale] if options[:locale]
+
+    all_keywords = []
+
+    keys.each do |key|
+      locales.each do |locale|
+        locale_keywords = USER_PROFILE_KEYWORDS.try(:[], locale.to_s).try(:[], key.to_s)
+        all_keywords |= locale_keywords if locale_keywords.present?
+      end
+    end
+   "(?:#{all_keywords.join('|')})"
+  end
+
   def cancel_searching_for_friend_if_chatting
     fire_events(:cancel_searching_for_friend) if currently_chatting?
     nil
@@ -793,13 +833,7 @@ class User < ActiveRecord::Base
   end
 
   def profile_keywords(*keys)
-    all_keywords = []
-    keys.each do |key|
-      english_keywords = USER_PROFILE_KEYWORDS["en"][key.to_s]
-      localized_keywords = USER_PROFILE_KEYWORDS.try(:[], country_code).try(:[], key.to_s)
-      all_keywords |= localized_keywords.present? ? (english_keywords | localized_keywords) : english_keywords
-    end
-   "(?:#{all_keywords.join('|')})"
+    self.class.profile_keywords(*keys, :locale => country_code)
   end
 
   def missing_only?(*attributes)
