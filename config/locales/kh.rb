@@ -17,24 +17,31 @@
         greetings = ["Sousdey", "Hi", "Hello"]
         greeting = greetings.sample
 
-        greeting_punctuations = ["!", ","]
+        greeting_punctuations = ["!", ",", "."]
         greeting_punctuation = greeting_punctuations.sample
 
         recipient_starter = "#{greeting}#{recipient_name}#{greeting_punctuation}"
 
+        name_questions = [
+          "What's ur name?", "Nek chhmous ey?", "Can you tell me ur name?"
+        ]
+
+        name_question = " #{name_questions.sample}" unless recipient_name.present?
+
         introductions = [
-          "#{recipient_starter} Soksabay te?#{sender_intro}",
-          "#{recipient_starter} Nhom rikreay nas del ban skal.",
-          "#{recipient_starter} Nek leng sms chea moy nhom te?",
-          "#{recipient_starter} Nhom jorng skoul nek ban te?",
-          "Oh can i make friend with you#{recipient_name}?",
-          "#{recipient_starter} Nhom#{sender_name} jong rok met leng SMS! Som chleuy tob vinh!",
-          "#{recipient_starter} Jong chat chea moy nhom ot?",
-          "#{greeting}#{greeting_punctuation}#{sender_intro} sousdey#{recipient_name} how a u 2 day?",
-          "#{recipient_starter} how a you doing now?#{sender_intro}",
-          "#{recipient_starter}#{sender_intro}",
-          "I want to make friend with ok te#{recipient_name}?",
-          "#{recipient_starter} Do ey neng fri ? H a u 2day?"
+          "#{recipient_starter}#{sender_intro} soksabay te?#{name_question}",
+          "#{recipient_starter}#{sender_intro} nhom rikreay nas del ban skal.#{name_question}",
+          "#{recipient_starter}#{sender_intro} mek leng sms chea moy nhom te?#{name_question}",
+          "#{recipient_starter}#{sender_intro} nhom jorng skoul nek ban te?#{name_question}",
+          "Oh#{sender_intro} can i make friend with you#{recipient_name}?#{name_question}",
+          "#{recipient_starter}#{sender_intro} jong chat chea moy nhom ot?#{name_question}",
+          "#{greeting}#{greeting_punctuation}#{sender_intro} sousdey#{recipient_name} how a u 2 day?#{name_question}",
+          "#{recipient_starter}#{sender_intro} how a you doing now?#{name_question}",
+          "#{recipient_starter}#{sender_intro}#{name_question}",
+          "#{sender_intro} I want to make friend with ok te#{recipient_name}?#{name_question}",
+          "#{recipient_starter}#{sender_intro} do ey neng fri ? H a u 2day?#{name_question}",
+          "#{recipient_starter}#{sender_intro} m really happy 2 make friend with u.#{name_question}",
+          "#{recipient_starter}#{sender_intro} nice to know u.#{name_question}"
         ]
 
         introductions.sample.strip
