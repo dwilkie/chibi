@@ -16,21 +16,21 @@ describe User do
   let(:user_with_complete_profile) { build(:user_with_complete_profile) }
   let(:male_user) { create(:male_user) }
 
-  def assert_friend_found
-    user_searching_for_friend.reload
-    user.reload
-    user.should be_currently_chatting
-    user.active_chat.user.should == user_searching_for_friend
-    user_searching_for_friend.should_not be_currently_chatting
-    user_searching_for_friend.should be_searching_for_friend
+  def assert_friend_found(searcher = user_searching_for_friend, new_friend = user)
+    searcher.reload
+    new_friend.reload
+    new_friend.should be_currently_chatting
+    new_friend.active_chat.user.should == searcher
+    searcher.should_not be_currently_chatting
+    searcher.should be_searching_for_friend
   end
 
-  def assert_friend_not_found
-    user_searching_for_friend.reload
-    user.reload
-    user.should_not be_currently_chatting
-    user_searching_for_friend.should_not be_currently_chatting
-    user_searching_for_friend.should be_searching_for_friend
+  def assert_friend_not_found(searcher = user_searching_for_friend, new_friend = user)
+    searcher.reload
+    new_friend.reload
+    new_friend.should_not be_currently_chatting
+    searcher.should_not be_currently_chatting
+    searcher.should be_searching_for_friend
   end
 
   it "should not be valid without a mobile number" do
@@ -257,44 +257,33 @@ describe User do
       create(:user_from_registered_service_provider_with_recent_interaction)
     end
 
-    def reminders_to(reference_user)
-      replies_to(reference_user).where(:created_at => Time.now)
-    end
-
     before do
       user_from_registered_service_provider_without_recent_interaction
       user_from_registered_service_provider_with_recent_interaction
       user_without_recent_interaction
-      Timecop.freeze(Time.now)
     end
 
-    after do
-      Timecop.return
-    end
+    it "should find friends for users without interaction within the last 5 days" do
 
-    it "should only remind users without interaction in within the last 5 days" do
-      expect_message { subject.class.remind! }
-      # run it twice to check that we don't resend reminders
-      subject.class.remind!
-
-      [user_from_registered_service_provider_without_recent_interaction].each do |reference_user|
-        reminders_to(reference_user).count.should == 1
-        reply_to(reference_user).body.should == spec_translate(
-          :anonymous_reminder, user.locale
-        )
+      with_resque do
+        subject.class.remind!.should == [
+          user_from_registered_service_provider_without_recent_interaction
+        ]
       end
 
-      reminders_to(user_from_registered_service_provider_with_recent_interaction).should be_empty
-      reminders_to(user_without_recent_interaction).should be_empty
-    end
-  end
+      # run it twice to check that we can't remind more than once
+      user
+      with_resque do
+        subject.class.remind!.should be_empty
+      end
 
-  describe "#remind!" do
-    it "should send a reminder to the user" do
-      expect_message { user.remind! }
-      reply_to(user).body.should == spec_translate(
-        :anonymous_reminder, user.locale
+      assert_friend_found(
+        user_from_registered_service_provider_without_recent_interaction,
+        user_from_registered_service_provider_with_recent_interaction
       )
+
+      #reminders_to(user_from_registered_service_provider_with_recent_interaction).should be_empty
+      #reminders_to(user_without_recent_interaction).should be_empty
     end
   end
 

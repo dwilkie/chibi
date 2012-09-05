@@ -214,11 +214,8 @@ FactoryGirl.define do
   factory :user do
 
     trait :without_recent_interaction do
-      after(:create) do |user|
-        FactoryGirl.create(:phone_call, :user => user, :created_at => 5.days.ago)
-        FactoryGirl.create(:message, :user => user, :created_at => 5.days.ago)
-        FactoryGirl.create(:reply, :user => user, :created_at => 5.days.ago)
-      end
+      created_at { 5.days.ago }
+      updated_at { 5.days.ago }
     end
 
     sequence(:mobile_number, 85597000000) {|n| n.to_s }

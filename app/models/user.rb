@@ -96,14 +96,14 @@ class User < ActiveRecord::Base
   end
 
   def self.remind!(options = {})
-    inactivity_period = options[:inactivity_period] || 5.days
-    limit = options[:limit] || 100
-    since = inactivity_period.ago
+    inactivity_period = options.delete(:inactivity_period) || 5.days
+    limit = options.delete(:limit) || 100
 
+    since = inactivity_period.ago
     users_to_remind = without_recent_interaction(since).from_registered_service_providers.online.limit(limit)
 
     users_to_remind.each do |user_to_remind|
-      user_to_remind.remind!
+      enqueue_friend_messenger(user_to_remind, options)
     end
   end
 
@@ -117,7 +117,7 @@ class User < ActiveRecord::Base
 
     if do_find
       scoped.where(:state => "searching_for_friend").find_each do |user|
-        Resque.enqueue(FriendMessenger, user.id, options)
+        enqueue_friend_messenger(user, options)
       end
     end
   end
@@ -299,10 +299,6 @@ class User < ActiveRecord::Base
 
   def screen_id
     (name || screen_name).try(:capitalize)
-  end
-
-  def remind!
-    replies.build.send_reminder!
   end
 
   def login!
@@ -578,16 +574,7 @@ class User < ActiveRecord::Base
   end
 
   def self.without_recent_interaction(since)
-    where_values = []
-
-    scope = scoped
-
-    COMMUNICABLE_RESOURCES.each do |communicable_resource|
-      sub_statement = reflect_on_association(communicable_resource).klass.users_latest.to_sql
-      scope = scope.where("(#{sub_statement}) < ? OR (#{sub_statement}) IS NULL", since)
-    end
-
-    scope
+    scoped.where("updated_at < ?", since)
   end
 
   def self.exclude_unavailable(scope)
@@ -640,6 +627,10 @@ class User < ActiveRecord::Base
       end
     end
    "(?:#{all_keywords.join('|')})"
+  end
+
+  def self.enqueue_friend_messenger(user, options = {})
+    Resque.enqueue(FriendMessenger, user.id, options)
   end
 
   def cancel_searching_for_friend_if_chatting
