@@ -24,7 +24,7 @@ en:
     - "free"
     - "is"
     - "my"
-    - "and"
+    - "and?"
     - "me"
     - "plz"
     - "pleased?"
@@ -37,7 +37,7 @@ en:
     - "verr?y"
     - "new"
     - "just"
-    - "(?:wel)?come"
+    - "(?:well?)?come?"
     - "so"
     - "wa(?:i|n)t"
     - "sms"
@@ -61,7 +61,7 @@ en:
     - "bored"
     - "missed"
     - "name"
-    - "glade?"
+    - "gla(?:d|t)e?"
     - "or"
     - "know"
     - "fight"
@@ -99,6 +99,19 @@ en:
     - "c?all"
     - "(?:al)?right"
     - "wrong"
+    - "sick"
+    - "ride"
+    - "drive"
+    - "farmm?er"
+    - "forg(?:e|o)t"
+    - "have"
+    - "reply"
+    - "do"
+    - "listen"
+    - "sometimes?"
+    - "ago"
+    - "you"
+    - "fri(?:e?nd)?"
     - "surpri(?:s|z)e"
     - "(?:w|v)ill"
     - "request"
@@ -112,9 +125,9 @@ en:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
   girlfriend:
     - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:gir?l|woman)(?!\s*boy|guy|man))'
-    - 'gir?l\s?friend'
+    - 'gir?l\s?fri(?:e?nd)?'
     - "gf"
-    - "friend gir?l"
+    - "fri(?:e?nd)? gir?l"
   girl:
     - f
   could_mean_girl_or_girlfriend:
@@ -123,9 +136,9 @@ en:
     - "f(?:a|e)m(?:a|e)?le"
   boyfriend:
     - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:girl |gil |woman ))(?:boy|guy|man)(?!\s*gir?l|woman))'
-    - 'boy\s?friend'
+    - 'boy\s?fri(?:e?nd)?'
     - bf
-    - friend boy
+    - "fri(?:e?nd)? boy"
   boy:
     - "m(?:a|e)le"
   could_mean_boy_or_boyfriend:
@@ -133,12 +146,12 @@ en:
     - guy
     - "man(?!\\?)"
   friend:
-    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*)?(?<!(?:your |ur ))fri(?:ends?)?'
+    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*)?(?<!(?:your |ur ))fri(?:e?nds?)?'
 kh:
   i_am:
-    - "(?:k?n(?:h|y)(?:o|u)m)"
+    - "(?:k?(?<!p)n(?:h|y)(?:o|u)m)"
   name:
-    - "(?:(?:(?:k?n(?:h|y)(?:o|u)m)\\s*(?:chh?mu?o?u?(?:r|s)))|(?:(?:k?n(?:h|y)(?:o|u)m)|(?:chh?mu?o?u?(?:r|s))))(?:\\s*name\\s*)?(?:\\s*(?:\\(|\\:))?\\s*"
+    - "(?:(?:(?:k?(?<!p)n(?:h|y)(?:o|u)m)\\s*(?:chh?o?mu?o?u?r?s?(?:r|s)))|(?:(?:k?(?<!p)n(?:h|y)(?:o|u)m)|(?:chh?o?mu?o?u?r?s?(?:r|s))))(?:\\s*name\\s*)?(?:\\s*(?:\\(|\\:))?\\s*"
   banned_names:
     - "(?:ch|j)or?ng"
     - "sour?sd(?:a|e)y"
@@ -170,6 +183,12 @@ kh:
     - "ouy"
     - "nah?"
     - "brab"
+    - "rekreay"
+    - "ob(?:sok)?"
+    - "soks"
+    - "orkun"
+    - "aos"
+    - "ors"
     - "k?m(?:i|e)an"
     - "(?:j|ch)bas"
     - "(?:k?n(?:h|y)(?:o|u)m)"
@@ -179,16 +198,16 @@ kh:
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
-    - '(?:(?:rok|m(?:i|e)t).+).*(?:(?<!(?:boy |(?:p|b)ros ))(?:srey|gir?l|\bf\b)(?!\s*boy|(?:p|b)ros))'
+    - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!(?:boy |(?:p|b)ros ))(?:srey|gir?l|\bf\b)(?!\s*boy|(?:p|b)ros))'
   girl:
     - '(ch|j)as?'
   could_mean_girl_or_girlfriend:
     - srey
   boyfriend:
-    - '(?:(?:rok|m(?:i|e)t).+).*(?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l|\bf\b))'
+    - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l|\bf\b))'
   boy:
     - 'bar?t'
   could_mean_boy_or_boyfriend:
     - '(?:b|p)ros'
   friend:
-    - '(?:(?:rok).+)?m(?:i|e)t'
+    - '(?:(?:rou?k).+)?m(?:i|e)r?t'
