@@ -175,7 +175,7 @@ class User < ActiveRecord::Base
     match_scope = filter_by_location(user, match_scope)
 
     # group by user and make sure the records are not read only
-    match_scope.group(self.all_columns.readonly(false)
+    match_scope.group(self.all_columns).readonly(false)
   end
 
   def update_profile(info)
