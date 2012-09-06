@@ -174,8 +174,8 @@ class User < ActiveRecord::Base
     # then by location
     match_scope = filter_by_location(user, match_scope)
 
-    # make sure the records are not read only
-    match_scope.readonly(false)
+    # group by user and make sure the records are not read only
+    match_scope.group(self.all_columns.readonly(false)
   end
 
   def update_profile(info)
@@ -423,11 +423,11 @@ class User < ActiveRecord::Base
 
   def self.order_by_age_difference_and_initiated_chats(user, scope)
     # join all users on intitated chats
-    scope = scope.joins("LEFT OUTER JOIN \"chats\" AS \"initiated_chats\" ON \"initiated_chats\".\"user_id\" = \"#{table_name}\".\"id\"")
+    scope = scope.joins("LEFT OUTER JOIN \"chats\" ON #{quoted_attribute(:id)} = \"chats\".\"user_id\"")
 
     age_diff_in_years = "((DATE('#{user.date_of_birth}') - \"#{table_name}\".\"date_of_birth\")/365)"
     abs_age_diff_in_years = "(ABS(#{age_diff_in_years}))"
-    chat_factor = "(count(\"initiated_chats\".*) + 1)"
+    chat_factor = "(count(\"chats\".*) + 1)"
 
     # Use a symmetrical age difference for when age starts to matter for non hetrosexual users
     age_bearing_case = "#{abs_age_diff_in_years} >= #{AGE_BEARING_CUTOFF}" unless user.hetrosexual?
@@ -454,7 +454,7 @@ class User < ActiveRecord::Base
   SMALLEST_INACTIVITY_PERIOD = 0.25
 
   # the number of inactivity periods
-  NUM_INACTIVITY_PERIODS = 11
+  NUM_INACTIVITY_PERIODS = 13
 
   # Orders users by recent activity in time periods
   # For example a user with 1 minute inactivity gets
@@ -462,28 +462,78 @@ class User < ActiveRecord::Base
 
   # ordering is as follows:
 
-  # 0 for updated_at > 0.25 hours ago
-  # 1 for updated_at > 0.50 hours ago
-  # 2 for updated_at > 1 hour ago
-  # 3 for updated_at > 2 hours ago
-  # 4 for updated_at > 4 hours ago
-  # 5 for updated_at > 8.hours.ago
-  # 6 for updated_at > 16.hours.ago
-  # 7 for updated_at > 32.hours.ago
-  # 8 for updated_at > 64.hours.ago
-  # 9 for updated_at > 128.hours.ago
-  # 10 for updated_at > 256.hours.ago
-  # 11 for updated_at <= 256 hours ago
+  # 0 for latest_interaction after 0.25 hours ago
+  # 1 for latest_interaction after 0.50 hours ago
+  # 2 for latest_interaction after 1 hour ago
+  # 3 for latest_interaction after 2 hours ago
+  # 4 for latest_interaction after 4 hours ago
+  # 5 for latest_interaction after 8.hours.ago
+  # 6 for latest_interaction after 16.hours.ago
+  # 7 for latest_interaction after 32.hours.ago
+  # 8 for latest_interaction after 64.hours.ago
+  # 9 for latest_interaction after 128.hours.ago
+  # 10 for latest_interaction after 256.hours.ago
+  # 11 for latest_interaction after 512 hours ago
+  # 12 for latest_interaction after 1024 hours ago
+  # 13 for latest_interaction before or equal to 1024 hours ago
 
   def self.order_by_recent_activity(user, scope)
+    # the timestamp to use if the user has had no interaction at all e.g. no phone calls
+    # which is the same as 1024 hours ago
+    coalesce_timestamp = ((2 ** (NUM_INACTIVITY_PERIODS - 1)) * SMALLEST_INACTIVITY_PERIOD).hours.ago
+
+    latest_activity_scope = self
+    latest_activity_subscope = self
+
+    # ACTIVE_COMMUNICABLE_RESOURCES (ACR) are communication mechanisms that are user initiated
+    ACTIVE_COMMUNICABLE_RESOURCES.each do |communicable_resource|
+      # This needs to be a LEFT JOIN because we need to get all the users even if there are no
+      # active resources, e.g. a user may have messages but no phone calls
+      latest_activity_scope = latest_activity_scope.joins(
+        "LEFT JOIN \"#{communicable_resource}\" ON #{quoted_attribute(:id)} = \"#{communicable_resource}\".\"user_id\""
+      )
+
+      # store the maximum created at value of the ACM in a scope so we can use AR sanitization
+      # using the collesce timestamp if there is no ACM for this user
+      latest_activity_subscope = latest_activity_subscope.where(
+        "COALESCE(MAX(#{communicable_resource}.created_at), ?)", coalesce_timestamp
+      )
+    end
+
+    latest_interaction_alias = "latest_interaction"
+
+    # Get the greatest value created at value from the users ACRs
+    latest_activity_condition = "GREATEST(#{latest_activity_subscope.where_values.join(', ')}) #{latest_interaction_alias}"
+
+    # select all of the user fields as well as the MAX value of their recent interaction
+    # and group by this since it's now an attribute of user.
+    latest_activity_scope = latest_activity_scope.select(
+      "\"#{table_name}\".*, #{latest_activity_condition}"
+    ).from(
+      "\"#{table_name}\""
+    ).group("#{quoted_attribute(:id)}")
+
+    # the global select statement should now select from the query we just created
+    # so that we have access to latest_interaction in the order by clause.
+    # note that we use the table alias 'users' so that the rest of the conditions can be based
+    # off of the results from this subquery
+    scope = scope.from(
+      "(#{latest_activity_scope.to_sql}) \"#{table_name}\""
+    ).group(latest_interaction_alias)
+
     inactivity_period = SMALLEST_INACTIVITY_PERIOD
     inactivity_scope = self
 
+    # use the latest interaction time to create
+    # case statements for recent interaction
     NUM_INACTIVITY_PERIODS.times do
-      inactivity_scope = inactivity_scope.where("#{table_name}.updated_at > ?", inactivity_period.hours.ago)
+      inactivity_scope = inactivity_scope.where(
+        "latest_interaction > ?", inactivity_period.hours.ago
+      )
       inactivity_period *= 2
     end
 
+    # finally order by the case
     order_by_case(scope, inactivity_scope, NUM_INACTIVITY_PERIODS)
   end
 
@@ -508,12 +558,8 @@ class User < ActiveRecord::Base
     # only match users from the same country
     scope = scope.joins(:location).where(:locations => {:country_code => user.country_code})
 
-    # add group by clause for every column that is being selected
-    # so Postgres doesn't complain. This can be removed after upgrading to Postgres 9.1
-    scope = scope.group(self.all_columns).group(Location.all_columns)
-
     # order by distance
-    scope.order(Location.distance_from_sql(user.location))
+    scope.group("locations.latitude, locations.longitude").order(Location.distance_from_sql(user.location))
   end
 
   def self.not_scope(scope, options)

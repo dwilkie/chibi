@@ -254,7 +254,7 @@ describe User do
     end
 
     let(:user_from_registered_service_provider_with_recent_interaction) do
-      create(:user_from_registered_service_provider_with_recent_interaction)
+      create(:user_from_registered_service_provider)
     end
 
     before do
@@ -281,9 +281,6 @@ describe User do
         user_from_registered_service_provider_without_recent_interaction,
         user_from_registered_service_provider_with_recent_interaction
       )
-
-      #reminders_to(user_from_registered_service_provider_with_recent_interaction).should be_empty
-      #reminders_to(user_without_recent_interaction).should be_empty
     end
   end
 

@@ -59,7 +59,8 @@ module Communicable
   module HasCommunicableResources
     extend ActiveSupport::Concern
 
-    COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
+    ACTIVE_COMMUNICABLE_RESOURCES = [:messages, :phone_calls]
+    COMMUNICABLE_RESOURCES = ACTIVE_COMMUNICABLE_RESOURCES + [:replies]
 
     included do
       COMMUNICABLE_RESOURCES.each do |communicable_resource|

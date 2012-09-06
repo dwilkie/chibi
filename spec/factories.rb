@@ -212,10 +212,21 @@ FactoryGirl.define do
   end
 
   factory :user do
-
     trait :without_recent_interaction do
       created_at { 5.days.ago }
       updated_at { 5.days.ago }
+    end
+
+    trait :with_a_semi_recent_message do
+      after(:create) do |user|
+        FactoryGirl.create(:message, :user => user, :created_at => 15.minutes.ago)
+      end
+    end
+
+    trait :with_a_recent_phone_call do
+      after(:create) do |user|
+        FactoryGirl.create(:phone_call, :user => user)
+      end
     end
 
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
@@ -231,14 +242,6 @@ FactoryGirl.define do
 
     factory :user_from_registered_service_provider do
       sequence(:mobile_number, 85510000000) {|n| n.to_s }
-
-      factory :user_from_registered_service_provider_with_recent_interaction do
-        after(:create) do |user|
-          FactoryGirl.create(:phone_call, :user => user)
-          FactoryGirl.create(:message, :user => user)
-          FactoryGirl.create(:reply, :user => user)
-        end
-      end
 
       factory :user_from_registered_service_provider_without_recent_interaction do
         without_recent_interaction
@@ -314,30 +317,33 @@ FactoryGirl.define do
     # users with unknown details
     factory :alex do
       name "alex"
+      with_a_recent_phone_call
     end
 
     factory :jamie do
       name "jamie"
-      updated_at { 15.minutes.ago }
+      with_a_semi_recent_message
     end
 
     # user with unknown gender
     factory :chamroune do
       name "chamroune"
       looking_for "f"
+      with_a_recent_phone_call
     end
 
     # bisexual with unknown gender
     factory :reaksmey do
       name "reaksmey"
       looking_for "e"
-      updated_at { 15.minutes.ago }
+      with_a_semi_recent_message
     end
 
     # user with unknown looking for preference
     factory :pauline do
       name "pauline"
       gender "f"
+      with_a_recent_phone_call
     end
 
     # straight girls
@@ -355,29 +361,30 @@ FactoryGirl.define do
     end
 
     # straight guys
-    factory :dave do
-      name "dave"
+    factory :paul do
+      name "paul"
+      age 39
       gender "m"
       looking_for "f"
-      age 28
       association :location, :factory => :phnom_penh
 
       factory :con do
         name "con"
         age 37
         association :location, :factory => :siem_reap
-        updated_at { 15.minutes.ago }
+        with_a_semi_recent_message
       end
 
-      factory :paul do
-        name "paul"
-        age 39
-        updated_at { 30.minutes.ago }
+      factory :dave do
+        name "dave"
+        age 28
+        with_a_recent_phone_call
       end
 
       factory :luke do
         name "luke"
         age 25
+        with_a_recent_phone_call
       end
     end
 
