@@ -10,10 +10,6 @@ describe MissedCall do
     end
   end
 
-  it_should_behave_like "communicable" do
-    let(:communicable_resource) { new_missed_call }
-  end
-
   describe "assigning a user" do
     it "should use the parsed mobile number when assigning the user" do
       missed_call = subject.class.new(:subject => new_missed_call.subject)

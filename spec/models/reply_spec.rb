@@ -69,10 +69,6 @@ describe Reply do
     end
   end
 
-  it_should_behave_like "communicable" do
-    let(:communicable_resource) { reply }
-  end
-
   it_should_behave_like "chatable" do
     let(:chatable_resource) { reply }
   end

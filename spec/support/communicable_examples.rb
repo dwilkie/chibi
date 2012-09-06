@@ -1,27 +1,6 @@
 COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
-shared_examples_for "communicable" do
-  describe ".users_latest" do
-    # this is a helper method to be used as part of another query
-
-    def unescape_first(values)
-      values.first.gsub(/[\\"]/, "")
-    end
-
-    it "should select the created at time of the most recent communicable resource" do
-      communicable_resource_klass = communicable_resource.class
-      table_name = communicable_resource_klass.table_name
-      relation = communicable_resource_klass.users_latest
-
-      unescape_first(relation.select_values).should == "#{table_name}.created_at"
-      unescape_first(relation.where_values).should == "#{table_name}.user_id = users.id"
-      unescape_first(relation.order_values).should == "#{table_name}.created_at DESC"
-      relation.limit_value.should == 1
-    end
-  end
-end
-
 shared_examples_for "communicable from user" do
   let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
   let(:user) { build(:user) }

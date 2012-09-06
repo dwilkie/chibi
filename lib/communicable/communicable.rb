@@ -1,20 +1,6 @@
 module Communicable
   extend ActiveSupport::Concern
 
-  module ClassMethods
-    def users_latest
-      association_reflection = reflect_on_association(:user)
-
-      select(
-        "\"#{table_name}\".\"created_at\""
-      ).where(
-        "\"#{table_name}\".\"#{association_reflection.foreign_key}\" = \"#{association_reflection.klass.table_name}\".\"id\""
-      ).order(
-        "\"#{table_name}\".\"created_at\" DESC"
-      ).limit(1)
-    end
-  end
-
   module FromUser
     extend ActiveSupport::Concern
 
