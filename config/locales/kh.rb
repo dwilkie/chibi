@@ -21,27 +21,46 @@
         greeting_punctuation = greeting_punctuations.sample
 
         recipient_starter = "#{greeting}#{recipient_name}#{greeting_punctuation}"
+        recipient_questions = []
 
         name_questions = [
           "What's ur name?", "Nek chhmous ey?", "Can you tell me ur name?"
         ]
 
-        name_question = " #{name_questions.sample}" unless recipient_name.present?
+        gender_questions = [
+          "You boy or girl?", "You girl or boy?",
+          "Bros ru srey?", "Srey ru pros?", "U b or g?", "You man or woman?"
+        ]
+
+        location_questions = [
+          "You nov na?", "Live na?", "Where do you live?", "Come from?", "U nov na del?"
+        ]
+
+        age_questions = [
+          "How old r u?", "A yu ponman heoy?", "Ayuk ponman?", "How old?"
+        ]
+
+        recipient_questions << name_questions.sample unless recipient_name.present?
+        recipient_questions << gender_questions.sample unless recipient.try(:gender).present?
+        recipient_questions << location_questions.sample unless recipient.try(:city).present?
+        recipient_questions << age_questions.sample unless recipient.try(:age).present?
+
+        recipient_question = " #{recipient_questions.shuffle.join(' ')}"
 
         introductions = [
-          "#{recipient_starter}#{sender_intro} soksabay te?#{name_question}",
-          "#{recipient_starter}#{sender_intro} nhom rikreay nas del ban skal.#{name_question}",
-          "#{recipient_starter}#{sender_intro} mek leng sms chea moy nhom te?#{name_question}",
-          "#{recipient_starter}#{sender_intro} nhom jorng skoul nek ban te?#{name_question}",
-          "Oh#{sender_intro} can i make friend with you#{recipient_name}?#{name_question}",
-          "#{recipient_starter}#{sender_intro} jong chat chea moy nhom ot?#{name_question}",
-          "#{greeting}#{greeting_punctuation}#{sender_intro} sousdey#{recipient_name} how a u 2 day?#{name_question}",
-          "#{recipient_starter}#{sender_intro} how a you doing now?#{name_question}",
-          "#{recipient_starter}#{sender_intro}#{name_question}",
-          "#{sender_intro} I want to make friend with ok te#{recipient_name}?#{name_question}",
-          "#{recipient_starter}#{sender_intro} do ey neng fri ? H a u 2day?#{name_question}",
-          "#{recipient_starter}#{sender_intro} m really happy 2 make friend with u.#{name_question}",
-          "#{recipient_starter}#{sender_intro} nice to know u.#{name_question}"
+          "#{recipient_starter}#{sender_intro} soksabay te?#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} nhom rikreay nas del ban skal.#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} nek leng sms chea moy nhom te?#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} nhom jorng skoul nek ban te?#{recipient_question}",
+          "Oh#{sender_intro} can i make friend with you#{recipient_name}?#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} jong chat chea moy nhom ot?#{recipient_question}",
+          "#{greeting}#{greeting_punctuation}#{sender_intro} sousdey#{recipient_name} how a u 2 day?#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} how a you doing now?#{recipient_question}",
+          "#{recipient_starter}#{sender_intro}#{recipient_question}",
+          "#{sender_intro} I want to make friend with ok te#{recipient_name}?#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} do ey neng fri ? H a u 2day?#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} m really happy 2 make friend with u.#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} nice to know u.#{recipient_question}"
         ]
 
         introductions.sample.strip
