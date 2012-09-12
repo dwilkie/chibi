@@ -69,16 +69,15 @@ describe Reply do
     end
   end
 
+  it_should_behave_like "communicable" do
+    let(:communicable_resource) { new_reply }
+  end
+
   it_should_behave_like "chatable" do
     let(:chatable_resource) { reply }
   end
 
   it_should_behave_like "analyzable"
-
-  it "should not be valid without a user" do
-    new_reply.user = nil
-    new_reply.should_not be_valid
-  end
 
   it "should not be valid without a destination" do
     new_reply.to = nil
@@ -268,7 +267,7 @@ describe Reply do
   describe "#send_reminder!" do
     it "should send the user a reminder on how to use the service" do
       assert_reply(
-        :send_reminder!, :anonymous_reminder,
+        :send_reminder!, :anonymous_reminder, :approx => true,
         :args => []
       )
     end

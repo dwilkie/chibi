@@ -3,8 +3,6 @@ class Reply < ActiveRecord::Base
   include Communicable::Chatable
   include Analyzable
 
-  belongs_to :user
-  validates :user, :presence => true
   validates :to, :presence => true
 
   alias_attribute :destination, :to
@@ -81,7 +79,8 @@ class Reply < ActiveRecord::Base
   end
 
   def send_reminder!
-    explain_how_to_start_a_new_chat!(:reminder)
+    translate("replies.greeting", :recipient => user)
+    deliver!
   end
 
   def welcome!

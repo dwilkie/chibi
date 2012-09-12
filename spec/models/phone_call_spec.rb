@@ -23,6 +23,10 @@ describe PhoneCall do
     new_phone_call.should_not be_valid
   end
 
+  it_should_behave_like "communicable" do
+    let(:communicable_resource) { new_phone_call }
+  end
+
   it_should_behave_like "communicable from user" do
     let(:communicable_resource) { new_phone_call }
   end

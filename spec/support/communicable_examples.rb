@@ -1,9 +1,8 @@
 COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
-shared_examples_for "communicable from user" do
+shared_examples_for "communicable" do
   let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
-  let(:user) { build(:user) }
 
   it "should not be valid without a user" do
     communicable_resource.user = nil
@@ -14,6 +13,24 @@ shared_examples_for "communicable from user" do
     communicable_resource.user = user_with_invalid_mobile_number
     communicable_resource.should_not be_valid
   end
+
+  describe "callbacks" do
+    context "when saving" do
+      before do
+        communicable_resource.save
+      end
+
+      it "should touch the user" do
+        user_timestamp = communicable_resource.user.updated_at
+        communicable_resource.save
+        communicable_resource.user.updated_at.should > user_timestamp
+      end
+    end
+  end
+end
+
+shared_examples_for "communicable from user" do
+  let(:user) { build(:user) }
 
   it "should not be valid without a 'from'" do
     communicable_resource.from = ""
@@ -31,18 +48,6 @@ shared_examples_for "communicable from user" do
   end
 
   describe "callbacks" do
-    context "when saving" do
-      before do
-        communicable_resource.save
-      end
-
-      it "should touch the user" do
-        user_timestamp = communicable_resource.user.updated_at
-        communicable_resource.save
-        communicable_resource.user.updated_at.should > user_timestamp
-      end
-    end
-
     context "when inititalizing with an origin" do
       before do
         subject # this is needed so we can call subject.class without re-calling after_initialize

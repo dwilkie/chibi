@@ -263,12 +263,13 @@ describe User do
       user_without_recent_interaction
     end
 
-    it "should find friends for users without interaction within the last 5 days" do
-
+    it "should only remind users without interaction within the last 5 days" do
       with_resque do
-        subject.class.remind!.should == [
-          user_from_registered_service_provider_without_recent_interaction
-        ]
+        expect_message do
+          subject.class.remind!.should == [
+            user_from_registered_service_provider_without_recent_interaction
+          ]
+        end
       end
 
       # run it twice to check that we can't remind more than once
@@ -277,10 +278,20 @@ describe User do
         subject.class.remind!.should be_empty
       end
 
-      assert_friend_found(
-        user_from_registered_service_provider_without_recent_interaction,
-        user_from_registered_service_provider_with_recent_interaction
-      )
+      [user_from_registered_service_provider_without_recent_interaction].each do |reference_user|
+        replies_to(reference_user).count.should == 1
+        reply_to(reference_user).body.should be_present
+      end
+
+      reply_to(user_from_registered_service_provider_with_recent_interaction).should be_nil
+      reply_to(user_without_recent_interaction).should be_nil
+    end
+  end
+
+  describe "#remind!" do
+    it "should send a reminder to the user" do
+      expect_message { user.remind! }
+      reply_to(user).body.should be_present
     end
   end
 

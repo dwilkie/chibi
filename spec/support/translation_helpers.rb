@@ -74,13 +74,8 @@ module TranslationHelpers
     },
 
     :anonymous_reminder => {
-      :en => "Hi! Want to meet a new friend? Reply with your name, age, sex, city & preferred gender",
-      :kh => "Sousdey! Jong rok mit tmey? Pjeur chhmos, a-yu, phet, ti-tang & phet del nek jong rok"
-    },
-
-    :reminder => {
-      :en => "Hi #[0]! Want to meet a new friend? Reply with 'new'",
-      :kh => "Sousdey #[0]! Pjeur 'new'"
+      :en => "^(?:Sousdey|Hi|Hello)",
+      :kh => "^(?:Sousdey|Hi|Hello)"
     }
   }
 

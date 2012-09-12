@@ -103,7 +103,7 @@ class User < ActiveRecord::Base
     users_to_remind = without_recent_interaction(since).from_registered_service_providers.online.limit(limit)
 
     users_to_remind.each do |user_to_remind|
-      enqueue_friend_messenger(user_to_remind, options)
+      user_to_remind.remind!
     end
   end
 
@@ -299,6 +299,10 @@ class User < ActiveRecord::Base
 
   def screen_id
     (name || screen_name).try(:capitalize)
+  end
+
+  def remind!
+    replies.build.send_reminder!
   end
 
   def login!

@@ -1,15 +1,17 @@
 module Communicable
   extend ActiveSupport::Concern
 
+  included do
+    belongs_to :user, :touch => true
+    validates :user, :associated => true, :presence => true
+  end
+
   module FromUser
     extend ActiveSupport::Concern
 
     included do
       attr_accessible :from
 
-      belongs_to :user, :touch => true
-
-      validates :user, :associated => true, :presence => true
       validates :from, :presence => true
 
       after_initialize :assign_to_user

@@ -1,7 +1,7 @@
 namespace :users do
-  desc "Finds new friends for users without recent interaction"
+  desc "Reminds users without recent interaction to use Chibi"
   task :remind => :environment do
-    Resque.enqueue(UserReminder, :limit => 100, :notify => true, :notify_no_match => false)
+    Resque.enqueue(UserReminder, :limit => 500)
   end
 
   desc "Finds new friends for users who are searching"
