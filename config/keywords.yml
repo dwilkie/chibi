@@ -1,15 +1,15 @@
 en:
   i_am:
-    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for |searching | searchimg )))(?:(?:i\\s*)?(?:\\b(?:am|i'm|im|me|\\bm\\b))(?:\\s*(?:a))?)"
+    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for |searching | searchimg )))(?:(?:i\\s*)?(?:\\b(?:am|i'm|\\bim|me|\\bm\\b))(?:\\s*(?:a))?)"
   name:
-    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|im|\\bm\\b)\\s*"
+    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|\\bim|\\bm\\b)\\s*"
   banned_names:
     - "e?at"
     - "on"
     - "from"
     - "l?ate"
     - "in"
-    - "fin(?:d|e)d?"
+    - "fi(?:n|m)(?:d|e)d?"
     - "stay"
     - "ok"
     - "unlucky?"
@@ -41,7 +41,7 @@ en:
     - "so"
     - "wa(?:i|n)t"
     - "sms"
-    - "play"
+    - "play(?:er)?"
     - "grade"
     - "great"
     - "watch"
@@ -63,11 +63,11 @@ en:
     - "name"
     - "gla(?:d|t)e?"
     - "or"
-    - "know"
+    - "k?now"
     - "fight"
     - "what"
     - "who"
-    - "where"
+    - "w?here"
     - "why"
     - "how"
     - "wish"
@@ -115,19 +115,36 @@ en:
     - "surpri(?:s|z)e"
     - "(?:w|v)ill"
     - "request"
+    - "relax"
+    - "answer"
+    - "khmer"
+    - "but"
+    - "nice"
+    - "add"
+    - "congratulation"
+    - "business"
+    - "read"
+    - "hmm"
+    - "pl"
+    - "twenty"
+    - "married"
+    - "gay"
+    - "go"
+    - "finish"
+    - "sen(?:d|t)"
     - "num(?:ber)?"
     - "(?:yo)?ur"
     - "(?:al)?ready"
     - "bu(?:s|z)y"
     - '\d+(?:cm|kg)'
+    - '(?:\w*)teen'
     - '\w+ing'
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
   girlfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:gir?l|woman)(?!\s*boy|guy|man))'
-    - 'gir?l\s?fri(?:e?nd)?'
+    - '(?:meet|fin(?:d|e)|chat|have|talk|fri(?:e?nd)?s?|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:gir?l|woman)(?!\s*boy|guy|man))'
+    - 'gir?l\s?fri(?:e?nd)?s?'
     - "gf"
-    - "fri(?:e?nd)? gir?l"
   girl:
     - f
   could_mean_girl_or_girlfriend:
@@ -135,10 +152,9 @@ en:
     - woman
     - "f(?:a|e)m(?:a|e)?le"
   boyfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:girl |gil |woman ))(?:boy|guy|man)(?!\s*gir?l|woman))'
-    - 'boy\s?fri(?:e?nd)?'
+    - '(?:meet|fin(?:d|e)|chat|have|talk|fri(?:e?nd)?s?|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:girl |gil |woman ))(?:boy|guy|man)(?!\s*gir?l|woman))'
+    - 'boy\s?fri(?:e?nd)?s?'
     - bf
-    - "fri(?:e?nd)? boy"
   boy:
     - "m(?:a|e)le"
   could_mean_boy_or_boyfriend:
@@ -151,7 +167,7 @@ kh:
   i_am:
     - "(?:k?(?<!p)n(?:h|y)(?:o|u)m)"
   name:
-    - "(?:(?:(?:k?(?<!p)n(?:h|y)(?:o|u)m)\\s*(?:chh?o?mu?o?u?r?s?(?:r|s)))|(?:(?:k?(?<!p)n(?:h|y)(?:o|u)m)|(?:chh?o?mu?o?u?r?s?(?:r|s))))(?:\\s*name\\s*)?(?:\\s*(?:\\(|\\:))?\\s*"
+    - "(?:(?:(?:k?(?<!p)n(?:h|y)(?:o|u)m)\\s*(?:chh?o?m?u?o?u?r?s?(?:r|s)))|(?:(?:k?(?<!p)n(?:h|y)(?:o|u)m)|(?:chh?o?m?u?o?u?r?s?(?:r|s))))(?:\\s*name\\s*)?(?:\\s*(?:\\(|\\:))?\\s*"
   banned_names:
     - "(?:ch|j)or?ng"
     - "sour?sd(?:a|e)y"
@@ -166,8 +182,8 @@ kh:
     - "rik(?:reay)?"
     - "som"
     - "or?tt?"
-    - "kor"
-    - "s(?:o|u)ksabay(?:te)?"
+    - "ko(?:r|m)"
+    - "s(?:o|u)u?ksabb?(?:a|e)y(?:te)?"
     - "mor?(?:k|ng)"
     - "keang"
     - "aa?r?c?(?:j|h)"
@@ -175,24 +191,26 @@ kh:
     - "phe(?:t|d)"
     - "chh?mu?o?u?(?:r|s)"
     - "chear"
-    - "skol"
+    - "skou?l"
     - "ti(?:c|k)"
     - "t(?:v|w)er"
     - "douch"
     - "ngoy"
-    - "ouy"
+    - "ou?y"
     - "nah?"
     - "brab"
     - "rekreay"
-    - "ob(?:sok)?"
+    - "o(?:b|p)(?:sok)?"
     - "soks"
     - "orkun"
     - "aos"
-    - "ors"
+    - "or?s"
+    - "hery"
     - "k?m(?:i|e)an"
     - "(?:j|ch)bas"
     - "(?:k?n(?:h|y)(?:o|u)m)"
     - "ch(?:leu|oul)y"
+    - "(?:ch|j)am"
     - "beeline"
     - "smart"
   years_old:
