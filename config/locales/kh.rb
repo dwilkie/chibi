@@ -29,7 +29,7 @@
 
         gender_questions = [
           "You boy or girl?", "You girl or boy?",
-          "Bros ru srey?", "Srey ru pros?", "U b or g?", "You man or woman?"
+          "Bros ru srey?", "Srey ru bros?", "U b or g?", "You man or woman?"
         ]
 
         location_questions = [
