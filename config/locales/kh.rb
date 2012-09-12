@@ -54,7 +54,7 @@
           "#{recipient_starter}#{sender_intro} nhom jorng skoul nek ban te?#{recipient_question}",
           "Oh#{sender_intro} can i make friend with you#{recipient_name}?#{recipient_question}",
           "#{recipient_starter}#{sender_intro} jong chat chea moy nhom ot?#{recipient_question}",
-          "#{greeting}#{greeting_punctuation}#{sender_intro} sousdey#{recipient_name} how a u 2 day?#{recipient_question}",
+          "#{greeting}#{greeting_punctuation}#{sender_intro}#{recipient_name} how a u 2 day?#{recipient_question}",
           "#{recipient_starter}#{sender_intro} how a you doing now?#{recipient_question}",
           "#{recipient_starter}#{sender_intro}#{recipient_question}",
           "#{sender_intro} I want to make friend with ok te#{recipient_name}?#{recipient_question}",
