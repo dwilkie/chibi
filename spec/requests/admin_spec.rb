@@ -227,21 +227,10 @@ describe "Admin" do
       end
 
       it "should show me an overview of Chibi" do
-        within "#this_month" do
-          within "#total_messages" do
-            page.should have_link "#{messages.count} messages", :href => interaction_path
-          end
-
-          within "#total_replies" do
-            page.should have_link "#{replies.count} replies", :href => interaction_path
-          end
-
-          within "#total_users" do
-            page.should have_link "#{users.count} new users", :href => users_path
-          end
-
-          within "#total_revenue" do
-            page.should have_content "$0.03"
+        [:day, :month].each do |timeframe|
+          within "#timeline_by_#{timeframe}" do
+            page.should have_content "Timeline By #{timeframe.to_s.titleize}"
+            page.should have_selector "#timeline_by_#{timeframe}_chart"
           end
         end
       end

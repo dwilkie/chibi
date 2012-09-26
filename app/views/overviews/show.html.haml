@@ -1,3 +1,4 @@
 %h1 Overview
 - present @overview do |overview_presenter|
-  = overview_presenter.new_users
+  = overview_presenter.timeline
+  = overview_presenter.timeline(:timeframe => :month)

@@ -2,8 +2,18 @@ require 'spec_helper'
 
 describe OverviewPresenter do
   include ActionView::TestCase::Behavior
-  let(:sample_data) { [1234, 5] }
-  let(:overview) { mock(Overview, :new_users => sample_data) }
+  let(:sample_data) do
+    {
+      :new_users => [1234, 5],
+      :messages_received => [6644, 4],
+      :users_texting => [1122, 5]
+    }
+  end
+
+  let(:overview) do
+    mock(Overview, sample_data)
+  end
+
   let(:presenter) { OverviewPresenter.new(overview, view) }
 
   def assert_highchart(identifier, result, assertions = {})
@@ -18,26 +28,49 @@ describe OverviewPresenter do
     highchart_options["title"]["text"].should == assertions[:title]
 
     chart_options = highchart_options["chart"]
-    series_options = highchart_options["series"].first
+    series_options = highchart_options["series"]
 
     chart_options["renderTo"].should == chart_identifier
     chart_options["borderWidth"].should == 5
 
-    series_options["name"].should == assertions[:title]
-    series_options["data"].should == sample_data
+    sample_data.each_with_index do |(identifier, data_set), index|
+      series_options[index]["name"].should == identifier.to_s.titleize
+      series_options[index]["data"].should == data_set
+    end
   end
 
   def capybara_string(input)
     Capybara.string(input)
   end
 
-  describe "#new_users", :focus do
-    it "render a StockChart for new users" do
-      result = capybara_string(presenter.new_users)
-      title = "New Users"
-      result.find("#new_users")
-      result.should have_selector("h2", :text => title)
-      assert_highchart(:new_users, result, :title => title)
+  def assert_overview_section(identifier, result, title = nil)
+    title ||= identifier.to_s.titleize
+    result = capybara_string(result)
+    section = result.find("##{identifier}")
+    section.should have_selector(".chart_title", :text => title)
+    assert_highchart(identifier, section, :title => title)
+    result.should have_selector(".separator")
+  end
+
+  def assert_overview_methods(options = {})
+    sample_data.keys.each do |method|
+      overview.should_receive(method).with(options)
+    end
+  end
+
+  describe "#timeline" do
+    context "passing no options" do
+      it "should render a StockChart showing new users, messages and users texting by day" do
+        assert_overview_methods
+        assert_overview_section(:timeline_by_day, presenter.timeline)
+      end
+    end
+
+    context "passing :timeframe => :month" do
+      it "should render a StockChart showing new users, messages and users texting by month" do
+        assert_overview_methods(:timeframe => :month)
+        assert_overview_section(:timeline_by_month, presenter.timeline(:timeframe => :month))
+      end
     end
   end
 end
