@@ -9,10 +9,18 @@
         sender_name = " #{sender.screen_id}" if sender.try(:name)
         recipient_name = " #{recipient.screen_id}" if recipient.try(:name)
 
-        i_ams = ["Nhom", "Knhom", "Nhum", "Nhom chhmous", "I am", "I'm", "m", "My name"]
-        i_am = i_ams.sample
+        i_ams = ["nhom", "nhom", "nhum", "i am", "i'm", "m"]
+        name_announcements = ["Nhom chhmous", "My name"]
 
-        sender_intro = " #{i_am}#{sender_name}" if sender_name
+        i_am = (i_ams | name_announcements).sample
+        i_am_gender = i_ams.sample
+
+        female_genders = ["girl na", "srey na", "gril na", "srey ja", "girl ja", "gril ja"]
+        female_gender = female_genders.sample
+
+        sender_intro = ""
+        sender_intro << " #{i_am}#{sender_name}" if sender_name
+        sender_intro << " #{i_am_gender} #{female_gender}" if sender.try(:female?)
 
         greetings = ["Sousdey", "Hi", "Hello"]
         greeting = greetings.sample

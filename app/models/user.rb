@@ -187,11 +187,11 @@ class User < ActiveRecord::Base
   end
 
   def female?
-    gender == 'f'
+    gender == FEMALE
   end
 
   def male?
-    gender == 'm'
+    gender == MALE
   end
 
   def bisexual?
