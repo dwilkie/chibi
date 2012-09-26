@@ -11,7 +11,7 @@ module Analyzable
       scope = scoped
 
       scope = scope.where(
-        "#{table_name}.created_at} >= ?", options[:least_recent].ago
+        "#{table_name}.created_at >= ?", options[:least_recent].ago
       ) if options[:least_recent]
 
       # hack to get the table alias name

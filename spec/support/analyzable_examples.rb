@@ -15,7 +15,6 @@ shared_examples_for "analyzable" do |skip_by_user|
     end
 
     def eight_days_ago_was_in_this_month
-      # from test values
       (Time.now.month == eight_days_ago.month)
     end
 
@@ -40,8 +39,8 @@ shared_examples_for "analyzable" do |skip_by_user|
 
     context "passing :least_recent => 2.months" do
       it "should return an overview of the resources created in the last 2 months (in HighStocks format)" do
-        subject.class.overview_of_created(:least_recent => 2.months).should == include(
-          [miliseconds_since_epoch(two_months_and_one_day_ago), total_this_month]
+        subject.class.overview_of_created(:least_recent => 2.months).should_not include(
+          [miliseconds_since_epoch(two_months_and_one_day_ago), 1]
         )
       end
     end
