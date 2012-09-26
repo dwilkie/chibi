@@ -807,7 +807,7 @@ class User < ActiveRecord::Base
   end
 
   def gender_question?(info)
-    strip_match!(info, /\b(?:#{gender_keywords}|m)\s*(?<!f)(?:k?or|a?nd?|r(?:e|u)y?)\s*(?:#{gender_keywords}|m)\b/)
+    strip_match!(info, /\b(?:#{gender_keywords}|m)\s*(?<!f)(?:k?or|a?nd?|r(?:e|u)?y?)\s*(?:#{gender_keywords}|m)\b/)
   end
 
   def gender_keywords
