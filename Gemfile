@@ -4,6 +4,7 @@ gem 'rails', '3.2.8'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
+gem "lazy_high_charts"
 gem "geocoder", "1.1.1"
 gem "phony"
 gem "countries", :require => 'iso3166', :git => "git://github.com/dwilkie/countries.git"

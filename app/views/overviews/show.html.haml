@@ -1,15 +1,3 @@
 %h1 Overview
-#this_month
-  %h2 This Month
-  #total_users
-    %p
-      = link_to pluralize(@overview.total_users_this_month, "new user"), users_path
-  #total_messages
-    %p
-      = link_to pluralize(@overview.total_messages_this_month, "message"), interaction_path
-  #total_replies
-    %p
-      = link_to pluralize(@overview.total_replies_this_month, "reply"), interaction_path
-  #total_revenue
-    %p
-      = number_to_currency(@overview.total_revenue_this_month)
+- present @overview do |overview_presenter|
+  = overview_presenter.new_users

@@ -5,4 +5,11 @@ class Hash
     end
     self
   end
+
+  def integerify_keys!
+    keys.each do |key|
+      self[key.to_i] = delete(key)
+    end
+    self
+  end
 end

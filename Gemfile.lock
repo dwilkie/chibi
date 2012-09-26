@@ -117,6 +117,8 @@ GEM
       railties (>= 3.0.0)
     launchy (2.1.2)
       addressable (~> 2.3)
+    lazy_high_charts (1.2.2)
+      bundler (~> 1.0)
     libwebsocket (0.1.5)
       addressable
     listen (0.4.7)
@@ -258,6 +260,7 @@ DEPENDENCIES
   jquery-ui-rails
   kaminari
   launchy
+  lazy_high_charts
   nuntium_api
   pg
   phony
