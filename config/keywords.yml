@@ -150,7 +150,7 @@ en:
     - 'gir?l\s?fri(?:e?nd)?s?'
     - "gf"
   girl:
-    - f
+    - "(?<!')f"
   could_mean_girl_or_girlfriend:
     - "g(?:i|r)(?:i|r)?ll?"
     - "wom(?:a|e)n"
