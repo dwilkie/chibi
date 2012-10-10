@@ -41,11 +41,12 @@
         ]
 
         location_questions = [
-          "You nov na?", "Live na?", "Where do you live?", "Come from?", "U nov na del?"
+          "You nov na?", "Live na?", "Where do you live?", "Come from?", "U nov na del?", "u live na?",
+          "nek nov e na?"
         ]
 
         age_questions = [
-          "How old r u?", "A yu ponman heoy?", "Ayuk ponman?", "How old?"
+          "How old r u?", "A yu ponman heoy?", "Ayuk ponman?", "How old?", "a yu pun man?"
         ]
 
         recipient_questions << name_questions.sample unless recipient_name.present?
