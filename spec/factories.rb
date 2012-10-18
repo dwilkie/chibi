@@ -217,6 +217,11 @@ FactoryGirl.define do
       updated_at { 5.days.ago }
     end
 
+    trait :without_recent_interaction_for_a_longer_time do
+      created_at { 5.days.ago }
+      updated_at { 6.days.ago }
+    end
+
     trait :with_a_semi_recent_message do
       after(:create) do |user|
         FactoryGirl.create(:message, :user => user, :created_at => 15.minutes.ago)
@@ -245,6 +250,10 @@ FactoryGirl.define do
 
       factory :user_from_registered_service_provider_without_recent_interaction do
         without_recent_interaction
+      end
+
+      factory :user_from_registered_service_provider_without_recent_interaction_for_a_longer_time do
+        without_recent_interaction_for_a_longer_time
       end
     end
 

@@ -253,12 +253,17 @@ describe User do
       create(:user_from_registered_service_provider_without_recent_interaction)
     end
 
+    let(:user_from_registered_service_provider_without_recent_interaction_for_a_longer_time) do
+      create(:user_from_registered_service_provider_without_recent_interaction_for_a_longer_time)
+    end
+
     let(:user_from_registered_service_provider_with_recent_interaction) do
       create(:user_from_registered_service_provider)
     end
 
     before do
       user_from_registered_service_provider_without_recent_interaction
+      user_from_registered_service_provider_without_recent_interaction_for_a_longer_time
       user_from_registered_service_provider_with_recent_interaction
       user_without_recent_interaction
     end
@@ -267,6 +272,7 @@ describe User do
       with_resque do
         expect_message do
           subject.class.remind!.should == [
+            user_from_registered_service_provider_without_recent_interaction_for_a_longer_time,
             user_from_registered_service_provider_without_recent_interaction
           ]
         end
