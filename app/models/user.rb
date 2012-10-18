@@ -597,7 +597,7 @@ class User < ActiveRecord::Base
   end
 
   def self.split_mobile_number(number)
-    Phony.split(number.to_i.to_s)
+    Phony.split(number.to_i.to_s).reject { |part| part == false }
   end
 
   def self.international_dialing_code(number)

@@ -5,7 +5,7 @@ gem 'haml'
 gem 'pg'
 gem 'kaminari'
 gem "lazy_high_charts"
-gem "geocoder", "1.1.1"
+gem "geocoder"
 gem "phony"
 gem "countries", :require => 'iso3166', :git => "git://github.com/dwilkie/countries.git"
 gem "faker"
