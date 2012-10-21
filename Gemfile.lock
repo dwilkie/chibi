@@ -162,6 +162,8 @@ GEM
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
     rake (0.9.2.2)
+    rb-inotify (0.8.8)
+      ffi (>= 0.5.0)
     rdoc (3.12)
       json (~> 1.4)
     redis (3.0.2)
@@ -260,6 +262,7 @@ DEPENDENCIES
   pg
   phony
   rails (= 3.2.8)
+  rb-inotify
   redis
   resque
   resque_spec

@@ -49,6 +49,7 @@ group :test do
   gem 'vcr', :git => 'git://github.com/myronmarston/vcr.git'
   gem 'guard-rspec'
   gem 'guard-spork'
+  gem 'rb-inotify'
   gem 'database_cleaner'
   gem 'timecop'
   gem 'resque_spec'
