@@ -225,7 +225,7 @@ class User < ActiveRecord::Base
   end
 
   def hetrosexual?
-    (male? && looking_for_female?) || (female? && looking_for_male?)
+    true
   end
 
   def profile_complete?

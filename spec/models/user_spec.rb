@@ -308,32 +308,23 @@ describe User do
     # Exclusions:
 
     # 1. Don't match him with himself
-    # 2. Exclude users who are NOT looking for his gender
-    # 3. Exclude users who do not have his gender preference
-    # 4. Exclude users who he has already chatted with
-    # 5. Exclude users who are offline
-    # 6. If he's with a registered service provider, exclude
+    # 2. Exclude users who he has already chatted with
+    # 3. Exclude users who are offline
+    # 4. If he's with a registered service provider, exclude
     #    users who are not from registered service providers.
     #    If he's NOT with a registered service provider, exclude
     #    users who are from registered service providers
 
     # Ordering
 
-    # 1. If his preferred gender is unknown, order by uses who prefer his gender.
-    #      a)
-    #        If his gender is known order by users who prefer his gender.
-    #        If his gender is also unknown assume he is MALE.
-    #      b)
-    #        Then order FEMALES first, followed by UNKNOWNS, followed by MALES.
-    #    If his preferred gender is known
-    #      a) Order by users who have his preferred gender
-    #      b)
-    #        If his gender is known then order by users who prefer his gender
-    #        If his gender is unknown then order users who prefer MALES first,
-    #        followed by UNKNOWNS, followed by FEMALES
+    # 1. If his/her gender is known
+    #   a) For males
+    #     Prefer females
+    #   b) For females
+    #     Prefer males
 
-    # 2. Order by recent activity. Note: This should come AFTER ordering by gender and
-    #    preferred gender for 2 reasons. Firstly, in the common situation where he is matched
+    # 2. Order by recent activity. Note: This should come AFTER ordering by gender
+    #    for 2 reasons. Firstly, in the common situation where he is matched
     #    with another user who has not been chatting for a long period of time, given the inactive
     #    user does not reply, he will still be ordered higher than other users because he has
     #    a recent interaction. Secondly, it helps to remind users who are inactive.
@@ -344,99 +335,120 @@ describe User do
     # User Descriptions
     # see spec/factories.rb for where users are defined
 
-    # Alex has an empty profile
+    # Alex has an empty profile last seen just now
     # Jamie has an empty profile last seen 15 minutes ago
-    # Joy is a straight 27 year old female in Phnom Penh
-    # Mara is a bisexual 25 year old female in Phnom Penh
-    # Pauline is a female
-    # Chamroune is looking for a female
-    # Dave is a straight 28 year old male in Phnom Penh
-    # Luke is a straight 25 year old male in Phnom Penh with 2 initiated chats
-    # Con is a straight 37 year old male in Siem Reap last seen 15 minutes ago
-    # Paul is a straight 39 year old male in Phnom Penh last seen 30 minutes ago
-    # Harriet is a lesbian from Battambang
-    # Eva is a lesbian from Siem Reap
+    # Joy is a straight 27 year old female in Phnom Penh last seen 15 minutes ago
+    # Mara is a bisexual 25 year old female in Phnom Penh last seen 15 minutes ago with 1 initiated chat
+    # Pauline is a female last seen just now with 1 initiated chat
+    # Chamroune is looking for a female last seen just now
+    # Dave is a straight 28 year old male in Phnom Penh last seen just now with 1 initiated chat
+    # Luke is a straight 25 year old male in Phnom Penh last seen just now with 2 initiated chats
+    # Con is a straight 37 year old male in Siem Reap last seen 15 minutes ago with 1 initiated chat
+    # Paul is a straight 39 year old male in Phnom Penh last seen 15 minutes ago with 1 initiated chat
+    # Harriet is a lesbian from Battambang last seen 15 minutes ago currently chatting with Eva
+    # Eva is a lesbian from Siem Reap last seen 15 minutes ago crrently chatting with Harriet
+    # Nok is a straight female from Chiang Mai last seen 15 minutes ago
+    # Michael is a bisexual 29 year old male from Chiang Mai last seen 15 minutes ago with 1 initiated chat
+    # Hanh is a gay 28 year old male from Chiang Mai last seen 15 minutes ago with 1 initiated chat
+    # View is a gay 26 year old male from Chiang Mai last seen 15 minutes ago
     # Reaksmey is bisexual last seen 15 minutes ago
 
     # Individual Match Explanations
 
-    # Alex has not specified his/her gender or his/her preferred gender (looking for).
-    # This is by far the most common case for new users.
-    # Since we don't have any information about the user, assume they're a straight male.
-    # This is because a straight male would be more disappointed if he got another guy then
-    # if a straight girl got another girl. Joy is a straight female,
-    # so she matches first. Mara is a bisexual female so she matches second.
-    # Pauline is female so she matches third.
-    # Reaksmey is bisexual but his gender is unknown so he/she matches before Jamie whos gender
-    # and sexual preference remain unknown. Luke is matched next because he has initiated
-    # the most chats and was seen in the last 15 minutes followed by Dave who was also seen in the last
-    # 15 minutes, followed by Con who chatted more recently than Paul. It's important to note
-    # that we don't want to eliminate the guys from the search because
-    # they are potential matches for straight females
+    # No profile information is known about Alex.
+    # Luke is matched first because he was seen recently and he has intitiated the most chats
+    # Dave or Pauline are matched second and third because they were seen recently and have initiated chats
+    # Chamroune is matched forth because he was seen recently
+    # Con, Paul and Mara are matched 5th, 6th or 7th.
+    # They were all seen less recently than the others and have initiated chats
+    # Finally Reaskmey, Joy and Jamie are matched last since they have
+    # less recent activity and no initiated chats
 
-    # Jamie gets the similar results as alex
+    # No Profile information is known about Jamie
+    # Similar to Alex, it's Luke first followed by Dave or Pauline
+    # Alex was just seen recently so either he is matched next or Chamroune who was also seen recently
+    # The rest of the results are the same as for Alex
 
-    # Chamroune is looking for a female so all males are eliminated from the match.
-    # Also we assume that because Chamroune is looking for a female that he is male. Which
-    # is why Joy matches first in this case. Alex was seen more recently than Jamie so he or she is
-    # matched before Jamie
+    # Chamroune is looking for a female but for now we are ignoring this data.
+    # Since his/her gender is unknown his matches are similar to Alex and Jamie's
 
-    # Pauline is female so users who are looking for males eliminated from the match.
-    # Also we assume that because Pauline is a female she is looking for a male.
-    # Which is why the boys match before the girls. Similarly, Reaksmey matches before Mara
-    # because of we are assuming that Pauline is straight and therefore would not be interested
-    # in Mara, so even though Reaksmey's gender is unknown it's still more likely a match.
-    # Luke has initiated more chats than the other boys so he matches first.
+    # Pauline is female so male users are matched first.
+    # Again, Luke wins because he's a boy was seen recently and has the most initiated chats
+    # Dave is outright second this time as he's a boy is was seen recently and has an initiated chat
+    # Con and Paul are equal third and forth because they're guys
+    # seen less recently than Dave but both with initiated chats.
+    # Chamroune and Alex are equal 5th and 6th because they have recent activity even
+    # though their genders are unknown.
+    # Mara is outright 7th because she has less recent interaction than Chamroune and Alex but has
+    # more inititated chats than Joy and Jamie. Reaksmey is excluded because he has already chatted
+    # with Pauline.
 
-    # Nok is a straight female. There are other straight males but they are not in Thailand
-    # so she can't be matched with them. Hanh and View are both males from Thailand
-    # but they are gay so she also can't be matched with either of them. Michael is a guy from Thailand
-    # who is bisexual so Michael matches with Nok.
+    # Nok is female from Thailand. The only other users from Thailand are Michael, Hanh and View
+    # who are all males. Nok has already chatted with Hanh (and he's also logged out) so he is eliminated
+    # Michael and View were both seen 15 minutes ago, however Michael has initiated one more chat than View
 
-    # Joy is a straight female in Cambodia, so she matches with all the straight males first.
+    # Joy is a female in Cambodia, so she matches with all the males first.
     # Dave and Luke were both seen in the last 15 minutes but Dave matches before Luke
     # because his is older than Joy by 2 years where as Luke is 2 years younger. Con and Paul have
     # initiated the same amount of chats but Con matches first because he is closer in age to Joy.
-    # Chamroune is included because he is looking for a female, and we assume he's a male
-    # Alex and Jamie are included last
+    # Pauline is next because she was recently seen just recently and has an initiated chat.
+    # Chamroune and Alex follow next because of their more recent interaction
+    # Mara is next because she has 1 initiated chat but was seen more than 15 minutes ago
+    # Finally Reaskmey and Jamie are last.
 
-    # Dave is a straight male in Cambodia. Harriet, Eva, Mara and Joy are all females in Cambodia however
-    # Harriet and Eva are lesbian, so they are ruled out. Mara is bisexual and Joy is straight so Joy
-    # matches before Mara. Similarly, Mara matches before Pauline because Paulines preferred gender
-    # unknown. Again alex and Jamie are matched last
+    # Dave is a guy in Cambodia. Harriet, Eva, Mara, Pauline and Joy are all females in Cambodia however
+    # Harriet and Eva are currently chatting with each other, so they are excluded
+    # (also Harriet has previously chatted with Dave).
+    # Pauline is the female seen most recently so she is matched first. Mara and Joy were both seen
+    # more than 15 minutes ago but Mara has more initiated chats so she matches second before Joy.
+    # Luke is matched next because he was seen most recently and has the most number of initiated chats
+    # Followed by Chamroune and Alex who both have recent interaction
+    # Followed by Paul and Con who were seen more than 15 mins ago but both have initiated chats
+    # Followed by Jamie and Reaksmey were seen more than 15 mins ago but have less initiated chats
 
-    # Con is a straight male from Cambodia, but he has already chatted with Mara, so Con matches
-    # with Pauline then Alex and Jamie similar to the previous example
+    # Con is also a guy in Cambodia. Con has already chatted with Mara, so Con matches
+    # with Pauline then Joy similar to the previous example. In contrast to the previous example
+    # however, Con matches with Chamroune and Alex before Luke because of the age difference
+    # between Con and Luke. Since the age of Chamroune and Alex is not known they are ordered by
+    # number of initiated chats only. However, since Luke's age is known and he is 12 years younger than Con
+    # Chamroune and Alex are matched before Luke. The rest of the logic is the same as the previous example
 
-    # Paul and Luke's matches are similar to Dave's match (not sure if it should be for Luke though)
+    # Paul is also a guy in Cambodia. Similar to the previous example Pauline matches first. In contrast,
+    # Joy matches before Mara because she is closer in age to Paul than Mara even though Mara has initiated
+    # more chats. Again Chamroune and Alex match next because their ages are unknown. Dave also matches
+    # before Luke even though he has initiated more chats than Dave because Dave is closer in age.
+    # Luke is however matched before Con because he was seen recently but Con was seen more than 15 mins ago/
+    # The rest of the logic is the same as the previous example
 
-    # Harriet is a lesbian so she can only be matched with females. Straight females are also
-    # eliminated from the result. This leaves Eva who is also a lesbian,
-    # Mara who is bisexual, Pauline who is a female
-    # and Chamroune who is looking for a female and Alex and Jamie
-    # Eva is is currently chatting so she is eliminated from the match
+    # Luke is also a guy in Cambodia, however he is younger or the same age as all of the available girls.
+    # Again Pauline matches first for the reasons described above. Mara is next because she is closer
+    # in age than Joy. Dave is next followed by Alex and Chamroune as in the previous example.
+    # I'm not sure why Paul is matching before Con though
 
-    # Eva gets the same results as Harriet
+    # Harriet is a girl. Like the other girls she matches with the boys first starting with
+    # Luke. Dave has already chatted with Harriet so he is eliminated from the results.
+    # Con and Paul were both seen more than 15 mins ago and have the same amount of initiated chats
+    # Con is matched before Paul because he is closer (in Siem Reap) to Harriet (in Battambang) than
+    # Paul (in Phnom Penh). Pauline is next since she was recently seen and has more initiated chats
+    # Followed by the usual suspects Chamroune and Alex, Mara and Joy and Jamie and Reaksmey.
+    # Eva is eliminated because she is currently chatting with Harriet
 
-    # Hanh is gay and lives in Thailand. Michael is bisexual and View is gay so View matches first
+    # Eva gets a similar result to Harriet (with Dave included)
 
-    # View has previously chatted with Michael and Hanh is offline, so nobody is matched
+    # Hanh is a guy living in Thailand. He has already chatted with Nok.
+    # He matches with Michael before View because Michael has one more initiated chat than View
 
-    # Mara is bisexual, so she doesn't care about the gender she gets. Therefore the only
-    # thing that is important is that she is matched with others that are seeking her gender.
-    # Also she would be probably be most happy if she was matched with other bisexuals, so Reasmey
-    # matches first. Luke, Dave, Chamroune and Paul are all seeking females so they match next.
-    # Eva and Harriet are currently chatting and Mara has already chatted with Con so they're
-    # all eliminated from the match. Luke, Dave and Paul match before Pauline because it's unknown
-    # whether pauline is searching for a guy or a girl.
+    # View has previously chatted with Michael and Hanh is offline, so Nok is matched
 
-    # Reaskmey is bisexual but his/her gender is unknown. Mara matches first because she is also
-    # bisexual. Then we assume that Reaksmey is a male so people seeking males are matched next.
+    # Mara is a girl. Her matches are similar to Joy's except Con is eliminated because he has
+    # already chatted with Mara before and for Mara, Luke is matched before Dave because
+    # Mara is not older than Luke and Luke has initiated more chats.
 
-    # Michael has previously chatted with View which leaves Nok and Hanh. Even though Nok hasn't specified
-    # her age yet, we give her the benifit of the doubt and assume she's in the free age zone.
-    # Hanh has initiated more chat than Nok so he would have been matched before Nok, but
-    # Hanh is offline so he is eliminated from the results anyway.
+    # Michael is from Thailand. He has previously chatted with View and Hanh is offline so
+    # Nok is matched with him
+
+    # Reaskmey's gender is unknown. His/Her matches are simliar to Alex's except Pauline is eliminated
+    # because he/she has already chatted with Pauline.
 
     # Finally all of these users use mobile numbers which are not from a registered service provider
     # We don't want to match these users with users that have mobile numbers which are from
@@ -446,23 +458,23 @@ describe User do
     # incase the test gateway is down or something.
 
     USER_MATCHES = {
-      :alex => [:joy, :mara, :pauline, :reaksmey, :jamie, :chamroune, :luke, :dave, :con, :paul],
-      :jamie => [:joy, :mara, :pauline, :reaksmey, :alex, :chamroune, :luke, :dave, :con, :paul],
-      :chamroune => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
-      :pauline => [:luke, :dave, :con, :paul, :chamroune, :mara, :alex, :jamie],
-      :nok => [:michael],
-      :joy => [:dave, :luke, :con, :paul, :chamroune, :reaksmey, :alex, :jamie],
-      :dave => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
-      :con => [:joy, :pauline, :reaksmey, :alex, :jamie],
-      :paul => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
-      :luke => [:joy, :mara, :pauline, :reaksmey, :alex, :jamie],
-      :harriet => [:mara, :pauline, :chamroune, :reaksmey, :alex, :jamie],
-      :eva => [:mara, :pauline, :chamroune, :reaksmey, :alex, :jamie],
-      :hanh => [:view, :michael],
-      :view => [],
-      :mara => [:reaksmey, :luke, :dave, :chamroune, :paul, :pauline, :alex, :jamie],
+      :alex => [:luke, [:dave, :pauline], :chamroune, [:con, :paul, :mara], [:reaksmey, :joy, :jamie]],
+      :jamie => [:luke, [:pauline, :dave], [:chamroune, :alex], [:paul, :con, :mara], [:reaksmey, :joy]],
+      :chamroune => [:luke, [:pauline, :dave], :alex, [:paul, :con, :mara], [:reaksmey, :joy, :jamie]],
+      :pauline => [:luke, :dave, [:con, :paul], [:chamroune, :alex], :mara, [:joy, :jamie]],
+      :nok => [:michael, :view],
+      :joy => [:dave, :luke, :con, :paul, :pauline, [:chamroune, :alex], :mara, [:reaksmey, :jamie]],
+      :dave => [:pauline, :mara, :joy, :luke, [:chamroune, :alex], [:paul, :con], [:jamie, :reaksmey]],
+      :con => [:pauline, :joy, :dave, [:chamroune, :alex], :luke, :paul, [:jamie, :reaksmey]],
+      :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, :con, [:jamie, :reaksmey]],
+      :luke => [:pauline, :mara, :joy, :dave, [:alex, :chamroune], :paul, :con, [:jamie, :reaksmey]],
+      :harriet => [:luke, :con, :paul, :pauline, [:chamroune, :alex], [:mara, :joy], [:jamie, :reaksmey]],
+      :eva => [:luke, :dave, :con, :paul, :pauline, [:chamroune, :alex], [:mara, :joy], [:reaksmey, :jamie]],
+      :hanh => [:michael, :view],
+      :view => [:nok],
+      :mara => [:luke, :dave, :paul, :pauline, [:chamroune, :alex], :joy, [:reaksmey, :jamie]],
       :michael => [:nok],
-      :reaksmey => [:mara, :joy, :alex, :jamie, :luke, :dave, :chamroune, :con, :paul]
+      :reaksmey => [:luke, :dave, [:alex, :chamroune], [:paul, :mara, :con], [:jamie, :joy]]
     }
 
     USER_MATCHES.each do |user, matches|
@@ -501,7 +513,19 @@ describe User do
       it "should match the user with the best compatible match" do
         USER_MATCHES.each do |user, matches|
           results = subject.class.matches(send(user))
-          results.map { |match| match.name.try(:to_sym) || match.screen_name.to_sym }.should == matches
+          result_names = results.map { |result| result.name.to_sym }
+
+          result_index = 0
+          matches.each do |expected_match|
+            if expected_match.is_a?(Array)
+              expected_match.should =~ result_names[result_index..result_index + expected_match.size - 1]
+              result_index += expected_match.size
+            else
+              expected_match.should == result_names[result_index]
+              result_index += 1
+            end
+          end
+
           results.each do |result|
             result.should_not be_readonly
           end
@@ -1513,18 +1537,18 @@ describe User do
   end
 
   describe "#hetrosexual?" do
-    it "should be true only for straight males and straight females" do
+    it "should be true all the time (don't handle gays for now)" do
       # unknown sexual preference
-      subject.should_not be_hetrosexual
+      subject.should be_hetrosexual
 
       # gay guy
       subject.gender = "m"
       subject.looking_for = "m"
-      subject.should_not be_hetrosexual
+      subject.should be_hetrosexual
 
       # bi guy
       subject.looking_for = "e"
-      subject.should_not be_hetrosexual
+      subject.should be_hetrosexual
 
       # straight guy
       subject.looking_for = "f"
@@ -1533,11 +1557,11 @@ describe User do
       # gay girl
       subject.gender = "f"
       subject.looking_for = "f"
-      subject.should_not be_hetrosexual
+      subject.should be_hetrosexual
 
       # bi girl
       subject.looking_for = "e"
-      subject.should_not be_hetrosexual
+      subject.should be_hetrosexual
 
       # straight girl
       subject.looking_for = "m"

@@ -361,6 +361,7 @@ FactoryGirl.define do
       gender "f"
       looking_for "m"
       association :location, :factory => :chiang_mai
+      with_a_semi_recent_message
 
       factory :joy do
         name "joy"
@@ -376,12 +377,12 @@ FactoryGirl.define do
       gender "m"
       looking_for "f"
       association :location, :factory => :phnom_penh
+      with_a_semi_recent_message
 
       factory :con do
         name "con"
         age 37
         association :location, :factory => :siem_reap
-        with_a_semi_recent_message
       end
 
       factory :dave do
@@ -403,6 +404,7 @@ FactoryGirl.define do
       gender "f"
       looking_for "f"
       association :location, :factory => :battambang
+      with_a_semi_recent_message
 
       factory :eva do
         name "eva"
@@ -417,6 +419,7 @@ FactoryGirl.define do
       looking_for "m"
       age 28
       association :location, :factory => :chiang_mai
+      with_a_semi_recent_message
 
       factory :view do
         name "view"
@@ -431,6 +434,7 @@ FactoryGirl.define do
       looking_for "e"
       age 25
       association :location, :factory => :phnom_penh
+      with_a_semi_recent_message
     end
 
     # bi guy
@@ -439,7 +443,7 @@ FactoryGirl.define do
       gender "m"
       looking_for "e"
       age 29
-      updated_at 15.minutes.ago
+      with_a_semi_recent_message
       association :location, :factory => :chiang_mai
     end
   end
