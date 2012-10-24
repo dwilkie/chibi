@@ -403,8 +403,10 @@ describe User do
     # more than 15 minutes ago but Mara has more initiated chats so she matches second before Joy.
     # Luke is matched next because he was seen most recently and has the most number of initiated chats
     # Followed by Chamroune and Alex who both have recent interaction
-    # Followed by Paul and Con who were seen more than 15 mins ago but both have initiated chats
+    # Followed by Con who were seen more than 15 mins ago but has an initiated chat
     # Followed by Jamie and Reaksmey were seen more than 15 mins ago but have less initiated chats
+    # Finally Paul is matched last even though he has initiated chats because
+    # he is more than 10 years older than Dave
 
     # Con is also a guy in Cambodia. Con has already chatted with Mara, so Con matches
     # with Pauline then Joy similar to the previous example. In contrast to the previous example
@@ -423,7 +425,9 @@ describe User do
     # Luke is also a guy in Cambodia, however he is younger or the same age as all of the available girls.
     # Again Pauline matches first for the reasons described above. Mara is next because she is closer
     # in age than Joy. Dave is next followed by Alex and Chamroune as in the previous example.
-    # I'm not sure why Paul is matching before Con though
+    # Reaksmey and Jamie are matched next because even though they have initiated less chats than Paul and Con
+    # their age is unknown, whereas for Con and Paul, they are more than 10 years older than Luke.
+    # Con matches before Paul because he is closer in age than Paul
 
     # Harriet is a girl. Like the other girls she matches with the boys first starting with
     # Luke. Dave has already chatted with Harriet so he is eliminated from the results.
@@ -450,6 +454,12 @@ describe User do
     # Reaskmey's gender is unknown. His/Her matches are simliar to Alex's except Pauline is eliminated
     # because he/she has already chatted with Pauline.
 
+    # Kris is offline and his/her gender is unknown however his/her age is known.
+    # Luke matches first because he has the most initiated chats, followed by either Dave or Pauline
+    # Alex or Chamroune are next due to their recent activity
+    # Followed by either Mara who has initiated more chats than Reaksmey, Joy and Jamie
+    # Con and Paul finish last again because of their age difference with Kris
+
     # Finally all of these users use mobile numbers which are not from a registered service provider
     # We don't want to match these users with users that have mobile numbers which are from
     # registered service providers. For example, say there are two registered service providers
@@ -464,17 +474,18 @@ describe User do
       :pauline => [:luke, :dave, [:con, :paul], [:chamroune, :alex], :mara, [:joy, :jamie]],
       :nok => [:michael, :view],
       :joy => [:dave, :luke, :con, :paul, :pauline, [:chamroune, :alex], :mara, [:reaksmey, :jamie]],
-      :dave => [:pauline, :mara, :joy, :luke, [:chamroune, :alex], [:paul, :con], [:jamie, :reaksmey]],
+      :dave => [:pauline, :mara, :joy, :luke, [:chamroune, :alex], :con, [:jamie, :reaksmey], :paul],
       :con => [:pauline, :joy, :dave, [:chamroune, :alex], :luke, :paul, [:jamie, :reaksmey]],
       :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, :con, [:jamie, :reaksmey]],
-      :luke => [:pauline, :mara, :joy, :dave, [:alex, :chamroune], :paul, :con, [:jamie, :reaksmey]],
+      :luke => [:pauline, :mara, :joy, :dave, [:alex, :chamroune], [:jamie, :reaksmey], :con, :paul],
       :harriet => [:luke, :con, :paul, :pauline, [:chamroune, :alex], [:mara, :joy], [:jamie, :reaksmey]],
       :eva => [:luke, :dave, :con, :paul, :pauline, [:chamroune, :alex], [:mara, :joy], [:reaksmey, :jamie]],
       :hanh => [:michael, :view],
       :view => [:nok],
       :mara => [:luke, :dave, :paul, :pauline, [:chamroune, :alex], :joy, [:reaksmey, :jamie]],
       :michael => [:nok],
-      :reaksmey => [:luke, :dave, [:alex, :chamroune], [:paul, :mara, :con], [:jamie, :joy]]
+      :reaksmey => [:luke, :dave, [:alex, :chamroune], [:paul, :mara, :con], [:jamie, :joy]],
+      :kris => [:luke, [:dave, :pauline], [:alex, :chamroune], :mara, [:reaksmey, :joy, :jamie], :con, :paul]
     }
 
     USER_MATCHES.each do |user, matches|
@@ -498,8 +509,9 @@ describe User do
       create(:chat,        :user => paul,       :friend => nok)
       create(:chat,        :user => pauline,    :friend => reaksmey)
 
-      # logout hanh
+      # logout hanh and kris
       hanh.logout!
+      kris.logout!
     end
 
     context "given there are other users" do

@@ -355,6 +355,13 @@ FactoryGirl.define do
       with_a_recent_phone_call
     end
 
+    # user with known age but unknown gender
+    factory :kris do
+      name "kris"
+      age 25
+      with_a_semi_recent_message
+    end
+
     # straight girls
     factory :nok do
       name "nok"

@@ -398,16 +398,13 @@ class User < ActiveRecord::Base
     abs_age_diff_in_years = "(ABS(#{age_diff_in_years}))"
     chat_factor = "(count(\"chats\".*) + 1)"
 
-    # Use a symmetrical age difference for when age starts to matter for non hetrosexual users
-    age_bearing_case = "#{abs_age_diff_in_years} >= #{AGE_BEARING_CUTOFF}" unless user.hetrosexual?
+    age_bearing_case = "#{abs_age_diff_in_years} >= #{AGE_BEARING_CUTOFF}"
 
     if user.female?
-      # prefer older guys
-      age_bearing_case ||= "#{age_diff_in_years} > #{AGE_BEARING_CUTOFF}"
+      # when matching with a boy disadvantage those that are too young
       out_of_range_case = "#{age_diff_in_years} <= #{OUT_OF_RANGE_CUTOFF * -1} AND #{table_name}.gender = 'm'"
     elsif user.male?
-      # prefer younger girls
-      age_bearing_case ||= "#{age_diff_in_years} < #{AGE_BEARING_CUTOFF * -1}"
+      # when matching with a girl disadvantage those that are too old
       out_of_range_case = "#{age_diff_in_years} >= #{OUT_OF_RANGE_CUTOFF} AND #{table_name}.gender = 'f'"
     end
 
