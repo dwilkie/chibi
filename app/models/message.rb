@@ -9,6 +9,8 @@ class Message < ActiveRecord::Base
   attr_accessible :body, :guid
   alias_attribute :origin, :from
 
+  has_many :delivery_receipts
+
   validates :guid, :uniqueness => true, :allow_nil => true
 
   def body

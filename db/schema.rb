@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120816071112) do
+ActiveRecord::Schema.define(:version => 20121026084052) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -23,6 +23,19 @@ ActiveRecord::Schema.define(:version => 20120816071112) do
   add_index "chats", ["friend_id"], :name => "index_chats_on_friend_id"
   add_index "chats", ["updated_at"], :name => "index_chats_on_updated_at"
   add_index "chats", ["user_id"], :name => "index_chats_on_user_id"
+
+  create_table "delivery_receipts", :force => true do |t|
+    t.string   "state"
+    t.string   "channel"
+    t.string   "guid"
+    t.integer  "message_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "delivery_receipts", ["guid"], :name => "index_delivery_receipts_on_guid"
+  add_index "delivery_receipts", ["message_id"], :name => "index_delivery_receipts_on_message_id"
+  add_index "delivery_receipts", ["state", "guid"], :name => "index_delivery_receipts_on_state_and_guid", :unique => true
 
   create_table "locations", :force => true do |t|
     t.string   "city"
