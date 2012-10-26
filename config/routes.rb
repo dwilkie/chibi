@@ -2,6 +2,7 @@ Chibi::Application.routes.draw do
   resources :messages, :only => :create
   resources :phone_calls, :only => :create, :defaults => { :format => 'xml' }
   resources :missed_calls, :only => :create
+  resources :delivery_receipts, :only => :create
 
   resource :overview, :only => :show
   resource :interaction, :only => :show
