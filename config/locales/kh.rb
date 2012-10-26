@@ -9,7 +9,7 @@
         sender_name = " #{sender.screen_id}" if sender.try(:name)
         recipient_name = " #{recipient.screen_id}" if recipient.try(:name)
 
-        i_ams = ["nhom", "nhom", "nhum", "i am", "i'm", "m"]
+        i_ams = ["nhom", "nhom", "nhum", "i am", "i'm", "m", "me"]
         name_announcements = ["Nhom chhmous", "My name"]
 
         i_am = (i_ams | name_announcements).sample
@@ -57,6 +57,9 @@
         recipient_question = " #{recipient_questions.shuffle.join(' ')}"
 
         introductions = [
+          "#{recipient_starter} w a y d? how d a y! #{sender_intro}",
+          "#{recipient_starter} Sorry friend del befor time i can't sms tov u but i men 4get u te or but why u men call mok me.or u 4get me hey.",
+          "Oh nice to know u, soksabay te? Eat rice Nov?",
           "#{recipient_starter}#{sender_intro} soksabay te?#{recipient_question}",
           "#{recipient_starter}#{sender_intro} nhom rikreay nas del ban skal.#{recipient_question}",
           "#{recipient_starter}#{sender_intro} nek leng sms chea moy nhom te?#{recipient_question}",
