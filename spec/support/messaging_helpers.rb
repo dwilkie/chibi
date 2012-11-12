@@ -13,17 +13,31 @@ module MessagingHelpers
     post_message options
   end
 
-  def expect_message(&block)
-    VCR.use_cassette(
-      "nuntium",
-      :erb => {
-        :url => ENV["NUNTIUM_URL"],
-        :account => ENV["NUNTIUM_ACCOUNT"],
-        :application => ENV["NUNTIUM_APPLICATION"],
-        :password => ENV["NUNTIUM_PASSWORD"]
-      },
-      :allow_playback_repeats => true
-    ) { yield }
+  def expect_message(options = {}, &block)
+    # eject the current cassette, and insert a new nuntium cassette with a unique token
+    # then after the request, eject the cassette
+    VCR.configure do |c|
+      cassette_filter = lambda { |req| URI.parse(req.uri).host == URI.parse(ENV["NUNTIUM_URL"]).host }
+      c.before_http_request(cassette_filter) do |request|
+        VCR.eject_cassette
+        VCR.insert_cassette(
+          "nuntium",
+          :erb => {
+            :url => ENV["NUNTIUM_URL"],
+            :account => ENV["NUNTIUM_ACCOUNT"],
+            :application => ENV["NUNTIUM_APPLICATION"],
+            :password => ENV["NUNTIUM_PASSWORD"],
+            :token => options[:token] || generate(:token)
+          }
+        )
+      end
+
+      c.after_http_request(cassette_filter) do
+        VCR.eject_cassette
+      end
+    end
+
+    yield
   end
 
   def assert_deliver(body)

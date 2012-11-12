@@ -43,7 +43,7 @@ http_interactions:
       x-runtime:
       - '0.238624'
       x-nuntium-token:
-      - 3111a268-4e82-15c0-a66d-b376394eaeba
+      - <%= token %>
       cache-control:
       - no-cache
       server:

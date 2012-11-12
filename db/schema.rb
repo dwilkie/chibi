@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121026084052) do
+ActiveRecord::Schema.define(:version => 20121112100355) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -27,15 +27,15 @@ ActiveRecord::Schema.define(:version => 20121026084052) do
   create_table "delivery_receipts", :force => true do |t|
     t.string   "state"
     t.string   "channel"
-    t.string   "guid"
-    t.integer  "message_id"
+    t.string   "token"
+    t.integer  "reply_id"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
 
-  add_index "delivery_receipts", ["guid"], :name => "index_delivery_receipts_on_guid"
-  add_index "delivery_receipts", ["message_id"], :name => "index_delivery_receipts_on_message_id"
-  add_index "delivery_receipts", ["state", "guid"], :name => "index_delivery_receipts_on_state_and_guid", :unique => true
+  add_index "delivery_receipts", ["reply_id"], :name => "index_delivery_receipts_on_reply_id"
+  add_index "delivery_receipts", ["state", "token"], :name => "index_delivery_receipts_on_state_and_token", :unique => true
+  add_index "delivery_receipts", ["token"], :name => "index_delivery_receipts_on_token"
 
   create_table "locations", :force => true do |t|
     t.string   "city"
@@ -98,9 +98,11 @@ ActiveRecord::Schema.define(:version => 20121026084052) do
     t.datetime "delivered_at"
     t.text     "alternate_translation"
     t.string   "locale",                :limit => 2
+    t.string   "token"
   end
 
   add_index "replies", ["chat_id"], :name => "index_replies_on_chat_id"
+  add_index "replies", ["token"], :name => "index_replies_on_token", :unique => true
   add_index "replies", ["user_id"], :name => "index_replies_on_user_id"
 
   create_table "users", :force => true do |t|

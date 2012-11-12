@@ -3,7 +3,10 @@ class Reply < ActiveRecord::Base
   include Communicable::Chatable
   include Analyzable
 
+  has_many :delivery_receipts
+
   validates :to, :presence => true
+  validates :token, :uniqueness => true, :allow_nil => true
 
   alias_attribute :destination, :to
 
@@ -149,6 +152,8 @@ class Reply < ActiveRecord::Base
   def perform_delivery!(message)
     nuntium = Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
     # use an array so Nuntium sends a POST
-    nuntium.send_ao([{:to => "sms://#{destination}", :body => message}])
+    response = nuntium.send_ao([{:to => "sms://#{destination}", :body => message}])
+    self.token = response["token"]
+    self.save!
   end
 end

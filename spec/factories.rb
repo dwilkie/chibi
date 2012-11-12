@@ -11,6 +11,10 @@ FactoryGirl.define do
     "296cba84-c82f-49c0-a732-a9b09815fbe#{n}"
   end
 
+  sequence :token do |n|
+    "123abc84-a82e-23a1-b691-b2c19834bce#{n}"
+  end
+
   factory :message do
     user
     from { user.mobile_number }
@@ -25,9 +29,9 @@ FactoryGirl.define do
   end
 
   factory :delivery_receipt do
-    association :message, :factory => :message_with_guid
+    association :reply, :factory => :reply_with_token
     state { "delivered" }
-    guid { message.guid }
+    token { reply.token }
   end
 
   factory :missed_call do
@@ -90,6 +94,10 @@ FactoryGirl.define do
 
     factory :reply_from_last_month do
       from_last_month
+    end
+
+    factory :reply_with_token do
+      token
     end
 
     factory :reply_with_locale do

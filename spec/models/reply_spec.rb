@@ -15,11 +15,13 @@ describe Reply do
   let(:partner) { build(:user_with_name) }
   let(:reply) { create(:reply, :user => user) }
   let(:delivered_reply) { create(:delivered_reply) }
+  let(:reply_with_token) { create(:reply_with_token) }
 
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
     options[:deliver] = true unless options[:deliver] == false
     reply.should be_persisted
     reply.destination.should == mobile_number
+    reply.token.should == options[:token] if options[:token]
     if options[:deliver]
       assert_deliver(reply.body)
       reply.should be_delivered
@@ -82,6 +84,11 @@ describe Reply do
   it "should not be valid without a destination" do
     new_reply.to = nil
     user.mobile_number = nil
+    new_reply.should_not be_valid
+  end
+
+  it "should not be valid with a duplicate a token" do
+    new_reply.token = reply_with_token.token
     new_reply.should_not be_valid
   end
 
@@ -181,9 +188,9 @@ describe Reply do
   end
 
   describe "#deliver!" do
-    it "should deliver the message" do
-      expect_message { new_reply.deliver! }
-      assert_persisted_and_delivered(new_reply, user.mobile_number)
+    it "should deliver the message and save the token" do
+      expect_message(:token => "token") { new_reply.deliver! }
+      assert_persisted_and_delivered(new_reply, user.mobile_number, :token => "token")
     end
   end
 
