@@ -24,6 +24,12 @@ FactoryGirl.define do
     end
   end
 
+  factory :delivery_receipt do
+    association :message, :factory => :message_with_guid
+    state { "delivered" }
+    guid { message.guid }
+  end
+
   factory :missed_call do
     user
     subject { "You have a missed call from 0#{user.local_number}" }
