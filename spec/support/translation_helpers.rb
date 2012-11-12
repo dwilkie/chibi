@@ -75,7 +75,7 @@ module TranslationHelpers
 
     :anonymous_reminder => {
       :en => "^(?:Sousdey|Hi|Hello)",
-      :kh => "(?:What's ur name|Nek chhmous ey|Can you tell me ur name)"
+      :kh => "(?:\\w+)"
     }
   }
 
