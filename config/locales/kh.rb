@@ -59,6 +59,8 @@
         introductions = [
           "#{recipient_starter} w a y d? how d a y! #{sender_intro}",
           "#{recipient_starter} Sorry friend del befor time i can't sms tov u but i men 4get u te or but why u men call mok me.or u 4get me hey.",
+          "#{recipient_starter}#{sender_intro} do you want to play sms with me ort?#{recipient_question} Can u teel me?",
+          "#{recipient_starter} same to y!#{sender_intro}!",
           "Oh nice to know u, soksabay te? Eat rice Nov?",
           "#{recipient_starter}#{sender_intro} soksabay te?#{recipient_question}",
           "#{recipient_starter}#{sender_intro} nhom rikreay nas del ban skal.#{recipient_question}",
