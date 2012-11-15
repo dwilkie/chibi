@@ -24,5 +24,7 @@ describe ChatDeactivator do
       end
       subject.class.perform(1, :some => :options)
     end
+
+    it_should_behave_like "rescheduling redis max client errors"
   end
 end
