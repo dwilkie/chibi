@@ -68,6 +68,12 @@ describe Message do
       user.stub(:match).and_return(new_friend)
     end
 
+    it "should mark the message as processed" do
+      message.should be_received
+      expect_message { message.process! }
+      message.should be_processed
+    end
+
     shared_examples_for "starting a new chat" do
       context "given there is no match for this user" do
         before do

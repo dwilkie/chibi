@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121112100355) do
+ActiveRecord::Schema.define(:version => 20121118045847) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -55,13 +55,15 @@ ActiveRecord::Schema.define(:version => 20121112100355) do
     t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
     t.string   "guid"
+    t.string   "state",      :default => "processed", :null => false
   end
 
   add_index "messages", ["chat_id"], :name => "index_messages_on_chat_id"
   add_index "messages", ["guid"], :name => "index_messages_on_guid", :unique => true
+  add_index "messages", ["state"], :name => "index_messages_on_state"
   add_index "messages", ["user_id"], :name => "index_messages_on_user_id"
 
   create_table "missed_calls", :force => true do |t|

@@ -11,11 +11,20 @@ class Message < ActiveRecord::Base
 
   validates :guid, :uniqueness => true, :allow_nil => true
 
+  state_machine :initial => :received do
+    state :processed
+
+    event :process do
+      transition(:received => :processed)
+    end
+  end
+
   def body
     read_attribute(:body).to_s
   end
 
   def process!
+    fire_events(:process)
     user.login!
 
     if user_wants_to_logout?
