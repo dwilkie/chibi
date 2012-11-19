@@ -27,10 +27,6 @@ FactoryGirl.define do
       guid
     end
 
-    factory :message_queued_for_processing do
-      state "queued_for_processing"
-    end
-
     factory :processed_message do
       state "processed"
     end

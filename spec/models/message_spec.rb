@@ -8,7 +8,7 @@ describe Message do
   let(:new_message) { build(:message, :user => user) }
   let(:chat) { create(:active_chat, :user => user, :friend => friend) }
   let(:message_with_guid) { create(:message_with_guid, :user => user) }
-  let(:message_in_queue) { create(:message_queued_for_processing) }
+  let(:processed_message) { create(:processed_message, :created_at => 10.minutes.ago, :user => user) }
 
   describe "factory" do
     it "should be valid" do
@@ -38,7 +38,6 @@ describe Message do
   describe ".queue_unprocessed" do
     let(:unprocessed_message) { create(:message, :created_at => 5.minutes.ago) }
     let(:recently_received_message) { create(:message, :created_at => 2.minutes.ago) }
-    let(:processed_message) { create(:processed_message, :created_at => 10.minutes.ago) }
 
     before do
       ResqueSpec.reset!
@@ -46,7 +45,7 @@ describe Message do
       unprocessed_message
       processed_message
       recently_received_message
-      message_in_queue
+      message
     end
 
     after do
@@ -59,9 +58,6 @@ describe Message do
       end
 
       it "should queue for processing any non processed messages that were created more than 30 secs ago" do
-        unprocessed_message.reload.should be_queued_for_processing
-        recently_received_message.reload.should be_queued_for_processing
-        processed_message.reload.should_not be_queued_for_processing
         MessageProcessor.should have_queued(unprocessed_message.id)
         MessageProcessor.should have_queued(recently_received_message.id)
         MessageProcessor.should have_queue_size_of(2)
@@ -74,9 +70,6 @@ describe Message do
       end
 
       it "should queue for processing any non processed message that was created more than 5 mins ago" do
-        unprocessed_message.reload.should be_queued_for_processing
-        recently_received_message.reload.should_not be_queued_for_processing
-        processed_message.reload.should_not be_queued_for_processing
         MessageProcessor.should have_queued(unprocessed_message.id)
         MessageProcessor.should have_queue_size_of(1)
       end
@@ -112,10 +105,8 @@ describe Message do
       ResqueSpec.reset!
     end
 
-    it "queue the message for processing and mark it as 'queued_for_processing'" do
-      message.should be_received
+    it "queue the message for processing" do
       message.queue_for_processing!
-      message.should be_queued_for_processing
       MessageProcessor.should have_queued(message.id)
     end
   end
@@ -131,9 +122,20 @@ describe Message do
     end
 
     it "should mark the message as 'processed'" do
-      message_in_queue.should be_queued_for_processing
-      expect_message { message_in_queue.process! }
-      message_in_queue.should be_processed
+      message.should be_received
+      expect_message { message.process! }
+      message.should be_processed
+    end
+
+    context "for an already processed message" do
+      before do
+        stub_match_for_user
+      end
+
+      it "should not do anything" do
+        processed_message.process!
+        reply_to(new_friend).should be_nil
+      end
     end
 
     shared_examples_for "starting a new chat" do
@@ -274,7 +276,6 @@ describe Message do
           context "#{new_variation}" do
             before do
               message.body = new_variation
-              expect_message { message.process! }
             end
 
             it_should_behave_like "starting a new chat" do

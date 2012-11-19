@@ -12,21 +12,17 @@ class Message < ActiveRecord::Base
   validates :guid, :uniqueness => true, :allow_nil => true
 
   state_machine :initial => :received do
-    state :queued_for_processing, :processed
-
-    event :queue_for_processing do
-      transition(:received => :queued_for_processing)
-    end
+    state :processed
 
     event :process do
-      transition(:queued_for_processing => :processed)
+      transition(:received => :processed)
     end
   end
 
   def self.queue_unprocessed(options = {})
     options[:timeout] ||= 30.seconds.ago
     scoped.where(
-      :state => "received"
+      "state != 'processed'"
     ).where("created_at <= ?", options[:timeout]).find_each do |message|
       message.queue_for_processing!
     end
@@ -37,7 +33,7 @@ class Message < ActiveRecord::Base
   end
 
   def process!
-    fire_events(:process)
+    return unless fire_events(:process)
     user.login!
 
     if user_wants_to_logout?
@@ -69,7 +65,6 @@ class Message < ActiveRecord::Base
 
   def queue_for_processing!
     Resque.enqueue(MessageProcessor, id)
-    fire_events(:queue_for_processing)
   end
 
   private
