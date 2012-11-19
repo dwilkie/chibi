@@ -8,6 +8,7 @@ describe Message do
   let(:new_message) { build(:message, :user => user) }
   let(:chat) { create(:active_chat, :user => user, :friend => friend) }
   let(:message_with_guid) { create(:message_with_guid, :user => user) }
+  let(:message_in_queue) { create(:message_queued_for_processing) }
 
   describe "factory" do
     it "should be valid" do
@@ -32,6 +33,54 @@ describe Message do
 
   it_should_behave_like "chatable" do
     let(:chatable_resource) { message }
+  end
+
+  describe ".queue_unprocessed" do
+    let(:unprocessed_message) { create(:message, :created_at => 5.minutes.ago) }
+    let(:recently_received_message) { create(:message, :created_at => 2.minutes.ago) }
+    let(:processed_message) { create(:processed_message, :created_at => 10.minutes.ago) }
+
+    before do
+      ResqueSpec.reset!
+      Timecop.freeze(Time.now)
+      unprocessed_message
+      processed_message
+      recently_received_message
+      message_in_queue
+    end
+
+    after do
+      Timecop.return
+    end
+
+    context "passing no options" do
+      before do
+        subject.class.queue_unprocessed
+      end
+
+      it "should queue for processing any non processed messages that were created more than 30 secs ago" do
+        unprocessed_message.reload.should be_queued_for_processing
+        recently_received_message.reload.should be_queued_for_processing
+        processed_message.reload.should_not be_queued_for_processing
+        MessageProcessor.should have_queued(unprocessed_message.id)
+        MessageProcessor.should have_queued(recently_received_message.id)
+        MessageProcessor.should have_queue_size_of(2)
+      end
+    end
+
+    context "passing :timeout => 5.minutes.ago" do
+      before do
+        subject.class.queue_unprocessed(:timeout => 5.minutes.ago)
+      end
+
+      it "should queue for processing any non processed message that was created more than 5 mins ago" do
+        unprocessed_message.reload.should be_queued_for_processing
+        recently_received_message.reload.should_not be_queued_for_processing
+        processed_message.reload.should_not be_queued_for_processing
+        MessageProcessor.should have_queued(unprocessed_message.id)
+        MessageProcessor.should have_queue_size_of(1)
+      end
+    end
   end
 
   describe "#guid" do
@@ -82,10 +131,9 @@ describe Message do
     end
 
     it "should mark the message as 'processed'" do
-      message = create(:message_queued_for_processing)
-      message.should be_queued_for_processing
-      expect_message { message.process! }
-      message.should be_processed
+      message_in_queue.should be_queued_for_processing
+      expect_message { message_in_queue.process! }
+      message_in_queue.should be_processed
     end
 
     shared_examples_for "starting a new chat" do

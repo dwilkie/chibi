@@ -23,6 +23,15 @@ class Message < ActiveRecord::Base
     end
   end
 
+  def self.queue_unprocessed(options = {})
+    options[:timeout] ||= 30.seconds.ago
+    scoped.where(
+      :state => "received"
+    ).where("created_at <= ?", options[:timeout]).find_each do |message|
+      message.queue_for_processing!
+    end
+  end
+
   def body
     read_attribute(:body).to_s
   end
