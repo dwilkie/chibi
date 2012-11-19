@@ -1,4 +1,4 @@
-class ChatDeactivator < RetryWorker
+class ChatDeactivator
   @queue = :chat_deactivator_queue
 
   def self.perform(chat_id, options = {})
