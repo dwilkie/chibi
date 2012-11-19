@@ -37,6 +37,7 @@ class Message < ActiveRecord::Base
   end
 
   def process!
+    puts "about to process"
     fire_events(:process)
     user.login!
 
