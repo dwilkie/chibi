@@ -37,7 +37,6 @@ class Message < ActiveRecord::Base
   end
 
   def process!
-    puts "about to process"
     fire_events(:process)
     user.login!
 
@@ -70,7 +69,7 @@ class Message < ActiveRecord::Base
 
   def queue_for_processing!
     Resque.enqueue(MessageProcessor, id)
-    #fire_events(:queue_for_processing)
+    fire_events(:queue_for_processing)
   end
 
   private
