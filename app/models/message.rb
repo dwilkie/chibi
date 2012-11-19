@@ -12,10 +12,14 @@ class Message < ActiveRecord::Base
   validates :guid, :uniqueness => true, :allow_nil => true
 
   state_machine :initial => :received do
-    state :processed
+    state :queued_for_processing, :processed
+
+    event :queue_for_processing do
+      transition(:received => :queued_for_processing)
+    end
 
     event :process do
-      transition(:received => :processed)
+      transition(:queued_for_processing => :processed)
     end
   end
 
@@ -52,6 +56,11 @@ class Message < ActiveRecord::Base
     Chat.activate_multiple!(
       user, :notify => true, :notify_no_match => false, :introduction => introduction
     ) if start_new_chat
+  end
+
+  def queue_for_processing!
+    Resque.enqueue(MessageProcessor, id)
+    fire_events(:queue_for_processing)
   end
 
   private

@@ -6,7 +6,7 @@ class MessagesController < ApplicationController
   def create
     message = Message.new(params[:message].slice(:from, :body, :guid))
     if message.save
-      Resque.enqueue(MessageProcessor, message.id)
+      message.queue_for_processing!
       status = :created
     else
       status = :bad_request

@@ -26,6 +26,10 @@ FactoryGirl.define do
     factory :message_with_guid do
       guid
     end
+
+    factory :message_queued_for_processing do
+      state "queued_for_processing"
+    end
   end
 
   factory :delivery_receipt do

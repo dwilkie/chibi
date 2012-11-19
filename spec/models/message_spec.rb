@@ -58,6 +58,19 @@ describe Message do
     end
   end
 
+  describe "queue_for_processing!" do
+    before do
+      ResqueSpec.reset!
+    end
+
+    it "queue the message for processing and mark it as 'queued_for_processing'" do
+      message.should be_received
+      message.queue_for_processing!
+      message.should be_queued_for_processing
+      MessageProcessor.should have_queued(message.id)
+    end
+  end
+
   describe "#process!" do
     include TranslationHelpers
     include MessagingHelpers
@@ -68,8 +81,9 @@ describe Message do
       user.stub(:match).and_return(new_friend)
     end
 
-    it "should mark the message as processed" do
-      message.should be_received
+    it "should mark the message as 'processed'" do
+      message = create(:message_queued_for_processing)
+      message.should be_queued_for_processing
       expect_message { message.process! }
       message.should be_processed
     end
