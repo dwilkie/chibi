@@ -70,7 +70,7 @@ class Message < ActiveRecord::Base
 
   def queue_for_processing!
     Resque.enqueue(MessageProcessor, id)
-    fire_events(:queue_for_processing)
+    #fire_events(:queue_for_processing)
   end
 
   private
