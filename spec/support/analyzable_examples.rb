@@ -66,7 +66,7 @@ shared_examples_for "analyzable" do |skip_by_user|
             [miliseconds_since_epoch(two_months_and_one_day_ago), 1],
             [miliseconds_since_epoch(eight_days_ago), 2],
             [miliseconds_since_epoch(7.days.ago), 1],
-            [miliseconds_since_epoch(Date.today), 3]
+            [miliseconds_since_epoch(Time.now.utc), 3]
           ]
         end
       end
