@@ -712,7 +712,7 @@ class User < ActiveRecord::Base
   end
 
   def extract_name(info)
-    matches = strip_match!(info, /#{profile_keywords(:name)}(?!\b#{profile_keywords(:banned_names)}\b)(\b[a-z]{2,}\b)/)
+    matches = strip_match!(info, /#{profile_keywords(:name)}(?!\b#{profile_keywords(:banned_names)}\b)(\b[a-z]{2,}\b)(?!\s*\?)/)
     match = matches.try(:[], 2) || matches.try(:[], 1)
     if match
       match.gsub!(/\d+/, "")
@@ -776,15 +776,12 @@ class User < ActiveRecord::Base
   end
 
   def info_suggests_looking_for?(sex, info, options)
-    looking_for = "#{sex}friend"
-    could_mean = "could_mean_#{sex}_or_#{looking_for}"
-
     if options[:include_shared_gender_words]
-      regexp = /\b#{profile_keywords(could_mean, looking_for)}\b/
+      regexp = /\b#{gender_keywords(sex, :desired => true)}\b/
     elsif options[:use_only_shared_gender_words]
-      regexp = /\b#{profile_keywords(could_mean)}\b/
+      regexp = /\b#{gender_keywords(sex, :desired => true, :strict => false)}\b/
     else
-      regexp = /\b#{profile_keywords(looking_for)}\b/
+      regexp = /\b#{gender_keywords(sex, :desired => true, :strict => true)}\b/
     end
     strip_match!(info, regexp)
   end
@@ -806,16 +803,28 @@ class User < ActiveRecord::Base
   end
 
   def gender_question?(info)
-    strip_match!(info, /\b(?:#{gender_keywords}|m)\s*(?<!f)(?:k?or|a?nd?|r(?:e|u)?y?)\s*(?:#{gender_keywords}|m)\b/)
+    strip_match!(info, /(?:\b(?:#{gender_keywords(:clues => false)}|m)\s*(?<!f)(?:k?or|a?nd?|r(?:e|u)?y?)\s*(?:#{gender_keywords(:clues => false)}|m)\b)|(?:#{gender_keywords(:clues => false)}\s*\?)/)
   end
 
-  def gender_keywords
-    profile_keywords(:could_mean_boy_or_boyfriend, :boy, :could_mean_girl_or_girlfriend, :girl)
+  def gender_keywords(*sexes)
+    options = sexes.extract_options!
+    sexes = [:boy, :girl] if sexes.empty?
+    keywords_to_lookup = []
+    sexes.each do |sex|
+      if options[:desired]
+        keywords_to_lookup << "#{sex}friend".to_sym if options[:strict] || options[:strict].nil?
+      else
+        keywords_to_lookup << sex
+        keywords_to_lookup << "#{sex}_gender_clues".to_sym unless options[:clues] == false
+      end
+
+      keywords_to_lookup << "could_mean_#{sex}_or_#{sex}friend".to_sym if options[:strict].nil? || options[:strict] == false
+    end
+    profile_keywords(*keywords_to_lookup)
   end
 
   def info_suggests_from?(sex, info, options)
-    could_mean = "could_mean_#{sex}_or_#{sex}friend"
-    strip_match!(info, /\b#{profile_keywords(sex, could_mean)}\b/, options)
+    strip_match!(info, /\b#{gender_keywords(sex)}\b/, options)
   end
 
   def info_suggests_from_girl?(info, options = {})

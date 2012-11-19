@@ -13,19 +13,22 @@ en:
     - "stay"
     - "agree"
     - "make"
-    - "ok(?:ay)?"
+    - "exactly"
+    - "ok(?:(?:a|e)y)?"
     - "unlucky?"
     - "simple"
     - "worship"
     - "wife"
+    - "poor"
     - "wonder(?:ful)?"
-    - "not?"
-    - "(?:old|young)(?:er)?"
-    - "live?"
+    - "not?(?:yet)?"
+    - "(?:old|young)(?:er)?(?:th(?:a|e)n)?"
+    - "live?d?"
     - "oh"
     - "good"
+    - "party"
     - "free"
-    - "this"
+    - "t?his"
     - "is"
     - "my"
     - "and?"
@@ -49,8 +52,9 @@ en:
     - "grade"
     - "great"
     - "watch"
+    - "look"
     - "age"
-    - "stud(?:y|ent|ied)"
+    - "stt?u?d(?:y|ent?|ied)"
     - "work(?:er)?"
     - "like"
     - "teacher"
@@ -114,11 +118,13 @@ en:
     - "sick"
     - "ride"
     - "drive"
+    - "dr(?:i|u)nk"
     - "farmm?er"
     - "forg(?:e|o)t"
     - "have"
-    - "reply"
+    - "rea?pla?y"
     - "do"
+    - "for"
     - "normal"
     - "listent?"
     - "sometimes?"
@@ -183,7 +189,7 @@ en:
   could_mean_boy_or_boyfriend:
     - boy
     - guy
-    - "man(?!\\?)"
+    - "man"
   friend:
     - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*)?(?<!(?:your |ur ))fri(?:e?nds?)?'
 kh:
@@ -192,13 +198,16 @@ kh:
   name:
     - "(?:(?:(?:k?(?<!p|h)n(?:h|y)?(?:o|u)m)\\s*(?:(?!chos)chh?o?m?u?o?u?r?s?(?:r|s)))|(?:(?:k?(?<!p|h)n(?:h|y)?(?:o|u)m)|(?:(?!chos)chh?o?m?u?o?u?r?s?(?:r|s))))(?:\\s*name\\s*)?(?:\\s*(?:\\(|\\:))?\\s*"
   banned_names:
-    - "(?:ch|j)or?ng"
+    - "(?:ch|j)ou?r?ng"
     - "sour?sd(?:a|e)y"
     - "(?:n|d|t)ov"
     - "(?:ah?)?y(?:o|u)k?"
     - "e(?:i|y)"
     - "leng"
     - "cf"
+    - "loy"
+    - "jeng"
+    - "p(?:o?n)?g"
     - "baa?n"
     - "t(?:a|e)"
     - "m(?:a|e|i)(?:a|r)?n"
@@ -218,18 +227,20 @@ kh:
     - "skou?l"
     - "ti(?:c|k)"
     - "t(?:v|w)er"
-    - "douch"
+    - "dou?ch"
     - "ngoy"
     - "ou?y"
     - "nah?"
     - "brab"
     - "nis"
+    - "nham"
+    - "nake"
     - "rekreay"
     - "or?(?:b|p)(?:sok)?"
     - "soks?"
     - "orkun"
     - "aos"
-    - "tomada"
+    - "t(?:a|o)mada"
     - "or?s"
     - "hery"
     - "k?m(?:i|e)an"
@@ -237,20 +248,20 @@ kh:
     - "(?:k?n(?:h|y)(?:o|u)m)"
     - "ch(?:leu|oul)y"
     - "(?:ch|j)(?:a|o)m"
-    - "k(?:a|o)mpong"
+    - "k(?:a|o)m?ph?ong"
     - "bee?line"
     - "smart"
   years_old:
     - "(?:chnaa?m)"
   girlfriend:
     - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!(?:boy |(?:p|b)ros ))(?:srey|gir?l|\bf\b)(?!\s*boy|(?:p|b)ros))'
-  girl:
-    - '(ch|j)as?'
+  girl_gender_clues:
+    - '(?:ch|j)as?'
   could_mean_girl_or_girlfriend:
     - srey
   boyfriend:
     - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l|\bf\b))'
-  boy:
+  boy_gender_clues:
     - 'bar?t'
   could_mean_boy_or_boyfriend:
     - '(?:b|p)ros'
