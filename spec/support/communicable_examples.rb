@@ -48,7 +48,7 @@ shared_examples_for "communicable from user" do
   end
 
   describe "callbacks" do
-    context "when inititalizing with an origin" do
+    context "when initializing with an origin" do
       before do
         subject # this is needed so we can call subject.class without re-calling after_initialize
       end
