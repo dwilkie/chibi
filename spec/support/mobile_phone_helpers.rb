@@ -16,6 +16,10 @@ module MobilePhoneHelpers
             "55", "62", "63", "64", "65", "72", "73", "74", "75"
           ],
           :short_code => "2442"
+        },
+        :hello => {
+          :prefixes => ["15", "16", "81", "87"],
+          :short_code => "2442"
         }
       }
     },
