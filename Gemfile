@@ -44,6 +44,10 @@ group :test, :development do
   gem 'debugger'
 end
 
+group :development do
+  gem "parallel_tests"
+end
+
 group :test do
   gem 'factory_girl'
   gem 'spork', :git => 'git://github.com/sporkrb/spork.git'

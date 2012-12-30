@@ -9,7 +9,7 @@ development: &development
 
 test:
   <<: *development
-  database: chibi_test
+  database: chibi_test<%= ENV['TEST_ENV_NUMBER'] %>
 
 # This gets overriden by Heroku
 production:
