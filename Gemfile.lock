@@ -106,6 +106,9 @@ GEM
     hash-deep-merge (0.1.1)
     hike (1.2.1)
     hirefireapp (0.0.8)
+    honeybadger (1.4.0)
+      activesupport
+      json
     i18n (0.6.1)
     journey (1.0.4)
     jquery-rails (2.1.4)
@@ -280,6 +283,7 @@ DEPENDENCIES
   guard-spork
   haml
   hirefireapp
+  honeybadger
   jquery-rails
   jquery-ui-rails
   kaminari
