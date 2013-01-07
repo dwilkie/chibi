@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe RetryWorker do
   describe ".retry_exceptions" do
-    it "should only be Redis::CommandError" do
-      subject.class.retry_exceptions.should == [Redis::CommandError]
+    it "should only be Redis::CommandError and Resque::TermException" do
+      subject.class.retry_exceptions.should == [Redis::CommandError, Resque::TermException]
     end
   end
 

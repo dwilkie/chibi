@@ -1,4 +1,4 @@
-class Dialer
+class Dialer < RetryWorker
   @queue = :dialer_queue
 
   def self.perform(missed_call_id)

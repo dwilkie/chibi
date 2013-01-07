@@ -2,7 +2,7 @@ class RetryWorker
   extend Resque::Plugins::Retry
 
   def self.retry_exceptions
-    [Redis::CommandError]
+    [Redis::CommandError, Resque::TermException]
   end
 
   def self.retry_delay

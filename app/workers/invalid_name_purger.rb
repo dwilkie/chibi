@@ -1,4 +1,4 @@
-class InvalidNamePurger
+class InvalidNamePurger < RetryWorker
   @queue = :invalid_name_purger_queue
 
   def self.perform(options = {})

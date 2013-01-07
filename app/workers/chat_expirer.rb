@@ -1,4 +1,4 @@
-class ChatExpirer
+class ChatExpirer < RetryWorker
   @queue = :chat_expirer_queue
 
   def self.perform(options = {})

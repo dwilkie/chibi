@@ -1,4 +1,4 @@
-class FriendMessenger
+class FriendMessenger < RetryWorker
   @queue = :friend_messenger_queue
 
   def self.perform(user_id, options = {})

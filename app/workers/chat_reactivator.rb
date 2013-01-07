@@ -1,4 +1,4 @@
-class ChatReactivator
+class ChatReactivator < RetryWorker
   @queue = :chat_reactivator_queue
 
   def self.perform(chat_id = nil)

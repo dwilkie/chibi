@@ -1,4 +1,4 @@
-class FriendFinder
+class FriendFinder < RetryWorker
   @queue = :friend_finder_queue
 
   def self.perform(options = {})

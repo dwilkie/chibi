@@ -1,4 +1,4 @@
-class UserReminder
+class UserReminder < RetryWorker
   @queue = :user_reminder_queue
 
   def self.perform(options = {})

@@ -1,4 +1,4 @@
-class MessageProcessor
+class MessageProcessor < RetryWorker
   @queue = :message_processor_queue
 
   def self.perform(message_id)
