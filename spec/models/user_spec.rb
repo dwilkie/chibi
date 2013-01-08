@@ -247,24 +247,26 @@ describe User do
   end
 
   describe ".remind!" do
-    let(:user_without_recent_interaction) { create(:user_without_recent_interaction) }
+    let(:user_without_recent_interaction) { create(:user, :without_recent_interaction) }
 
-    let(:user_from_registered_service_provider_without_recent_interaction) do
-      create(:user_from_registered_service_provider_without_recent_interaction)
+    let(:registered_sp_user_without_recent_interaction) do
+      create(:user, :from_registered_service_provider, :without_recent_interaction)
     end
 
-    let(:user_from_registered_service_provider_without_recent_interaction_for_a_longer_time) do
-      create(:user_from_registered_service_provider_without_recent_interaction_for_a_longer_time)
+    let(:registered_sp_user_without_recent_interaction_for_a_longer_time) do
+      create(
+        :user, :from_registered_service_provider, :without_recent_interaction_for_a_longer_time
+      )
     end
 
-    let(:user_from_registered_service_provider_with_recent_interaction) do
-      create(:user_from_registered_service_provider)
+    let(:registered_sp_user_with_recent_interaction) do
+      create(:user, :from_registered_service_provider)
     end
 
     before do
-      user_from_registered_service_provider_without_recent_interaction
-      user_from_registered_service_provider_without_recent_interaction_for_a_longer_time
-      user_from_registered_service_provider_with_recent_interaction
+      registered_sp_user_without_recent_interaction
+      registered_sp_user_without_recent_interaction_for_a_longer_time
+      registered_sp_user_with_recent_interaction
       user_without_recent_interaction
     end
 
@@ -272,8 +274,8 @@ describe User do
       with_resque do
         expect_message do
           subject.class.remind!.should == [
-            user_from_registered_service_provider_without_recent_interaction_for_a_longer_time,
-            user_from_registered_service_provider_without_recent_interaction
+            registered_sp_user_without_recent_interaction_for_a_longer_time,
+            registered_sp_user_without_recent_interaction
           ]
         end
       end
@@ -284,13 +286,13 @@ describe User do
         subject.class.remind!.should be_empty
       end
 
-      [user_from_registered_service_provider_without_recent_interaction].each do |reference_user|
+      [registered_sp_user_without_recent_interaction].each do |reference_user|
         replies_to(reference_user).count.should == 1
         reply_to(reference_user).body.should be_present
       end
 
-      reply_to(user_from_registered_service_provider_with_recent_interaction).should be_nil
-      reply_to(user_without_recent_interaction).should be_nil
+      reply_to(registered_sp_user_with_recent_interaction).should be_nil
+      reply_to(registered_sp_user_without_recent_interaction).should be_nil
     end
   end
 
@@ -519,7 +521,7 @@ describe User do
 
       before do
         load_matches
-        users_from_registered_service_providers
+        registered_sp_users
       end
 
       it "should match the user with the best compatible match" do
@@ -543,12 +545,12 @@ describe User do
           end
         end
 
-        users_from_registered_service_providers.each do |user_from_registered_service_provider|
-          results = subject.class.matches(user_from_registered_service_provider)
+        registered_sp_users.each do |registered_sp_user|
+          results = subject.class.matches(registered_sp_user)
           results.should_not be_empty
 
-          USER_MATCHES.each do |user_from_unregistered_service_provider, matches|
-            results.should_not include(send(user_from_unregistered_service_provider))
+          USER_MATCHES.each do |unregistered_sp_user, matches|
+            results.should_not include(send(unregistered_sp_user))
           end
         end
       end

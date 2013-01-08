@@ -13,7 +13,7 @@ shared_context "existing users" do
     end
   end
 
-  let(:users_from_registered_service_providers) do
+  let(:registered_sp_users) do
     users = []
     with_service_providers do |service_provider, prefix, short_code, factory_name|
       users << User.create!(:mobile_number => build(factory_name).mobile_number)

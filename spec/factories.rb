@@ -252,27 +252,15 @@ FactoryGirl.define do
       end
     end
 
+    trait :from_registered_service_provider do
+      sequence(:mobile_number, 85510000000) {|n| n.to_s }
+    end
+
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
     location
 
     factory :user_searching_for_friend do
       state "searching_for_friend"
-    end
-
-    factory :user_without_recent_interaction do
-      without_recent_interaction
-    end
-
-    factory :user_from_registered_service_provider do
-      sequence(:mobile_number, 85510000000) {|n| n.to_s }
-
-      factory :user_from_registered_service_provider_without_recent_interaction do
-        without_recent_interaction
-      end
-
-      factory :user_from_registered_service_provider_without_recent_interaction_for_a_longer_time do
-        without_recent_interaction_for_a_longer_time
-      end
     end
 
     factory :user_from_last_month do

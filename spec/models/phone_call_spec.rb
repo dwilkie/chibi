@@ -294,14 +294,14 @@ describe PhoneCall do
     def assert_dial_friend(phone_call)
       # load some users
       load_users
-      users_from_registered_service_providers
+      registered_sp_users
 
       # assert dial from the twilio number for users from a service provider without short code
       assert_dial_to_redirect_url(phone_call, :twilio_number => true)
 
       # assert dial from the user's friend's short code for users from registered service provider
       phone_call.chat = create(
-        :active_chat, :user => phone_call.user, :friend => users_from_registered_service_providers.first
+        :active_chat, :user => phone_call.user, :friend => registered_sp_users.first
       )
 
       assert_dial_to_redirect_url(phone_call)
