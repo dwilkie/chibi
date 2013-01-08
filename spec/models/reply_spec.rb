@@ -126,6 +126,7 @@ describe Reply do
 
     it "should return only the undelivered replies" do
       subject.class.undelivered.should == [reply]
+      subject.class.undelivered.order_values.should == [:created_at]
     end
   end
 

@@ -21,7 +21,7 @@ class Reply < ActiveRecord::Base
   end
 
   def self.undelivered
-    scoped.where(:delivered_at => nil)
+    scoped.where(:delivered_at => nil).order(:created_at)
   end
 
   def body
