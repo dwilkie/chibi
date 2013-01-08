@@ -33,6 +33,28 @@ describe User do
     searcher.should be_searching_for_friend
   end
 
+  shared_examples_for "within hours" do
+    context "passing :between => 2..14" do
+      context "given the current time is not between 02:00 UTC and 14:00 UTC" do
+        it "should not perform the task" do
+          Timecop.freeze(Time.new(2012, 1, 7, 1)) do
+            send(task, :between => 2..14)
+            send(negative_assertion)
+          end
+        end
+      end
+
+      context "given the current time is between 02:00 UTC and 14:00 UTC" do
+        it "should perform the task" do
+          Timecop.freeze(Time.new(2012, 1, 7, 2)) do
+            send(task, :between => 2..14)
+            send(positive_assertion)
+          end
+        end
+      end
+    end
+  end
+
   it "should not be valid without a mobile number" do
     new_user.mobile_number = nil
     new_user.should_not be_valid
@@ -189,36 +211,24 @@ describe User do
   end
 
   describe ".find_friends" do
+    def do_find_friends(options = {})
+      with_resque { subject.class.find_friends(options) }
+    end
+
     before do
       user_searching_for_friend
       user
     end
 
-    context "passing no options" do
-      it "should only try and find friends for users who are looking for them" do
-        with_resque { subject.class.find_friends }
-        assert_friend_found
-      end
+    it "should only try and find friends for users who are looking for them" do
+      do_find_friends
+      assert_friend_found
     end
 
-    context "passing :between => 2..14" do
-      context "given the current time is not between 02:00 UTC and 14:00 UTC" do
-        it "should not try to find friends" do
-          Timecop.freeze(Time.new(2012, 1, 7, 1, 0, 0)) do
-            with_resque { subject.class.find_friends(:between => 2..14) }
-            assert_friend_not_found
-          end
-        end
-      end
-
-      context "given the current time is between 02:00 UTC and 14:00 UTC" do
-        it "should try to find friends" do
-          Timecop.freeze(Time.new(2012, 1, 7, 2, 0, 0)) do
-            with_resque { subject.class.find_friends(:between => 2..14) }
-            assert_friend_found
-          end
-        end
-      end
+    it_should_behave_like "within hours" do
+      let(:positive_assertion) { :assert_friend_found }
+      let(:negative_assertion) { :assert_friend_not_found }
+      let(:task) { :do_find_friends }
     end
   end
 
@@ -263,35 +273,55 @@ describe User do
       create(:user, :from_registered_service_provider)
     end
 
-    before do
+    def create_actors
       registered_sp_user_without_recent_interaction
       registered_sp_user_without_recent_interaction_for_a_longer_time
       registered_sp_user_with_recent_interaction
       user_without_recent_interaction
     end
 
+    def do_remind(options = {})
+      create_actors unless options.delete(:skip_create_actors)
+      with_resque { expect_message { subject.class.remind!(options) } }
+    end
+
+    def assert_user_reminded(reference_user)
+      replies_to(reference_user).count.should == 1
+      reply_to(reference_user).body.should be_present
+    end
+
+    def assert_reminded
+      assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_longer_time)
+      assert_user_reminded(registered_sp_user_without_recent_interaction)
+      reply_to(registered_sp_user_with_recent_interaction).should be_nil
+      reply_to(user_without_recent_interaction).should be_nil
+    end
+
+    def assert_not_reminded
+      reply_to(registered_sp_user_without_recent_interaction_for_a_longer_time).should be_nil
+      reply_to(registered_sp_user_without_recent_interaction).should be_nil
+      reply_to(registered_sp_user_with_recent_interaction).should be_nil
+      reply_to(user_without_recent_interaction).should be_nil
+    end
+
     it "should only remind users without interaction within the last 5 days" do
-      with_resque do
-        expect_message do
-          subject.class.remind!.should == [
-            registered_sp_user_without_recent_interaction_for_a_longer_time,
-            registered_sp_user_without_recent_interaction
-          ]
-        end
-      end
+      create_actors
+
+      do_remind(:skip_create_actors => true).should == [
+        registered_sp_user_without_recent_interaction_for_a_longer_time,
+        registered_sp_user_without_recent_interaction
+      ]
 
       # run it twice to check that we can't remind more than once
-      user
-      with_resque do
-        subject.class.remind!.should be_empty
-      end
+      do_remind(:skip_create_actors => true).should be_empty
 
-      [registered_sp_user_without_recent_interaction].each do |reference_user|
-        replies_to(reference_user).count.should == 1
-        reply_to(reference_user).body.should be_present
-      end
+      assert_reminded
+    end
 
-      reply_to(registered_sp_user_with_recent_interaction).should be_nil
+    it_should_behave_like "within hours" do
+      let(:positive_assertion) { :assert_reminded }
+      let(:negative_assertion) { :assert_not_reminded }
+      let(:task) { :do_remind }
     end
   end
 

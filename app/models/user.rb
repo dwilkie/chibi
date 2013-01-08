@@ -96,28 +96,23 @@ class User < ActiveRecord::Base
   end
 
   def self.remind!(options = {})
-    inactivity_period = options.delete(:inactivity_period) || 5.days
-    limit = options.delete(:limit) || 100
+    within_hours(options) do
+      inactivity_period = options.delete(:inactivity_period) || 5.days
+      limit = options.delete(:limit) || 100
 
-    since = inactivity_period.ago
-    users_to_remind = without_recent_interaction(
-      since
-    ).from_registered_service_providers.online.order(:updated_at).limit(limit)
+      since = inactivity_period.ago
+      users_to_remind = without_recent_interaction(
+        since
+      ).from_registered_service_providers.online.order(:updated_at).limit(limit)
 
-    users_to_remind.each do |user_to_remind|
-      Resque.enqueue(UserReminder, user_to_remind.id)
+      users_to_remind.each do |user_to_remind|
+        Resque.enqueue(UserReminder, user_to_remind.id)
+      end
     end
   end
 
   def self.find_friends(options = {})
-    do_find = true
-
-    if between = options.delete(:between)
-      now = Time.now
-      do_find = (now >= time_at(between.min) && now <= time_at(between.max))
-    end
-
-    if do_find
+    within_hours(options) do
       scoped.where(:state => "searching_for_friend").find_each do |user|
         enqueue_friend_messenger(user, options)
       end
@@ -603,6 +598,17 @@ class User < ActiveRecord::Base
 
   def self.quoted_attribute(attribute)
     "\"#{table_name}\".\"#{attribute}\""
+  end
+
+  def self.within_hours(options = {}, &block)
+    do_find = true
+
+    if between = options.delete(:between)
+      now = Time.now
+      do_find = (now >= time_at(between.min) && now <= time_at(between.max))
+    end
+
+    yield if do_find
   end
 
   def self.time_at(hour)

@@ -231,13 +231,13 @@ FactoryGirl.define do
 
   factory :user do
     trait :without_recent_interaction do
-      created_at { 5.days.ago }
-      updated_at { 5.days.ago }
+      created_at { 6.days.ago }
+      updated_at { 6.days.ago }
     end
 
     trait :without_recent_interaction_for_a_longer_time do
-      created_at { 5.days.ago }
-      updated_at { 6.days.ago }
+      created_at { 8.days.ago }
+      updated_at { 7.days.ago }
     end
 
     trait :with_a_semi_recent_message do
