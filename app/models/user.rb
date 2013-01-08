@@ -105,7 +105,7 @@ class User < ActiveRecord::Base
     ).from_registered_service_providers.online.order(:updated_at).limit(limit)
 
     users_to_remind.each do |user_to_remind|
-      user_to_remind.remind!
+      Resque.enqueue(UserReminder, user_to_remind.id)
     end
   end
 

@@ -292,7 +292,6 @@ describe User do
       end
 
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
-      reply_to(registered_sp_user_without_recent_interaction).should be_nil
     end
   end
 

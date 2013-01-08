@@ -9,18 +9,15 @@ describe UserReminder do
   end
 
   describe ".perform" do
+    let(:user) { mock_model(User) }
     before do
-      User.stub(:remind!)
+      user.stub(:remind!)
+      User.stub(:find).and_return(user)
     end
 
-    it "should remind inactive users" do
-      User.should_receive(:remind!) do |options|
-        options["some"].should == :options
-        options[:some].should == :options
-        options.should be_a(HashWithIndifferentAccess)
-      end
-
-      subject.class.perform(:some => :options)
+    it "should tell the user to remind itself" do
+      user.should_receive(:remind!)
+      subject.class.perform(1)
     end
   end
 end

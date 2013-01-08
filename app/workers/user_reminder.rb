@@ -1,7 +1,8 @@
 class UserReminder < RetryWorker
   @queue = :user_reminder_queue
 
-  def self.perform(options = {})
-    User.remind!(HashWithIndifferentAccess.new(options))
+  def self.perform(user_id)
+    user = User.find(user_id)
+    user.remind!
   end
 end
