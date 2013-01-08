@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe UserReminder do
+describe UserReminderer do
 
   context "@queue" do
-    it "should == :user_reminder_queue" do
-      subject.class.instance_variable_get(:@queue).should == :user_reminder_queue
+    it "should == :user_reminderer_queue" do
+      subject.class.instance_variable_get(:@queue).should == :user_reminderer_queue
     end
   end
 
@@ -15,7 +15,7 @@ describe UserReminder do
       User.stub(:find).and_return(user)
     end
 
-    it "should tell the user to remind itself" do
+    it "should tell the user to remind himself" do
       user.should_receive(:remind!)
       subject.class.perform(1)
     end
