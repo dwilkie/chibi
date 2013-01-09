@@ -134,7 +134,7 @@ class User < ActiveRecord::Base
     match_scope = match_users_from_registered_service_providers(user, match_scope)
 
     # exclude users who were contacted in the last 5 minutes
-    match_scope = exclude_recently_contacted(match_scope)
+    # match_scope = exclude_recently_contacted(match_scope)
 
     # order by the user's preferred gender
     match_scope = order_by_preferred_gender(user, match_scope)
