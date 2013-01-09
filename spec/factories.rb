@@ -243,6 +243,8 @@ FactoryGirl.define do
     trait :with_a_semi_recent_message do
       after(:create) do |user|
         FactoryGirl.create(:message, :user => user, :created_at => 15.minutes.ago)
+        user.updated_at = 15.minutes.ago
+        user.save!
       end
     end
 

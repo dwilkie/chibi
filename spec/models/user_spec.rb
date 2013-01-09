@@ -387,10 +387,9 @@ describe User do
     # Individual Match Explanations
 
     # No profile information is known about Alex.
-    # Luke is matched first because he was seen recently and he has intitiated the most chats
-    # Dave or Pauline are matched second and third because they were seen recently and have initiated chats
-    # Chamroune is matched forth because he was seen recently
-    # Con, Paul and Mara are matched 5th, 6th or 7th.
+    # Luke, Dave, Pauline and Chamroune are excluded because they had some
+    # interaction with the system in the last 5 minutes.
+    # Con, Paul and Mara are matched 1st, 2nd or 3rd.
     # They were all seen less recently than the others and have initiated chats
     # Finally Reaskmey, Joy and Jamie are matched last since they have
     # less recent activity and no initiated chats
@@ -499,7 +498,7 @@ describe User do
     # incase the test gateway is down or something.
 
     USER_MATCHES = {
-      :alex => [:luke, [:dave, :pauline], :chamroune, [:con, :paul, :mara], [:reaksmey, :joy, :jamie]],
+      :alex => [[:con, :paul, :mara], [:reaksmey, :joy, :jamie]],
       :jamie => [:luke, [:pauline, :dave], [:chamroune, :alex], [:paul, :con, :mara], [:reaksmey, :joy]],
       :chamroune => [:luke, [:pauline, :dave], :alex, [:paul, :con, :mara], [:reaksmey, :joy, :jamie]],
       :pauline => [:luke, :dave, [:con, :paul], [:chamroune, :alex], :mara, [:joy, :jamie]],
@@ -564,7 +563,7 @@ describe User do
               expected_match.should =~ result_names[result_index..result_index + expected_match.size - 1]
               result_index += expected_match.size
             else
-              expected_match.should == result_names[result_index]
+              result_names[result_index].should == expected_match
               result_index += 1
             end
           end
