@@ -6,3 +6,8 @@ require 'resque_scheduler/tasks'
 task "resque:setup" => :environment do
   Resque.before_fork = Proc.new { ActiveRecord::Base.establish_connection }
 end
+
+desc "cleans stale workers"
+task "resque:clean_stale_workers" => :environment do
+  Resque::WorkerBoss.clean_stale_workers
+end
