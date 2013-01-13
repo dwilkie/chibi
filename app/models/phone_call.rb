@@ -116,43 +116,51 @@ class PhoneCall < ActiveRecord::Base
       transition(any => :completed, :if => :complete?)
 
       # welcome the user
-      transition(:answered => :welcoming_user)
+#      transition(:answered => :welcoming_user)
 
       # offer him the menu
-      transition(:welcoming_user => :offering_menu)
+#      transition(:welcoming_user => :offering_menu)
 
       # offer him the menu for more options
-      transition(:offering_menu => :asking_for_age_in_menu, :if => :wants_menu?)
-      transition(:asking_for_age_in_menu => :asking_for_gender_in_menu)
-      transition(:asking_for_gender_in_menu => :asking_for_looking_for_in_menu)
-      transition(:asking_for_looking_for_in_menu => :offering_menu)
+#      transition(:offering_menu => :asking_for_age_in_menu, :if => :wants_menu?)
+#      transition(:asking_for_age_in_menu => :asking_for_gender_in_menu)
+#      transition(:asking_for_gender_in_menu => :asking_for_looking_for_in_menu)
+#      transition(:asking_for_looking_for_in_menu => :offering_menu)
 
       # connect him with his existing friend
+#      transition(
+#        :offering_menu => :connecting_user_with_friend,
+#        :if => :user_chatting?
+#      )
+
       transition(
-        :offering_menu => :connecting_user_with_friend,
+        :answered => :connecting_user_with_friend,
         :if => :user_chatting?
       )
 
+#      # find him a new friend
+#      transition(:offering_menu => :finding_new_friend)
+
       # find him a new friend
-      transition(:offering_menu => :finding_new_friend)
+      transition(:answered => :finding_new_friend)
 
       # connect him with his new friend
       transition(:finding_new_friend => :connecting_user_with_friend, :if => :friend_available?)
 
       # tell him to try again later (no friend available)
-      transition(:finding_new_friend => :telling_user_to_try_again_later)
+#      transition(:finding_new_friend => :telling_user_to_try_again_later)
 
       # complete call
-      transition(:telling_user_to_try_again_later => :completed)
+#      transition(:telling_user_to_try_again_later => :completed)
 
       # tell him his chat has ended
-      transition(:connecting_user_with_friend => :telling_user_their_chat_has_ended, :if => :connected?)
+#      transition(:connecting_user_with_friend => :telling_user_their_chat_has_ended, :if => :connected?)
 
       # find him a new friend
       transition(:connecting_user_with_friend => :finding_new_friend)
 
       # offer him the menu
-      transition(:telling_user_their_chat_has_ended => :offering_menu)
+#      transition(:telling_user_their_chat_has_ended => :offering_menu)
     end
   end
 
