@@ -370,7 +370,7 @@ describe User do
     # Jamie has an empty profile last seen 15 minutes ago
     # Joy is a straight 27 year old female in Phnom Penh last seen 15 minutes ago
     # Mara is a bisexual 25 year old female in Phnom Penh last seen 15 minutes ago with 1 initiated chat
-    # Pauline is a female last seen just now with 1 initiated chat
+    # Pauline is a female last seen just now with 1 initiated chat from a registered service provider
     # Chamroune is looking for a female last seen just now
     # Dave is a straight 28 year old male in Phnom Penh last seen just now with 1 initiated chat
     # Luke is a straight 25 year old male in Phnom Penh last seen just now with 2 initiated chats
@@ -491,6 +491,8 @@ describe User do
     # Followed by either Mara who has initiated more chats than Reaksmey, Joy and Jamie
     # Con and Paul finish last again because of their age difference with Kris
 
+    # The following is no longer valid since we are using Twilio
+
     # Finally all of these users use mobile numbers which are not from a registered service provider
     # We don't want to match these users with users that have mobile numbers which are from
     # registered service providers. For example, say there are two registered service providers
@@ -550,7 +552,6 @@ describe User do
 
       before do
         load_matches
-        registered_sp_users
       end
 
       it "should match the user with the best compatible match" do
@@ -571,15 +572,6 @@ describe User do
 
           results.each do |result|
             result.should_not be_readonly
-          end
-        end
-
-        registered_sp_users.each do |registered_sp_user|
-          results = subject.class.matches(registered_sp_user)
-          results.should_not be_empty
-
-          USER_MATCHES.each do |unregistered_sp_user, matches|
-            results.should_not include(send(unregistered_sp_user))
           end
         end
       end

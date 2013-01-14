@@ -400,6 +400,7 @@ FactoryGirl.define do
       name "pauline"
       gender "f"
       with_a_recent_phone_call
+      from_registered_service_provider
     end
 
     # user with known age but unknown gender
