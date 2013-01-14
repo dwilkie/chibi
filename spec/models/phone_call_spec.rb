@@ -7,6 +7,11 @@ describe PhoneCall do
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
 
+  def create_phone_call(*traits)
+    options = traits.extract_options!
+    options[:build] ? build(:phone_call, *traits) : create(:phone_call, *traits)
+  end
+
   describe "factory" do
     it "should be valid" do
       new_phone_call.should be_valid
@@ -142,7 +147,7 @@ describe PhoneCall do
   end
 
   describe "#login_user!" do
-    let(:phone_call_from_offline_user) { create(:phone_call_from_offline_user) }
+    let(:phone_call_from_offline_user) { create(:phone_call, :from_offline_user) }
 
     it "should delegate to user#login!" do
       phone_call_from_offline_user.login_user!
@@ -165,7 +170,7 @@ describe PhoneCall do
     it "should find or create the phone call and process it returning the phone call if valid" do
       params = sample_params
 
-      subject.class.stub(:find_or_initialize_by_sid).and_return(phone_call)
+      subject.class.stub(:find_or_create_by_sid).and_return(phone_call)
 
       phone_call.should_receive(:login_user!)
       phone_call.should_receive(:process!)
@@ -178,7 +183,7 @@ describe PhoneCall do
 
       subject.should_not_receive(:login_user!)
       subject.should_not_receive(:process!)
-      subject.class.stub(:find_or_initialize_by_sid).and_return(subject)
+      subject.class.stub(:find_or_create_by_sid).and_return(subject)
       subject.class.find_or_create_and_process_by(params.dup, "http://example.com").should be_nil
     end
   end
@@ -206,25 +211,34 @@ describe PhoneCall do
       end
     end
 
-    it "should transition to the correct state" do
-      with_phone_call_states do |factory_name, twiml_expectation, phone_call_state, next_state, sub_factories|
-        assert_phone_call_can_be_completed(create(factory_name))
+    def assert_correct_transition(options = {})
+      with_phone_call_states(options) do |state, traits, next_state, twiml_expectation, substates|
+        assert_phone_call_can_be_completed(create_phone_call(state, *traits))
 
-        phone_call = create(factory_name)
+        phone_call = create_phone_call(state, *traits)
         phone_call.process!
         phone_call.should send("be_#{next_state}")
 
-        sub_factories.each do |sub_factory_name, sub_factory_attributes|
-          next_sub_factory_state = sub_factory_attributes.keys.first
-          expectations = sub_factory_attributes.values.first["expectations"] || {}
+        substates.each do |substate_trait, substate_attributes|
+          if substate_attributes.is_a?(Hash)
+            next_state_from_substate = substate_attributes["next_state"]
+            expectations = substate_attributes["expectations"]
+          else
+            next_state_from_substate = substate_attributes
+            expectations = {}
+          end
 
-          phone_call = create(sub_factory_name)
+          phone_call = create_phone_call(state, substate_trait.to_sym, *traits)
           phone_call.process!
-          phone_call.should send("be_#{next_sub_factory_state}")
+          phone_call.should send("be_#{next_state_from_substate}")
 
           assert_phone_call_attributes(phone_call, expectations)
         end
       end
+    end
+
+    it "should transition to the correct state" do
+      assert_correct_transition(:voice_prompts => false)
     end
   end
 
@@ -319,11 +333,15 @@ describe PhoneCall do
       send("assert_#{assertion_method}", phone_call, *assertion_args)
     end
 
+    def assert_correct_twiml(options = {})
+      with_phone_call_states(options) do |state, traits, next_state, expectation|
+        assert_twiml_response(create_phone_call(state, *traits, :build => true), expectation)
+      end
+    end
+
     context "given the redirect url has been set" do
       it "should return the correct twiml" do
-        with_phone_call_states do |factory_name, expectation|
-          assert_twiml_response(build(factory_name), expectation)
-        end
+        assert_correct_twiml(:voice_prompts => false)
       end
     end
   end

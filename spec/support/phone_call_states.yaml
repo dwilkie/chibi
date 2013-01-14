@@ -1,92 +1,101 @@
----
-- answered:
-    welcoming_user:
-      twiml_expectation: no_response
-- welcoming_user:
-    offering_menu:
-      twiml_expectation:
-        play_languages: welcome
-- offering_menu:
-    finding_new_friend:
-      twiml_expectation:
-        ask_for_input: offer_menu
-      substates:
-        digits:
-          caller_wants_menu:
-            asking_for_age_in_menu: '8'
-        already_in_chat:
-          connecting_user_with_friend:
-            parent: phone_call_with_active_chat
-        to_unavailable_user:
-          finding_new_friend:
-            parent: phone_call_to_unavailable_user
-- asking_for_age_in_menu:
-    asking_for_gender_in_menu:
-      twiml_expectation:
-        ask_for_input:
-          ask_for_age:
-            numDigits: 2
-      substates:
-        digits:
+without_voice_prompts:
+  - answered:
+      finding_new_friend:
+        twiml_expectation: no_response
+        substates:
+          already_in_chat: connecting_user_with_friend
+          to_unavailable_user: finding_new_friend
+  - finding_new_friend:
+      completed:
+        twiml_expectation: redirect_to_current_url
+        substates:
+          already_in_chat: connecting_user_with_friend
+  - connecting_user_with_friend:
+      finding_new_friend:
+        twiml_expectation: dial_friend
+        traits:
+        - already_in_chat
+  - completed:
+      completed:
+        twiml_expectation: hangup_current_call
+with_voice_prompts:
+  - answered:
+      welcoming_user:
+        twiml_expectation: no_response
+  - welcoming_user:
+      offering_menu:
+        twiml_expectation:
+          play_languages: welcome
+  - offering_menu:
+      finding_new_friend:
+        twiml_expectation:
+          ask_for_input: offer_menu
+        substates:
+          caller_wants_menu: asking_for_age_in_menu
+          already_in_chat: connecting_user_with_friend
+          to_unavailable_user: finding_new_friend
+  - asking_for_age_in_menu:
+      asking_for_gender_in_menu:
+        twiml_expectation:
+          ask_for_input:
+            ask_for_age:
+              numDigits: 2
+        substates:
           caller_is_24_years_old:
-            asking_for_gender_in_menu: '24'
+            next_state: asking_for_gender_in_menu
             expectations:
               user:
                 age: 24
-- asking_for_gender_in_menu:
-    asking_for_looking_for_in_menu:
-      twiml_expectation:
-        ask_for_input: ask_for_gender
-      substates:
-        digits:
+  - asking_for_gender_in_menu:
+      asking_for_looking_for_in_menu:
+        twiml_expectation:
+          ask_for_input: ask_for_gender
+        substates:
           caller_answers_male:
-            asking_for_looking_for_in_menu: '1'
+            next_state: asking_for_looking_for_in_menu
             expectations:
               user:
                 gender: m
           caller_answers_female:
-            asking_for_looking_for_in_menu: '2'
+            next_state: asking_for_looking_for_in_menu
             expectations:
               user:
                 gender: f
-- asking_for_looking_for_in_menu:
-    offering_menu:
-      twiml_expectation:
-        ask_for_input: ask_for_looking_for
-      substates:
-        digits:
+  - asking_for_looking_for_in_menu:
+      offering_menu:
+        twiml_expectation:
+          ask_for_input: ask_for_looking_for
+        substates:
           caller_answers_male:
-            offering_menu: '1'
+            next_state: offering_menu
             expectations:
               user:
                 looking_for: m
           caller_answers_female:
-            offering_menu: '2'
+            next_state: offering_menu
             expectations:
               user:
                 looking_for: f
-- finding_new_friend:
-    telling_user_to_try_again_later:
-      twiml_expectation: redirect_to_current_url
-      substates:
-        friend_found:
-          connecting_user_with_friend:
-            parent: phone_call_with_active_chat
-- connecting_user_with_friend:
-    finding_new_friend:
-      twiml_expectation: dial_friend
-      substates:
-        dial_status:
-          telling_user_their_chat_has_ended: completed
-      parent: finding_new_friend_phone_call_friend_found
-- telling_user_their_chat_has_ended:
-    offering_menu:
-      twiml_expectation:
-        play_languages: tell_user_their_chat_has_ended
-- telling_user_to_try_again_later:
-    completed:
-      twiml_expectation:
-        play_languages: tell_user_to_try_again_later
-- completed:
-    completed:
-      twiml_expectation: hangup_current_call
+  - finding_new_friend:
+      telling_user_to_try_again_later:
+        twiml_expectation: redirect_to_current_url
+        substates:
+          already_in_chat: connecting_user_with_friend
+  - connecting_user_with_friend:
+      finding_new_friend:
+        twiml_expectation: dial_friend
+        substates:
+          dial_status_completed: telling_user_their_chat_has_ended
+        traits:
+         - already_in_chat
+  - telling_user_their_chat_has_ended:
+      offering_menu:
+        twiml_expectation:
+          play_languages: tell_user_their_chat_has_ended
+  - telling_user_to_try_again_later:
+      completed:
+        twiml_expectation:
+          play_languages: tell_user_to_try_again_later
+  - completed:
+      completed:
+        twiml_expectation: hangup_current_call

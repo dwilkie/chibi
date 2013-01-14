@@ -49,16 +49,60 @@ FactoryGirl.define do
     from { user.mobile_number }
     sequence(:sid)
 
-    factory :phone_call_from_offline_user do
-      association :user, :factory => :offline_user
+    trait :answered do
+      state "answered"
     end
 
-    factory :phone_call_with_active_chat do
+    trait :welcoming_user do
+      state "welcoming_user"
+    end
+
+    trait :offering_menu do
+      state "offering_menu"
+    end
+
+    trait :asking_for_age_in_menu do
+      state "asking_for_age_in_menu"
+    end
+
+    trait :asking_for_gender_in_menu do
+      state "asking_for_gender_in_menu"
+    end
+
+    trait :asking_for_looking_for_in_menu do
+      state "asking_for_looking_for_in_menu"
+    end
+
+    trait :finding_new_friend do
+      state "finding_new_friend"
+    end
+
+    trait :connecting_user_with_friend do
+      state "connecting_user_with_friend"
+    end
+
+    trait :telling_user_their_chat_has_ended do
+      state "telling_user_their_chat_has_ended"
+    end
+
+    trait :telling_user_to_try_again_later do
+      state "telling_user_to_try_again_later"
+    end
+
+    trait :completed do
+      state "completed"
+    end
+
+    trait :caller_wants_menu do
+      digits "8"
+    end
+
+    trait :already_in_chat do
       association :chat, :factory => :active_chat
       user { chat.user }
     end
 
-    factory :phone_call_to_unavailable_user do
+    trait :to_unavailable_user do
       before(:create) do |phone_call|
         chat = FactoryGirl.create(:active_chat_with_single_user)
         FactoryGirl.create(:active_chat, :user => chat.friend)
@@ -66,29 +110,24 @@ FactoryGirl.define do
       end
     end
 
-    extend PhoneCallHelpers::States
+    trait :caller_is_24_years_old do
+      digits "24"
+    end
 
-    with_phone_call_states do |factory_name, twiml_expectation, phone_call_state, next_state, sub_factories, parent|
-      factory_options = {}
-      factory_options.merge!(:parent => parent) if parent
+    trait :caller_answers_male do
+      digits "1"
+    end
 
-      factory(factory_name, factory_options) do
-        state phone_call_state
+    trait :caller_answers_female do
+      digits "2"
+    end
 
-        sub_factories.each do |sub_factory_name, substate_attributes|
-          attribute_value_pair = substate_attributes.values.first["factory"]
-          substate_parent = attribute_value_pair["parent"]
-          sub_factory_options = {}
-          sub_factory_options.merge!(:parent => substate_parent) if substate_parent
-          factory(sub_factory_name, sub_factory_options) do
-            if substate_parent
-              state phone_call_state
-            else
-              send(attribute_value_pair.keys.first, *attribute_value_pair.values.first)
-            end
-          end
-        end
-      end
+    trait :dial_status_completed do
+      dial_status "completed"
+    end
+
+    trait :from_offline_user do
+      association :user, :factory => :offline_user
     end
   end
 

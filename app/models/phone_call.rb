@@ -18,12 +18,16 @@ class PhoneCall < ActiveRecord::Base
   end
 
   module PromptStates
+    extend ActiveSupport::Concern
 
     USER_INPUTS = {
       :gender => {:manditory => false},
       :looking_for => {:manditory => false},
       :age => {:numDigits => 2}
     }
+
+    # turn voice prompts on or off
+    VOICE_PROMPTS = false
 
     private
 
@@ -115,59 +119,60 @@ class PhoneCall < ActiveRecord::Base
       # complete the call if it has finished
       transition(any => :completed, :if => :complete?)
 
-      # welcome the user
-#      transition(:answered => :welcoming_user)
+      if PromptStates::VOICE_PROMPTS
+        # welcome the user
+        transition(:answered => :welcoming_user)
 
-      # offer him the menu
-#      transition(:welcoming_user => :offering_menu)
+        # offer him the menu
+        transition(:welcoming_user => :offering_menu)
 
-      # offer him the menu for more options
-#      transition(:offering_menu => :asking_for_age_in_menu, :if => :wants_menu?)
-#      transition(:asking_for_age_in_menu => :asking_for_gender_in_menu)
-#      transition(:asking_for_gender_in_menu => :asking_for_looking_for_in_menu)
-#      transition(:asking_for_looking_for_in_menu => :offering_menu)
+        # offer him the menu for more options
+        transition(:offering_menu => :asking_for_age_in_menu, :if => :wants_menu?)
+        transition(:asking_for_age_in_menu => :asking_for_gender_in_menu)
+        transition(:asking_for_gender_in_menu => :asking_for_looking_for_in_menu)
+        transition(:asking_for_looking_for_in_menu => :offering_menu)
+      end
 
       # connect him with his existing friend
-#      transition(
-#        :offering_menu => :connecting_user_with_friend,
-#        :if => :user_chatting?
-#      )
-
       transition(
-        :answered => :connecting_user_with_friend,
+        [:answered, :offering_menu] => :connecting_user_with_friend,
         :if => :user_chatting?
       )
 
-#      # find him a new friend
-#      transition(:offering_menu => :finding_new_friend)
-
       # find him a new friend
-      transition(:answered => :finding_new_friend)
+      transition([:answered, :offering_menu] => :finding_new_friend)
 
       # connect him with his new friend
       transition(:finding_new_friend => :connecting_user_with_friend, :if => :friend_available?)
 
-      # tell him to try again later (no friend available)
-#      transition(:finding_new_friend => :telling_user_to_try_again_later)
+      if PromptStates::VOICE_PROMPTS
+        # tell him his chat has ended
+        transition(
+          :connecting_user_with_friend => :telling_user_their_chat_has_ended,
+          :if => :connected?
+        )
 
-      # complete call
-#      transition(:telling_user_to_try_again_later => :completed)
-
-      # tell him his chat has ended
-#      transition(:connecting_user_with_friend => :telling_user_their_chat_has_ended, :if => :connected?)
+        # offer him the menu
+        transition(:telling_user_their_chat_has_ended => :offering_menu)
+      end
 
       # find him a new friend
       transition(:connecting_user_with_friend => :finding_new_friend)
 
-      # offer him the menu
-#      transition(:telling_user_their_chat_has_ended => :offering_menu)
+      if PromptStates::VOICE_PROMPTS
+        # tell him to try again later (no friend available)
+        transition(:finding_new_friend => :telling_user_to_try_again_later)
+      end
+
+      # complete call
+      transition([:finding_new_friend, :telling_user_to_try_again_later] => :completed)
     end
   end
 
   def self.find_or_create_and_process_by(params, redirect_url)
     params.underscorify_keys!
 
-    phone_call = self.find_or_initialize_by_sid(params[:call_sid], params.slice(:from, :to))
+    phone_call = self.find_or_create_by_sid(params[:call_sid], params.slice(:from, :to))
 
     if phone_call.valid?
       phone_call.login_user!
