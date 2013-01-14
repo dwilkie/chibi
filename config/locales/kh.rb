@@ -74,9 +74,21 @@
           "#{sender_intro} I want to make friend with ok te#{recipient_name}?#{recipient_question}",
           "#{recipient_starter}#{sender_intro} do ey neng fri ? H a u 2day?#{recipient_question}",
           "#{recipient_starter}#{sender_intro} m really happy 2 make friend with u.#{recipient_question}",
-          "#{recipient_starter}#{sender_intro} nice to know u.#{recipient_question}"
+          "#{recipient_starter}#{sender_intro} nice to know u.#{recipient_question}",
+          "#{recipient_starter}#{sender_intro} How could I know U?",
+          "#{recipient_starter} nice to know u",
+          "Nice 2 chat with you #{recipient_name}!",
+          "#{sender_intro} u ban play chat with me?",
+          "Oh #{recipient_starter}",
+          "#{recipient_starter}...",
+          "#{recipient_starter} nice to know u... H a u?",
+          "#{recipient_starter} 2day u can play sms mok me ban ot?",
+          "#{recipient_starter} nice to meet u",
+          "#{recipient_starter} how r u and doing what ? Oh i 4get where r u Now ?",
+          "#{recipient_starter} 92c u nas fri.....",
+          "fri how are you?",
+          "Hello how are you #{recipient_name}?"
         ]
-
         introductions.sample.strip
       },
 
