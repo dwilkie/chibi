@@ -12,7 +12,7 @@ gem "countries", :require => 'iso3166', :git => "git://github.com/dwilkie/countr
 gem "faker"
 gem "hirefireapp"
 gem "resque"
-gem "resque-retry"
+#gem "resque-retry"
 gem "thin"
 gem "redis"
 gem "nuntium_api"

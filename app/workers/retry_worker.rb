@@ -1,5 +1,5 @@
 class RetryWorker
-  extend Resque::Plugins::Retry
+  #extend Resque::Plugins::Retry
 
   def self.retry_exceptions
     [Redis::CommandError]
