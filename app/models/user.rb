@@ -131,7 +131,7 @@ class User < ActiveRecord::Base
 
     # match users from registered service providers together
     # and users from unregistered service providers together
-    match_scope = match_users_from_registered_service_providers(user, match_scope)
+    #match_scope = match_users_from_registered_service_providers(user, match_scope)
 
     # order by the user's preferred gender
     match_scope = order_by_preferred_gender(user, match_scope)
@@ -140,7 +140,7 @@ class User < ActiveRecord::Base
     match_scope = order_by_recent_activity(user, match_scope)
 
     # then by age difference and number of initiated chats
-    match_scope = order_by_age_difference_and_initiated_chats(user, match_scope)
+    #match_scope = order_by_age_difference_and_initiated_chats(user, match_scope)
 
     # then by location
     match_scope = filter_by_location(user, match_scope)
