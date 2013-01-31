@@ -131,7 +131,7 @@ class User < ActiveRecord::Base
 
     # match users from registered service providers together
     # and users from unregistered service providers together
-    # match_scope = match_users_from_registered_service_providers(user, match_scope)
+    match_scope = match_users_from_registered_service_providers(user, match_scope)
 
     # order by the user's preferred gender
     match_scope = order_by_preferred_gender(user, match_scope)
