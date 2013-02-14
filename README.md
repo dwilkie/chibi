@@ -1,5 +1,47 @@
 # Chibi
 
+## Version Control
+
+The master branch contains the code currently on the production server
+The staging branch contains the code on the staging server
+
+## Development Method
+
+1. Create a new feature branch off of master
+2. Write some tests for the new functionality
+3. Implement the code to make the tests pass
+4. Run the tests on the feature branch
+5. Commit the change to the feature branch
+6. Merge the feature branch into staging
+7. Run the tests on the staging branch
+8. Deploy to staging
+9. Manually check that it works in staging
+10. Merge the feature branch into master
+11. Run the tests on master
+12. Deploy to production
+
+## Production Server
+
+### Host
+
+[https://chibi.herokuapp.com/](https://chibi.herokuapp.com/)
+
+### Deployment
+
+    git push heroku master
+
+## Staging Environment
+
+### Host
+
+[https://chibi-staging.herokuapp.com](https://chibi-staging.herokuapp.com)
+
+### Deployment
+
+    git push staging staging:master
+
+This command tells git that you want to push from your local `staging` branch to the `master` branch of your `staging` remote.
+
 ## Pull remote data to local database
 
     curl -o latest.dump `heroku pgbackups:url`
@@ -10,7 +52,7 @@
 
 ### Creating a message
 
-    curl -i -d "message[from]=85512223445&message[body]=m+Dave+kt+jong+rok+met+srey" --user username:secret https://chibi.herokuapp.com/messages
+    curl -i -d "message[from]=85512223445&message[body]=m+Dave+kt+jong+rok+met+srey" --user username:secret https://chibi-staging.herokuapp.com/messages
 
     HTTP/1.1 201 Created
     Cache-Control: max-age=0, private, must-revalidate
