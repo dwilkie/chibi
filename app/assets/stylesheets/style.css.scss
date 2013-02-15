@@ -1,6 +1,6 @@
 /* - -- --- ---- ----- RESET ----- ---- --- -- - */
 
-body, h1, h2, h3, h3, h4, h5, h6, p, ul, ol, li, form, input, img, blockquote, code, pre{
+body, h1, h2, h3, h3, h4, h5, h6, p, ul, ol, li, img, blockquote, code, pre{
   border:0;
   margin:0;
   padding:0;
@@ -347,49 +347,6 @@ ul.faq li img{
 
 .social li img:hover{
   margin: 0 0 -1px 0;
-}
-
-/* - -- --- FORM --- -- - */
-
-.form{
-  float: left;
-  width: 210px;
-  padding: 8px 12px;
-  font-size: 14px;
-  line-height: 1em;
-  color: #333;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #fff #d5d5d5 #a0a0a0;
-  background: #f9f9f9;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  -webkit-box-shadow: inset 0 0 10px rgba(0,0,0,0.25);
-  -moz-box-shadow: inset 0 0 10px rgba(0,0,0,0.25);
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.25);
-}
-
-input:focus, input:active, textarea:focus{
-    outline: none;
-}
-
-input::-moz-focus-inner {
-  border: 0;
-}
-
-textarea{
-    resize: none;
-    -moz-resize: none; /* FF4 - via @sambowler */
-    overflow: auto;
-}
-
-.form::-webkit-input-placeholder{
-  color: #333;
-}
-
-.form:-moz-placeholder{
-  color: #333;
 }
 
 /* - -- --- TYPOGRAPHY AND OTHER STYLES --- -- - */

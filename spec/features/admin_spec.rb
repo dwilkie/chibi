@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe "Admin" do
   include MessagingHelpers
+  include AdminHelpers
 
   let(:user) { create(:male_user) }
   let(:another_user) { create(:female_user) }
@@ -25,12 +26,6 @@ describe "Admin" do
   let(:chats) { [another_chat, chat] }
 
   let(:communicable_resources) { [messages, replies, phone_calls] }
-
-  def authorize
-    page.driver.browser.basic_authorize(
-      ENV["HTTP_BASIC_AUTH_ADMIN_USER"], ENV["HTTP_BASIC_AUTH_ADMIN_PASSWORD"]
-    )
-  end
 
   context "without the username and password" do
     it "should deny me access" do
