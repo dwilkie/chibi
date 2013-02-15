@@ -139,8 +139,8 @@ class User < ActiveRecord::Base
     # then by recent activity
     match_scope = order_by_recent_activity(user, match_scope)
 
-    # then by age difference and number of initiated chats
-    #match_scope = order_by_age_difference_and_initiated_chats(user, match_scope)
+    # then by age difference
+    match_scope = order_by_age_difference(user, match_scope)
 
     # then by location
     match_scope = filter_by_location(user, match_scope)
@@ -338,77 +338,71 @@ class User < ActiveRecord::Base
   OUT_OF_RANGE_CUTOFF = 2
 
   # Orders users by a function based on the age difference of the user being matched
-  # and the amount of chats the user has initiated. Orders in ASC order.
+  # Orders in ASC order.
 
   # The function when matching a female with a male is:
-  # |a| + 100                  for a <= -K2
-  # 1/(c + 1)                  for -K2 < a <= K1
-  # (|a| - K1 + 1)^2 / (c + 1) for a > K1
+  # |a| + 50                   for a <= -K2
+  # 0                          for -K2 < a <= K1
+  # (|a| - K1)                 for a > K1
 
   # Similarly, the function when matching a male with a female is:
-  # (|a| - K1 + 1)^2 / (c + 1) for a < -K1
-  # 1/(c + 1)                  for -K1 <= a < K2
-  # |a| + 100                  for a >= K2
+  # (|a| - K1)                 for a < -K1
+  # 0                          for -K1 <= a < K2
+  # |a| + 50                   for a >= K2
 
   # The function when matching males with males or females with females is:
-  # (|a| - K1 + 1)^2 / (c + 1) for a < -K1
-  # 1/(c + 1)                  for -K1 <= a <= K1
-  # (|a| - K1 + 1)^2 / (c + 1) for a > K1
+  # (|a| - K1)                 for a < -K1
+  # 0                          for -K1 <= a <= K1
+  # (|a| - K1)                 for a > K1
 
   # where:
   # a is the age difference in years between the user being matched and the db user
-  # c is the number of chats the db user has initiated
   # K1 is the age bearing cutoff in years (AGE_BEARING_CUTOFF)
   # K2 is the out of range cutoff in years (OUT_OF_RANGE_CUTOFF)
 
   # Examples:
   # User being matched is female & the current db user is male:
   # a = 25 (the male db user is 25 years older than the female being matched)
-  # c = 50 (the male db user has initiated 50 chats)
   # K1 = 10
-  # (25 - 10 + 1)^2 / (50 + 1) = 25.4
+  # 25 - 10 = 15
 
   # Next db user is male
   # a = 11 (the male db user is 11 years older than the female being matched)
-  # c = 5  (the male db user has initiated 0 chats)
   # K1 = 10
-  # (11 - 10 + 1)^2 / (0 + 1) = 4
+  # 11 - 10 = 1
 
   # Next db user is male
   # a = -2 (the male db user is 2 years younger than the female being matched)
   # K2 = 2
-  # 2 + 100 = 102
+  # 2 + 50 = 52
 
   # Next db user is female
   # a = -10 (the female db user is 10 years younger than the female being matched)
-  # c = 1 (the female db user has initiated 1 chat)
   # K1 = 10
-  # 1/(1 + 1) = 0.5
+  # 0
 
-  def self.order_by_age_difference_and_initiated_chats(user, scope)
-    # join all users on intitated chats
-    scope = scope.joins("LEFT OUTER JOIN \"chats\" ON #{quoted_attribute(:id)} = \"chats\".\"user_id\"")
+  def self.order_by_age_difference(user, scope)
+    if user.date_of_birth?
+      age_diff_in_years = "((DATE('#{user.date_of_birth}') - \"#{table_name}\".\"date_of_birth\")/365)"
+      abs_age_diff_in_years = "(ABS(#{age_diff_in_years}))"
 
-    age_diff_in_years = "((DATE('#{user.date_of_birth}') - \"#{table_name}\".\"date_of_birth\")/365)"
-    abs_age_diff_in_years = "(ABS(#{age_diff_in_years}))"
-    chat_factor = "(count(\"chats\".*) + 1)"
+      age_bearing_case = "#{abs_age_diff_in_years} > #{AGE_BEARING_CUTOFF}"
 
-    age_bearing_case = "#{abs_age_diff_in_years} >= #{AGE_BEARING_CUTOFF}"
+      if user.female?
+        # when matching with a boy disadvantage those that are too young
+        out_of_range_case = "#{age_diff_in_years} <= #{OUT_OF_RANGE_CUTOFF * -1} AND #{table_name}.gender = 'm'"
+      elsif user.male?
+        # when matching with a girl disadvantage those that are too old
+        out_of_range_case = "#{age_diff_in_years} >= #{OUT_OF_RANGE_CUTOFF} AND #{table_name}.gender = 'f'"
+      end
 
-    if user.female?
-      # when matching with a boy disadvantage those that are too young
-      out_of_range_case = "#{age_diff_in_years} <= #{OUT_OF_RANGE_CUTOFF * -1} AND #{table_name}.gender = 'm'"
-    elsif user.male?
-      # when matching with a girl disadvantage those that are too old
-      out_of_range_case = "#{age_diff_in_years} >= #{OUT_OF_RANGE_CUTOFF} AND #{table_name}.gender = 'f'"
+      # significantly disadvantage non prefered age group
+      out_of_range_clause = "WHEN #{out_of_range_case} THEN #{abs_age_diff_in_years} + 50" if out_of_range_case
+
+      scope.order("CASE WHEN #{age_bearing_case} THEN (#{abs_age_diff_in_years} - #{AGE_BEARING_CUTOFF}) #{out_of_range_clause} ELSE 0 END")
+    else
+      scope
     end
-
-    # significantly disadvantage non prefered age group
-    out_of_range_clause = "WHEN #{out_of_range_case} THEN #{abs_age_diff_in_years} + 100" if out_of_range_case
-
-    order_sql = user.date_of_birth? ? "CASE WHEN #{age_bearing_case} THEN (POWER(#{abs_age_diff_in_years} - #{AGE_BEARING_CUTOFF} + 1, 2)) * 1.0/#{chat_factor} #{out_of_range_clause} ELSE 1.0/#{chat_factor} END" : "1.0/#{chat_factor}"
-
-    scope.order(order_sql)
   end
 
   # the smallest period in hours of user inactivity

@@ -360,7 +360,7 @@ describe User do
     #    user does not reply, he will still be ordered higher than other users because he has
     #    a recent interaction. Secondly, it helps to remind users who are inactive.
 
-    # 3. Order by a combination of age difference and number of initiated chats
+    # 3. Order by age difference
     # 4. Order by location
 
     # User Descriptions
@@ -369,126 +369,112 @@ describe User do
     # Alex has an empty profile last seen just now
     # Jamie has an empty profile last seen 15 minutes ago
     # Joy is a straight 27 year old female in Phnom Penh last seen 15 minutes ago
-    # Mara is a bisexual 25 year old female in Phnom Penh last seen 15 minutes ago with 1 initiated chat
-    # Pauline is a female last seen just now with 1 initiated chat from a registered service provider
+    # Mara is a bisexual 25 year old female in Phnom Penh last seen 15 minutes ago
+    # Pauline is a female last seen just now from a registered service provider
     # Chamroune is looking for a female last seen just now
-    # Dave is a straight 28 year old male in Phnom Penh last seen just now with 1 initiated chat
-    # Luke is a straight 25 year old male in Phnom Penh last seen just now with 2 initiated chats
-    # Con is a straight 37 year old male in Siem Reap last seen 15 minutes ago with 1 initiated chat
-    # Paul is a straight 39 year old male in Phnom Penh last seen 15 minutes ago with 1 initiated chat
+    # Dave is a straight 28 year old male in Phnom Penh last seen just now
+    # Luke is a straight 25 year old male in Phnom Penh last seen just now
+    # Con is a straight 37 year old male in Siem Reap last seen 15 minutes ago with
+    # Paul is a straight 39 year old male in Phnom Penh last seen 15 minutes ago with
     # Harriet is a lesbian from Battambang last seen 15 minutes ago currently chatting with Eva
-    # Eva is a lesbian from Siem Reap last seen 15 minutes ago crrently chatting with Harriet
+    # Eva is a lesbian from Siem Reap last seen 15 minutes ago currently chatting with Harriet
     # Nok is a straight female from Chiang Mai last seen 15 minutes ago
-    # Michael is a bisexual 29 year old male from Chiang Mai last seen 15 minutes ago with 1 initiated chat
-    # Hanh is a gay 28 year old male from Chiang Mai last seen 15 minutes ago with 1 initiated chat
+    # Michael is a bisexual 29 year old male from Chiang Mai last seen 15 minutes ago with
+    # Hanh is a gay 28 year old male from Chiang Mai last seen 15 minutes ago
     # View is a gay 26 year old male from Chiang Mai last seen 15 minutes ago
     # Reaksmey is bisexual last seen 15 minutes ago
 
     # Individual Match Explanations
 
-    # No profile information is known about Alex.
-    # Luke is matched first because he was seen recently and he has intitiated the most chats
-    # Dave or Pauline are matched second and third because they were seen recently and have initiated chats
-    # Chamroune is matched forth because he was seen recently
-    # Con, Paul and Mara are matched 5th, 6th or 7th.
-    # They were all seen less recently than the others and have initiated chats
-    # Finally Reaskmey, Joy and Jamie are matched last since they have
-    # less recent activity and no initiated chats
+    # No profile information is known about Alex,
+    # so there is no ordering on gender, age difference nor location.
+    # Ordering is based on recent activity only.
 
     # No Profile information is known about Jamie
-    # Similar to Alex, it's Luke first followed by Dave or Pauline
-    # Alex was just seen recently so either he is matched next or Chamroune who was also seen recently
-    # The rest of the results are the same as for Alex
+    # Similar to Alex, ordering is based on recent activity only
 
     # Chamroune is looking for a female but for now we are ignoring this data.
-    # Since his/her gender is unknown his matches are similar to Alex and Jamie's
+    # Since his/her gender and location is unknown his matches are similar to Alex and Jamie's
 
     # Pauline is female so male users are matched first.
-    # Again, Luke wins because he's a boy was seen recently and has the most initiated chats
-    # Dave is outright second this time as he's a boy is was seen recently and has an initiated chat
-    # Con and Paul are equal third and forth because they're guys
-    # seen less recently than Dave but both with initiated chats.
-    # Chamroune and Alex are equal 5th and 6th because they have recent activity even
-    # though their genders are unknown.
-    # Mara is outright 7th because she has less recent interaction than Chamroune and Alex but has
-    # more inititated chats than Joy and Jamie. Reaksmey is excluded because he has already chatted
-    # with Pauline.
+    # Luke and Dave are equal first because they're guys
+    # Con and Paul are equal second because they're also guys but were
+    # seen less recently than Dave and Luke.
+    # Chamroune and Alex are equal 3rd because they have more recent activity than
+    # Mara, Joy and Jamie even though their genders are unknown.
+    # Mara, Joy and Jamie are therefore equal 4th
+    # Reaksmey is excluded because he has already chatted with Pauline.
 
     # Nok is female from Thailand. The only other users from Thailand are Michael, Hanh and View
     # who are all males. Nok has already chatted with Hanh (and he's also logged out) so he is eliminated
-    # Michael and View were both seen 15 minutes ago, however Michael has initiated one more chat than View
+    # Michael and View were both seen 15 minutes ago so they match equal first.
 
     # Joy is a female in Cambodia, so she matches with all the males first.
     # Dave and Luke were both seen in the last 15 minutes but Dave matches before Luke
-    # because his is older than Joy by 2 years where as Luke is 2 years younger. Con and Paul have
-    # initiated the same amount of chats but Con matches first because he is closer in age to Joy.
-    # Pauline is next because she was recently seen just recently and has an initiated chat.
-    # Chamroune and Alex follow next because of their more recent interaction
-    # Mara is next because she has 1 initiated chat but was seen more than 15 minutes ago
-    # Finally Reaskmey and Jamie are last.
+    # because his is older than Joy by 2 years where as Luke is 2 years younger.
+    # Con matches because Paul because he is closer in age to Joy.
+    # Pauline, Chamroune and Alex are equal fifth because of their more recent interaction
+    # Finally Reaskmey, Jamie and Mara match last.
 
     # Dave is a guy in Cambodia. Harriet, Eva, Mara, Pauline and Joy are all females in Cambodia however
     # Harriet and Eva are currently chatting with each other, so they are excluded
     # (also Harriet has previously chatted with Dave).
-    # Pauline is the female seen most recently so she is matched first. Mara and Joy were both seen
-    # more than 15 minutes ago but Mara has more initiated chats so she matches second before Joy.
-    # Luke is matched next because he was seen most recently and has the most number of initiated chats
-    # Followed by Chamroune and Alex who both have recent interaction
-    # Followed by Con who were seen more than 15 mins ago but has an initiated chat
-    # Followed by Jamie and Reaksmey were seen more than 15 mins ago but have less initiated chats
-    # Finally Paul is matched last even though he has initiated chats because
-    # he is more than 10 years older than Dave
+    # Pauline is the female seen most recently so she is matched first.
+    # Mara and Joy are equal second as they are the two remaining females.
+    # Luke, Chamroune and Alex are equal third because of their more recent activity
+    # Followed by Con, Jamie and Reaksmey who were all seen more than 15 mins ago
+    # Paul is matched last because he is more than 10 years older than Dave
 
-    # Con is also a guy in Cambodia. Con has already chatted with Mara, so Con matches
-    # with Pauline then Joy similar to the previous example. In contrast to the previous example
-    # however, Con matches with Chamroune and Alex before Luke because of the age difference
-    # between Con and Luke. Since the age of Chamroune and Alex is not known they are ordered by
-    # number of initiated chats only. However, since Luke's age is known and he is 12 years younger than Con
-    # Chamroune and Alex are matched before Luke. The rest of the logic is the same as the previous example
+    # Con is also a guy in Cambodia. Con has already chatted with Mara so she is eliminated
+    # Pauline and Joy match first and second similar to the previous example.
+    # In contrast to the previous example, Con matches with Dave, Chamroune and Alex before Luke
+    # because Luke is 12 years younger than Con and the age of Chamroune and Alex is not known
+    # Paul, Jamie and Reaksmey are matched last because of their less recent activity
 
-    # Paul is also a guy in Cambodia. Similar to the previous example Pauline matches first. In contrast,
-    # Joy matches before Mara because she is closer in age to Paul than Mara even though Mara has initiated
-    # more chats. Again Chamroune and Alex match next because their ages are unknown. Dave also matches
-    # before Luke even though he has initiated more chats than Dave because Dave is closer in age.
-    # Luke is however matched before Con because he was seen recently but Con was seen more than 15 mins ago/
-    # The rest of the logic is the same as the previous example
+    # Paul is also a guy in Cambodia.
+    # Similar to the previous example Pauline matches first.
+    # In contrast, Joy matches before Mara because she is closer in age to Paul than Mara.
+    # Again, Chamroune and Alex match next because of their recent activity and unknown ages
+    # Dave matches before Luke because he is closer in age to Paul
+    # Luke is however matched next because he was seen more recently than Con, Reaskmey and Jamie
 
-    # Luke is also a guy in Cambodia, however he is younger or the same age as all of the available girls.
-    # Again Pauline matches first for the reasons described above. Mara is next because she is closer
-    # in age than Joy. Dave is next followed by Alex and Chamroune as in the previous example.
-    # Reaksmey and Jamie are matched next because even though they have initiated less chats than Paul and Con
-    # their age is unknown, whereas for Con and Paul, they are more than 10 years older than Luke.
-    # Con matches before Paul because he is closer in age than Paul
+    # Luke is also a guy in Cambodia, however he is younger or the same age
+    # as all of the available girls.
+    # Again Pauline matches first.
+    # Mara is next because she is closer in age than Joy.
+    # Dave, Alex and Chamroune are next because of their recent activity
+    # Reaksmey and Jamie matched before Con and Paul because even though their age is unknown,
+    # Con and Paul are more than 10 years older than Luke.
+    # Con matches before Paul because he is closer in age to Luke than Paul
 
-    # Harriet is a girl. Like the other girls she matches with the boys first starting with
-    # Luke. Dave has already chatted with Harriet so he is eliminated from the results.
-    # Con and Paul were both seen more than 15 mins ago and have the same amount of initiated chats
+    # Harriet is a girl. Like the other girls she matches with the boys first.
+    # Dave has already chatted with Harriet so he is eliminated from the results.
+    # Luke is matched first because of his recent activity
     # Con is matched before Paul because he is closer (in Siem Reap) to Harriet (in Battambang) than
-    # Paul (in Phnom Penh). Pauline is next since she was recently seen and has more initiated chats
-    # Followed by the usual suspects Chamroune and Alex, Mara and Joy and Jamie and Reaksmey.
+    # Paul (in Phnom Penh).
+    # Pauline, Chamroune and Alex are next due to their recent activity
+    # Followed by Mara, Joy, Jamie and Reaksmey.
     # Eva is eliminated because she is currently chatting with Harriet
 
-    # Eva gets a similar result to Harriet (with Dave included)
+    # Eva is also in Siem Reap and gets a similar result to Harriet (with Dave included)
 
     # Hanh is a guy living in Thailand. He has already chatted with Nok.
-    # He matches with Michael before View because Michael has one more initiated chat than View
+    # Michael and View match equal first
 
     # View has previously chatted with Michael and Hanh is offline, so Nok is matched
 
-    # Mara is a girl. Her matches are similar to Joy's except Con is eliminated because he has
-    # already chatted with Mara before and for Mara, Luke is matched before Dave because
-    # Mara is not older than Luke and Luke has initiated more chats.
+    # Mara is a girl. Her matches are similar to Joy's
+    # Con is eliminated because he has already chatted with Mara before.
 
     # Michael is from Thailand. He has previously chatted with View and Hanh is offline so
     # Nok is matched with him
 
-    # Reaskmey's gender is unknown. His/Her matches are simliar to Alex's except Pauline is eliminated
-    # because he/she has already chatted with Pauline.
+    # Reaskmey's gender is unknown. His/Her matches are simliar to Alex and Jamie's
+    # Pauline is eliminated because he/she has already chatted with Pauline.
 
     # Kris is offline and his/her gender is unknown however his/her age is known.
-    # Luke matches first because he has the most initiated chats, followed by either Dave or Pauline
-    # Alex or Chamroune are next due to their recent activity
-    # Followed by either Mara who has initiated more chats than Reaksmey, Joy and Jamie
+    # Luke, Dave, Pauline, Chamroune and Alex match first because of their recent activity
+    # Followed by Joy, Mara, Reaksmey and Jamie
     # Con and Paul finish last again because of their age difference with Kris
 
     # The following is no longer valid since we are using Twilio
@@ -501,24 +487,24 @@ describe User do
     # incase the test gateway is down or something.
 
     USER_MATCHES = {
-      :alex => [:luke, [:dave, :pauline], :chamroune, [:con, :paul, :mara], [:reaksmey, :joy, :jamie]],
-      :jamie => [:luke, [:pauline, :dave], [:chamroune, :alex], [:paul, :con, :mara], [:reaksmey, :joy]],
-      :chamroune => [:luke, [:pauline, :dave], :alex, [:paul, :con, :mara], [:reaksmey, :joy, :jamie]],
-      :pauline => [:luke, :dave, [:con, :paul], [:chamroune, :alex], :mara, [:joy, :jamie]],
-      :nok => [:michael, :view],
-      :joy => [:dave, :luke, :con, :paul, :pauline, [:chamroune, :alex], :mara, [:reaksmey, :jamie]],
-      :dave => [:pauline, :mara, :joy, :luke, [:chamroune, :alex], :con, [:jamie, :reaksmey], :paul],
-      :con => [:pauline, :joy, :dave, [:chamroune, :alex], :luke, :paul, [:jamie, :reaksmey]],
-      :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, :con, [:jamie, :reaksmey]],
-      :luke => [:pauline, :mara, :joy, :dave, [:alex, :chamroune], [:jamie, :reaksmey], :con, :paul],
-      :harriet => [:luke, :con, :paul, :pauline, [:chamroune, :alex], [:mara, :joy], [:jamie, :reaksmey]],
-      :eva => [:luke, :dave, :con, :paul, :pauline, [:chamroune, :alex], [:mara, :joy], [:reaksmey, :jamie]],
-      :hanh => [:michael, :view],
+      :alex => [[:chamroune, :luke, :pauline, :dave], [:mara, :paul, :jamie, :reaksmey, :con, :joy]],
+      :jamie => [[:chamroune, :luke, :pauline, :dave, :alex], [:mara, :paul, :reaksmey, :con, :joy]],
+      :chamroune => [[:luke, :pauline, :dave, :alex], [:mara, :paul, :reaksmey, :con, :joy, :jamie]],
+      :pauline => [[:luke, :dave], [:con, :paul], [:alex, :chamroune], [:joy, :mara, :jamie]],
+      :nok => [[:michael, :view]],
+      :joy => [:dave, :luke, :con, :paul, [:chamroune, :pauline, :alex], [:mara, :jamie, :reaksmey]],
+      :dave => [:pauline, [:mara, :joy], [:luke, :chamroune, :alex], [:con, :jamie, :reaksmey], :paul],
+      :con => [:pauline, :joy, [:dave, :chamroune, :alex], :luke, [:paul, :jamie, :reaksmey]],
+      :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, [:con, :reaksmey, :jamie]],
+      :luke => [:pauline, :mara, :joy, [:dave, :alex, :chamroune], [:reaksmey, :jamie], :con, :paul],
+      :harriet => [:luke, :con, :paul, [:pauline, :chamroune, :alex], [:mara, :joy, :jamie, :reaksmey]],
+      :eva => [[:dave, :luke], :con, :paul, [:alex, :chamroune, :pauline], [:joy, :mara, :reaksmey, :jamie]],
+      :hanh => [[:michael, :view]],
       :view => [:nok],
-      :mara => [:luke, :dave, :paul, :pauline, [:chamroune, :alex], :joy, [:reaksmey, :jamie]],
+      :mara => [[:dave, :luke], :paul, [:chamroune, :alex, :pauline], [:joy, :jamie, :reaksmey]],
       :michael => [:nok],
-      :reaksmey => [:luke, :dave, [:alex, :chamroune], [:paul, :mara, :con], [:jamie, :joy]],
-      :kris => [:luke, [:dave, :pauline], [:alex, :chamroune], :mara, [:reaksmey, :joy, :jamie], :con, :paul]
+      :reaksmey => [[:luke, :chamroune, :dave, :alex], [:mara, :joy, :con, :jamie, :paul]],
+      :kris => [[:luke, :dave, :pauline, :chamroune, :alex], [:joy, :mara, :reaksmey, :jamie], :con, :paul]
     }
 
     USER_MATCHES.each do |user, matches|
