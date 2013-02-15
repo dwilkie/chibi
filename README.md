@@ -2,7 +2,7 @@
 
 ## Version Control
 
-The master branch contains the code currently on the production server
+The master branch contains the code currently on the production server.
 The staging branch contains the code on the staging server
 
 ## Development Method
@@ -35,6 +35,10 @@ The staging branch contains the code on the staging server
 ### Host
 
 [https://chibi-staging.herokuapp.com](https://chibi-staging.herokuapp.com)
+
+### Form to simulate MO
+
+https://chibi-staging.herokuapp.com/test_messages/new
 
 ### Deployment
 
