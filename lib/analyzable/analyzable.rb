@@ -5,7 +5,7 @@ module Analyzable
     # this returns the data in the format required by HighStocks
     def overview_of_created(options = {})
       count_args = "DISTINCT(#{table_name}.user_id)" if options[:by_user]
-      date_sql = options[:timeframe] ? "DATE_TRUNC('#{options[:timeframe]}', #{table_name}.created_at)" : "DATE(#{table_name}.created_at)"
+      date_sql = options[:timeframe] ? "DATE_TRUNC('#{options[:timeframe]}', created_at)" : "DATE(created_at)"
       group_by_sql = "EXTRACT(EPOCH FROM #{date_sql}) * 1000"
 
       scope = scoped
