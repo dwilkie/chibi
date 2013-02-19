@@ -7,7 +7,9 @@ class OverviewPresenter < BasePresenter
       "timeline_by_#{timeframe}",
       :new_users => overview.new_users(options),
       :messages_received => overview.messages_received(options),
-      :users_texting => overview.users_texting(options)
+      :users_texting => overview.users_texting(options),
+      :return_users => overview.return_users(options),
+      :profit => overview.profit(options)
     )
   end
 

@@ -4,9 +4,11 @@ describe OverviewPresenter do
   include ActionView::TestCase::Behavior
   let(:sample_data) do
     {
-      :new_users => [1234, 5],
+      :new_users => [1122, 5],
       :messages_received => [6644, 4],
-      :users_texting => [1122, 5]
+      :users_texting => [1122, 5],
+      :return_users => [1122, 0],
+      :profit => [6644, 0.06]
     }
   end
 
