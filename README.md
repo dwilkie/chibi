@@ -40,6 +40,11 @@ The staging branch contains the code on the staging server
 
 https://chibi-staging.herokuapp.com/test_messages/new
 
+### Toggle Message Delivery
+
+    heroku config:add DELIVER_REPLIES=1
+    heroku config:add DELIVER_REPLIES=0
+
 ### Deployment
 
     git push staging staging:master
@@ -106,9 +111,25 @@ Under "Applications" select "edit" then under "Custom HTTP POST format" insert t
   <tr>
     <td>To</td>
     <td>Regexp</td>
-    <td>sms://(?:1|44)\d+</td>
+    <td>sms://855(?:10|69|70|86|93|98)\d+</td>
     <td>suggested_channel</td>
-    <td>twilio</td>
+    <td>smart2</td>
+    <td>checked</td>
+  </tr>
+  <tr>
+    <td>To</td>
+    <td>Regexp</td>
+    <td>sms://855(?:60|66|67|68|90|2346|2446|2546|2646|3246|3346|3446|3546|3646|4246|4346|4446|4546|5246|5346|5446|5546|6246|6346|6446|6546|7246|7346|7446|7546)\d+</td>
+    <td>suggested_channel</td>
+    <td>beeline</td>
+    <td>checked</td>
+  </tr>
+  <tr>
+    <td>To</td>
+    <td>Regexp</td>
+    <td>sms://855(?:15|16|81|87|2345|2445|2545|2645|3245|3345|3445|3545|3645|4245|4345|4445|4545|5245|5345|5445|5545|6245|6345|6445|6545|7245|7345|7445|7545)\d+</td>
+    <td>suggested_channel</td>
+    <td>hello</td>
     <td>checked</td>
   </tr>
   <tr>
@@ -116,7 +137,7 @@ Under "Applications" select "edit" then under "Custom HTTP POST format" insert t
     <td>Regexp</td>
     <td>sms://\d+</td>
     <td>suggested_channel</td>
-    <td>test</td>
+    <td>twilio</td>
     <td>checked</td>
   </tr>
 </table>
