@@ -31,6 +31,7 @@ class OverviewPresenter < BasePresenter
     chart = LazyHighCharts::HighChart.new do |f|
       f.options[:title][:text] = title
       f.options[:chart][:borderWidth] = 5
+      f.options[:chart][:zoomType] = "y"
       data_sets.each do |series_id, data|
         f.series(:name => series_id.to_s.titleize, :data => data)
       end

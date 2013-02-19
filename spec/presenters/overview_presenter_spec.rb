@@ -34,6 +34,7 @@ describe OverviewPresenter do
 
     chart_options["renderTo"].should == chart_identifier
     chart_options["borderWidth"].should == 5
+    chart_options["zoomType"].should == "y"
 
     sample_data.each_with_index do |(identifier, data_set), index|
       series_options[index]["name"].should == identifier.to_s.titleize
