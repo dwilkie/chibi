@@ -5,3 +5,4 @@ tmp/
 .sass-cache/
 vendor/ruby
 *.swp
+latest.dump
