@@ -29,11 +29,11 @@ class Overview
     users
   end
 
-  def profit(options = {})
-    profit_in_dollars = []
+  def revenue(options = {})
+    revenue_in_dollars = []
     messages_received(options).each do |timestamp_with_count|
-      profit_in_dollars << [timestamp_with_count[0], (timestamp_with_count[1] * ENV['REVENUE_PER_SMS'].to_f).round(2)]
+      revenue_in_dollars << [timestamp_with_count[0], (timestamp_with_count[1] * ENV['REVENUE_PER_SMS'].to_f).round(2)]
     end
-    profit_in_dollars
+    revenue_in_dollars
   end
 end

@@ -5,7 +5,7 @@ ENV["NUNTIUM_URL"] = "https://nuntium.example.com"
 ENV["NUNTIUM_ACCOUNT"] = "nuntium_account"
 ENV["NUNTIUM_APPLICATION"] = "nuntium_application"
 ENV["NUNTIUM_PASSWORD"] = "nuntium_password"
-ENV["REVENUE_PER_SMS"] = "0.015"
+ENV["REVENUE_PER_SMS"] = "0.05"
 ENV["TWILIO_OUTGOING_NUMBERS"] = "1415345678:85512217920"
 ENV['CLOUDMAILIN_FORWARD_ADDRESS'] = "someone@example.com"
 
