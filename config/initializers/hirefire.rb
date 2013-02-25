@@ -8,8 +8,10 @@ HireFire::Resource.configure do |config|
       :chat_reactivator_queue,
       :chat_deactivator_queue,
       :chat_expirer_queue,
-      :reminderer_queue,
-      :friend_finder_queue
+      :friend_messenger_queue,
+      :friend_finder_queue,
+      :user_reminderer_queue,
+      :reminderer_queue
     )
   end
 end
