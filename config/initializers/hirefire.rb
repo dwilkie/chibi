@@ -14,8 +14,4 @@ HireFire::Resource.configure do |config|
       :reminderer_queue
     )
   end
-
-  config.dyno(:long_running_task_worker) do
-    HireFire::Macro::Resque.queue(:reply_state_setter_queue)
-  end
 end
