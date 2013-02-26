@@ -33,7 +33,7 @@ FactoryGirl.define do
   end
 
   factory :delivery_receipt do
-    association :reply, :factory => :reply_with_token
+    association :reply, :delivered, :with_token
     delivered
     token { reply.token }
 

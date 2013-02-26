@@ -43,32 +43,25 @@ describe DeliveryReceipt do
   end
 
   describe ".set_reply_states!" do
-    context "for replies with confirmed delivery receipts" do
-      let(:user) { create(:user) }
-
-      before do
-        create_list(
-          :delivery_receipt, 10, :confirmed
-        )
-        create_list(
-          :delivery_receipt, 15, :failed
-        )
-        create_list(:delivery_receipt, 20, :delivered
-        )
-        25.times do
-          reply = create(:reply, :with_token, :user => user)
-          create(:delivery_receipt, :delivered, :reply => reply)
-          create(:delivery_receipt, :failed, :reply => reply)
-        end
+    before do
+      create_list(:reply, 5, :delivered)
+      create_list(:delivery_receipt, 10, :confirmed)
+      create_list(:delivery_receipt, 15, :failed)
+      create_list(:delivery_receipt, 20, :delivered)
+      25.times do
+        reply = create(:reply, :with_token, :delivered)
+        create(:delivery_receipt, :delivered, :reply => reply)
+        create(:delivery_receipt, :failed, :reply => reply)
       end
+    end
 
-      it "should mark the replies with the correct state" do
-        timing = Benchmark.measure { subject.class.set_reply_states! }
-        Reply.where(:state => :confirmed).count.should == 10
-        Reply.where(:state => :rejected).count.should == 15
-        Reply.where(:state => :delivered_by_smsc).count.should == 20
-        Reply.where(:state => :failed).count.should == 25
-      end
+    it "should mark the replies with the correct state" do
+      timing = Benchmark.measure { subject.class.set_reply_states! }
+      Reply.where(:state => :queued_for_smsc_delivery).count.should == 5
+      Reply.where(:state => :confirmed).count.should == 10
+      Reply.where(:state => :rejected).count.should == 15
+      Reply.where(:state => :delivered_by_smsc).count.should == 20
+      Reply.where(:state => :failed).count.should == 25
     end
   end
 end
