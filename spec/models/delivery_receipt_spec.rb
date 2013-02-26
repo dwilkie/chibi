@@ -45,6 +45,7 @@ describe DeliveryReceipt do
   describe ".set_reply_states!" do
     before do
       create_list(:reply, 5, :delivered)
+      create_list(:reply, 10, :delivered, :confirmed)
       create_list(:delivery_receipt, 10, :confirmed)
       create_list(:delivery_receipt, 15, :failed)
       create_list(:delivery_receipt, 20, :delivered)
@@ -58,7 +59,7 @@ describe DeliveryReceipt do
     it "should mark the replies with the correct state" do
       timing = Benchmark.measure { subject.class.set_reply_states! }
       Reply.where(:state => :queued_for_smsc_delivery).count.should == 5
-      Reply.where(:state => :confirmed).count.should == 10
+      Reply.where(:state => :confirmed).count.should == 20
       Reply.where(:state => :rejected).count.should == 15
       Reply.where(:state => :delivered_by_smsc).count.should == 20
       Reply.where(:state => :failed).count.should == 25
