@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121118045847) do
+ActiveRecord::Schema.define(:version => 20130225075503) do
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
@@ -95,15 +95,17 @@ ActiveRecord::Schema.define(:version => 20121118045847) do
     t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at",                         :null => false
-    t.datetime "updated_at",                         :null => false
+    t.datetime "created_at",                                                         :null => false
+    t.datetime "updated_at",                                                         :null => false
     t.datetime "delivered_at"
     t.text     "alternate_translation"
     t.string   "locale",                :limit => 2
     t.string   "token"
+    t.string   "state",                              :default => "pending_delivery", :null => false
   end
 
   add_index "replies", ["chat_id"], :name => "index_replies_on_chat_id"
+  add_index "replies", ["state"], :name => "index_replies_on_state"
   add_index "replies", ["token"], :name => "index_replies_on_token", :unique => true
   add_index "replies", ["user_id"], :name => "index_replies_on_user_id"
 

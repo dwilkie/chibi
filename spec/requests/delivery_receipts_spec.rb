@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Delivery Receipts" do
   include AuthenticationHelpers
 
-  let(:reply) { create(:reply_with_token) }
+  let(:reply) { create(:reply, :with_token, :delivered, :queued_for_smsc_delivery) }
   let(:new_delivery_receipt) { DeliveryReceipt.last }
 
   def post_delivery_receipt(options = {})
@@ -26,8 +26,8 @@ describe "Delivery Receipts" do
           post_delivery_receipt(:reply => reply)
         end
 
-        it "should link the delivery receipt with the reply" do
-          reply.delivery_receipts.should == [new_delivery_receipt]
+        it "should mark the reply as delivered by smsc" do
+          reply.reload.should be_delivered_by_smsc
         end
       end
     end

@@ -34,8 +34,20 @@ FactoryGirl.define do
 
   factory :delivery_receipt do
     association :reply, :factory => :reply_with_token
-    state { "delivered" }
+    delivered
     token { reply.token }
+
+    trait :delivered do
+      state "delivered"
+    end
+
+    trait :failed do
+      state "failed"
+    end
+
+    trait :confirmed do
+      state "confirmed"
+    end
   end
 
   factory :missed_call do
@@ -140,7 +152,7 @@ FactoryGirl.define do
     end
 
     factory :reply_with_token do
-      token
+      with_token
     end
 
     factory :reply_with_locale do
@@ -160,7 +172,35 @@ FactoryGirl.define do
     end
 
     factory :delivered_reply do
+      delivered
+    end
+
+    trait :delivered do
       delivered_at { Time.now }
+    end
+
+    trait :queued_for_smsc_delivery do
+      state "queued_for_smsc_delivery"
+    end
+
+    trait :delivered_by_smsc do
+      state "delivered_by_smsc"
+    end
+
+    trait :rejected do
+      state "rejected"
+    end
+
+    trait :failed do
+      state "failed"
+    end
+
+    trait :confirmed do
+      state "confirmed"
+    end
+
+    trait :with_token do
+      token
     end
   end
 

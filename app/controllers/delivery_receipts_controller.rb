@@ -4,9 +4,9 @@ class DeliveryReceiptsController < ApplicationController
   before_filter :authenticate_delivery_receipt
 
   def create
-    delivery_receipt = DeliveryReceipt.new(params.slice(:channel, :token, :state))
-    status = delivery_receipt.save ? :created : :bad_request
-    render(:nothing => true, :status => status)
+    reply = Reply.find_by_token!(params[:token])
+    reply.update_delivery_state(params[:state])
+    render(:nothing => true, :status => :created)
   end
 
   private

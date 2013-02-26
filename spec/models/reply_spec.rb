@@ -25,8 +25,10 @@ describe Reply do
     if options[:deliver]
       assert_deliver(reply.body)
       reply.should be_delivered
+      reply.should be_queued_for_smsc_delivery
     else
       reply.should_not be_delivered
+      reply.should be_pending_delivery
     end
   end
 
@@ -68,6 +70,12 @@ describe Reply do
   describe "factory" do
     it "should be valid" do
       new_reply.should be_valid
+    end
+  end
+
+  describe "default state" do
+    it "should be pending_delivery" do
+      reply.should be_pending_delivery
     end
   end
 
@@ -188,10 +196,74 @@ describe Reply do
     end
   end
 
+  describe "#update_delivery_state(state = nil)" do
+    it "should correctly update the delivery state" do
+      reply = create(:reply)
+      reply.update_delivery_state
+      reply.should be_queued_for_smsc_delivery
+
+      reply = create(:reply)
+      reply.update_delivery_state("delivered")
+      reply.should be_queued_for_smsc_delivery
+
+      reply = create(:reply, :queued_for_smsc_delivery)
+      reply.update_delivery_state("delivered")
+      reply.should be_delivered_by_smsc
+
+      reply = create(:reply, :queued_for_smsc_delivery)
+      reply.update_delivery_state("confirmed")
+      reply.should be_confirmed
+
+      reply = create(:reply, :queued_for_smsc_delivery)
+      reply.update_delivery_state("failed")
+      reply.should be_rejected
+
+      reply = create(:reply, :delivered_by_smsc)
+      reply.update_delivery_state("confirmed")
+      reply.should be_confirmed
+
+      reply = create(:reply, :delivered_by_smsc)
+      reply.update_delivery_state("failed")
+      reply.should be_failed
+
+      reply = create(:reply, :failed)
+      reply.update_delivery_state("delivered")
+      reply.should be_failed
+
+      reply = create(:reply, :rejected)
+      reply.update_delivery_state("confirmed")
+      reply.should be_confirmed
+
+      reply = create(:reply, :failed)
+      reply.update_delivery_state("confirmed")
+      reply.should be_confirmed
+
+      reply = create(:reply, :confirmed)
+      reply.update_delivery_state("delivered")
+      reply.should be_confirmed
+
+      reply = create(:reply, :confirmed)
+      reply.update_delivery_state("failed")
+      reply.should be_confirmed
+    end
+  end
+
   describe "#deliver!" do
     it "should deliver the message and save the token" do
       expect_message(:token => "token") { new_reply.deliver! }
       assert_persisted_and_delivered(new_reply, user.mobile_number, :token => "token")
+    end
+
+    context "given the delivery fails" do
+      before do
+        Nuntium.stub(:new).and_raise("BOOM! Cannot connect to Nuntium Server")
+      end
+
+      it "should not mark the reply as delivered" do
+        expect { reply.deliver! }.to raise_error
+        reply.should_not be_delivered
+        reply.should be_pending_delivery
+      end
     end
   end
 

@@ -5,12 +5,40 @@ class Reply < ActiveRecord::Base
 
   has_many :delivery_receipts
 
+  DELIVERED = "delivered"
+  FAILED = "failed"
+  CONFIRMED = "confirmed"
+
   validates :to, :presence => true
   validates :token, :uniqueness => true, :allow_nil => true
 
   alias_attribute :destination, :to
 
   before_validation :set_destination
+
+  state_machine :initial => :pending_delivery do
+    state :pending_delivery,
+          :queued_for_smsc_delivery,
+          :delivered_by_smsc,
+          :rejected,
+          :failed,
+          :confirmed
+
+    event :update_delivery_status do
+      transition(:pending_delivery         => :queued_for_smsc_delivery)
+      transition(:queued_for_smsc_delivery => :delivered_by_smsc, :if => :delivery_succeeded?)
+      transition(:queued_for_smsc_delivery => :rejected,          :if => :delivery_failed?)
+      transition(:delivered_by_smsc        => :failed,            :if => :delivery_failed?)
+      transition(
+        [
+          :queued_for_smsc_delivery,
+          :delivered_by_smsc,
+          :rejected,
+          :failed
+        ] => :confirmed, :if => :delivery_confirmed?
+      )
+    end
+  end
 
   def self.delivered
     scoped.where("delivered_at IS NOT NULL")
@@ -99,9 +127,14 @@ class Reply < ActiveRecord::Base
   end
 
   def deliver!
-    self.delivered_at = Time.now
-    save
     perform_delivery!(body)
+    touch(:delivered_at)
+    update_delivery_state
+  end
+
+  def update_delivery_state(state = nil)
+    @delivery_state = state
+    update_delivery_status
   end
 
   private
@@ -135,6 +168,18 @@ class Reply < ActiveRecord::Base
 
   def set_destination
     self.destination ||= user.try(:mobile_number)
+  end
+
+  def delivery_succeeded?
+    @delivery_state == DELIVERED
+  end
+
+  def delivery_failed?
+    @delivery_state == FAILED
+  end
+
+  def delivery_confirmed?
+    @delivery_state == CONFIRMED
   end
 
   def explain_how_to_start_a_new_chat!(action, options = {})
