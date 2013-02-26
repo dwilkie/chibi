@@ -1,9 +1,9 @@
 HireFire::Resource.configure do |config|
-  config.dyno(:worker) do
+  config.dyno(:urgent_task_worker) do
     HireFire::Macro::Resque.queue(:message_processor_queue, :dialer_queue)
   end
 
-  config.dyno(:highloadworker) do
+  config.dyno(:non_essential_task_worker) do
     HireFire::Macro::Resque.queue(
       :chat_reactivator_queue,
       :chat_deactivator_queue,
@@ -13,5 +13,9 @@ HireFire::Resource.configure do |config|
       :user_reminderer_queue,
       :reminderer_queue
     )
+  end
+
+  config.dyno(:long_running_task_worker) do
+    HireFire::Macro::Resque.queue(:reply_state_setter_queue)
   end
 end
