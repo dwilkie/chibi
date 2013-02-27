@@ -129,6 +129,7 @@ class Reply < ActiveRecord::Base
   end
 
   def deliver!
+    save!
     perform_delivery!(body)
     touch(:delivered_at)
     update_delivery_state
