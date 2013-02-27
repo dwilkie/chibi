@@ -234,6 +234,10 @@ describe Reply do
       reply.update_delivery_state("confirmed")
       reply.should be_confirmed
 
+      reply = create(:reply, :rejected)
+      reply.update_delivery_state("delivered")
+      reply.should be_failed
+
       reply = create(:reply, :failed)
       reply.update_delivery_state("confirmed")
       reply.should be_confirmed
