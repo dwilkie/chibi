@@ -11,7 +11,7 @@ describe Reply do
     [build(:cambodian), build(:english)]
   end
 
-  let(:new_reply) { build(:reply, :user => user) }
+  let(:new_reply) { build(:reply, :with_unset_destination, :user => user) }
   let(:partner) { build(:user_with_name) }
   let(:reply) { create(:reply, :user => user) }
   let(:delivered_reply) { create(:delivered_reply) }
@@ -23,7 +23,7 @@ describe Reply do
     reply.destination.should == mobile_number
     reply.token.should == options[:token] if options[:token]
     if options[:deliver]
-      assert_deliver(reply.body)
+      assert_deliver(:body => reply.body, :to => reply.destination)
       reply.should be_delivered
       reply.should be_queued_for_smsc_delivery
     else
@@ -90,7 +90,6 @@ describe Reply do
   it_should_behave_like "analyzable"
 
   it "should not be valid without a destination" do
-    new_reply.to = nil
     user.mobile_number = nil
     new_reply.should_not be_valid
   end
@@ -103,10 +102,6 @@ describe Reply do
   describe "callbacks" do
     describe "when saving the reply" do
       context "if the destination is nil" do
-        before do
-          new_reply.destination = nil
-        end
-
         it "should be set as the user's mobile number" do
           new_reply.should be_valid
           new_reply.destination.should == user.mobile_number
@@ -278,7 +273,7 @@ describe Reply do
 
       if deliver
         expect_message { reply.deliver_alternate_translation! }
-        assert_deliver(reply.send(deliver))
+        assert_deliver(:body => reply.send(deliver))
       else
         # will raise an error if it delivers because the message is not expected
         reply.deliver_alternate_translation!

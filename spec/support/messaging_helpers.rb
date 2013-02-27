@@ -40,10 +40,12 @@ module MessagingHelpers
     yield
   end
 
-  def assert_deliver(body)
+  def assert_deliver(options = {})
     last_request = FakeWeb.last_request
     last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
-    JSON.parse(last_request.body).first["body"].should == body
+    last_request_data = JSON.parse(last_request.body).first
+    last_request_data["body"].should == options[:body] if options[:body].present?
+    last_request_data["to"].should == "sms://#{options[:to]}" if options[:to].present?
   end
 
   def expect_locate(options = {}, &block)

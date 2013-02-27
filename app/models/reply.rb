@@ -129,7 +129,6 @@ class Reply < ActiveRecord::Base
   end
 
   def deliver!
-    save!
     perform_delivery!(body)
     touch(:delivered_at)
     update_delivery_state
@@ -198,10 +197,11 @@ class Reply < ActiveRecord::Base
   end
 
   def perform_delivery!(message)
+    save! if new_record? # ensure message is saved so we don't get a blank destination
     nuntium = Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
     # use an array so Nuntium sends a POST
     response = nuntium.send_ao([{:to => "sms://#{destination}", :body => message}])
     self.token = response["token"]
-    self.save!
+    save!
   end
 end

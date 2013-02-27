@@ -182,7 +182,7 @@ describe Message do
 
         if expect_reply
           expect_message { message.process! }
-          assert_deliver(last_reply.alternate_translation)
+          assert_deliver(:body => last_reply.alternate_translation)
         else
           message.process!
         end

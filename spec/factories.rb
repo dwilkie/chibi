@@ -202,6 +202,10 @@ FactoryGirl.define do
     trait :with_token do
       token
     end
+
+    trait :with_unset_destination do
+      to nil
+    end
   end
 
   factory :chat do

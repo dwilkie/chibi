@@ -1891,7 +1891,7 @@ describe User do
 
       if assert_notify
         expect_message { subject.update_locale!(with_locale, options).should send("be_#{success}") }
-        assert_deliver(reply_to_redeliver.alternate_translation)
+        assert_deliver(:body => reply_to_redeliver.alternate_translation)
       else
         # this will raise an error if a reply is delivered
         subject.update_locale!(with_locale, options).should send("be_#{success}")
