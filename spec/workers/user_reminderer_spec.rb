@@ -16,8 +16,12 @@ describe UserReminderer do
     end
 
     it "should tell the user to remind himself" do
-      user.should_receive(:remind!)
-      subject.class.perform(1)
+      user.should_receive(:remind!) do |options|
+        options["some"].should == :options
+        options[:some].should == :options
+        options.should be_a(HashWithIndifferentAccess)
+      end
+      subject.class.perform(1, :some => :options)
     end
   end
 end

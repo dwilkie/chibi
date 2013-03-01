@@ -256,7 +256,7 @@ describe User do
     end
   end
 
-  describe ".remind!" do
+  describe ".remind!(options = {})" do
     let(:user_without_recent_interaction) { create(:user, :without_recent_interaction) }
 
     let(:registered_sp_user_without_recent_interaction) do
@@ -305,17 +305,23 @@ describe User do
     end
 
     it "should only remind users without interaction within the last 5 days" do
-      create_actors
-
-      do_remind(:skip_create_actors => true).should == [
-        registered_sp_user_without_recent_interaction_for_a_longer_time,
-        registered_sp_user_without_recent_interaction
-      ]
-
-      # run it twice to check that we can't remind more than once
-      do_remind(:skip_create_actors => true).should be_empty
-
+      do_remind
       assert_reminded
+    end
+
+    context "passing :inactivity_period => 8.days" do
+      it "should only remind users without recent interaction within the last 8 days" do
+        do_remind(:inactivity_period => 8.days)
+        assert_not_reminded
+      end
+    end
+
+    context "passing :limit => 1" do
+      it "should only remind the user with the longest inactivity period" do
+        do_remind(:limit => 1)
+        assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_longer_time)
+        reply_to(registered_sp_user_without_recent_interaction.reload).should be_nil
+      end
     end
 
     it_should_behave_like "within hours" do
@@ -325,10 +331,48 @@ describe User do
     end
   end
 
-  describe "#remind!" do
-    it "should send a reminder to the user" do
-      expect_message { user.remind! }
+  describe "#remind!(options = {})" do
+    let(:user) { create(:user, :without_recent_interaction) }
+
+    def do_remind(options = {})
+      expect_message { user.remind!(options) }
+    end
+
+    def assert_reminded
       reply_to(user).body.should be_present
+    end
+
+    def assert_not_reminded
+      reply_to(user).should be_nil
+    end
+
+    context "given the user needs reminding" do
+      it "should send a reminder to the user" do
+        do_remind
+        assert_reminded
+      end
+
+      context "passing :inactivity_period => 8.days" do
+        it "not send a reminder to the user" do
+          do_remind(:inactivity_period => 8.days)
+          assert_not_reminded
+        end
+      end
+    end
+
+    context "given the user does not need reminding" do
+      let(:user) { create(:user) }
+
+      it "should not send a reminder to the user" do
+        do_remind
+        assert_not_reminded
+      end
+    end
+
+    it_should_behave_like "within hours" do
+      let(:positive_assertion) { :assert_reminded }
+      let(:negative_assertion) { :assert_not_reminded }
+      let(:task) { :do_remind }
     end
   end
 

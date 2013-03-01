@@ -97,16 +97,14 @@ class User < ActiveRecord::Base
 
   def self.remind!(options = {})
     within_hours(options) do
-      inactivity_period = options.delete(:inactivity_period) || 5.days
       limit = options.delete(:limit) || 100
 
-      since = inactivity_period.ago
       users_to_remind = without_recent_interaction(
-        since
+        inactive_timestamp
       ).from_registered_service_providers.online.order(:updated_at).limit(limit)
 
       users_to_remind.each do |user_to_remind|
-        Resque.enqueue(UserReminderer, user_to_remind.id)
+        Resque.enqueue(UserReminderer, user_to_remind.id, options)
       end
     end
   end
@@ -272,8 +270,10 @@ class User < ActiveRecord::Base
     (name || screen_name).try(:capitalize)
   end
 
-  def remind!
-    replies.build.send_reminder!
+  def remind!(options = {})
+    self.class.within_hours(options) do
+      replies.build.send_reminder! unless has_recent_interaction?(self.class.inactive_timestamp(options))
+    end
   end
 
   def login!
@@ -574,8 +574,12 @@ class User < ActiveRecord::Base
     scope.where(condition_statements.join(condition_sql), *condition_values)
   end
 
-  def self.without_recent_interaction(since)
-    scoped.where("updated_at < ?", since)
+  def self.inactive_timestamp(options = {})
+    (options[:inactivity_period] || 5.days).ago
+  end
+
+  def self.without_recent_interaction(inactivity_timestamp)
+    scoped.where("updated_at < ?", inactivity_timestamp)
   end
 
   def self.exclude_unavailable(scope)
@@ -660,6 +664,10 @@ class User < ActiveRecord::Base
 
   def number_prefix
     local_number[0..1]
+  end
+
+  def has_recent_interaction?(inactivity_timestamp)
+    updated_at >= inactivity_timestamp
   end
 
   def assign_location
