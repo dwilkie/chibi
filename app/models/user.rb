@@ -100,7 +100,7 @@ class User < ActiveRecord::Base
       limit = options.delete(:limit) || 100
 
       users_to_remind = without_recent_interaction(
-        inactive_timestamp
+        inactive_timestamp(options)
       ).from_registered_service_providers.online.order(:updated_at).limit(limit)
 
       users_to_remind.each do |user_to_remind|

@@ -269,6 +269,12 @@ describe User do
       )
     end
 
+    let(:registered_sp_user_without_recent_interaction_for_a_shorter_time) do
+      create(
+        :user, :from_registered_service_provider, :without_recent_interaction_for_a_shorter_time
+      )
+    end
+
     let(:registered_sp_user_with_recent_interaction) do
       create(:user, :from_registered_service_provider)
     end
@@ -276,6 +282,7 @@ describe User do
     def create_actors
       registered_sp_user_without_recent_interaction
       registered_sp_user_without_recent_interaction_for_a_longer_time
+      registered_sp_user_without_recent_interaction_for_a_shorter_time
       registered_sp_user_with_recent_interaction
       user_without_recent_interaction
     end
@@ -309,10 +316,11 @@ describe User do
       assert_reminded
     end
 
-    context "passing :inactivity_period => 8.days" do
-      it "should only remind users without recent interaction within the last 8 days" do
-        do_remind(:inactivity_period => 8.days)
-        assert_not_reminded
+    context "passing :inactivity_period => 3.days" do
+      it "should remind users without recent interaction within the last 3 days" do
+        do_remind(:inactivity_period => 3.days)
+        assert_reminded
+        assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_shorter_time)
       end
     end
 
