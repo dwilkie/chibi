@@ -10,21 +10,9 @@ class Chat < ActiveRecord::Base
 
   alias_attribute :initiator, :user
 
-  # a chat with inactivity, is a fully active chat (which has two or more active users) or
-  # a partially active chat chat (which has one or more active users)
-  # with no activity in the past inactivity_period timeframe
-  def self.with_inactivity(options = {})
-    inactivity_period = options[:inactivity_period] || 10.minutes
-
-    condition = options[:active] ? "AND" : "OR"
-    joins(:user).joins(:friend).where(
-      "users.active_chat_id = #{table_name}.id #{condition} friends_chats.active_chat_id = #{table_name}.id"
-    ).where("#{table_name}.updated_at < ?", inactivity_period.ago)
-  end
-
   def self.end_inactive(options = {})
     with_inactivity(options).find_each do |chat|
-      Resque.enqueue(ChatDeactivator, chat.id, options)
+      Resque.enqueue(ChatDeactivator, chat.id, options.merge(:with_inactivity => true))
     end
   end
 
@@ -109,6 +97,8 @@ class Chat < ActiveRecord::Base
   end
 
   def deactivate!(options = {})
+    return if options[:with_inactivity] && !has_inactivity?(options)
+
     # reactivate previous chats by default
     options[:reactivate_previous_chat] = true unless options[:reactivate_previous_chat] == false
 
@@ -257,13 +247,32 @@ class Chat < ActiveRecord::Base
     with_undelivered_messages.where(:replies => {:user_id => user.id})
   end
 
+  # a chat with inactivity, is a fully active chat (which has two or more active users) or
+  # a partially active chat chat (which has one or more active users)
+  # with no activity in the past inactivity_period timeframe
+  def self.with_inactivity(options = {})
+    condition = options.delete(:all) ? "OR" : "AND"
+
+    joins(:user).joins(:friend).where(
+      "users.active_chat_id = #{table_name}.id #{condition} friends_chats.active_chat_id = #{table_name}.id"
+    ).where("#{table_name}.updated_at < ?", inactive_timestamp(options))
+  end
+
   def self.filter_params(params = {})
     super.where(params.slice(:user_id))
+  end
+
+  def self.inactive_timestamp(options = {})
+    (options[:inactivity_period] || 10.minutes).ago
   end
 
   def one_sided?(num_messages = 3)
     last_messages = messages.order("created_at DESC").limit(num_messages).pluck(:user_id)
     last_messages.uniq == [last_messages.first] if last_messages.count >= num_messages
+  end
+
+  def has_inactivity?(options = {})
+    updated_at < self.class.inactive_timestamp(options)
   end
 
   def introduce_participants(options = {})

@@ -34,7 +34,11 @@ describe Chat do
   end
 
   let(:active_chat_with_inactivity) do
-    create(:active_chat_with_inactivity, :user => user, :friend => friend)
+    create(:chat, :active, :with_inactivity, :user => user, :friend => friend)
+  end
+
+  let(:active_chat_with_single_user_with_inactivity) do
+    create(:chat, :initiator_active, :with_inactivity)
   end
 
   let(:active_chat_with_single_user) do
@@ -43,10 +47,6 @@ describe Chat do
 
   let(:active_chat_with_single_friend) do
     create(:active_chat_with_single_friend, :user => user, :friend => friend)
-  end
-
-  let(:active_chat_with_single_user_with_inactivity) do
-    create(:active_chat_with_single_user_with_inactivity)
   end
 
   let(:reply_to_user) do
@@ -339,6 +339,31 @@ describe Chat do
     def assert_active_users_cleared
       active_chat.active_users.should be_empty
       active_chat.should_not be_active
+    end
+
+    context "passing :with_inactivity => true" do
+      context "for a chat with inactivity" do
+        it "should deactivate the chat" do
+          active_chat_with_inactivity.deactivate!(:with_inactivity => true)
+          active_chat_with_inactivity.should_not be_active
+        end
+      end
+
+      context "passing :inactivity_period => 11.minutes" do
+        it "should not deactivate the chat" do
+          active_chat_with_inactivity.deactivate!(
+            :with_inactivity => true, :inactivity_period => 11.minutes
+          )
+          active_chat_with_inactivity.should be_active
+        end
+      end
+
+      context "for a chat that has activity" do
+        it "should not deactivate the chat" do
+          active_chat.deactivate!(:with_inactivity => true)
+          active_chat.should be_active
+        end
+      end
     end
 
     context "passing :activate_new_chats => true" do
@@ -848,33 +873,6 @@ describe Chat do
     end
   end
 
-  describe ".with_inactivity" do
-    before do
-      active_chat_with_inactivity
-      unique_active_chat
-      chat
-      active_chat_with_single_user_with_inactivity
-    end
-
-    context "passing no options" do
-      it "should return chats which have been inactive for more than 10 minutes" do
-        subject.class.with_inactivity.should == [active_chat_with_inactivity, active_chat_with_single_user_with_inactivity]
-      end
-    end
-
-    context "passing :active => true" do
-      it "should return active chats which have been inactive for more than 10 minutes" do
-        subject.class.with_inactivity(:active => true).should == [active_chat_with_inactivity]
-      end
-    end
-
-    context "passing 11.minutes" do
-      it "should return chats which have been inactive for more than 11 minutes" do
-        subject.class.with_inactivity(:inactivity_period => 11.minutes).should == []
-      end
-    end
-  end
-
   describe ".reactivate_stagnant!" do
     context "with pending replies" do
 
@@ -934,6 +932,8 @@ describe Chat do
   end
 
   describe ".end_inactive" do
+    include ResqueHelpers
+
     before do
       chat.should_not be_active
       unique_active_chat.should be_active
@@ -946,36 +946,46 @@ describe Chat do
       unique_active_chat.should be_active
     end
 
-    context "passing no options" do
+    context "for chats with inactivity in the last 10 minutes" do
+      def perform_background_job
+        super(:chat_deactivator_queue)
+      end
+
       before do
-        with_resque { subject.class.end_inactive }
+        do_background_task(:queue_only => true) { subject.class.end_inactive }
       end
 
-      it "should deactivate chats with more than 10 minutes of inactivity" do
-        active_chat_with_inactivity.should_not be_active
-        active_chat_with_single_user_with_inactivity.active_users.count.should be_zero
+      context "that still do not have activity when the job is run" do
+        before do
+          perform_background_job
+        end
+
+        it "should deactivate chats with more than 10 minutes of inactivity" do
+          active_chat_with_inactivity.should_not be_active
+          active_chat_with_single_user_with_inactivity.active_users.count.should == 1
+        end
+
+        it "should not notify the users that their chat has ended" do
+          reply_to_user.should be_nil
+          reply_to_friend.should be_nil
+        end
       end
 
-      it "should not notify the users that their chat has ended" do
-        reply_to_user.should be_nil
-        reply_to_friend.should be_nil
-      end
-    end
+      context "that have activity again when the job is run" do
+        before do
+          active_chat_with_inactivity.touch
+          perform_background_job
+        end
 
-    context "passing :active => true" do
-      before do
-        with_resque { subject.class.end_inactive(:active => true) }
-      end
-
-      it "should deactivate active chats with more than 10 minutes of inactivity" do
-        active_chat_with_inactivity.should_not be_active
-        active_chat_with_single_user_with_inactivity.active_users.count.should == 1
+        it "should not deactivate the chats" do
+          active_chat_with_inactivity.should be_active
+        end
       end
     end
 
     context "passing :inactivity_period => 11.minutes" do
       before do
-        with_resque { subject.class.end_inactive(:inactivity_period => 11.minutes) }
+        do_background_task { subject.class.end_inactive(:inactivity_period => 11.minutes) }
       end
 
       it "should deactivate chats with more than 11 minutes of inactivity" do
@@ -983,9 +993,20 @@ describe Chat do
       end
     end
 
+    context "passing :all => true" do
+      before do
+        do_background_task { subject.class.end_inactive(:all => true) }
+      end
+
+      it "should deactivate all chats with inactivity" do
+        active_chat_with_inactivity.should_not be_active
+        active_chat_with_single_user_with_inactivity.active_users.count.should be_zero
+      end
+    end
+
     context "passing :notify => true" do
       before do
-        with_resque { expect_message { subject.class.end_inactive(:notify => true) } }
+        do_background_task { expect_message { subject.class.end_inactive(:notify => true) } }
       end
 
       it "should notify both users that their chat has ended" do
@@ -1010,7 +1031,7 @@ describe Chat do
         active_chat_with_inactivity.should_receive(:deactivate!).with do |other_options|
           other_options.should == HashWithIndifferentAccess.new(other_options)
         end
-        with_resque { subject.class.end_inactive({:inactivity_period => 10.minutes}.merge(other_options)) }
+        do_background_task { subject.class.end_inactive({:inactivity_period => 10.minutes}.merge(other_options)) }
       end
     end
   end

@@ -224,10 +224,16 @@ FactoryGirl.define do
     end
 
     trait :active do
+      initiator_active
+
       after(:create) do |chat|
         chat.active_users << chat.friend
         chat.save
       end
+    end
+
+    trait :with_inactivity do
+      updated_at { 10.minutes.ago }
     end
 
     # a chat where only the friend is active
@@ -239,23 +245,12 @@ FactoryGirl.define do
 
     # a chat where only the initator is active
     factory :active_chat_with_single_user do
-      after(:create) do |chat|
-        chat.active_users << chat.user
-        chat.save
-      end
-
-      factory :active_chat_with_single_user_with_inactivity do
-        updated_at { 10.minutes.ago }
-      end
+      initiator_active
 
       factory :active_chat do
         after(:create) do |chat|
           chat.active_users << chat.friend
           chat.save
-        end
-
-        factory :active_chat_with_inactivity do
-          updated_at { 10.minutes.ago }
         end
       end
     end
