@@ -4,10 +4,12 @@ describe User do
   include MobilePhoneHelpers
   include TranslationHelpers
   include MessagingHelpers
+  include ResqueHelpers
+
   include_context "replies"
 
   let(:user) { create(:user) }
-  let(:user_searching_for_friend) { create(:user_searching_for_friend) }
+  let(:user_searching_for_friend) { create(:user, :searching_for_friend) }
   let(:new_user) { build(:user) }
   let(:cambodian) { build(:cambodian) }
   let(:friend) { create(:user) }
@@ -16,25 +18,33 @@ describe User do
   let(:user_with_complete_profile) { build(:user_with_complete_profile) }
   let(:male_user) { create(:male_user) }
 
-  def assert_friend_found(searcher = user_searching_for_friend, new_friend = user)
-    searcher.reload
-    new_friend.reload
-    new_friend.should be_currently_chatting
-    new_friend.active_chat.user.should == searcher
-    searcher.should_not be_currently_chatting
-    searcher.should be_searching_for_friend
+  def assert_friend_found(options = {})
+    options[:searcher] ||= user_searching_for_friend
+    options[:new_friend] ||= user
+
+    options[:searcher].reload
+    options[:new_friend].reload
+    options[:new_friend].should be_currently_chatting
+    options[:new_friend].active_chat.user.should == options[:searcher]
+    options[:searcher].should_not be_currently_chatting
+    options[:searcher].should be_searching_for_friend
   end
 
-  def assert_friend_not_found(searcher = user_searching_for_friend, new_friend = user)
-    searcher.reload
-    new_friend.reload
-    new_friend.should_not be_currently_chatting
-    searcher.should_not be_currently_chatting
-    searcher.should be_searching_for_friend
+  def assert_friend_not_found(options = {})
+    options[:searcher] ||= user_searching_for_friend
+    options[:new_friend] ||= user
+    options[:still_searching] = true unless options[:still_searching] == false
+
+    options[:searcher].reload
+    options[:new_friend].reload
+    options[:new_friend].should_not be_currently_chatting
+    options[:searcher].should_not be_currently_chatting
+    options[:searcher].searching_for_friend?.should == options[:still_searching]
   end
 
-  shared_examples_for "within hours" do
+  shared_examples_for "within hours" do |background_job|
     context "passing :between => 2..14" do
+
       context "given the current time is not between 02:00 UTC and 14:00 UTC" do
         it "should not perform the task" do
           Timecop.freeze(Time.new(2012, 1, 7, 1)) do
@@ -45,9 +55,33 @@ describe User do
       end
 
       context "given the current time is between 02:00 UTC and 14:00 UTC" do
-        it "should perform the task" do
-          Timecop.freeze(Time.new(2012, 1, 7, 2)) do
-            send(task, :between => 2..14)
+        before do
+          Timecop.freeze(Time.new(2012, 1, 7, 14))
+          send(task, :between => 2..14, :queue_only => background_job)
+        end
+
+        after do
+          Timecop.return
+        end
+
+        if background_job
+          context "and @ the time the task is run it's still between 02:00 UTC and 14:00 UTC" do
+            it "should perform the task" do
+              perform_background_job
+              send(positive_assertion)
+            end
+          end
+
+          context "and @ the time the task is run it's no longer between 02:00 UTC and 14:00 UTC" do
+            it "should not perform the task" do
+              Timecop.freeze(Time.new(2012, 1, 7, 14, 1)) do
+                perform_background_job
+                send(negative_assertion)
+              end
+            end
+          end
+        else
+          it "should perform the task" do
             send(positive_assertion)
           end
         end
@@ -115,11 +149,11 @@ describe User do
     context "before save" do
       context "if the user is currently chatting and also searching" do
         let(:chat_with_user_searching_for_friend) do
-          create(:chat_with_user_searching_for_friend, :user => user_searching_for_friend)
+          create(:chat, :with_user_searching_for_friend, :user => user_searching_for_friend)
         end
 
         let(:active_chat_with_user_searching_for_friend) do
-          create(:active_chat_with_user_searching_for_friend, :user => user_searching_for_friend)
+          create(:chat, :with_user_searching_for_friend, :initiator_active, :user => user_searching_for_friend)
         end
 
         it "should no longer be searching for a friend" do
@@ -211,8 +245,13 @@ describe User do
   end
 
   describe ".find_friends" do
+
     def do_find_friends(options = {})
-      with_resque { subject.class.find_friends(options) }
+      do_background_task(options) { subject.class.find_friends(options) }
+    end
+
+    def perform_background_job
+      expect_message { super(queue_name) }
     end
 
     before do
@@ -225,10 +264,11 @@ describe User do
       assert_friend_found
     end
 
-    it_should_behave_like "within hours" do
+    it_should_behave_like "within hours", true do
       let(:positive_assertion) { :assert_friend_found }
       let(:negative_assertion) { :assert_friend_not_found }
       let(:task) { :do_find_friends }
+      let(:queue_name) { :friend_messenger_queue }
     end
   end
 
@@ -289,7 +329,11 @@ describe User do
 
     def do_remind(options = {})
       create_actors unless options.delete(:skip_create_actors)
-      with_resque { expect_message { subject.class.remind!(options) } }
+      do_background_task(options) { subject.class.remind!(options) }
+    end
+
+    def perform_background_job
+      expect_message { super(queue_name) }
     end
 
     def assert_user_reminded(reference_user)
@@ -332,10 +376,11 @@ describe User do
       end
     end
 
-    it_should_behave_like "within hours" do
+    it_should_behave_like "within hours", true do
       let(:positive_assertion) { :assert_reminded }
       let(:negative_assertion) { :assert_not_reminded }
       let(:task) { :do_remind }
+      let(:queue_name) { :user_reminderer_queue }
     end
   end
 
@@ -1893,14 +1938,38 @@ describe User do
   end
 
   describe "#find_friends!" do
+    def do_find_friends(options = {})
+      reference_user = options.delete(:reference_user) || user_searching_for_friend
+      reference_user.find_friends!(options)
+    end
+
     before do
       user_searching_for_friend
       user
     end
 
-    it "should find friends for the user" do
-      user_searching_for_friend.find_friends!
-      assert_friend_found
+    context "given the user is searching for a friend" do
+      it "should find friends for the user" do
+        do_find_friends
+        assert_friend_found
+      end
+    end
+
+    context "given the user is not searching for a friend" do
+      let(:user_not_searching_for_friend) { create(:user) }
+
+      it "should not find friends for the user" do
+        do_find_friends(:reference_user => user_not_searching_for_friend)
+        assert_friend_not_found(
+          :searcher => user_not_searching_for_friend, :still_searching => false
+        )
+      end
+    end
+
+    it_should_behave_like "within hours" do
+      let(:positive_assertion) { :assert_friend_found }
+      let(:negative_assertion) { :assert_friend_not_found }
+      let(:task) { :do_find_friends }
     end
   end
 

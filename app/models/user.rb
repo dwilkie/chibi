@@ -178,7 +178,9 @@ class User < ActiveRecord::Base
   end
 
   def find_friends!(options = {})
-    Chat.activate_multiple!(self, options)
+    self.class.within_hours(options) do
+      Chat.activate_multiple!(self, options) if searching_for_friend?
+    end
   end
 
   def female?
@@ -601,7 +603,7 @@ class User < ActiveRecord::Base
   def self.within_hours(options = {}, &block)
     do_find = true
 
-    if between = options.delete(:between)
+    if between = options[:between]
       now = Time.now
       do_find = (now >= time_at(between.min) && now <= time_at(between.max))
     end
