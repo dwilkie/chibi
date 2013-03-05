@@ -139,6 +139,9 @@ class Reply < ActiveRecord::Base
     touch(:delivered_at)
     puts "updating delivery state in deliver! method..."
     puts "delivery state was: #{state}"
+    puts "reloading..."
+    reload
+    puts "delivery state was: #{state}"
     puts update_delivery_state
     puts "delivery state is now: #{state}"
   end

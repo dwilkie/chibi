@@ -272,6 +272,31 @@ describe Reply do
         reply.should be_pending_delivery
       end
     end
+
+    context "given there is a race condition for when the state is updated" do
+      module RaceCondition
+        def self.included(base)
+          base.class_eval do
+            alias_method_chain :perform_delivery!, :race_condition
+          end
+        end
+
+        def perform_delivery_with_race_condition!(message)
+          perform_delivery_without_race_condition!(message)
+          Reply.update_all({:state => "delivered_by_smsc"}, :id => id)
+        end
+      end
+
+      before do
+        Reply.send(:include, RaceCondition)
+      end
+
+      it "should correctly update the state of the reply" do
+        expect_message { reply.deliver! }
+        reply.should be_delivered
+        reply.should be_delivered_by_smsc
+      end
+    end
   end
 
   describe "#deliver_alternate_translation!" do
