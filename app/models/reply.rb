@@ -60,6 +60,16 @@ class Reply < ActiveRecord::Base
     scoped.where(:delivered_at => nil).order(:created_at)
   end
 
+  def self.query_queued!
+    queued_for_smsc_delivery.where("delivered_at < ?", 10.minutes.ago).find_each do |reply|
+      Resque.enqueue(ReplyStateQueryer, reply.id)
+    end
+  end
+
+  def query_state!
+    update_delivery_state(nuntium.get_ao(token).first["state"]) if token.present?
+  end
+
   def body
     read_attribute(:body).to_s
   end
@@ -147,6 +157,10 @@ class Reply < ActiveRecord::Base
 
   private
 
+  def self.queued_for_smsc_delivery
+    scoped.where(:state => "queued_for_smsc_delivery").where("token IS NOT NULL")
+  end
+
   def save_with_state_check
     if valid?
       state_attribute = self.class.state_machine.attribute
@@ -214,10 +228,13 @@ class Reply < ActiveRecord::Base
 
   def perform_delivery!(message)
     save! if new_record? # ensure message is saved so we don't get a blank destination
-    nuntium = Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
     # use an array so Nuntium sends a POST
     response = nuntium.send_ao([{:to => "sms://#{destination}", :body => message}])
     self.token = response["token"]
     save!
+  end
+
+  def nuntium
+    @nuntium ||= Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
   end
 end

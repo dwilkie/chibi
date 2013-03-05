@@ -17,6 +17,21 @@ describe Reply do
   let(:delivered_reply) { create(:delivered_reply) }
   let(:reply_with_token) { create(:reply_with_token) }
 
+  let(:recently_queued_reply) { create_reply(:delivered_at => Time.now) }
+  let(:less_recently_queued_reply) { create_reply(:token => "token") }
+  let(:reply_with_no_token) { create_reply(:with_token => false) }
+
+  def create_reply(options = {})
+    with_token = true unless options.delete(:with_token) == false
+    state = options.delete(:state) || :queued_for_smsc_delivery
+    options[:delivered_at] ||= 10.minutes.ago
+
+    args = [:reply, :delivered]
+    args << :with_token if with_token
+    args << state
+    create(*args, options)
+  end
+
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
     options[:deliver] = true unless options[:deliver] == false
     reply.should be_persisted
@@ -155,6 +170,52 @@ describe Reply do
 
     it "should return the last delivered reply" do
       subject.class.last_delivered.should == another_delivered_reply
+    end
+  end
+
+  describe ".query_queued!" do
+    include ResqueHelpers
+
+    let!(:smsc_delivered_reply) { create_reply(:state => :delivered_by_smsc) }
+    let!(:confirmed_reply) { create_reply(:state => :confirmed) }
+
+    before do
+      recently_queued_reply
+      less_recently_queued_reply
+      reply_with_no_token
+    end
+
+    it "should update the message state based off of the nuntium ao state" do
+      do_background_task do
+        expect_ao_fetch(:token => less_recently_queued_reply.token) do
+          subject.class.query_queued!
+        end
+      end
+
+      recently_queued_reply.reload.should be_queued_for_smsc_delivery
+      reply_with_no_token.reload.should be_queued_for_smsc_delivery
+      smsc_delivered_reply.reload.should be_delivered_by_smsc
+      confirmed_reply.reload.should be_confirmed
+      less_recently_queued_reply.reload.should be_delivered_by_smsc
+    end
+  end
+
+  describe "#query_state!" do
+    it "should update the state based off of the nuntium ao state" do
+      reply_with_no_token.query_state!
+      reply_with_no_token.reload.should be_queued_for_smsc_delivery
+
+      expect_ao_fetch(:token => less_recently_queued_reply.token) do
+        less_recently_queued_reply.query_state!
+      end
+
+      less_recently_queued_reply.reload.should be_delivered
+
+      expect_ao_fetch(:token => recently_queued_reply.token, :state => "confirmed") do
+        recently_queued_reply.query_state!
+      end
+
+      recently_queued_reply.reload.should be_confirmed
     end
   end
 

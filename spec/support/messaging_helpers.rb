@@ -20,16 +20,7 @@ module MessagingHelpers
       cassette_filter = lambda { |req| URI.parse(req.uri).host == URI.parse(ENV["NUNTIUM_URL"]).host }
       c.before_http_request(cassette_filter) do |request|
         VCR.eject_cassette
-        VCR.insert_cassette(
-          "nuntium",
-          :erb => {
-            :url => ENV["NUNTIUM_URL"],
-            :account => ENV["NUNTIUM_ACCOUNT"],
-            :application => ENV["NUNTIUM_APPLICATION"],
-            :password => ENV["NUNTIUM_PASSWORD"],
-            :token => options[:token] || generate(:token)
-          }
-        )
+        VCR.insert_cassette(:nuntium, :erb => nuntium_erb(options))
       end
 
       c.after_http_request(cassette_filter) do
@@ -38,6 +29,13 @@ module MessagingHelpers
     end
 
     yield
+  end
+
+  def expect_ao_fetch(options = {}, &block)
+    options[:state] ||= "delivered"
+    VCR.use_cassette(:nuntium_get_ao, :erb => nuntium_erb(options)) do
+      yield
+    end
   end
 
   def assert_deliver(options = {})
@@ -89,5 +87,15 @@ module MessagingHelpers
         end
       end
     end
+  end
+
+  def nuntium_erb(options = {})
+    {
+      :url => ENV["NUNTIUM_URL"],
+      :account => ENV["NUNTIUM_ACCOUNT"],
+      :application => ENV["NUNTIUM_APPLICATION"],
+      :password => ENV["NUNTIUM_PASSWORD"],
+      :token => options.delete(:token) || generate(:token)
+    }.merge(options)
   end
 end

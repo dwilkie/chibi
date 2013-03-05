@@ -1,0 +1,56 @@
+---
+http_interactions:
+
+<% uri = URI.parse(url) %>
+<% scheme = uri.scheme %>
+<% host = uri.host %>
+<% result = "[{\"state\":\"#{state}\",\"channel_kind\":\"smpp\",\"body\":\"Dada: Hi Chivan. i am Dada m girl na soksabay te?\",\"to\":\"sms://85510000000\",\"channel\":\"smart\",\"country\":\"KH\",\"suggested_channel\":\"smart\",\"guid\":\"591fc86f-fd2e-390d-6100-c3ba144ve6e3\"}]" %>
+
+- request:
+    method: get
+    uri: <%= scheme %>://<%= account %>%2F<%= application %>:<%= password %>@<%= host %>/<%= account %>/<%= application %>/get_ao.json?token=<%= token %>
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      accept:
+      - ! '*/*; q=0.5, application/xml'
+      accept-encoding:
+      - gzip, deflate
+      content-type:
+      - application/json
+      user-agent:
+      - Ruby
+      authorization:
+      - Basic <%= Base64.encode64("#{application}:#{password}").gsub(/\s/, "") %>
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      date:
+      - Tue, 05 Mar 2013 07:40:58 GMT
+      server:
+      - Apache/2.2.20 (Ubuntu)
+      x-powered-by:
+      - Phusion Passenger (mod_rails/mod_rack) 3.0.11
+      x-ua-compatible:
+      - IE=Edge,chrome=1
+      cache-control:
+      - max-age=0, private, must-revalidate
+      etag:
+      - ! '"67b9145f80c0544ec3ff0840b919def8"'
+      x-runtime:
+      - '0.007301'
+      status:
+      - '200'
+      content-length:
+      - '236'
+      content-type:
+      - application/json; charset=utf-8
+    body:
+      encoding: US-ASCII
+      string: ! <%= result.to_json %>
+    http_version: '1.1'
+  recorded_at: Tue, 05 Mar 2013 07:40:58 GMT
+recorded_with: VCR 2.3.0
