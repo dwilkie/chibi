@@ -5,10 +5,7 @@ class DeliveryReceiptsController < ApplicationController
 
   def create
     reply = Reply.find_by_token!(params[:token])
-    puts "updating delivery state..."
-    puts "current state: #{reply.state}"
-    puts reply.update_delivery_state(params[:state])
-    puts "new state: #{reply.state}"
+    reply.update_delivery_state(params[:state])
     render(:nothing => true, :status => :created)
   end
 
