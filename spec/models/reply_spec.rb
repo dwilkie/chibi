@@ -287,13 +287,44 @@ describe Reply do
         end
       end
 
+      module NoRaceCondition
+        def self.included(base)
+          base.class_eval do
+            target = :perform_delivery!
+            feature = :race_condition
+
+            # Strip out punctuation on predicates or bang methods since
+            # e.g. target?_without_feature is not a valid method name.
+            aliased_target, punctuation = target.to_s.sub(/([?!=])$/, ''), $1
+            yield(aliased_target, punctuation) if block_given?
+
+            with_method, without_method = "#{aliased_target}_with_#{feature}#{punctuation}", "#{aliased_target}_without_#{feature}#{punctuation}"
+
+            alias_method target, without_method
+
+            case
+            when public_method_defined?(without_method)
+              public target
+            when protected_method_defined?(without_method)
+              protected target
+            when private_method_defined?(without_method)
+              private target
+            end
+          end
+        end
+      end
+
       before do
         Reply.send(:include, RaceCondition)
       end
 
+      after do
+        Reply.send(:include, NoRaceCondition)
+      end
+
       it "should correctly update the state of the reply" do
         expect_message { reply.deliver! }
-        reply.should be_delivered
+        reply.reload.should be_delivered
         reply.should be_delivered_by_smsc
       end
     end

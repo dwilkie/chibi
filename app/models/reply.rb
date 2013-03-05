@@ -16,7 +16,7 @@ class Reply < ActiveRecord::Base
 
   before_validation :set_destination
 
-  state_machine :initial => :pending_delivery do
+  state_machine :initial => :pending_delivery, :action => :save_with_state_check do
     state :pending_delivery,
           :queued_for_smsc_delivery,
           :delivered_by_smsc,
@@ -137,7 +137,6 @@ class Reply < ActiveRecord::Base
   def deliver!
     perform_delivery!(body)
     touch(:delivered_at)
-    reload
     update_delivery_state
   end
 
@@ -147,6 +146,16 @@ class Reply < ActiveRecord::Base
   end
 
   private
+
+  def save_with_state_check
+    if valid?
+      state_attribute = self.class.state_machine.attribute
+      self.class.update_all(
+        { state_attribute => state },
+        { self.class.primary_key => id, state_attribute => state_was }
+      ) == 1
+    end
+  end
 
   def set_forward_message(from, message)
     message.gsub!(/\A#{from.screen_id}\s*\:?\s*/i, "")
