@@ -25,8 +25,14 @@ class Reply < ActiveRecord::Base
           :confirmed
 
     event :update_delivery_status do
+      transition(
+        [
+          :pending_delivery,
+          :queued_for_smsc_delivery
+        ] => :delivered_by_smsc, :if => :delivery_succeeded?
+      )
+
       transition(:pending_delivery         => :queued_for_smsc_delivery)
-      transition(:queued_for_smsc_delivery => :delivered_by_smsc, :if => :delivery_succeeded?)
       transition(:queued_for_smsc_delivery => :rejected,          :if => :delivery_failed?)
       transition(:delivered_by_smsc        => :failed,            :if => :delivery_failed?)
       # the following handles the case where the delivery receipts were received out of order

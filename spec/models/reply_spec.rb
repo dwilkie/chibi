@@ -197,9 +197,11 @@ describe Reply do
       reply.update_delivery_state
       reply.should be_queued_for_smsc_delivery
 
+      # tests the case where the delivery receipt
+      # is received before the reply has been updated to 'queued_for_smsc_delivery'
       reply = create(:reply)
       reply.update_delivery_state("delivered")
-      reply.should be_queued_for_smsc_delivery
+      reply.should be_delivered_by_smsc
 
       reply = create(:reply, :queued_for_smsc_delivery)
       reply.update_delivery_state("delivered")
@@ -220,6 +222,12 @@ describe Reply do
       reply = create(:reply, :delivered_by_smsc)
       reply.update_delivery_state("failed")
       reply.should be_failed
+
+      # tests the case where the delivery receipt
+      # is received before the reply has been updated to 'queued_for_smsc_delivery'
+      reply = create(:reply, :delivered_by_smsc)
+      reply.update_delivery_state
+      reply.should be_delivered_by_smsc
 
       reply = create(:reply, :failed)
       reply.update_delivery_state("delivered")
