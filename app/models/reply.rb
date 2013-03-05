@@ -137,13 +137,8 @@ class Reply < ActiveRecord::Base
   def deliver!
     perform_delivery!(body)
     touch(:delivered_at)
-    puts "updating delivery state in deliver! method..."
-    puts "delivery state was: #{state}"
-    puts "reloading..."
     reload
-    puts "delivery state was: #{state}"
-    puts update_delivery_state
-    puts "delivery state is now: #{state}"
+    update_delivery_state
   end
 
   def update_delivery_state(state = nil)
