@@ -11,7 +11,8 @@ HireFire::Resource.configure do |config|
       :friend_messenger_queue,
       :friend_finder_queue,
       :user_reminderer_queue,
-      :reminderer_queue
+      :reminderer_queue,
+      :reply_state_queryer_queue
     )
   end
 end
