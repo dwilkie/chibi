@@ -67,7 +67,7 @@ class Reply < ActiveRecord::Base
   end
 
   def query_state!
-    update_delivery_state(nuntium.get_ao(token).first["state"]) if token.present?
+    update_delivery_state(:state => nuntium.get_ao(token).first["state"]) if token.present?
   end
 
   def body
@@ -150,8 +150,9 @@ class Reply < ActiveRecord::Base
     update_delivery_state
   end
 
-  def update_delivery_state(state = nil)
-    @delivery_state = state
+  def update_delivery_state(options = {})
+    @delivery_state = options[:state]
+    @force_state_update = options[:force]
     update_delivery_status
   end
 
@@ -162,6 +163,7 @@ class Reply < ActiveRecord::Base
   end
 
   def save_with_state_check
+    return save if @force_state_update
     if valid?
       state_attribute = self.class.state_machine.attribute
       self.class.update_all(

@@ -32,6 +32,10 @@ describe Reply do
     create(*args, options)
   end
 
+  def create_race_condition(reference_reply, state)
+    Reply.update_all({:state => state}, :id => reference_reply.id)
+  end
+
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
     options[:deliver] = true unless options[:deliver] == false
     reply.should be_persisted
@@ -252,7 +256,7 @@ describe Reply do
     end
   end
 
-  describe "#update_delivery_state(state = nil)" do
+  describe "#update_delivery_state(options = {})" do
     it "should correctly update the delivery state" do
       reply = create(:reply)
       reply.update_delivery_state
@@ -261,27 +265,39 @@ describe Reply do
       # tests the case where the delivery receipt
       # is received before the reply has been updated to 'queued_for_smsc_delivery'
       reply = create(:reply)
-      reply.update_delivery_state("delivered")
+      reply.update_delivery_state(:state => "delivered")
+      reply.should be_delivered_by_smsc
+
+      # tests that not passing :force => true will not update incase of a race condition
+      reply = create(:reply)
+      reply.stub(:update_delivery_state) do |options|
+        options ||= {}
+        create_race_condition(reply, :delivered_by_smsc)
+        reply.instance_variable_set(:@delivery_state, options[:state])
+        reply.instance_variable_set(:@force_state_update, options[:force])
+        reply.update_delivery_status
+      end
+      reply.update_delivery_state
+      reply.reload.should be_delivered_by_smsc
+
+      reply = create(:reply, :queued_for_smsc_delivery)
+      reply.update_delivery_state(:state => "delivered")
       reply.should be_delivered_by_smsc
 
       reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state("delivered")
-      reply.should be_delivered_by_smsc
-
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state("confirmed")
+      reply.update_delivery_state(:state => "confirmed")
       reply.should be_confirmed
 
       reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state("failed")
+      reply.update_delivery_state(:state => "failed")
       reply.should be_rejected
 
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state("confirmed")
+      reply.update_delivery_state(:state => "confirmed")
       reply.should be_confirmed
 
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state("failed")
+      reply.update_delivery_state(:state => "failed")
       reply.should be_failed
 
       # tests the case where the delivery receipt
@@ -290,28 +306,41 @@ describe Reply do
       reply.update_delivery_state
       reply.should be_delivered_by_smsc
 
+      # tests that passing :force => true
+      # updates regardless of a race condition
+      reply = create(:reply)
+      reply.stub(:update_delivery_state) do |options|
+        options ||= {}
+        create_race_condition(reply, :queued_for_smsc_delivery)
+        reply.instance_variable_set(:@delivery_state, options[:state])
+        reply.instance_variable_set(:@force_state_update, options[:force])
+        reply.update_delivery_status
+      end
+      reply.update_delivery_state(:state => "delivered", :force => true)
+      reply.reload.should be_delivered_by_smsc
+
       reply = create(:reply, :failed)
-      reply.update_delivery_state("delivered")
+      reply.update_delivery_state(:state => "delivered")
       reply.should be_failed
 
       reply = create(:reply, :rejected)
-      reply.update_delivery_state("confirmed")
+      reply.update_delivery_state(:state => "confirmed")
       reply.should be_confirmed
 
       reply = create(:reply, :rejected)
-      reply.update_delivery_state("delivered")
+      reply.update_delivery_state(:state => "delivered")
       reply.should be_failed
 
       reply = create(:reply, :failed)
-      reply.update_delivery_state("confirmed")
+      reply.update_delivery_state(:state => "confirmed")
       reply.should be_confirmed
 
       reply = create(:reply, :confirmed)
-      reply.update_delivery_state("delivered")
+      reply.update_delivery_state(:state => "delivered")
       reply.should be_confirmed
 
       reply = create(:reply, :confirmed)
-      reply.update_delivery_state("failed")
+      reply.update_delivery_state(:state => "failed")
       reply.should be_confirmed
     end
   end
@@ -338,7 +367,7 @@ describe Reply do
       before do
         reply.stub(:touch).with(:delivered_at) do
           reply.update_attribute(:delivered_at, Time.now)
-          Reply.update_all({:state => "delivered_by_smsc"}, :id => reply.id)
+          create_race_condition(reply, :delivered_by_smsc)
         end
       end
 
