@@ -135,12 +135,13 @@ FactoryGirl.define do
     end
 
     trait :from_offline_user do
-      association :user, :factory => :offline_user
+      association :user, :factory => [:user, :offline]
     end
   end
 
   factory :reply do
     user
+    body "body"
     to { user.mobile_number }
 
     trait :with_alternate_translation do
@@ -186,6 +187,10 @@ FactoryGirl.define do
 
     trait :with_unset_destination do
       to nil
+    end
+
+    trait :with_no_body do
+      body nil
     end
   end
 
@@ -294,6 +299,9 @@ FactoryGirl.define do
   end
 
   factory :user do
+    sequence(:mobile_number, 85597000000) {|n| n.to_s }
+    location
+
     trait :without_recent_interaction do
       created_at { 6.days.ago }
       updated_at { 6.days.ago }
@@ -331,66 +339,68 @@ FactoryGirl.define do
       state "searching_for_friend"
     end
 
-    sequence(:mobile_number, 85597000000) {|n| n.to_s }
-    location
-
-    factory :offline_user do
+    trait :offline do
       state "offline"
     end
 
-    factory :male_user do
+    trait :with_name do
+      name "veronica"
+    end
+
+    trait :with_gender do
+      female
+    end
+
+    trait :with_looking_for_preference do
+      looking_for "m"
+    end
+
+    trait :with_location do
+      association :location, :factory => :phnom_penh
+    end
+
+    trait :with_date_of_birth do
+      date_of_birth { 23.years.ago }
+    end
+
+    trait :with_complete_profile do
+      with_name
+      with_date_of_birth
+      with_gender
+      with_looking_for_preference
+      with_location
+    end
+
+    trait :from_england do
+      association :location, :factory => :london
+    end
+
+    trait :male do
       gender "m"
     end
 
-    factory :female_user do
+    trait :female do
       gender "f"
     end
 
-    factory :user_with_invalid_mobile_number do
+    trait :with_invalid_mobile_number do
       sequence(:mobile_number, 8551234) {|n| n.to_s }
     end
 
-    factory :user_with_invalid_gender do
+    trait :with_invalid_gender do
       gender "e"
     end
 
-    factory :user_with_invalid_looking_for_preference do
+    trait :with_invalid_looking_for_preference do
       looking_for 3
     end
 
-    factory :user_who_is_too_old do
-      age 100
-    end
-
-    factory :user_who_is_too_young do
+    trait :too_young do
       age 9
     end
 
-    factory :user_with_name do
-      name "veronica"
-
-      factory :user_with_complete_profile do
-        date_of_birth { 23.years.ago }
-        gender "f"
-        looking_for "m"
-        association :location, :factory => :phnom_penh
-
-        factory :english_user_with_complete_profile do
-          association :location, :factory => :london
-        end
-      end
-    end
-
-    factory :user_with_gender do
-      gender "f"
-
-      factory :user_with_gender_and_looking_for_preference do
-        looking_for "m"
-      end
-    end
-
-    factory :user_with_age do
-      age 23
+    trait :too_old do
+      age 100
     end
 
     # do not reorder these factories because the tests rely on

@@ -17,7 +17,7 @@ module MessagingHelpers
     # eject the current cassette, and insert a new nuntium cassette with a unique token
     # then after the request, eject the cassette
     VCR.configure do |c|
-      cassette_filter = lambda { |req| URI.parse(req.uri).host == URI.parse(ENV["NUNTIUM_URL"]).host }
+      cassette_filter = lambda { |req| URI.parse(req.uri).path == nuntium_send_ao_path }
       c.before_http_request(cassette_filter) do |request|
         VCR.eject_cassette
         VCR.insert_cassette(:nuntium, :erb => nuntium_erb(options))
@@ -40,7 +40,7 @@ module MessagingHelpers
 
   def assert_deliver(options = {})
     last_request = FakeWeb.last_request
-    last_request.path.should == "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
+    last_request.path.should == nuntium_send_ao_path
     last_request_data = JSON.parse(last_request.body).first
     last_request_data["body"].should == options[:body] if options[:body].present?
     last_request_data["to"].should == "sms://#{options[:to]}" if options[:to].present?
@@ -97,5 +97,9 @@ module MessagingHelpers
       :password => ENV["NUNTIUM_PASSWORD"],
       :token => options.delete(:token) || generate(:token)
     }.merge(options)
+  end
+
+  def nuntium_send_ao_path
+    "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
   end
 end

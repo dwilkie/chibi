@@ -14,9 +14,9 @@ describe User do
   let(:cambodian) { build(:cambodian) }
   let(:friend) { create(:user) }
   let(:active_chat) { create(:active_chat, :user => user, :friend => friend) }
-  let(:offline_user) { build(:offline_user) }
-  let(:user_with_complete_profile) { build(:user_with_complete_profile) }
-  let(:male_user) { create(:male_user) }
+  let(:offline_user) { build(:user, :offline) }
+  let(:user_with_complete_profile) { build(:user, :with_complete_profile) }
+  let(:male_user) { create(:user, :male) }
 
   def assert_friend_found(options = {})
     options[:searcher] ||= user_searching_for_friend
@@ -95,20 +95,20 @@ describe User do
   end
 
   it "should not be valid with an invalid gender" do
-    build(:user_with_invalid_gender).should_not be_valid
+    build(:user, :with_invalid_gender).should_not be_valid
   end
 
   it "should not be valid with an invalid looking for preference" do
-    build(:user_with_invalid_looking_for_preference).should_not be_valid
+    build(:user, :with_invalid_looking_for_preference).should_not be_valid
   end
 
   it "should not be valid with an invalid age" do
-    build(:user_who_is_too_old).should_not be_valid
-    build(:user_who_is_too_young).should_not be_valid
+    build(:user, :too_old).should_not be_valid
+    build(:user, :too_young).should_not be_valid
   end
 
   it "should not be valid with an invalid mobile number e.g. a short code" do
-    build(:user_with_invalid_mobile_number).should_not be_valid
+    build(:user, :with_invalid_mobile_number).should_not be_valid
   end
 
   it "should not be valid without a screen name" do
@@ -208,7 +208,7 @@ describe User do
   end
 
   describe ".online" do
-    let(:offline_user) { create(:offline_user) }
+    let(:offline_user) { create(:user, :offline) }
 
     before do
       offline_user
@@ -281,8 +281,8 @@ describe User do
   describe ".filter_params" do
     context "passing search params" do
       it "should filter the users by the search params" do
-        male_user = create(:male_user)
-        female_user = create(:female_user)
+        male_user = create(:user, :male)
+        female_user = create(:user, :female)
 
         user
         offline_user.save
@@ -778,7 +778,7 @@ describe User do
 
     context "for users with a gender and looking for preference" do
       let(:user_with_gender_and_looking_for_preference) do
-        create(:user_with_gender_and_looking_for_preference)
+        create(:user, :with_gender, :with_looking_for_preference)
       end
 
       it "should update the profile with the new information" do
@@ -1219,7 +1219,7 @@ describe User do
       user_with_complete_profile.should be_profile_complete
 
       ["name", "date_of_birth", "gender", "looking_for"].each do |attribute|
-        reference_user = build(:user_with_complete_profile)
+        reference_user = build(:user, :with_complete_profile)
         reference_user.send("#{attribute}=", nil)
         reference_user.should_not be_profile_complete
       end
@@ -1823,7 +1823,7 @@ describe User do
 
   describe "#screen_id" do
     context "the user has a name" do
-      let(:user_with_name) { create(:user, :name => "sok", :id => 69) }
+      let(:user_with_name) { create(:user, :with_name, :name => "sok", :id => 69) }
 
       it "should return the user's name" do
         user_with_name.screen_id.should == "Sok"

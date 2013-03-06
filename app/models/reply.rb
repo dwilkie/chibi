@@ -9,7 +9,7 @@ class Reply < ActiveRecord::Base
   FAILED = "failed"
   CONFIRMED = "confirmed"
 
-  validates :to, :presence => true
+  validates :to, :body, :presence => true
   validates :token, :uniqueness => true, :allow_nil => true
 
   alias_attribute :destination, :to

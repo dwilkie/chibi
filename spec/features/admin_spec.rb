@@ -4,8 +4,8 @@ describe "Admin" do
   include MessagingHelpers
   include AdminHelpers
 
-  let(:user) { create(:male_user) }
-  let(:another_user) { create(:female_user) }
+  let(:user) { create(:user, :male) }
+  let(:another_user) { create(:user, :female) }
 
   let(:chat) { create(:active_chat_with_single_user, :user => user, :friend => another_user, :created_at => 10.minutes.ago) }
   let(:another_chat) { create(:chat, :user => another_user, :friend => user, :created_at => 10.minutes.ago) }

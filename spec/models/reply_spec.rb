@@ -12,13 +12,13 @@ describe Reply do
   end
 
   let(:new_reply) { build(:reply, :with_unset_destination, :user => user) }
-  let(:partner) { build(:user_with_name) }
+  let(:partner) { build(:user, :with_name) }
   let(:reply) { create(:reply, :user => user) }
   let(:delivered_reply) { create(:reply, :delivered) }
   let(:reply_with_token) { create(:reply, :with_token) }
 
   let(:recently_queued_reply) { create_reply(:delivered_at => Time.now) }
-  let(:less_recently_queued_reply) { create_reply(:token => "token") }
+  let(:less_recently_queued_reply) { create_reply }
   let(:reply_with_no_token) { create_reply(:with_token => false) }
 
   def create_reply(options = {})
@@ -116,6 +116,10 @@ describe Reply do
   it "should not be valid with a duplicate a token" do
     new_reply.token = reply_with_token.token
     new_reply.should_not be_valid
+  end
+
+  it "should not be valid without a body" do
+    build(:reply, :with_no_body).should_not be_valid
   end
 
   describe "callbacks" do
@@ -445,7 +449,7 @@ describe Reply do
       # special case
 
       let(:english_user_only_missing_sexual_preference) do
-        build(:english_user_with_complete_profile, :looking_for => nil)
+        build(:user, :with_complete_profile, :from_england, :looking_for => nil)
       end
 
       it "should tell them to text their preferred gender" do

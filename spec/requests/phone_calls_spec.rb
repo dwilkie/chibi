@@ -179,7 +179,7 @@ describe "PhoneCalls" do
 
               context "and I answer with a valid age" do
                 before do
-                  update_current_call_status(:digits => build(:user_with_age).age)
+                  update_current_call_status(:digits => build(:user, :with_date_of_birth).age)
                 end
 
                 it "should save my preference and ask me if I am male of female" do
@@ -241,7 +241,7 @@ describe "PhoneCalls" do
 
               context "and I answer with an invalid age" do
                 before do
-                  update_current_call_status(:digits => build(:user_who_is_too_young).age)
+                  update_current_call_status(:digits => build(:user, :too_young).age)
                 end
 
                 it "should ignore my input and ask me for my gender" do
@@ -370,7 +370,7 @@ describe "PhoneCalls" do
       context "as a user" do
         context "when I call" do
           context "and I am offline" do
-            let(:offline_user) { create(:offline_user) }
+            let(:offline_user) { create(:user, :offline) }
 
             before do
               call(:from => offline_user)

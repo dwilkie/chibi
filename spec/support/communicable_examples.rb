@@ -2,7 +2,7 @@ COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
 shared_examples_for "communicable" do
-  let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
+  let(:user_with_invalid_mobile_number) { build(:user, :with_invalid_mobile_number) }
 
   it "should not be valid without a user" do
     communicable_resource.user = nil

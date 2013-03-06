@@ -20,7 +20,7 @@ describe "Messages" do
     context "as a user" do
       context "when I text" do
         context "given I am offline" do
-          let(:offline_user) { create(:offline_user) }
+          let(:offline_user) { create(:user, :offline) }
 
           before do
             create(:message, :user => offline_user)
@@ -519,7 +519,7 @@ describe "Messages" do
 
     context "as an automated 5 digit short code" do
 
-      let(:user_with_invalid_mobile_number) { build(:user_with_invalid_mobile_number) }
+      let(:user_with_invalid_mobile_number) { build(:user, :with_invalid_mobile_number) }
 
       context "when I text 'some notification'" do
         before do

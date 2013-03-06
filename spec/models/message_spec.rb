@@ -226,7 +226,7 @@ describe Message do
     end
 
     context "given the message body is anything other than 'stop'" do
-      let(:offline_user) { create(:offline_user) }
+      let(:offline_user) { create(:user, :offline) }
       let(:message_from_offline_user) { create(:message, :user => offline_user) }
 
       before do
@@ -359,7 +359,7 @@ describe Message do
           end
 
           context "and the user is offline" do
-            let(:offline_user) { build(:offline_user) }
+            let(:offline_user) { build(:user, :offline) }
 
             before do
               message.body = ""
