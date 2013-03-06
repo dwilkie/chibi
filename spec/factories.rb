@@ -19,10 +19,6 @@ FactoryGirl.define do
     user
     from { user.mobile_number }
 
-    factory :message_from_last_month do
-      from_last_month
-    end
-
     factory :message_with_guid do
       guid
     end
@@ -147,32 +143,17 @@ FactoryGirl.define do
     user
     to { user.mobile_number }
 
-    factory :reply_from_last_month do
-      from_last_month
+    trait :with_alternate_translation do
+      alternate_translation "alternate translation"
+      with_locale
     end
 
-    factory :reply_with_token do
-      with_token
+    trait :without_locale do
+      locale nil
     end
 
-    factory :reply_with_locale do
+    trait :with_locale do
       locale { user.locale }
-
-      factory :reply_with_alternate_translation do
-        alternate_translation "alternate translation"
-
-        factory :delivered_reply_with_alternate_translation do
-          delivered_at { Time.now }
-
-          factory :delivered_reply_with_alternate_translation_no_locale do
-            locale nil
-          end
-        end
-      end
-    end
-
-    factory :delivered_reply do
-      delivered
     end
 
     trait :delivered do
@@ -352,10 +333,6 @@ FactoryGirl.define do
 
     sequence(:mobile_number, 85597000000) {|n| n.to_s }
     location
-
-    factory :user_from_last_month do
-      from_last_month
-    end
 
     factory :offline_user do
       state "offline"

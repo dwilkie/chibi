@@ -13,7 +13,7 @@ describe "Admin" do
   let(:message) { create(:message, :user => another_user, :body => "Hello", :chat => another_chat) }
   let(:another_message) { create(:message, :user => user, :body => "Goodbye", :chat => chat) }
 
-  let(:reply) { create(:delivered_reply, :user => another_user, :body => "Hello", :chat => another_chat) }
+  let(:reply) { create(:reply, :delivered, :user => another_user, :body => "Hello", :chat => another_chat) }
   let(:another_reply) { create(:reply, :user => user, :body => "Goodbye", :chat => chat) }
 
   let(:phone_call) { create(:phone_call, :user => another_user, :chat => another_chat) }
@@ -207,9 +207,9 @@ describe "Admin" do
     end
 
     context "when I visit '/overview'" do
-      let(:message_from_last_month) { create(:message_from_last_month, :user => user) }
-      let(:reply_from_last_month) { create(:reply_from_last_month, :user => user) }
-      let(:user_from_last_month) { create(:user_from_last_month) }
+      let(:message_from_last_month) { create(:message, :from_last_month, :user => user) }
+      let(:reply_from_last_month) { create(:reply, :from_last_month, :user => user) }
+      let(:user_from_last_month) { create(:user, :from_last_month) }
 
       before do
         messages

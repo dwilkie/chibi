@@ -1974,25 +1974,24 @@ describe User do
   end
 
   describe "#update_locale!" do
-
     def setup_redelivery_scenario(subject, options = {})
       body = "something"
 
       # create a delivered reply with an alternate translation
       # to test that this reply is redelivered with the alternative translation
       delivered_reply_with_alternate_translation = create(
-        :delivered_reply_with_alternate_translation, :user => subject, :body => body
+        :reply, :delivered, :with_alternate_translation, :user => subject, :body => body
       )
 
       # create an undelivered reply with an alternate translation to test
       # that this reply should not be redelivered when updating the locale
-      create(:reply_with_alternate_translation, :user => subject, :body => body)
+      create(:reply, :with_alternate_translation, :user => subject, :body => body)
 
       # create another delivered reply without an alternate translation
       # to test that no resend is performed when updating the locale when the last
       # reply has no alternate translation
       delivered_reply = create(
-        :delivered_reply, :user => subject, :body => body
+        :reply, :delivered, :user => subject, :body => body
       ) if options[:later_no_alternate_translation_reply]
 
       delivered_reply || delivered_reply_with_alternate_translation

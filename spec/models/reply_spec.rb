@@ -14,8 +14,8 @@ describe Reply do
   let(:new_reply) { build(:reply, :with_unset_destination, :user => user) }
   let(:partner) { build(:user_with_name) }
   let(:reply) { create(:reply, :user => user) }
-  let(:delivered_reply) { create(:delivered_reply) }
-  let(:reply_with_token) { create(:reply_with_token) }
+  let(:delivered_reply) { create(:reply, :delivered) }
+  let(:reply_with_token) { create(:reply, :with_token) }
 
   let(:recently_queued_reply) { create_reply(:delivered_at => Time.now) }
   let(:less_recently_queued_reply) { create_reply(:token => "token") }
@@ -164,7 +164,7 @@ describe Reply do
   end
 
   describe ".last_delivered" do
-    let(:another_delivered_reply) { create(:delivered_reply) }
+    let(:another_delivered_reply) { create(:reply, :delivered) }
 
     before do
       delivered_reply
@@ -380,9 +380,10 @@ describe Reply do
   end
 
   describe "#deliver_alternate_translation!" do
-    def assert_deliver_alternate_translation(factory_name, options = {})
+    def assert_deliver_alternate_translation(*traits)
+      options = traits.extract_options!
       deliver = options.delete(:deliver)
-      reply = build(factory_name, options)
+      reply = build(:reply, *traits, options)
 
       if deliver
         expect_message { reply.deliver_alternate_translation! }
@@ -395,22 +396,23 @@ describe Reply do
 
     it "should deliver the alternate translation based off the users locale if available" do
       # assert no deliver for reply without alternate translation
-      assert_deliver_alternate_translation(:delivered_reply)
+      assert_deliver_alternate_translation(:delivered)
 
       # assert no delivery for a reply with an alternate translation but no locale
-      assert_deliver_alternate_translation(:delivered_reply_with_alternate_translation_no_locale)
+      assert_deliver_alternate_translation(:delivered, :with_alternate_translation, :without_locale)
 
       # assert no delivery for a reply with an alternate translation that has not been delivered yet
-      assert_deliver_alternate_translation(:reply_with_alternate_translation)
+      assert_deliver_alternate_translation(:with_alternate_translation)
 
       # assert delivery of the body for a delivered reply with an alternate translation
       # when the user's locale is the same as the original delivered reply
-      assert_deliver_alternate_translation(:delivered_reply_with_alternate_translation, :deliver => :body)
+      assert_deliver_alternate_translation(:delivered, :with_alternate_translation, :deliver => :body)
 
-      # assert delivery of the alternate translation for a delivered reply with an alternate translation
+      # assert delivery of the alternate translation for a
+      # delivered reply with an alternate translation
       # when the user's locale is different from the original delivered reply
       assert_deliver_alternate_translation(
-        :delivered_reply_with_alternate_translation, :deliver => :alternate_translation, :locale => "en"
+        :delivered, :with_alternate_translation, :deliver => :alternate_translation, :locale => "en"
       )
     end
   end

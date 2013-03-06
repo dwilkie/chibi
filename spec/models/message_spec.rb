@@ -178,7 +178,7 @@ describe Message do
         user.locale.should_not == :en
         message.body = body
 
-        last_reply = create(:delivered_reply_with_alternate_translation, :user => user)
+        last_reply = create(:reply, :delivered, :with_alternate_translation, :user => user)
 
         if expect_reply
           expect_message { message.process! }

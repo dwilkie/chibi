@@ -455,7 +455,7 @@ describe Chat do
 
       context "given there are replies for this chat" do
         before do
-          create(:delivered_reply, :chat => active_chat, :user => user)
+          create(:reply, :delivered, :chat => active_chat, :user => user)
         end
 
         context "and the last reply was to the user" do
@@ -470,7 +470,7 @@ describe Chat do
 
         context "and the last reply was to the friend" do
           before do
-            rep = create(:delivered_reply, :chat => active_chat, :user => friend)
+            rep = create(:reply, :delivered, :chat => active_chat, :user => friend)
             active_chat.deactivate!(:active_user => true)
           end
 

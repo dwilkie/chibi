@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe DeliveryReceipt do
-  let(:reply) { create(:reply_with_token) }
+  let(:reply) { create(:reply, :with_token) }
   let(:new_delivery_receipt) { build(:delivery_receipt, :reply => reply) }
   let(:delivery_receipt) { create(:delivery_receipt, :reply => reply) }
 
