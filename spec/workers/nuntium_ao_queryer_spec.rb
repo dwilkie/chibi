@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe NuntiumAoQueryer, :focus do
+describe NuntiumAoQueryer do
   context "@queue" do
     it "should == :nuntium_ao_queryer_queue" do
       subject.class.instance_variable_get(:@queue).should == :nuntium_ao_queryer_queue

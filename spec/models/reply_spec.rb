@@ -256,7 +256,7 @@ describe Reply do
     end
   end
 
-  describe "redelivering blank messages" do
+  describe "undelivering blank replies" do
     let(:chat_with_message) { create(:chat, :with_message) }
     let(:chat) { create(:chat) }
 
@@ -279,23 +279,19 @@ describe Reply do
       super(*args, options)
     end
 
-    def assert_redelivered(reference_reply)
-      old_reply_token = reference_reply.token
+    def assert_fixed(reference_reply)
       reference_reply.reload.body.should be_present
-      reference_reply.should be_delivered
-      reference_reply.chat.should be_active
-      reference_reply.token.should_not == old_reply_token
+      reference_reply.should_not be_delivered
+      reference_reply.chat.should_not be_active
     end
 
-    def assert_not_redelivered(reference_reply)
+    def assert_not_fixed(reference_reply)
       old_reply_body = reference_reply.body
-      old_reply_token = reference_reply.token
       reference_reply.should be_delivered
-      reference_reply.token.should == old_reply_token
       reference_reply.body.should == old_reply_body
     end
 
-    describe ".redeliver_blank!" do
+    describe ".fix_blank!" do
       before do
         blank_reply_from_chat_with_messages
         blank_reply_from_chat_with_no_messages
@@ -304,22 +300,22 @@ describe Reply do
         reply_with_body
       end
 
-      it "should redeliver blank messages that were intended to be forwarded" do
+      it "should fix delivered blank messages and mark them as undelivered" do
         do_background_task do
           expect_message do
-            subject.class.redeliver_blank!
+            subject.class.fix_blank!
           end
         end
 
-        assert_redelivered(blank_reply_from_chat_with_messages)
-        assert_not_redelivered(blank_reply_from_chat_with_no_messages)
-        assert_not_redelivered(blank_reply_no_chat)
-        assert_not_redelivered(blank_reply_without_token)
-        assert_not_redelivered(reply_with_body)
+        assert_fixed(blank_reply_from_chat_with_messages)
+        assert_not_fixed(blank_reply_from_chat_with_no_messages)
+        assert_not_fixed(blank_reply_no_chat)
+        assert_not_fixed(blank_reply_without_token)
+        assert_not_fixed(reply_with_body)
       end
     end
 
-    describe "#redeliver_blank!" do
+    describe "#fix_blank!" do
       it "should only redeliver blank messages that were intended for forwarding" do
         # create a reply and a message in the chat
         create_reply(:with_body => true)
@@ -327,21 +323,21 @@ describe Reply do
         blank_reply_from_chat_with_messages
         # create a second message with a body
         create(:message, :from_chat_initiator, :body => "foo", :chat => chat_with_message)
-        expect_message { blank_reply_from_chat_with_messages.redeliver_blank! }
+        expect_message { blank_reply_from_chat_with_messages.fix_blank! }
 
-        assert_redelivered(blank_reply_from_chat_with_messages)
+        assert_fixed(blank_reply_from_chat_with_messages)
 
         # assert that the blank reply does not contain the content of the second message
         blank_reply_from_chat_with_messages.body.should_not include("foo")
 
-        blank_reply_from_chat_with_no_messages.redeliver_blank!
-        assert_not_redelivered(blank_reply_from_chat_with_no_messages)
+        blank_reply_from_chat_with_no_messages.fix_blank!
+        assert_not_fixed(blank_reply_from_chat_with_no_messages)
 
-        blank_reply_no_chat.redeliver_blank!
-        assert_not_redelivered(blank_reply_no_chat)
+        blank_reply_no_chat.fix_blank!
+        assert_not_fixed(blank_reply_no_chat)
 
-        reply_with_body.redeliver_blank!
-        assert_not_redelivered(reply_with_body)
+        reply_with_body.fix_blank!
+        assert_not_fixed(reply_with_body)
       end
     end
   end

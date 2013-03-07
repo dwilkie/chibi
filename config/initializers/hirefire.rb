@@ -13,7 +13,7 @@ HireFire::Resource.configure do |config|
       :user_reminderer_queue,
       :reminderer_queue,
       :nuntium_ao_queryer_queue,
-      :blank_reply_redeliverer_queue
+      :blank_reply_fixer_queue
     )
   end
 end
