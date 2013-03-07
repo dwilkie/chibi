@@ -24,6 +24,10 @@ FactoryGirl.define do
     "123abc84-a82e-23a1-b691-b2c19834bce#{n}"
   end
 
+  sequence :mobile_number, 85597000000 do |n|
+    n.to_s
+  end
+
   factory :message do
     user
     from { user.mobile_number }
@@ -314,7 +318,7 @@ FactoryGirl.define do
   end
 
   factory :user do
-    sequence(:mobile_number, 85597000000) {|n| n.to_s }
+    mobile_number
     location
 
     trait :without_recent_interaction do

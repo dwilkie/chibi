@@ -200,6 +200,7 @@ describe Reply do
     let(:recently_queued_reply) { create_reply(:delivered_at => Time.now) }
     let(:less_recently_queued_reply) { create_reply }
     let(:reply_with_no_token) { create_reply(:with_token => false) }
+    let(:blank_reply) { create_reply(:with_body => false) }
 
     describe ".query_queued!" do
       let!(:smsc_delivered_reply) { create_reply(:state => :delivered_by_smsc) }
@@ -209,6 +210,7 @@ describe Reply do
         recently_queued_reply
         less_recently_queued_reply
         reply_with_no_token
+        blank_reply
       end
 
       it "should update the message state based off of the nuntium ao state" do
@@ -220,28 +222,36 @@ describe Reply do
 
         recently_queued_reply.reload.should be_queued_for_smsc_delivery
         reply_with_no_token.reload.should be_queued_for_smsc_delivery
+        blank_reply.reload.should be_queued_for_smsc_delivery
         smsc_delivered_reply.reload.should be_delivered_by_smsc
         confirmed_reply.reload.should be_confirmed
         less_recently_queued_reply.reload.should be_delivered_by_smsc
       end
     end
 
-    describe "#query_state!" do
+    describe "#query_nuntium_ao!" do
       it "should update the state based off of the nuntium ao state" do
-        reply_with_no_token.query_state!
+        reply_with_no_token.query_nuntium_ao!
         reply_with_no_token.reload.should be_queued_for_smsc_delivery
+        reply_with_no_token.should be_delivered
 
-        expect_ao_fetch(:token => less_recently_queued_reply.token) do
-          less_recently_queued_reply.query_state!
+        blank_reply.query_nuntium_ao!
+        blank_reply.reload.should be_queued_for_smsc_delivery
+        blank_reply.should be_delivered
+
+        expect_ao_fetch(:token => less_recently_queued_reply.token, :body => "") do
+          less_recently_queued_reply.query_nuntium_ao!
         end
 
-        less_recently_queued_reply.reload.should be_delivered
+        # assert that the reply is marked undelivered for a blank ao body
+        less_recently_queued_reply.should_not be_delivered
 
         expect_ao_fetch(:token => recently_queued_reply.token, :state => "confirmed") do
-          recently_queued_reply.query_state!
+          recently_queued_reply.query_nuntium_ao!
         end
 
         recently_queued_reply.reload.should be_confirmed
+        recently_queued_reply.should be_delivered
       end
     end
   end

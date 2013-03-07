@@ -9,7 +9,7 @@ http_interactions:
     uri: <%= scheme %>://<%= account %>%2F<%= application %>:<%= password %>@<%= host %>/<%= account %>/<%= application %>/send_ao.json
     body:
       encoding: US-ASCII
-      string: ! '[{"to":"sms://85597000000","body":"hello"}]'
+      string: ! "[{\"to\":\"sms://#{to}\",\"body\":\"#{body}\"}]"
     headers:
       accept:
       - ! '*/*; q=0.5, application/xml'

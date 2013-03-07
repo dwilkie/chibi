@@ -4,7 +4,7 @@ http_interactions:
 <% uri = URI.parse(url) %>
 <% scheme = uri.scheme %>
 <% host = uri.host %>
-<% result = "[{\"state\":\"#{state}\",\"channel_kind\":\"smpp\",\"body\":\"Dada: Hi Chivan. i am Dada m girl na soksabay te?\",\"to\":\"sms://85510000000\",\"channel\":\"smart\",\"country\":\"KH\",\"suggested_channel\":\"smart\",\"guid\":\"591fc86f-fd2e-390d-6100-c3ba144ve6e3\"}]" %>
+<% result = "[{\"state\":\"#{state}\",\"channel_kind\":\"smpp\",\"body\":\"#{body}\",\"to\":\"sms://#{to}\",\"channel\":\"smart\",\"country\":\"KH\",\"suggested_channel\":\"smart\",\"guid\":\"591fc86f-fd2e-390d-6100-c3ba144ve6e3\"}]" %>
 
 - request:
     method: get

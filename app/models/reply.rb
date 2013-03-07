@@ -61,8 +61,8 @@ class Reply < ActiveRecord::Base
   end
 
   def self.query_queued!
-    queued_for_smsc_delivery.where("delivered_at < ?", 10.minutes.ago).find_each do |reply|
-      Resque.enqueue(ReplyStateQueryer, reply.id)
+    queued_for_smsc_delivery.where("delivered_at < ?", 10.minutes.ago).where("body IS NOT NULL").find_each do |reply|
+      Resque.enqueue(NuntiumAoQueryer, reply.id)
     end
   end
 
@@ -72,8 +72,12 @@ class Reply < ActiveRecord::Base
     end
   end
 
-  def query_state!
-    update_delivery_state(:state => nuntium.get_ao(token).first["state"]) if token.present?
+  def query_nuntium_ao!
+    if token.present? && body.present?
+      ao = nuntium.get_ao(token).first
+      undeliver! if ao["body"].blank?
+      update_delivery_state(:state => ao["state"])
+    end
   end
 
   def redeliver_blank!
@@ -81,8 +85,7 @@ class Reply < ActiveRecord::Base
       replies = chat.replies.order(:id).all
       if message_to_forward = chat.messages.order(:id).all[replies.index(self) - 1]
         set_forward_message(message_to_forward.user, message_to_forward.body)
-        self.delivered_at = nil
-        save!
+        undeliver!
         chat.reactivate!
       end
     end
@@ -178,6 +181,11 @@ class Reply < ActiveRecord::Base
 
   def self.queued_for_smsc_delivery
     scoped.where(:state => "queued_for_smsc_delivery").where("token IS NOT NULL")
+  end
+
+  def undeliver!
+    self.delivered_at = nil
+    save!
   end
 
   def save_with_state_check

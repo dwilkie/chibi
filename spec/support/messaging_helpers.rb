@@ -95,7 +95,9 @@ module MessagingHelpers
       :account => ENV["NUNTIUM_ACCOUNT"],
       :application => ENV["NUNTIUM_APPLICATION"],
       :password => ENV["NUNTIUM_PASSWORD"],
-      :token => options.delete(:token) || generate(:token)
+      :token => options.delete(:token) || generate(:token),
+      :to => options.delete(:to) || generate(:mobile_number),
+      :body => options.delete(:body) || "hello"
     }.merge(options)
   end
 
