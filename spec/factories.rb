@@ -7,6 +7,15 @@ FactoryGirl.define do
     created_at {1.month.ago}
   end
 
+  trait :from_chat do
+    chat
+  end
+
+  trait :from_chat_initiator do
+    from_chat
+    user { chat.user }
+  end
+
   sequence :guid do |n|
     "296cba84-c82f-49c0-a732-a9b09815fbe#{n}"
   end
@@ -206,6 +215,12 @@ FactoryGirl.define do
       after(:create) do |chat|
         chat.active_users << chat.user
         chat.save
+      end
+    end
+
+    trait :with_message do
+      after(:create) do |chat|
+        chat.messages << FactoryGirl.create(:message, :user => chat.friend)
       end
     end
 

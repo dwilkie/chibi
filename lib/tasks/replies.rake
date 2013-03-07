@@ -3,4 +3,9 @@ namespace :replies do
   task :query_queued => :environment do
     Reply.query_queued!
   end
+
+  desc "Attempts to redeliver blank replies that were intended for forwarding"
+  task :redeliver_blank => :environment do
+    Reply.redeliver_blank!
+  end
 end

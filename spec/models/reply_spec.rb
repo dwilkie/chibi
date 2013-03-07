@@ -3,6 +3,7 @@ require 'spec_helper'
 describe Reply do
   include TranslationHelpers
   include MessagingHelpers
+  include ResqueHelpers
 
   let(:user) { build(:user) }
 
@@ -17,19 +18,33 @@ describe Reply do
   let(:delivered_reply) { create(:reply, :delivered) }
   let(:reply_with_token) { create(:reply, :with_token) }
 
-  let(:recently_queued_reply) { create_reply(:delivered_at => Time.now) }
-  let(:less_recently_queued_reply) { create_reply }
-  let(:reply_with_no_token) { create_reply(:with_token => false) }
+  def create_reply(*traits)
+    options = traits.extract_options!
 
-  def create_reply(options = {})
     with_token = true unless options.delete(:with_token) == false
-    state = options.delete(:state) || :queued_for_smsc_delivery
-    options[:delivered_at] ||= 10.minutes.ago
+    with_body = true unless options.delete(:with_body) == false
+    delivered = true unless options.delete(:delivered) == false
 
-    args = [:reply, :delivered]
+    if delivered
+      default_state = :queued_for_smsc_delivery
+      options[:delivered_at] ||= 10.minutes.ago
+    end
+
+    state = options.delete(:state) || default_state
+
+    args = [:reply, *traits]
+    args << :delivered if delivered
     args << :with_token if with_token
-    args << state
-    create(*args, options)
+    args << :with_no_body unless with_body
+    args << state if state
+
+    if with_body
+      create(*args, options)
+    else
+      reply = build(*args, options)
+      reply.save(:validate => false)
+      reply
+    end
   end
 
   def create_race_condition(reference_reply, state)
@@ -181,49 +196,143 @@ describe Reply do
     end
   end
 
-  describe ".query_queued!" do
-    include ResqueHelpers
+  describe "querying ao messages from nuntium" do
+    let(:recently_queued_reply) { create_reply(:delivered_at => Time.now) }
+    let(:less_recently_queued_reply) { create_reply }
+    let(:reply_with_no_token) { create_reply(:with_token => false) }
 
-    let!(:smsc_delivered_reply) { create_reply(:state => :delivered_by_smsc) }
-    let!(:confirmed_reply) { create_reply(:state => :confirmed) }
+    describe ".query_queued!" do
+      let!(:smsc_delivered_reply) { create_reply(:state => :delivered_by_smsc) }
+      let!(:confirmed_reply) { create_reply(:state => :confirmed) }
 
-    before do
-      recently_queued_reply
-      less_recently_queued_reply
-      reply_with_no_token
-    end
-
-    it "should update the message state based off of the nuntium ao state" do
-      do_background_task do
-        expect_ao_fetch(:token => less_recently_queued_reply.token) do
-          subject.class.query_queued!
-        end
+      before do
+        recently_queued_reply
+        less_recently_queued_reply
+        reply_with_no_token
       end
 
-      recently_queued_reply.reload.should be_queued_for_smsc_delivery
-      reply_with_no_token.reload.should be_queued_for_smsc_delivery
-      smsc_delivered_reply.reload.should be_delivered_by_smsc
-      confirmed_reply.reload.should be_confirmed
-      less_recently_queued_reply.reload.should be_delivered_by_smsc
+      it "should update the message state based off of the nuntium ao state" do
+        do_background_task do
+          expect_ao_fetch(:token => less_recently_queued_reply.token) do
+            subject.class.query_queued!
+          end
+        end
+
+        recently_queued_reply.reload.should be_queued_for_smsc_delivery
+        reply_with_no_token.reload.should be_queued_for_smsc_delivery
+        smsc_delivered_reply.reload.should be_delivered_by_smsc
+        confirmed_reply.reload.should be_confirmed
+        less_recently_queued_reply.reload.should be_delivered_by_smsc
+      end
+    end
+
+    describe "#query_state!" do
+      it "should update the state based off of the nuntium ao state" do
+        reply_with_no_token.query_state!
+        reply_with_no_token.reload.should be_queued_for_smsc_delivery
+
+        expect_ao_fetch(:token => less_recently_queued_reply.token) do
+          less_recently_queued_reply.query_state!
+        end
+
+        less_recently_queued_reply.reload.should be_delivered
+
+        expect_ao_fetch(:token => recently_queued_reply.token, :state => "confirmed") do
+          recently_queued_reply.query_state!
+        end
+
+        recently_queued_reply.reload.should be_confirmed
+      end
     end
   end
 
-  describe "#query_state!" do
-    it "should update the state based off of the nuntium ao state" do
-      reply_with_no_token.query_state!
-      reply_with_no_token.reload.should be_queued_for_smsc_delivery
+  describe "redelivering blank messages" do
+    let(:chat_with_message) { create(:chat, :with_message) }
+    let(:chat) { create(:chat) }
 
-      expect_ao_fetch(:token => less_recently_queued_reply.token) do
-        less_recently_queued_reply.query_state!
+    let(:blank_reply_from_chat_with_messages) { create_reply }
+    let(:blank_reply_from_chat_with_no_messages) { create_reply(:chat => chat) }
+    let(:blank_reply_no_chat) { create_reply(:from_chat => false) }
+    let(:blank_reply_without_token) { create_reply(:with_token => false) }
+    let(:reply_with_body) { create_reply(:with_body => true) }
+
+    def create_reply(*traits)
+      options = traits.extract_options!
+      from_chat = true unless options.delete(:from_chat) == false
+      options[:with_body] = false unless options[:with_body]
+
+      default_chat = chat_with_message if from_chat
+      options[:chat] ||= default_chat
+
+      args = []
+      args << :from_chat_initiator if from_chat
+      super(*args, options)
+    end
+
+    def assert_redelivered(reference_reply)
+      old_reply_token = reference_reply.token
+      reference_reply.reload.body.should be_present
+      reference_reply.should be_delivered
+      reference_reply.chat.should be_active
+      reference_reply.token.should_not == old_reply_token
+    end
+
+    def assert_not_redelivered(reference_reply)
+      old_reply_body = reference_reply.body
+      old_reply_token = reference_reply.token
+      reference_reply.should be_delivered
+      reference_reply.token.should == old_reply_token
+      reference_reply.body.should == old_reply_body
+    end
+
+    describe ".redeliver_blank!" do
+      before do
+        blank_reply_from_chat_with_messages
+        blank_reply_from_chat_with_no_messages
+        blank_reply_no_chat
+        blank_reply_without_token
+        reply_with_body
       end
 
-      less_recently_queued_reply.reload.should be_delivered
+      it "should redeliver blank messages that were intended to be forwarded" do
+        do_background_task do
+          expect_message do
+            subject.class.redeliver_blank!
+          end
+        end
 
-      expect_ao_fetch(:token => recently_queued_reply.token, :state => "confirmed") do
-        recently_queued_reply.query_state!
+        assert_redelivered(blank_reply_from_chat_with_messages)
+        assert_not_redelivered(blank_reply_from_chat_with_no_messages)
+        assert_not_redelivered(blank_reply_no_chat)
+        assert_not_redelivered(blank_reply_without_token)
+        assert_not_redelivered(reply_with_body)
       end
+    end
 
-      recently_queued_reply.reload.should be_confirmed
+    describe "#redeliver_blank!" do
+      it "should only redeliver blank messages that were intended for forwarding" do
+        # create a reply and a message in the chat
+        create_reply(:with_body => true)
+        # create a blank reply
+        blank_reply_from_chat_with_messages
+        # create a second message with a body
+        create(:message, :from_chat_initiator, :body => "foo", :chat => chat_with_message)
+        expect_message { blank_reply_from_chat_with_messages.redeliver_blank! }
+
+        assert_redelivered(blank_reply_from_chat_with_messages)
+
+        # assert that the blank reply does not contain the content of the second message
+        blank_reply_from_chat_with_messages.body.should_not include("foo")
+
+        blank_reply_from_chat_with_no_messages.redeliver_blank!
+        assert_not_redelivered(blank_reply_from_chat_with_no_messages)
+
+        blank_reply_no_chat.redeliver_blank!
+        assert_not_redelivered(blank_reply_no_chat)
+
+        reply_with_body.redeliver_blank!
+        assert_not_redelivered(reply_with_body)
+      end
     end
   end
 

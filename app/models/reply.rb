@@ -66,8 +66,26 @@ class Reply < ActiveRecord::Base
     end
   end
 
+  def self.redeliver_blank!
+    queued_for_smsc_delivery.where(:body => nil).find_each do |reply|
+      Resque.enqueue(BlankReplyRedeliverer, reply.id)
+    end
+  end
+
   def query_state!
     update_delivery_state(:state => nuntium.get_ao(token).first["state"]) if token.present?
+  end
+
+  def redeliver_blank!
+    if body.blank? && chat.present?
+      replies = chat.replies.order(:id).all
+      if message_to_forward = chat.messages.order(:id).all[replies.index(self) - 1]
+        set_forward_message(message_to_forward.user, message_to_forward.body)
+        self.delivered_at = nil
+        save!
+        chat.reactivate!
+      end
+    end
   end
 
   def body
