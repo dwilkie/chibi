@@ -6,4 +6,3 @@ tmp/
 vendor/ruby
 *.swp
 latest.dump
-.env
