@@ -164,7 +164,8 @@ class User < ActiveRecord::Base
   end
 
   def short_code
-    SERVICE_PROVIDER_PREFIXES[country_code].try(:[], number_prefix)
+    operator_prefixes = SERVICE_PROVIDER_PREFIXES[country_code]
+    operator_prefixes.try(:[], number_prefix) || operator_prefixes.try(:[], number_prefix(false))
   end
 
   def local_number
@@ -664,8 +665,8 @@ class User < ActiveRecord::Base
     self.class.split_mobile_number(mobile_number)
   end
 
-  def number_prefix
-    local_number[0..1]
+  def number_prefix(long = true)
+    long ? local_number[0..3] : local_number[0..1]
   end
 
   def has_recent_interaction?(inactivity_timestamp)

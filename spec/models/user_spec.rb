@@ -11,7 +11,7 @@ describe User do
   let(:user) { create(:user) }
   let(:user_searching_for_friend) { create(:user, :searching_for_friend) }
   let(:new_user) { build(:user) }
-  let(:cambodian) { build(:cambodian) }
+  let(:cambodian) { build(:user, :cambodian) }
   let(:friend) { create(:user) }
   let(:active_chat) { create(:active_chat, :user => user, :friend => friend) }
   let(:offline_user) { build(:user, :offline) }
@@ -174,8 +174,8 @@ describe User do
     context "when inititalizing a new user with a mobile number" do
       context "if a the user does not yet have a location" do
         it "should build a location from the mobile number and assign it to itself" do
-          with_users_from_different_countries do |country_code, prefix, country_name, factory_name|
-            new_location = subject.class.new(:mobile_number => build(factory_name).mobile_number).location
+          with_users_from_different_countries do |country_code, prefix, country_name, trait_name|
+            new_location = subject.class.new(:mobile_number => build(:user, trait_name).mobile_number).location
             new_location.country_code.should == country_code
           end
         end
@@ -221,10 +221,10 @@ describe User do
   end
 
   describe ".purge_invalid_names!" do
-    let(:thai_with_invalid_english_name) { create(:thai, :name => "want") }
-    let(:thai_with_invalid_cambodian_name) { create(:thai, :name => "jong") }
-    let(:cambodian_with_invalid_cambodian_name) { create(:cambodian, :name => "jong") }
-    let(:cambodian_with_valid_cambodian_name) { create(:cambodian, :name => "abajongbab") }
+    let(:thai_with_invalid_english_name) { create(:user, :thai, :name => "want") }
+    let(:thai_with_invalid_cambodian_name) { create(:user, :thai, :name => "jong") }
+    let(:cambodian_with_invalid_cambodian_name) { create(:user, :cambodian, :name => "jong") }
+    let(:cambodian_with_valid_cambodian_name) { create(:user, :cambodian, :name => "abajongbab") }
 
     before do
       thai_with_invalid_english_name
@@ -1762,8 +1762,8 @@ describe User do
 
   describe "#short_code" do
     it "should return the correct short code for the given service provider" do
-      with_service_providers do |service_provider, prefix, short_code, factory_name|
-        new_user = subject.class.new(:mobile_number => build(factory_name).mobile_number)
+      with_service_providers do |service_provider, prefix, short_code, trait_name|
+        new_user = subject.class.new(:mobile_number => build(:user, trait_name).mobile_number)
         new_user.short_code.should == short_code
       end
     end

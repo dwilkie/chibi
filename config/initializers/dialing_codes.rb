@@ -10,10 +10,18 @@ REVERSE_DIALING_CODES = DIALING_CODES.invert
 
 service_provider_prefixes = {}
 
-TSP::TelecomServiceProvider.all.each do |country_code, service_providers|
+TSP::TelecomServiceProvider.all.each do |country_code, properties|
+  area_codes = properties["area_codes"]
+  service_providers = properties["service_providers"]
   country = service_provider_prefixes[country_code] = {}
   service_providers.each do |service_provider, info|
-    info["prefixes"].each do |prefix|
+    prefixes = info["prefixes"]
+    (info["area_code_prefixes"] || []).each do |area_code_prefix|
+      properties["area_codes"].each do |area_code, region|
+        prefixes << "#{area_code}#{area_code_prefix}"
+      end
+    end
+    prefixes.each do |prefix|
       country[prefix] = info["short_code"]
     end
   end

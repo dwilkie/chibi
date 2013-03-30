@@ -6,15 +6,15 @@ describe Chat do
   include MessagingHelpers
 
   let(:user) do
-    create(:english)
+    create(:user, :english)
   end
 
   let(:new_partner_for_user) do
-    create(:english)
+    create(:user, :english)
   end
 
   let(:friend) do
-    create(:cambodian)
+    create(:user, :cambodian)
   end
 
   let(:chat) do
