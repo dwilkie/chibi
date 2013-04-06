@@ -431,7 +431,7 @@ FactoryGirl.define do
       end
     end
 
-    with_service_providers do |service_provider, prefix, short_code, trait_name, padding|
+    with_operator_data do |service_provider, prefix, short_code, trait_name, padding|
       trait(trait_name) do
         sequence(:mobile_number) {|n| "#{prefix}#{padding}#{n}" }
       end

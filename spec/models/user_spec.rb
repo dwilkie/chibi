@@ -1760,9 +1760,9 @@ describe User do
     end
   end
 
-  describe "#short_code" do
+  describe "#short_code", :focus do
     it "should return the correct short code for the given service provider" do
-      with_service_providers do |service_provider, prefix, short_code, trait_name|
+      with_operator_data do |operator, operator_data|
         new_user = subject.class.new(:mobile_number => build(:user, trait_name).mobile_number)
         new_user.short_code.should == short_code
       end
