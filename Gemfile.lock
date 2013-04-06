@@ -17,6 +17,14 @@ GIT
   specs:
     spork (1.0.0rc3)
 
+PATH
+  remote: /home/dave/work/contrib/torasup
+  specs:
+    torasup (0.0.1)
+      countries
+      deep_merge
+      phony
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -78,6 +86,7 @@ GEM
     debugger-linecache (1.1.2)
       debugger-ruby_core_source (>= 1.1.1)
     debugger-ruby_core_source (1.1.8)
+    deep_merge (1.0.0)
     diff-lcs (1.1.3)
     erubis (2.7.0)
     eventmachine (1.0.0)
@@ -298,6 +307,7 @@ DEPENDENCIES
   state_machine
   thin
   timecop
+  torasup!
   twilio-ruby
   uglifier
   vcr!

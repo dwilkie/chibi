@@ -12,8 +12,8 @@ module TwilioHelpers
 
     if options[:default] == false
       alternate_number
-    elsif split_number = options[:for]
-      split_number[0] == twilio_country_code(:default => false) ? alternate_number : default_number
+    elsif country_code = options[:for]
+      country_code == twilio_country_code(:default => false) ? alternate_number : default_number
     else
       default_number
     end

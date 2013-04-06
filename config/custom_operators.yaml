@@ -1,0 +1,21 @@
+# this file overrides the standard pstn data provided by the torasup gem
+---
+kh:
+  operators:
+    smart:
+      metadata:
+        short_code: "2442"
+    beeline:
+      metadata:
+        short_code: "2442"
+    hello:
+      metadata:
+        name: Hello
+        short_code: "2442"
+      prefixes:
+      - '15'
+      - '16'
+      - '81'
+      - '87'
+      area_code_prefixes:
+      - '45'

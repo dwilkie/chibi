@@ -127,10 +127,6 @@ class User < ActiveRecord::Base
     # only include available users
     match_scope = exclude_unavailable(match_scope)
 
-    # match users from registered service providers together
-    # and users from unregistered service providers together
-    #match_scope = match_users_from_registered_service_providers(user, match_scope)
-
     # order by the user's preferred gender
     match_scope = order_by_preferred_gender(user, match_scope)
 
@@ -163,19 +159,16 @@ class User < ActiveRecord::Base
     raw_locale ? raw_locale.to_s.downcase.to_sym : country_code.to_sym
   end
 
-  def short_code
-    operator_prefixes = SERVICE_PROVIDER_PREFIXES[country_code]
-    operator_prefixes.try(:[], number_prefix) || operator_prefixes.try(:[], number_prefix(false))
+  def operator
+    @operator ||= self.class.operator.new(mobile_number)
   end
 
-  def local_number
-    split_number = split_mobile_number
-    split_number.shift
-    split_number.join
+  def short_code
+    operator.short_code
   end
 
   def twilio_number
-    twilio_outgoing_number(:for => split_mobile_number)
+    twilio_outgoing_number(:for => operator.country_code)
   end
 
   def find_friends!(options = {})
@@ -533,48 +526,12 @@ class User < ActiveRecord::Base
     condition_statements = []
     condition_values = []
 
-    SERVICE_PROVIDER_PREFIXES_WITH_INTERNATIONAL_DIALING_CODE.each do |prefix|
+    operator.prefixes(:registered => true).each do |prefix, properties|
       condition_statements << "\"#{table_name}\".\"mobile_number\" LIKE ?"
       condition_values << "#{prefix}%"
     end
 
     scoped.where(condition_statements.join(" OR "), *condition_values)
-  end
-
-  def self.match_users_from_registered_service_providers(user, scope)
-    # skip this restriction if the user is from a country with no service providers
-    # another restriction says they can't be matched with users from other countries anyway
-    service_providers_in_users_location = SERVICE_PROVIDER_PREFIXES[user.country_code]
-    return scope unless service_providers_in_users_location
-
-    # for the following examples '012' and '097' are prefixes of a registered service provider
-
-    # if the user being matched has a short code (i.e. there is a registered service provider for his number)
-    # match him with other users that have registered service providers. This prevents users
-    # who are coming through testing gateways being matched with users coming from registered service providers
-    # e.g. users.mobile_number LIKE 85512% OR users.mobile_number LIKE 85597%
-
-    # on the other hand if the user being matched has no short code
-    # (i.e. there is no registered service provider for his number)
-    # don't match him with users belong to a registered service provider
-    # e.g. users.mobile_number NOT LIKE 85512% OR users.mobile_number NOT LIKE 85597%
-
-    if user.short_code.present?
-      condition_sql = " OR "
-    else
-      negation_sql = "NOT "
-      condition_sql = " AND "
-    end
-
-    condition_statements = []
-    condition_values = []
-
-    service_providers_in_users_location.each do |prefix, short_code|
-      condition_statements << "\"#{table_name}\".\"mobile_number\" #{negation_sql}LIKE ?"
-      condition_values << "#{international_dialing_code(user.mobile_number)}#{prefix}%"
-    end
-
-    scope.where(condition_statements.join(condition_sql), *condition_values)
   end
 
   def self.inactive_timestamp(options = {})
@@ -587,14 +544,6 @@ class User < ActiveRecord::Base
 
   def self.exclude_unavailable(scope)
     scope.where(:active_chat_id => nil).online
-  end
-
-  def self.split_mobile_number(number)
-    Phony.split(number.to_i.to_s).reject { |part| part == false }
-  end
-
-  def self.international_dialing_code(number)
-    split_mobile_number(number).first
   end
 
   def self.quoted_attribute(attribute)
@@ -652,21 +601,13 @@ class User < ActiveRecord::Base
     Resque.enqueue(FriendMessenger, user.id, options)
   end
 
+  def self.operator
+    TSP::Operator
+  end
+
   def cancel_searching_for_friend_if_chatting
     fire_events(:cancel_searching_for_friend) if currently_chatting?
     nil
-  end
-
-  def international_dialing_code
-    self.class.international_dialing_code(mobile_number)
-  end
-
-  def split_mobile_number
-    self.class.split_mobile_number(mobile_number)
-  end
-
-  def number_prefix(long = true)
-    long ? local_number[0..3] : local_number[0..1]
   end
 
   def has_recent_interaction?(inactivity_timestamp)
@@ -674,9 +615,7 @@ class User < ActiveRecord::Base
   end
 
   def assign_location
-    build_location(
-      :country_code => DIALING_CODES[international_dialing_code].try(:downcase)
-    ) unless persisted? || location.present?
+    build_location(:country_code => operator.country_id) unless persisted? || location.present?
   end
 
   def set_gender_related_attribute(attribute, value)

@@ -1,0 +1,22 @@
+# this file is used to test the custom operators in config/custom_operators.yaml
+
+---
+kh:
+  operators:
+    smart:
+      assertions:
+        short_code: "2442"
+    beeline:
+      assertions:
+        short_code: "2443"
+    hello:
+      assertions:
+        name: Hello
+        short_code: "2442"
+      prefixes:
+      - '15'
+      - '16'
+      - '81'
+      - '87'
+      area_code_prefixes:
+      - '45'
