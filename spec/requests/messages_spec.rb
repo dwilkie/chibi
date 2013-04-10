@@ -539,7 +539,7 @@ describe "Messages" do
 
     context "as nuntium" do
       context "when I post a duplicate to the server" do
-        let(:message_with_guid) { create(:message_with_guid) }
+        let(:message_with_guid) { create(:message, :with_guid) }
 
         before do
           send_message(

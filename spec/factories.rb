@@ -32,12 +32,17 @@ FactoryGirl.define do
     user
     from { user.mobile_number }
 
-    factory :message_with_guid do
+    trait :with_guid do
       guid
     end
 
-    factory :processed_message do
+    trait :processed do
       state "processed"
+    end
+
+    trait :without_user do
+      user nil
+      from "85597000000"
     end
   end
 
@@ -60,12 +65,10 @@ FactoryGirl.define do
   end
 
   factory :missed_call do
-    user
-    subject { "You have a missed call from 0#{user.local_number}" }
+    subject { "You have a missed call from 062000000" }
   end
 
   factory :phone_call do
-
     user
     from { user.mobile_number }
     sequence(:sid)

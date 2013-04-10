@@ -1739,22 +1739,6 @@ describe User do
     end
   end
 
-  describe "#local_number" do
-    it "should return the mobile number of the user without the country code" do
-      # Cambodia
-      user.mobile_number = "855123456789"
-      user.local_number.should == "123456789"
-
-      # Vietnam
-      user.mobile_number = "84123456789"
-      user.local_number.should == "123456789"
-
-      # US
-      user.mobile_number = "1123456789"
-      user.local_number.should == "123456789"
-    end
-  end
-
   describe "#age" do
     before do
       Timecop.freeze(Time.now)

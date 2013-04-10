@@ -14,7 +14,9 @@ module Communicable
 
       validates :from, :presence => true
 
-      after_initialize :assign_to_user
+      before_validation(:on => :create) do
+        assign_to_user
+      end
     end
 
     def from=(value)

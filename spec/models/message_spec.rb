@@ -7,8 +7,9 @@ describe Message do
   let(:message) { create(:message, :user => user) }
   let(:new_message) { build(:message, :user => user) }
   let(:chat) { create(:active_chat, :user => user, :friend => friend) }
-  let(:message_with_guid) { create(:message_with_guid, :user => user) }
-  let(:processed_message) { create(:processed_message, :created_at => 10.minutes.ago, :user => user) }
+  let(:message_with_guid) { create(:message, :with_guid, :user => user) }
+  let(:processed_message) { create(:message, :processed, :created_at => 10.minutes.ago, :user => user) }
+  let(:subject) { build(:message, :without_user) }
 
   describe "factory" do
     it "should be valid" do
@@ -24,11 +25,11 @@ describe Message do
   it_should_behave_like "analyzable"
 
   it_should_behave_like "communicable" do
-    let(:communicable_resource) { new_message }
+    let(:communicable_resource) { message }
   end
 
   it_should_behave_like "communicable from user" do
-    let(:communicable_resource) { new_message }
+    let(:communicable_resource) { message }
   end
 
   it_should_behave_like "chatable" do
