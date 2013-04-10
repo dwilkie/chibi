@@ -34,11 +34,10 @@ class User < ActiveRecord::Base
 
   before_validation(:on => :create) do
     self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
+    assign_location
   end
 
   before_save :cancel_searching_for_friend_if_chatting
-
-  after_initialize :assign_location
 
   delegate :city, :country_code, :address, :address=, :locate!, :to => :location, :allow_nil => true
 
@@ -159,8 +158,12 @@ class User < ActiveRecord::Base
     raw_locale ? raw_locale.to_s.downcase.to_sym : country_code.to_sym
   end
 
+  def torasup_number
+    @torasup_number ||= Torasup::PhoneNumber.new(mobile_number)
+  end
+
   def operator
-    @operator ||= self.class.operator.new(mobile_number)
+    torasup_number.operator
   end
 
   def short_code
@@ -526,7 +529,7 @@ class User < ActiveRecord::Base
     condition_statements = []
     condition_values = []
 
-    operator.prefixes(:registered => true).each do |prefix, properties|
+    Torasup::Operator.registered_prefixes.each do |prefix|
       condition_statements << "\"#{table_name}\".\"mobile_number\" LIKE ?"
       condition_values << "#{prefix}%"
     end
@@ -601,10 +604,6 @@ class User < ActiveRecord::Base
     Resque.enqueue(FriendMessenger, user.id, options)
   end
 
-  def self.operator
-    TSP::Operator
-  end
-
   def cancel_searching_for_friend_if_chatting
     fire_events(:cancel_searching_for_friend) if currently_chatting?
     nil
@@ -615,7 +614,7 @@ class User < ActiveRecord::Base
   end
 
   def assign_location
-    build_location(:country_code => operator.country_id) unless persisted? || location.present?
+    build_location(:country_code => torasup_number.country_id, :address => torasup_number.location.area)
   end
 
   def set_gender_related_attribute(attribute, value)

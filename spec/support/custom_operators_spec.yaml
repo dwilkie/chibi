@@ -8,7 +8,7 @@ kh:
         short_code: "2442"
     beeline:
       assertions:
-        short_code: "2443"
+        short_code: "2442"
     hello:
       assertions:
         name: Hello

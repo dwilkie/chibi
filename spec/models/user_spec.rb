@@ -165,37 +165,20 @@ describe User do
       end
     end
 
-    it "should generate a screen name before validation on create" do
-      new_user.screen_name.should be_nil
-      new_user.valid?
-      new_user.screen_name.should be_present
-    end
-
-    context "when inititalizing a new user with a mobile number" do
-      context "if a the user does not yet have a location" do
-        it "should build a location from the mobile number and assign it to itself" do
-          with_users_from_different_countries do |country_code, prefix, country_name, trait_name|
-            new_location = subject.class.new(:mobile_number => build(:user, trait_name).mobile_number).location
-            new_location.country_code.should == country_code
-          end
-        end
+    context "before validation on create" do
+      it "should generate a screen name" do
+        new_user.screen_name.should be_nil
+        new_user.valid?
+        new_user.screen_name.should be_present
       end
 
-      context "if the user is already persisted" do
-        it "should not load the associated location to check if it exists" do
-          # Otherwise it will load every location when displaying a list of users
-          subject.class.any_instance.stub(:persisted?).and_return(true)
-          subject.class.new.location.should be_nil
-        end
-      end
-
-      context "if a user already has a location" do
-        it "should not assign a new location to itself" do
-          location = subject.class.new(
-            :location => new_user.location, :mobile_number => new_user.mobile_number
-          ).location
-
-          location.should == new_user.location
+      it "should build a location from the mobile number and assign it to itself" do
+        with_users_from_different_countries do |nationality, country_code, address|
+          user = build(:user, nationality, :location => nil)
+          user.location.should be_nil
+          user.valid?
+          user.location.country_code.should == country_code.to_s
+          user.location.address.should == address
         end
       end
     end
@@ -329,7 +312,7 @@ describe User do
 
     def do_remind(options = {})
       create_actors unless options.delete(:skip_create_actors)
-      do_background_task(options) { subject.class.remind!(options) }
+      do_background_task(options) { expect_message { subject.class.remind!(options) } }
     end
 
     def perform_background_job
@@ -438,10 +421,6 @@ describe User do
     # 1. Don't match him with himself
     # 2. Exclude users who he has already chatted with
     # 3. Exclude users who are offline
-    # 4. If he's with a registered service provider, exclude
-    #    users who are not from registered service providers.
-    #    If he's NOT with a registered service provider, exclude
-    #    users who are from registered service providers
 
     # Ordering
 
@@ -573,15 +552,6 @@ describe User do
     # Luke, Dave, Pauline, Chamroune and Alex match first because of their recent activity
     # Followed by Joy, Mara, Reaksmey and Jamie
     # Con and Paul finish last again because of their age difference with Kris
-
-    # The following is no longer valid since we are using Twilio
-
-    # Finally all of these users use mobile numbers which are not from a registered service provider
-    # We don't want to match these users with users that have mobile numbers which are from
-    # registered service providers. For example, say there are two registered service providers
-    # in Cambodia Smart and Mobitel. If a Metfone user contacts the app through the test gateway
-    # We don't want to match them with the Smart or Mobitel users,
-    # incase the test gateway is down or something.
 
     USER_MATCHES = {
       :alex => [[:chamroune, :luke, :pauline, :dave], [:mara, :paul, :jamie, :reaksmey, :con, :joy]],
@@ -1760,11 +1730,11 @@ describe User do
     end
   end
 
-  describe "#short_code", :focus do
-    it "should return the correct short code for the given service provider" do
-      with_operator_data do |operator, operator_data|
-        new_user = subject.class.new(:mobile_number => build(:user, trait_name).mobile_number)
-        new_user.short_code.should == short_code
+  describe "#short_code" do
+    it "should return the correct short code for each different operator" do
+      with_operators do |number_parts, assertions|
+        new_user = build(:user, :mobile_number => number_parts.join)
+        new_user.short_code.should == assertions["short_code"]
       end
     end
   end

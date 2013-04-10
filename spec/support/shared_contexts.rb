@@ -12,14 +12,6 @@ shared_context "existing users" do
       send(user)
     end
   end
-
-  let(:registered_sp_users) do
-    users = []
-    with_service_providers do |service_provider, prefix, short_code, trait_name|
-      users << User.create!(:mobile_number => build(:user, trait_name).mobile_number)
-    end
-    users
-  end
 end
 
 shared_context "replies" do

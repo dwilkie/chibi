@@ -422,19 +422,28 @@ FactoryGirl.define do
       age 100
     end
 
-    extend MobilePhoneHelpers
-
-    with_users_from_different_countries do |country_code, country_prefix, country_name, trait_name|
-      trait(trait_name) do
-        sequence(:mobile_number) {|n| "#{country_prefix}00000000#{n}" }
-        association :location, :factory => country_name
-      end
+    trait :cambodian do
+      sequence(:mobile_number) { |n| "+85500000000#{n}" }
     end
 
-    with_operator_data do |service_provider, prefix, short_code, trait_name, padding|
-      trait(trait_name) do
-        sequence(:mobile_number) {|n| "#{prefix}#{padding}#{n}" }
-      end
+    trait :from_kampong_thom do
+      sequence(:mobile_number) { |n| "+85562000000#{n}" }
+    end
+
+    trait :from_phnom_penh do
+      sequence(:mobile_number) { |n| "+85523000000#{n}" }
+    end
+
+    trait :english do
+      sequence(:mobile_number) { |n| "+4400000000#{n}" }
+    end
+
+    trait :american do
+      sequence(:mobile_number) { |n| "+100000000#{n}" }
+    end
+
+    trait :thai do
+      sequence(:mobile_number) { |n| "+6600000000#{n}" }
     end
 
     # do not reorder these factories because the tests rely on
