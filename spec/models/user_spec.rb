@@ -117,8 +117,8 @@ describe User do
   end
 
   it "should not be valid without a location" do
-    new_user.location = nil
-    new_user.should_not be_valid
+    user.location = nil
+    user.should_not be_valid
   end
 
   it "should default to being online" do
@@ -172,13 +172,22 @@ describe User do
         new_user.screen_name.should be_present
       end
 
-      it "should build a location from the mobile number and assign it to itself" do
-        with_users_from_different_countries do |nationality, country_code, address|
-          user = build(:user, nationality, :location => nil)
-          user.location.should be_nil
-          user.valid?
-          user.location.country_code.should == country_code.to_s
-          user.location.address.should == address
+      context "given a mobile number is present" do
+        it "should build a location from the mobile number and assign it to itself" do
+          with_users_from_different_countries do |nationality, country_code, address|
+            user = build(:user, nationality, :location => nil)
+            user.location.should be_nil
+            user.valid?
+            user.location.country_code.should == country_code.to_s
+            user.location.address.should == address
+          end
+        end
+      end
+
+      context "given a mobile number is not present" do
+        it "should not try to build a location" do
+          subject.valid?
+          subject.location.should be_nil
         end
       end
     end
@@ -607,15 +616,17 @@ describe User do
         load_matches
       end
 
-      it "should match the user with the best compatible match" do
+      it "should match the user with the best compatible match", :focus do
         USER_MATCHES.each do |user, matches|
           results = subject.class.matches(send(user))
           result_names = results.map { |result| result.name.to_sym }
+          p user
+          p send(user).location.reload if user == :harriet
 
           result_index = 0
           matches.each do |expected_match|
             if expected_match.is_a?(Array)
-              expected_match.should =~ result_names[result_index..result_index + expected_match.size - 1]
+              result_names[result_index..result_index + expected_match.size - 1].should =~ expected_match
               result_index += expected_match.size
             else
               result_names[result_index].should == expected_match
@@ -1318,24 +1329,6 @@ describe User do
     it "should delegate to location" do
       subject.country_code.should be_nil
       user.country_code.should be_present
-    end
-  end
-
-  describe "#address" do
-    it "should delegate to location" do
-      new_user.location.address = "some address"
-      new_user.address.should == "some address"
-
-      new_user.address = "another address"
-      new_user.location.address.should == "another address"
-    end
-  end
-
-  describe "#locate!" do
-    it "should delegate to location" do
-      new_user.location.stub(:locate!)
-      new_user.location.should_receive(:locate!)
-      new_user.locate!
     end
   end
 

@@ -3,6 +3,7 @@ require 'spec_helper'
 describe MissedCall do
 
   let(:new_missed_call) { build(:missed_call) }
+  let(:missed_call) { create(:missed_call) }
 
   describe "factory" do
     it "should be valid" do
@@ -10,11 +11,12 @@ describe MissedCall do
     end
   end
 
-  describe "assigning a user" do
-    it "should use the parsed mobile number when assigning the user" do
-      missed_call = subject.class.new(:subject => new_missed_call.subject)
-      missed_call.user.mobile_number.should == new_missed_call.user.mobile_number
-    end
+  it_should_behave_like "communicable" do
+    let(:communicable_resource) { missed_call }
+  end
+
+  it_should_behave_like "communicable from user" do
+    let(:communicable_resource) { missed_call }
   end
 
   [:subject, :plain].each do |attribute|

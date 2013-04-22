@@ -29,11 +29,11 @@ describe PhoneCall do
   end
 
   it_should_behave_like "communicable" do
-    let(:communicable_resource) { new_phone_call }
+    let(:communicable_resource) { phone_call }
   end
 
   it_should_behave_like "communicable from user" do
-    let(:communicable_resource) { new_phone_call }
+    let(:communicable_resource) { phone_call }
   end
 
   it_should_behave_like "chatable" do

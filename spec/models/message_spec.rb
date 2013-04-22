@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe Message do
-  let(:user) { build(:user) }
-  let(:friend) { build(:user, :english) }
-  let(:new_friend) { build(:user, :cambodian) }
+  let(:user) { create(:user) }
+  let(:friend) { create(:user, :english) }
+  let(:new_friend) { create(:user, :cambodian) }
   let(:message) { create(:message, :user => user) }
   let(:new_message) { build(:message, :user => user) }
   let(:chat) { create(:active_chat, :user => user, :friend => friend) }

@@ -34,12 +34,12 @@ class User < ActiveRecord::Base
 
   before_validation(:on => :create) do
     self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
-    assign_location
+    assign_location if mobile_number.present?
   end
 
   before_save :cancel_searching_for_friend_if_chatting
 
-  delegate :city, :country_code, :address, :address=, :locate!, :to => :location, :allow_nil => true
+  delegate :city, :country_code, :to => :location, :allow_nil => true
 
   state_machine :initial => :online do
     state :offline, :searching_for_friend
@@ -615,6 +615,7 @@ class User < ActiveRecord::Base
 
   def assign_location
     build_location(:country_code => torasup_number.country_id, :address => torasup_number.location.area)
+    location.locate!
   end
 
   def set_gender_related_attribute(attribute, value)
@@ -671,8 +672,8 @@ class User < ActiveRecord::Base
   end
 
   def extract_location(info)
-    self.address = info
-    result = locate!
+    location.address = info
+    result = location.locate!
     strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?#{result}/) if result
   end
 
