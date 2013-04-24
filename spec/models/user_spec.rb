@@ -663,7 +663,7 @@ describe User do
     end
 
     def assert_user_attributes(info, options = {})
-      user = options[:user] || build(:user)
+      user = options[:user] || create(:user)
 
       [:name, :age].each do |attribute|
         user.send("#{attribute}=", options.has_key?(attribute) ? options[attribute] : user.send(attribute))
@@ -748,11 +748,6 @@ describe User do
         keywords(:girl, :could_mean_girl_or_girlfriend),
         { :expected_gender => :female }.merge(options)
       )
-    end
-
-    it "should save the record" do
-      new_user.update_profile("")
-      new_user.should be_persisted
     end
 
     context "for users with a gender and looking for preference" do
@@ -1968,7 +1963,7 @@ describe User do
 
     it "should only update the locale of the user for valid locales" do
       assert_update_locale("en")
-      assert_update_locale(new_user.country_code)
+      assert_update_locale(user.country_code)
       assert_update_locale("us", :success => false)
       assert_update_locale("hi im tom what are you doing", :success => false)
     end
@@ -1976,7 +1971,7 @@ describe User do
     context "passing :notify" do
       it "should try to resend the last message in the new locale only if :notify => true" do
         assert_update_locale("en", :notify => true, :assert_notify => true)
-        assert_update_locale(new_user.country_code, :notify => true, :assert_notify => false)
+        assert_update_locale(user.country_code, :notify => true, :assert_notify => false)
         assert_update_locale(
           "en", :notify => true, :assert_notify => false, :later_no_alternate_translation_reply => true
         )
