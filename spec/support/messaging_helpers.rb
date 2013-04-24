@@ -48,6 +48,7 @@ module MessagingHelpers
     last_request_data = JSON.parse(last_request.body).first
     last_request_data["body"].should == options[:body] if options[:body].present?
     last_request_data["to"].should == "sms://#{options[:to]}" if options[:to].present?
+    last_request_data["suggested_channel"].should == options[:suggested_channel] if options[:suggested_channel].present?
   end
 
   def non_introducable_examples

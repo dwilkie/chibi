@@ -5,13 +5,16 @@ kh:
     smart:
       metadata:
         short_code: "2442"
+        nuntium_channel: "smart"
     beeline:
       metadata:
         short_code: "2442"
+        nuntium_channel: "beeline"
     hello:
       metadata:
         name: Hello
         short_code: "2442"
+        nuntium_channel: "hello"
       prefixes:
       - '15'
       - '16'

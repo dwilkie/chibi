@@ -9,6 +9,8 @@ class Reply < ActiveRecord::Base
   FAILED = "failed"
   CONFIRMED = "confirmed"
 
+  TWILIO_CHANNEL = "twilio"
+
   validates :to, :body, :presence => true
   validates :token, :uniqueness => true, :allow_nil => true
 
@@ -253,10 +255,22 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
+  def torasup_number
+    @torasup_number ||= Torasup::PhoneNumber.new(destination)
+  end
+
+  def operator
+    torasup_number.operator
+  end
+
   def perform_delivery!(message)
     save! if new_record? # ensure message is saved so we don't get a blank destination
     # use an array so Nuntium sends a POST
-    response = nuntium.send_ao([{:to => "sms://#{destination}", :body => message}])
+    response = nuntium.send_ao([{
+      :to => "sms://#{destination}",
+      :body => message,
+      :suggested_channel => operator.nuntium_channel || TWILIO_CHANNEL
+    }])
     self.token = response["token"]
     save!
   end

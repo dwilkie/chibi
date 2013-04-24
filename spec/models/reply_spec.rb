@@ -57,7 +57,9 @@ describe Reply do
     reply.destination.should == mobile_number
     reply.token.should == options[:token] if options[:token]
     if options[:deliver]
-      assert_deliver(:body => reply.body, :to => reply.destination)
+      assertions = {:body => reply.body, :to => reply.destination}
+      assertions.merge!(:suggested_channel => options[:suggested_channel]) if options[:suggested_channel]
+      assert_deliver(assertions)
       reply.should be_delivered
       reply.should be_queued_for_smsc_delivery
     else
@@ -465,9 +467,23 @@ describe Reply do
   end
 
   describe "#deliver!" do
+    include MobilePhoneHelpers
+
     it "should deliver the message and save the token" do
-      expect_message(:token => "token") { new_reply.deliver! }
-      assert_persisted_and_delivered(new_reply, user.mobile_number, :token => "token")
+      expect_message(:token => "token") { reply.deliver! }
+      assert_persisted_and_delivered(reply, user.mobile_number, :token => "token")
+    end
+
+    it "should suggest the correct channel" do
+      with_operators do |number_parts, assertions|
+        number = number_parts.join
+        reply = create(:reply, :to => number)
+        expect_message { reply.deliver! }
+        assert_persisted_and_delivered(reply, number, :suggested_channel => assertions["nuntium_channel"])
+      end
+      reply = create(:reply)
+      expect_message { reply.deliver! }
+      assert_persisted_and_delivered(reply, reply.destination, :suggested_channel => "twilio")
     end
 
     context "given the delivery fails" do

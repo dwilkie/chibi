@@ -6,13 +6,16 @@ kh:
     smart:
       assertions:
         short_code: "2442"
+        nuntium_channel: "smart"
     beeline:
       assertions:
         short_code: "2442"
+        nuntium_channel: "beeline"
     hello:
       assertions:
         name: Hello
         short_code: "2442"
+        nuntium_channel: "hello"
       prefixes:
       - '15'
       - '16'
