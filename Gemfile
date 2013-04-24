@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby "1.9.3"
 
-gem 'rails', '3.2.12'
+gem 'rails', '3.2.13'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -15,7 +15,7 @@ gem "resque"
 #gem "resque-retry"
 gem "thin"
 gem "redis"
-gem "torasup", :path => "/home/dave/work/contrib/torasup"
+gem "torasup"
 gem "nuntium_api"
 gem "state_machine"
 gem "twilio-ruby"
@@ -43,7 +43,6 @@ gem 'jquery-rails'
 
 group :test, :development do
   gem 'rspec-rails'
-  gem 'debugger'
 end
 
 group :development do
