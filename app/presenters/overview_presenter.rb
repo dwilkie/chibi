@@ -20,9 +20,7 @@ class OverviewPresenter < BasePresenter
     chart_div_id = "#{identifier}_chart"
     result = content_tag(:div, :class => "overview_section", :id => identifier) do
       content_tag(:h2, title, :class => "chart_title") +
-      content_tag(:div, :id => chart_div_id) do
-        generate_chart(chart_div_id, title, data_sets)
-      end
+      generate_chart(chart_div_id, title, data_sets)
     end
     result + tag(:hr, :class => "separator")
   end

@@ -19,12 +19,9 @@ describe OverviewPresenter do
   let(:presenter) { OverviewPresenter.new(overview, view) }
 
   def assert_highchart(identifier, result, assertions = {})
-    chart_identifier = "#{identifier}_chart"
 
     highchart_options = JSON.parse(
-      result.find(
-        "##{chart_identifier} script"
-      ).text.match(/options\s*=\s*(.+)\;/)[1]
+      result.text.match(/options\s*=\s*(.+)\;/)[1]
     )
 
     highchart_options["title"]["text"].should == assertions[:title]
@@ -32,7 +29,8 @@ describe OverviewPresenter do
     chart_options = highchart_options["chart"]
     series_options = highchart_options["series"]
 
-    chart_options["renderTo"].should == chart_identifier
+    chart_options["renderTo"].should == "#{identifier}_chart"
+
     chart_options["borderWidth"].should == 5
     chart_options["zoomType"].should == "y"
 
