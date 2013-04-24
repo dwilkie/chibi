@@ -1,5 +1,9 @@
+require_relative "authentication_helpers"
+require_relative "location_helpers"
+
 module MessagingHelpers
   include AuthenticationHelpers
+  include LocationHelpers
 
   EXAMPLES = YAML.load_file(File.join(File.dirname(__FILE__), 'message_examples.yaml'))
 
@@ -44,18 +48,6 @@ module MessagingHelpers
     last_request_data = JSON.parse(last_request.body).first
     last_request_data["body"].should == options[:body] if options[:body].present?
     last_request_data["to"].should == "sms://#{options[:to]}" if options[:to].present?
-  end
-
-  def expect_locate(options = {}, &block)
-    if options[:location]
-      options[:cassette] ||= "results"
-      options[:vcr_options] ||= { :erb => true }
-    else
-      options[:cassette] ||= "no_results"
-      options[:vcr_options] ||= { :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)] }
-    end
-
-    VCR.use_cassette(options[:cassette], options[:vcr_options]) { yield }
   end
 
   def non_introducable_examples

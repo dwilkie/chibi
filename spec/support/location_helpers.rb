@@ -10,11 +10,10 @@ module LocationHelpers
       sub_examples.each do |sub_example|
         subject = build(:location)
         subject.country_code = country_code
-        subject.address = sub_example
         result = nil
 
         VCR.use_cassette("#{country_code}/#{address}") do
-          result = subject.locate!
+          result = subject.locate!(sub_example)
         end
 
         [:latitude, :longitude, :city].each do |attribute|
@@ -30,5 +29,17 @@ module LocationHelpers
         end
       end
     end
+  end
+
+  def expect_locate(options = {}, &block)
+    if options[:location]
+      options[:cassette] ||= "results"
+      options[:vcr_options] ||= { :erb => true }
+    else
+      options[:cassette] ||= "no_results"
+      options[:vcr_options] ||= { :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)] }
+    end
+
+    VCR.use_cassette(options[:cassette], options[:vcr_options]) { yield }
   end
 end

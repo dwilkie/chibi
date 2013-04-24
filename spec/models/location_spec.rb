@@ -13,10 +13,21 @@ describe Location do
   end
 
   describe "callbacks" do
-    it "should always save the lowercased version of the country code" do
-      location.country_code = "KH"
-      location.save
-      location.reload.country_code.should == "kh"
+    context "before_save" do
+      it "should normalize the country code" do
+        location.country_code = "KH"
+        location.save
+        location.reload.country_code.should == "kh"
+      end
+    end
+
+    context "after_create" do
+      include ResqueHelpers
+
+      it "should try to determine the location" do
+        location.address = "foo"
+        expect_locate { do_background_task { location.save } }
+      end
     end
   end
 
@@ -25,7 +36,7 @@ describe Location do
     location.should_not be_valid
   end
 
-  describe "#locate!" do
+  describe "#locate!(address)" do
     it "should skip geolocation if address or country code is blank and reject it if the address is in the wrong country" do
 
       # locating a city in the wrong country
@@ -39,20 +50,18 @@ describe Location do
       )
 
       # try to locate without an address
-      build(:location).locate!.should be_nil
+      build(:location).locate!("").should be_nil
 
       # try to locate without a country code
-      subject.country_code = nil
-      subject.address = "new york"
-      subject.locate!.should be_nil
+      subject.country_code = ""
+      subject.locate!("new york").should be_nil
 
       # do not try to reverse geocode unless the latitude or longitude changes
-      new_york = create(:new_york)
-      new_york.address = "some new address"
+      new_york = create(:location, :new_york)
 
       VCR.use_cassette("no_results", :match_requests_on => [:method, VCR.request_matchers.uri_without_param(:address)]) do
         # this should not raise a vcr error
-        new_york.locate!
+        new_york.locate!("some new address")
       end
     end
   end

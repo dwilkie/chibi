@@ -267,62 +267,67 @@ FactoryGirl.define do
   factory :location do
     country_code "kh"
 
-    factory :cambodia do
+    trait :cambodia do
       country_code "kh"
-
-      factory :phnom_penh do
-        city "Phnom Penh"
-        latitude 11.558831
-        longitude 104.917445
-      end
-
-      factory :siem_reap do
-        city "Siem Reap"
-        latitude 13.3622222
-        longitude 103.8597222
-      end
-
-      factory :battambang do
-        city "Battambang"
-        latitude 13.1
-        longitude 103.2
-      end
     end
 
-    factory :thailand do
+    trait :thailand do
       country_code "th"
-
-      factory :chiang_mai do
-        city "Samoeng"
-        latitude 18.7964642
-        longitude 98.6600586
-      end
     end
 
-    factory :england do
+    trait :england do
       country_code "gb"
-
-      factory :london do
-        city "London"
-        latitude 51.5081289
-        longitude -0.128005
-      end
     end
 
-    factory :united_states do
+    trait :united_states do
       country_code "us"
+    end
 
-      factory :new_york do
-        city "New York"
-        latitude 40.7143528
-        longitude -74.00597309999999
-      end
+    trait :phnom_penh do
+      cambodia
+      city "Phnom Penh"
+      latitude 11.558831
+      longitude 104.917445
+    end
+
+    trait :siem_reap do
+      cambodia
+      city "Siem Reap"
+      latitude 13.3622222
+      longitude 103.8597222
+    end
+
+    trait :battambang do
+      cambodia
+      city "Battambang"
+      latitude 13.1
+      longitude 103.2
+    end
+
+    trait :chiang_mai do
+      thailand
+      city "Samoeng"
+      latitude 18.7964642
+      longitude 98.6600586
+    end
+
+    trait :london do
+      england
+      city "London"
+      latitude 51.5081289
+      longitude -0.128005
+    end
+
+    trait :new_york do
+      united_states
+      city "New York"
+      latitude 40.7143528
+      longitude -74.00597309999999
     end
   end
 
   factory :user do
     cambodian
-    location
 
     trait :without_recent_interaction do
       created_at { 6.days.ago }
@@ -378,7 +383,7 @@ FactoryGirl.define do
     end
 
     trait :with_location do
-      association :location, :factory => :phnom_penh
+      association :location, :phnom_penh
     end
 
     trait :with_date_of_birth do
@@ -394,7 +399,7 @@ FactoryGirl.define do
     end
 
     trait :from_england do
-      association :location, :factory => :london
+      association :location, :london
     end
 
     trait :male do
@@ -434,19 +439,6 @@ FactoryGirl.define do
     end
 
     trait :from_phnom_penh do
-      before(:create) do
-        Geocoder.configure(:lookup => :test)
-        Geocoder::Lookup::Test.add_stub(
-          "phnom penh, Cambodia", [
-            {
-              'latitude'     => 11.558831,
-              'longitude'    => 104.917445,
-              'country_code' => 'KH',
-              'city' => "Phnom Penh"
-            }
-          ]
-        )
-      end
       sequence(:mobile_number) { |n| "+85523000000#{n}" }
     end
 
@@ -515,33 +507,34 @@ FactoryGirl.define do
 
     # straight girls
     factory :nok do
-      thai
       name "nok"
       gender "f"
       looking_for "m"
-      association :location, :factory => :chiang_mai
       with_a_semi_recent_message
+      thai
+      association :location, :chiang_mai
 
       factory :joy do
-        from_phnom_penh
         name "joy"
         age 27
+        cambodian
+        association :location, :phnom_penh
       end
     end
 
     # straight guys
     factory :paul do
-      from_phnom_penh
       name "paul"
       age 39
       gender "m"
       looking_for "f"
       with_a_semi_recent_message
+      association :location, :phnom_penh
 
       factory :con do
-        from_siem_reap
         name "con"
         age 37
+        association :location, :siem_reap
       end
 
       factory :dave do
@@ -559,27 +552,27 @@ FactoryGirl.define do
 
     # lesbians
     factory :harriet do
-      from_battambang
       name "harriet"
       gender "f"
       looking_for "f"
       with_a_semi_recent_message
+      association :location, :battambang
 
       factory :eva do
-        from_siem_reap
         name "eva"
+        association :location, :siem_reap
       end
     end
 
     # gays
     factory :hanh do
-      thai
       name "hanh"
       gender "m"
       looking_for "m"
       age 28
-      association :location, :factory => :chiang_mai
       with_a_semi_recent_message
+      thai
+      association :location, :chiang_mai
 
       factory :view do
         name "view"
@@ -589,23 +582,23 @@ FactoryGirl.define do
 
     # bi girl
     factory :mara do
-      from_phnom_penh
       name "mara"
       gender "f"
       looking_for "e"
       age 25
       with_a_semi_recent_message
+      association :location, :phnom_penh
     end
 
     # bi guy
     factory :michael do
-      thai
       name "michael"
       gender "m"
       looking_for "e"
       age 29
       with_a_semi_recent_message
-      association :location, :factory => :chiang_mai
+      thai
+      association :location, :chiang_mai
     end
   end
 end

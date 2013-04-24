@@ -19,9 +19,12 @@ class Location < ActiveRecord::Base
 
   validates :country_code, :presence => true
 
+  after_create :locate
+
   # long running task
-  def locate!
-    if address.present? && country_code?
+  def locate!(address)
+    self.address = address
+    if locatable?
       localized = localize_address!
       geocode
       reverse_geocode if latitude? && longitude? && (latitude_changed? || longitude_changed?)
@@ -35,6 +38,14 @@ class Location < ActiveRecord::Base
   end
 
   private
+
+  def locatable?
+    address.present? && country_code.present?
+  end
+
+  def locate
+    Resque.enqueue(Locator, id, address) if locatable?
+  end
 
   def normalize_country_code
     self.country_code = country_code.downcase

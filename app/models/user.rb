@@ -614,8 +614,7 @@ class User < ActiveRecord::Base
   end
 
   def assign_location
-    build_location(:country_code => torasup_number.country_id, :address => torasup_number.location.area)
-    location.locate!
+    build_location(:country_code => torasup_number.country_id, :address => torasup_number.location.area) if location.blank?
   end
 
   def set_gender_related_attribute(attribute, value)
@@ -672,8 +671,7 @@ class User < ActiveRecord::Base
   end
 
   def extract_location(info)
-    location.address = info
-    result = location.locate!
+    result = location.locate!(info)
     strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?#{result}/) if result
   end
 

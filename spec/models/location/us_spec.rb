@@ -4,7 +4,7 @@ describe Location do
   include LocationHelpers
 
   describe "US" do
-    let(:new_york) { build(:new_york) }
+    let(:new_york) { build(:location, :new_york) }
 
     let(:address_examples) do
       {
