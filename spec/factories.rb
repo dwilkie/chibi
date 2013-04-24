@@ -431,35 +431,35 @@ FactoryGirl.define do
     end
 
     trait :cambodian do
-      sequence(:mobile_number) { |n| "+85500000000#{n}" }
+      sequence(:mobile_number) { |n| "85500000000#{n}" }
     end
 
     trait :from_kampong_thom do
-      sequence(:mobile_number) { |n| "+85562000000#{n}" }
+      sequence(:mobile_number) { |n| "85562000000#{n}" }
     end
 
     trait :from_phnom_penh do
-      sequence(:mobile_number) { |n| "+85523000000#{n}" }
+      sequence(:mobile_number) { |n| "85523000000#{n}" }
     end
 
     trait :from_battambang do
-      sequence(:mobile_number) { |n| "+85553000000#{n}" }
+      sequence(:mobile_number) { |n| "85553000000#{n}" }
     end
 
     trait :from_siem_reap do
-      sequence(:mobile_number) { |n| "+85563000000#{n}" }
+      sequence(:mobile_number) { |n| "85563000000#{n}" }
     end
 
     trait :english do
-      sequence(:mobile_number) { |n| "+4400000000#{n}" }
+      sequence(:mobile_number) { |n| "4400000000#{n}" }
     end
 
     trait :american do
-      sequence(:mobile_number) { |n| "+100000000#{n}" }
+      sequence(:mobile_number) { |n| "100000000#{n}" }
     end
 
     trait :thai do
-      sequence(:mobile_number) { |n| "+6600000000#{n}" }
+      sequence(:mobile_number) { |n| "6600000000#{n}" }
     end
 
     # do not reorder these factories because the tests rely on

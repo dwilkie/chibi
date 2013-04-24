@@ -9,7 +9,7 @@ describe Reply do
 
   # add more users here as you get more languages
   let(:local_users) do
-    [build(:user, :cambodian), build(:user, :english)]
+    [create(:user, :cambodian), create(:user, :english)]
   end
 
   let(:new_reply) { build(:reply, :with_unset_destination, :user => user) }
@@ -114,7 +114,7 @@ describe Reply do
   end
 
   it_should_behave_like "communicable" do
-    let(:communicable_resource) { new_reply }
+    let(:communicable_resource) { reply }
   end
 
   it_should_behave_like "chatable" do
