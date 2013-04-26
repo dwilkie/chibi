@@ -12,6 +12,7 @@ class User < ActiveRecord::Base
   BISEXUAL = "e"
   PROBABLE_GENDER = MALE
   PROBABLE_LOOKING_FOR = FEMALE
+  MINIMUM_MOBILE_NUMBER_LENGTH = 9
 
   has_one :location, :autosave => true
 
@@ -25,7 +26,7 @@ class User < ActiveRecord::Base
 
   belongs_to :active_chat, :class_name => "Chat"
 
-  validates :mobile_number, :presence => true, :uniqueness => true, :length => {:minimum => 9}
+  validates :mobile_number, :presence => true, :uniqueness => true, :length => {:minimum => MINIMUM_MOBILE_NUMBER_LENGTH}
   validates :location, :screen_name, :presence => true
 
   validates :gender, :inclusion => {:in => [MALE, FEMALE], :allow_nil => true}

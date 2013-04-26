@@ -190,7 +190,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def to=(value)
-    self.from = value if value.present? && !twilio_number?(value)
+    self.from = value if value.present? && !twilio_number?(value) && value.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH
   end
 
   def from=(value)

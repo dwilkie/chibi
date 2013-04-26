@@ -49,47 +49,47 @@ describe "PhoneCalls" do
     end
 
     shared_examples_for "a phone call without voice prompts" do
-      it_should_behave_like "a call from an offline user"
+      context "given there are new friends online" do
+        let(:friends) { caller.matches.all }
+        let(:caller) { User.first }
 
-      context "as a user" do
+        before do
+          load_users
+          caller
+          friends
+        end
+
         context "when I call" do
-          let(:user) { create(:user) }
-          let(:friends) { user.matches << user }
-
           before do
-            load_users
-            friends
-            call(:from => my_number)
+            call(:from => caller.mobile_number)
           end
 
-          it_should_behave_like "saving the phone call" do
-            let(:from) { my_number }
+          it "should try to find me a new friend" do
+            assert_redirect_to_current_url
           end
 
-          context "if I hold the line" do
+          context "after a girl is found for me" do
             before do
               update_current_call_status
             end
 
-            context "and there is a girl online to talk with" do
-              it "should try to connect me with her" do
-                assert_dial_to_current_url(friends[0].mobile_number)
-              end
+            it "should try to connect me with her" do
+              assert_dial_to_current_url(friends[0].mobile_number)
+            end
 
-              context "if she answers" do
-                context "and hangs up first" do
+            context "if she answers" do
+              context "and hangs up first" do
+                before do
+                  update_current_call_status(:dial_call_status => :completed)
+                end
+
+                context "if I hold the line" do
                   before do
-                    update_current_call_status(:dial_call_status => :completed)
+                    update_current_call_status
                   end
 
-                  context "if I hold the line" do
-                    before do
-                      update_current_call_status
-                    end
-
-                    it "should connect me with a new friend" do
-                      assert_dial_to_current_url(friends[1].mobile_number)
-                    end
+                  it "should connect me with a new friend" do
+                    assert_dial_to_current_url(friends[1].mobile_number)
                   end
                 end
               end
@@ -100,43 +100,110 @@ describe "PhoneCalls" do
     end
 
     shared_examples_for "a phone call with voice prompts" do
-      it_should_behave_like "a call from an offline user"
+      context "when I call" do
+        before do
+          call(:from => my_number)
+        end
 
-      context "as an existing user in a chat session" do
-        let(:active_chat) { create(:active_chat) }
+        it "should introduce me to Chibi" do
+          assert_play_then_redirect_to_current_url(:welcome)
+        end
 
-        context "when I call" do
-          context "and I am offered the menu" do
+        context "after I hear the welcome message" do
+          before do
+            update_current_call_status
+          end
 
-            let(:offering_menu_phone_call) { create(:phone_call, :offering_menu, :user => active_chat.user) }
+          it "should offer me the menu" do
+            assert_ask_for_input(:offer_menu)
+          end
 
+          context "if I answer that I want the menu" do
             before do
-              call(offering_menu_phone_call)
+              update_current_call_status(
+                :digits =>  build(:phone_call, :offering_menu, :caller_wants_menu).digits
+              )
             end
 
-            context "if I hold the line" do
+            it "should ask me for my age" do
+              assert_ask_for_input(:ask_for_age, :numDigits => 2)
+            end
+
+            context "and I answer with a valid age" do
               before do
-                update_current_call_status
+                update_current_call_status(:digits => build(:user, :with_date_of_birth).age)
               end
 
-              it "should connect me with my friend" do
-                assert_dial_to_current_url(active_chat.friend.mobile_number)
+              it "should save my preference and ask me if I am male of female" do
+                assert_ask_for_input(:ask_for_gender)
+              end
+
+              context "and I answer with a valid gender" do
+                before do
+                  update_current_call_status(
+                    :digits => build(
+                      :phone_call, :asking_for_gender_in_menu, :caller_answers_male
+                    ).digits
+                  )
+                end
+
+                it "should ask me if I want to chat with a boy or a girl" do
+                  assert_ask_for_input(:ask_for_looking_for)
+                end
+
+                context "and I answer with a valid looking for preference" do
+                  before do
+                    update_current_call_status(
+                      :digits => build(
+                        :phone_call, :asking_for_looking_for_in_menu, :caller_answers_male
+                      ).digits
+                    )
+                  end
+
+                  it "should offer me the menu" do
+                    assert_ask_for_input(:offer_menu)
+                  end
+                end
+
+                context "and I answer with an invalid looking for preference" do
+                  before do
+                    update_current_call_status(
+                      :digits => 3
+                    )
+                  end
+
+                  it "should ignore my input and offer me the menu" do
+                    assert_ask_for_input(:offer_menu)
+                  end
+                end
+              end
+
+              context "and I answer with an invalid gender" do
+                before do
+                  update_current_call_status(
+                    :digits => 3
+                  )
+                end
+
+                it "should ignore my input and ask me if I want to chat with a boy or a girl" do
+                  assert_ask_for_input(:ask_for_looking_for)
+                end
+              end
+            end
+
+            context "and I answer with an invalid age" do
+              before do
+                update_current_call_status(:digits => build(:user, :too_young).age)
+              end
+
+              it "should ignore my input and ask me for my gender" do
+                assert_ask_for_input(:ask_for_gender)
               end
             end
           end
-        end
-      end
 
-      context "as a user" do
-        context "when I call" do
-          context "and I am offered the menu" do
-            let(:offering_menu_phone_call) { create(:phone_call, :offering_menu) }
-
-            before do
-              call(offering_menu_phone_call)
-            end
-
-            context "if I hold the line" do
+          context "given there are no new friends online" do
+            context "and I hold the line" do
               before do
                 update_current_call_status
               end
@@ -145,7 +212,7 @@ describe "PhoneCalls" do
                 assert_redirect_to_current_url
               end
 
-              context "but there are no matches for me" do
+              context "after no matches are found" do
                 before do
                   update_current_call_status
                 end
@@ -165,138 +232,26 @@ describe "PhoneCalls" do
                 end
               end
             end
-
-            context "if I answer that I want the menu" do
-              before do
-                update_current_call_status(
-                  :digits =>  build(:phone_call, :offering_menu, :caller_wants_menu).digits
-                )
-              end
-
-              it "should ask me for my age" do
-                assert_ask_for_input(:ask_for_age, :numDigits => 2)
-              end
-
-              context "and I answer with a valid age" do
-                before do
-                  update_current_call_status(:digits => build(:user, :with_date_of_birth).age)
-                end
-
-                it "should save my preference and ask me if I am male of female" do
-                  assert_ask_for_input(:ask_for_gender)
-                end
-
-                context "and I answer with a valid gender" do
-                  before do
-                    update_current_call_status(
-                      :digits => build(
-                        :phone_call, :asking_for_gender_in_menu, :caller_answers_male
-                      ).digits
-                    )
-                  end
-
-                  it "should ask me if I want to chat with a boy or a girl" do
-                    assert_ask_for_input(:ask_for_looking_for)
-                  end
-
-                  context "and I answer with a valid looking for preference" do
-                    before do
-                      update_current_call_status(
-                        :digits => build(
-                          :phone_call, :asking_for_looking_for_in_menu, :caller_answers_male
-                        ).digits
-                      )
-                    end
-
-                    it "should offer me the menu" do
-                      assert_ask_for_input(:offer_menu)
-                    end
-                  end
-
-                  context "and I answer with an invalid looking for preference" do
-                    before do
-                      update_current_call_status(
-                        :digits => 3
-                      )
-                    end
-
-                    it "should ignore my input and offer me the menu" do
-                      assert_ask_for_input(:offer_menu)
-                    end
-                  end
-                end
-
-                context "and I answer with an invalid gender" do
-                  before do
-                    update_current_call_status(
-                      :digits => 3
-                    )
-                  end
-
-                  it "should ignore my input and ask me if I want to chat with a boy or a girl" do
-                    assert_ask_for_input(:ask_for_looking_for)
-                  end
-                end
-              end
-
-              context "and I answer with an invalid age" do
-                before do
-                  update_current_call_status(:digits => build(:user, :too_young).age)
-                end
-
-                it "should ignore my input and ask me for my gender" do
-                  assert_ask_for_input(:ask_for_gender)
-                end
-              end
-            end
           end
-        end
-      end
 
-      context "as a new user" do
-        context "when I am called" do
-          context "and I answer" do
+          context "given there are new friends online" do
+            let(:friends) { new_user.matches.all }
+
             before do
-              call(:to => my_number)
+              load_users
+              friends
             end
 
-            it_should_behave_like "saving the phone call" do
-              let(:from) { my_number }
-            end
-          end
-        end
-
-        context "when I call" do
-          before do
-            call(:from => my_number)
-          end
-
-          it_should_behave_like "saving the phone call" do
-            let(:from) { my_number }
-          end
-
-          it_should_behave_like "introducing me to chibi"
-
-          context "after I hear the welcome message" do
-            before do
-              update_current_call_status
-            end
-
-            it "should offer me the menu" do
-              assert_ask_for_input(:offer_menu)
-            end
-
-            context "if I hold the line" do
-              let(:friends) { new_user.matches.all }
-
+            context "and I hold the line" do
               before do
-                load_users
-                friends
                 update_current_call_status
               end
 
-              context "and there is a girl online to talk with" do
+              it "should try to find me a new friend" do
+                assert_redirect_to_current_url
+              end
 
+              context "after a girl is found for me" do
                 before do
                   update_current_call_status
                 end
@@ -350,12 +305,29 @@ describe "PhoneCalls" do
             end
           end
         end
-      end
-    end
 
-    shared_examples_for "introducing me to chibi" do
-      it "should introduce me to Chibi" do
-        assert_play_then_redirect_to_current_url(:welcome)
+        context "given that I'm already in a chat session" do
+          let(:active_chat) { create(:active_chat) }
+
+          context "after I am offered the menu" do
+
+            let(:offering_menu_phone_call) { create(:phone_call, :offering_menu, :user => active_chat.user) }
+
+            before do
+              call(offering_menu_phone_call)
+            end
+
+            context "if I hold the line" do
+              before do
+                update_current_call_status
+              end
+
+              it "should connect me with my friend" do
+                assert_dial_to_current_url(active_chat.friend.mobile_number)
+              end
+            end
+          end
+        end
       end
     end
 
@@ -367,23 +339,55 @@ describe "PhoneCalls" do
     end
 
     shared_examples_for "a call from an offline user" do
-      context "as a user" do
-        context "when I call" do
-          context "and I am offline" do
-            let(:offline_user) { create(:user, :offline) }
+      context "given I am offline" do
+        let(:offline_user) { create(:user, :offline) }
 
-            before do
-              call(:from => offline_user)
-            end
+        before do
+          call(:from => offline_user)
+        end
 
-            it "should put me online" do
-              offline_user.reload.should be_online
-            end
-          end
+        it "should put me online" do
+          offline_user.reload.should be_online
+        end
+      end
+    end
+
+    context "when I call" do
+      it_should_behave_like "a call from an offline user"
+
+      context "to Twilio" do
+        before do
+          call(:from => my_number)
+        end
+
+        it_should_behave_like "saving the phone call" do
+          let(:from) { my_number }
         end
       end
     end
 
     it_should_behave_like "a phone call without voice prompts"
+
+    context "when I call to the short code '2442'" do
+      before do
+        call(:from => "+85510236139", :to => "+2442")
+      end
+
+      it_should_behave_like "saving the phone call" do
+        let(:from) { "85510236139" }
+      end
+    end
+
+    context "when I am called" do
+      context "and I answer" do
+        before do
+          call(:to => my_number)
+        end
+
+        it_should_behave_like "saving the phone call" do
+          let(:from) { my_number }
+        end
+      end
+    end
   end
 end

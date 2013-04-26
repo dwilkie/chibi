@@ -91,6 +91,11 @@ describe PhoneCall do
         subject.to = number
         subject.from.should == "123452222"
       end
+
+      # test no override for a 'to' which is a short code
+      subject.from = "+1-2345-2222"
+      subject.to = build(:user, :with_invalid_mobile_number).mobile_number
+      subject.from.should == "123452222"
     end
 
     it "should be mass assignable" do

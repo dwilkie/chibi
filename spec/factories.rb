@@ -69,8 +69,7 @@ FactoryGirl.define do
   end
 
   factory :phone_call do
-    user
-    from { user.mobile_number }
+    from { FactoryGirl.generate(:mobile_number) }
     sequence(:sid)
 
     trait :answered do
