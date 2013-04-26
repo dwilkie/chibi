@@ -5,16 +5,15 @@ kh:
   operators:
     smart:
       assertions:
-        short_code: "2442"
+        caller_id: "2442"
         nuntium_channel: "smart"
+        dial_string: "sofia/internal/%{number_to_dial}@27.109.112.12"
     beeline:
       assertions:
-        short_code: "2442"
         nuntium_channel: "beeline"
     hello:
       assertions:
         name: Hello
-        short_code: "2442"
         nuntium_channel: "hello"
       prefixes:
       - '15'

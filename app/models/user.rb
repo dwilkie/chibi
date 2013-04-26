@@ -159,20 +159,12 @@ class User < ActiveRecord::Base
     raw_locale ? raw_locale.to_s.downcase.to_sym : country_code.to_sym
   end
 
-  def torasup_number
-    @torasup_number ||= Torasup::PhoneNumber.new(mobile_number)
+  def caller_id
+    operator.caller_id || twilio_outgoing_number
   end
 
-  def operator
-    torasup_number.operator
-  end
-
-  def short_code
-    operator.short_code
-  end
-
-  def twilio_number
-    twilio_outgoing_number(:for => operator.country_code)
+  def dial_string
+    operator.dial_string(:number_to_dial => mobile_number) || mobile_number
   end
 
   def find_friends!(options = {})
@@ -603,6 +595,14 @@ class User < ActiveRecord::Base
 
   def self.enqueue_friend_messenger(user, options = {})
     Resque.enqueue(FriendMessenger, user.id, options)
+  end
+
+  def torasup_number
+    @torasup_number ||= Torasup::PhoneNumber.new(mobile_number)
+  end
+
+  def operator
+    torasup_number.operator
   end
 
   def cancel_searching_for_friend_if_chatting

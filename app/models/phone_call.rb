@@ -262,8 +262,8 @@ class PhoneCall < ActiveRecord::Base
   def dial(user_to_dial)
     generate_twiml(:redirect => false) do |twiml|
       twiml.Dial(
-        user_to_dial.mobile_number,
-        :callerId => user_to_dial.short_code || user_to_dial.twilio_number,
+        user_to_dial.dial_string,
+        :callerId => user_to_dial.caller_id,
         :action => redirect_url
       )
     end

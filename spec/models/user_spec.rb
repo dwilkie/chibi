@@ -1296,21 +1296,6 @@ describe User do
     end
   end
 
-  describe "#twilio_number" do
-    include PhoneCallHelpers::Twilio
-
-    it "should return the correct twilio number for the user" do
-      subject = build(:user, :mobile_number => "85512323348")
-      subject.twilio_number.should == twilio_number(:default => false)
-
-      subject = build(:user, :mobile_number => "61413455442")
-      subject.twilio_number.should == twilio_number
-
-      subject = build(:user, :mobile_number => "12345678906")
-      subject.twilio_number.should == twilio_number
-    end
-  end
-
   describe "#city" do
     it "should delegate to location" do
       subject.city.should be_nil
@@ -1716,11 +1701,28 @@ describe User do
     end
   end
 
-  describe "#short_code" do
-    it "should return the correct short code for each different operator" do
+  describe "#caller_id" do
+    include PhoneCallHelpers::Twilio
+
+    it "should return the correct caller id for each different operator" do
       with_operators do |number_parts, assertions|
         new_user = build(:user, :mobile_number => number_parts.join)
-        new_user.short_code.should == assertions["short_code"]
+        asserted_caller_id = assertions["caller_id"] || twilio_number
+        new_user.caller_id.should == asserted_caller_id
+      end
+
+      new_user = build(:user)
+      new_user.caller_id.should == twilio_number
+    end
+  end
+
+  describe "#dial_string" do
+    it "should return the correct dial string for each different operator" do
+      with_operators do |number_parts, assertions|
+        number = number_parts.join
+        new_user = build(:user, :mobile_number => number)
+        asserted_dial_string = interpolated_assertion(assertions["dial_string"], :number_to_dial => number) || number
+        new_user.dial_string.should == asserted_dial_string
       end
     end
   end

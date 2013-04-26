@@ -36,8 +36,8 @@ module MobilePhoneHelpers
 
   def registered_operator_number
     numbers = []
-    with_operators do |number_parts|
-      numbers << number_parts.join
+    with_operators do |number_parts, assertions|
+      numbers << number_parts.join if assertions["caller_id"]
     end
     numbers.first
   end
