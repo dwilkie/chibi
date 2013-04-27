@@ -395,7 +395,7 @@ describe "PhoneCalls" do
       end
     end
 
-    it_should_behave_like "a phone call with voice prompts"
+    it_should_behave_like "a phone call without voice prompts"
 
     context "when I call to the short code '2442'" do
       before do
