@@ -4,6 +4,7 @@ describe "PhoneCalls" do
   describe "POST /phone_calls.xml" do
     include PhoneCallHelpers
     include PhoneCallHelpers::Twilio
+    include MobilePhoneHelpers
 
     include_context "existing users"
     include_context "twiml"
@@ -69,29 +70,43 @@ describe "PhoneCalls" do
           end
 
           context "after a girl is found for me" do
-            before do
-              update_current_call_status
-            end
+            context "given I'm calling to Twilio" do
+              before do
+                update_current_call_status
+              end
 
-            it "should try to connect me with her" do
-              assert_dial_to_current_url(friends[0].mobile_number)
-            end
+              it "should try to connect me with her through Twilio" do
+                assert_dial_to_current_url(friends[0].mobile_number)
+              end
 
-            context "if she answers" do
-              context "and hangs up first" do
-                before do
-                  update_current_call_status(:dial_call_status => :completed)
-                end
-
-                context "if I hold the line" do
+              context "if she answers" do
+                context "and hangs up first" do
                   before do
-                    update_current_call_status
+                    update_current_call_status(:dial_call_status => :completed)
                   end
 
-                  it "should connect me with a new friend" do
-                    assert_dial_to_current_url(friends[1].mobile_number)
+                  context "if I hold the line" do
+                    before do
+                      update_current_call_status
+                    end
+
+                    it "should connect me with a new friend" do
+                      assert_dial_to_current_url(friends[1].mobile_number)
+                    end
                   end
                 end
+              end
+            end
+
+            context "given I'm calling to 2442" do
+              before do
+                update_current_call_status(:api_version => sample_adhearsion_twilio_api_version)
+              end
+
+              it "should try to connect me with her through the default PBX dial string" do
+                assert_dial_to_current_url(
+                  asserted_default_pbx_dial_string(:number_to_dial => friends[0].mobile_number)
+                )
               end
             end
           end
@@ -252,22 +267,44 @@ describe "PhoneCalls" do
               end
 
               context "after a girl is found for me" do
-                before do
-                  update_current_call_status
-                end
+                context "given I'm calling to Twilio" do
+                  before do
+                    update_current_call_status
+                  end
 
-                it "should try to connect me with her" do
-                  assert_dial_to_current_url(friends[0].mobile_number)
-                end
+                  it "should try to connect me with her through Twilio" do
+                    assert_dial_to_current_url(friends[0].mobile_number)
+                  end
 
-                context "if she answers" do
-                  context "and hangs up first" do
+                  context "if she answers" do
+                    context "and hangs up first" do
+                      before do
+                        update_current_call_status(:dial_call_status => :completed)
+                      end
+
+                      it "should tell me that my chat has ended" do
+                        assert_play_then_redirect_to_current_url(:tell_user_their_chat_has_ended)
+                      end
+
+                      context "and I hold the line" do
+                        before do
+                          update_current_call_status
+                        end
+
+                        it "should offer me the menu" do
+                          assert_ask_for_input(:offer_menu)
+                        end
+                      end
+                    end
+                  end
+
+                  context "but she does not answer" do
                     before do
-                      update_current_call_status(:dial_call_status => :completed)
+                      update_current_call_status(:dial_call_status => :no_answer)
                     end
 
-                    it "should tell me that my chat has ended" do
-                      assert_play_then_redirect_to_current_url(:tell_user_their_chat_has_ended)
+                    it "should find me a new friend" do
+                      assert_redirect_to_current_url
                     end
 
                     context "and I hold the line" do
@@ -275,30 +312,22 @@ describe "PhoneCalls" do
                         update_current_call_status
                       end
 
-                      it "should offer me the menu" do
-                        assert_ask_for_input(:offer_menu)
+                      it "should connnect me with my new friend" do
+                        assert_dial_to_current_url(friends[1].mobile_number)
                       end
                     end
                   end
                 end
 
-                context "but she does not answer" do
+                context "given I'm calling to 2442" do
                   before do
-                    update_current_call_status(:dial_call_status => :no_answer)
+                    update_current_call_status(:api_version => sample_adhearsion_twilio_api_version)
                   end
 
-                  it "should find me a new friend" do
-                    assert_redirect_to_current_url
-                  end
-
-                  context "and I hold the line" do
-                    before do
-                      update_current_call_status
-                    end
-
-                    it "should connnect me with my new friend" do
-                      assert_dial_to_current_url(friends[1].mobile_number)
-                    end
+                  it "should try and connect me with her through the default PBX dial string" do
+                    assert_dial_to_current_url(
+                      asserted_default_pbx_dial_string(:number_to_dial => friends[0].mobile_number)
+                    )
                   end
                 end
               end
@@ -366,11 +395,11 @@ describe "PhoneCalls" do
       end
     end
 
-    it_should_behave_like "a phone call without voice prompts"
+    it_should_behave_like "a phone call with voice prompts"
 
     context "when I call to the short code '2442'" do
       before do
-        call(:from => "+85510236139", :to => "+2442")
+        call(:from => "+85510236139", :to => "+2442", :api_version => "adhearsion-twilio-0.0.1")
       end
 
       it_should_behave_like "saving the phone call" do

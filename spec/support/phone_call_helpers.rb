@@ -13,11 +13,11 @@ module PhoneCallHelpers
     {
       :From => options[:from],
       :CallSid => options[:call_sid],
-      :Channel => options[:channel] || "test",
       :Digits => options[:digits],
       :To => options[:to],
       :DialCallStatus => options[:dial_call_status].try(:to_s).try(:dasherize),
-      :CallStatus => options[:call_status].try(:to_s).try(:dasherize)
+      :CallStatus => options[:call_status].try(:to_s).try(:dasherize),
+      :ApiVersion => options[:api_version] || "2010-04-01"
     }
   end
 
@@ -53,6 +53,10 @@ module PhoneCallHelpers
       end
 
       formatted_numbers
+    end
+
+    def sample_adhearsion_twilio_api_version
+      "adhearsion-twilio-0.0.1"
     end
   end
 

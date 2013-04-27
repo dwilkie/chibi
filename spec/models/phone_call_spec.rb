@@ -185,6 +185,7 @@ describe PhoneCall do
       phone_call.digits.should == params[:Digits].to_i
       phone_call.call_status.should == params[:CallStatus]
       phone_call.dial_status.should == params[:DialCallStatus]
+      phone_call.api_version.should == params[:ApiVersion]
 
       subject.should_not_receive(:login_user!)
       subject.should_not_receive(:process!)
@@ -263,9 +264,9 @@ describe PhoneCall do
     def assert_dial_to_redirect_url(phone_call, options = {})
       twiml_options = options.dup
       user_to_dial = phone_call.chat.partner(phone_call.user)
-      number_to_dial = user_to_dial.dial_string
+      number_to_dial = user_to_dial.dial_string(nil)
 
-      twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? user_to_dial.twilio_number : user_to_dial.caller_id
+      twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? user_to_dial.twilio_number : user_to_dial.caller_id(nil)
       assert_dial(twiml_response(phone_call), redirect_url, number_to_dial, twiml_options)
     end
 

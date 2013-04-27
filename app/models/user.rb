@@ -159,12 +159,12 @@ class User < ActiveRecord::Base
     raw_locale ? raw_locale.to_s.downcase.to_sym : country_code.to_sym
   end
 
-  def caller_id
-    operator.caller_id || twilio_outgoing_number
+  def caller_id(requesting_api_version)
+    adhearsion_twilio_requested?(requesting_api_version) ? operator.caller_id : twilio_outgoing_number
   end
 
-  def dial_string
-    operator.dial_string(:number_to_dial => mobile_number) || mobile_number
+  def dial_string(requesting_api_version)
+    adhearsion_twilio_requested?(requesting_api_version) ? (operator.dial_string(:number_to_dial => mobile_number) || default_pbx_dial_string(:number_to_dial => mobile_number)) : mobile_number
   end
 
   def find_friends!(options = {})

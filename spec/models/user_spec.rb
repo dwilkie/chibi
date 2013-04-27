@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe User do
   include MobilePhoneHelpers
+  include PhoneCallHelpers::Twilio
   include TranslationHelpers
   include MessagingHelpers
   include ResqueHelpers
@@ -1701,28 +1702,56 @@ describe User do
     end
   end
 
-  describe "#caller_id" do
-    include PhoneCallHelpers::Twilio
+  describe "#caller_id(requesting_api_version)" do
+    def assert_caller_id(requesting_api_version, assert_twilio_number)
+      factory_user = build(:user)
+      factory_asserted_caller_id = twilio_number if assert_twilio_number
+      factory_user.caller_id(requesting_api_version).should == factory_asserted_caller_id
 
-    it "should return the correct caller id for each different operator" do
-      with_operators do |number_parts, assertions|
-        new_user = build(:user, :mobile_number => number_parts.join)
-        asserted_caller_id = assertions["caller_id"] || twilio_number
-        new_user.caller_id.should == asserted_caller_id
-      end
-
-      new_user = build(:user)
-      new_user.caller_id.should == twilio_number
-    end
-  end
-
-  describe "#dial_string" do
-    it "should return the correct dial string for each different operator" do
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
-        asserted_dial_string = interpolated_assertion(assertions["dial_string"], :number_to_dial => number) || number
-        new_user.dial_string.should == asserted_dial_string
+        asserted_caller_id = assert_twilio_number ? twilio_number : assertions["caller_id"]
+        new_user.caller_id(requesting_api_version).should == asserted_caller_id
+      end
+    end
+
+    context "requesting_api_version = '2010-04-01'" do
+      it "should return the twilio number as the caller id" do
+        assert_caller_id("2010-04-01", true)
+      end
+    end
+
+    context "requesting_api_version = 'adhearsion-twilio-0.0.1'" do
+      it "should return a caller id appropriate for the operator" do
+        assert_caller_id(sample_adhearsion_twilio_api_version, false)
+      end
+    end
+  end
+
+  describe "#dial_string(requesting_api_version)" do
+    def assert_dial_string(requesting_api_version, assert_only_number)
+      factory_user = build(:user)
+      factory_asserted_dial_string = assert_only_number ? factory_user.mobile_number : asserted_default_pbx_dial_string(:number_to_dial => factory_user.mobile_number)
+      factory_user.dial_string(requesting_api_version).should == factory_asserted_dial_string
+
+      with_operators do |number_parts, assertions|
+        number = number_parts.join
+        new_user = build(:user, :mobile_number => number)
+        asserted_dial_string = assert_only_number ? new_user.mobile_number : (interpolated_assertion(assertions["dial_string"], :number_to_dial => number) || asserted_default_pbx_dial_string(:number_to_dial => number))
+        new_user.dial_string(requesting_api_version).should == asserted_dial_string
+      end
+    end
+
+    context "requesting_api_version = '2010-04-01'" do
+      it "should return the mobile number as the dial string" do
+        assert_dial_string("2010-04-01", true)
+      end
+    end
+
+    context "requesting_api_version = 'adhearsion-twilio-0.0.1'" do
+      it "should return a dial string appropriate for the operator" do
+        assert_dial_string(sample_adhearsion_twilio_api_version, false)
       end
     end
   end

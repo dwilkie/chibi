@@ -41,4 +41,16 @@ module TwilioHelpers
   def twilio_country_code(options = {})
     Phony.split(twilio_outgoing_number(options.merge(:formatted => false)))[0]
   end
+
+  def adhearsion_twilio_requested?(api_version)
+    api_version =~ /adhearsion-twilio/
+  end
+
+  def default_pbx_dial_string(interpolations = {})
+    dial_string = ENV['DEFAULT_PBX_DIAL_STRING'].dup
+    interpolations.each do |interpolation, value|
+      dial_string.gsub!("%{#{interpolation}}", value)
+    end
+    dial_string
+  end
 end

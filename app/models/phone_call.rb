@@ -42,10 +42,10 @@ class PhoneCall < ActiveRecord::Base
     end
   end
 
-  attr_accessor :redirect_url, :digits, :to, :dial_status, :call_status
+  attr_accessor :redirect_url, :digits, :to, :dial_status, :call_status, :api_version
   alias_attribute :call_sid, :sid
 
-  attr_accessible :to
+  attr_accessible :to, :api_version
 
   validates :sid, :presence => true, :uniqueness => true
 
@@ -180,6 +180,7 @@ class PhoneCall < ActiveRecord::Base
       phone_call.digits = params[:digits]
       phone_call.call_status = params[:call_status]
       phone_call.dial_status = params[:dial_call_status]
+      phone_call.api_version = params[:api_version]
       phone_call.process!
       phone_call
     end
@@ -262,8 +263,8 @@ class PhoneCall < ActiveRecord::Base
   def dial(user_to_dial)
     generate_twiml(:redirect => false) do |twiml|
       twiml.Dial(
-        user_to_dial.dial_string,
-        :callerId => user_to_dial.caller_id,
+        user_to_dial.dial_string(api_version),
+        :callerId => user_to_dial.caller_id(api_version),
         :action => redirect_url
       )
     end

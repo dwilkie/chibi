@@ -30,6 +30,14 @@ module MobilePhoneHelpers
     super("custom_operators_spec.yaml")
   end
 
+  def asserted_default_pbx_dial_string(interpolations = {})
+    asserted_dial_string = "sofia/gateway/didlogic/%{number_to_dial}"
+    interpolations.each do |interpolation, value|
+      asserted_dial_string.gsub!("%{#{interpolation}}", value)
+    end
+    asserted_dial_string
+  end
+
   def with_operators(&block)
     super(:only_registered => ASSERTED_REGISTERED_OPERATORS, &block)
   end
