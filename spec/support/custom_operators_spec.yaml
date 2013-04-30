@@ -15,6 +15,7 @@ kh:
       assertions:
         name: Hello
         nuntium_channel: "hello"
+        dial_string: "sofia/internal/%{number_to_dial}@27.109.112.12"
       prefixes:
       - '15'
       - '16'
