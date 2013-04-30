@@ -50,6 +50,20 @@ describe "PhoneCalls" do
     end
 
     shared_examples_for "a phone call without voice prompts" do
+      context "given that I'm already in a chat session" do
+        let!(:active_chat) { create(:active_chat) }
+
+        context "when I call" do
+          before do
+            call(:from => active_chat.user)
+          end
+
+          it "should connect me with my friend" do
+            assert_dial_to_current_url(active_chat.friend.mobile_number)
+          end
+        end
+      end
+
       context "given there are new friends online" do
         let(:friends) { caller.matches.all }
         let(:caller) { User.first }
@@ -217,6 +231,20 @@ describe "PhoneCalls" do
             end
           end
 
+          context "given that I'm already in a chat session" do
+            let!(:active_chat) { create(:active_chat, :user => new_user) }
+
+            context "if I hold the line" do
+              before do
+                update_current_call_status
+              end
+
+              it "should connect me with my friend" do
+                assert_dial_to_current_url(active_chat.friend.mobile_number)
+              end
+            end
+          end
+
           context "given there are no new friends online" do
             context "and I hold the line" do
               before do
@@ -330,29 +358,6 @@ describe "PhoneCalls" do
                     )
                   end
                 end
-              end
-            end
-          end
-        end
-
-        context "given that I'm already in a chat session" do
-          let(:active_chat) { create(:active_chat) }
-
-          context "after I am offered the menu" do
-
-            let(:offering_menu_phone_call) { create(:phone_call, :offering_menu, :user => active_chat.user) }
-
-            before do
-              call(offering_menu_phone_call)
-            end
-
-            context "if I hold the line" do
-              before do
-                update_current_call_status
-              end
-
-              it "should connect me with my friend" do
-                assert_dial_to_current_url(active_chat.friend.mobile_number)
               end
             end
           end
