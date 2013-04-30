@@ -160,7 +160,7 @@ class User < ActiveRecord::Base
   end
 
   def caller_id(requesting_api_version)
-    adhearsion_twilio_requested?(requesting_api_version) ? operator.caller_id : twilio_outgoing_number
+    adhearsion_twilio_requested?(requesting_api_version) ? (operator.caller_id || twilio_outgoing_number) : twilio_outgoing_number
   end
 
   def dial_string(requesting_api_version)

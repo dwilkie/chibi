@@ -1704,14 +1704,14 @@ describe User do
 
   describe "#caller_id(requesting_api_version)" do
     def assert_caller_id(requesting_api_version, assert_twilio_number)
-      factory_user = build(:user)
-      factory_asserted_caller_id = twilio_number if assert_twilio_number
-      factory_user.caller_id(requesting_api_version).should == factory_asserted_caller_id
+      # regardless of the requesting api it should always return the twilio number
+      # if the operator does not have it's own caller_id
+      build(:user).caller_id(requesting_api_version).should == twilio_number
 
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
-        asserted_caller_id = assert_twilio_number ? twilio_number : assertions["caller_id"]
+        asserted_caller_id = assert_twilio_number ? twilio_number : (assertions["caller_id"] || twilio_number)
         new_user.caller_id(requesting_api_version).should == asserted_caller_id
       end
     end
