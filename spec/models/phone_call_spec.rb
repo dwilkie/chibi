@@ -71,11 +71,9 @@ describe PhoneCall do
     end
   end
 
-  describe "#to" do
-    # phone calls should behave the same whether they were initiated by
-    # the user or not
-    it "should be an accessor that overrides #from if present but if #to is a twilio number" do
-
+  describe "#to=(value)" do
+    # phone calls should behave the same whether they were initiated by the user or not
+    it "should override #from=(value) if present" do
       # test override
       subject.from = "+1-2345-2222"
       subject.to = "+1-2345-3333"
@@ -84,18 +82,6 @@ describe PhoneCall do
       # test no override for blank 'to'
       subject.to = ""
       subject.from.should == "123453333"
-
-      # test no override for a 'to' which is a twilio number
-      subject.from = "+1-2345-2222"
-      twilio_numbers.each do |number|
-        subject.to = number
-        subject.from.should == "123452222"
-      end
-
-      # test no override for a 'to' which is a short code
-      subject.from = "+1-2345-2222"
-      subject.to = build(:user, :with_invalid_mobile_number).mobile_number
-      subject.from.should == "123452222"
     end
 
     it "should be mass assignable" do
@@ -104,7 +90,7 @@ describe PhoneCall do
     end
   end
 
-  describe "#from=" do
+  describe "#from=(value)" do
     it "should ignore leading 1's generated from Twilio" do
       # double leading 1 (Cambodia)
       subject.from = "+1185512808814"
@@ -139,8 +125,16 @@ describe PhoneCall do
       subject.from.should == "17378742833"
 
       # test Twilio number
-      subject.from = "+14156926280"
-      subject.from.should == "14156926280"
+      subject.from = "+1-2345-2222"
+      twilio_numbers.each do |number|
+        subject.from = number
+        subject.from.should == "123452222"
+      end
+
+      # test invalid number
+      subject.from = "+1-2345-2222"
+      subject.from = build(:user, :with_invalid_mobile_number).mobile_number
+      subject.from.should == "123452222"
     end
   end
 

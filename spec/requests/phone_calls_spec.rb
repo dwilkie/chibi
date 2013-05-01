@@ -412,6 +412,16 @@ describe "PhoneCalls" do
       end
     end
 
+    context "when I call to a number from the Twilio number" do
+      before do
+        call(:from => twilio_number, :to => "+85510236139")
+      end
+
+      it_should_behave_like "saving the phone call" do
+        let(:from) { "85510236139" }
+      end
+    end
+
     context "when I am called" do
       context "and I answer" do
         before do

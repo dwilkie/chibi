@@ -191,23 +191,27 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def to=(value)
-    self.from = value if value.present? && !twilio_number?(value) && value.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH
+    self.from = value if value.present?
   end
 
   def from=(value)
     # this method is overriden because Twilio adds
     # random 1's to the start of phone numbers
-    if value
-      # remove non digits
-      value.gsub!(/\D/, "")
+    if value.present?
+      if !twilio_number?(value) && value.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH
+        # remove non digits
+        value.gsub!(/\D/, "")
 
-      if value.first == "1"
-        # remove all leading ones
-        non_us_number = value.gsub(/\A1+/, "")
-        value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
+        if value.first == "1"
+          # remove all leading ones
+          non_us_number = value.gsub(/\A1+/, "")
+          value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
+        end
+        super value
       end
+    else
+      super value
     end
-    super value
   end
 
   def login_user!
