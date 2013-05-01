@@ -7,16 +7,7 @@ module TwilioHelpers
 
   def twilio_outgoing_number(options = {})
     twilio_numbers = twilio_outgoing_numbers(options)
-    default_number = twilio_numbers.first
-    alternate_number = twilio_numbers.last
-
-    if options[:default] == false
-      alternate_number
-    elsif country_code = options[:for]
-      country_code == twilio_country_code(:default => false) ? alternate_number : default_number
-    else
-      default_number
-    end
+    options[:default] == false ? twilio_numbers.last : twilio_numbers.first
   end
 
   def twilio_outgoing_numbers(options = {})
@@ -36,10 +27,6 @@ module TwilioHelpers
 
   def twilio_number?(number)
     twilio_outgoing_numbers.include?(number)
-  end
-
-  def twilio_country_code(options = {})
-    Phony.split(twilio_outgoing_number(options.merge(:formatted => false)))[0]
   end
 
   def adhearsion_twilio_requested?(api_version)

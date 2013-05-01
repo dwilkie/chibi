@@ -15,7 +15,7 @@ class MissedCall < ActiveRecord::Base
     return unless raw_phone_number
 
     phone_number_parts = Phony.split(raw_phone_number)
-    phone_number_parts[0] = twilio_country_code(:default => false) if phone_number_parts[0] == "0"
+    phone_number_parts[0] = default_country_code if phone_number_parts[0] == "0"
     self.from = phone_number_parts.join
   end
 
@@ -31,5 +31,9 @@ class MissedCall < ActiveRecord::Base
 
   def twilio_client
     @client ||= Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
+  end
+
+  def default_country_code
+    ENV['MISSED_CALL_COUNTRY_CODE']
   end
 end
