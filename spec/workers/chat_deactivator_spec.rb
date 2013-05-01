@@ -1,19 +1,19 @@
 require 'spec_helper'
 
 describe ChatDeactivator do
-
   context "@queue" do
     it "should == :chat_deactivator_queue" do
       subject.class.instance_variable_get(:@queue).should == :chat_deactivator_queue
     end
   end
 
-  describe ".perform" do
+  describe ".perform(chat_id, options = {})" do
     let(:chat) { mock_model(Chat) }
+    let(:find_stub) { Chat.stub(:find) }
 
     before do
       chat.stub(:deactivate!)
-      Chat.stub(:find).and_return(chat)
+      find_stub.and_return(chat)
     end
 
     it "should tell the chat to deactivate itself" do
@@ -25,6 +25,9 @@ describe ChatDeactivator do
       subject.class.perform(1, :some => :options)
     end
 
-    #it_should_behave_like "rescheduling redis max client errors"
+    it_should_behave_like "rescheduling SIGTERM exceptions" do
+      let(:args) { [1, {}] }
+      let(:error_stub) { find_stub }
+    end
   end
 end

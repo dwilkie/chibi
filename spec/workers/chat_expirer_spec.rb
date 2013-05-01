@@ -8,10 +8,8 @@ describe ChatExpirer do
     end
   end
 
-  describe ".perform" do
-    before do
-      Chat.stub(:end_inactive)
-    end
+  describe ".perform(options = {})" do
+    let!(:job_stub) { Chat.stub(:end_inactive) }
 
     it "should end inactive chats" do
       Chat.should_receive(:end_inactive) do |options|
@@ -20,6 +18,11 @@ describe ChatExpirer do
         options.should be_a(HashWithIndifferentAccess)
       end
       subject.class.perform(:some => :options)
+    end
+
+    it_should_behave_like "rescheduling SIGTERM exceptions" do
+      let(:args) { [{}] }
+      let(:error_stub) { job_stub }
     end
   end
 end

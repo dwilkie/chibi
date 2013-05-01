@@ -1,8 +1,9 @@
-class Dialer < RetryWorker
+class Dialer
   @queue = :dialer_queue
 
   def self.perform(missed_call_id)
-    missed_call = MissedCall.find(missed_call_id)
-    missed_call.return_call!
+    MissedCall.find(missed_call_id).return_call!
+  rescue Resque::TermException
+    Resque.enqueue(self, missed_call_id)
   end
 end

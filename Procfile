@@ -1,3 +1,3 @@
 web: bundle exec thin start -p $PORT
-urgent_task_worker: bundle exec rake resque:work QUEUE=message_processor_queue,dialer_queue
-non_essential_task_worker: bundle exec rake resque:work QUEUE=locator_queue,chat_reactivator_queue,chat_deactivator_queue,chat_expirer_queue,friend_messenger_queue,friend_finder_queue,user_reminderer_queue,reminderer_queue,nuntium_ao_queryer_queue,blank_reply_fixer_queue
+urgent_task_worker: bundle exec rake resque:work TERM_CHILD=1 QUEUE=message_processor_queue,dialer_queue
+non_essential_task_worker: bundle exec rake resque:work TERM_CHILD=1 QUEUE=locator_queue,chat_reactivator_queue,chat_deactivator_queue,chat_expirer_queue,friend_messenger_queue,friend_finder_queue,user_reminderer_queue,reminderer_queue,nuntium_ao_queryer_queue,blank_reply_fixer_queue

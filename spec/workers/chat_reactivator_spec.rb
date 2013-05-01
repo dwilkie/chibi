@@ -8,10 +8,12 @@ describe ChatReactivator do
     end
   end
 
-  describe ".perform" do
+  describe ".perform(chat_id = nil)" do
+    let(:job_stub) { Chat.stub(:reactivate_stagnant!) }
+
     context "with no chat id" do
       before do
-        Chat.stub(:reactivate_stagnant!)
+        job_stub
       end
 
       it "should reactivate all stagnant chats" do
@@ -32,6 +34,11 @@ describe ChatReactivator do
         chat.should_receive(:reactivate!)
         subject.class.perform(1)
       end
+    end
+
+    it_should_behave_like "rescheduling SIGTERM exceptions" do
+      let(:args) { [nil] }
+      let(:error_stub) { job_stub }
     end
   end
 end
