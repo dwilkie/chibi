@@ -91,8 +91,32 @@ class User < ActiveRecord::Base
 
   def self.filter_params(params = {})
     scope = super.where(params.slice(:gender))
-    scope = exclude_unavailable(scope) if params[:available]
+    scope = scope.available if params[:available]
     scope
+  end
+
+  def self.between_the_ages(range)
+    scoped.where("date_of_birth <= ? AND date_of_birth > ?", range.min.years.ago, range.max.years.ago)
+  end
+
+  def self.male
+    scoped.where(:gender => MALE)
+  end
+
+  def self.female
+    scoped.where(:gender => FEMALE)
+  end
+
+  def self.with_date_of_birth
+    scoped.where("date_of_birth IS NOT NULL")
+  end
+
+  def self.without_gender
+    scoped.where("gender IS NULL")
+  end
+
+  def self.available
+    scoped.where(:active_chat_id => nil).online
   end
 
   def self.remind!(options = {})
@@ -125,7 +149,7 @@ class User < ActiveRecord::Base
     match_scope = exclude_existing_friends(user, match_scope)
 
     # only include available users
-    match_scope = exclude_unavailable(match_scope)
+    match_scope = match_scope.available
 
     # order by the user's preferred gender
     match_scope = order_by_preferred_gender(user, match_scope)
@@ -536,10 +560,6 @@ class User < ActiveRecord::Base
 
   def self.without_recent_interaction(inactivity_timestamp)
     scoped.where("updated_at < ?", inactivity_timestamp)
-  end
-
-  def self.exclude_unavailable(scope)
-    scope.where(:active_chat_id => nil).online
   end
 
   def self.quoted_attribute(attribute)

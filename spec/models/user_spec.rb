@@ -15,9 +15,10 @@ describe User do
   let(:cambodian) { build(:user, :cambodian) }
   let(:friend) { create(:user) }
   let(:active_chat) { create(:active_chat, :user => user, :friend => friend) }
-  let(:offline_user) { build(:user, :offline) }
+  let(:offline_user) { create(:user, :offline) }
   let(:user_with_complete_profile) { build(:user, :with_complete_profile) }
-  let(:male_user) { create(:user, :male) }
+  let(:male) { create(:user, :male) }
+  let(:female) { create(:user, :female) }
 
   def assert_friend_found(options = {})
     options[:searcher] ||= user_searching_for_friend
@@ -200,9 +201,75 @@ describe User do
     let(:resources) { [user, friend] }
   end
 
-  describe ".online" do
-    let(:offline_user) { create(:user, :offline) }
+  describe ".between_the_ages(ranges)" do
+    let!(:thirteen_year_old)  { create(:user, :date_of_birth => 13.years.ago) }
+    let!(:seventeen_year_old) { create(:user, :date_of_birth => 17.years.ago + 1.day) }
+    let!(:eighteen_year_old)  { create(:user, :date_of_birth => 17.years.ago) }
 
+    it "should return the users whos age is in the given range" do
+      User.between_the_ages(13..17).should =~ [thirteen_year_old, seventeen_year_old]
+    end
+  end
+
+  describe ".male" do
+    before do
+      male
+      female
+    end
+
+    it "should return only the males" do
+      User.male.should == [male]
+    end
+  end
+
+  describe ".female" do
+    before do
+      male
+      female
+    end
+
+    it "should return only the females" do
+      User.female.should == [female]
+    end
+  end
+
+  describe ".with_date_of_birth" do
+    let!(:user_with_date_of_birth) { create(:user, :with_date_of_birth) }
+
+    before do
+      user
+    end
+
+    it "should only return the users with a date of birth" do
+      User.with_date_of_birth.should == [user_with_date_of_birth]
+    end
+  end
+
+  describe ".without_gender" do
+    before do
+      user
+      male
+    end
+
+    it "should only return the users without a gender" do
+      User.without_gender.should == [user]
+    end
+  end
+
+  describe ".available" do
+    before do
+      male
+      user
+      offline_user
+      active_chat
+    end
+
+    it "should only return users who are online and not currently chatting" do
+      User.available.should == [male]
+    end
+  end
+
+  describe ".online" do
     before do
       offline_user
       user
@@ -274,17 +341,17 @@ describe User do
   describe ".filter_params" do
     context "passing search params" do
       it "should filter the users by the search params" do
-        male_user = create(:user, :male)
-        female_user = create(:user, :female)
+        male
+        female
 
         user
-        offline_user.save
+        offline_user
         active_chat
 
-        subject.class.filter_params(:gender => "m").should == [male_user]
-        subject.class.filter_params(:gender => "f").should == [female_user]
+        subject.class.filter_params(:gender => "m").should == [male]
+        subject.class.filter_params(:gender => "f").should == [female]
 
-        subject.class.filter_params(:available => true).should =~ [male_user, female_user]
+        subject.class.filter_params(:available => true).should =~ [male, female]
       end
     end
   end
@@ -804,7 +871,7 @@ describe User do
         registration_examples(
           keywords(:boy),
           :expected_gender => :male,
-          :user => male_user,
+          :user => male,
         )
       end
     end

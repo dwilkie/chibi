@@ -43,20 +43,6 @@ describe "Admin" do
 
     def assert_user_index(*resources)
       assert_index :user, *resources, :reverse => true
-
-      within "#overview" do
-        within "#available_users" do
-          page.should have_link "1 available user", :href => users_path(:available => true)
-        end
-
-        within "#available_males" do
-          page.should have_link "0 available guys", :href => users_path(:available => true, :gender => "m")
-        end
-
-        within "#available_females" do
-          page.should have_link "1 available girl", :href => users_path(:available => true, :gender => "f")
-        end
-      end
     end
 
     def assert_chat_index(*resources)
@@ -206,6 +192,16 @@ describe "Admin" do
       end
     end
 
+    context "when I visit '/user_demographic'" do
+      before do
+        visit user_demographic_path
+      end
+
+      it "should show me the user demographic" do
+        page.should have_content "User Demographic"
+      end
+    end
+
     context "when I visit '/overview'" do
       let(:message_from_last_month) { create(:message, :from_last_month, :user => user) }
       let(:reply_from_last_month) { create(:reply, :from_last_month, :user => user) }
@@ -283,33 +279,6 @@ describe "Admin" do
 
         it "should show me a list of users" do
           assert_user_index
-        end
-
-        def assert_show_only_available_users
-          {"user" => 1, "girl" => 1, "guys" => 0}.each do |user_type, count|
-            visit users_path
-
-            click_link("#{count} available #{user_type}")
-
-            within total_resources_id(:users) do
-              page.should have_content count.to_s
-            end
-
-            if count.zero?
-              page.should have_no_css "#user_1"
-            else
-              within "#user_1" do
-                page.should have_content another_user.id
-              end
-              page.should have_no_css "#user_2"
-            end
-          end
-        end
-
-        context "when I click the links for the available users" do
-          it "should show me only the available users" do
-            assert_show_only_available_users
-          end
         end
 
         context "when I click on 'X' for one of the users" do

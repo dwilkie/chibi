@@ -4,8 +4,9 @@ Chibi::Application.routes.draw do
   resources :missed_calls, :only => :create
   resources :delivery_receipts, :only => :create
 
-  resource :overview, :only => :show
-  resource :interaction, :only => :show
+  resource :overview,         :only => :show
+  resource :user_demographic, :only => :show
+  resource :interaction,      :only => :show
 
   resources :chats, :only => :index do
     resource :interaction, :only => :show

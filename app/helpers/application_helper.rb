@@ -1,6 +1,12 @@
 module ApplicationHelper
-  def present(object, klass = nil)
-    klass ||= "#{object.class}Presenter".constantize
+  def present(object_or_name, klass = nil)
+    if object_or_name.is_a?(Symbol) || object_or_name.is_a?(String)
+      class_name = object_or_name.to_s.classify
+    else
+      object = object_or_name
+      class_name = object.class
+    end
+    klass ||= "#{class_name}Presenter".constantize
     presenter = klass.new(object, self)
     yield presenter if block_given?
     presenter

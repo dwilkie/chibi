@@ -1,4 +1,8 @@
-class Interaction < AbstractFilter
+class Interaction
+  def initialize(params = {})
+    @params = params
+  end
+
   def total_messages
     resources(:message).count
   end
@@ -16,6 +20,10 @@ class Interaction < AbstractFilter
   end
 
   private
+
+  def params
+    @params
+  end
 
   def resources(name)
     name.to_s.classify.constantize.filter_by(params)
