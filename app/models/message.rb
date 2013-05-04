@@ -33,7 +33,7 @@ class Message < ActiveRecord::Base
   end
 
   def process!
-    return unless fire_events(:process)
+    return if processed?
     user.login!
 
     if user_wants_to_logout?
@@ -61,6 +61,8 @@ class Message < ActiveRecord::Base
     Chat.activate_multiple!(
       user, :notify => true, :notify_no_match => false, :introduction => introduction
     ) if start_new_chat
+
+    fire_events(:process)
   end
 
   def queue_for_processing!

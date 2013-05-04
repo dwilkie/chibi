@@ -122,10 +122,24 @@ describe Message do
       user.stub(:match).and_return(new_friend)
     end
 
-    it "should mark the message as 'processed'" do
-      message.should be_received
-      expect_message { message.process! }
-      message.should be_processed
+    context "if an exception is raised during the processing" do
+      before do
+        user.stub(:match).and_raise(Resque::TermException.new("SIGTERM"))
+      end
+
+      it "should not mark the message as 'processed'" do
+        message.should be_received
+        expect { message.process! }.to raise_error
+        message.should_not be_processed
+      end
+    end
+
+    context "unless an exception is raised during the processing" do
+      it "should mark the message as 'processed'" do
+        message.should be_received
+        expect_message { message.process! }
+        message.should be_processed
+      end
     end
 
     context "for an already processed message" do
