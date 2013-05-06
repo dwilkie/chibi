@@ -38,29 +38,28 @@ class Message < ActiveRecord::Base
 
     if user_wants_to_logout?
       user.logout!
-      return
-    elsif user.update_locale!(normalized_body, :notify => true)
-      return
-    end
+    else
+      unless user.update_locale!(normalized_body, :notify => true)
+        start_new_chat = true
 
-    start_new_chat = true
+        unless user_wants_to_chat_with_someone_new?
+          user.update_profile(normalized_body)
 
-    unless user_wants_to_chat_with_someone_new?
-      user.update_profile(normalized_body)
+          chat_to_forward_message_to = Chat.intended_for(self, :num_recent_chats => 10) || user.active_chat
 
-      chat_to_forward_message_to = Chat.intended_for(self, :num_recent_chats => 10) || user.active_chat
+          if chat_to_forward_message_to.present?
+            chat_to_forward_message_to.forward_message(self)
+            start_new_chat = false
+          end
+        end
 
-      if chat_to_forward_message_to.present?
-        chat_to_forward_message_to.forward_message(self)
-        start_new_chat = false
+        introduction = body if introducable?
+
+        Chat.activate_multiple!(
+          user, :notify => true, :notify_no_match => false, :introduction => introduction
+        ) if start_new_chat
       end
     end
-
-    introduction = body if introducable?
-
-    Chat.activate_multiple!(
-      user, :notify => true, :notify_no_match => false, :introduction => introduction
-    ) if start_new_chat
 
     fire_events(:process)
   end

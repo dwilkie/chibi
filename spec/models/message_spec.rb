@@ -202,6 +202,7 @@ describe Message do
           message.process!
         end
         user.locale.should == asserted_locale
+        message.should be_processed
       end
 
       context "if the message body is same as the user's current locale" do
@@ -272,14 +273,20 @@ describe Message do
             expect_message { message.process! }
           end
 
+          def assert_logout
+            user.should be_offline
+            message.should be_processed
+          end
+
           it "should logout the user but not notify him that he is now offline" do
+            assert_logout
             reply_to(user).should be_nil
             reply_to(friend).should be_nil
             user.should be_currently_chatting
-            user.should_not be_online
           end
 
           it "should not inform the user's partner how to update their profile" do
+            assert_logout
             reply_to(friend, chat).should be_nil
             friend.reload
             friend.should_not be_currently_chatting
