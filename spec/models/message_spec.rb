@@ -164,6 +164,19 @@ describe Message do
       end
     end
 
+    context "for a message that already belongs to a chat" do
+      let(:message_in_chat) { create(:message, :user => user, :chat => chat) }
+
+      before do
+        stub_match_for_user
+      end
+
+      it "should not do anything" do
+        message_in_chat.process!
+        message_in_chat.should_not be_processed
+      end
+    end
+
     shared_examples_for "starting a new chat" do
       context "given there is no match for this user" do
         before do

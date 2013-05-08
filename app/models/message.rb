@@ -37,7 +37,7 @@ class Message < ActiveRecord::Base
   end
 
   def process!
-    return if processed?
+    return if processed? || chat_id.present?
     user.login!
 
     if user_wants_to_logout?
@@ -57,11 +57,7 @@ class Message < ActiveRecord::Base
           end
         end
 
-        introduction = body if introducable?
-
-        Chat.activate_multiple!(
-          user, :notify => true, :notify_no_match => false, :introduction => introduction
-        ) if start_new_chat
+        activate_chats! if start_new_chat
       end
     end
 
@@ -88,5 +84,10 @@ class Message < ActiveRecord::Base
 
   def introducable?
     false
+  end
+
+  def activate_chats!
+    introduction = body if introducable?
+    Chat.activate_multiple!(user, :notify => true, :notify_no_match => false, :introduction => introduction)
   end
 end
