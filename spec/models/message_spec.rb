@@ -39,6 +39,7 @@ describe Message do
   describe ".queue_unprocessed" do
     let(:unprocessed_message) { create(:message, :created_at => 5.minutes.ago) }
     let(:recently_received_message) { create(:message, :created_at => 2.minutes.ago) }
+    let(:unprocessed_message_with_chat) { create(:message, :chat => chat, :created_at => 5.minutes.ago) }
 
     before do
       ResqueSpec.reset!
@@ -46,6 +47,7 @@ describe Message do
       unprocessed_message
       processed_message
       recently_received_message
+      unprocessed_message_with_chat
       message
     end
 
@@ -53,12 +55,21 @@ describe Message do
       Timecop.return
     end
 
+    it "should leave mark messages with chats as processed" do
+      subject.class.queue_unprocessed
+      unprocessed_message.reload.should_not be_processed
+      processed_message.reload.should be_processed
+      recently_received_message.reload.should_not be_processed
+      unprocessed_message_with_chat.reload.should be_processed
+      message.reload.should_not be_processed
+    end
+
     context "passing no options" do
       before do
         subject.class.queue_unprocessed
       end
 
-      it "should queue for processing any non processed messages that were created more than 30 secs ago" do
+      it "should queue for processing any non processed messages with no chat that were created more than 30 secs ago" do
         MessageProcessor.should have_queued(unprocessed_message.id)
         MessageProcessor.should have_queued(recently_received_message.id)
         MessageProcessor.should have_queue_size_of(2)

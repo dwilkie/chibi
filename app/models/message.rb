@@ -21,10 +21,14 @@ class Message < ActiveRecord::Base
 
   def self.queue_unprocessed(options = {})
     options[:timeout] ||= 30.seconds.ago
-    scoped.where(
+    unprocessed = scoped.where(
       "state != 'processed'"
-    ).where("created_at <= ?", options[:timeout]).find_each do |message|
+    ).where("created_at <= ?", options[:timeout])
+    unprocessed.where(:chat_id => nil).find_each do |message|
       message.queue_for_processing!
+    end
+    unprocessed.where("chat_id IS NOT NULL").find_each do |message|
+      message.fire_events(:process)
     end
   end
 
