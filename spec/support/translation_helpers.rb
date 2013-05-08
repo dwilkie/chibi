@@ -74,8 +74,8 @@ module TranslationHelpers
     },
 
     :anonymous_reminder => {
-      :en => "^(?:Sousdey|Hi|Hello)",
-      :kh => "(?:\\w+)"
+      :en => "^(?:\\w+)\\:\\s(?:Sousdey|Hi|Hello)",
+      :kh => "^(?:\\w+)\\:\\s(\\w+)"
     }
   }
 

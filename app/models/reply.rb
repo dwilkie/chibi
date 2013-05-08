@@ -151,6 +151,7 @@ class Reply < ActiveRecord::Base
 
   def send_reminder!
     translate("replies.greeting", :recipient => user)
+    prepend_screen_id(Faker::Name.first_name)
     deliver!
   end
 
@@ -202,7 +203,17 @@ class Reply < ActiveRecord::Base
 
   def set_forward_message(from, message)
     message.gsub!(/\A#{from.screen_id}\s*\:?\s*/i, "")
-    self.body = "#{from.screen_id}: #{message}"
+    prepend_screen_id(from.screen_id, message)
+  end
+
+  def prepend_screen_id(name, message = nil)
+    message ||= body
+    self.body = message_with_prepended_screen_name(name, message)
+    self.alternate_translation = message_with_prepended_screen_name(name, alternate_translation) if alternate_translation
+  end
+
+  def message_with_prepended_screen_name(name, message)
+    "#{name}: #{message}"
   end
 
   def translate(key, interpolations = {})
