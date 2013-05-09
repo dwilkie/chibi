@@ -92,6 +92,7 @@ class User < ActiveRecord::Base
   def self.filter_params(params = {})
     scope = super.where(params.slice(:gender))
     scope = scope.available if params[:available]
+    scope = scope.joins(:location).where(:locations => {:country_code => params[:country_code]}) if params[:country_code]
     scope
   end
 

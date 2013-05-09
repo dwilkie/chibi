@@ -343,6 +343,7 @@ describe User do
       it "should filter the users by the search params" do
         male
         female
+        thai = create(:user, :thai)
 
         user
         offline_user
@@ -351,7 +352,8 @@ describe User do
         subject.class.filter_params(:gender => "m").should == [male]
         subject.class.filter_params(:gender => "f").should == [female]
 
-        subject.class.filter_params(:available => true).should =~ [male, female]
+        subject.class.filter_params(:available => true).should =~ [male, female, thai]
+        subject.class.filter_params(:country_code => "th").should == [thai]
       end
     end
   end
