@@ -2,22 +2,62 @@
   :en => {
     :replies => {
       :greeting => lambda {|key, options|
-        if options[:friend].try(:male?)
-          gender = "male"
-        elsif options[:friend].try(:female?)
-          gender = "female"
-        end
 
-        age = options[:friend].try(:age)
-        city = options[:friend].try(:city)
+        sender = options[:friend]
+        recipient = options[:recipient]
 
-        gender_intro = "a #{gender} " if gender
-        age_intro = "#{age} yo " if age
-        city_intro = "living in #{city} " if city
+        sender_name = " #{sender.screen_id}" if sender.try(:name)
+        recipient_name = " #{recipient.screen_id}" if recipient.try(:name)
 
-        intro = "I'm #{gender_intro}#{age_intro}#{city_intro}. " if gender_intro || age_intro || city_intro
+        i_ams = ["i am", "i'm", "m"]
+        name_announcements = ["My name"]
 
-        "Hi! I want to play SMS! #{intro}Please write back to me now!"
+        i_am = (i_ams | name_announcements).sample
+        i_am_gender = i_ams.sample
+
+        female_genders = ["a girl", "a gril"]
+        female_gender = female_genders.sample
+
+        sender_intro = ""
+        sender_intro << " #{i_am}#{sender_name}" if sender_name
+        sender_intro << " #{i_am_gender} #{female_gender}" if sender.try(:female?)
+
+        greetings = ["Hi", "Hello"]
+        greeting = greetings.sample
+
+        greeting_punctuations = ["!", ",", "."]
+        greeting_punctuation = greeting_punctuations.sample
+
+        recipient_starter = "#{greeting}#{recipient_name}#{greeting_punctuation}"
+        recipient_questions = []
+
+        name_questions = [
+          "What's ur name?", "Can you tell me ur name?"
+        ]
+
+        gender_questions = [
+          "You boy or girl?", "U girl or boy?", "You man or woman?"
+        ]
+
+        location_questions = [
+          "Where do you live?", "Come from?", "Where r u?"
+        ]
+
+        age_questions = [
+          "How old r u?", "How old?"
+        ]
+
+        recipient_questions << name_questions.sample unless recipient_name.present?
+        recipient_questions << gender_questions.sample unless recipient.try(:gender).present?
+        recipient_questions << location_questions.sample unless recipient.try(:city).present?
+        recipient_questions << age_questions.sample unless recipient.try(:age).present?
+
+        recipient_question = " #{recipient_questions.shuffle.join(' ')}"
+
+        introductions = [
+          "#{recipient_starter}#{sender_intro} i want to play SMS! #{recipient_question}"
+        ]
+        introductions.sample.strip
       },
 
       :welcome => lambda {|key, options|
