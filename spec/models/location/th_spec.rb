@@ -7,6 +7,13 @@ describe Location do
 
     let(:address_examples) do
       {
+        "bangkok" => {
+          :abbreviations => ["BKK"],
+          :expected_city => "Bangkok",
+          :expected_latitude => 13.7278956,
+          :expected_longitude => 100.5241235
+        },
+
         "chiang mai" => {
           :expected_city => "Samoeng",
           :expected_latitude => 18.7964642,

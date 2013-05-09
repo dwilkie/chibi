@@ -1,8 +1,9 @@
 GIT
   remote: git://github.com/dwilkie/countries.git
-  revision: 5cdc1586360fce3c1752c0f6f5410aeed3611ed0
+  revision: a43740b5797b2fa716480d7f839916ad10b6b8c3
+  branch: abbreviations_for_subdivisions_in_thailand
   specs:
-    countries (0.8.2)
+    countries (0.9.1)
       currencies (>= 0.4.0)
 
 GIT
