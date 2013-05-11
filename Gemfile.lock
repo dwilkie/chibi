@@ -1,7 +1,6 @@
 GIT
-  remote: git://github.com/dwilkie/countries.git
-  revision: a43740b5797b2fa716480d7f839916ad10b6b8c3
-  branch: abbreviations_for_subdivisions_in_thailand
+  remote: git://github.com/hexorx/countries.git
+  revision: f9c3415f1892a6da4decfbd935124c0e81395b35
   specs:
     countries (0.9.1)
       currencies (>= 0.4.0)
@@ -67,7 +66,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.6.2)
-    currencies (0.4.0)
+    currencies (0.4.1)
     daemons (1.1.9)
     database_cleaner (0.9.1)
     deep_merge (1.0.0)

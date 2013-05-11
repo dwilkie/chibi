@@ -8,7 +8,7 @@ gem 'kaminari'
 gem "lazy_high_charts"
 gem "geocoder"
 gem "phony"
-gem "countries", :require => 'iso3166', :git => "git://github.com/dwilkie/countries.git", :branch => "abbreviations_for_subdivisions_in_thailand"
+gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countries.git"
 gem "faker"
 gem "hirefire-resource"
 gem "resque"
