@@ -886,7 +886,7 @@ describe Chat do
 
         before do
           reference_reply
-          do_background_job { expect_message { subject.class.reactivate_stagnant! }}
+          do_background_task { expect_message { subject.class.reactivate_stagnant! }}
         end
 
         it "should be reactivated" do
@@ -913,7 +913,7 @@ describe Chat do
           end
 
           it "should not be reactivated" do
-            do_background_job { subject.class.reactivate_stagnant! }
+            do_background_task { subject.class.reactivate_stagnant! }
             chat_with_pending_messages.reload.should_not be_active
             reference_reply.reload.should_not be_delivered
           end

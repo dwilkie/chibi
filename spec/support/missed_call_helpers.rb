@@ -26,7 +26,7 @@ module MissedCallHelpers
   private
 
   def post_missed_call(options = {})
-    do_background_job do
+    do_background_task do
       post missed_calls_path,
       {
         :to => options[:to] || "<#{ENV['CLOUDMAILIN_FORWARD_ADDRESS']}>",
