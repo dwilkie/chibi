@@ -19,6 +19,7 @@ gem "nuntium_api"
 gem "state_machine"
 gem "twilio-ruby"
 gem "honeybadger"
+gem "uuid"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'

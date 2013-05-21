@@ -276,6 +276,25 @@ class Reply < ActiveRecord::Base
 
   def perform_delivery!(message)
     save! if new_record? # ensure message is saved so we don't get a blank destination
+
+    if deliver_via_nuntium?
+      perform_delivery_via_nuntium!(message)
+      return save!
+    end
+
+    self.token = uuid.generate
+    if queue = operator.mt_message_queue
+      Resque.enqueue_to(
+        queue, MtMessageWorker, token,
+        operator.short_code, destination, message
+      )
+    else
+      # queue message on Twilio...
+    end
+    save!
+  end
+
+  def perform_delivery_via_nuntium!(message)
     # use an array so Nuntium sends a POST
     response = nuntium.send_ao([{
       :to => "sms://#{destination}",
@@ -283,7 +302,14 @@ class Reply < ActiveRecord::Base
       :suggested_channel => operator.nuntium_channel || TWILIO_CHANNEL
     }])
     self.token = response["token"]
-    save!
+  end
+
+  def uuid
+    @uuid ||= UUID.new
+  end
+
+  def deliver_via_nuntium?
+    ENV["DELIVER_VIA_NUNTIUM"].nil? || ENV["DELIVER_VIA_NUNTIUM"] != "0"
   end
 
   def nuntium

@@ -58,7 +58,7 @@ describe Reply do
     reply.token.should == options[:token] if options[:token]
     if options[:deliver]
       assertions = {:body => reply.body, :to => reply.destination}
-      assertions.merge!(:suggested_channel => options[:suggested_channel]) if options[:suggested_channel]
+      assertions.merge!(options.slice(:id, :suggested_channel, :via, :short_code, :mt_message_queue))
       assert_deliver(assertions)
       reply.should be_delivered
       reply.should be_queued_for_smsc_delivery
@@ -469,47 +469,81 @@ describe Reply do
   describe "#deliver!" do
     include MobilePhoneHelpers
 
-    it "should deliver the message and save the token" do
-      expect_message(:token => "token") { reply.deliver! }
-      assert_persisted_and_delivered(reply, user.mobile_number, :token => "token")
+    context "without Nuntium" do
+      before do
+        ResqueSpec.reset!
+      end
+
+      it "should enqueue a MT message to be sent via SMPP" do
+        with_operators do |number_parts, assertions|
+          number = number_parts.join
+          reply = create(:reply, :to => number)
+          reply.deliver!
+          assert_persisted_and_delivered(
+            reply, number,
+            :id => reply.token, :short_code => assertions["short_code"],
+            :mt_message_queue => assertions["mt_message_queue"]
+          )
+        end
+        reply = create(:reply)
+        reply.deliver!
+        assert_persisted_and_delivered(reply, reply.destination)
+        reply.token.should be_present
+      end
     end
 
-    it "should suggest the correct channel" do
-      with_operators do |number_parts, assertions|
-        number = number_parts.join
-        reply = create(:reply, :to => number)
+    context "via Nuntium" do
+      def assert_persisted_and_delivered(reply, mobile_number, options = {})
+        super(reply, mobile_number, options.merge(:via => :nuntium))
+      end
+
+      before do
+        ENV.stub(:[]).and_call_original
+        ENV.stub(:[]).with("DELIVER_VIA_NUNTIUM").and_return("1")
+      end
+
+      it "should deliver the message and save the token" do
+        expect_message(:token => "token") { reply.deliver! }
+        assert_persisted_and_delivered(reply, user.mobile_number, :token => "token")
+      end
+
+      it "should suggest the correct channel" do
+        with_operators do |number_parts, assertions|
+          number = number_parts.join
+          reply = create(:reply, :to => number)
+          expect_message { reply.deliver! }
+          assert_persisted_and_delivered(reply, number, :suggested_channel => assertions["nuntium_channel"])
+        end
+        reply = create(:reply)
         expect_message { reply.deliver! }
-        assert_persisted_and_delivered(reply, number, :suggested_channel => assertions["nuntium_channel"])
-      end
-      reply = create(:reply)
-      expect_message { reply.deliver! }
-      assert_persisted_and_delivered(reply, reply.destination, :suggested_channel => "twilio")
-    end
-
-    context "given the delivery fails" do
-      before do
-        Nuntium.stub(:new).and_raise("BOOM! Cannot connect to Nuntium Server")
+        assert_persisted_and_delivered(reply, reply.destination, :suggested_channel => "twilio")
       end
 
-      it "should not mark the reply as delivered" do
-        expect { reply.deliver! }.to raise_error
-        reply.should_not be_delivered
-        reply.should be_pending_delivery
-      end
-    end
+      context "given the delivery fails" do
+        before do
+          Nuntium.stub(:new).and_raise("BOOM! Cannot connect to Nuntium Server")
+        end
 
-    context "given there is a race condition for when the state is updated" do
-      before do
-        reply.stub(:touch).with(:delivered_at) do
-          reply.update_attribute(:delivered_at, Time.now)
-          create_race_condition(reply, :delivered_by_smsc)
+        it "should not mark the reply as delivered" do
+          expect { reply.deliver! }.to raise_error
+          reply.should_not be_delivered
+          reply.should be_pending_delivery
         end
       end
 
-      it "should correctly update the state of the reply" do
-        expect_message { reply.deliver! }
-        reply.reload.should be_delivered
-        reply.should be_delivered_by_smsc
+      context "given there is a race condition for when the state is updated" do
+        before do
+          reply.stub(:touch).with(:delivered_at) do
+            reply.update_attribute(:delivered_at, Time.now)
+            create_race_condition(reply, :delivered_by_smsc)
+          end
+        end
+
+        it "should correctly update the state of the reply" do
+          expect_message { reply.deliver! }
+          reply.reload.should be_delivered
+          reply.should be_delivered_by_smsc
+        end
       end
     end
   end
