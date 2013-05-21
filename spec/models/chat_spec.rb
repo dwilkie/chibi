@@ -4,6 +4,7 @@ describe Chat do
   include_context "replies"
   include TranslationHelpers
   include MessagingHelpers
+  include ResqueHelpers
 
   let(:user) do
     create(:user, :english)
@@ -885,7 +886,7 @@ describe Chat do
 
         before do
           reference_reply
-          with_resque { expect_message { subject.class.reactivate_stagnant! }}
+          do_background_job { expect_message { subject.class.reactivate_stagnant! }}
         end
 
         it "should be reactivated" do
@@ -912,7 +913,7 @@ describe Chat do
           end
 
           it "should not be reactivated" do
-            with_resque { subject.class.reactivate_stagnant! }
+            do_background_job { subject.class.reactivate_stagnant! }
             chat_with_pending_messages.reload.should_not be_active
             reference_reply.reload.should_not be_delivered
           end
@@ -932,8 +933,6 @@ describe Chat do
   end
 
   describe ".end_inactive" do
-    include ResqueHelpers
-
     before do
       chat.should_not be_active
       unique_active_chat.should be_active

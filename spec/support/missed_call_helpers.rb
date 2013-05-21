@@ -1,8 +1,11 @@
-require File.dirname(__FILE__) << '/phone_call_helpers'
+require_relative "authentication_helpers"
+require_relative "phone_call_helpers"
+require_relative "resque_helpers"
 
 module MissedCallHelpers
   include AuthenticationHelpers
   include PhoneCallHelpers::Twilio
+  include ResqueHelpers
 
   def missed_call(options = {})
     post_missed_call options
@@ -23,7 +26,7 @@ module MissedCallHelpers
   private
 
   def post_missed_call(options = {})
-    with_resque do
+    do_background_job do
       post missed_calls_path,
       {
         :to => options[:to] || "<#{ENV['CLOUDMAILIN_FORWARD_ADDRESS']}>",

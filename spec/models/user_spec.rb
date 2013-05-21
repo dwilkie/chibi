@@ -295,7 +295,7 @@ describe User do
 
     context "passing no options" do
       it "should purge the all invalid english names and invalid names for the users country" do
-        with_resque { subject.class.purge_invalid_names! }
+        do_background_job { subject.class.purge_invalid_names! }
         thai_with_invalid_english_name.reload.name.should be_nil
         thai_with_invalid_cambodian_name.reload.name.should be_present
         cambodian_with_invalid_cambodian_name.reload.name.should be_nil
