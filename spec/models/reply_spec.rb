@@ -216,10 +216,8 @@ describe Reply do
       end
 
       it "should update the message state based off of the nuntium ao state" do
-        do_background_task do
-          expect_ao_fetch(:token => less_recently_queued_reply.token) do
-            subject.class.query_queued!
-          end
+        expect_ao_fetch(:token => less_recently_queued_reply.token) do
+          do_background_task { subject.class.query_queued! }
         end
 
         recently_queued_reply.reload.should be_queued_for_smsc_delivery
