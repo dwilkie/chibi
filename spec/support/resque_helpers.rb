@@ -1,5 +1,7 @@
 module ResqueHelpers
   def do_background_task(options = {}, &block)
+    ResqueSpec.reset!
+
     yield
 
     unless options.delete(:queue_only)
