@@ -20,6 +20,7 @@ gem "state_machine"
 gem "twilio-ruby"
 gem "honeybadger"
 gem "uuid"
+gem "multi_xml"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -63,4 +64,5 @@ group :test do
   gem 'resque_spec'
   gem 'capybara'
   gem 'launchy'
+  #gem 'multi_xml'
 end

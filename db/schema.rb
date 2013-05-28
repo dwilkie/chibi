@@ -11,7 +11,22 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130424110221) do
+ActiveRecord::Schema.define(:version => 20130528064448) do
+
+  create_table "call_data_records", :force => true do |t|
+    t.text     "body"
+    t.string   "uuid"
+    t.integer  "duration"
+    t.integer  "bill_sec"
+    t.datetime "rfc2822_date"
+    t.string   "direction"
+    t.integer  "phone_call_id"
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
+  end
+
+  add_index "call_data_records", ["phone_call_id"], :name => "index_call_data_records_on_phone_call_id", :unique => true
+  add_index "call_data_records", ["uuid"], :name => "index_call_data_records_on_uuid", :unique => true
 
   create_table "chats", :force => true do |t|
     t.integer  "user_id"

@@ -141,6 +141,7 @@ GEM
     mime-types (1.23)
     mono_logger (1.0.1)
     multi_json (1.7.2)
+    multi_xml (0.5.3)
     nokogiri (1.5.9)
     nuntium_api (0.21)
       json
@@ -285,6 +286,7 @@ DEPENDENCIES
   kaminari
   launchy
   lazy_high_charts
+  multi_xml
   nuntium_api
   parallel_tests
   pg

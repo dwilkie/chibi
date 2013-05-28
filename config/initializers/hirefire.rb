@@ -13,6 +13,7 @@ HireFire::Resource.configure do |config|
       :friend_finder_queue,
       :user_reminderer_queue,
       :reminderer_queue,
+      :call_data_record_creator_queue,
       :nuntium_ao_queryer_queue,
       :blank_reply_fixer_queue
     )

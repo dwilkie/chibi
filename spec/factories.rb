@@ -28,6 +28,24 @@ FactoryGirl.define do
     n.to_s
   end
 
+  factory :call_data_record do
+    body {
+      related_phone_call = phone_call || FactoryGirl.create(:phone_call)
+      <<-CDR
+        <?xml version="1.0"?>
+        <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
+          <variables>
+            <direction>#{direction || 'inbound'}</direction>
+            <uuid>#{uuid || related_phone_call.sid}</uuid>
+            <duration>#{duration || 20}</duration>
+            <billsec>#{bill_sec || 15}</billsec>
+            <RFC2822_DATE>#{Rack::Utils.escape((rfc2822_date || Time.now).rfc2822)}</RFC2822_DATE>
+          </variables>
+        </cdr>
+      CDR
+    }
+  end
+
   factory :message do
     user
     from { user.mobile_number }
