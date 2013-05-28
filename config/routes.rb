@@ -3,6 +3,7 @@ Chibi::Application.routes.draw do
   resources :phone_calls, :only => :create, :defaults => { :format => 'xml' }
   resources :missed_calls, :only => :create
   resources :delivery_receipts, :only => :create
+  resources :call_data_records, :only => :create, :defaults => { :format => 'xml' }
 
   resource :overview,         :only => :show
   resource :user_demographic, :only => :show
