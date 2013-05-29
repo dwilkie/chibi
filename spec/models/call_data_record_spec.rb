@@ -61,6 +61,14 @@ describe CallDataRecord do
     ).should_not be_valid
   end
 
+  it_should_behave_like "communicable" do
+    let(:communicable_resource) { cdr }
+  end
+
+  it_should_behave_like "communicable from user" do
+    let(:communicable_resource) { cdr }
+  end
+
   describe "callbacks" do
     describe "after initialize" do
       it "should correctly populate the required attributes" do
