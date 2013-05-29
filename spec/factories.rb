@@ -28,24 +28,6 @@ FactoryGirl.define do
     n.to_s
   end
 
-  factory :call_data_record do
-    body {
-      related_phone_call = phone_call || FactoryGirl.create(:phone_call)
-      <<-CDR
-        <?xml version="1.0"?>
-        <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
-          <variables>
-            <direction>#{direction || 'inbound'}</direction>
-            <uuid>#{uuid || related_phone_call.sid}</uuid>
-            <duration>#{duration || 20}</duration>
-            <billsec>#{bill_sec || 15}</billsec>
-            <RFC2822_DATE>#{Rack::Utils.escape((rfc2822_date || Time.now).rfc2822)}</RFC2822_DATE>
-          </variables>
-        </cdr>
-      CDR
-    }
-  end
-
   factory :message do
     user
     from { user.mobile_number }
@@ -88,7 +70,7 @@ FactoryGirl.define do
 
   factory :phone_call do
     from { FactoryGirl.generate(:mobile_number) }
-    sequence(:sid)
+    sid { FactoryGirl.generate(:guid) }
 
     trait :answered do
       state "answered"
@@ -616,6 +598,56 @@ FactoryGirl.define do
       with_a_semi_recent_message
       thai
       association :location, :chiang_mai
+    end
+  end
+
+  factory :call_data_record do
+    ignore do
+      variables false
+
+      default_body <<-CDR
+        <?xml version="1.0"?>
+        <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
+          <variables>
+            <direction>inbound</direction>
+            <uuid>some_uuid</uuid>
+            <duration>20</duration>
+            <billsec>15</billsec>
+          </variables>
+        </cdr>
+      CDR
+    end
+
+    body do
+      dynamic_body = MultiXml.parse(default_body)["cdr"]
+      related_user = User.first || FactoryGirl.create(:user)
+
+      dynamic_variables = variables || {}
+
+      dynamic_variables["direction"] ||= "inbound"
+      dynamic_variables["duration"] ||= "20"
+      dynamic_variables["billsec"] ||= "15"
+
+      if dynamic_variables["direction"] == "inbound"
+        related_phone_call = PhoneCall.first || FactoryGirl.create(:phone_call, :user => related_user)
+
+        dynamic_variables["sip_from_user"] ||= related_user.mobile_number
+        dynamic_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{related_user.mobile_number}")
+
+        dynamic_variables["uuid"] ||= related_phone_call.sid
+        dynamic_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
+      else
+        related_inbound_cdr = InboundCdr.first || CallDataRecord.create!(
+          :body => build(:call_data_record).body
+        )
+
+        dynamic_variables["uuid"] ||= FactoryGirl.generate(:guid)
+        dynamic_variables["sip_to_user"] ||= related_user.mobile_number
+        dynamic_variables["bridge_uuid"] ||= related_inbound_cdr.uuid
+      end
+
+      dynamic_body["variables"].merge!(dynamic_variables)
+      dynamic_body.to_xml(:root => "cdr")
     end
   end
 end

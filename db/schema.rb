@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130528064448) do
+ActiveRecord::Schema.define(:version => 20130529054159) do
 
   create_table "call_data_records", :force => true do |t|
     t.text     "body"
@@ -21,11 +21,21 @@ ActiveRecord::Schema.define(:version => 20130528064448) do
     t.datetime "rfc2822_date"
     t.string   "direction"
     t.integer  "phone_call_id"
-    t.datetime "created_at",    :null => false
-    t.datetime "updated_at",    :null => false
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+    t.string   "type"
+    t.integer  "inbound_cdr_id"
+    t.string   "bridge_uuid"
+    t.string   "from"
+    t.integer  "user_id"
   end
 
+  add_index "call_data_records", ["bridge_uuid"], :name => "index_call_data_records_on_bridge_uuid"
+  add_index "call_data_records", ["direction"], :name => "index_call_data_records_on_direction"
+  add_index "call_data_records", ["from"], :name => "index_call_data_records_on_from"
+  add_index "call_data_records", ["inbound_cdr_id"], :name => "index_call_data_records_on_inbound_cdr_id"
   add_index "call_data_records", ["phone_call_id"], :name => "index_call_data_records_on_phone_call_id", :unique => true
+  add_index "call_data_records", ["user_id"], :name => "index_call_data_records_on_user_id"
   add_index "call_data_records", ["uuid"], :name => "index_call_data_records_on_uuid", :unique => true
 
   create_table "chats", :force => true do |t|
