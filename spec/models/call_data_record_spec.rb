@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe CallDataRecord do
+  include CdrHelpers
 
-  let(:sample_cdr) { build(:call_data_record) }
-  let(:cdr) { CallDataRecord.create!(:body => sample_cdr.body) }
-  subject { CallDataRecord.new(:body => sample_cdr.body) }
+  let(:cdr) { create_cdr }
+  subject { build_cdr }
 
   describe "factory" do
     it "should be valid" do
@@ -51,6 +51,14 @@ describe CallDataRecord do
   it "should not be valid without a bill_sec" do
     subject.bill_sec = nil
     subject.should_not be_valid
+  end
+
+  it "should not be valid without a related user" do
+    subject = build_cdr(
+      :variables => {
+        "sip_from_user" => "invalid", "sip_P-Asserted-Identity" => "invalid"
+      }
+    ).should_not be_valid
   end
 
   describe "callbacks" do

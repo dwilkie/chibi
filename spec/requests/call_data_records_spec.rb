@@ -3,6 +3,7 @@ require 'spec_helper'
 describe "Call Data Records" do
   include AuthenticationHelpers
   include ResqueHelpers
+  include CdrHelpers
 
   def post_call_data_record(options = {})
     queue_only = options.delete(:queue_only)
@@ -18,8 +19,8 @@ describe "Call Data Records" do
 
   describe "POST /call_data_records.xml" do
 
-    def build_sample_cdr(*args)
-      cdr = CallDataRecord.new(:body => build(:call_data_record, *args).body).typed
+    def build_cdr(*args)
+      cdr = super.typed
       cdr.valid?
       cdr
     end
@@ -38,6 +39,7 @@ describe "Call Data Records" do
           perform_background_job(:call_data_record_creator_queue)
         end
 
+        # this tests that the correct type of CDR was created (and therefore was valid)
         it "should create the CDR with the correct fields" do
           new_cdr = CallDataRecord.find_by_uuid(sample_cdr.uuid)
           asserted_cdr_type.nil? ? new_cdr.should(be_nil) : asserted_cdr_type.last.should(eq(new_cdr))
@@ -47,21 +49,21 @@ describe "Call Data Records" do
 
     context "for an inbound cdr" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_sample_cdr(:inbound) }
+        let(:sample_cdr) { build_cdr(:variables => {"direction" => "inbound"} ) }
         let(:asserted_cdr_type) { InboundCdr }
       end
     end
 
     context "for an outbound cdr" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_sample_cdr(:outbound) }
+        let(:sample_cdr) { build_cdr(:variables => {"direction" => "outbound"} ) }
         let(:asserted_cdr_type) { OutboundCdr }
       end
     end
 
     context "for an outbound cdr with an invalid bridge_uid" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_sample_cdr(:outbound, :bridge_uuid => "invalid") }
+        let(:sample_cdr) { build_cdr(:variables => {"direction" => "outbound", "bridge_uuid" => "invalid"} ) }
         let(:asserted_cdr_type) { nil }
       end
     end

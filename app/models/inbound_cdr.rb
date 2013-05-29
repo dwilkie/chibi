@@ -10,7 +10,7 @@ class InboundCdr < CallDataRecord
 
   def set_inbound_cdr_attributes
     if body.present?
-      self.rfc2822_date ||= Rack::Utils.unescape(variables["RFC2822_DATE"])
+      self.rfc2822_date ||= unescaped_variable("RFC2822_DATE")
       self.phone_call ||= PhoneCall.find_by_sid(uuid)
     end
   end

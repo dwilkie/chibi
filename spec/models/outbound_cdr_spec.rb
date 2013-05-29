@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe OutboundCdr do
+  include CdrHelpers
 
-  let(:sample_cdr) { build(:call_data_record, :outbound) }
-  let(:cdr) { CallDataRecord.create!(:body => sample_cdr.body).typed }
-  subject { CallDataRecord.new(:body => sample_cdr.body).typed }
+  let(:cdr) { create_cdr(:variables => {"direction" => "outbound"}).typed }
+  subject { build_cdr(:variables => {"direction" => "outbound"}).typed }
 
   describe "factory" do
     it "should be valid" do
@@ -20,7 +20,7 @@ describe OutboundCdr do
   # tests the database uniqueness constraint of phone_calls
   it "should allow multiple records to be saved" do
     cdr
-    another_cdr = CallDataRecord.create!(:body => build(:call_data_record, :outbound).body)
+    another_cdr = create_cdr(:variables => {"direction" => "outbound"}).typed
     cdr.phone_call.should be_nil
     another_cdr.phone_call.should be_nil
   end

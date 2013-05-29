@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe InboundCdr do
+  include CdrHelpers
 
-  let(:sample_cdr) { build(:call_data_record, :inbound) }
-  let(:cdr) { CallDataRecord.create!(:body => sample_cdr.body).typed }
-  subject { CallDataRecord.new(:body => sample_cdr.body).typed }
+  let(:cdr) { create_cdr.typed }
+  subject { build_cdr.typed }
 
   describe "factory" do
     it "should be valid" do
