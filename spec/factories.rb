@@ -30,20 +30,54 @@ FactoryGirl.define do
 
   factory :call_data_record do
     body {
-      related_phone_call = phone_call || FactoryGirl.create(:phone_call)
       <<-CDR
         <?xml version="1.0"?>
         <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
           <variables>
             <direction>#{direction || 'inbound'}</direction>
-            <uuid>#{uuid || related_phone_call.sid}</uuid>
+            <uuid>#{uuid || FactoryGirl.generate(:guid)}</uuid>
             <duration>#{duration || 20}</duration>
             <billsec>#{bill_sec || 15}</billsec>
-            <RFC2822_DATE>#{Rack::Utils.escape((rfc2822_date || Time.now).rfc2822)}</RFC2822_DATE>
           </variables>
         </cdr>
       CDR
     }
+
+    trait :inbound do
+      body {
+        related_phone_call = phone_call || FactoryGirl.create(:phone_call)
+        <<-CDR
+          <?xml version="1.0"?>
+          <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
+            <variables>
+              <direction>#{direction || 'inbound'}</direction>
+              <uuid>#{uuid || related_phone_call.sid}</uuid>
+              <duration>#{duration || 20}</duration>
+              <billsec>#{bill_sec || 15}</billsec>
+              <RFC2822_DATE>#{Rack::Utils.escape((rfc2822_date || Time.now).rfc2822)}</RFC2822_DATE>
+            </variables>
+          </cdr>
+        CDR
+      }
+    end
+
+    trait :outbound do
+      body {
+        related_inbound_cdr = inbound_cdr || CallDataRecord.create!(:body => build(:call_data_record, :inbound).body)
+        <<-CDR
+          <?xml version="1.0"?>
+          <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
+            <variables>
+              <direction>#{direction || 'outbound'}</direction>
+              <uuid>#{uuid || FactoryGirl.generate(:guid)}</uuid>
+              <duration>#{duration || 30}</duration>
+              <billsec>#{bill_sec || 10}</billsec>
+              <bridge_uuid>#{bridge_uuid || related_inbound_cdr.uuid}</bridge_uuid>
+            </variables>
+          </cdr>
+        CDR
+      }
+    end
   end
 
   factory :message do

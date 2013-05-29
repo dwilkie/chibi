@@ -1,27 +1,32 @@
 class CallDataRecord < ActiveRecord::Base
+  VALID_TYPES = %w{InboundCdr OutboundCdr}
+
   belongs_to :phone_call
+  belongs_to :inbound_cdr
 
-  validates :body, :phone_call, :duration, :bill_sec, :rfc2822_date, :uuid, :presence => true
-  validates :uuid, :phone_call_id, :uniqueness => true
+  validates :body, :duration, :bill_sec, :uuid, :type, :direction, :presence => true
+  validates :uuid, :phone_call_id, :uniqueness => true, :allow_nil => true
+  validates :type,  :inclusion => { :in => VALID_TYPES }
 
-  before_validation(:on => :create) do
-    set_attributes
+  after_initialize :set_cdr_attributes
+
+  def typed
+    valid? ? becomes(type.constantize) : self
   end
 
   private
 
-  def set_attributes
-    if body.present?
-      variables = parsed_body["variables"]
+  def set_cdr_attributes
+    if new_record? && body.present?
+      self.direction ||= variables["direction"]
+      self.type ||= "#{direction}_cdr".classify
       self.uuid ||= variables["uuid"]
       self.duration ||= variables["duration"]
       self.bill_sec ||= variables["billsec"]
-      self.rfc2822_date ||= Rack::Utils.unescape(variables["RFC2822_DATE"])
-      self.phone_call ||= PhoneCall.find_by_sid(uuid)
     end
   end
 
-  def parsed_body
-    @parsed_body ||= MultiXml.parse(body)["cdr"]
+  def variables
+    @variables ||= MultiXml.parse(body)["cdr"]["variables"]
   end
 end
