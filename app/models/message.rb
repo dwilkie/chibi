@@ -5,6 +5,7 @@ class Message < ActiveRecord::Base
   include Communicable::FromUser
   include Communicable::Chatable
   include Analyzable
+  include ChatStarter
 
   attr_accessible :body, :guid
   alias_attribute :origin, :from
@@ -88,6 +89,6 @@ class Message < ActiveRecord::Base
 
   def activate_chats!
     introduction = body if introducable?
-    Chat.activate_multiple!(user, :notify => true, :notify_no_match => false, :introduction => introduction)
+    Chat.activate_multiple!(user, :starter => self, :notify => true, :notify_no_match => false, :introduction => introduction)
   end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130529054159) do
+ActiveRecord::Schema.define(:version => 20130603063110) do
 
   create_table "call_data_records", :force => true do |t|
     t.text     "body"
@@ -41,11 +41,14 @@ ActiveRecord::Schema.define(:version => 20130529054159) do
   create_table "chats", :force => true do |t|
     t.integer  "user_id"
     t.integer  "friend_id"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+    t.integer  "starter_id"
+    t.string   "starter_type"
   end
 
   add_index "chats", ["friend_id"], :name => "index_chats_on_friend_id"
+  add_index "chats", ["starter_type", "starter_id"], :name => "index_chats_on_starter_type_and_starter_id"
   add_index "chats", ["updated_at"], :name => "index_chats_on_updated_at"
   add_index "chats", ["user_id"], :name => "index_chats_on_user_id"
 

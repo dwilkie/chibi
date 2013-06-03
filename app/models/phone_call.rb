@@ -3,6 +3,7 @@ class PhoneCall < ActiveRecord::Base
   include Communicable::FromUser
   include Communicable::Chatable
   include TwilioHelpers
+  include ChatStarter
 
   # the maximum length of a US phone number
   # without the country code
@@ -239,7 +240,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def create_chat_session(transition)
-    build_chat(:user => user).activate!
+    build_chat(:user => user).activate!(:starter => self)
   end
 
   def set_profile_from_digits(transition)

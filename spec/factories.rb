@@ -122,7 +122,10 @@ FactoryGirl.define do
 
     trait :already_in_chat do
       association :chat, :factory => :active_chat
-      user { chat.user }
+      after(:create) do |phone_call|
+        phone_call.triggered_chats << phone_call.chat
+        phone_call.save
+      end
     end
 
     trait :to_unavailable_user do

@@ -28,6 +28,10 @@ describe PhoneCall do
     new_phone_call.should_not be_valid
   end
 
+  it_should_behave_like "a chat starter" do
+    let(:starter) { phone_call }
+  end
+
   it_should_behave_like "communicable" do
     let(:communicable_resource) { phone_call }
   end
@@ -198,6 +202,7 @@ describe PhoneCall do
       if chat = reference_phone_call.chat
         chat.should_not be_active
         chat.active_users.should_not include(phone_call.user)
+        chat.starter.should == reference_phone_call
       end
     end
 
@@ -257,7 +262,9 @@ describe PhoneCall do
 
     def assert_dial_to_redirect_url(phone_call, options = {})
       twiml_options = options.dup
-      user_to_dial = phone_call.chat.partner(phone_call.user)
+      triggered_chat = phone_call.chat
+      triggered_chat.starter.should == phone_call
+      user_to_dial = triggered_chat.partner(phone_call.user)
       number_to_dial = user_to_dial.dial_string(nil)
 
       twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? user_to_dial.twilio_number : user_to_dial.caller_id(nil)
@@ -317,7 +324,8 @@ describe PhoneCall do
       # assert dial from the user's friend's short code for users from registered service provider
       phone_call.chat = create(
         :active_chat, :user => phone_call.user,
-        :friend => create(:user, :mobile_number => registered_operator_number)
+        :friend => create(:user, :mobile_number => registered_operator_number),
+        :starter => phone_call
       )
 
       assert_dial_to_redirect_url(phone_call)
@@ -337,7 +345,7 @@ describe PhoneCall do
 
     def assert_correct_twiml(options = {})
       with_phone_call_states(options) do |state, traits, next_state, expectation|
-        assert_twiml_response(create_phone_call(state, *traits, :build => true), expectation)
+        assert_twiml_response(create_phone_call(state, *traits), expectation)
       end
     end
 
