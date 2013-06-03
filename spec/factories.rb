@@ -121,7 +121,7 @@ FactoryGirl.define do
     end
 
     trait :already_in_chat do
-      association :chat, :factory => :active_chat
+      association :chat, :active
       after(:create) do |phone_call|
         phone_call.triggered_chats << phone_call.chat
         phone_call.save
@@ -130,8 +130,8 @@ FactoryGirl.define do
 
     trait :to_unavailable_user do
       before(:create) do |phone_call|
-        chat = FactoryGirl.create(:active_chat_with_single_user)
-        FactoryGirl.create(:active_chat, :user => chat.friend)
+        chat = FactoryGirl.create(:chat, :initiator_active)
+        FactoryGirl.create(:chat, :active, :user => chat.friend)
         phone_call.user = chat.user
       end
     end
@@ -227,6 +227,13 @@ FactoryGirl.define do
       end
     end
 
+    trait :friend_active do
+      after(:create) do |chat|
+        chat.active_users << chat.friend
+        chat.save
+      end
+    end
+
     trait :with_message do
       after(:create) do |chat|
         chat.messages << FactoryGirl.create(:message, :user => chat.friend)
@@ -235,34 +242,11 @@ FactoryGirl.define do
 
     trait :active do
       initiator_active
-
-      after(:create) do |chat|
-        chat.active_users << chat.friend
-        chat.save
-      end
+      friend_active
     end
 
     trait :with_inactivity do
       updated_at { 10.minutes.ago }
-    end
-
-    # a chat where only the friend is active
-    factory :active_chat_with_single_friend do
-      after(:create) do |chat|
-        chat.active_users << chat.friend
-      end
-    end
-
-    # a chat where only the initator is active
-    factory :active_chat_with_single_user do
-      initiator_active
-
-      factory :active_chat do
-        after(:create) do |chat|
-          chat.active_users << chat.friend
-          chat.save
-        end
-      end
     end
   end
 

@@ -159,10 +159,9 @@ class Chat < ActiveRecord::Base
 
       # start a new chat for the sender of the message
       self.class.activate_multiple!(
-        reference_user.reload, :notify => true, :notify_no_match => false
+        reference_user.reload, :starter => message, :notify => true, :notify_no_match => false
       )
     end
-
   end
 
   def reactivate!(options = {})

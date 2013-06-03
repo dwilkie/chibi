@@ -75,7 +75,7 @@ shared_examples_for "communicable from user" do
 end
 
 shared_examples_for "chatable" do
-  let(:chat) { create(:active_chat, :user => user) }
+  let(:chat) { create(:chat, :active, :user => user) }
   let(:user) { build(:user) }
 
   context "when saving with an associated chat" do

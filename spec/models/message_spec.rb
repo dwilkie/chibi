@@ -6,7 +6,7 @@ describe Message do
   let(:new_friend) { create(:user, :cambodian) }
   let(:message) { create(:message, :user => user) }
   let(:new_message) { build(:message, :user => user) }
-  let(:chat) { create(:active_chat, :user => user, :friend => friend) }
+  let(:chat) { create(:chat, :active, :user => user, :friend => friend) }
   let(:message_with_guid) { create(:message, :with_guid, :user => user) }
   let(:processed_message) { create(:message, :processed, :created_at => 10.minutes.ago, :user => user) }
   let(:subject) { build(:message, :without_user) }
