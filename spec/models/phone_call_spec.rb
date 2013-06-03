@@ -263,7 +263,7 @@ describe PhoneCall do
     def assert_dial_to_redirect_url(phone_call, options = {})
       twiml_options = options.dup
       triggered_chat = phone_call.chat
-      triggered_chat.starter.should == triggered_chat
+      triggered_chat.starter.should == phone_call
       user_to_dial = triggered_chat.partner(phone_call.user)
       number_to_dial = user_to_dial.dial_string(nil)
 
@@ -324,7 +324,8 @@ describe PhoneCall do
       # assert dial from the user's friend's short code for users from registered service provider
       phone_call.chat = create(
         :active_chat, :user => phone_call.user,
-        :friend => create(:user, :mobile_number => registered_operator_number)
+        :friend => create(:user, :mobile_number => registered_operator_number),
+        :starter => phone_call
       )
 
       assert_dial_to_redirect_url(phone_call)
@@ -344,7 +345,7 @@ describe PhoneCall do
 
     def assert_correct_twiml(options = {})
       with_phone_call_states(options) do |state, traits, next_state, expectation|
-        assert_twiml_response(create_phone_call(state, *traits, :build => true), expectation)
+        assert_twiml_response(create_phone_call(state, *traits), expectation)
       end
     end
 
