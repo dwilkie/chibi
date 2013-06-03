@@ -28,6 +28,10 @@ describe PhoneCall do
     new_phone_call.should_not be_valid
   end
 
+  it_should_behave_like "a chat starter" do
+    let(:starter) { phone_call }
+  end
+
   it_should_behave_like "communicable" do
     let(:communicable_resource) { phone_call }
   end
@@ -198,6 +202,7 @@ describe PhoneCall do
       if chat = reference_phone_call.chat
         chat.should_not be_active
         chat.active_users.should_not include(phone_call.user)
+        chat.starter.should == reference_phone_call
       end
     end
 
@@ -257,7 +262,9 @@ describe PhoneCall do
 
     def assert_dial_to_redirect_url(phone_call, options = {})
       twiml_options = options.dup
-      user_to_dial = phone_call.chat.partner(phone_call.user)
+      triggered_chat = phone_call.chat
+      triggered_chat.starter.should == triggered_chat
+      user_to_dial = triggered_chat.partner(phone_call.user)
       number_to_dial = user_to_dial.dial_string(nil)
 
       twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? user_to_dial.twilio_number : user_to_dial.caller_id(nil)

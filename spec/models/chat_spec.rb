@@ -107,7 +107,7 @@ describe Chat do
     end
   end
 
-  describe "#activate!" do
+  describe "#activate!(options = {})" do
     shared_examples_for "activating a chat" do
       it "should set the active users and save the chat" do
         reference_chat.activate!
@@ -173,6 +173,18 @@ describe Chat do
         it "should not introduce the new chat participants" do
           reply_to(user, reference_chat).should be_nil
           reply_to(friend, reference_chat).should be_nil
+        end
+      end
+    end
+
+    context "passing :starter" do
+      [:message, :phone_call].each do |starter|
+        context "=> #<#{starter.to_s.classify}...>" do
+          it "should set the starter as the #{starter}" do
+            chat_starter = create(starter)
+            chat.activate!(:starter => chat_starter)
+            chat.starter.should == chat_starter
+          end
         end
       end
     end

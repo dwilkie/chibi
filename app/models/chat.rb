@@ -3,6 +3,7 @@ class Chat < ActiveRecord::Base
 
   belongs_to :user
   belongs_to :friend, :class_name => 'User'
+  belongs_to :starter, :polymorphic => true
 
   has_many :active_users, :class_name => 'User', :foreign_key => "active_chat_id"
 
@@ -66,6 +67,7 @@ class Chat < ActiveRecord::Base
   end
 
   def activate!(options = {})
+    self.starter ||= options[:starter]
     self.friend ||= user.match
     active_users << user unless options[:activate_user] == false
 

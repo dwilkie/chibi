@@ -22,6 +22,10 @@ describe Message do
     new_message.should_not be_valid
   end
 
+  it_should_behave_like "a chat starter" do
+    let(:starter) { message }
+  end
+
   it_should_behave_like "analyzable"
 
   it_should_behave_like "communicable" do
@@ -208,6 +212,10 @@ describe Message do
               :forward_message, new_friend.locale, user.screen_id, message.body
             )
           end
+        end
+
+        it "should trigger a new chat" do
+          message.triggered_chats.should == [Chat.last]
         end
       end
     end
