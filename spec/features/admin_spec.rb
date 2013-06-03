@@ -7,7 +7,7 @@ describe "Admin" do
   let(:user) { create(:user, :male) }
   let(:another_user) { create(:user, :female) }
 
-  let(:chat) { create(:active_chat_with_single_user, :user => user, :friend => another_user, :created_at => 10.minutes.ago) }
+  let(:chat) { create(:chat, :initiator_active, :user => user, :friend => another_user, :created_at => 10.minutes.ago) }
   let(:another_chat) { create(:chat, :user => another_user, :friend => user, :created_at => 10.minutes.ago) }
 
   let(:message) { create(:message, :user => another_user, :body => "Hello", :chat => another_chat) }

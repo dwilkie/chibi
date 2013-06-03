@@ -51,7 +51,7 @@ describe "PhoneCalls" do
 
     shared_examples_for "a phone call without voice prompts" do
       context "given that I'm already in a chat session" do
-        let!(:active_chat) { create(:active_chat) }
+        let!(:active_chat) { create(:chat, :active) }
 
         context "when I call" do
           before do
@@ -232,7 +232,7 @@ describe "PhoneCalls" do
           end
 
           context "given that I'm already in a chat session" do
-            let!(:active_chat) { create(:active_chat, :user => new_user) }
+            let!(:active_chat) { create(:chat, :active, :user => new_user) }
 
             context "if I hold the line" do
               before do

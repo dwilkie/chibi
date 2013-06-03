@@ -14,7 +14,7 @@ describe User do
   let(:new_user) { build(:user) }
   let(:cambodian) { build(:user, :cambodian) }
   let(:friend) { create(:user) }
-  let(:active_chat) { create(:active_chat, :user => user, :friend => friend) }
+  let(:active_chat) { create(:chat, :active, :user => user, :friend => friend) }
   let(:offline_user) { create(:user, :offline) }
   let(:user_with_complete_profile) { build(:user, :with_complete_profile) }
   let(:male) { create(:user, :male) }
@@ -663,7 +663,7 @@ describe User do
       end
 
       # create some chats
-      create(:active_chat, :user => eva,        :friend => harriet)
+      create(:chat, :active,  :user => eva,     :friend => harriet)
       create(:chat,        :user => michael,    :friend => view)
       create(:chat,        :user => dave,       :friend => harriet)
       create(:chat,        :user => con,        :friend => mara)
@@ -1307,7 +1307,7 @@ describe User do
 
       context "but his chat is not active" do
         let(:active_chat_with_single_friend) do
-          create(:active_chat_with_single_friend, :friend => user)
+          create(:chat, :friend_active, :friend => user)
         end
 
         before do
