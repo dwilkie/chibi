@@ -323,7 +323,7 @@ describe PhoneCall do
 
       # assert dial from the user's friend's short code for users from registered service provider
       phone_call.chat = create(
-        :active_chat, :user => phone_call.user,
+        :chat, :active, :user => phone_call.user,
         :friend => create(:user, :mobile_number => registered_operator_number),
         :starter => phone_call
       )
