@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-include PhoneCallHelpers::States
-include PhoneCallHelpers::Twilio
-
 describe PhoneCall do
+  include PhoneCallHelpers::States
+  include PhoneCallHelpers::TwilioHelpers
+
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
 
@@ -193,6 +193,9 @@ describe PhoneCall do
   end
 
   describe "#process!" do
+    include TranslationHelpers
+    include_context "replies"
+
     def assert_phone_call_can_be_completed(reference_phone_call)
       reference_phone_call.call_status = "completed"
       reference_phone_call.process!
@@ -206,12 +209,33 @@ describe PhoneCall do
       end
     end
 
+    def assert_message_queued_for_partner(phone_call)
+      caller = phone_call.user.reload
+      old_partner = phone_call.chat.partner(caller)
+      reply = reply_to(old_partner)
+      reply.body.should =~ Regexp.new(
+        spec_translate(
+          :call_me, old_partner.locale, caller.screen_id,
+          Regexp.escape(old_partner.caller_id(phone_call.api_version))
+        )
+      )
+      reply.should_not be_delivered
+      caller.should_not be_currently_chatting
+      phone_call.triggered_chats.should_not be_empty
+    end
+
     def assert_phone_call_attributes(resource, expectations)
       expectations.each do |attribute, value|
         if value.is_a?(Hash)
           assert_phone_call_attributes(resource.send(attribute), value)
         else
-          resource.send(attribute).should == value
+          if attribute == "assertions"
+            value.each do |assertion|
+              send("assert_#{assertion}", resource)
+            end
+          else
+            resource.send(attribute).should == value
+          end
         end
       end
     end
@@ -260,15 +284,20 @@ describe PhoneCall do
       parse_twiml(resource.to_twiml)
     end
 
-    def assert_dial_to_redirect_url(phone_call, options = {})
-      twiml_options = options.dup
-      triggered_chat = phone_call.chat
-      triggered_chat.starter.should == phone_call
-      user_to_dial = triggered_chat.partner(phone_call.user)
-      number_to_dial = user_to_dial.dial_string(nil)
-
-      twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? user_to_dial.twilio_number : user_to_dial.caller_id(nil)
-      assert_dial(twiml_response(phone_call), redirect_url, number_to_dial, twiml_options)
+    def assert_dial_to_redirect_url(twiml, asserted_numbers, dial_options = {}, number_options = {})
+      assert_dial(twiml, redirect_url, dial_options) do |dial_twiml|
+        if asserted_numbers.is_a?(String)
+          assert_number(dial_twiml, asserted_numbers, number_options)
+        elsif asserted_numbers.is_a?(Array)
+          asserted_numbers.each_with_index do |asserted_number, index|
+            assert_number(dial_twiml, asserted_number, number_options.merge(:index => index))
+          end
+        elsif asserted_numbers.is_a?(Hash)
+          asserted_numbers.each_with_index do |(asserted_number, asserted_number_options), index|
+            assert_number(dial_twiml, asserted_number, asserted_number_options.merge(:index => index))
+          end
+        end
+      end
     end
 
     def assert_play_languages(phone_call, filename, options = {})
@@ -314,21 +343,89 @@ describe PhoneCall do
       assert_hangup(twiml_response(phone_call))
     end
 
-    def assert_dial_friend(phone_call)
-      # load some users
-      load_users
+    def find_friends(phone_call, with_mobile_numbers)
+      with_mobile_numbers.each do |mobile_number|
+        create(
+          :chat, :friend_active,
+          :user => phone_call.user, :starter => phone_call,
+          :friend => create(:user, :mobile_number => mobile_number)
+        )
+      end
+    end
 
-      # assert dial from the twilio number for users from a service provider without short code
-      assert_dial_to_redirect_url(phone_call, :twilio_number => true)
+    def assert_dial_friends(phone_call)
+      # assert correct TwiML for Twilio request
 
-      # assert dial from the user's friend's short code for users from registered service provider
+      non_registered_operator_number = generate(:mobile_number)
+      registered_operator_number = registered_operator(:number)
+
+      sample_numbers = [non_registered_operator_number, registered_operator_number]
+
+      find_friends(phone_call, sample_numbers)
+      asserted_numbers = sample_numbers.map { |sample_number| asserted_number_formatted_for_twilio(sample_number) }.reverse
+
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_numbers, :callerId => twilio_number
+      )
+
+      # Simulate an adhearsion-twilio request
+      phone_call.api_version = sample_adhearsion_twilio_api_version
+
+      asserted_registered_operator_dial_string = interpolated_assertion(
+        registered_operator(:dial_string), :number_to_dial => registered_operator_number
+      )
+
+      asserted_non_registered_operator_dial_string = asserted_default_pbx_dial_string(
+        :number_to_dial => non_registered_operator_number
+      )
+
+      asserted_numbers = {
+        asserted_registered_operator_dial_string => {
+          :callerId => registered_operator(:caller_id)
+        },
+        asserted_non_registered_operator_dial_string => {
+          :callerId => twilio_number
+        }
+      }
+
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_numbers
+      )
+    end
+
+    def assert_dial_partner(phone_call)
+      # assert correct TwiML for Twilio request
+      user_to_dial = phone_call.chat.partner(phone_call.user)
+      asserted_number = asserted_number_formatted_for_twilio(user_to_dial.mobile_number)
+
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_number, :callerId => twilio_number
+      )
+
+      # Simulate an adhearsion-twilio request
+      phone_call.api_version = sample_adhearsion_twilio_api_version
+
+      # assert correct TwiML when dialing to a user from an unregistered service provider
+      asserted_number = asserted_default_pbx_dial_string(:number_to_dial => user_to_dial.mobile_number)
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_number, {}, :callerId => twilio_number
+      )
+
+      # assert correct TwiML when dialing to a user from registered service provider
+      partners_number = registered_operator(:number)
+      asserted_number = interpolated_assertion(
+        registered_operator(:dial_string), :number_to_dial => partners_number
+      )
+
       phone_call.chat = create(
         :chat, :active, :user => phone_call.user,
-        :friend => create(:user, :mobile_number => registered_operator_number),
+        :friend => create(:user, :mobile_number => partners_number),
         :starter => phone_call
       )
 
-      assert_dial_to_redirect_url(phone_call)
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_number, {}, :callerId => registered_operator(:caller_id)
+      )
     end
 
     def assert_twiml_response(phone_call, expectation)
@@ -350,7 +447,7 @@ describe PhoneCall do
     end
 
     context "given the redirect url has been set" do
-      it "should return the correct twiml" do
+      it "should return the correct TwiML" do
         assert_correct_twiml(:voice_prompts => false)
       end
     end

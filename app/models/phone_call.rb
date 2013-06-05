@@ -10,6 +10,9 @@ class PhoneCall < ActiveRecord::Base
   # note: this is only used to determine whether Twilio added an extra 1 or not
   MAX_LOCAL_NUMBER_LENGTH = 10
 
+  # The maximum number of concurrent outbound dials to trigger
+  MAX_SIMULTANEOUS_OUTBOUND_DIALS = 5
+
   module Digits
     MENU = 8
   end
@@ -82,7 +85,7 @@ class PhoneCall < ActiveRecord::Base
       end
     end
 
-    state :finding_new_friend do
+    state :finding_new_friends do
       def to_twiml
         redirect
       end
@@ -94,13 +97,19 @@ class PhoneCall < ActiveRecord::Base
       end
     end
 
-    before_transition any => :finding_new_friend, :do => :create_chat_session
+    before_transition any => :finding_new_friends, :do => :find_friends
     before_transition any => :connecting_user_with_friend, :do => :set_or_update_current_chat
     before_transition any => :completed, :do => :deactivate_chat_for_user
 
     state :connecting_user_with_friend do
       def to_twiml
         dial(chat.partner(user))
+      end
+    end
+
+    state :dialing_friends do
+      def to_twiml
+        dial(*new_friends)
       end
     end
 
@@ -140,11 +149,11 @@ class PhoneCall < ActiveRecord::Base
         :if => :user_chatting?
       )
 
-      # find him a new friend
-      transition([:answered, :offering_menu] => :finding_new_friend)
+      # find him new friends
+      transition([:answered, :offering_menu] => :finding_new_friends)
 
       # connect him with his new friend
-      transition(:finding_new_friend => :connecting_user_with_friend, :if => :friend_available?)
+      transition(:finding_new_friends => :dialing_friends, :if => :friends_available?)
 
       if PromptStates::VOICE_PROMPTS
         # tell him his chat has ended
@@ -158,15 +167,18 @@ class PhoneCall < ActiveRecord::Base
       end
 
       # find him a new friend
-      transition(:connecting_user_with_friend => :finding_new_friend)
+      transition(
+        [:dialing_friends, :connecting_user_with_friend] => :finding_new_friends,
+        :unless => :answered?
+      )
 
       if PromptStates::VOICE_PROMPTS
         # tell him to try again later (no friend available)
-        transition(:finding_new_friend => :telling_user_to_try_again_later)
+        transition(:finding_new_friends => :telling_user_to_try_again_later)
       end
 
       # complete call
-      transition([:finding_new_friend, :telling_user_to_try_again_later] => :completed)
+      transition([:finding_new_friends, :telling_user_to_try_again_later] => :completed)
     end
   end
 
@@ -222,10 +234,39 @@ class PhoneCall < ActiveRecord::Base
   private
 
   def user_chatting?
-    chat.present? || (user.currently_chatting? && user.active_chat.partner(user).available?(user.active_chat))
+    chat.present? || can_dial_to_partner?
   end
 
-  alias friend_available? user_chatting?
+  def can_dial_to_partner?
+    user.currently_chatting? && (current_chat.active? || current_partner.available?)
+  end
+
+  def current_partner
+    @current_partner ||= current_chat.partner(user)
+  end
+
+  def current_chat
+    @current_chat ||= user.active_chat
+  end
+
+  def find_friends(transition)
+    set_or_update_current_chat
+    ask_partner_to_call_me if user.currently_chatting? && !can_dial_to_partner?
+    Chat.activate_multiple!(user, :starter => self, :count => MAX_SIMULTANEOUS_OUTBOUND_DIALS)
+  end
+
+  def new_friends
+    @new_friends ||= triggered_chats.order("created_at DESC").includes(:friend).limit(MAX_SIMULTANEOUS_OUTBOUND_DIALS).map(&:friend)
+  end
+
+  def friends_available?
+    triggered_chats.any?
+  end
+
+  def ask_partner_to_call_me
+    to = current_partner
+    current_chat.replies.build(:user => to).call_me(user, to.caller_id(api_version))
+  end
 
   def wants_menu?
     digits == Digits::MENU
@@ -237,10 +278,6 @@ class PhoneCall < ActiveRecord::Base
 
   def complete?
     call_status == CallStatuses::COMPLETED
-  end
-
-  def create_chat_session(transition)
-    build_chat(:user => user).activate!(:starter => self)
   end
 
   def set_profile_from_digits(transition)
@@ -265,13 +302,18 @@ class PhoneCall < ActiveRecord::Base
     generate_twiml(:redirect => false) { |twiml| twiml.Hangup }
   end
 
-  def dial(user_to_dial)
+  def dial(*users_to_dial)
     generate_twiml(:redirect => false) do |twiml|
-      twiml.Dial(
-        user_to_dial.dial_string(api_version),
-        :callerId => user_to_dial.caller_id(api_version),
-        :action => redirect_url
-      )
+      dial_options = { :action => redirect_url }
+      adhearsion_twilio_request = adhearsion_twilio_requested?(api_version)
+      dial_options.merge!(:callerId => twilio_outgoing_number) unless adhearsion_twilio_request
+      twiml.Dial(dial_options) do
+        users_to_dial.each do |user_to_dial|
+          number_options = {}
+          number_options.merge!(:callerId => user_to_dial.caller_id(api_version)) if adhearsion_twilio_request
+          twiml.Number(user_to_dial.dial_string(api_version), number_options)
+        end
+      end
     end
   end
 

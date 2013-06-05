@@ -28,6 +28,10 @@ FactoryGirl.define do
     n.to_s
   end
 
+  sequence :registered_operator_number, 85510000000 do |n|
+    n.to_s
+  end
+
   factory :message do
     user
     from { user.mobile_number }
@@ -69,8 +73,8 @@ FactoryGirl.define do
   end
 
   factory :phone_call do
-    from { FactoryGirl.generate(:mobile_number) }
-    sid { FactoryGirl.generate(:guid) }
+    from { generate(:mobile_number) }
+    sid { generate(:guid) }
 
     trait :answered do
       state "answered"
@@ -96,8 +100,12 @@ FactoryGirl.define do
       state "asking_for_looking_for_in_menu"
     end
 
-    trait :finding_new_friend do
-      state "finding_new_friend"
+    trait :finding_new_friends do
+      state "finding_new_friends"
+    end
+
+    trait :dialing_friends do
+      state "dialing_friends"
     end
 
     trait :connecting_user_with_friend do
@@ -133,6 +141,14 @@ FactoryGirl.define do
         chat = FactoryGirl.create(:chat, :initiator_active)
         FactoryGirl.create(:chat, :active, :user => chat.friend)
         phone_call.user = chat.user
+      end
+    end
+
+    trait :found_friends do
+      after(:create) do |phone_call|
+        FactoryGirl.create_list(
+          :chat, 5, :friend_active, :user => phone_call.user, :starter => phone_call
+        )
       end
     end
 
@@ -345,7 +361,7 @@ FactoryGirl.define do
     end
 
     trait :from_registered_service_provider do
-      sequence(:mobile_number, 85510000000) {|n| n.to_s }
+      mobile_number { generate(:registered_operator_number) }
     end
 
     trait :searching_for_friend do

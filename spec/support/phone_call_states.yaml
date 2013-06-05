@@ -1,18 +1,25 @@
 without_voice_prompts:
   - answered:
-      finding_new_friend:
+      finding_new_friends:
         twiml_expectation: no_response
         substates:
           already_in_chat: connecting_user_with_friend
-          to_unavailable_user: finding_new_friend
-  - finding_new_friend:
+          to_unavailable_user:
+            next_state: finding_new_friends
+            expectations:
+              assertions:
+              - message_queued_for_partner
+  - finding_new_friends:
       completed:
         twiml_expectation: redirect_to_current_url
         substates:
-          already_in_chat: connecting_user_with_friend
+          found_friends: dialing_friends
+  - dialing_friends:
+      finding_new_friends:
+        twiml_expectation: dial_friends
   - connecting_user_with_friend:
-      finding_new_friend:
-        twiml_expectation: dial_friend
+      finding_new_friends:
+        twiml_expectation: dial_partner
         traits:
         - already_in_chat
   - completed:

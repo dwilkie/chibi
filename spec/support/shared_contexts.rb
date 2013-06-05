@@ -43,8 +43,14 @@ shared_context "twiml" do
 
     xpath = command_xpath(twiml_response, command)
 
+    # asserts that each asserted attribute is present in the TwiML
     options.each do |attribute, value|
       xpath[index].attributes[attribute.to_s].value.should == value.to_s
+    end
+
+    # asserts that no extra attributes are present in the TwiML
+    xpath[index].attributes.each do |attribute_name, attribute_value|
+      attribute_value.value.should == options[attribute_name.to_sym]
     end
 
     block_given? ? yield(xpath) : xpath[index].content.strip.should.should == content
@@ -79,9 +85,13 @@ shared_context "twiml" do
     assert_twiml(twiml_response, :hangup, options.merge(:content => ""))
   end
 
-  def assert_dial(twiml_response, url, number, options = {})
-    assert_twiml(twiml_response, :dial, options.merge(:content => number, :action => authenticated_url(url)))
+  def assert_dial(twiml_response, url, options = {}, &block)
+    assert_twiml(twiml_response, :dial, options.merge(:action => authenticated_url(url)), &block)
     assert_no_redirect(twiml_response)
+  end
+
+  def assert_number(twiml_response, number, options = {})
+    assert_twiml(twiml_response, :number, options.merge(:content => number))
   end
 
   def authenticated_url(uri)
