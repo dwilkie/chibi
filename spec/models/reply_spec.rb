@@ -602,6 +602,15 @@ describe Reply do
     end
   end
 
+  describe "#call_me(from, on)" do
+    it "should ask the recipient to call back to the number given" do
+      assert_reply(
+        :call_me, :call_me, :approx => true, :deliver => false,
+        :args => [partner, "2443"], :interpolations => [partner.screen_id, "2443"]
+      )
+    end
+  end
+
   describe "#logout!" do
     it "should confirm the user that they have been logged out and explain how to find a new friend" do
       assert_reply(:logout!, :anonymous_logged_out)

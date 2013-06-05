@@ -73,6 +73,11 @@ module TranslationHelpers
       :kh => "#[0]: "
     },
 
+    :call_me => {
+      :en => "#[0]:.+#[1]",
+      :kh => "#[0]:.+#[1]"
+    },
+
     :anonymous_reminder => {
       :en => "^(?:\\w+)\\:\\s(?:Sousdey|Hi|Hello)",
       :kh => "^(?:\\w+)\\:\\s(\\w+)"
