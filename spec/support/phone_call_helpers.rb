@@ -34,7 +34,13 @@ module PhoneCallHelpers
     options[:call_sid]
   end
 
-  module Twilio
+  module TwilioHelpers
+    private
+
+    def asserted_number_formatted_for_twilio(number)
+      "+#{number}"
+    end
+
     def twilio_number(options = {})
       twilio_numbers = twilio_numbers(options)
       options[:default] == false ? twilio_numbers.last : twilio_numbers.first

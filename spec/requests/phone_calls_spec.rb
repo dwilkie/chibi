@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "PhoneCalls" do
   describe "POST /phone_calls.xml" do
     include PhoneCallHelpers
-    include PhoneCallHelpers::Twilio
+    include PhoneCallHelpers::TwilioHelpers
     include MobilePhoneHelpers
 
     include_context "existing users"

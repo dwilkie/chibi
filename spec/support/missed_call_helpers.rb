@@ -4,7 +4,7 @@ require_relative "resque_helpers"
 
 module MissedCallHelpers
   include AuthenticationHelpers
-  include PhoneCallHelpers::Twilio
+  include PhoneCallHelpers::TwilioHelpers
   include ResqueHelpers
 
   def missed_call(options = {})
