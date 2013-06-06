@@ -135,6 +135,12 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
+  def call_me(from, on)
+    translate("replies.call_me", :recipient => user, :on => on)
+    prepend_screen_id(from.screen_id)
+    save
+  end
+
   def introduce!(partner, to_initiator, introduction = nil)
     if to_initiator
       translate(

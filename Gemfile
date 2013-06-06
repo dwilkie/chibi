@@ -64,5 +64,4 @@ group :test do
   gem 'resque_spec'
   gem 'capybara'
   gem 'launchy'
-  #gem 'multi_xml'
 end

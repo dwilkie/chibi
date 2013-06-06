@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe User do
   include MobilePhoneHelpers
-  include PhoneCallHelpers::Twilio
+  include PhoneCallHelpers::TwilioHelpers
   include TranslationHelpers
   include MessagingHelpers
   include ResqueHelpers
@@ -1319,14 +1319,6 @@ describe User do
         end
       end
     end
-
-    context "passing a chat" do
-      it "should return true if the users is currently chatting in the passed chat" do
-        active_chat
-        user.available?(friend.active_chat).should be_true
-        user.available?(create(:chat)).should be_false
-      end
-    end
   end
 
   describe "#first_message?" do
@@ -1801,13 +1793,13 @@ describe User do
   describe "#dial_string(requesting_api_version)" do
     def assert_dial_string(requesting_api_version, assert_only_number)
       factory_user = build(:user)
-      factory_asserted_dial_string = assert_only_number ? factory_user.mobile_number : asserted_default_pbx_dial_string(:number_to_dial => factory_user.mobile_number)
+      factory_asserted_dial_string = assert_only_number ? asserted_number_formatted_for_twilio(factory_user.mobile_number) : asserted_default_pbx_dial_string(:number_to_dial => factory_user.mobile_number)
       factory_user.dial_string(requesting_api_version).should == factory_asserted_dial_string
 
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
-        asserted_dial_string = assert_only_number ? new_user.mobile_number : (interpolated_assertion(assertions["dial_string"], :number_to_dial => number) || asserted_default_pbx_dial_string(:number_to_dial => number))
+        asserted_dial_string = assert_only_number ? asserted_number_formatted_for_twilio(new_user.mobile_number) : (interpolated_assertion(assertions["dial_string"], :number_to_dial => number) || asserted_default_pbx_dial_string(:number_to_dial => number))
         new_user.dial_string(requesting_api_version).should == asserted_dial_string
       end
     end

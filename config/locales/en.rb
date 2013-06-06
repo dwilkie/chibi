@@ -60,6 +60,17 @@
         introductions.sample.strip
       },
 
+      :call_me => lambda {|key, options|
+        recipient = options[:recipient]
+
+        recipient_name = " #{recipient.screen_id}" if recipient.try(:name)
+
+        call_to_me = [
+          "Hi#{recipient_name} can you call me back on #{options[:on]}?"
+        ]
+        call_to_me.sample.strip
+      },
+
       :welcome => lambda {|key, options|
         notification = "Welcome to Chibi! We'll help you meet a new friend! At any time you can write "
 

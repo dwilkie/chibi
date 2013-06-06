@@ -92,6 +92,27 @@
         introductions.sample.strip
       },
 
+      :call_me => lambda {|key, options|
+        recipient = options[:recipient]
+
+        recipient_name = " #{recipient.screen_id}" if recipient.try(:name)
+
+        call_to_me = [
+          "Hi#{recipient_name} can you call me back on #{options[:on]}?",
+          "#{recipient_name} Som call mok nhom veng tam #{options[:on]}",
+          "Can u call me ban ort#{recipient_name}? Ach call tam #{options[:on]}",
+          "#{recipient_name}, u call mok ban 0rt. nhom #{options[:on]}",
+          "Hi#{recipient_name} plscall me tam #{options[:on]}",
+          "Please call #{options[:on]} na #{recipient_name}",
+          "#{recipient_name} can u call or sms with me ban ort?number i #{options[:on]}",
+          "#{recipient_name}, please call me. #{options[:on]}",
+          "#{recipient_name}, could u call to me by phone?would u like?my phone #{options[:on]}",
+          "C to me na tam #{options[:on]} call to me na #{recipient_name}",
+          "hi #{recipient_name} :) Som call mok nhom tam #{options[:on]}"
+        ]
+        call_to_me.sample.strip
+      },
+
       :welcome => lambda {|key, options|
         "Som sva-kom mok kan Chibi! Yerng chuay nek rok mit tmey! At any time you can write 'en' to read English, 'kh' to read Khmer or 'stop' to go offline"
       },

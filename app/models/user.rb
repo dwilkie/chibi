@@ -189,7 +189,7 @@ class User < ActiveRecord::Base
   end
 
   def dial_string(requesting_api_version)
-    adhearsion_twilio_requested?(requesting_api_version) ? (operator.dial_string(:number_to_dial => mobile_number) || default_pbx_dial_string(:number_to_dial => mobile_number)) : mobile_number
+    adhearsion_twilio_requested?(requesting_api_version) ? (operator.dial_string(:number_to_dial => mobile_number) || default_pbx_dial_string(:number_to_dial => mobile_number)) : twilio_formatted(mobile_number)
   end
 
   def find_friends!(options = {})
@@ -271,8 +271,8 @@ class User < ActiveRecord::Base
     state != "offline"
   end
 
-  def available?(in_chat = nil)
-    online? && (!currently_chatting? || active_chat == in_chat || !active_chat.active?)
+  def available?
+    online? && (!currently_chatting? || !active_chat.active?)
   end
 
   def currently_chatting?
