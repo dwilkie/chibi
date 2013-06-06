@@ -36,13 +36,17 @@ with_voice_prompts:
         twiml_expectation:
           play_languages: welcome
   - offering_menu:
-      finding_new_friend:
+      finding_new_friends:
         twiml_expectation:
           ask_for_input: offer_menu
         substates:
           caller_wants_menu: asking_for_age_in_menu
           already_in_chat: connecting_user_with_friend
-          to_unavailable_user: finding_new_friend
+          to_unavailable_user:
+            next_state: finding_new_friends
+            expectations:
+              assertions:
+              - message_queued_for_partner
   - asking_for_age_in_menu:
       asking_for_gender_in_menu:
         twiml_expectation:
@@ -85,14 +89,19 @@ with_voice_prompts:
             expectations:
               user:
                 looking_for: f
-  - finding_new_friend:
+  - finding_new_friends:
       telling_user_to_try_again_later:
         twiml_expectation: redirect_to_current_url
         substates:
-          already_in_chat: connecting_user_with_friend
+          found_friends: dialing_friends
+  - dialing_friends:
+      finding_new_friends:
+        twiml_expectation: dial_friends
+        substates:
+          dial_status_completed: telling_user_their_chat_has_ended
   - connecting_user_with_friend:
       finding_new_friend:
-        twiml_expectation: dial_friend
+        twiml_expectation: dial_partner
         substates:
           dial_status_completed: telling_user_their_chat_has_ended
         traits:

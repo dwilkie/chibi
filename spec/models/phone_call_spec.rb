@@ -309,15 +309,14 @@ describe PhoneCall do
       assert_play(twiml, "#{user.locale}/#{filename_with_extension}", options)
       assert_redirect(twiml, redirect_url, options)
 
-      original_location = user.location
-      user.location = build(:united_states)
+      phone_call.user = create(:user, :american)
 
       flunk(
         "choose a location with no translation to test the default locale"
-      ) if I18n.available_locales.include?(user.locale)
+      ) if I18n.available_locales.include?(phone_call.user.locale)
 
       assert_play(twiml_response(phone_call), "en/#{filename_with_extension}", options)
-      user.location = original_location
+      phone_call.user = user
     end
 
     def assert_ask_for_input(phone_call, prompt, twiml_options = {})
@@ -325,7 +324,10 @@ describe PhoneCall do
       assert_play_languages(phone_call, prompt)
       filename_with_extension = filename_with_extension(prompt)
 
-      twiml_options["numDigits"] ||= 1
+      twiml_options.symbolize_keys!
+
+      twiml_options[:numDigits] ||= 1
+      twiml_options[:numDigits] = twiml_options[:numDigits].to_s
       assert_gather(twiml_response(phone_call), twiml_options) do |gather|
         assert_play(gather, "#{phone_call.user.locale}/#{filename_with_extension}")
       end
