@@ -211,8 +211,9 @@ describe PhoneCall do
 
     def assert_message_queued_for_partner(phone_call)
       caller = phone_call.user.reload
-      old_partner = phone_call.chat.partner(caller)
-      reply = reply_to(old_partner)
+      old_chat = phone_call.chat
+      old_partner = old_chat.partner(caller)
+      reply = reply_to(old_partner, old_chat)
       reply.body.should =~ Regexp.new(
         spec_translate(
           :call_me, old_partner.locale, caller.screen_id,

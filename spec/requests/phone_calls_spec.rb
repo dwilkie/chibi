@@ -5,7 +5,9 @@ describe "PhoneCalls" do
     include PhoneCallHelpers
     include PhoneCallHelpers::TwilioHelpers
     include MobilePhoneHelpers
+    include TranslationHelpers
 
+    include_context "replies"
     include_context "existing users"
     include_context "twiml"
 
@@ -62,22 +64,59 @@ describe "PhoneCalls" do
       }.reverse
     end
 
-    shared_examples_for "a phone call without voice prompts" do
+    shared_examples_for "calling while in chat" do |new_call|
       context "given that I'm already in a chat session" do
-        let!(:active_chat) { create(:chat, :active) }
+        context "and my partner is available" do
+          let!(:chat) { create(:chat, :active, :user => caller) }
 
-        context "when I call" do
-          before do
-            call(:from => active_chat.user)
-          end
+          context(new_call ? "when I call" : "if I hold the line") do
+            before do
+              new_call ? call(:from => caller) : update_current_call_status
+            end
 
-          it "should connect me with my friend" do
-            assert_dial_to_current_url(
-              asserted_number_formatted_for_twilio(active_chat.friend.mobile_number),
-              :callerId => twilio_number
-            )
+            it "should connect me with my friend" do
+              assert_dial_to_current_url(
+                asserted_number_formatted_for_twilio(chat.friend.mobile_number),
+                :callerId => twilio_number
+              )
+            end
           end
         end
+
+        context "but my partner is not available" do
+          let!(:chat) { create(:chat, :initiator_active, :user => caller) }
+
+          before do
+            create(:chat, :active, :friend => chat.friend)
+          end
+
+          context(new_call ? "when I call" : "if I hold the line") do
+            before do
+              new_call ? call(:from => caller) : update_current_call_status
+            end
+
+            it "should find me some new friends" do
+              assert_redirect_to_current_url
+            end
+
+            it "should queue a message to my partner to call me back" do
+              reply = reply_to(chat.friend, chat)
+              reply.body.should =~ Regexp.new(
+                spec_translate(
+                  :call_me, chat.friend.locale, chat.user.screen_id,
+                  Regexp.escape(twilio_number)
+                )
+              )
+              reply.should_not be_delivered
+            end
+          end
+        end
+      end
+    end
+
+    shared_examples_for "a phone call without voice prompts" do
+      it_should_behave_like "calling while in chat", true do
+        let(:caller) { create(:user) }
       end
 
       context "given there are new friends online" do
@@ -262,21 +301,8 @@ describe "PhoneCalls" do
             end
           end
 
-          context "given that I'm already in a chat session" do
-            let!(:active_chat) { create(:chat, :active, :user => new_user) }
-
-            context "if I hold the line" do
-              before do
-                update_current_call_status
-              end
-
-              it "should connect me with my friend" do
-                assert_dial_to_current_url(
-                  asserted_number_formatted_for_twilio(active_chat.friend.mobile_number),
-                  :callerId => twilio_number
-                )
-              end
-            end
+          it_should_behave_like "calling while in chat", false do
+            let(:caller) { new_user }
           end
 
           context "given there are no new friends online" do

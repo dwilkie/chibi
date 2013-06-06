@@ -271,8 +271,8 @@ class User < ActiveRecord::Base
     state != "offline"
   end
 
-  def available?(in_chat = nil)
-    online? && (!currently_chatting? || active_chat == in_chat || !active_chat.active?)
+  def available?
+    online? && (!currently_chatting? || !active_chat.active?)
   end
 
   def currently_chatting?

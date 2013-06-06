@@ -146,7 +146,7 @@ class PhoneCall < ActiveRecord::Base
       # connect him with his existing friend
       transition(
         [:answered, :offering_menu] => :connecting_user_with_friend,
-        :if => :user_chatting?
+        :if => :can_dial_to_partner?
       )
 
       # find him new friends
@@ -237,10 +237,6 @@ class PhoneCall < ActiveRecord::Base
   end
 
   private
-
-  def user_chatting?
-    chat.present? || can_dial_to_partner?
-  end
 
   def can_dial_to_partner?
     user.currently_chatting? && (current_chat.active? || current_partner.available?)

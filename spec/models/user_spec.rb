@@ -1319,14 +1319,6 @@ describe User do
         end
       end
     end
-
-    context "passing a chat" do
-      it "should return true if the users is currently chatting in the passed chat" do
-        active_chat
-        user.available?(friend.active_chat).should be_true
-        user.available?(create(:chat)).should be_false
-      end
-    end
   end
 
   describe "#first_message?" do
