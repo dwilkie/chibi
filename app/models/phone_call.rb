@@ -158,7 +158,7 @@ class PhoneCall < ActiveRecord::Base
       if PromptStates::VOICE_PROMPTS
         # tell him his chat has ended
         transition(
-          :connecting_user_with_friend => :telling_user_their_chat_has_ended,
+          [:connecting_user_with_friend, :dialing_friends] => :telling_user_their_chat_has_ended,
           :if => :connected?
         )
 
@@ -166,10 +166,15 @@ class PhoneCall < ActiveRecord::Base
         transition(:telling_user_their_chat_has_ended => :offering_menu)
       end
 
+      # hangup if the call has ended
+      transition(
+        [:connecting_user_with_friend, :dialing_friends] => :completed,
+        :if => :connected?
+      )
+
       # find him a new friend
       transition(
-        [:dialing_friends, :connecting_user_with_friend] => :finding_new_friends,
-        :unless => :answered?
+        [:dialing_friends, :connecting_user_with_friend] => :finding_new_friends
       )
 
       if PromptStates::VOICE_PROMPTS
