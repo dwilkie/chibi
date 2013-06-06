@@ -129,24 +129,21 @@ FactoryGirl.define do
     end
 
     trait :already_in_chat do
-      association :chat, :active
       after(:create) do |phone_call|
-        phone_call.triggered_chats << phone_call.chat
-        phone_call.save
+        create(:chat, :active, :user => phone_call.user)
       end
     end
 
     trait :to_unavailable_user do
-      before(:create) do |phone_call|
-        chat = FactoryGirl.create(:chat, :initiator_active)
-        FactoryGirl.create(:chat, :active, :user => chat.friend)
-        phone_call.user = chat.user
+      after(:create) do |phone_call|
+        chat = create(:chat, :initiator_active, :user => phone_call.user)
+        create(:chat, :active, :user => chat.friend)
       end
     end
 
     trait :found_friends do
       after(:create) do |phone_call|
-        FactoryGirl.create_list(
+        create_list(
           :chat, 5, :friend_active, :user => phone_call.user, :starter => phone_call
         )
       end
