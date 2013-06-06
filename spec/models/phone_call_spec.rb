@@ -205,7 +205,6 @@ describe PhoneCall do
       if chat = reference_phone_call.chat
         chat.should_not be_active
         chat.active_users.should_not include(phone_call.user)
-        chat.starter.should == reference_phone_call
       end
     end
 

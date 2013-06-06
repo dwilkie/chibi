@@ -134,6 +134,13 @@ FactoryGirl.define do
       end
     end
 
+    trait :with_active_chat do
+      after(:create) do |phone_call|
+        chat = create(:chat, :active, :user => phone_call.user)
+        phone_call.chat = chat
+      end
+    end
+
     trait :to_unavailable_user do
       after(:create) do |phone_call|
         chat = create(:chat, :initiator_active, :user => phone_call.user)
