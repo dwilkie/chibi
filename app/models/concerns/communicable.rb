@@ -22,7 +22,10 @@ module Communicable
     def from=(value)
       # remove any non-digits then replace multiple leading ones
       # to produce a more valid looking E.164 number
-      sanitized_value = value.gsub(/\D/, "").gsub(/\A1+/, "1") if value
+      if value
+        sanitized_value = value.gsub(/\D/, "").gsub(/\A1+/, "1")
+        sanitized_value = Phony.normalize(sanitized_value) if Phony.plausible?(sanitized_value)
+      end
       write_attribute(:from, sanitized_value)
     end
 

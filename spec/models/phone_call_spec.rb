@@ -139,6 +139,10 @@ describe PhoneCall do
       subject.from = "+1-2345-2222"
       subject.from = build(:user, :with_invalid_mobile_number).mobile_number
       subject.from.should == "123452222"
+
+      # test invalid E.164 number
+      subject.from = "855010123456"
+      subject.from.should == "85510123456"
     end
   end
 
