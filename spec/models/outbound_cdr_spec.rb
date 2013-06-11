@@ -32,5 +32,22 @@ describe OutboundCdr do
         subject.bridge_uuid.should == subject.inbound_cdr.uuid
       end
     end
+
+    describe "after create" do
+      let(:user) { create(:user) }
+      let(:friend) { create(:user) }
+      let(:inbound_cdr) { create_cdr } # creates an inbound cd from user
+
+      context "given there is an existing chat between the caller and the recipient" do
+        let(:chat) { create(:chat, :friend_active, :user => user, :friend => friend) }
+
+        it "should reactivate the chat" do
+          chat.should_not be_active
+          inbound_cdr
+          subject.save!
+          chat.reload.should be_active
+        end
+      end
+    end
   end
 end
