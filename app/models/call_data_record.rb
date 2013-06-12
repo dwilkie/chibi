@@ -7,8 +7,9 @@ class CallDataRecord < ActiveRecord::Base
   belongs_to :phone_call
   belongs_to :inbound_cdr
 
-  validates :body, :duration, :bill_sec, :uuid, :type, :direction, :presence => true
-  validates :uuid, :phone_call_id, :uniqueness => true, :allow_nil => true
+  validates :phone_call, :body, :duration, :bill_sec, :uuid, :type, :direction, :presence => true
+  validates :uuid, :uniqueness => true
+  validates :phone_call_id, :uniqueness => {:scope => :type}
   validates :type,  :inclusion => { :in => VALID_TYPES }
 
   attr_accessible :body
@@ -29,7 +30,13 @@ class CallDataRecord < ActiveRecord::Base
       self.duration ||= variables["duration"]
       self.bill_sec ||= variables["billsec"]
       self.from ||= cdr_from
+      self.bridge_uuid ||= variables["bridge_uuid"]
+      self.phone_call ||= (find_related_phone_call(uuid) || find_related_phone_call(bridge_uuid))
     end
+  end
+
+  def find_related_phone_call(sid)
+    PhoneCall.find_by_sid(sid)
   end
 
   def cdr_from

@@ -611,6 +611,9 @@ FactoryGirl.define do
   factory :call_data_record do
     ignore do
       variables false
+      user_who_called nil
+      user_who_was_called nil
+      phone_call nil
 
       default_body <<-CDR
         <?xml version="1.0"?>
@@ -627,7 +630,7 @@ FactoryGirl.define do
 
     body do
       dynamic_body = MultiXml.parse(default_body)["cdr"]
-      related_user = User.first || FactoryGirl.create(:user)
+      calling_user = user_who_called || FactoryGirl.create(:user)
 
       dynamic_variables = variables || {}
 
@@ -635,22 +638,20 @@ FactoryGirl.define do
       dynamic_variables["duration"] ||= "20"
       dynamic_variables["billsec"] ||= "15"
 
+      incoming_phone_call = phone_call || FactoryGirl.create(:phone_call, :user => calling_user)
+
       if dynamic_variables["direction"] == "inbound"
-        related_phone_call = PhoneCall.first || FactoryGirl.create(:phone_call, :user => related_user)
 
-        dynamic_variables["sip_from_user"] ||= related_user.mobile_number
-        dynamic_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{related_user.mobile_number}")
+        dynamic_variables["sip_from_user"] ||= calling_user.mobile_number
+        dynamic_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{calling_user.mobile_number}")
 
-        dynamic_variables["uuid"] ||= related_phone_call.sid
+        dynamic_variables["uuid"] ||= incoming_phone_call.sid
         dynamic_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
       else
-        related_inbound_cdr = InboundCdr.first || CallDataRecord.create!(
-          :body => build(:call_data_record).body
-        )
-
+        called_user = user_who_was_called || FactoryGirl.create(:user)
         dynamic_variables["uuid"] ||= FactoryGirl.generate(:guid)
-        dynamic_variables["sip_to_user"] ||= related_user.mobile_number
-        dynamic_variables["bridge_uuid"] ||= related_inbound_cdr.uuid
+        dynamic_variables["sip_to_user"] ||= called_user.mobile_number
+        dynamic_variables["bridge_uuid"] ||= incoming_phone_call.sid
       end
 
       dynamic_body["variables"].merge!(dynamic_variables)

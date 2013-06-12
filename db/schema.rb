@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130603063110) do
+ActiveRecord::Schema.define(:version => 20130612144846) do
 
   create_table "call_data_records", :force => true do |t|
     t.text     "body"
@@ -34,7 +34,7 @@ ActiveRecord::Schema.define(:version => 20130603063110) do
   add_index "call_data_records", ["direction"], :name => "index_call_data_records_on_direction"
   add_index "call_data_records", ["from"], :name => "index_call_data_records_on_from"
   add_index "call_data_records", ["inbound_cdr_id"], :name => "index_call_data_records_on_inbound_cdr_id"
-  add_index "call_data_records", ["phone_call_id"], :name => "index_call_data_records_on_phone_call_id", :unique => true
+  add_index "call_data_records", ["phone_call_id", "type"], :name => "index_call_data_records_on_phone_call_id_and_type", :unique => true
   add_index "call_data_records", ["user_id"], :name => "index_call_data_records_on_user_id"
   add_index "call_data_records", ["uuid"], :name => "index_call_data_records_on_uuid", :unique => true
 

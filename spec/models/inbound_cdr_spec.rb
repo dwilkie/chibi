@@ -12,16 +12,6 @@ describe InboundCdr do
     end
   end
 
-  it "should not be valid without an associated phone call" do
-    subject.uuid = "invalid"
-    subject.should_not be_valid
-  end
-
-  it "should not be valid with a duplicate phone call id" do
-    subject.phone_call = cdr.phone_call
-    subject.should_not be_valid
-  end
-
   it "should not be valid without a rfc2822 date" do
     cdr.rfc2822_date = nil
     cdr.should_not be_valid
