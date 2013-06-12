@@ -43,6 +43,19 @@ describe CallDataRecord do
     subject.should_not be_valid
   end
 
+  it "should not be valid without an associated phone call" do
+    subject = build_cdr(:variables => {"uuid" => "invalid"})
+    subject.should_not be_valid
+  end
+
+  it "should not be valid with a duplicate phone call id for the same type" do
+    subject.phone_call = cdr.phone_call
+    subject.should_not be_valid
+    outbound_cdr = create_cdr(:variables => {"direction" => "outbound"})
+    subject.phone_call = outbound_cdr.phone_call
+    subject.should be_valid
+  end
+
   it "should not be valid without a duration" do
     subject.duration = nil
     subject.should_not be_valid
@@ -77,6 +90,7 @@ describe CallDataRecord do
         subject.bill_sec.should == 15         # from factory
         subject.duration.should == 20         # from factory
         subject.uuid.should be_present
+        subject.phone_call.should be_present
       end
     end
   end
