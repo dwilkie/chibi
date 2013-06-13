@@ -52,6 +52,7 @@ class PhoneCall < ActiveRecord::Base
   attr_accessible :to, :api_version
 
   validates :sid, :presence => true, :uniqueness => true
+  validates :dial_call_sid, :uniqueness => true, :allow_nil => true
 
   state_machine :initial => :answered do
     extend PromptStates

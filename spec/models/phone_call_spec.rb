@@ -29,6 +29,12 @@ describe PhoneCall do
     new_phone_call.should_not be_valid
   end
 
+  it "should not be valid with a duplicate dial_call_sid" do
+    phone_call = create(:phone_call, :with_dial_call_sid)
+    new_phone_call.dial_call_sid = phone_call.dial_call_sid
+    new_phone_call.should_not be_valid
+  end
+
   it_should_behave_like "a chat starter" do
     let(:starter) { phone_call }
   end
