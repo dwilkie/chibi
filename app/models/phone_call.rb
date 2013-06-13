@@ -99,7 +99,6 @@ class PhoneCall < ActiveRecord::Base
 
     before_transition any => :finding_new_friends, :do => :find_friends
     before_transition any => :connecting_user_with_friend, :do => :set_or_update_current_chat
-    before_transition any => :completed, :do => :deactivate_chat_for_user
 
     state :connecting_user_with_friend do
       def to_twiml
@@ -289,10 +288,6 @@ class PhoneCall < ActiveRecord::Base
 
   def set_or_update_current_chat
     self.chat ||= user.active_chat
-  end
-
-  def deactivate_chat_for_user
-    chat.deactivate!(:active_user => user) if chat.present?
   end
 
   def play(file, options = {})
