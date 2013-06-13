@@ -100,7 +100,7 @@ class PhoneCall < ActiveRecord::Base
 
     before_transition any => :finding_new_friends, :do => :find_friends
     before_transition any => :connecting_user_with_friend, :do => :set_or_update_current_chat
-    before_transition any => :completed, :do => :fetch_twilio_cdr
+    after_transition any => :completed, :do => :fetch_twilio_cdr
 
     state :connecting_user_with_friend do
       def to_twiml
@@ -199,8 +199,9 @@ class PhoneCall < ActiveRecord::Base
       phone_call.digits = params[:digits]
       phone_call.call_status = params[:call_status]
       phone_call.dial_status = params[:dial_call_status]
-      phone_call.dial_call_sid = params[:dial_call_sid]
+      phone_call.dial_call_sid ||= params[:dial_call_sid]
       phone_call.api_version = params[:api_version]
+      phone_call.save!
       phone_call.process!
       phone_call
     end
@@ -257,7 +258,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def fetch_twilio_cdr
-    Resque.enqueue(TwilioCdrFetcher, id) if from_twilio?
+    from_twilio? ? Resque.enqueue(TwilioCdrFetcher, id) : nil
   end
 
   def can_dial_to_partner?

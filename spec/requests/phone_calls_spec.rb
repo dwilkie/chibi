@@ -209,7 +209,13 @@ describe "PhoneCalls" do
                     end
                   end
 
-                  it_should_behave_like "hanging up", :from_twilio => true, :from_connected_user => true
+                  context "when I hold the line", :focus do
+                    before do
+                      update_current_call_status
+                    end
+
+                    it_should_behave_like "hanging up", :from_twilio => true, :from_connected_user => true
+                  end
                 end
               end
 
