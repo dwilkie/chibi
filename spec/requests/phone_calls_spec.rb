@@ -6,6 +6,7 @@ describe "PhoneCalls" do
     include PhoneCallHelpers::TwilioHelpers
     include MobilePhoneHelpers
     include TranslationHelpers
+    include ResqueHelpers
 
     include_context "replies"
     include_context "existing users"
@@ -114,6 +115,53 @@ describe "PhoneCalls" do
       end
     end
 
+    shared_examples_for "hanging up" do |options|
+      it "should hangup on me" do
+        assert_hangup(twiml_response)
+      end
+
+      if options[:from_twilio]
+        def expect_twilio_cdr_fetch(options = {}, &block)
+          super
+        end
+
+        let(:new_inbound_twilio_cdr) { Chibi::Twilio::InboundCdr.last }
+
+        if options[:from_connected_user]
+          let(:new_outbound_twilio_cdr) { Chibi::Twilio::OutboundCdr.last }
+
+          before do
+            expect_twilio_cdr_fetch(:call_sid => current_call) do
+              expect_twilio_cdr_fetch(
+                :cassette => "get_outbound_call",
+                :call_sid => dial_call_sid,
+                :parent_call_sid => current_call,
+                :direction => :outbound
+              ) { perform_background_job(:twilio_cdr_fetcher_queue) }
+            end
+          end
+
+          it "should create a Twilio Inbound CDR" do
+            new_inbound_twilio_cdr.should be_present
+          end
+
+          it "should create a Twilio Outbound CDR" do
+            new_outbound_twilio_cdr.should be_present
+          end
+        else
+          before do
+            expect_twilio_cdr_fetch(:call_sid => current_call) do
+              perform_background_job(:twilio_cdr_fetcher_queue)
+            end
+          end
+
+          it "should create a Twilio Inbound CDR" do
+            new_inbound_twilio_cdr.should be_present
+          end
+        end
+      end
+    end
+
     shared_examples_for "a phone call without voice prompts" do
       it_should_behave_like "calling while in chat", true do
         let(:caller) { create(:user) }
@@ -151,13 +199,17 @@ describe "PhoneCalls" do
 
               context "if someone answers" do
                 context "and hangs up first" do
+                  let(:dial_call_sid) { "dial_call_sid" }
+
                   before do
-                    update_current_call_status(:dial_call_status => :completed)
+                    do_background_task(:queue_only => true) do
+                      update_current_call_status(
+                        :dial_call_status => :completed, :dial_call_sid => dial_call_sid
+                      )
+                    end
                   end
 
-                  it "should hangup on me" do
-                    assert_hangup(twiml_response)
-                  end
+                  it_should_behave_like "hanging up", :from_twilio => true, :from_connected_user => true
                 end
               end
 
@@ -329,9 +381,7 @@ describe "PhoneCalls" do
                     update_current_call_status
                   end
 
-                  it "should hang up" do
-                    assert_hangup(twiml_response)
-                  end
+                  it_should_behave_like "hanging up", :from_twilio => true
                 end
               end
             end

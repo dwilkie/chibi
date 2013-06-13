@@ -1,9 +1,9 @@
 # encoding: utf-8
 
 class User < ActiveRecord::Base
-  include Analyzable
-  include Communicable::HasCommunicableResources
-  include TwilioHelpers
+  include Chibi::Analyzable
+  include Chibi::Communicable::HasCommunicableResources
+  include Chibi::Twilio::ApiHelpers
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
   DEFAULT_ALTERNATE_LOCALE = "en"

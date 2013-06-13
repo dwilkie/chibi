@@ -172,6 +172,10 @@ FactoryGirl.define do
       dial_status "completed"
     end
 
+    trait :with_dial_call_sid do
+      dial_call_sid { generate(:guid) }
+    end
+
     trait :from_offline_user do
       association :user, :factory => [:user, :offline]
     end

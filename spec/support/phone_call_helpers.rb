@@ -16,6 +16,7 @@ module PhoneCallHelpers
       :Digits => options[:digits],
       :To => options[:to],
       :DialCallStatus => options[:dial_call_status].try(:to_s).try(:dasherize),
+      :DialCallSid => options[:dial_call_sid],
       :CallStatus => options[:call_status].try(:to_s).try(:dasherize),
       :ApiVersion => options[:api_version] || "2010-04-01"
     }
@@ -35,7 +36,49 @@ module PhoneCallHelpers
   end
 
   module TwilioHelpers
+    shared_examples_for "a Chibi Twilio CDR" do
+      describe "#body" do
+        let(:uuid) { generate(:guid) }
+        subject { klass.new(:uuid => uuid) }
+
+        it "should fetch the body from the Twilio API" do
+          expect_twilio_cdr_fetch(:call_sid => uuid, :direction => direction) { subject.body }
+          body = subject.body
+          body["duration"].should be_present
+          body["billsec"].should be_present
+          assertions.each do |assertion_key, assertion_value|
+            actual_value = body[assertion_key]
+            if assertion_value == true
+              actual_value.should be_present
+            else
+              actual_value.should == assertion_value
+            end
+          end
+        end
+      end
+    end
+
     private
+
+    def twilio_cassette_erb(options = {})
+      {
+        :account_sid => ENV['TWILIO_ACCOUNT_SID'],
+        :auth_token =>  ENV['TWILIO_AUTH_TOKEN'],
+        :application_sid => ENV['TWILIO_APPLICATION_SID'],
+      }.merge(options)
+    end
+
+    def expect_twilio_cdr_fetch(options = {}, &block)
+      cassette = options.delete(:cassette) || "get_call"
+      options[:direction] ||= "inbound"
+      options[:direction] = "outbound-dial" if options[:direction] == :outbound
+      options[:duration] ||= 20
+      options[:from] ||= generate(:mobile_number)
+      options[:to] ||= generate(:mobile_number)
+      options[:call_sid] ||= generate(:guid)
+      options[:parent_call_sid] ||= generate(:guid)
+      VCR.use_cassette("twilio/#{cassette}", :erb => twilio_cassette_erb(options)) { yield }
+    end
 
     def asserted_number_formatted_for_twilio(number)
       "+#{number}"

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130612144846) do
+ActiveRecord::Schema.define(:version => 20130613083217) do
 
   create_table "call_data_records", :force => true do |t|
     t.text     "body"
@@ -96,11 +96,13 @@ ActiveRecord::Schema.define(:version => 20130612144846) do
     t.string   "state"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
+    t.string   "dial_call_sid"
   end
 
   add_index "phone_calls", ["chat_id"], :name => "index_phone_calls_on_chat_id"
+  add_index "phone_calls", ["dial_call_sid"], :name => "index_phone_calls_on_dial_call_sid", :unique => true
   add_index "phone_calls", ["sid"], :name => "index_phone_calls_on_sid", :unique => true
   add_index "phone_calls", ["state"], :name => "index_phone_calls_on_state"
   add_index "phone_calls", ["user_id"], :name => "index_phone_calls_on_user_id"

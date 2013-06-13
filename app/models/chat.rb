@@ -1,5 +1,5 @@
 class Chat < ActiveRecord::Base
-  include Communicable::HasCommunicableResources
+  include Chibi::Communicable::HasCommunicableResources
 
   belongs_to :user
   belongs_to :friend, :class_name => 'User'

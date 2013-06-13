@@ -1,11 +1,11 @@
 # encoding: utf-8
 
 class Message < ActiveRecord::Base
-  include Communicable
-  include Communicable::FromUser
-  include Communicable::Chatable
-  include Analyzable
-  include ChatStarter
+  include Chibi::Communicable
+  include Chibi::Communicable::FromUser
+  include Chibi::Communicable::Chatable
+  include Chibi::Analyzable
+  include Chibi::ChatStarter
 
   attr_accessible :body, :guid
   alias_attribute :origin, :from

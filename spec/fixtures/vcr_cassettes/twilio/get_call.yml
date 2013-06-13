@@ -1,0 +1,52 @@
+<% response = "{\"sid\":\"#{call_sid}\",\"date_created\":\"Wed, 12 Jun 2013 19:27:42 +0000\",\"date_updated\":\"Wed, 12 Jun 2013 19:28:02 +0000\",\"parent_call_sid\":\"#{parent_call_sid}\",\"account_sid\":\"#{account_sid}\",\"to\":\"+#{to}\",\"to_formatted\":\"(415) 692-3656\",\"from\":\"+#{from}\",\"from_formatted\":\"(737) 874-2833\",\"phone_number_sid\":\"PN99dc941492473c44532e19ef0c5f3600\",\"status\":\"completed\",\"start_time\":\"Wed, 12 Jun 2013 19:27:42 +0000\",\"end_time\":\"Wed, 12 Jun 2013 19:28:02 +0000\",\"duration\":\"#{duration}\",\"price\":\"-0.01000\",\"price_unit\":\"USD\",\"direction\":\"#{direction}\",\"answered_by\":null,\"api_version\":\"2010-04-01\",\"annotation\":null,\"forwarded_from\":\"+14156923656\",\"group_sid\":null,\"caller_name\":null,\"uri\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/#{call_sid}.json\",\"subresource_uris\":{\"notifications\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/#{call_sid}\/Notifications.json\",\"recordings\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/#{call_sid}\/Recordings.json\"}}" %>
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://<%= account_sid %>:<%= auth_token %>@api.twilio.com/2010-04-01/Accounts/<%= account_sid %>/Calls/<%= call_sid %>.json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      accept:
+      - application/json
+      accept-charset:
+      - utf-8
+      user-agent:
+      - twilio-ruby/3.9.0
+      accept-encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      authorization:
+      - Basic <%= Base64.encode64("#{account_sid}:#{auth_token}").gsub(/\s/, "") %>
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      server:
+      - nginx
+      date:
+      - Thu, 13 Jun 2013 10:16:06 GMT
+      content-type:
+      - application/json; charset=utf-8
+      content-length:
+      - '1111'
+      connection:
+      - close
+      x-powered-by:
+      - PHP/5.3.11
+      - AT-5000
+      etag:
+      - cb6e7bccc5d304b383a7d5b9f47f370d
+      last-modified:
+      - Wed, 12 Jun 2013 12:28:02 -0700
+      access-control-allow-origin:
+      - https://www.twilio.com
+      x-shenanigans:
+      - none
+    body:
+      encoding: UTF-8
+      string: <%= response.to_json %>
+    http_version: '1.1'
+  recorded_at: Thu, 13 Jun 2013 10:16:05 GMT
+recorded_with: VCR 2.3.0
