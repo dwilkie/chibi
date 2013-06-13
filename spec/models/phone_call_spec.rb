@@ -3,6 +3,7 @@ require 'spec_helper'
 describe PhoneCall do
   include PhoneCallHelpers::States
   include PhoneCallHelpers::TwilioHelpers
+  include ResqueHelpers
 
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
@@ -162,6 +163,35 @@ describe PhoneCall do
     end
   end
 
+  describe "#fetch_inbound_twilio_cdr!" do
+    it "should create a Chibi Twilio Inbound CDR" do
+      expect_twilio_cdr_fetch(:call_sid => phone_call.sid) { phone_call.fetch_inbound_twilio_cdr! }
+      Chibi::Twilio::InboundCdr.last.phone_call.should == phone_call
+    end
+  end
+
+  describe "#fetch_outbound_twilio_cdr!" do
+    context "given the phone call has a dial_call_sid" do
+      let(:phone_call) { create(:phone_call, :with_dial_call_sid) }
+
+      it "should create a Chibi Twilio Outbound CDR" do
+        expect_twilio_cdr_fetch(
+          :call_sid => phone_call.dial_call_sid, :direction => :outbound,
+          :parent_call_sid => phone_call.sid
+        ) { phone_call.fetch_outbound_twilio_cdr! }
+
+        Chibi::Twilio::OutboundCdr.last.phone_call.should == phone_call
+      end
+    end
+
+    context "given the phone call does not have a dial_call_sid" do
+      it "should not create a Chibi Twilio Outbound CDR" do
+        phone_call.fetch_outbound_twilio_cdr!
+        Chibi::Twilio::OutboundCdr.last.should be_nil
+      end
+    end
+  end
+
   describe ".find_or_create_and_process_by" do
     include PhoneCallHelpers
 
@@ -187,6 +217,7 @@ describe PhoneCall do
       phone_call.digits.should == params[:Digits].to_i
       phone_call.call_status.should == params[:CallStatus]
       phone_call.dial_status.should == params[:DialCallStatus]
+      phone_call.dial_call_sid.should == params[:DialCallSid]
       phone_call.api_version.should == params[:ApiVersion]
 
       subject.should_not_receive(:login_user!)
@@ -198,18 +229,14 @@ describe PhoneCall do
 
   describe "#process!" do
     include TranslationHelpers
+
     include_context "replies"
 
     def assert_phone_call_can_be_completed(reference_phone_call)
       reference_phone_call.call_status = "completed"
-      reference_phone_call.process!
+      do_background_task(:queue_only => true) { reference_phone_call.process! }
       reference_phone_call.should be_completed
-
-      # assert chat is expired for caller
-      if chat = reference_phone_call.chat
-        chat.should_not be_active
-        chat.active_users.should_not include(phone_call.user)
-      end
+      TwilioCdrFetcher.should have_queued(reference_phone_call.id)
     end
 
     def assert_message_queued_for_partner(phone_call)

@@ -1,8 +1,8 @@
 class CallDataRecord < ActiveRecord::Base
-  VALID_TYPES = %w{InboundCdr OutboundCdr}
+  VALID_TYPES = %w{InboundCdr OutboundCdr Chibi::Twilio::InboundCdr Chibi::Twilio::OutboundCdr}
 
-  include Communicable
-  include Communicable::FromUser
+  include Chibi::Communicable
+  include Chibi::Communicable::FromUser
 
   belongs_to :phone_call
   belongs_to :inbound_cdr
@@ -44,7 +44,7 @@ class CallDataRecord < ActiveRecord::Base
   end
 
   def unescaped_variable(name)
-    Rack::Utils.unescape(variables[name]) if variables[name]
+    Rack::Utils.unescape(variables[name]).strip if variables[name]
   end
 
   def valid_source(name)

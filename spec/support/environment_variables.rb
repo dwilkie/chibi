@@ -1,5 +1,5 @@
 ENV["TWILIO_APPLICATION_SID"] = "twilio_application_sid"
-ENV["TWILIO_ACCOUNT_SID"] = "twilio_acccount_sid"
+ENV["TWILIO_ACCOUNT_SID"] = "twilio_account_sid"
 ENV['TWILIO_AUTH_TOKEN'] = "twilio_auth_token"
 ENV["NUNTIUM_URL"] = "https://nuntium.example.com"
 ENV["NUNTIUM_ACCOUNT"] = "nuntium_account"

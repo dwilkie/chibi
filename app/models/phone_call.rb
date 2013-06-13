@@ -1,9 +1,9 @@
 class PhoneCall < ActiveRecord::Base
-  include Communicable
-  include Communicable::FromUser
-  include Communicable::Chatable
-  include TwilioHelpers
-  include ChatStarter
+  include Chibi::Communicable
+  include Chibi::Communicable::FromUser
+  include Chibi::Communicable::Chatable
+  include Chibi::Twilio::ApiHelpers
+  include Chibi::ChatStarter
 
   # the maximum length of a US phone number
   # without the country code
@@ -99,7 +99,7 @@ class PhoneCall < ActiveRecord::Base
 
     before_transition any => :finding_new_friends, :do => :find_friends
     before_transition any => :connecting_user_with_friend, :do => :set_or_update_current_chat
-    before_transition any => :completed, :do => :deactivate_chat_for_user
+    before_transition any => :completed, :do => :fetch_twilio_cdr
 
     state :connecting_user_with_friend do
       def to_twiml
@@ -198,6 +198,7 @@ class PhoneCall < ActiveRecord::Base
       phone_call.digits = params[:digits]
       phone_call.call_status = params[:call_status]
       phone_call.dial_status = params[:dial_call_status]
+      phone_call.dial_call_sid = params[:dial_call_sid]
       phone_call.api_version = params[:api_version]
       phone_call.process!
       phone_call
@@ -236,7 +237,27 @@ class PhoneCall < ActiveRecord::Base
     user.login!
   end
 
+  def fetch_inbound_twilio_cdr!
+    Chibi::Twilio::InboundCdr.create(:uuid => sid)
+  end
+
+  def fetch_outbound_twilio_cdr!
+    Chibi::Twilio::OutboundCdr.create(:uuid => dial_call_sid) if dial_call_sid.present?
+  end
+
   private
+
+  def from_adhearsion_twilio?
+    adhearsion_twilio_requested?(api_version)
+  end
+
+  def from_twilio?
+    !from_adhearsion_twilio?
+  end
+
+  def fetch_twilio_cdr
+    Resque.enqueue(TwilioCdrFetcher, id) if from_twilio?
+  end
 
   def can_dial_to_partner?
     user.currently_chatting? && (current_chat.active? || current_partner.available?)
@@ -291,10 +312,6 @@ class PhoneCall < ActiveRecord::Base
     self.chat ||= user.active_chat
   end
 
-  def deactivate_chat_for_user
-    chat.deactivate!(:active_user => user) if chat.present?
-  end
-
   def play(file, options = {})
     generate_twiml(options) { |twiml| twiml.Play play_url(file) }
   end
@@ -306,12 +323,11 @@ class PhoneCall < ActiveRecord::Base
   def dial(*users_to_dial)
     generate_twiml(:redirect => false) do |twiml|
       dial_options = { :action => redirect_url }
-      adhearsion_twilio_request = adhearsion_twilio_requested?(api_version)
-      dial_options.merge!(:callerId => twilio_outgoing_number) unless adhearsion_twilio_request
+      dial_options.merge!(:callerId => twilio_outgoing_number) if from_twilio?
       twiml.Dial(dial_options) do
         users_to_dial.each do |user_to_dial|
           number_options = {}
-          number_options.merge!(:callerId => user_to_dial.caller_id(api_version)) if adhearsion_twilio_request
+          number_options.merge!(:callerId => user_to_dial.caller_id(api_version)) if from_adhearsion_twilio?
           twiml.Number(user_to_dial.dial_string(api_version), number_options)
         end
       end

@@ -1,7 +1,7 @@
 class Reply < ActiveRecord::Base
-  include Communicable
-  include Communicable::Chatable
-  include Analyzable
+  include Chibi::Communicable
+  include Chibi::Communicable::Chatable
+  include Chibi::Analyzable
 
   has_many :delivery_receipts
 
