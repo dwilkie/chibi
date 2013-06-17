@@ -226,6 +226,12 @@ class PhoneCall < ActiveRecord::Base
         if value.first == "1"
           # remove all leading ones
           non_us_number = value.gsub(/\A1+/, "")
+          # assume the number is a US number by adding a leading 1
+          us_number = "1" + non_us_number
+          # add the default country code if the number is an invalid US Number
+          value = (ENV['DEFAULT_COUNTRY_CODE'] + non_us_number) unless Phony.plausible?(us_number)
+          # if the non-us number is too long
+          # then assume it's an international number with the country code already included
           value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
         end
         super value

@@ -209,7 +209,7 @@ describe "PhoneCalls" do
                     end
                   end
 
-                  context "when I hold the line", :focus do
+                  context "when I hold the line" do
                     before do
                       update_current_call_status
                     end
