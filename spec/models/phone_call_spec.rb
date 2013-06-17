@@ -86,18 +86,18 @@ describe PhoneCall do
     # phone calls should behave the same whether they were initiated by the user or not
     it "should override #from=(value) if present" do
       # test override
-      subject.from = "+1-2345-2222"
-      subject.to = "+1-2345-3333"
-      subject.from.should == "123453333"
+      subject.from = "+1-234-567-8910"
+      subject.to = "+1-229-876-5432"
+      subject.from.should == "12298765432"
 
       # test no override for blank 'to'
       subject.to = ""
-      subject.from.should == "123453333"
+      subject.from.should == "12298765432"
     end
 
     it "should be mass assignable" do
-      new_phone_call = subject.class.new(:from => "+1-2345-2222", :to => "+1-2345-3333")
-      new_phone_call.from.should == "123453333"
+      new_phone_call = subject.class.new(:from => "+1-234-567-8910", :to => "+1-229-876-5432")
+      new_phone_call.from.should == "12298765432"
     end
   end
 
