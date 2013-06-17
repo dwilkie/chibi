@@ -101,11 +101,13 @@ describe Message do
 
   describe "#origin" do
     it "should be an alias for the attribute '#from'" do
-      subject.from = "123"
-      subject.origin.should == "123"
+      sample_number = generate(:mobile_number)
+      subject.from = sample_number
+      subject.origin.should == sample_number
 
-      subject.origin = "456"
-      subject.from.should == "456"
+      sample_number = generate(:mobile_number)
+      subject.origin = sample_number
+      subject.from.should == sample_number
     end
   end
 
