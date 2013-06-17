@@ -1,4 +1,11 @@
 GIT
+  remote: git://github.com/dwilkie/phony.git
+  revision: ce2de790bf40447142cc06389c3de46bf95fe180
+  branch: correctly_validate_cambodian_numbers
+  specs:
+    phony (2.0.0.beta7)
+
+GIT
   remote: git://github.com/hexorx/countries.git
   revision: f9c3415f1892a6da4decfbd935124c0e81395b35
   specs:
@@ -150,7 +157,6 @@ GEM
     parallel_tests (0.11.1)
       parallel
     pg (0.15.1)
-    phony (1.9.0)
     polyglot (0.3.3)
     pry (0.9.12.1)
       coderay (~> 1.0.5)
@@ -290,7 +296,7 @@ DEPENDENCIES
   nuntium_api
   parallel_tests
   pg
-  phony
+  phony!
   rails (= 3.2.13)
   rb-inotify
   redis

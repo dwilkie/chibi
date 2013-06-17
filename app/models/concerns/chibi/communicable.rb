@@ -9,6 +9,12 @@ module Chibi
 
     module FromUser
       extend ActiveSupport::Concern
+      include Chibi::Twilio::ApiHelpers
+
+      # the maximum length of a US phone number
+      # without the country code
+      # note: this is only used to determine whether Twilio added an extra 1 or not
+      MAX_LOCAL_NUMBER_LENGTH = 10
 
       included do
         attr_accessible :from
@@ -21,13 +27,34 @@ module Chibi
       end
 
       def from=(value)
-        # remove any non-digits then replace multiple leading ones
-        # to produce a more valid looking E.164 number
-        if value
+        # this method is overriden because Twilio adds
+        # random 1's to the start of phone numbers
+        if value.present?
+          # remove any non-digits then replace multiple leading ones
+          # to produce a more valid looking E.164 number
           sanitized_value = value.gsub(/\D/, "").gsub(/\A1+/, "1")
-          sanitized_value = Phony.normalize(sanitized_value) if Phony.plausible?(sanitized_value)
+          sanitized_value = Phony.normalize(sanitized_value)
+
+          if !twilio_number?(sanitized_value, :formatted => false) && sanitized_value.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH
+            # remove non digits
+            if sanitized_value.first == "1"
+              # remove all leading ones
+              non_us_number = sanitized_value.gsub(/\A1+/, "")
+
+              # add the default country code if the number is an invalid US Number
+              sanitized_value = Phony.normalize(
+                ENV['DEFAULT_COUNTRY_CODE'] + non_us_number
+              ) unless Phony.plausible?(sanitized_value)
+
+              # if the non-us number is too long
+              # then assume it's an international number with the country code already included
+              sanitized_value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
+            end
+            write_attribute(:from, sanitized_value)
+          end
+        else
+          write_attribute(:from, value)
         end
-        write_attribute(:from, sanitized_value)
       end
 
       private

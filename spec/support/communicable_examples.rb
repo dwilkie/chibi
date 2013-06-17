@@ -1,3 +1,5 @@
+require_relative 'phone_call_helpers'
+
 COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
@@ -26,6 +28,7 @@ shared_examples_for "communicable" do
 end
 
 shared_examples_for "communicable from user" do
+
   let(:user) { build(:user) }
 
   it "should not be valid without a 'from'" do
@@ -33,12 +36,74 @@ shared_examples_for "communicable from user" do
     communicable_resource.should_not be_valid
   end
 
-  describe "#from=" do
+  describe "#from=(value)" do
+    include PhoneCallHelpers::TwilioHelpers
+
     it "should sanitize the number and remove multiple leading ones" do
-      communicable_resource.from = "+1111-3323-23345"
-      communicable_resource.from.should == "1332323345"
+      communicable_resource.from = "+1111-737-874-2833"
+      communicable_resource.from.should == "17378742833"
       communicable_resource.from = nil
       communicable_resource.from.should be_nil
+
+      # double leading 1 (Cambodia)
+      communicable_resource.from = "+1185512808814"
+      communicable_resource.from.should == "85512808814"
+
+      # single leading 1 (Cambodia)
+      communicable_resource.from = "+185512808814"
+      communicable_resource.from.should == "85512808814"
+
+      # no leading 1 (Cambodia)
+      communicable_resource.from = "+85512808814"
+      communicable_resource.from.should == "85512808814"
+
+      # single leading 1 (Thai)
+      communicable_resource.from = "+166814417695"
+      communicable_resource.from.should == "66814417695"
+
+      # no leading 1 (Thai)
+      communicable_resource.from = "+66814417695"
+      communicable_resource.from.should == "66814417695"
+
+      # single leading 1 (Australia)
+      communicable_resource.from = "+161412345678"
+      communicable_resource.from.should == "61412345678"
+
+      # no leading 1 (Australia)
+      communicable_resource.from = "+61412345678"
+      communicable_resource.from.should == "61412345678"
+
+      # test normal US number
+      communicable_resource.from = "+17378742833"
+      communicable_resource.from.should == "17378742833"
+
+      # test Twilio number
+      communicable_resource.from = "+1-234-567-8912"
+      twilio_numbers.each do |number|
+        communicable_resource.from = number
+        communicable_resource.from.should == "12345678912"
+      end
+
+      # test invalid number
+      communicable_resource.from = "+1-234-567-8912"
+      communicable_resource.from = build(:user, :with_invalid_mobile_number).mobile_number
+      communicable_resource.from.should == "12345678912"
+
+      # test invalid E.164 number
+      communicable_resource.from = "855010123456"
+      communicable_resource.from.should == "85510123456"
+
+      # test invalid long E.164 number
+      communicable_resource.from = "8550961234567"
+      communicable_resource.from.should == "855961234567"
+
+      # test incorrect country code
+      communicable_resource.from = "198786779"
+      communicable_resource.from.should == "85598786779"
+
+      # test incorrect country code with leading '0'
+      communicable_resource.from = "1098786779"
+      communicable_resource.from.should == "85598786779"
     end
   end
 

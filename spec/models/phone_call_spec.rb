@@ -86,70 +86,18 @@ describe PhoneCall do
     # phone calls should behave the same whether they were initiated by the user or not
     it "should override #from=(value) if present" do
       # test override
-      subject.from = "+1-2345-2222"
-      subject.to = "+1-2345-3333"
-      subject.from.should == "123453333"
+      subject.from = "+1-234-567-8910"
+      subject.to = "+1-229-876-5432"
+      subject.from.should == "12298765432"
 
       # test no override for blank 'to'
       subject.to = ""
-      subject.from.should == "123453333"
+      subject.from.should == "12298765432"
     end
 
     it "should be mass assignable" do
-      new_phone_call = subject.class.new(:from => "+1-2345-2222", :to => "+1-2345-3333")
-      new_phone_call.from.should == "123453333"
-    end
-  end
-
-  describe "#from=(value)" do
-    it "should ignore leading 1's generated from Twilio" do
-      # double leading 1 (Cambodia)
-      subject.from = "+1185512808814"
-      subject.from.should == "85512808814"
-
-      # single leading 1 (Cambodia)
-      subject.from = "+185512808814"
-      subject.from.should == "85512808814"
-
-      # no leading 1 (Cambodia)
-      subject.from = "+85512808814"
-      subject.from.should == "85512808814"
-
-      # single leading 1 (Thai)
-      subject.from = "+166814417695"
-      subject.from.should == "66814417695"
-
-      # no leading 1 (Thai)
-      subject.from = "+66814417695"
-      subject.from.should == "66814417695"
-
-      # single leading 1 (Australia)
-      subject.from = "+161412345678"
-      subject.from.should == "61412345678"
-
-      # no leading 1 (Australia)
-      subject.from = "+61412345678"
-      subject.from.should == "61412345678"
-
-      # test normal US number
-      subject.from = "+17378742833"
-      subject.from.should == "17378742833"
-
-      # test Twilio number
-      subject.from = "+1-2345-2222"
-      twilio_numbers.each do |number|
-        subject.from = number
-        subject.from.should == "123452222"
-      end
-
-      # test invalid number
-      subject.from = "+1-2345-2222"
-      subject.from = build(:user, :with_invalid_mobile_number).mobile_number
-      subject.from.should == "123452222"
-
-      # test invalid E.164 number
-      subject.from = "855010123456"
-      subject.from.should == "85510123456"
+      new_phone_call = subject.class.new(:from => "+1-234-567-8910", :to => "+1-229-876-5432")
+      new_phone_call.from.should == "12298765432"
     end
   end
 
