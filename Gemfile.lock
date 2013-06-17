@@ -1,9 +1,8 @@
 GIT
-  remote: git://github.com/dwilkie/phony.git
-  revision: ce2de790bf40447142cc06389c3de46bf95fe180
-  branch: correctly_validate_cambodian_numbers
+  remote: git://github.com/floere/phony.git
+  revision: 138e54c61cb7e8b12aa8f9bd0d1ba797c45340c3
   specs:
-    phony (2.0.0.beta7)
+    phony (2.0.0.beta10)
 
 GIT
   remote: git://github.com/hexorx/countries.git
