@@ -100,6 +100,10 @@ shared_examples_for "communicable from user" do
       # test incorrect country code
       communicable_resource.from = "198786779"
       communicable_resource.from.should == "85598786779"
+
+      # test incorrect country code with leading '0'
+      communicable_resource.from = "1098786779"
+      communicable_resource.from.should == "85598786779"
     end
   end
 
