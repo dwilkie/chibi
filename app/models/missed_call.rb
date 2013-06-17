@@ -1,7 +1,6 @@
 class MissedCall < ActiveRecord::Base
   include Chibi::Communicable
   include Chibi::Communicable::FromUser
-  include Chibi::Twilio::ApiHelpers
 
   attr_accessor :subject
   attr_accessible :subject, :plain

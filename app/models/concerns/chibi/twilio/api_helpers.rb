@@ -31,8 +31,8 @@ module Chibi
         formatted_numbers
       end
 
-      def twilio_number?(number)
-        twilio_outgoing_numbers.include?(number)
+      def twilio_number?(number, options = {})
+        twilio_outgoing_numbers(options).include?(number)
       end
 
       def adhearsion_twilio_requested?(api_version)
