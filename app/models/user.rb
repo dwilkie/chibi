@@ -6,7 +6,6 @@ class User < ActiveRecord::Base
   include Chibi::Twilio::ApiHelpers
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
-  DEFAULT_ALTERNATE_LOCALE = "en"
   MALE = "m"
   FEMALE = "f"
   BISEXUAL = "e"
@@ -179,11 +178,6 @@ class User < ActiveRecord::Base
     end
   end
 
-  def locale
-    raw_locale = read_attribute(:locale)
-    raw_locale ? raw_locale.to_s.downcase.to_sym : country_code.to_sym
-  end
-
   def caller_id(requesting_api_version)
     adhearsion_twilio_requested?(requesting_api_version) ? (operator.caller_id || twilio_outgoing_number) : twilio_outgoing_number
   end
@@ -236,6 +230,10 @@ class User < ActiveRecord::Base
 
   def hetrosexual?
     true
+  end
+
+  def locale
+    country_code.to_sym
   end
 
   def profile_complete?
@@ -297,37 +295,18 @@ class User < ActiveRecord::Base
     fire_events(:login)
   end
 
-  def logout!(options = {})
+  def logout!
     if currently_chatting?
       partner = active_chat.partner(self)
-      notify = partner if options[:notify_chat_partner]
-      active_chat.deactivate!(:active_user => partner, :notify => notify)
+      active_chat.deactivate!(:active_user => partner)
     end
 
     fire_events(:logout)
-
-    replies.build.logout!(partner) if options[:notify]
-  end
-
-  def welcome!
-    replies.build.welcome!
   end
 
   def search_for_friend!
     fire_events(:search_for_friend)
     nil
-  end
-
-  def update_locale!(locale, options = {})
-    updating_to_same_locale = (locale.to_s.to_sym == self.locale)
-
-    if (locale == DEFAULT_ALTERNATE_LOCALE || locale == country_code) && !updating_to_same_locale
-      update_successful = update_attributes!(:locale => locale)
-      replies.last_delivered.try(:deliver_alternate_translation!) if options[:notify]
-      update_successful
-    else
-      updating_to_same_locale
-    end
   end
 
   def matches

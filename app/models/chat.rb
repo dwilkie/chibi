@@ -74,20 +74,12 @@ class Chat < ActiveRecord::Base
     active_users << friend if friend
 
     if user.currently_chatting?
-      current_chat = user.active_chat
-      current_partner = current_chat.partner(user) if options[:notify] && options[:notify_previous_partner]
-      current_chat.deactivate!(
-        :active_user => user, :notify => current_partner, :reactivate_previous_chat => false
-      )
+      user.active_chat.deactivate!(:active_user => user, :reactivate_previous_chat => false)
     end
 
     if friend.present?
       save!
-      introduce_participants(options) if options[:notify]
-    else
-      replies.build(
-        :user => user
-      ).explain_could_not_find_a_friend! if options[:notify] && options[:notify_no_match] != false
+      replies.build(:user => friend).introduce!(user) if options[:notify]
     end
 
     user.search_for_friend!
@@ -119,19 +111,9 @@ class Chat < ActiveRecord::Base
       # create new chats for users who have been deactivated from the chat
       users_to_leave_chat.each do |user|
         self.class.activate_multiple!(
-          user, :notify => true, :notify_no_match => false
+          user, :notify => true
         ) unless user.reload.currently_chatting?
       end
-    end
-
-    # notify the users skipping the instructions to update the users profile if
-    # they still remain activated in this chat
-    if notify = options[:notify]
-      notify = in_this_chat?(notify) ? [notify] : users_to_notify
-
-      reply_chat_was_deactivated!(
-        *notify, :skip_update_profile_instructions => notify.include?(user_to_remain_in_chat)
-      )
     end
   end
 
@@ -159,7 +141,7 @@ class Chat < ActiveRecord::Base
 
       # start a new chat for the sender of the message
       self.class.activate_multiple!(
-        reference_user.reload, :starter => message, :notify => true, :notify_no_match => false
+        reference_user.reload, :starter => message, :notify => true
       )
     end
   end
@@ -276,16 +258,6 @@ class Chat < ActiveRecord::Base
     updated_at < self.class.inactive_timestamp(options)
   end
 
-  def introduce_participants(options = {})
-    users_to_notify = [friend]
-    users_to_notify << user if options[:notify_initiator]
-    users_to_notify.each do |reference_user|
-      replies.build(:user => reference_user).introduce!(
-        partner(reference_user), reference_user == user, options[:introduction]
-      )
-    end
-  end
-
   def reactivate_expired_chats(users)
     users_to_notify = []
 
@@ -309,13 +281,6 @@ class Chat < ActiveRecord::Base
       users_to_leave_chat = [user, friend]
     end
     users_to_leave_chat
-  end
-
-  def reply_chat_was_deactivated!(*destination_users)
-    options = destination_users.extract_options!
-    destination_users.each do |destination_user|
-      replies.build(:user => destination_user).end_chat!(partner(destination_user), options)
-    end
   end
 
   def user_with_inactivity

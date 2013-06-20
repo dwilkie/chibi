@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130613083217) do
+ActiveRecord::Schema.define(:version => 20130620064836) do
 
   create_table "call_data_records", :force => true do |t|
     t.text     "body"
@@ -112,13 +112,11 @@ ActiveRecord::Schema.define(:version => 20130613083217) do
     t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at",                                                         :null => false
-    t.datetime "updated_at",                                                         :null => false
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
     t.datetime "delivered_at"
-    t.text     "alternate_translation"
-    t.string   "locale",                :limit => 2
     t.string   "token"
-    t.string   "state",                              :default => "pending_delivery", :null => false
+    t.string   "state",        :default => "pending_delivery", :null => false
   end
 
   add_index "replies", ["chat_id"], :name => "index_replies_on_chat_id"
@@ -136,7 +134,6 @@ ActiveRecord::Schema.define(:version => 20130613083217) do
     t.integer  "active_chat_id"
     t.datetime "created_at",                                        :null => false
     t.datetime "updated_at",                                        :null => false
-    t.string   "locale",         :limit => 2
     t.string   "state",                       :default => "online", :null => false
   end
 

@@ -222,36 +222,6 @@ describe Message do
       end
     end
 
-    shared_examples_for "updating the user's locale" do
-      def assert_update_locale(body, asserted_locale, expect_reply)
-        user.locale.should_not == :en
-        message.body = body
-
-        last_reply = create(:reply, :delivered, :with_alternate_translation, :user => user)
-
-        if expect_reply
-          expect_message { message.process! }
-          assert_deliver(:body => last_reply.alternate_translation)
-        else
-          message.process!
-        end
-        user.locale.should == asserted_locale
-        message.should be_processed
-      end
-
-      context "if the message body is same as the user's current locale" do
-        it "should not update the user's locale nor resend the last reply" do
-          assert_update_locale(user.locale.to_s, user.locale, false)
-        end
-      end
-
-      context "if the message body is different from the user's current locale and is valid" do
-        it "should update the user's locale and resend the last reply in the new locale" do
-          assert_update_locale("en", :en, true)
-        end
-      end
-    end
-
     shared_examples_for "forwarding the message to a previous chat partner" do
       context "if the message body contains the screen id of a recent previous chat partner" do
         let(:bob) { create(:user, :name => "bob") }
@@ -297,7 +267,6 @@ describe Message do
         chat
       end
 
-      it_should_behave_like "updating the user's locale"
       it_should_behave_like "forwarding the message to a previous chat partner"
 
       context "and the message body is" do
@@ -367,7 +336,6 @@ describe Message do
 
     context "given the user is not currently chatting" do
 
-      it_should_behave_like "updating the user's locale"
       it_should_behave_like "forwarding the message to a previous chat partner"
 
       context "and the message body is" do

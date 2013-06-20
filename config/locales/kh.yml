@@ -14,3 +14,69 @@ kh:
       last_word_connector: ! ' & '
       two_words_connector: ! ' & '
       words_connector: ! ', '
+  i_ams:
+    - "nhom"
+    - "nhum"
+    - "me"
+  name_announcements:
+    - "nhom chhmous"
+    - "my name"
+  genders:
+    female:
+      - "srey"
+      - "gril"
+    male:
+      - "bros"
+  softeners:
+    female:
+      - "na"
+      - "ja"
+  greeting_starters:
+    - "sousdey"
+  name_questions:
+    - "nek chhmous ey?"
+  gender_questions:
+    - "bros ru srey?"
+    - "srey ru bros?"
+    - "b ru g?"
+    - "g ru b?"
+  you:
+    - "nek"
+  location_questions:
+    - "nov na?"
+    - "live na?"
+    - "nov na del?"
+    - "nov ey na?"
+  age_questions:
+    - "a yu ponman heoy?"
+    - "ayuk ponman?"
+    - "a yu pun man?"
+  greetings:
+    - "%{recipient_greeting} 2day u can play sms mok me ban ot?"
+    - "%{recipient_greeting} 92c u nas fri....."
+    - "%{recipient_greeting}%{sender_introduction} do ey neng fri ? H a u 2day?%{recipient_questions}"
+    - "%{recipient_greeting}%{sender_introduction} do you want to play sms with me ort?%{recipient_questions} Can u teel me?"
+    - "fri how are you?"
+    - "%{recipient_greeting}%{sender_introduction} how a you doing now?%{recipient_questions}"
+    - "%{recipient_greeting} how r u and doing what ? Oh i 4get where r u Now ?"
+    - "%{sender_introduction} I want to make friend with ok te%{recipient_name}?%{recipient_questions}"
+    - "%{recipient_greeting}%{sender_introduction} jong chat chea moy nhom ot?%{recipient_questions}"
+    - "Mean fri na jong chat muy nhom ot . %{sender_introduction}"
+    - "%{recipient_greeting}%{sender_introduction} nhom jorng skoul nek ban te?%{recipient_questions}"
+    - "%{recipient_greeting}%{sender_introduction} nhom rikreay nas del ban skal.%{recipient_questions}"
+    - "%{recipient_greeting}%{sender_introduction} nek leng sms chea moy nhom te?%{recipient_questions}"
+    - "oh nice to know u, soksabay te? Eat rice Nov?"
+    - "%{recipient_greeting}%{sender_introduction} soksabay te?%{recipient_questions}"
+    - "%{recipient_greeting} Sorry friend del befor time i can't sms tov u but i men 4get u te or but why u men call mok me.or u 4get me hey."
+    - "%{sender_introduction} u ban play chat with me?"
+    - "%{recipient_greeting} w a y d? how d a y! %{sender_introduction}"
+  call_me:
+    - "%{recipient_name} Som call mok nhom veng tam %{on}"
+    - "Can u call me ban ort%{recipient_name}? Ach call tam %{on}"
+    - "%{recipient_name}, u call mok ban 0rt. nhom %{on}"
+    - "Hi%{recipient_name} plscall me tam %{on}"
+    - "Please call %{on} na %{recipient_name}"
+    - "%{recipient_name} can u call or sms with me ban ort?number i %{on}"
+    - "%{recipient_name}, could u call to me by phone?would u like?my phone %{on}"
+    - "C to me na tam %{on} call to me na %{recipient_name}"
+    - "hi %{recipient_name} :) Som call mok nhom tam %{on}"

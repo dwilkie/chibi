@@ -1344,17 +1344,9 @@ describe User do
   end
 
   describe "#locale" do
-    it "should return a lowercase symbol of the locale" do
-      subject.locale = :EN
-      subject.locale.should == :en
-    end
-
-    context "if the locale is nil" do
-      it "should delegate to #country_code and convert it to a symbol" do
-        user.locale = nil
-        user.country_code.should be_present
-        user.locale.should == user.country_code.to_sym
-      end
+    it "should delegate to #country_code and convert it to a symbol" do
+      user.country_code.should be_present
+      user.locale.should == user.country_code.to_sym
     end
   end
 
@@ -1900,7 +1892,7 @@ describe User do
       user.should_not be_online
     end
 
-    context "passing no options" do
+    context "given the user is not currently chatting" do
       before do
         user.logout!
       end
@@ -1908,15 +1900,6 @@ describe User do
       it "should not create any notifications" do
         reply.should be_nil
         reply_to_partner.should be_nil
-      end
-    end
-
-    context ":notify => true" do
-      it "should notify the user that they are now offline and inform him how to meet someone new" do
-        expect_message do
-          user.logout!(:notify => true)
-        end
-        reply.body.should == spec_translate(:anonymous_logged_out, user.locale)
       end
     end
 
@@ -1936,36 +1919,6 @@ describe User do
         friend.should_not be_currently_chatting
         friend.should be_online
       end
-
-      context "passing :notify => true" do
-        it "should notify the user that they are now offline and inform them how to chat again" do
-          expect_message do
-            user.logout!(:notify => true)
-          end
-          reply.body.should == spec_translate(:logged_out_from_chat, user.locale, friend.screen_id)
-        end
-      end
-
-      context "passing :notify_chat_partner => true" do
-        it "should notify the chat partner that their chat has ended" do
-          expect_message do
-            user.logout!(:notify_chat_partner => true)
-          end
-          reply_to_partner.body.should == spec_translate(
-            :anonymous_chat_has_ended, friend.locale
-          )
-          reply.should be_nil
-        end
-      end
-    end
-  end
-
-  describe "#welcome!" do
-    it "should welcome the user" do
-      expect_message do
-        user.welcome!
-      end
-      reply_to(user).body.should == spec_translate(:welcome, [user.locale, user.country_code])
     end
   end
 
@@ -2002,72 +1955,6 @@ describe User do
       let(:positive_assertion) { :assert_friend_found }
       let(:negative_assertion) { :assert_friend_not_found }
       let(:task) { :do_find_friends }
-    end
-  end
-
-  describe "#update_locale!" do
-    def setup_redelivery_scenario(subject, options = {})
-      body = "something"
-
-      # create a delivered reply with an alternate translation
-      # to test that this reply is redelivered with the alternative translation
-      delivered_reply_with_alternate_translation = create(
-        :reply, :delivered, :with_alternate_translation, :user => subject, :body => body
-      )
-
-      # create an undelivered reply with an alternate translation to test
-      # that this reply should not be redelivered when updating the locale
-      create(:reply, :with_alternate_translation, :user => subject, :body => body)
-
-      # create another delivered reply without an alternate translation
-      # to test that no resend is performed when updating the locale when the last
-      # reply has no alternate translation
-      delivered_reply = create(
-        :reply, :delivered, :user => subject, :body => body
-      ) if options[:later_no_alternate_translation_reply]
-
-      delivered_reply || delivered_reply_with_alternate_translation
-    end
-
-    def assert_update_locale(with_locale, options = {})
-      options[:success] = true unless options[:success] == false
-      success = options.delete(:success)
-      assert_notify = options.delete(:assert_notify)
-      later_no_alternate_translation_reply = options.delete(:later_no_alternate_translation_reply)
-
-      subject = create(:user)
-
-      reply_to_redeliver = setup_redelivery_scenario(
-        subject, :later_no_alternate_translation_reply => later_no_alternate_translation_reply
-      ) if options[:notify]
-
-      if assert_notify
-        expect_message { subject.update_locale!(with_locale, options).should send("be_#{success}") }
-        assert_deliver(:body => reply_to_redeliver.alternate_translation)
-      else
-        # this will raise an error if a reply is delivered
-        subject.update_locale!(with_locale, options).should send("be_#{success}")
-      end
-
-      subject.reload # ensure changes are saved
-      success ? subject.locale.should == with_locale.downcase.to_sym : subject.locale.should == subject.country_code.to_sym
-    end
-
-    it "should only update the locale of the user for valid locales" do
-      assert_update_locale("en")
-      assert_update_locale(user.country_code)
-      assert_update_locale("us", :success => false)
-      assert_update_locale("hi im tom what are you doing", :success => false)
-    end
-
-    context "passing :notify" do
-      it "should try to resend the last message in the new locale only if :notify => true" do
-        assert_update_locale("en", :notify => true, :assert_notify => true)
-        assert_update_locale(user.country_code, :notify => true, :assert_notify => false)
-        assert_update_locale(
-          "en", :notify => true, :assert_notify => false, :later_no_alternate_translation_reply => true
-        )
-      end
     end
   end
 end
