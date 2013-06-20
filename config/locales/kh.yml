@@ -70,3 +70,13 @@ kh:
     - "%{recipient_greeting} Sorry friend del befor time i can't sms tov u but i men 4get u te or but why u men call mok me.or u 4get me hey."
     - "%{sender_introduction} u ban play chat with me?"
     - "%{recipient_greeting} w a y d? how d a y! %{sender_introduction}"
+  call_me:
+    - "%{recipient_name} Som call mok nhom veng tam %{on}"
+    - "Can u call me ban ort%{recipient_name}? Ach call tam %{on}"
+    - "%{recipient_name}, u call mok ban 0rt. nhom %{on}"
+    - "Hi%{recipient_name} plscall me tam %{on}"
+    - "Please call %{on} na %{recipient_name}"
+    - "%{recipient_name} can u call or sms with me ban ort?number i %{on}"
+    - "%{recipient_name}, could u call to me by phone?would u like?my phone %{on}"
+    - "C to me na tam %{on} call to me na %{recipient_name}"
+    - "hi %{recipient_name} :) Som call mok nhom tam %{on}"

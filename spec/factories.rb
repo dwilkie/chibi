@@ -186,19 +186,6 @@ FactoryGirl.define do
     body "body"
     to { user.mobile_number }
 
-    trait :with_alternate_translation do
-      alternate_translation "alternate translation"
-      with_locale
-    end
-
-    trait :without_locale do
-      locale nil
-    end
-
-    trait :with_locale do
-      locale { user.locale }
-    end
-
     trait :delivered do
       delivered_at { Time.now }
     end

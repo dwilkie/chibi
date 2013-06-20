@@ -75,3 +75,7 @@ en:
     - "nice 2 chat with you %{recipient_name}!"
     - "%{recipient_greeting}%{sender_introduction} nice to know u.%{recipient_questions}"
     - "%{recipient_greeting} same to you!%{sender_introduction}!"
+    - "%{recipient_greeting}%{sender_introduction} i want to play SMS! %{recipient_questions}"
+  call_me:
+    - "Hi%{recipient_name} can you call me back on %{on}?"
+    - "%{recipient_name}, please call me. %{on}"

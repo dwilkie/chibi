@@ -119,18 +119,6 @@ describe Chat do
           reply_to(user, reference_chat).should be_nil
           reply_to(friend, reference_chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
         end
-
-        context "and :notify_initator => true" do
-          it "should introduce the initiator as well" do
-            expect_message { reference_chat.activate!(:notify => true, :notify_initiator => true) }
-
-            reply_to(friend, reference_chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
-
-            reply_to(user, reference_chat).body.should == spec_translate(
-              :anonymous_new_friend_found, user.locale, friend.screen_id
-            )
-          end
-        end
       end
 
       context "passing no options" do
@@ -184,22 +172,6 @@ describe Chat do
           reply_to(current_chat_partner, current_active_chat).should be_nil
           reply_to(user, current_active_chat).should be_nil
         end
-
-        context "and :notify_previous_partner => true" do
-          it "should inform the previous chat partner how to find a new friend" do
-            expect_message { new_chat.activate!(:notify => true, :notify_previous_partner => true) }
-            reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
-              :chat_has_ended, current_chat_partner.locale
-            )
-          end
-        end
-      end
-
-      context "passing no options" do
-        it "should not inform the current chat partner how to find a new friend" do
-          new_chat.activate!
-          reply_to(current_chat_partner, current_active_chat).should be_nil
-        end
       end
     end
 
@@ -243,18 +215,7 @@ describe Chat do
         end
 
         context "passing :notify => true" do
-          it "should notify the user that there are no matches at this time" do
-            expect_message { subject.activate!(:notify => true) }
-            reply_to(user).body.should == spec_translate(:anonymous_could_not_find_a_friend, user.locale)
-          end
-
-          context "with :notify_no_match => false" do
-            before do
-              subject.activate!(:notify => true, :notify_no_match => false)
-            end
-
-            it_should_behave_like "not notifying the user of no match"
-          end
+          it_should_behave_like "not notifying the user of no match"
         end
 
         context "passing no options" do
@@ -401,16 +362,6 @@ describe Chat do
           active_chat_with_single_user.active_users.should == []
         end
       end
-
-      context ":notify => #<User...B>" do
-        it "should inform User B how to start a new chat" do
-          expect_message { active_chat.deactivate!(:active_user => user, :notify => friend) }
-          reply_to_friend.body.should == spec_translate(
-            :chat_has_ended, friend.locale
-          )
-          reply_to_user.should be_nil
-        end
-      end
     end
 
     context "passing :active_user => true" do
@@ -550,24 +501,6 @@ describe Chat do
           create(:chat, :active, :friend => friend)
           assert_chat_not_reactivated(user, chat, :active_user => true, :reactivate_previous_chat => true)
         end
-      end
-    end
-
-    context ":notify => true" do
-      it "should inform both active users how to find a new friend" do
-        expect_message { active_chat.deactivate!(:notify => true) }
-        assert_active_users_cleared
-        reply_to_user.body.should == spec_translate(:anonymous_chat_has_ended, user.locale)
-        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale)
-      end
-    end
-
-    context ":notify => #<User...>" do
-      it "should inform the user specified how to find a new friend" do
-        expect_message { active_chat.deactivate!(:notify => friend) }
-        assert_active_users_cleared
-        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale)
-        reply_to_user.should be_nil
       end
     end
 
@@ -1003,21 +936,6 @@ describe Chat do
       it "should deactivate all chats with inactivity" do
         active_chat_with_inactivity.should_not be_active
         active_chat_with_single_user_with_inactivity.active_users.count.should be_zero
-      end
-    end
-
-    context "passing :notify => true" do
-      before do
-        do_background_task { expect_message { subject.class.end_inactive(:notify => true) } }
-      end
-
-      it "should notify both users that their chat has ended" do
-        reply_to(user, active_chat_with_inactivity).body.should == spec_translate(
-          :anonymous_chat_has_ended, user.locale
-        )
-        reply_to(friend, active_chat_with_inactivity).body.should == spec_translate(
-          :anonymous_chat_has_ended, friend.locale
-        )
       end
     end
 

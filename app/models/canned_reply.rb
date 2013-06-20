@@ -17,6 +17,10 @@ class CannedReply
     )
   end
 
+  def call_me(on)
+    random_sample(:call_me, :on => on, :recipient_name => @recipient_name)
+  end
+
   private
 
   def screen_name(user)
@@ -32,7 +36,7 @@ class CannedReply
   end
 
   def recipient_greeting
-    "#{random_sample(:greeting_starters)}#{screen_name(@recipient)}#{random_sample(:greeting_punctuation_marks)} "
+    "#{random_sample(:greeting_starters)}#{screen_name(@recipient)}#{random_sample(:greeting_punctuation_marks)}"
   end
 
   def recipient_questions
