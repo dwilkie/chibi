@@ -270,7 +270,7 @@ describe Message do
       it_should_behave_like "forwarding the message to a previous chat partner"
 
       context "and the message body is" do
-        ["stop", "off"].each do |stop_variation|
+        ["stop", "off", "stop all"].each do |stop_variation|
           context "'#{stop_variation}'" do
             before do
               message.body = stop_variation

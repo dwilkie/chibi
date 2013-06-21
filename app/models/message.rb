@@ -70,7 +70,7 @@ class Message < ActiveRecord::Base
   private
 
   def user_wants_to_logout?
-    normalized_body == "stop" || normalized_body == "off"
+    normalized_body == "stop" || normalized_body == "off" || normalized_body == "stop all"
   end
 
   def user_wants_to_chat_with_someone_new?
