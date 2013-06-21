@@ -270,30 +270,32 @@ describe Message do
       it_should_behave_like "forwarding the message to a previous chat partner"
 
       context "and the message body is" do
-        context "'stop'" do
-          before do
-            message.body = "stop"
-            expect_message { message.process! }
-          end
+        ["stop", "off"].each do |stop_variation|
+          context "'#{stop_variation}'" do
+            before do
+              message.body = stop_variation
+              expect_message { message.process! }
+            end
 
-          def assert_logout
-            user.should be_offline
-            message.should be_processed
-          end
+            def assert_logout
+              user.should be_offline
+              message.should be_processed
+            end
 
-          it "should logout the user but not notify him that he is now offline" do
-            assert_logout
-            reply_to(user).should be_nil
-            reply_to(friend).should be_nil
-            user.should be_currently_chatting
-          end
+            it "should logout the user but not notify him that he is now offline" do
+              assert_logout
+              reply_to(user).should be_nil
+              reply_to(friend).should be_nil
+              user.should be_currently_chatting
+            end
 
-          it "should not inform the user's partner how to update their profile" do
-            assert_logout
-            reply_to(friend, chat).should be_nil
-            friend.reload
-            friend.should_not be_currently_chatting
-            friend.should be_online
+            it "should not inform the user's partner how to update their profile" do
+              assert_logout
+              reply_to(friend, chat).should be_nil
+              friend.reload
+              friend.should_not be_currently_chatting
+              friend.should be_online
+            end
           end
         end
 
