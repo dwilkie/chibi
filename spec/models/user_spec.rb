@@ -46,7 +46,6 @@ describe User do
 
   shared_examples_for "within hours" do |background_job|
     context "passing :between => 2..14" do
-
       context "given the current time is not between 02:00 UTC and 14:00 UTC" do
         it "should not perform the task" do
           Timecop.freeze(Time.new(2012, 1, 7, 1)) do
