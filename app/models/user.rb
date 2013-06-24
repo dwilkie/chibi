@@ -178,6 +178,10 @@ class User < ActiveRecord::Base
     end
   end
 
+  def can_call_short_code?
+    operator.caller_id.present?
+  end
+
   def caller_id(requesting_api_version)
     adhearsion_twilio_requested?(requesting_api_version) ? (operator.caller_id || twilio_outgoing_number) : twilio_outgoing_number
   end
