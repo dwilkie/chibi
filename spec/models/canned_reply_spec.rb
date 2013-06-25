@@ -12,9 +12,12 @@ describe CannedReply do
     100.times do
       result = subject.send(method, *args)
       result.should_not =~ /[\%\{]+/
-      result.should =~ /#{Regexp.escape(recipient.contact_me_number)}/
       yield(result) if block_given?
     end
+  end
+
+  def assert_contact_number_included(result)
+    result.should =~ /#{Regexp.escape(recipient.contact_me_number)}/
   end
 
   describe "#greeting" do
@@ -26,6 +29,7 @@ describe CannedReply do
   describe "#contact_me" do
     def assert_sms_me(result)
       result.should =~ /sms/i
+      assert_contact_number_included(result)
     end
 
     def assert_call_me(result, positive_assertion = true)

@@ -117,13 +117,12 @@ class Reply < ActiveRecord::Base
   end
 
   def introduce!(partner)
-    introduction ||= canned_reply(:sender => partner, :recipient => user).greeting
-    set_forward_message(partner, introduction)
+    set_forward_message(partner, random_canned_greeting(:sender => partner, :recipient => user))
     deliver!
   end
 
   def send_reminder!
-    self.body = canned_reply(:recipient => user).greeting
+    self.body = random_canned_greeting(:recipient => user)
     prepend_screen_id(Faker::Name.first_name)
     deliver!
   end
@@ -141,6 +140,11 @@ class Reply < ActiveRecord::Base
   end
 
   private
+
+  def random_canned_greeting(options = {})
+    reply = canned_reply(options)
+    rand < (1.0/2) ? reply.greeting : reply.contact_me
+  end
 
   def canned_reply(options = {})
     CannedReply.new(user.locale, options)

@@ -85,7 +85,7 @@ class CannedReply
     end
     sample = pool.sample
     sample.capitalize! if rand < (1.0/2)
-    sample
+    sample.strip
   end
 
   def translation_samples(key, options = {})
