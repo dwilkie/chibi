@@ -32,7 +32,7 @@ FactoryGirl.define do
     n.to_s
   end
 
-  sequence :operator_with_voice, 85510000000 do |n|
+  sequence :operator_number_with_voice, 85510000000 do |n|
     n.to_s
   end
 
@@ -364,7 +364,7 @@ FactoryGirl.define do
     end
 
     trait :from_operator_with_voice do
-      mobile_number { generate(:operator_with_voice) }
+      mobile_number { generate(:operator_number_with_voice) }
     end
 
     trait :searching_for_friend do

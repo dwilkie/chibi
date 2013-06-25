@@ -45,7 +45,7 @@ module MobilePhoneHelpers
   end
 
   def registered_operator(type)
-    factory_generated_number = generate(:registered_operator_number)
+    factory_generated_number = generate(:operator_number_with_voice)
     numbers = {}
     with_operators do |number_parts, assertions|
       number_without_padding = number_parts.join.gsub(/0+$/, "")
