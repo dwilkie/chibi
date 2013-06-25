@@ -8,23 +8,32 @@ class CannedReply
   end
 
   def greeting
-    random_sample(
-      :greetings,
-      :recipient_name => @recipient_name,
-      :recipient_greeting => recipient_greeting,
-      :recipient_questions => recipient_questions,
-      :sender_introduction => sender_introduction,
-    )
+    random_sample(:greetings, interpolations)
   end
 
-  def call_me(on)
-    random_sample(:call_me, :on => on, :recipient_name => @recipient_name)
+  def contact_me
+    random_sample(:contact_me, interpolations.merge(:on => contact_me_on, :call_sms => call_or_sms))
   end
 
   private
 
+  def interpolations
+    {
+      :recipient_name => @recipient_name,
+      :recipient_greeting => recipient_greeting,
+      :recipient_questions => recipient_questions,
+      :sender_introduction => sender_introduction,
+      :sender_name => @sender_name,
+      :sender_city => city(@sender)
+    }
+  end
+
   def screen_name(user)
     " #{user.screen_id}" if user.try(:name)
+  end
+
+  def city(user)
+    user.try(:city) || "pp"
   end
 
   def sender_introduction
@@ -33,6 +42,16 @@ class CannedReply
     sender_intro << gender_announcement if @sender.try(:female?)
     sender_intro << "." unless sender_intro.empty?
     sender_intro
+  end
+
+  def call_or_sms
+    methods = [random_sample(:sms)]
+    methods << random_sample(:call) if @recipient.can_call_short_code?
+    methods.shuffle.join(" #{random_sample(:or)} ")
+  end
+
+  def contact_me_on
+    "#{random_sample(:contact_me_prepositions)} #{@recipient.contact_me_number}"
   end
 
   def recipient_greeting
@@ -66,7 +85,7 @@ class CannedReply
     end
     sample = pool.sample
     sample.capitalize! if rand < (1.0/2)
-    sample
+    sample.strip
   end
 
   def translation_samples(key, options = {})

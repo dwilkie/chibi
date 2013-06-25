@@ -104,7 +104,7 @@ describe "PhoneCalls" do
               reply = reply_to(chat.friend, chat)
               reply.body.should =~ Regexp.new(
                 spec_translate(
-                  :call_me, chat.friend.locale, chat.user.screen_id,
+                  :contact_me, chat.friend.locale, chat.user.screen_id,
                   Regexp.escape(twilio_number)
                 )
               )

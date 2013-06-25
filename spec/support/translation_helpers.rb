@@ -10,7 +10,7 @@ module TranslationHelpers
       :kh => "#[0]: "
     },
 
-    :call_me => {
+    :contact_me => {
       :en => "#[0]:.+#[1]",
       :kh => "#[0]:.+#[1]"
     },
