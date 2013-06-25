@@ -47,7 +47,7 @@ class CannedReply
   def call_or_sms
     methods = [random_sample(:sms)]
     methods << random_sample(:call) if @recipient.can_call_short_code?
-    methods.join(" #{random_sample(:or)} ")
+    methods.shuffle.join(" #{random_sample(:or)} ")
   end
 
   def call_me_on(on)
