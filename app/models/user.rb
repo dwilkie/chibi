@@ -178,6 +178,10 @@ class User < ActiveRecord::Base
     end
   end
 
+  def contact_me_number
+    operator.short_code || twilio_outgoing_number
+  end
+
   def can_call_short_code?
     operator.caller_id.present?
   end

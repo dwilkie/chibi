@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe CannedReply do
+  include PhoneCallHelpers::TwilioHelpers
+
   let(:sender) { create(:user, :female, :name => "bunheng") }
   let(:recipient) { create(:user) }
 
@@ -10,6 +12,7 @@ describe CannedReply do
     100.times do
       result = subject.send(method, *args)
       result.should_not =~ /[\%\{]+/
+      result.should =~ /#{Regexp.escape(recipient.contact_me_number)}/
       yield(result) if block_given?
     end
   end
@@ -20,7 +23,7 @@ describe CannedReply do
     end
   end
 
-  describe "#call_me(on)" do
+  describe "#contact_me" do
     def assert_sms_me(result)
       result.should =~ /sms/i
     end
@@ -32,7 +35,7 @@ describe CannedReply do
 
     context "the recipient's operator does not have voice enabled" do
       it "should generate a 'sms me' message" do
-        assert_random(:call_me, "2442") do |result|
+        assert_random(:contact_me) do |result|
           assert_sms_me(result)
           assert_call_me(result, false)
         end
@@ -43,7 +46,7 @@ describe CannedReply do
       let(:recipient) { create(:user, :from_operator_with_voice) }
 
       it "should generate a 'sms or call me' message" do
-        assert_random(:call_me, "2442") do |result|
+        assert_random(:contact_me) do |result|
           assert_sms_me(result)
           assert_call_me(result)
         end

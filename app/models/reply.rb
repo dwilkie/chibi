@@ -110,8 +110,8 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
-  def call_me(from, on)
-    self.body = canned_reply(:recipient => user).call_me(on)
+  def contact_me(from)
+    self.body = canned_reply(:recipient => user).contact_me
     prepend_screen_id(from.screen_id)
     save
   end

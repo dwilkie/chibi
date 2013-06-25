@@ -1770,6 +1770,15 @@ describe User do
     end
   end
 
+  describe "#contact_me_number" do
+    it "should retun the user's operator's SMS short code or the twilio number" do
+      user.contact_me_number.should == twilio_number
+      with_operators do |number_parts, assertions|
+        build(:user, :mobile_number => number_parts.join).contact_me_number.should == assertions["short_code"]
+      end
+    end
+  end
+
   describe "#caller_id(requesting_api_version)" do
     def assert_caller_id(requesting_api_version, assert_twilio_number)
       # regardless of the requesting api it should always return the twilio number

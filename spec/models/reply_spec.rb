@@ -4,6 +4,7 @@ describe Reply do
   include TranslationHelpers
   include MessagingHelpers
   include ResqueHelpers
+  include PhoneCallHelpers::TwilioHelpers
 
   let(:user) { build(:user) }
 
@@ -520,11 +521,11 @@ describe Reply do
     end
   end
 
-  describe "#call_me(from, on)" do
-    it "should ask the recipient to call back to the number given" do
+  describe "#contact_me(from)" do
+    it "should ask the recipient to sms and/or call back to contactable number" do
       assert_reply(
-        :call_me, :call_me, :approx => true, :deliver => false,
-        :args => [partner, "2443"], :interpolations => [partner.screen_id, "2443"]
+        :contact_me, :contact_me, :approx => true, :deliver => false,
+        :args => [partner], :interpolations => [partner.screen_id, Regexp.escape(twilio_number)]
       )
     end
   end

@@ -67,7 +67,7 @@ en:
     - "sms"
   call:
     - "call"
-  call_me_prepositions:
+  contact_me_prepositions:
     - "on"
   greetings:
     - "%{recipient_greeting}..."
@@ -84,6 +84,6 @@ en:
     - "%{recipient_greeting}%{sender_introduction} nice to know u.%{recipient_questions}"
     - "%{recipient_greeting} same to you!%{sender_introduction}!"
     - "%{recipient_greeting}%{sender_introduction} i want to play SMS! %{recipient_questions}"
-  call_me:
+  contact_me:
     - "Hi%{recipient_name} can you %{call_sms} back %{on}?"
     - "%{recipient_name}, please %{call_sms} me. %{on}"

@@ -249,7 +249,7 @@ class PhoneCall < ActiveRecord::Base
 
   def find_friends(transition)
     set_or_update_current_chat
-    ask_partner_to_call_me if user.currently_chatting? && !can_dial_to_partner?
+    ask_partner_to_contact_me if user.currently_chatting? && !can_dial_to_partner?
     Chat.activate_multiple!(user, :starter => self, :count => MAX_SIMULTANEOUS_OUTBOUND_DIALS)
   end
 
@@ -261,9 +261,9 @@ class PhoneCall < ActiveRecord::Base
     triggered_chats.any?
   end
 
-  def ask_partner_to_call_me
+  def ask_partner_to_contact_me
     to = current_partner
-    current_chat.replies.build(:user => to).call_me(user, to.caller_id(api_version))
+    current_chat.replies.build(:user => to).contact_me(user)
   end
 
   def wants_menu?

@@ -200,7 +200,7 @@ describe PhoneCall do
       reply = reply_to(old_partner, old_chat)
       reply.body.should =~ Regexp.new(
         spec_translate(
-          :call_me, old_partner.locale, caller.screen_id,
+          :contact_me, old_partner.locale, caller.screen_id,
           Regexp.escape(old_partner.caller_id(phone_call.api_version))
         )
       )

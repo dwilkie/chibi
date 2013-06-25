@@ -11,8 +11,8 @@ class CannedReply
     random_sample(:greetings, interpolations)
   end
 
-  def call_me(on)
-    random_sample(:call_me, interpolations.merge(:on => call_me_on(on), :call_sms => call_or_sms))
+  def contact_me
+    random_sample(:contact_me, interpolations.merge(:on => contact_me_on, :call_sms => call_or_sms))
   end
 
   private
@@ -33,7 +33,7 @@ class CannedReply
   end
 
   def city(user)
-    user.city || "pp"
+    user.try(:city) || "pp"
   end
 
   def sender_introduction
@@ -50,8 +50,8 @@ class CannedReply
     methods.shuffle.join(" #{random_sample(:or)} ")
   end
 
-  def call_me_on(on)
-    "#{random_sample(:call_me_prepositions)} #{on}"
+  def contact_me_on
+    "#{random_sample(:contact_me_prepositions)} #{@recipient.contact_me_number}"
   end
 
   def recipient_greeting
