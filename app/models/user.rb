@@ -77,7 +77,7 @@ class User < ActiveRecord::Base
       ).where_values.first
     end
 
-    joins(:location).update_all("name = NULL", banned_name_conditions.join(" OR "))
+    joins(:location).where(banned_name_conditions.join(" OR ")).update_all("name = NULL")
   end
 
   def self.online
@@ -558,6 +558,7 @@ class User < ActiveRecord::Base
     do_find = true
 
     if between = options[:between]
+      between = Range.new(*(between.split("..")).map(&:to_i)) if between.is_a?(String)
       now = Time.now
       do_find = (now >= time_at(between.min) && now <= time_at(between.max))
     end

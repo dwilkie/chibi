@@ -145,14 +145,16 @@ describe Reply do
   end
 
   describe ".undelivered" do
+    let(:another_reply) { create(:reply) }
+
     before do
       reply
+      another_reply
       delivered_reply
     end
 
     it "should return only the undelivered replies" do
-      subject.class.undelivered.should == [reply]
-      subject.class.undelivered.order_values.should == [:created_at]
+      subject.class.undelivered.should == [reply, another_reply]
     end
   end
 
