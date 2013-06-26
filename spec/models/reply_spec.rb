@@ -49,7 +49,7 @@ describe Reply do
   end
 
   def create_race_condition(reference_reply, state)
-    Reply.update_all({:state => state}, :id => reference_reply.id)
+    Reply.where(:id => reference_reply.id).update_all(:state => state)
   end
 
   def assert_persisted_and_delivered(reply, mobile_number, options = {})

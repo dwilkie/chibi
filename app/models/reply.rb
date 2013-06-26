@@ -84,8 +84,8 @@ class Reply < ActiveRecord::Base
 
   def fix_blank!
     if body.blank? && chat.present?
-      replies = chat.replies.order(:id).all
-      if message_to_forward = chat.messages.order(:id).all[replies.index(self) - 1]
+      replies = chat.replies.order(:id)
+      if message_to_forward = chat.messages.order(:id)[replies.index(self) - 1]
         set_forward_message(message_to_forward.user, message_to_forward.body)
         undeliver!
       end
