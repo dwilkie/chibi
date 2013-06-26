@@ -3,7 +3,6 @@ class MissedCall < ActiveRecord::Base
   include Chibi::Communicable::FromUser
 
   attr_accessor :subject
-  attr_accessible :subject, :plain
 
   alias_attribute :plain, :subject
 

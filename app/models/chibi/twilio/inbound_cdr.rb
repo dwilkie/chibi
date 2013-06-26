@@ -1,6 +1,6 @@
 module Chibi
   module Twilio
-    class InboundCdr < InboundCdr
+    class InboundCdr < ::InboundCdr
       include Chibi::Twilio::CallDataRecord
 
       private

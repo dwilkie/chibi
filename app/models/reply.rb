@@ -51,15 +51,15 @@ class Reply < ActiveRecord::Base
   end
 
   def self.delivered
-    scoped.where("delivered_at IS NOT NULL")
+    where("delivered_at IS NOT NULL")
   end
 
   def self.last_delivered
-    scoped.delivered.order(:delivered_at).last
+    delivered.order(:delivered_at).last
   end
 
   def self.undelivered
-    scoped.where(:delivered_at => nil).order(:created_at)
+    where(:delivered_at => nil).order(:created_at)
   end
 
   def self.query_queued!
@@ -156,7 +156,7 @@ class Reply < ActiveRecord::Base
   end
 
   def self.queued_for_smsc_delivery
-    scoped.where(:state => "queued_for_smsc_delivery").where("token IS NOT NULL")
+    where(:state => "queued_for_smsc_delivery").where("token IS NOT NULL")
   end
 
   def undeliver!
@@ -168,10 +168,9 @@ class Reply < ActiveRecord::Base
     return save if @force_state_update
     if valid?
       state_attribute = self.class.state_machine.attribute
-      self.class.update_all(
-        { state_attribute => state },
-        { self.class.primary_key => id, state_attribute => state_was }
-      ) == 1
+      self.class.where(
+        self.class.primary_key => id
+      ).where(state_attribute => state_was).update_all(state_attribute => state) == 1
     end
   end
 

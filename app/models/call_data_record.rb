@@ -12,8 +12,6 @@ class CallDataRecord < ActiveRecord::Base
   validates :phone_call_id, :uniqueness => {:scope => :type}
   validates :type,  :inclusion => { :in => VALID_TYPES }
 
-  attr_accessible :body
-
   after_initialize :set_cdr_attributes
 
   def typed

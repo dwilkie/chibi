@@ -77,11 +77,11 @@ class User < ActiveRecord::Base
       ).where_values.first
     end
 
-    scoped.joins(:location).update_all("name = NULL", banned_name_conditions.join(" OR "))
+    joins(:location).update_all("name = NULL", banned_name_conditions.join(" OR "))
   end
 
   def self.online
-    scoped.where("\"#{table_name}\".\"state\" != ?", "offline")
+    where("\"#{table_name}\".\"state\" != ?", "offline")
   end
 
   def self.filter_by(params = {})
@@ -96,27 +96,27 @@ class User < ActiveRecord::Base
   end
 
   def self.between_the_ages(range)
-    scoped.where("date_of_birth <= ? AND date_of_birth > ?", range.min.years.ago, range.max.years.ago)
+    where("date_of_birth <= ? AND date_of_birth > ?", range.min.years.ago, range.max.years.ago)
   end
 
   def self.male
-    scoped.where(:gender => MALE)
+    where(:gender => MALE)
   end
 
   def self.female
-    scoped.where(:gender => FEMALE)
+    where(:gender => FEMALE)
   end
 
   def self.with_date_of_birth
-    scoped.where("date_of_birth IS NOT NULL")
+    where("date_of_birth IS NOT NULL")
   end
 
   def self.without_gender
-    scoped.where("gender IS NULL")
+    where("gender IS NULL")
   end
 
   def self.available
-    scoped.where(:active_chat_id => nil).online
+    where(:active_chat_id => nil).online
   end
 
   def self.remind!(options = {})
@@ -135,7 +135,7 @@ class User < ActiveRecord::Base
 
   def self.find_friends(options = {})
     within_hours(options) do
-      scoped.where(:state => "searching_for_friend").find_each do |user|
+      where(:state => "searching_for_friend").find_each do |user|
         enqueue_friend_messenger(user, options)
       end
     end
@@ -143,7 +143,7 @@ class User < ActiveRecord::Base
 
   def self.matches(user)
     # don't match the user being matched
-    match_scope = not_scope(scoped, :id => user.id, :include_nil => false)
+    match_scope = not_scope(all, :id => user.id, :include_nil => false)
 
     # exclude existing friends
     match_scope = exclude_existing_friends(user, match_scope)
@@ -539,7 +539,7 @@ class User < ActiveRecord::Base
       condition_values << "#{prefix}%"
     end
 
-    scoped.where(condition_statements.join(" OR "), *condition_values)
+    where(condition_statements.join(" OR "), *condition_values)
   end
 
   def self.inactive_timestamp(options = {})
@@ -547,7 +547,7 @@ class User < ActiveRecord::Base
   end
 
   def self.without_recent_interaction(inactivity_timestamp)
-    scoped.where("updated_at < ?", inactivity_timestamp)
+    where("updated_at < ?", inactivity_timestamp)
   end
 
   def self.quoted_attribute(attribute)
@@ -623,7 +623,11 @@ class User < ActiveRecord::Base
   end
 
   def assign_location
-    build_location(:country_code => torasup_number.country_id, :address => torasup_number.location.area) if location.blank?
+    if location.blank?
+      build_location
+      location.country_code = torasup_number.country_id
+      location.address = torasup_number.location.area
+    end
   end
 
   def set_gender_related_attribute(attribute, value)

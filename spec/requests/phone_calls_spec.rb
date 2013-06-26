@@ -168,7 +168,7 @@ describe "PhoneCalls" do
       end
 
       context "given there are new friends online" do
-        let(:friends) { caller.matches.all }
+        let(:friends) { caller.matches }
         let(:caller) { User.first }
 
         before do

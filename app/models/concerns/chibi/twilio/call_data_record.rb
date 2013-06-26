@@ -6,7 +6,7 @@ module Chibi
 
       included do
         serialize :body, Hash
-        attr_accessible :uuid
+        #attr_accessible :uuid
       end
 
       def body

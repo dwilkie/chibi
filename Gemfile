@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby "2.0.0"
 
-gem 'rails', '3.2.13'
+gem 'rails', '4.0.0'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -25,22 +25,12 @@ gem "multi_xml"
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
-# Gems used only for assets and not required
-# in production environments by default.
-group :assets do
-  gem 'jquery-ui-rails'
-  gem 'sass-rails', "  ~> 3.2.3"
-  gem 'coffee-rails', "~> 3.2.1"
-  gem 'uglifier'
-end
+gem 'jquery-ui-rails'
+gem 'sass-rails', "  ~> 4.0.0"
+gem 'coffee-rails', "~> 4.0.0"
+gem 'uglifier', ">= 1.3.0"
 
 gem 'jquery-rails'
-
-# Use unicorn as the web server
-# gem 'unicorn'
-
-# Deploy with Capistrano
-# gem 'capistrano'
 
 group :test, :development do
   gem 'rspec-rails'

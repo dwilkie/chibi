@@ -51,7 +51,7 @@ class Chat < ActiveRecord::Base
       WHERE (\"replies\".\"user_id\" = ?
       AND \"replies\".\"chat_id\" = \"#{table_name}\".\"id\")
       LIMIT 1) IS NOT NULL", sender.id
-    ).order("\"#{table_name}\".\"created_at\" DESC").limit(options[:num_recent_chats]).includes(:user, :friend)
+    ).order("\"#{table_name}\".\"created_at\" DESC").limit(options[:num_recent_chats]).includes(:user, :friend).references(:replies, table_name)
 
     normalized_message = message.body.downcase
     intended_chat = nil
@@ -182,7 +182,7 @@ class Chat < ActiveRecord::Base
     # return chats that have undelivered messages and the chat participants
     # are available to chat
 
-    scoped.joins(
+    joins(
       :user, :friend, :replies
     ).participant_available(
       :users
@@ -194,7 +194,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.participant_available(participant)
-    scoped.where(
+    where(
       "#{participant}.active_chat_id IS NULL
       OR #{participant}.active_chat_id = #{table_name}.id
       OR (
