@@ -87,3 +87,23 @@ en:
   contact_me:
     - "Hi%{recipient_name} can you %{call_sms} back %{on}?"
     - "%{recipient_name}, please %{call_sms} me. %{on}"
+  its_me:
+    - "Hi%{recipient_name} it's me here"
+  how_do_you_know_my_number:
+    - "Hey! Curious, how do you know my number?"
+    - "Hey! How u know my number?"
+  nice_to_know_you:
+    - "Nice to know you!"
+  thank_you_for_calling_me:
+    - "thank u for calling me%{recipient_name}!"
+  are_you_there:
+    - "Hello%{recipient_name}?"
+    - "Hello%{recipient_name}..are you there?"
+    - "%{recipient_name} are you there ? "
+    - "%{recipient_name} are you there?"
+    - "Hello%{recipient_name} a u there?"
+    - "Hi%{recipient_name}, a u there?"
+    - "R u there?"
+  call_me_back:
+    - "Please call me back"
+    - "Please call me"
