@@ -26,6 +26,32 @@ describe CannedReply do
     end
   end
 
+  describe "#follow_up(options)" do
+    context "passing :to => :caller, :after => :conversation" do
+      it "should should generate a canned message suitable for the caller after a conversation" do
+        assert_random(:follow_up, :to => :caller, :after => :conversation)
+      end
+    end
+
+    context "passing :to => :called_user, :after => :conversation" do
+      it "should should generate a canned message suitable for the called user after a conversation" do
+        assert_random(:follow_up, :to => :called_user, :after => :conversation)
+      end
+    end
+
+    context "passing :to => :user, :after => :short_conversation" do
+      it "should should generate a canned message suitable for the caller user after a short conversation" do
+        assert_random(:follow_up, :to => :caller, :after => :short_conversation)
+      end
+    end
+
+    context "passing :to => :called_user, :after => :short_conversation" do
+      it "should should generate a canned message suitable for the called user after a short conversation" do
+        assert_random(:follow_up, :to => :called_user, :after => :short_conversation)
+      end
+    end
+  end
+
   describe "#contact_me" do
     def assert_sms_me(result)
       result.should =~ /sms/i

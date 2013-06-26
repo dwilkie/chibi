@@ -472,3 +472,29 @@ kh:
     - "Hi%{recipient_name} nhom %{sender_name} u can %{call_sms} %{on} ban na"
     - "%{recipient_name} please %{call_sms} %{on}"
     - "Ok%{recipient_name} u can %{call_sms} me ban %{on}"
+  its_me:
+    - "Hi%{recipient_name} it's me na"
+    - "Hello%{recipient_name} it's%{sender_name} na"
+  how_do_you_know_my_number:
+    - "U skal lek nhom mech del?"
+    - "U skal lek nhom pi na ke?"
+  nice_to_know_you:
+    - "nice 2 know u..ber u opsok can sms or call mok me na"
+    - "Hi%{recipient_name}, nice to meet u. u can call or sms to me ban na"
+    - "hello%{recipient_name}, me reakrey del bay skel na fri"
+    - "hi%{recipient_name}, I reakrey nas del ban skal nak , u can call mok me any time"
+    - "Nhom reakrey nas del ban skel ."
+    - "Hi%{recipient_name}, Nhom rikreay del ban skal u can call or sms mok me ban 24h na"
+    - "Hi%{recipient_name}! I'm rikreay nas del know u. U can call to me ban anytime na."
+    - "Nhom rikreay del ban skol. U can call or sms 2 me ban na"
+    - "%{recipient_name} i want to tell u that, Nice to know u to become my friend na!"
+    - "9 2 know u na fri!"
+  thank_you_for_calling_me:
+    - "thank u for call me na%{recipient_name}.."
+  are_you_there:
+    - "Hi%{recipient_name} ! what happened ? Can i hellp you . How're you ?"
+  call_me_back:
+    - "%{recipient_name} Som call mok nhom veng"
+    - "%{recipient_name} Som call"
+    - "%{recipient_name} call me back ban ort?"
+    - "u can call me back ban?"

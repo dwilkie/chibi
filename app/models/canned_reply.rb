@@ -15,6 +15,16 @@ class CannedReply
     random_sample(:contact_me, interpolations.merge(:on => contact_me_on, :call_sms => call_or_sms))
   end
 
+  def follow_up(options)
+    if options[:after] == :conversation
+      canned_message_keys = [:its_me, :nice_to_know_you]
+      canned_message_keys |= [:thank_you_for_calling_me, :how_do_you_know_my_number] if options[:to] == :caller
+    else
+      canned_message_keys = options[:to] == :caller ? [:are_you_there] : [:call_me_back]
+    end
+    random_sample(*canned_message_keys, interpolations)
+  end
+
   private
 
   def interpolations

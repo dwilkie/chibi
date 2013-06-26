@@ -116,6 +116,11 @@ class Reply < ActiveRecord::Base
     save
   end
 
+  def follow_up!(from, options)
+    set_forward_message(from, canned_reply(:recipient => user, :sender => from).follow_up(options))
+    deliver!
+  end
+
   def introduce!(partner)
     set_forward_message(partner, random_canned_greeting(:sender => partner, :recipient => user))
     deliver!

@@ -53,14 +53,28 @@ describe OutboundCdr do
       let(:user) { create(:user) }
       let(:friend) { create(:user) }
 
+      include MessagingHelpers
+      include TranslationHelpers
+      include_context "replies"
+
       context "given there is an existing chat between the caller and the recipient" do
-        let(:chat) { create(:chat, :friend_active, :user => user, :friend => friend) }
-        subject { build_cdr(:user_who_called => user, :user_who_was_called => friend).typed }
+        def build_cdr(options = {})
+          super({:user_who_called => user, :user_who_was_called => friend}.merge(options)).typed
+        end
+
+        let!(:chat) { create(:chat, :friend_active, :user => user, :friend => friend) }
+        subject { build_cdr }
 
         it "should reactivate the chat" do
           chat.should_not be_active
           subject.save!
           chat.reload.should be_active
+        end
+
+        it "should send a canned message to the caller from the receiver and to the receiver from the caller" do
+          expect_message { subject.save! }
+          reply_to(user, chat).body.should =~ /#{spec_translate(:forward_message_approx, user.locale, friend.screen_id)}/
+          reply_to(friend, chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
         end
       end
     end

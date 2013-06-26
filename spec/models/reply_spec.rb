@@ -530,6 +530,15 @@ describe Reply do
     end
   end
 
+  describe "#follow_up!(from, options)" do
+    it "should send canned follow up message to the recipient from the given user" do
+      assert_reply(
+        :follow_up!, :forward_message_approx, :approx => true,
+        :args => [partner, {:to => :caller, :after => :conversation}], :interpolations => [partner.screen_id]
+      )
+    end
+  end
+
   describe "#send_reminder!" do
     it "should send the user a reminder on how to use the service" do
       assert_reply(
