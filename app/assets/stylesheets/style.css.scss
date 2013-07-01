@@ -37,13 +37,13 @@ body, h1, h2, h3, h3, h4, h5, h6, p, ul, ol, li, img, blockquote, code, pre{
 body, .number{
   font: 15px DroidSansRegular,arial;
   color: #141414;
-  background: url(bg.jpg) repeat #7bb6da;
+  background: image-url("bg.jpg") repeat #7bb6da;
   text-shadow: 0 1px 0 rgba(255,255,255,0.2);
 }
 
 #fancy{
   padding: 60px 0 20px;
-  background: url(fancy-bg.jpg) repeat-x 0 0;
+  background: image-url("fancy-bg.jpg") repeat-x 0 0;
 }
 
 .wrap{
@@ -85,41 +85,6 @@ body, .number{
 #logo{
   float: left;
   margin: 0 0 20px;
-}
-
-
-/* - -- --- TWITTER --- -- - */
-
-#twitter{
-  padding: 0 0 4px;
-  margin: 0 0 -4px 0;
-  height: 26px;
-  text-align: center;
-  font: normal 12px/26px DroidSansRegular,arial;
-  color: #fff;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.3);
-  background: url(twitter-bg.png) repeat-x 0 0;
-  position: relative;
-}
-
-#twitter div{
-  display: inline-block;
-  padding: 0 0 0 40px;
-  margin: 0 auto;
-  height: 26px;
-  background: url(twitter-icon.png) no-repeat 0 0;
-  overflow: hidden;
-}
-
-#twitter a{
-  color: #fff;
-  text-decoration: underline;
-}
-
-#twitter .status{
-  padding: 0 10px 0 0;
-  font: normal 12px/26px DroidSansBold,arial;
-  text-decoration: none;
 }
 
 
@@ -178,7 +143,7 @@ ul.sliderController li a{
   display: block;
   height: 13px;
   width: 13px;
-  background: url(controller.png) no-repeat 0 0;
+  background: image-url("controller.png") no-repeat 0 0;
 }
 
 ul.sliderController li a:hover, ul.sliderController li.current a{
@@ -197,11 +162,11 @@ a.arrow:active{
 }
 
 a.arrow.arrowLeft{
-  background: url(arrow-left.png) no-repeat left center;
+  background: image-url("arrow-left.png") no-repeat left center;
 }
 
 a.arrow.arrowRight{
-  background: url(arrow-right.png) no-repeat right center;
+  background: image-url("arrow-right.png") no-repeat right center;
 }
 
 /* - -- SLIDER COLUMNS -- - */
@@ -303,17 +268,6 @@ ul.faq li img{
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-#singUp{
-  float: left;
-  margin: -2px 0 0 10px;
-  width: 91px;
-  height: 40px;
-  text-indent: -9999px;
-  background: url(signup.png) no-repeat 0 0;
-  cursor: pointer;
-}
-
-
 /* - -- --- FOOTER --- -- - */
 
 #footer{
@@ -375,14 +329,14 @@ h2{
 .titleSeparator{
   margin: 0 0 30px 0;
   text-align: center;
-  background: url(separator.png) repeat-x 0 center;
+  background: image-url("separator.png") repeat-x 0 center;
   clear: both;
 }
 
 .titleSeparator h2{
   display: inline-block;
   padding: 0 30px;
-  background: url(bg.jpg) repeat;
+  background: image-url("bg.jpg") repeat;
 }
 
 h3{
@@ -409,49 +363,6 @@ h5{
   text-align: center;
 }
 
-.downloadButton{
-  float: left;
-  height: 71px;
-  margin: 0 0 1px 0;
-  padding: 0 12px 0 0;
-  color: #fff;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.5);
-  background: url(download-button.png) no-repeat right -71px;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.2);
-  overflow: hidden;
-}
-
-.downloadButton .slidingDoor{
-    float: left;
-    height: 71px;
-    margin: 0;
-    padding: 0 0 0 12px;
-    background: url(download-button.png) no-repeat 0 0;
-    cursor: pointer;
-}
-
-.downloadButton .title{
-  float: left;
-  padding: 7px 5px;
-  font: normal 29px/1em DroidSansBold, arial;
-}
-
-.downloadButton .detail{
-  display: block;
-  clear: both;
-  overflow: hidden;
-}
-
-.downloadButton .detail span{
-  float: left;
-  margin: 0 5px;
-  font: normal 12px/1em arial;
-}
-
-.downloadButton:active{
-  margin: 1px 0 0 0;
-}
-
 .intro p{
   margin-bottom: 20px;
   font-size: 20px;
@@ -461,7 +372,7 @@ h5{
 .separator{
   height: 2px;
   margin: 0 0 25px;
-  background: url(separator.png) repeat-x 0 center;
+  background: image-url("separator.png") repeat-x 0 center;
   clear: both;
 }
 
