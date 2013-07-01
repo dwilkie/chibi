@@ -43,8 +43,6 @@ class PhoneCall < ActiveRecord::Base
   attr_accessor :redirect_url, :digits, :to, :dial_status, :call_status, :api_version
   alias_attribute :call_sid, :sid
 
-  attr_accessible :to, :api_version
-
   validates :sid, :presence => true, :uniqueness => true
   validates :dial_call_sid, :uniqueness => true, :allow_nil => true
 
@@ -185,7 +183,11 @@ class PhoneCall < ActiveRecord::Base
   def self.find_or_create_and_process_by(params, redirect_url)
     params.underscorify_keys!
 
-    phone_call = self.find_or_create_by_sid(params[:call_sid], params.slice(:from, :to))
+    phone_call = find_or_create_by(:sid => params[:call_sid])
+    if phone_call.new_record?
+      phone_call.from = params[:from]
+      phone_call.to = params[:to]
+    end
 
     if phone_call.valid?
       phone_call.login_user!

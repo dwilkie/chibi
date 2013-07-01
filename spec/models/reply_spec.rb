@@ -49,7 +49,7 @@ describe Reply do
   end
 
   def create_race_condition(reference_reply, state)
-    Reply.update_all({:state => state}, :id => reference_reply.id)
+    Reply.where(:id => reference_reply.id).update_all(:state => state)
   end
 
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
@@ -145,14 +145,16 @@ describe Reply do
   end
 
   describe ".undelivered" do
+    let(:another_reply) { create(:reply) }
+
     before do
       reply
+      another_reply
       delivered_reply
     end
 
     it "should return only the undelivered replies" do
-      subject.class.undelivered.should == [reply]
-      subject.class.undelivered.order_values.should == [:created_at]
+      subject.class.undelivered.should == [reply, another_reply]
     end
   end
 

@@ -161,7 +161,7 @@ describe PhoneCall do
     it "should find or create the phone call and process it returning the phone call if valid" do
       params = sample_params
 
-      subject.class.stub(:find_or_create_by_sid).and_return(phone_call)
+      subject.class.stub(:find_or_create_by).and_return(phone_call)
 
       phone_call.should_receive(:login_user!)
       phone_call.should_receive(:process!)
@@ -176,7 +176,8 @@ describe PhoneCall do
 
       subject.should_not_receive(:login_user!)
       subject.should_not_receive(:process!)
-      subject.class.stub(:find_or_create_by_sid).and_return(subject)
+      subject.class.stub(:find_or_create_by).and_return(subject)
+      subject.stub(:new_record?).and_return(false)
       subject.class.find_or_create_and_process_by(params.dup, "http://example.com").should be_nil
     end
   end

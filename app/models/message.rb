@@ -7,7 +7,6 @@ class Message < ActiveRecord::Base
   include Chibi::Analyzable
   include Chibi::ChatStarter
 
-  attr_accessible :body, :guid
   alias_attribute :origin, :from
 
   validates :guid, :uniqueness => true, :allow_nil => true
@@ -22,7 +21,7 @@ class Message < ActiveRecord::Base
 
   def self.queue_unprocessed(options = {})
     options[:timeout] ||= 30.seconds.ago
-    unprocessed = scoped.where(
+    unprocessed = where(
       "state != 'processed'"
     ).where("created_at <= ?", options[:timeout])
     unprocessed.where(:chat_id => nil).find_each do |message|

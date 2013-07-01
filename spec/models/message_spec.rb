@@ -92,13 +92,6 @@ describe Message do
     end
   end
 
-  describe "#guid" do
-    it "should be mass assignable" do
-      message = subject.class.new(:guid => "1234")
-      message.guid.should == "1234"
-    end
-  end
-
   describe "#origin" do
     it "should be an alias for the attribute '#from'" do
       sample_number = generate(:mobile_number)

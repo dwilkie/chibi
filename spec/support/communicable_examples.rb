@@ -110,7 +110,7 @@ shared_examples_for "communicable from user" do
   describe "callbacks" do
     context "before validation(:on => :create)" do
       it "should try to find or initialize the user with the mobile number" do
-        User.should_receive(:find_or_initialize_by_mobile_number).with(user.mobile_number)
+        User.should_receive(:find_or_initialize_by).with(:mobile_number => user.mobile_number)
         subject.class.new(:from => user.mobile_number).valid?
       end
 
@@ -209,7 +209,7 @@ shared_examples_for "filtering with communicable resources" do
 
   describe ".filter_params" do
     it "should return the total number of resources" do
-      subject.class.filter_params.should == subject.class.scoped
+      subject.class.filter_params.should == subject.class.all
     end
   end
 

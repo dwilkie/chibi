@@ -9,7 +9,7 @@ module Chibi
         date_sql = options[:timeframe] ? "DATE_TRUNC('#{options[:timeframe]}', created_at)" : "DATE(created_at)"
         group_by_sql = "EXTRACT(EPOCH FROM #{date_sql}) * 1000"
 
-        scope = scoped
+        scope = all
 
         scope = scope.where(
           "#{table_name}.created_at >= ?", options[:least_recent].ago

@@ -17,8 +17,6 @@ module Chibi
       MAX_LOCAL_NUMBER_LENGTH = 10
 
       included do
-        attr_accessible :from
-
         validates :from, :presence => true
 
         before_validation(:on => :create) do
@@ -60,7 +58,7 @@ module Chibi
       private
 
       def assign_to_user
-        self.user = User.find_or_initialize_by_mobile_number(from) unless user_id.present?
+        self.user = User.find_or_initialize_by(:mobile_number => from) unless user_id.present?
       end
     end
 
@@ -73,7 +71,7 @@ module Chibi
 
       module ClassMethods
         def filter_by(params = {})
-          scoped.where(params.slice(:user_id, :chat_id)).order("created_at DESC")
+          where(params.slice(:user_id, :chat_id)).order("created_at DESC")
         end
       end
     end
@@ -106,13 +104,13 @@ module Chibi
         end
 
         def filter_params(params = {})
-          scoped
+          all
         end
 
         private
 
         def communicable_resources_scope
-          scoped.includes(*COMMUNICABLE_RESOURCES).order("\"#{table_name}\".\"updated_at\" DESC")
+          includes(*COMMUNICABLE_RESOURCES).order("\"#{table_name}\".\"updated_at\" DESC")
         end
       end
     end

@@ -304,7 +304,6 @@ describe User do
   end
 
   describe ".find_friends" do
-
     def do_find_friends(options = {})
       do_background_task(options) { subject.class.find_friends(options) }
     end
@@ -1721,7 +1720,7 @@ describe User do
       end
 
       it "should set the user's date of birth to 15 years ago" do
-        subject.date_of_birth.should == 15.years.ago.utc
+        subject.date_of_birth.should == 15.years.ago.to_date
       end
     end
 

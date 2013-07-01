@@ -1,6 +1,6 @@
 module Chibi
   module Twilio
-    class Twilio::OutboundCdr < OutboundCdr
+    class OutboundCdr < ::OutboundCdr
       include Chibi::Twilio::CallDataRecord
 
       def variables
