@@ -1,4 +1,6 @@
 Chibi::Application.routes.draw do
+  root "welcome#index"
+
   resources :messages, :only => :create
   resources :phone_calls, :only => :create, :defaults => { :format => 'xml' }
   resources :missed_calls, :only => :create
