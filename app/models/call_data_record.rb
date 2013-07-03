@@ -1,6 +1,8 @@
 class CallDataRecord < ActiveRecord::Base
   VALID_TYPES = %w{InboundCdr OutboundCdr Chibi::Twilio::InboundCdr Chibi::Twilio::OutboundCdr}
 
+  after_initialize :set_cdr_attributes
+
   include Chibi::Communicable
   include Chibi::Communicable::FromUser
 
@@ -12,10 +14,8 @@ class CallDataRecord < ActiveRecord::Base
   validates :phone_call_id, :uniqueness => {:scope => :type}
   validates :type,  :inclusion => { :in => VALID_TYPES }
 
-  after_initialize :set_cdr_attributes
-
   def typed
-    valid? ? becomes(type.constantize) : self
+    valid? ? type.constantize.new(:body => body) : self
   end
 
   private
