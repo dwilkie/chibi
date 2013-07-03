@@ -1,9 +1,7 @@
 class InboundCdr < CallDataRecord
   validates :rfc2822_date, :presence => true
 
-  before_validation(:on => :create) do
-    set_inbound_cdr_attributes
-  end
+  before_validation :set_inbound_cdr_attributes, :on => :create
 
   private
 

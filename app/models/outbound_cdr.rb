@@ -3,9 +3,7 @@ class OutboundCdr < CallDataRecord
 
   validates :bridge_uuid, :presence => true
 
-  before_validation(:on => :create) do
-    set_outbound_cdr_attributes
-  end
+  before_validation :set_outbound_cdr_attributes, :on => :create
 
   after_create :activate_chat
 
