@@ -1,7 +1,8 @@
 class CallDataRecord < ActiveRecord::Base
   VALID_TYPES = %w{InboundCdr OutboundCdr Chibi::Twilio::InboundCdr Chibi::Twilio::OutboundCdr}
 
-  after_initialize :set_cdr_attributes
+  after_initialize :set_type
+  before_validation :set_cdr_attributes, :on => :create
 
   include Chibi::Communicable
   include Chibi::Communicable::FromUser
@@ -15,30 +16,31 @@ class CallDataRecord < ActiveRecord::Base
   validates :type,  :inclusion => { :in => VALID_TYPES }
 
   def typed
-    valid? ? type.constantize.new(:body => body) : self
+    VALID_TYPES.include?(type) ? type.constantize.new(:body => body) : self
   end
 
   private
 
-  def set_cdr_attributes
+  def set_type
     if new_record? && body.present?
       self.direction ||= variables["direction"]
       self.type ||= "#{direction}_cdr".classify
+    end
+  end
+
+  def set_cdr_attributes
+    if body.present?
       self.uuid ||= variables["uuid"]
       self.duration ||= variables["duration"]
       self.bill_sec ||= variables["billsec"]
-      self.from ||= cdr_from
       self.bridge_uuid ||= variables["bridge_uuid"]
+      self.from ||= cdr_from
       self.phone_call ||= (find_related_phone_call(uuid) || find_related_phone_call(bridge_uuid))
     end
   end
 
   def find_related_phone_call(sid)
     PhoneCall.find_by_sid(sid)
-  end
-
-  def cdr_from
-    inbound? ? (valid_source("sip_from_user") || valid_source("sip_P_Asserted_Identity")) : valid_source("sip_to_user")
   end
 
   def unescaped_variable(name)

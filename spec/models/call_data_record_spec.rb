@@ -4,74 +4,65 @@ describe CallDataRecord do
   include CdrHelpers
 
   let(:cdr) { create_cdr }
-  subject { build_cdr }
+  let(:new_cdr) { build_cdr }
 
   describe "factory" do
     it "should be valid" do
-      subject.should be_valid
+      cdr.should be_valid
     end
   end
 
   it "should not be valid without a body" do
-    subject.body = nil
-    subject.should_not be_valid
+    cdr.body = nil
+    cdr.should_not be_valid
   end
 
   it "should not be valid without a direction" do
-    subject.direction = nil
-    subject.should_not be_valid
+    cdr.direction = nil
+    cdr.should_not be_valid
   end
 
   it "should not be valid without a type" do
-    subject.type = nil
-    subject.should_not be_valid
+    cdr.type = nil
+    cdr.should_not be_valid
   end
 
   it "should not be valid with the wrong type" do
-    subject.type = "Foo"
-    subject.should_not be_valid
+    cdr.type = "Foo"
+    cdr.should_not be_valid
   end
 
   it "should not be valid without a uuid" do
-    subject.uuid = nil
-    subject.should_not be_valid
+    cdr.uuid = nil
+    cdr.should_not be_valid
   end
 
   it "should not be valid with a duplicate uuid" do
-    cdr
-    subject.uuid = cdr.uuid
-    subject.should_not be_valid
+    new_cdr.uuid = cdr.uuid
+    new_cdr.should_not be_valid
   end
 
   it "should not be valid without an associated phone call" do
-    subject = build_cdr(:variables => {"uuid" => "invalid"})
-    subject.should_not be_valid
+    new_cdr = build_cdr(:variables => {"uuid" => "invalid"})
+    new_cdr.should_not be_valid
   end
 
   it "should not be valid with a duplicate phone call id for the same type" do
-    subject.phone_call = cdr.phone_call
-    subject.should_not be_valid
+    new_cdr.phone_call = cdr.phone_call
+    new_cdr.should_not be_valid
     outbound_cdr = create_cdr(:variables => {"direction" => "outbound"})
-    subject.phone_call = outbound_cdr.phone_call
-    subject.should be_valid
+    new_cdr.phone_call = outbound_cdr.phone_call
+    new_cdr.should be_valid
   end
 
   it "should not be valid without a duration" do
-    subject.duration = nil
-    subject.should_not be_valid
+    cdr.duration = nil
+    cdr.should_not be_valid
   end
 
   it "should not be valid without a bill_sec" do
-    subject.bill_sec = nil
-    subject.should_not be_valid
-  end
-
-  it "should not be valid without a related user" do
-    subject = build_cdr(
-      :variables => {
-        "sip_from_user" => "invalid", "sip_P-Asserted-Identity" => "invalid"
-      }
-    ).should_not be_valid
+    cdr.bill_sec = nil
+    cdr.should_not be_valid
   end
 
   it_should_behave_like "communicable" do
@@ -84,27 +75,39 @@ describe CallDataRecord do
 
   describe "callbacks" do
     describe "after initialize" do
-      it "should correctly populate the required attributes" do
-        subject.direction.should == "inbound" # from factory
-        subject.type.should == "InboundCdr"   # from factory
-        subject.bill_sec.should == 15         # from factory
-        subject.duration.should == 20         # from factory
-        subject.uuid.should be_present
-        subject.phone_call.should be_present
+      it "should set the type for type casting" do
+        new_cdr.direction.should == "inbound" # from factory
+        new_cdr.type.should == "InboundCdr"   # from factory
+      end
+    end
+
+    describe "before_validation(:on => :create)" do
+      it "should set the rest of the fields" do
+        new_cdr.valid?
+        new_cdr.bill_sec.should == 15         # from factory
+        new_cdr.duration.should == 20         # from factory
+        new_cdr.uuid.should be_present
+        new_cdr.phone_call.should be_present
       end
     end
   end
 
   describe "#typed" do
-    context "cdr is valid" do
+    subject { CallDataRecord.new }
+
+    context "cdr has a valid type" do
+      before do
+        subject.type = "InboundCdr"
+      end
+
       it "should return the typed version of the CDR" do
-        subject.typed.should be_a(InboundCdr) # From factory
+        subject.typed.should be_a(InboundCdr)
       end
     end
 
     context "cdr is invalid" do
       before do
-        subject.direction = nil
+        subject.type = nil
       end
 
       it "should return itself" do

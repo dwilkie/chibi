@@ -8,19 +8,13 @@ describe OutboundCdr do
     super(*args, {:variables => {"direction" => "outbound"}}.deep_merge(options))
   end
 
-  let(:cdr) { create_cdr.typed }
-  subject { build_cdr.typed }
+  let(:cdr) { create_cdr }
+  subject { build_cdr }
 
   describe "factory" do
     it "should be valid" do
       subject.should be_valid
     end
-  end
-
-  it "should be valid without an associated incoming cdr" do
-    # these can get created before and incoming CDR is received
-    subject.bridge_uuid = "invalid"
-    subject.should be_valid
   end
 
   it "should not be valid without a bridge_uuid" do
@@ -29,15 +23,19 @@ describe OutboundCdr do
     subject.should_not be_valid
   end
 
+  it "should not be valid without a related user" do
+    build_cdr(:variables => {"sip_to_user" => "invalid", "destination_number" => "invalid"}).should_not be_valid
+  end
+
   describe "callbacks" do
     describe "before validate on create" do
       context "given an existing related inbound cdr" do
         let(:inbound_cdr) { create_cdr(:variables => {"direction" => "inbound"}) }
-        subject { build_cdr(:variables => {"bridge_uuid" => inbound_cdr.uuid}).typed }
+        subject { build_cdr(:variables => {"bridge_uuid" => inbound_cdr.uuid}) }
 
         it "should set the related inbound cdr" do
           subject.valid?
-          subject.bridge_uuid.should == inbound_cdr.uuid
+          subject.inbound_cdr.should == inbound_cdr
         end
       end
 
@@ -59,7 +57,7 @@ describe OutboundCdr do
 
       context "given there is an existing chat between the caller and the recipient" do
         def build_cdr(options = {})
-          super({:user_who_called => user, :user_who_was_called => friend}.merge(options)).typed
+          super({:user_who_called => user, :user_who_was_called => friend}.merge(options))
         end
 
         let!(:chat) { create(:chat, :friend_active, :user => user, :friend => friend) }
