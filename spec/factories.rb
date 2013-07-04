@@ -650,6 +650,7 @@ FactoryGirl.define do
         called_user = user_who_was_called || FactoryGirl.create(:user)
         dynamic_variables["uuid"] ||= FactoryGirl.generate(:guid)
         dynamic_variables["sip_to_user"] ||= called_user.mobile_number
+        dynamic_variables["destination_number"] ||= called_user.mobile_number
         dynamic_variables["bridge_uuid"] ||= incoming_phone_call.sid
       end
 

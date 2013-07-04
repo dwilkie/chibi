@@ -19,7 +19,7 @@ describe "Call Data Records" do
 
   describe "POST /call_data_records.xml" do
     def build_cdr(*args)
-      cdr = super.typed
+      cdr = super
       cdr.valid?
       cdr
     end

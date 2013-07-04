@@ -10,4 +10,8 @@ class InboundCdr < CallDataRecord
       self.rfc2822_date ||= unescaped_variable("RFC2822_DATE")
     end
   end
+
+  def cdr_from
+    valid_source("sip_from_user") || valid_source("sip_P_Asserted_Identity")
+  end
 end

@@ -3,8 +3,8 @@ require 'spec_helper'
 describe InboundCdr do
   include CdrHelpers
 
-  let(:cdr) { create_cdr.typed }
-  subject { build_cdr.typed }
+  let(:cdr) { create_cdr }
+  subject { build_cdr }
 
   describe "factory" do
     it "should be valid" do
@@ -15,6 +15,14 @@ describe InboundCdr do
   it "should not be valid without a rfc2822 date" do
     cdr.rfc2822_date = nil
     cdr.should_not be_valid
+  end
+
+  it "should not be valid without a related user" do
+    build_cdr(
+      :variables => {
+        "sip_from_user" => "invalid", "sip_P-Asserted-Identity" => "invalid"
+      }
+    ).should_not be_valid
   end
 
   describe "callbacks" do

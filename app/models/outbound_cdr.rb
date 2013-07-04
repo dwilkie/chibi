@@ -26,4 +26,8 @@ class OutboundCdr < CallDataRecord
       chat.replies.build(:user => called_user).follow_up!(caller, :to => :called_user, :after => conversation_type)
     end
   end
+
+  def cdr_from
+    valid_source("sip_to_user") || valid_source("destination_number")
+  end
 end

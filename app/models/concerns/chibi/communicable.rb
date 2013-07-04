@@ -18,10 +18,7 @@ module Chibi
 
       included do
         validates :from, :presence => true
-
-        before_validation(:on => :create) do
-          assign_to_user
-        end
+        before_validation :assign_to_user, :on => :create
       end
 
       def from=(value)
