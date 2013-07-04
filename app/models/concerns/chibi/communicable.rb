@@ -76,16 +76,31 @@ module Chibi
     module HasCommunicableResources
       extend ActiveSupport::Concern
 
-      ACTIVE_COMMUNICABLE_RESOURCES = [:phone_calls, :messages]
-      COMMUNICABLE_RESOURCES = ACTIVE_COMMUNICABLE_RESOURCES + [:replies]
-
       included do
-        COMMUNICABLE_RESOURCES.each do |communicable_resource|
-          has_many communicable_resource
-        end
+        cattr_accessor :communicable_resources
       end
 
       module ClassMethods
+        def has_communicable_resources(*resources)
+          options = resources.extract_options!
+          new_resources = resources.dup
+
+          type = options.delete(:active) ? :active : :passive
+          self.communicable_resources ||= {}
+          self.communicable_resources[type] ||= []
+          self.communicable_resources[type] |= new_resources
+
+          new_resources.each do |resource|
+            association_options = ""
+            options.each do |key, value|
+              association_options += ", :#{key} => #{value}"
+            end
+            self.instance_eval <<-RUBY, __FILE__, __LINE__+1
+              has_many :#{resource}#{association_options}
+            RUBY
+          end
+        end
+
         def filter_by(params = {})
           communicable_resources_scope.filter_params(params)
         end
@@ -104,10 +119,14 @@ module Chibi
           all
         end
 
+        def communicable_resources(type = nil)
+          type ? communicable_resources[type] || communicable_resources.values.flatten
+        end
+
         private
 
         def communicable_resources_scope
-          includes(*COMMUNICABLE_RESOURCES).order("\"#{table_name}\".\"updated_at\" DESC")
+          includes(*communicable_resources).order("\"#{table_name}\".\"updated_at\" DESC")
         end
       end
     end

@@ -1,6 +1,6 @@
 require_relative 'phone_call_helpers'
 
-COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
+COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls, :outbound_dials]
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
 shared_examples_for "communicable" do
@@ -197,7 +197,7 @@ shared_examples_for "filtering with communicable resources" do
     end
 
     it "should include the communicable resources associations" do
-      subject.class.filter_by.includes_values.should include(:messages, :replies, :phone_calls)
+      subject.class.filter_by.includes_values.should include(*COMMUNICABLE_RESOURCES)
     end
   end
 
@@ -211,6 +211,10 @@ shared_examples_for "filtering with communicable resources" do
     it "should return the total number of resources" do
       subject.class.filter_params.should == subject.class.all
     end
+  end
+
+  describe ".communicable_resources" do
+    pending "add some examples here"
   end
 
   describe ".find_with_communicable_resources" do

@@ -15,7 +15,7 @@ module ApplicationHelper
   def communicable_links(resource)
     resource_name = resource.class.to_s.underscore
     capture_haml do
-      resource.class::COMMUNICABLE_RESOURCES.each do |communicable_resources|
+      resource.class.communicable_resources.each do |communicable_resources|
         communicable_resource_count = resource.send(communicable_resources).size.to_i
         if communicable_resource_count.zero?
           content = communicable_resource_count

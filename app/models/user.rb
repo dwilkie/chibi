@@ -2,8 +2,18 @@
 
 class User < ActiveRecord::Base
   include Chibi::Analyzable
-  include Chibi::Communicable::HasCommunicableResources
   include Chibi::Twilio::ApiHelpers
+  include Chibi::Communicable::HasCommunicableResources
+
+  # active communicable resources
+  has_communicable_resources :messages, :phone_calls, :active => true
+  has_communicable_resources :outbound_dials, :class_name => "InboundCdr", :active => true
+  has_communicable_resources :twilio_outbound_dials, :class_name => "Chibi::Twilio::InboundCdr", :active => true
+
+  # passive communicable resources
+  has_communicable_resources :replies
+  has_communicable_resources :inbound_dials, :class_name => "OutboundCdr"
+  has_communicable_resources :twilio_inbound_dials, :class_name => "Chibi::Twilio::OutboundCdr"
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
   MALE = "m"
@@ -444,8 +454,8 @@ class User < ActiveRecord::Base
     latest_activity_scope = self
     latest_activity_subscope = self
 
-    # ACTIVE_COMMUNICABLE_RESOURCES (ACR) are communication mechanisms that are user initiated
-    ACTIVE_COMMUNICABLE_RESOURCES.each do |communicable_resource|
+    # communicable_resources[:active] (ACR) are communication mechanisms that are user initiated
+    communicable_resources(:active).each do |communicable_resource|
       # This needs to be a LEFT JOIN because we need to get all the users even if there are no
       # active resources, e.g. a user may have messages but no phone calls
       latest_activity_scope = latest_activity_scope.joins(

@@ -1,8 +1,4 @@
-require "#{Rails.root}/spec/support/phone_call_helpers"
-require "#{Rails.root}/spec/support/mobile_phone_helpers"
-
 FactoryGirl.define do
-
   trait :from_last_month do
     created_at {1.month.ago}
   end
