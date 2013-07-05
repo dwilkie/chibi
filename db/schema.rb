@@ -129,13 +129,14 @@ ActiveRecord::Schema.define(version: 20130705025726) do
     t.string   "name"
     t.string   "screen_name"
     t.date     "date_of_birth"
-    t.string   "gender",         limit: 1
-    t.string   "looking_for",    limit: 1
+    t.string   "gender",             limit: 1
+    t.string   "looking_for",        limit: 1
     t.integer  "active_chat_id"
-    t.datetime "created_at",                                  null: false
-    t.datetime "updated_at",                                  null: false
-    t.string   "state",                    default: "online", null: false
-    t.datetime "last_active_at"
+    t.datetime "created_at",                                      null: false
+    t.datetime "updated_at",                                      null: false
+    t.string   "state",                        default: "online", null: false
+    t.datetime "last_interacted_at"
+    t.datetime "last_contacted_at"
   end
 
   add_index "users", ["active_chat_id"], name: "index_users_on_active_chat_id", using: :btree

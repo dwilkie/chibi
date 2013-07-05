@@ -25,6 +25,10 @@ describe InboundCdr do
     ).should_not be_valid
   end
 
+  it_should_behave_like "communicable from user" do
+    let(:communicable_resource) { cdr }
+  end
+
   describe "callbacks" do
     describe "before validate on create" do
       it "should correctly populate the required attributes" do

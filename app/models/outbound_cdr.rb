@@ -9,6 +9,10 @@ class OutboundCdr < CallDataRecord
 
   private
 
+  def self.user_interaction?
+    false
+  end
+
   def set_outbound_cdr_attributes
     if body.present?
       self.inbound_cdr ||= InboundCdr.where(:direction => "inbound").find_by_uuid(bridge_uuid)

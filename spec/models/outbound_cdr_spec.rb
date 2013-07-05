@@ -27,6 +27,10 @@ describe OutboundCdr do
     build_cdr(:variables => {"sip_to_user" => "invalid", "destination_number" => "invalid"}).should_not be_valid
   end
 
+  it_should_behave_like "communicable from user", :passive => true do
+    let(:communicable_resource) { cdr }
+  end
+
   describe "callbacks" do
     describe "before validate on create" do
       context "given an existing related inbound cdr" do

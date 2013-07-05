@@ -18,16 +18,18 @@ shared_examples_for "communicable" do
 
   describe "callbacks" do
     context "when saving" do
-      it "should touch the user" do
+      it "should record the user's last_contacted_at" do
         user_timestamp = communicable_resource.user.updated_at
         communicable_resource.save
         communicable_resource.user.updated_at.should > user_timestamp
+        communicable_resource.user.last_contacted_at.should > user_timestamp
       end
     end
   end
 end
 
-shared_examples_for "communicable from user" do
+shared_examples_for "communicable from user" do |options|
+  options ||= {}
 
   let(:user) { build(:user) }
 
@@ -108,6 +110,18 @@ shared_examples_for "communicable from user" do
   end
 
   describe "callbacks" do
+    context "after_create" do
+      if options[:passive]
+        it "should not record the users's last_interacted_at" do
+          communicable_resource.user.last_interacted_at.should be_nil
+        end
+      else
+        it "should record the users's last_interacted_at" do
+          communicable_resource.user.last_interacted_at.should be_present
+        end
+      end
+    end
+
     context "before validation(:on => :create)" do
       it "should try to find or initialize the user with the mobile number" do
         User.should_receive(:find_or_initialize_by).with(:mobile_number => user.mobile_number)

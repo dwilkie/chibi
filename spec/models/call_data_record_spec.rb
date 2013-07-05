@@ -69,10 +69,6 @@ describe CallDataRecord do
     let(:communicable_resource) { cdr }
   end
 
-  it_should_behave_like "communicable from user" do
-    let(:communicable_resource) { cdr }
-  end
-
   describe "callbacks" do
     describe "after initialize" do
       it "should set the type for type casting" do

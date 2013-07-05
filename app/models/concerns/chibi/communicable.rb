@@ -3,7 +3,7 @@ module Chibi
     extend ActiveSupport::Concern
 
     included do
-      belongs_to :user, :touch => true
+      belongs_to :user, :touch => :last_contacted_at
       validates :user, :associated => true, :presence => true
     end
 
@@ -17,8 +17,10 @@ module Chibi
       MAX_LOCAL_NUMBER_LENGTH = 10
 
       included do
-        validates :from, :presence => true
         before_validation :assign_to_user, :on => :create
+        after_create :record_user_interaction
+
+        validates :from, :presence => true
       end
 
       def from=(value)
@@ -54,8 +56,18 @@ module Chibi
 
       private
 
+      def record_user_interaction
+        user.touch(:last_interacted_at) if self.class.user_interaction?
+      end
+
       def assign_to_user
         self.user = User.find_or_initialize_by(:mobile_number => from) unless user_id.present?
+      end
+
+      module ClassMethods
+        def user_interaction?
+          true
+        end
       end
     end
 
@@ -82,22 +94,26 @@ module Chibi
 
       module ClassMethods
         def has_communicable_resources(*resources)
-          options = resources.extract_options!
-          new_resources = resources.dup
+          self.communicable_resources ||= []
 
-          type = options.delete(:active) ? :active : :passive
-          self.communicable_resources ||= {}
-          self.communicable_resources[type] ||= []
-          self.communicable_resources[type] |= new_resources
+          resources.each do |resources_config|
+            if resources_config.is_a?(Hash)
+              resources_name = resources_config.keys.first
+              resources_options = resources_config[resources_name]
+            else
+              resources_name = resources_config
+              resources_options = {}
+            end
 
-          new_resources.each do |resource|
             association_options = ""
-            options.each do |key, value|
+            resources_options.each do |key, value|
               association_options += ", :#{key} => #{value}"
             end
             self.instance_eval <<-RUBY, __FILE__, __LINE__+1
-              has_many :#{resource}#{association_options}
+              has_many :#{resources_name}#{association_options}
             RUBY
+
+            self.communicable_resources << resources_name
           end
         end
 
@@ -117,10 +133,6 @@ module Chibi
 
         def filter_params(params = {})
           all
-        end
-
-        def communicable_resources(type = nil)
-          type ? communicable_resources[type] || communicable_resources.values.flatten
         end
 
         private

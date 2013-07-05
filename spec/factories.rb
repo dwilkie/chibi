@@ -326,6 +326,14 @@ FactoryGirl.define do
   factory :user do
     cambodian
 
+    trait :with_recent_interaction do
+      last_interacted_at { Time.now }
+    end
+
+    trait :with_semi_recent_interaction do
+      last_interacted_at { 15.minutes.ago }
+    end
+
     trait :without_recent_interaction do
       created_at { 6.days.ago }
       updated_at { 6.days.ago }
@@ -339,20 +347,6 @@ FactoryGirl.define do
     trait :without_recent_interaction_for_a_shorter_time do
       created_at { 8.days.ago }
       updated_at { 3.days.ago }
-    end
-
-    trait :with_a_semi_recent_message do
-      after(:create) do |user|
-        FactoryGirl.create(:message, :user => user, :created_at => 15.minutes.ago)
-        user.updated_at = 15.minutes.ago
-        user.save!
-      end
-    end
-
-    trait :with_a_recent_phone_call do
-      after(:create) do |user|
-        FactoryGirl.create(:phone_call, :user => user)
-      end
     end
 
     trait :from_registered_service_provider do
@@ -469,33 +463,33 @@ FactoryGirl.define do
     # users with unknown details
     factory :alex do
       name "alex"
-      with_a_recent_phone_call
+      with_recent_interaction
     end
 
     factory :jamie do
       name "jamie"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
     end
 
     # user with unknown gender
     factory :chamroune do
       name "chamroune"
       looking_for "f"
-      with_a_recent_phone_call
+      with_recent_interaction
     end
 
     # bisexual with unknown gender
     factory :reaksmey do
       name "reaksmey"
       looking_for "e"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
     end
 
     # user with unknown looking for preference
     factory :pauline do
       name "pauline"
       gender "f"
-      with_a_recent_phone_call
+      with_recent_interaction
       from_registered_service_provider
     end
 
@@ -503,7 +497,7 @@ FactoryGirl.define do
     factory :kris do
       name "kris"
       age 25
-      with_a_semi_recent_message
+      with_semi_recent_interaction
     end
 
     # straight girls
@@ -511,7 +505,7 @@ FactoryGirl.define do
       name "nok"
       gender "f"
       looking_for "m"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
 
@@ -529,7 +523,7 @@ FactoryGirl.define do
       age 39
       gender "m"
       looking_for "f"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :phnom_penh
 
       factory :con do
@@ -541,13 +535,13 @@ FactoryGirl.define do
       factory :dave do
         name "dave"
         age 28
-        with_a_recent_phone_call
+        with_recent_interaction
       end
 
       factory :luke do
         name "luke"
         age 25
-        with_a_recent_phone_call
+        with_recent_interaction
       end
     end
 
@@ -556,7 +550,7 @@ FactoryGirl.define do
       name "harriet"
       gender "f"
       looking_for "f"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :battambang
 
       factory :eva do
@@ -571,7 +565,7 @@ FactoryGirl.define do
       gender "m"
       looking_for "m"
       age 28
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
 
@@ -587,7 +581,7 @@ FactoryGirl.define do
       gender "f"
       looking_for "e"
       age 25
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :phnom_penh
     end
 
@@ -597,7 +591,7 @@ FactoryGirl.define do
       gender "m"
       looking_for "e"
       age 29
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
     end
