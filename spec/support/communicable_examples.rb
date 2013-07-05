@@ -208,13 +208,13 @@ shared_examples_for "chatable" do
 end
 
 shared_examples_for "filtering with communicable resources" do
+  include CommunicableExampleHelpers
+
   before do
     resources
   end
 
   describe ".filter_by" do
-    include CommunicableExampleHelpers
-
     it "should order by latest updated at" do
       subject.class.filter_by.should == resources.reverse
     end
@@ -237,7 +237,9 @@ shared_examples_for "filtering with communicable resources" do
   end
 
   describe ".communicable_resources" do
-    pending "add some examples here"
+    it "should return the configured communicable resources" do
+      subject.class.communicable_resources.should =~ asserted_communicable_resources
+    end
   end
 
   describe ".find_with_communicable_resources" do
