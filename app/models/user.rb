@@ -5,11 +5,7 @@ class User < ActiveRecord::Base
   include Chibi::Twilio::ApiHelpers
   include Chibi::Communicable::HasCommunicableResources
 
-  has_communicable_resources :messages, :phone_calls, :replies,
-                             :outbound_dials => { :class_name => "InboundCdr" },
-                             :twilio_outbound_dials => {:class_name => "Chibi::Twilio::InboundCdr"},
-                             :inbound_dials => { :class_name => "OutboundCdr" },
-                             :twilio_inbound_dials => { :class_name => "Chibi::Twilio::OutboundCdr" }
+  has_communicable_resources :messages, :phone_calls, :replies
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
   MALE = "m"

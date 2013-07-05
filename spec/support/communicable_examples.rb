@@ -1,6 +1,13 @@
 require_relative 'phone_call_helpers'
 
-COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls, :outbound_dials]
+module CommunicableExampleHelpers
+  private
+
+  def asserted_communicable_resources
+    [:messages, :replies, :phone_calls]
+  end
+end
+
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
 shared_examples_for "communicable" do
@@ -206,12 +213,14 @@ shared_examples_for "filtering with communicable resources" do
   end
 
   describe ".filter_by" do
+    include CommunicableExampleHelpers
+
     it "should order by latest updated at" do
       subject.class.filter_by.should == resources.reverse
     end
 
     it "should include the communicable resources associations" do
-      subject.class.filter_by.includes_values.should include(*COMMUNICABLE_RESOURCES)
+      subject.class.filter_by.includes_values.should include(*asserted_communicable_resources)
     end
   end
 
