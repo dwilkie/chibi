@@ -17,37 +17,53 @@ describe OutboundCdr do
     end
   end
 
-  it "should not be valid without a bridge_uuid" do
-    subject.save!
-    subject.bridge_uuid = nil
-    subject.should_not be_valid
-  end
-
   it "should not be valid without a related user" do
     build_cdr(:variables => {"sip_to_user" => "invalid", "destination_number" => "invalid"}).should_not be_valid
   end
 
+  it_should_behave_like "communicable from user", :passive => true do
+    let(:communicable_resource) { cdr }
+  end
+
   describe "callbacks" do
-    describe "before validate on create" do
-      context "given an existing related inbound cdr" do
-        let(:inbound_cdr) { create_cdr(:variables => {"direction" => "inbound"}) }
-        subject { build_cdr(:variables => {"bridge_uuid" => inbound_cdr.uuid}) }
+    describe "before_validation(:on => :create)" do
+      context "given a bridge_uuid" do
+        subject { build_cdr(:variables => {"bridge_uuid" => bridge_uuid}) }
+        let(:bridge_uuid) { generate(:guid) }
 
-        it "should set the related inbound cdr" do
-          subject.valid?
-          subject.inbound_cdr.should == inbound_cdr
+        context "and an existing related inbound cdr" do
+          let(:inbound_cdr) {
+            create_cdr(:variables => {"direction" => "inbound"})
+          }
+
+          let(:bridge_uuid) { inbound_cdr.uuid }
+
+          it "should set the related inbound cdr" do
+            subject.valid?
+            subject.inbound_cdr.should == inbound_cdr
+          end
         end
-      end
 
-      context "given no existing related inbound cdr" do
-        it "should still set the bridge uuid" do
-          subject.valid?
-          subject.bridge_uuid.should be_present
+        context "given no existing related inbound cdr" do
+          it "should still set the bridge uuid" do
+            subject.valid?
+            subject.bridge_uuid.should be_present
+          end
+        end
+
+        context "given there's a related phone call" do
+          let(:phone_call) { create(:phone_call) }
+          let(:bridge_uuid) { phone_call.sid }
+
+          it "should set the related phone call" do
+            subject.valid?
+            subject.phone_call.should == phone_call
+          end
         end
       end
     end
 
-    describe "after create" do
+    describe "after_create" do
       let(:user) { create(:user) }
       let(:friend) { create(:user) }
 
@@ -56,12 +72,20 @@ describe OutboundCdr do
       include_context "replies"
 
       context "given there is an existing chat between the caller and the recipient" do
-        def build_cdr(options = {})
-          super({:user_who_called => user, :user_who_was_called => friend}.merge(options))
-        end
 
-        let!(:chat) { create(:chat, :friend_active, :user => user, :friend => friend) }
-        subject { build_cdr }
+        let!(:chat) {
+          create(:chat, :friend_active, :user => user, :friend => friend)
+        }
+
+        let(:phone_call) { create(:phone_call, :user => user) }
+
+        subject {
+          build_cdr(
+            :user_who_called => user,
+            :user_who_was_called => friend,
+            :variables => {"bridge_uuid" => phone_call.sid}
+          )
+        }
 
         it "should reactivate the chat" do
           chat.should_not be_active

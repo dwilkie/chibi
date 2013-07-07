@@ -3,6 +3,8 @@ class InboundCdr < CallDataRecord
 
   before_validation :set_inbound_cdr_attributes, :on => :create
 
+  has_many :outbound_cdrs
+
   private
 
   def set_inbound_cdr_attributes
@@ -13,5 +15,9 @@ class InboundCdr < CallDataRecord
 
   def cdr_from
     valid_source("sip_from_user") || valid_source("sip_P_Asserted_Identity")
+  end
+
+  def find_related_phone_call
+    PhoneCall.find_by_sid(uuid)
   end
 end

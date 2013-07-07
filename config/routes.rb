@@ -15,7 +15,7 @@ Chibi::Application.routes.draw do
     resource :interaction, :only => :show
   end
 
-  resources :users, :only => [:index, :destroy, :show] do
+  resources :users, :only => [:index, :show] do
     resource :interaction, :only => :show
   end
 

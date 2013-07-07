@@ -3,6 +3,9 @@ module Chibi
     class InboundCdr < ::InboundCdr
       include Chibi::Twilio::CallDataRecord
 
+      # this is needed to correctly accociate Chibi::Twilio::OutboundCdr
+      has_many :outbound_cdrs
+
       private
 
       def variables

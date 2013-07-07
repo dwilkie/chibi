@@ -71,7 +71,7 @@ describe "Call Data Records" do
     context "for an outbound cdr with an invalid bridge_uid" do
       it_should_behave_like "creating a CDR" do
         let(:sample_cdr) { build_cdr(:variables => {"direction" => "outbound", "bridge_uuid" => "invalid"} ) }
-        let(:asserted_cdr_type) { nil }
+        let(:asserted_cdr_type) { OutboundCdr }
       end
     end
   end

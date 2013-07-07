@@ -2,8 +2,10 @@
 
 class User < ActiveRecord::Base
   include Chibi::Analyzable
-  include Chibi::Communicable::HasCommunicableResources
   include Chibi::Twilio::ApiHelpers
+  include Chibi::Communicable::HasCommunicableResources
+
+  has_communicable_resources :messages, :phone_calls, :replies
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
   MALE = "m"
@@ -123,9 +125,9 @@ class User < ActiveRecord::Base
     within_hours(options) do
       limit = options.delete(:limit) || 100
 
-      users_to_remind = without_recent_interaction(
+      users_to_remind = not_contacted_recently(
         inactive_timestamp(options)
-      ).from_registered_service_providers.online.order(:updated_at).limit(limit)
+      ).from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(limit)
 
       users_to_remind.each do |user_to_remind|
         Resque.enqueue(UserReminderer, user_to_remind.id, options)
@@ -295,7 +297,7 @@ class User < ActiveRecord::Base
 
   def remind!(options = {})
     self.class.within_hours(options) do
-      replies.build.send_reminder! unless has_recent_interaction?(self.class.inactive_timestamp(options))
+      replies.build.send_reminder! unless contacted_recently?(self.class.inactive_timestamp(options))
     end
   end
 
@@ -421,78 +423,38 @@ class User < ActiveRecord::Base
 
   # ordering is as follows:
 
-  # 0 for latest_interaction after 0.25 hours ago
-  # 1 for latest_interaction after 0.50 hours ago
-  # 2 for latest_interaction after 1 hour ago
-  # 3 for latest_interaction after 2 hours ago
-  # 4 for latest_interaction after 4 hours ago
-  # 5 for latest_interaction after 8.hours.ago
-  # 6 for latest_interaction after 16.hours.ago
-  # 7 for latest_interaction after 32.hours.ago
-  # 8 for latest_interaction after 64.hours.ago
-  # 9 for latest_interaction after 128.hours.ago
-  # 10 for latest_interaction after 256.hours.ago
-  # 11 for latest_interaction after 512 hours ago
-  # 12 for latest_interaction after 1024 hours ago
-  # 13 for latest_interaction before or equal to 1024 hours ago
+  # 0 for last_interaction_at after 0.25 hours ago
+  # 1 for last_interaction_at after 0.50 hours ago
+  # 2 for last_interaction_at after 1 hour ago
+  # 3 for last_interaction_at after 2 hours ago
+  # 4 for last_interaction_at after 4 hours ago
+  # 5 for last_interaction_at after 8.hours.ago
+  # 6 for last_interaction_at after 16.hours.ago
+  # 7 for last_interaction_at after 32.hours.ago
+  # 8 for last_interaction_at after 64.hours.ago
+  # 9 for last_interaction_at after 128.hours.ago
+  # 10 for last_interaction_at after 256.hours.ago
+  # 11 for last_interaction_at after 512 hours ago
+  # 12 for last_interaction_at after 1024 hours ago
+  # 13 for last_interaction_at before or equal to 1024 hours ago
 
   def self.order_by_recent_activity(user, scope)
-    # the timestamp to use if the user has had no interaction at all e.g. no phone calls
+    # the timestamp to use if the user has had no last_interaction
     # which is the same as 1024 hours ago
     coalesce_timestamp = ((2 ** (NUM_INACTIVITY_PERIODS - 1)) * SMALLEST_INACTIVITY_PERIOD).hours.ago
-
-    latest_activity_scope = self
-    latest_activity_subscope = self
-
-    # ACTIVE_COMMUNICABLE_RESOURCES (ACR) are communication mechanisms that are user initiated
-    ACTIVE_COMMUNICABLE_RESOURCES.each do |communicable_resource|
-      # This needs to be a LEFT JOIN because we need to get all the users even if there are no
-      # active resources, e.g. a user may have messages but no phone calls
-      latest_activity_scope = latest_activity_scope.joins(
-        "LEFT JOIN \"#{communicable_resource}\" ON #{quoted_attribute(:id)} = \"#{communicable_resource}\".\"user_id\""
-      )
-
-      # store the maximum created at value of the ACM in a scope so we can use AR sanitization
-      # using the collesce timestamp if there is no ACM for this user
-      latest_activity_subscope = latest_activity_subscope.where(
-        "COALESCE(MAX(#{communicable_resource}.created_at), ?)", coalesce_timestamp
-      )
-    end
-
-    latest_interaction_alias = "latest_interaction"
-
-    # Get the greatest value created at value from the users ACRs
-    latest_activity_condition = "GREATEST(#{latest_activity_subscope.where_values.join(', ')}) #{latest_interaction_alias}"
-
-    # select all of the user fields as well as the MAX value of their recent interaction
-    # and group by this since it's now an attribute of user.
-    latest_activity_scope = latest_activity_scope.select(
-      "\"#{table_name}\".*, #{latest_activity_condition}"
-    ).from(
-      "\"#{table_name}\""
-    ).group("#{quoted_attribute(:id)}")
-
-    # the global select statement should now select from the query we just created
-    # so that we have access to latest_interaction in the order by clause.
-    # note that we use the table alias 'users' so that the rest of the conditions can be based
-    # off of the results from this subquery
-    scope = scope.from(
-      "(#{latest_activity_scope.to_sql}) \"#{table_name}\""
-    ).group(latest_interaction_alias)
 
     inactivity_period = SMALLEST_INACTIVITY_PERIOD
     inactivity_scope = self
 
-    # use the latest interaction time to create
-    # case statements for recent interaction
+    # use the last_interacted_at timestamp to create case statements for recent interaction
     NUM_INACTIVITY_PERIODS.times do
       inactivity_scope = inactivity_scope.where(
-        "latest_interaction > ?", inactivity_period.hours.ago
+        "COALESCE(#{quoted_attribute(:last_interacted_at)}, ?) > ?", coalesce_timestamp, inactivity_period.hours.ago
       )
       inactivity_period *= 2
     end
 
-    # finally order by the case
+    # order by the case
     order_by_case(scope, inactivity_scope, NUM_INACTIVITY_PERIODS)
   end
 
@@ -546,8 +508,12 @@ class User < ActiveRecord::Base
     (options[:inactivity_period] || 5.days).ago
   end
 
-  def self.without_recent_interaction(inactivity_timestamp)
-    where("updated_at < ?", inactivity_timestamp)
+  def self.not_contacted_recently(inactivity_timestamp)
+    where("#{coalesce_last_contacted_at} < ?", inactivity_timestamp)
+  end
+
+  def self.coalesce_last_contacted_at
+    "COALESCE(#{quoted_attribute(:last_contacted_at)}, #{quoted_attribute(:updated_at)})"
   end
 
   def self.quoted_attribute(attribute)
@@ -619,8 +585,9 @@ class User < ActiveRecord::Base
     nil
   end
 
-  def has_recent_interaction?(inactivity_timestamp)
-    updated_at >= inactivity_timestamp
+  def contacted_recently?(inactivity_timestamp)
+    last_contacted_timestamp = last_contacted_at || updated_at
+    last_contacted_timestamp >= inactivity_timestamp
   end
 
   def assign_location

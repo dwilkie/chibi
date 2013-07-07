@@ -1,6 +1,13 @@
 require_relative 'phone_call_helpers'
 
-COMMUNICABLE_RESOURCES = [:messages, :replies, :phone_calls]
+module CommunicableExampleHelpers
+  private
+
+  def asserted_communicable_resources
+    [:messages, :replies, :phone_calls]
+  end
+end
+
 USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
 
 shared_examples_for "communicable" do
@@ -18,16 +25,18 @@ shared_examples_for "communicable" do
 
   describe "callbacks" do
     context "when saving" do
-      it "should touch the user" do
+      it "should record the user's last_contacted_at" do
         user_timestamp = communicable_resource.user.updated_at
         communicable_resource.save
         communicable_resource.user.updated_at.should > user_timestamp
+        communicable_resource.user.last_contacted_at.should > user_timestamp
       end
     end
   end
 end
 
-shared_examples_for "communicable from user" do
+shared_examples_for "communicable from user" do |options|
+  options ||= {}
 
   let(:user) { build(:user) }
 
@@ -108,6 +117,18 @@ shared_examples_for "communicable from user" do
   end
 
   describe "callbacks" do
+    context "after_create" do
+      if options[:passive]
+        it "should not record the users's last_interacted_at" do
+          communicable_resource.user.last_interacted_at.should be_nil
+        end
+      else
+        it "should record the users's last_interacted_at" do
+          communicable_resource.user.last_interacted_at.should be_present
+        end
+      end
+    end
+
     context "before validation(:on => :create)" do
       it "should try to find or initialize the user with the mobile number" do
         User.should_receive(:find_or_initialize_by).with(:mobile_number => user.mobile_number)
@@ -187,6 +208,8 @@ shared_examples_for "chatable" do
 end
 
 shared_examples_for "filtering with communicable resources" do
+  include CommunicableExampleHelpers
+
   before do
     resources
   end
@@ -197,7 +220,7 @@ shared_examples_for "filtering with communicable resources" do
     end
 
     it "should include the communicable resources associations" do
-      subject.class.filter_by.includes_values.should include(:messages, :replies, :phone_calls)
+      subject.class.filter_by.includes_values.should include(*asserted_communicable_resources)
     end
   end
 
@@ -210,6 +233,12 @@ shared_examples_for "filtering with communicable resources" do
   describe ".filter_params" do
     it "should return the total number of resources" do
       subject.class.filter_params.should == subject.class.all
+    end
+  end
+
+  describe ".communicable_resources" do
+    it "should return the configured communicable resources" do
+      subject.class.communicable_resources.should =~ asserted_communicable_resources
     end
   end
 

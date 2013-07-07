@@ -1,8 +1,4 @@
-require "#{Rails.root}/spec/support/phone_call_helpers"
-require "#{Rails.root}/spec/support/mobile_phone_helpers"
-
 FactoryGirl.define do
-
   trait :from_last_month do
     created_at {1.month.ago}
   end
@@ -330,33 +326,24 @@ FactoryGirl.define do
   factory :user do
     cambodian
 
-    trait :without_recent_interaction do
-      created_at { 6.days.ago }
-      updated_at { 6.days.ago }
+    trait :with_recent_interaction do
+      last_interacted_at { Time.now }
     end
 
-    trait :without_recent_interaction_for_a_longer_time do
-      created_at { 8.days.ago }
-      updated_at { 7.days.ago }
+    trait :with_semi_recent_interaction do
+      last_interacted_at { 15.minutes.ago }
     end
 
-    trait :without_recent_interaction_for_a_shorter_time do
-      created_at { 8.days.ago }
+    trait :not_contacted_recently do
+      last_contacted_at { 6.days.ago }
+    end
+
+    trait :not_contacted_for_a_long_time do
+      last_contacted_at { 8.days.ago }
+    end
+
+    trait :not_contacted_for_a_short_time do
       updated_at { 3.days.ago }
-    end
-
-    trait :with_a_semi_recent_message do
-      after(:create) do |user|
-        FactoryGirl.create(:message, :user => user, :created_at => 15.minutes.ago)
-        user.updated_at = 15.minutes.ago
-        user.save!
-      end
-    end
-
-    trait :with_a_recent_phone_call do
-      after(:create) do |user|
-        FactoryGirl.create(:phone_call, :user => user)
-      end
     end
 
     trait :from_registered_service_provider do
@@ -473,33 +460,32 @@ FactoryGirl.define do
     # users with unknown details
     factory :alex do
       name "alex"
-      with_a_recent_phone_call
+      with_recent_interaction
     end
 
     factory :jamie do
       name "jamie"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
     end
 
     # user with unknown gender
     factory :chamroune do
       name "chamroune"
       looking_for "f"
-      with_a_recent_phone_call
+      with_recent_interaction
     end
 
-    # bisexual with unknown gender
+    # bisexual, never interacted, with unknown gender
     factory :reaksmey do
       name "reaksmey"
       looking_for "e"
-      with_a_semi_recent_message
     end
 
     # user with unknown looking for preference
     factory :pauline do
       name "pauline"
       gender "f"
-      with_a_recent_phone_call
+      with_recent_interaction
       from_registered_service_provider
     end
 
@@ -507,7 +493,7 @@ FactoryGirl.define do
     factory :kris do
       name "kris"
       age 25
-      with_a_semi_recent_message
+      with_semi_recent_interaction
     end
 
     # straight girls
@@ -515,7 +501,7 @@ FactoryGirl.define do
       name "nok"
       gender "f"
       looking_for "m"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
 
@@ -533,7 +519,7 @@ FactoryGirl.define do
       age 39
       gender "m"
       looking_for "f"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :phnom_penh
 
       factory :con do
@@ -545,13 +531,13 @@ FactoryGirl.define do
       factory :dave do
         name "dave"
         age 28
-        with_a_recent_phone_call
+        with_recent_interaction
       end
 
       factory :luke do
         name "luke"
         age 25
-        with_a_recent_phone_call
+        with_recent_interaction
       end
     end
 
@@ -560,7 +546,7 @@ FactoryGirl.define do
       name "harriet"
       gender "f"
       looking_for "f"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :battambang
 
       factory :eva do
@@ -575,7 +561,7 @@ FactoryGirl.define do
       gender "m"
       looking_for "m"
       age 28
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
 
@@ -591,7 +577,7 @@ FactoryGirl.define do
       gender "f"
       looking_for "e"
       age 25
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :phnom_penh
     end
 
@@ -601,7 +587,7 @@ FactoryGirl.define do
       gender "m"
       looking_for "e"
       age 29
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
     end
@@ -637,21 +623,18 @@ FactoryGirl.define do
       dynamic_variables["duration"] ||= "20"
       dynamic_variables["billsec"] ||= "15"
 
-      incoming_phone_call = phone_call || FactoryGirl.create(:phone_call, :user => calling_user)
-
       if dynamic_variables["direction"] == "inbound"
 
         dynamic_variables["sip_from_user"] ||= calling_user.mobile_number
         dynamic_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{calling_user.mobile_number}")
 
-        dynamic_variables["uuid"] ||= incoming_phone_call.sid
+        dynamic_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
         dynamic_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
       else
         called_user = user_who_was_called || FactoryGirl.create(:user)
         dynamic_variables["uuid"] ||= FactoryGirl.generate(:guid)
         dynamic_variables["sip_to_user"] ||= called_user.mobile_number
         dynamic_variables["destination_number"] ||= called_user.mobile_number
-        dynamic_variables["bridge_uuid"] ||= incoming_phone_call.sid
       end
 
       dynamic_body["variables"].merge!(dynamic_variables)

@@ -42,17 +42,19 @@ describe CallDataRecord do
     new_cdr.should_not be_valid
   end
 
-  it "should not be valid without an associated phone call" do
+  it "should be valid without an associated phone call" do
     new_cdr = build_cdr(:variables => {"uuid" => "invalid"})
-    new_cdr.should_not be_valid
+    new_cdr.should be_valid
   end
 
   it "should not be valid with a duplicate phone call id for the same type" do
-    new_cdr.phone_call = cdr.phone_call
-    new_cdr.should_not be_valid
-    outbound_cdr = create_cdr(:variables => {"direction" => "outbound"})
-    new_cdr.phone_call = outbound_cdr.phone_call
-    new_cdr.should be_valid
+    phone_call = create(:phone_call)
+    inbound_cdr = create_cdr(:phone_call => phone_call)
+    new_cdr.phone_call = inbound_cdr.phone_call
+    new_cdr.should_not be_valid # because the new cdr is inbound as well
+    new_cdr = build_cdr(:variables => {"direction" => "outbound"})
+    new_cdr.phone_call = phone_call
+    new_cdr.should be_valid # because the new cdr is outbound
   end
 
   it "should not be valid without a duration" do
@@ -66,10 +68,6 @@ describe CallDataRecord do
   end
 
   it_should_behave_like "communicable" do
-    let(:communicable_resource) { cdr }
-  end
-
-  it_should_behave_like "communicable from user" do
     let(:communicable_resource) { cdr }
   end
 
@@ -87,7 +85,6 @@ describe CallDataRecord do
         new_cdr.bill_sec.should == 15         # from factory
         new_cdr.duration.should == 20         # from factory
         new_cdr.uuid.should be_present
-        new_cdr.phone_call.should be_present
       end
     end
   end

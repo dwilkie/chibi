@@ -3,6 +3,7 @@ require 'spec_helper'
 describe "Admin" do
   include MessagingHelpers
   include AdminHelpers
+  include CommunicableExampleHelpers
 
   let(:user) { create(:user, :male) }
   let(:another_user) { create(:user, :female) }
@@ -120,7 +121,7 @@ describe "Admin" do
     end
 
     def assert_communicable_resources_counts(resource)
-      COMMUNICABLE_RESOURCES.each do |communicable_resources|
+      asserted_communicable_resources.each do |communicable_resources|
         within("##{communicable_resources}") do
           communicable_resources_count = resource.send(communicable_resources).count
           communicable_resources_link = communicable_resources_count.to_s
@@ -180,8 +181,7 @@ describe "Admin" do
     def assert_navigate_to_interaction(resource_name)
       resources_name = resource_name.to_s.pluralize
 
-      COMMUNICABLE_RESOURCES.each do |communicable_resources|
-
+      asserted_communicable_resources.each do |communicable_resources|
         visit send("#{resources_name}_path")
 
         within("##{resource_name}_1 ##{communicable_resources}") do
@@ -279,22 +279,6 @@ describe "Admin" do
 
         it "should show me a list of users" do
           assert_user_index
-        end
-
-        context "when I click on 'X' for one of the users" do
-          before do
-            within("#user_1") do
-              click_link("X")
-            end
-          end
-
-          it "should delete the user" do
-            within("#user_1") do
-              page.should have_content another_user.id
-            end
-
-            page.should have_no_css "#user_2"
-          end
         end
 
         context "when I click on the number of communicable resources for one of the users" do

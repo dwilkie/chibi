@@ -9,10 +9,4 @@ class UsersController < ApplicationController
   def show
     @user = User.find_with_communicable_resources(params[:id])
   end
-
-  def destroy
-    @user = User.find(params[:id])
-    @user.destroy
-    redirect_to :action => :index
-  end
 end

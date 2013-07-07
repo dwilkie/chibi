@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe ApplicationHelper do
+  include CommunicableExampleHelpers
+
   before do
     helper.extend Haml
     helper.extend Haml::Helpers
@@ -9,7 +11,7 @@ describe ApplicationHelper do
 
   describe "#communicable_links" do
     def assert_communicable_content(resource, resource_name)
-      COMMUNICABLE_RESOURCES.each do |communicable_resources|
+      asserted_communicable_resources.each do |communicable_resources|
         communicable_resources_count = resource.send(communicable_resources).count
         output = helper.communicable_links(resource)
         xpath = "//td[@id='#{communicable_resources}']"
@@ -29,7 +31,7 @@ describe ApplicationHelper do
       reference_resource = resource_class.filter_by.first
       assert_communicable_content(reference_resource, resource_name)
       resource = create(resource_name)
-      COMMUNICABLE_RESOURCES.each do |communicable_resources|
+      asserted_communicable_resources.each do |communicable_resources|
         create(communicable_resources.to_s.singularize, resource_name => resource)
       end
       reference_resource = resource_class.filter_by.first
