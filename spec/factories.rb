@@ -475,11 +475,10 @@ FactoryGirl.define do
       with_recent_interaction
     end
 
-    # bisexual with unknown gender
+    # bisexual, never interacted, with unknown gender
     factory :reaksmey do
       name "reaksmey"
       looking_for "e"
-      with_semi_recent_interaction
     end
 
     # user with unknown looking for preference

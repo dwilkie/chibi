@@ -535,7 +535,7 @@ describe User do
     # Michael is a bisexual 29 year old male from Chiang Mai last seen 15 minutes ago with
     # Hanh is a gay 28 year old male from Chiang Mai last seen 15 minutes ago
     # View is a gay 26 year old male from Chiang Mai last seen 15 minutes ago
-    # Reaksmey is bisexual last seen 15 minutes ago
+    # Reaksmey is bisexual who has never interacted (his last_interacted_at is nil)
 
     # Individual Match Explanations
 
@@ -575,14 +575,16 @@ describe User do
     # Pauline is the female seen most recently so she is matched first.
     # Mara and Joy are equal second as they are the two remaining females.
     # Luke, Chamroune and Alex are equal third because of their more recent activity
-    # Followed by Con, Jamie and Reaksmey who were all seen more than 15 mins ago
-    # Paul is matched last because he is more than 10 years older than Dave
+    # Followed by Con and Jamie who were both seen more than 15 mins ago
+    # Paul is matched next because he is more than 10 years older than Dave
+    # Reaksmey matches last because he has *never* interacted
 
     # Con is also a guy in Cambodia. Con has already chatted with Mara so she is eliminated
     # Pauline and Joy match first and second similar to the previous example.
     # In contrast to the previous example, Con matches with Dave, Chamroune and Alex before Luke
     # because Luke is 12 years younger than Con and the age of Chamroune and Alex is not known
-    # Paul, Jamie and Reaksmey are matched last because of their less recent activity
+    # Paul and Jamie are matched next because of their less recent activity
+    # Reaksmey matches last because he has *never* interacted
 
     # Paul is also a guy in Cambodia.
     # Similar to the previous example Pauline matches first.
@@ -596,9 +598,10 @@ describe User do
     # Again Pauline matches first.
     # Mara is next because she is closer in age than Joy.
     # Dave, Alex and Chamroune are next because of their recent activity
-    # Reaksmey and Jamie matched before Con and Paul because even though their age is unknown,
+    # Jamie is matched before Con and Paul because even though his/her age is unknown,
     # Con and Paul are more than 10 years older than Luke.
     # Con matches before Paul because he is closer in age to Luke than Paul
+    # Reaksmey matches last because he has *never* interacted
 
     # Harriet is a girl. Like the other girls she matches with the boys first.
     # Dave has already chatted with Harriet so he is eliminated from the results.
@@ -606,7 +609,8 @@ describe User do
     # Con is matched before Paul because he is closer (in Siem Reap) to Harriet (in Battambang) than
     # Paul (in Phnom Penh).
     # Pauline, Chamroune and Alex are next due to their recent activity
-    # Followed by Mara, Joy, Jamie and Reaksmey.
+    # Followed by Mara, Joy, Jamie
+    # Reaksmey matches last because he has *never* interacted
     # Eva is eliminated because she is currently chatting with Harriet
 
     # Eva is also in Siem Reap and gets a similar result to Harriet (with Dave included)
@@ -627,28 +631,29 @@ describe User do
 
     # Kris is offline and his/her gender is unknown however his/her age is known.
     # Luke, Dave, Pauline, Chamroune and Alex match first because of their recent activity
-    # Followed by Joy, Mara, Reaksmey and Jamie
-    # Con and Paul finish last again because of their age difference with Kris
+    # Followed by Joy, Mara and Jamie
+    # Con and Paul finish next because of their age difference with Kris
+    # Reaksmey matches last because he has *never* interacted
 
     USER_MATCHES = {
-      :alex => [[:chamroune, :luke, :pauline, :dave], [:mara, :paul, :jamie, :reaksmey, :con, :joy]],
-      :jamie => [[:chamroune, :luke, :pauline, :dave, :alex], [:mara, :paul, :reaksmey, :con, :joy]],
-      :chamroune => [[:luke, :pauline, :dave, :alex], [:mara, :paul, :reaksmey, :con, :joy, :jamie]],
+      :alex => [[:chamroune, :luke, :pauline, :dave], [:mara, :paul, :jamie, :con, :joy], :reaksmey],
+      :jamie => [[:chamroune, :luke, :pauline, :dave, :alex], [:mara, :paul, :con, :joy], :reaksmey],
+      :chamroune => [[:luke, :pauline, :dave, :alex], [:mara, :paul, :con, :joy, :jamie], :reaksmey],
       :pauline => [[:luke, :dave], [:con, :paul], [:alex, :chamroune], [:joy, :mara, :jamie]],
       :nok => [[:michael, :view]],
-      :joy => [:dave, :luke, :con, :paul, [:chamroune, :pauline, :alex], [:mara, :jamie, :reaksmey]],
-      :dave => [:pauline, [:mara, :joy], [:luke, :chamroune, :alex], [:con, :jamie, :reaksmey], :paul],
-      :con => [:pauline, :joy, [:dave, :chamroune, :alex], :luke, [:paul, :jamie, :reaksmey]],
-      :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, [:con, :reaksmey, :jamie]],
-      :luke => [:pauline, :mara, :joy, [:dave, :alex, :chamroune], [:reaksmey, :jamie], :con, :paul],
-      :harriet => [:luke, :con, :paul, [:pauline, :chamroune, :alex], [:mara, :joy, :jamie, :reaksmey]],
-      :eva => [[:dave, :luke], :con, :paul, [:alex, :chamroune, :pauline], [:joy, :mara, :reaksmey, :jamie]],
+      :joy => [:dave, :luke, :con, :paul, [:chamroune, :pauline, :alex], [:mara, :jamie], :reaksmey],
+      :dave => [:pauline, [:mara, :joy], [:luke, :chamroune, :alex], [:con, :jamie], :paul, :reaksmey],
+      :con => [:pauline, :joy, [:dave, :chamroune, :alex], :luke, [:paul, :jamie], :reaksmey],
+      :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, [:con, :jamie], :reaksmey],
+      :luke => [:pauline, :mara, :joy, [:dave, :alex, :chamroune], :jamie, :con, :paul, :reaksmey],
+      :harriet => [:luke, :con, :paul, [:pauline, :chamroune, :alex], [:mara, :joy, :jamie], :reaksmey],
+      :eva => [[:dave, :luke], :con, :paul, [:alex, :chamroune, :pauline], [:joy, :mara, :jamie], :reaksmey],
       :hanh => [[:michael, :view]],
       :view => [:nok],
-      :mara => [[:dave, :luke], :paul, [:chamroune, :alex, :pauline], [:joy, :jamie, :reaksmey]],
+      :mara => [[:dave, :luke], :paul, [:chamroune, :alex, :pauline], [:joy, :jamie], :reaksmey],
       :michael => [:nok],
       :reaksmey => [[:luke, :chamroune, :dave, :alex], [:mara, :joy, :con, :jamie, :paul]],
-      :kris => [[:luke, :dave, :pauline, :chamroune, :alex], [:joy, :mara, :reaksmey, :jamie], :con, :paul]
+      :kris => [[:luke, :dave, :pauline, :chamroune, :alex], [:joy, :mara, :jamie], :con, :paul, :reaksmey]
     }
 
     USER_MATCHES.each do |user, matches|
