@@ -12,6 +12,14 @@ describe InboundCdr do
     end
   end
 
+  describe "associations" do
+    describe "#outbound_cdrs" do
+      it "should have_many" do
+        subject.outbound_cdrs.should be_empty
+      end
+    end
+  end
+
   it "should not be valid without a rfc2822 date" do
     cdr.rfc2822_date = nil
     cdr.should_not be_valid

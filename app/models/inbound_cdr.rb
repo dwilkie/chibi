@@ -3,6 +3,8 @@ class InboundCdr < CallDataRecord
 
   before_validation :set_inbound_cdr_attributes, :on => :create
 
+  has_many :outbound_cdrs
+
   private
 
   def set_inbound_cdr_attributes
