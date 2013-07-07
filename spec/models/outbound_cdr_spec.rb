@@ -32,7 +32,7 @@ describe OutboundCdr do
   end
 
   describe "callbacks" do
-    describe "before validate on create" do
+    describe "before validation(:on => :create)" do
       context "given an existing related inbound cdr" do
         let(:inbound_cdr) { create_cdr(:variables => {"direction" => "inbound"}) }
         subject { build_cdr(:variables => {"bridge_uuid" => inbound_cdr.uuid}) }
@@ -49,6 +49,16 @@ describe OutboundCdr do
           subject.bridge_uuid.should be_present
         end
       end
+
+      context "given there's a related phone call" do
+        let(:phone_call) { create(:phone_call) }
+        subject { build_cdr(:phone_call => phone_call) }
+
+        it "should set the related phone call" do
+          subject.valid?
+          subject.phone_call.should == phone_call
+        end
+      end
     end
 
     describe "after create" do
@@ -60,12 +70,20 @@ describe OutboundCdr do
       include_context "replies"
 
       context "given there is an existing chat between the caller and the recipient" do
-        def build_cdr(options = {})
-          super({:user_who_called => user, :user_who_was_called => friend}.merge(options))
-        end
 
-        let!(:chat) { create(:chat, :friend_active, :user => user, :friend => friend) }
-        subject { build_cdr }
+        let!(:chat) {
+          create(:chat, :friend_active, :user => user, :friend => friend)
+        }
+
+        let(:phone_call) { create(:phone_call, :user => user) }
+
+        subject {
+          build_cdr(
+            :user_who_called => user,
+            :user_who_was_called => friend,
+            :phone_call => phone_call
+          )
+        }
 
         it "should reactivate the chat" do
           chat.should_not be_active

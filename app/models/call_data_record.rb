@@ -10,9 +10,9 @@ class CallDataRecord < ActiveRecord::Base
   belongs_to :phone_call
   belongs_to :inbound_cdr
 
-  validates :phone_call, :body, :duration, :bill_sec, :uuid, :type, :direction, :presence => true
+  validates :body, :duration, :bill_sec, :uuid, :type, :direction, :presence => true
   validates :uuid, :uniqueness => true
-  validates :phone_call_id, :uniqueness => {:scope => :type}
+  validates :phone_call_id, :uniqueness => {:scope => :type}, :allow_nil => true
   validates :type,  :inclusion => { :in => VALID_TYPES }
 
   def typed
@@ -35,12 +35,8 @@ class CallDataRecord < ActiveRecord::Base
       self.bill_sec ||= variables["billsec"]
       self.bridge_uuid ||= variables["bridge_uuid"]
       self.from ||= cdr_from
-      self.phone_call ||= (find_related_phone_call(uuid) || find_related_phone_call(bridge_uuid))
+      self.phone_call ||= find_related_phone_call
     end
-  end
-
-  def find_related_phone_call(sid)
-    PhoneCall.find_by_sid(sid)
   end
 
   def unescaped_variable(name)

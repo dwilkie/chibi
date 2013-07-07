@@ -14,4 +14,8 @@ class InboundCdr < CallDataRecord
   def cdr_from
     valid_source("sip_from_user") || valid_source("sip_P_Asserted_Identity")
   end
+
+  def find_related_phone_call
+    PhoneCall.find_by_sid(uuid)
+  end
 end
