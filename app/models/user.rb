@@ -125,9 +125,9 @@ class User < ActiveRecord::Base
     within_hours(options) do
       limit = options.delete(:limit) || 100
 
-      users_to_remind = without_recent_interaction(
+      users_to_remind = not_contacted_recently(
         inactive_timestamp(options)
-      ).from_registered_service_providers.online.order(:updated_at).limit(limit)
+      ).from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(limit)
 
       users_to_remind.each do |user_to_remind|
         Resque.enqueue(UserReminderer, user_to_remind.id, options)
@@ -297,7 +297,7 @@ class User < ActiveRecord::Base
 
   def remind!(options = {})
     self.class.within_hours(options) do
-      replies.build.send_reminder! unless has_recent_interaction?(self.class.inactive_timestamp(options))
+      replies.build.send_reminder! unless contacted_recently?(self.class.inactive_timestamp(options))
     end
   end
 
@@ -508,8 +508,12 @@ class User < ActiveRecord::Base
     (options[:inactivity_period] || 5.days).ago
   end
 
-  def self.without_recent_interaction(inactivity_timestamp)
-    where("updated_at < ?", inactivity_timestamp)
+  def self.not_contacted_recently(inactivity_timestamp)
+    where("#{coalesce_last_contacted_at} < ?", inactivity_timestamp)
+  end
+
+  def self.coalesce_last_contacted_at
+    "COALESCE(#{quoted_attribute(:last_contacted_at)}, #{quoted_attribute(:updated_at)})"
   end
 
   def self.quoted_attribute(attribute)
@@ -581,8 +585,9 @@ class User < ActiveRecord::Base
     nil
   end
 
-  def has_recent_interaction?(inactivity_timestamp)
-    updated_at >= inactivity_timestamp
+  def contacted_recently?(inactivity_timestamp)
+    last_contacted_timestamp = last_contacted_at || updated_at
+    last_contacted_timestamp >= inactivity_timestamp
   end
 
   def assign_location

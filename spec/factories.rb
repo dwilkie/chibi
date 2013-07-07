@@ -334,18 +334,15 @@ FactoryGirl.define do
       last_interacted_at { 15.minutes.ago }
     end
 
-    trait :without_recent_interaction do
-      created_at { 6.days.ago }
-      updated_at { 6.days.ago }
+    trait :not_contacted_recently do
+      last_contacted_at { 6.days.ago }
     end
 
-    trait :without_recent_interaction_for_a_longer_time do
-      created_at { 8.days.ago }
-      updated_at { 7.days.ago }
+    trait :not_contacted_for_a_long_time do
+      last_contacted_at { 8.days.ago }
     end
 
-    trait :without_recent_interaction_for_a_shorter_time do
-      created_at { 8.days.ago }
+    trait :not_contacted_for_a_short_time do
       updated_at { 3.days.ago }
     end
 

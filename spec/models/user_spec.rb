@@ -357,21 +357,21 @@ describe User do
   end
 
   describe ".remind!(options = {})" do
-    let(:user_without_recent_interaction) { create(:user, :without_recent_interaction) }
+    let(:user_not_contacted_recently) { create(:user, :not_contacted_recently) }
 
-    let(:registered_sp_user_without_recent_interaction) do
-      create(:user, :from_registered_service_provider, :without_recent_interaction)
+    let(:registered_sp_user_not_contacted_recently) do
+      create(:user, :from_registered_service_provider, :not_contacted_recently)
     end
 
-    let(:registered_sp_user_without_recent_interaction_for_a_longer_time) do
+    let(:registered_sp_user_not_contacted_for_a_long_time) do
       create(
-        :user, :from_registered_service_provider, :without_recent_interaction_for_a_longer_time
+        :user, :from_registered_service_provider, :not_contacted_for_a_long_time
       )
     end
 
-    let(:registered_sp_user_without_recent_interaction_for_a_shorter_time) do
+    let(:registered_sp_user_not_contacted_for_a_short_time) do
       create(
-        :user, :from_registered_service_provider, :without_recent_interaction_for_a_shorter_time
+        :user, :from_registered_service_provider, :not_contacted_for_a_short_time
       )
     end
 
@@ -380,11 +380,11 @@ describe User do
     end
 
     def create_actors
-      registered_sp_user_without_recent_interaction
-      registered_sp_user_without_recent_interaction_for_a_longer_time
-      registered_sp_user_without_recent_interaction_for_a_shorter_time
+      registered_sp_user_not_contacted_recently
+      registered_sp_user_not_contacted_for_a_long_time
+      registered_sp_user_not_contacted_for_a_short_time
       registered_sp_user_with_recent_interaction
-      user_without_recent_interaction
+      user_not_contacted_recently
     end
 
     def do_remind(options = {})
@@ -402,37 +402,37 @@ describe User do
     end
 
     def assert_reminded
-      assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_longer_time)
-      assert_user_reminded(registered_sp_user_without_recent_interaction)
+      assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
+      assert_user_reminded(registered_sp_user_not_contacted_recently)
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
-      reply_to(user_without_recent_interaction).should be_nil
+      reply_to(user_not_contacted_recently).should be_nil
     end
 
     def assert_not_reminded
-      reply_to(registered_sp_user_without_recent_interaction_for_a_longer_time).should be_nil
-      reply_to(registered_sp_user_without_recent_interaction).should be_nil
+      reply_to(registered_sp_user_not_contacted_for_a_long_time).should be_nil
+      reply_to(registered_sp_user_not_contacted_recently).should be_nil
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
-      reply_to(user_without_recent_interaction).should be_nil
+      reply_to(user_not_contacted_recently).should be_nil
     end
 
-    it "should only remind users without interaction within the last 5 days" do
+    it "should only remind users that have not been contacted in the last 5 days" do
       do_remind
       assert_reminded
     end
 
     context "passing :inactivity_period => 3.days" do
-      it "should remind users without recent interaction within the last 3 days" do
+      it "should remind users that have not been contacted in the last 3 days" do
         do_remind(:inactivity_period => 3.days)
         assert_reminded
-        assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_shorter_time)
+        assert_user_reminded(registered_sp_user_not_contacted_for_a_short_time)
       end
     end
 
     context "passing :limit => 1" do
-      it "should only remind the user with the longest inactivity period" do
+      it "should only remind the user who was contacted least recently" do
         do_remind(:limit => 1)
-        assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_longer_time)
-        reply_to(registered_sp_user_without_recent_interaction.reload).should be_nil
+        assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
+        reply_to(registered_sp_user_not_contacted_recently.reload).should be_nil
       end
     end
 
@@ -445,7 +445,7 @@ describe User do
   end
 
   describe "#remind!(options = {})" do
-    let(:user) { create(:user, :without_recent_interaction) }
+    let(:user) { create(:user, :not_contacted_recently) }
 
     def do_remind(options = {})
       expect_message { user.remind!(options) }
