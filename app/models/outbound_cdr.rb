@@ -1,8 +1,6 @@
 class OutboundCdr < CallDataRecord
   MIN_CONVERSATION_TIME = 30
 
-  validates :bridge_uuid, :presence => true
-
   before_validation :set_outbound_cdr_attributes, :on => :create
 
   after_create :activate_chat

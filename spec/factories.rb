@@ -624,21 +624,18 @@ FactoryGirl.define do
       dynamic_variables["duration"] ||= "20"
       dynamic_variables["billsec"] ||= "15"
 
-      incoming_phone_call_uuid = phone_call.try(:sid) || FactoryGirl.generate(:guid)
-
       if dynamic_variables["direction"] == "inbound"
 
         dynamic_variables["sip_from_user"] ||= calling_user.mobile_number
         dynamic_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{calling_user.mobile_number}")
 
-        dynamic_variables["uuid"] ||= incoming_phone_call_uuid
+        dynamic_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
         dynamic_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
       else
         called_user = user_who_was_called || FactoryGirl.create(:user)
         dynamic_variables["uuid"] ||= FactoryGirl.generate(:guid)
         dynamic_variables["sip_to_user"] ||= called_user.mobile_number
         dynamic_variables["destination_number"] ||= called_user.mobile_number
-        dynamic_variables["bridge_uuid"] ||= incoming_phone_call_uuid
       end
 
       dynamic_body["variables"].merge!(dynamic_variables)
