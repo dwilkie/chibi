@@ -56,21 +56,21 @@ describe "Call Data Records" do
 
     context "for an inbound cdr" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_cdr(:variables => {"direction" => "inbound"} ) }
+        let(:sample_cdr) { build_cdr(:cdr_variables => {"variables" => {"direction" => "inbound"} } ) }
         let(:asserted_cdr_type) { InboundCdr }
       end
     end
 
     context "for an outbound cdr" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_cdr(:variables => {"direction" => "outbound"} ) }
+        let(:sample_cdr) { build_cdr(:cdr_variables => {"variables" => {"direction" => "outbound"}} ) }
         let(:asserted_cdr_type) { OutboundCdr }
       end
     end
 
     context "for an outbound cdr with an invalid bridge_uid" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_cdr(:variables => {"direction" => "outbound", "bridge_uuid" => "invalid"} ) }
+        let(:sample_cdr) { build_cdr(:cdr_variables => {"variables" => {"direction" => "outbound", "bridge_uuid" => "invalid"}})}
         let(:asserted_cdr_type) { OutboundCdr }
       end
     end

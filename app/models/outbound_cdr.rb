@@ -30,7 +30,9 @@ class OutboundCdr < CallDataRecord
   end
 
   def cdr_from
-    valid_source("sip_to_user") || valid_source("destination_number")
+    valid_source("sip_to_user") || valid_source(
+      "caller_profile", "destination_number", :root => "callflow"
+    )
   end
 
   def find_related_phone_call

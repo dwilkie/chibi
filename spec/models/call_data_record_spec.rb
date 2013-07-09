@@ -43,7 +43,7 @@ describe CallDataRecord do
   end
 
   it "should be valid without an associated phone call" do
-    new_cdr = build_cdr(:variables => {"uuid" => "invalid"})
+    new_cdr = build_cdr(:cdr_variables => {"variables" => {"uuid" => "invalid"}})
     new_cdr.should be_valid
   end
 
@@ -52,7 +52,7 @@ describe CallDataRecord do
     inbound_cdr = create_cdr(:phone_call => phone_call)
     new_cdr.phone_call = inbound_cdr.phone_call
     new_cdr.should_not be_valid # because the new cdr is inbound as well
-    new_cdr = build_cdr(:variables => {"direction" => "outbound"})
+    new_cdr = build_cdr(:cdr_variables => {"variables" => {"direction" => "outbound"}})
     new_cdr.phone_call = phone_call
     new_cdr.should be_valid # because the new cdr is outbound
   end

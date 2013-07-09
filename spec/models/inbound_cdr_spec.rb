@@ -27,8 +27,10 @@ describe InboundCdr do
 
   it "should not be valid without a related user" do
     build_cdr(
-      :variables => {
-        "sip_from_user" => "invalid", "sip_P-Asserted-Identity" => "invalid"
+      :cdr_variables => {
+        "variables" => {
+          "sip_from_user" => "invalid", "sip_P-Asserted-Identity" => "invalid"
+        }
       }
     ).should_not be_valid
   end

@@ -595,7 +595,7 @@ FactoryGirl.define do
 
   factory :call_data_record do
     ignore do
-      variables false
+      cdr_variables false
       user_who_called nil
       user_who_was_called nil
       phone_call nil
@@ -603,12 +603,6 @@ FactoryGirl.define do
       default_body <<-CDR
         <?xml version="1.0"?>
         <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
-          <variables>
-            <direction>inbound</direction>
-            <uuid>some_uuid</uuid>
-            <duration>20</duration>
-            <billsec>15</billsec>
-          </variables>
         </cdr>
       CDR
     end
@@ -617,27 +611,31 @@ FactoryGirl.define do
       dynamic_body = MultiXml.parse(default_body)["cdr"]
       calling_user = user_who_called || FactoryGirl.create(:user)
 
-      dynamic_variables = variables || {}
+      dynamic_cdr = cdr_variables || {}
+      dynamic_cdr_variables = dynamic_cdr["variables"] ||= {}
 
-      dynamic_variables["direction"] ||= "inbound"
-      dynamic_variables["duration"] ||= "20"
-      dynamic_variables["billsec"] ||= "15"
+      dynamic_cdr_callflow = dynamic_cdr["callflow"] ||= {}
+      dynamic_cdr_callflow_caller_profile = dynamic_cdr_callflow["caller_profile"] ||= {}
 
-      if dynamic_variables["direction"] == "inbound"
+      dynamic_cdr_variables["direction"] ||= "inbound"
+      dynamic_cdr_variables["duration"] ||= "20"
+      dynamic_cdr_variables["billsec"] ||= "15"
 
-        dynamic_variables["sip_from_user"] ||= calling_user.mobile_number
-        dynamic_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{calling_user.mobile_number}")
+      if dynamic_cdr_variables["direction"] == "inbound"
 
-        dynamic_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
-        dynamic_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
+        dynamic_cdr_variables["sip_from_user"] ||= calling_user.mobile_number
+        dynamic_cdr_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{calling_user.mobile_number}")
+
+        dynamic_cdr_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
+        dynamic_cdr_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
       else
         called_user = user_who_was_called || FactoryGirl.create(:user)
-        dynamic_variables["uuid"] ||= FactoryGirl.generate(:guid)
-        dynamic_variables["sip_to_user"] ||= called_user.mobile_number
-        dynamic_variables["destination_number"] ||= called_user.mobile_number
+        dynamic_cdr_variables["uuid"] ||= FactoryGirl.generate(:guid)
+        dynamic_cdr_variables["sip_to_user"] ||= called_user.mobile_number
+        dynamic_cdr_callflow_caller_profile["destination_number"] ||= called_user.mobile_number
       end
 
-      dynamic_body["variables"].merge!(dynamic_variables)
+      dynamic_body.deep_merge!(dynamic_cdr)
       dynamic_body.to_xml(:root => "cdr")
     end
   end

@@ -39,12 +39,14 @@ class CallDataRecord < ActiveRecord::Base
     end
   end
 
-  def unescaped_variable(name)
-    Rack::Utils.unescape(variables[name]).strip if variables[name]
+  def unescaped_variable(*keys)
+    options = keys.extract_options!
+    raw_value = keys.unshift(options[:root] || "variables").inject(parsed_body) {|acc, e| acc[e] if acc.is_a?(Hash)}
+    Rack::Utils.unescape(raw_value).strip if raw_value
   end
 
-  def valid_source(name)
-    normalized_value = unescaped_variable(name)
+  def valid_source(*keys)
+    normalized_value = unescaped_variable(*keys)
     normalized_value if normalized_value =~ /\A\+?\d+\z/
   end
 
@@ -53,6 +55,10 @@ class CallDataRecord < ActiveRecord::Base
   end
 
   def variables
-    @variables ||= MultiXml.parse(body)["cdr"]["variables"]
+    parsed_body["variables"]
+  end
+
+  def parsed_body
+    @parsed_body ||= MultiXml.parse(body)["cdr"]
   end
 end

@@ -5,7 +5,7 @@ describe OutboundCdr do
 
   def cdr_body(*args)
     options = args.flatten!.extract_options!
-    super(*args, {:variables => {"direction" => "outbound"}}.deep_merge(options))
+    super(*args, {:cdr_variables => {"variables" => {"direction" => "outbound"}}}.deep_merge(options))
   end
 
   let(:cdr) { create_cdr }
@@ -18,7 +18,14 @@ describe OutboundCdr do
   end
 
   it "should not be valid without a related user" do
-    build_cdr(:variables => {"sip_to_user" => "invalid", "destination_number" => "invalid"}).should_not be_valid
+    build_cdr(
+      :cdr_variables => {
+        "variables" => {"sip_to_user" => "invalid"},
+        "callflow" => {
+          "caller_profile" => {"destination_number" => "invalid"}
+        }
+      }
+    ).should_not be_valid
   end
 
   it_should_behave_like "communicable from user", :passive => true do
@@ -28,13 +35,20 @@ describe OutboundCdr do
   describe "callbacks" do
     describe "before_validation(:on => :create)" do
       context "given a bridge_uuid" do
-        subject { build_cdr(:variables => {"bridge_uuid" => bridge_uuid}) }
+        subject do
+          build_cdr(
+            :cdr_variables => {"variables" => {"bridge_uuid" => bridge_uuid}}
+          )
+        end
+
         let(:bridge_uuid) { generate(:guid) }
 
         context "and an existing related inbound cdr" do
-          let(:inbound_cdr) {
-            create_cdr(:variables => {"direction" => "inbound"})
-          }
+          let(:inbound_cdr) do
+            create_cdr(
+              :cdr_variables => {"variables" => {"direction" => "inbound"}}
+            )
+          end
 
           let(:bridge_uuid) { inbound_cdr.uuid }
 
@@ -83,7 +97,7 @@ describe OutboundCdr do
           build_cdr(
             :user_who_called => user,
             :user_who_was_called => friend,
-            :variables => {"bridge_uuid" => phone_call.sid}
+            :cdr_variables => {"variables" => {"bridge_uuid" => phone_call.sid}}
           )
         }
 
