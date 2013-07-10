@@ -10,9 +10,6 @@ class User < ActiveRecord::Base
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
   MALE = "m"
   FEMALE = "f"
-  BISEXUAL = "e"
-  PROBABLE_GENDER = MALE
-  PROBABLE_LOOKING_FOR = FEMALE
   MINIMUM_MOBILE_NUMBER_LENGTH = 9
 
   has_one :location, :autosave => true
@@ -31,7 +28,7 @@ class User < ActiveRecord::Base
   validates :location, :screen_name, :presence => true
 
   validates :gender, :inclusion => {:in => [MALE, FEMALE], :allow_nil => true}
-  validates :looking_for, :inclusion => {:in => [MALE, FEMALE, BISEXUAL], :allow_nil => true}
+  validates :looking_for, :inclusion => {:in => [MALE, FEMALE], :allow_nil => true}
   validates :age, :inclusion => {:in => 10..99, :allow_nil => true}
 
   before_validation(:on => :create) do
@@ -210,10 +207,6 @@ class User < ActiveRecord::Base
     gender == MALE
   end
 
-  def bisexual?
-    looking_for == BISEXUAL
-  end
-
   def opposite_gender
     if male?
       FEMALE
@@ -222,24 +215,8 @@ class User < ActiveRecord::Base
     end
   end
 
-  def opposite_looking_for
-    if looking_for_male?
-      FEMALE
-    elsif looking_for_female?
-      MALE
-    end
-  end
-
-  def probable_gender
-    gender.present? ? gender : (opposite_looking_for || PROBABLE_GENDER)
-  end
-
-  def probable_looking_for
-    looking_for.present? ? looking_for : (opposite_gender || PROBABLE_LOOKING_FOR)
-  end
-
-  def hetrosexual?
-    true
+  def gay?
+    gender.present? && gender == looking_for
   end
 
   def locale
@@ -329,10 +306,16 @@ class User < ActiveRecord::Base
 
   private
 
-  # don't worry about the user's looking for anymore
-  # just assume they're straight
   def self.order_by_preferred_gender(user, scope)
-    scope = order_by_case(scope, self.where(:gender => user.opposite_gender), 1) if user.opposite_gender.present?
+    if user.gay?
+      # prefer other gays of the same gender
+      # then prefer all others of the same gender
+      order_scope = where(:looking_for => user.gender).where(:gender => user.looking_for)
+    else
+      # prefer the opposite sex (if known)
+      order_scope = where(:gender => user.opposite_gender) if user.opposite_gender.present?
+    end
+    scope = order_by_case(scope, order_scope, 2) if order_scope
     scope
   end
 
