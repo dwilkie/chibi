@@ -44,10 +44,10 @@ module PhoneCallHelpers
         it "should fetch the body from the Twilio API" do
           expect_twilio_cdr_fetch(:call_sid => uuid, :direction => direction) { subject.body }
           body = subject.body
-          body["duration"].should be_present
-          body["billsec"].should be_present
+          body["variables"]["duration"].should be_present
+          body["variables"]["billsec"].should be_present
           assertions.each do |assertion_key, assertion_value|
-            actual_value = body[assertion_key]
+            actual_value = body["variables"][assertion_key]
             if assertion_value == true
               actual_value.should be_present
             else

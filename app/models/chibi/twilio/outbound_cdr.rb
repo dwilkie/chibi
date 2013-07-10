@@ -3,11 +3,13 @@ module Chibi
     class OutboundCdr < ::OutboundCdr
       include Chibi::Twilio::CallDataRecord
 
-      def variables
-        @variables ||= super.merge(
-          "direction" => direction,
-          "sip_to_user" => twilio_call.to,
-          "bridge_uuid" => twilio_call.parent_call_sid
+      def parsed_body
+        @parsed_body ||= super.deep_merge(
+          "variables" => {
+            "direction" => direction,
+            "sip_to_user" => twilio_call.to,
+            "bridge_uuid" => twilio_call.parent_call_sid
+          }
         )
       end
 

@@ -8,11 +8,13 @@ module Chibi
 
       private
 
-      def variables
-        @variables ||= super.merge(
-          "direction" => twilio_call.direction,
-          "sip_from_user" => twilio_call.from,
-          "RFC2822_DATE" => twilio_call.start_time
+      def parsed_body
+        @parsed_body ||= super.deep_merge(
+          "variables" => {
+            "direction" => twilio_call.direction,
+            "sip_from_user" => twilio_call.from,
+            "RFC2822_DATE" => twilio_call.start_time
+          }
         )
       end
     end

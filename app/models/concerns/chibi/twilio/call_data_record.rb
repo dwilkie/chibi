@@ -11,8 +11,8 @@ module Chibi
       def body
         returned_body = read_attribute(:body)
         if returned_body.empty?
-          write_attribute(:body, variables)
-          variables
+          write_attribute(:body, parsed_body)
+          parsed_body
         else
           returned_body
         end
@@ -24,10 +24,12 @@ module Chibi
         @twilio_call ||= twilio_client.account.calls.get(uuid)
       end
 
-      def variables
-        @variables ||= {
-          "duration" => twilio_call.duration,
-          "billsec" => twilio_call.duration,
+      def parsed_body
+        @parsed_body ||= {
+          "variables" => {
+            "duration" => twilio_call.duration,
+            "billsec" => twilio_call.duration
+          }
         }
       end
     end
