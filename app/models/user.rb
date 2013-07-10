@@ -627,13 +627,22 @@ class User < ActiveRecord::Base
   end
 
   def extract_gender_and_looking_for(info)
+    return if gay_from?(info)
     gender_question?(info) # removes gender question
-    found_gender = extract_gender(info, :explicit_only => true)
-    found_looking_for = extract_looking_for(info)
-    unless (found_gender && found_looking_for) || includes_gender_and_looking_for?(info)
-      extract_looking_for(info, :include_shared_gender_words => gender.present?) unless found_looking_for
-      extract_gender(info)
+    return if extract_gender(info, :explicit_only => true)
+    suggests_looking_for?(info) # removes gender preference
+    extract_gender(info)
+  end
+
+  def gay_from?(info)
+    if strip_match!(info, /#{profile_keywords(:gay_boy)}/)
+      self.gender = MALE
+      self.looking_for = MALE
+    elsif(strip_match!(info, /#{profile_keywords(:gay_girl)}/))
+      self.gender = FEMALE
+      self.looking_for = FEMALE
     end
+    gender && looking_for
   end
 
   def extract_date_of_birth(info)
@@ -656,47 +665,13 @@ class User < ActiveRecord::Base
     strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?#{result}/) if result
   end
 
-  def includes_gender_and_looking_for?(info)
-    tmp_info = info.dup
-    if sex = determine_gender(tmp_info, :only_first => true)
-      if wants = determine_looking_for(tmp_info, :use_only_shared_gender_words => true)
-        # we have the sex and looking for already so remove all references to
-        # gender and looking for from the message
-        unless gender_question?(info)
-          determine_gender(info, :only_first => true)
-          determine_looking_for(info, :include_shared_gender_words => true)
-          self.gender = sex
-          self.looking_for = wants
-          updated = true
-        end
-        info = tmp_info
-      end
-    end
-    updated
-  end
-
-  def extract_looking_for(info, options = {})
-    user_looking_for = determine_looking_for(info, options)
-    self.looking_for = user_looking_for if user_looking_for
-  end
-
   def extract_gender(info, options = {})
     sex = determine_gender(info, options)
     self.gender = sex if sex
   end
 
-  def determine_looking_for(info, options = {})
-    if info_suggests_looking_for_girl?(info, options)
-      FEMALE
-    elsif info_suggests_looking_for_boy?(info, options)
-      MALE
-    elsif !options[:use_only_shared_gender_words] && info_suggests_looking_for_friend?(info)
-      BISEXUAL
-    end
-  end
-
   def determine_gender(info, options = {})
-    text = (options[:explicit_only] || options[:only_first]) ? includes_gender?(info, options).try(:[], 0).to_s : info
+    text = options[:explicit_only] ? includes_gender?(info, options).try(:[], 0).to_s : info
     if info_suggests_from_girl?(text, options)
       FEMALE
     elsif info_suggests_from_boy?(text, options)
@@ -704,27 +679,8 @@ class User < ActiveRecord::Base
     end
   end
 
-  def info_suggests_looking_for?(sex, info, options)
-    if options[:include_shared_gender_words]
-      regexp = /\b#{gender_keywords(sex, :desired => true)}\b/
-    elsif options[:use_only_shared_gender_words]
-      regexp = /\b#{gender_keywords(sex, :desired => true, :strict => false)}\b/
-    else
-      regexp = /\b#{gender_keywords(sex, :desired => true, :strict => true)}\b/
-    end
-    strip_match!(info, regexp)
-  end
-
-  def info_suggests_looking_for_girl?(info, options = {})
-    info_suggests_looking_for?(:girl, info, options)
-  end
-
-  def info_suggests_looking_for_boy?(info, options = {})
-   info_suggests_looking_for?(:boy, info, options)
-  end
-
-  def info_suggests_looking_for_friend?(info)
-    strip_match!(info, /\b#{profile_keywords(:friend)}\b/)
+  def suggests_looking_for?(info)
+    strip_match!(info, /\b#{gender_keywords(:desired => true)}\b/)
   end
 
   def includes_gender?(info, options)
@@ -741,13 +697,11 @@ class User < ActiveRecord::Base
     keywords_to_lookup = []
     sexes.each do |sex|
       if options[:desired]
-        keywords_to_lookup << "#{sex}friend".to_sym if options[:strict] || options[:strict].nil?
+        keywords_to_lookup << "#{sex}friend".to_sym
       else
         keywords_to_lookup << sex
         keywords_to_lookup << "#{sex}_gender_clues".to_sym unless options[:clues] == false
       end
-
-      keywords_to_lookup << "could_mean_#{sex}_or_#{sex}friend".to_sym if options[:strict].nil? || options[:strict] == false
     end
     profile_keywords(*keywords_to_lookup)
   end

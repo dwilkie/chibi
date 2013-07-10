@@ -2,16 +2,17 @@
 en:
   boy:
   - male
+  - boy
+  - guy
+  - man
   - "am boy"
   - "i'm boy.....070728444..... n u ?"
   - "i'm boy too"
   - "baby: i am boy.060598431 i'f you want skoul me you call mok kr ban 016310503"
   - "hi amy am virak am boy me fine thank chos amy? can u play sms with me is my number 010679976"
-  could_mean_boy_or_boyfriend:
-  - boy
-  - guy
-  - man
   girl:
+  - girl
+  - woman
   - f
   - female
   - "i som show number del 010917019 i'm girl"
@@ -19,54 +20,15 @@ en:
   - "i'm girll and u?"
   - "im sex f"
   - "hello. i'm girl. i'm pretty well,and you?"
-  could_mean_girl_or_girlfriend:
-  - girl
-  - woman
-  friend:
-  - friend
-  - "i'm fine. thank! n u?do u want to make friend with me?this is my number phone:086708448"
-  - "i am afraid that you are mind but for me you are welcome! I am happy to make friend with you dear"
-  - "theary :today i'm sad nas who want make fri wit me ?"
-  - "with : hello h a u all fri ? m make fri with allfri ban ot ?"
-  - "i am afraid that you are mind but for me you are welcome! i am happy to make friend with you dear"
-  girlfriend:
-  - girlfriend
-  - gf
-  - friend girl
-  - girl friend
-  - "i need friend gil."
-  - "sousdey pich i'm find girl fri. very happy to know you . and h a u?"
-  boyfriend:
-  - boyfriend
-  - bf
-  - friend boy
-  - boy friend
-  - "hello everybody i'm eighteen year old . i live at komphong cham province . i want to add friends 'boy '."
-  guy_looking_for_a_girl:
-  - guy looking for a hot girl sexy
-  - man seeking woman
-  - "fine girl jea mit som phone number pong i am boy"
-  - "i am is a boy. have no girlfriend yet, my facebook's \"phearinvansak phv\""
-  girl_looking_for_a_guy:
-  - girl looking for a hot guy sporty
-  - woman seeking man
-  - f seeking guy hot
-  - m girl looking for man
   guy_looking_for_a_guy:
-  - male looking for a guy to have fun with
-  - guy seeking guy
+  - "boy love boy"
+  - "boy loves boy"
+  - "man love man"
+  - "man loves man"
+  - "i'm man love man!!! call 2 me"
   girl_looking_for_a_girl:
-  - f looking for a girl for relationship
-  - girl seeking girl
-  - f seeking woman
-  guy_looking_for_a_friend:
-  - man looking for a friend to hang out with
-  - guy seeking friend
-  girl_looking_for_a_friend:
-  - f looking for a friend to go shopping with
-  - girl seeking friend
-  - "hi, i'm girl, i want to find friend girl or boy can call to me my number 098850625 welcome 24 hour,"
-  - "( girl cute cute ) hi al fri . me girl . find fri . (girl boy)"
+  - "girl love girl"
+  - "girl loves girl"
   guy_named_frank:
   - im frank man
   - "i'm frank male"
@@ -126,8 +88,6 @@ en:
   - "hello r u girl or boy im boy"
   - "i am  a boy. .how old are u dave ?"
   - "i am male"
-  im_looking_for_a_guy:
-  - im looking for a guy
   not_an_age:
   - "24 hours"
   - "24 h"
@@ -416,6 +376,7 @@ en:
   - "name : makara age : 21year live : pp boy : finegirl number : 010524369"
 kh:
   girl:
+  - srey
   - ja
   - jas
   - chas
@@ -426,50 +387,13 @@ kh:
   - "i am srey i am twenty year old and i one to b your"
   - "a ly ka: ja sou sdey nikola ! nhum soksabey te and you !"
   boy:
+  - pros
+  - bros
   - bart
   - bat
   - "baat,,,nhom boy,,,069786886"
   - "now i'm boy pp"
   - "bat ban ter ^^ i'm grad to be ur fri"
-  could_mean_boy_or_boyfriend:
-  - pros
-  - bros
-  could_mean_girl_or_girlfriend:
-  - srey
-  friend:
-  - mit
-  - met
-  - "sousdey nhom rok mit leng sms number nhom 069828626 ok"
-  - "nhom mit boy kor girl ?"
-  girlfriend:
-  - met srey
-  - mit srey
-  boyfriend:
-  - met bros
-  - met pros
-  - mit bros
-  - mit pros
-  - "a noch jong rok met boy"
-  guy_looking_for_a_girl:
-  - bros sa-at jong mian srey sa-at
-  - khnom pros jab srey
-  girl_looking_for_a_guy:
-  - srey mao jong mian bros saat nas
-  - nhom srey jong mian pros hot
-  guy_looking_for_a_guy:
-  - nhom bros jong rok mit bros
-  - pros jong mian bros hot
-  - pros jong pros
-  girl_looking_for_a_girl:
-  - nhom srey jong mian bumak srey sa-at
-  guy_looking_for_a_friend:
-  - nhom pros jong rok met sabai
-  - bros jong rok mit leng sms
-  - pros rok met funny
-  girl_looking_for_a_friend:
-  - nhom srey jong rok met sabai
-  - srey jong rok mit leng sms
-  - srey rok met cute
   im_something_other_than_a_name:
   - "nhom soursdey"
   - "nhom sousdey"
@@ -621,10 +545,5 @@ kh:
   - nyom srey
   im_a_boy:
   - ",,,nhom boy,,,"
-  im_looking_for_a_guy:
-  - nyom jong rok met pros
-  im_looking_for_a_girl:
-  - ", phet : famle"
-  - "phet del me jong rok . f ."
   hai:
   - "i bat chhmos ( bros hai ) phet bros rous nov kampong cham a yu 20,mit bros"
