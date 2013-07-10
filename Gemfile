@@ -19,7 +19,6 @@ gem "torasup"
 gem "nuntium_api"
 gem "state_machine"
 gem "twilio-ruby"
-gem "honeybadger"
 gem "uuid"
 gem "multi_xml"
 
