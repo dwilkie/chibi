@@ -16,8 +16,8 @@ module TranslationHelpers
     },
 
     :anonymous_reminder => {
-      :en => "^(?:\\w+)\\:\\s.+",
-      :kh => "^(?:\\w+)\\:\\s.+"
+      :en => "^(?:.+)\\:\\s.+",
+      :kh => "^(?:.+)\\:\\s.+"
     }
   }
 
