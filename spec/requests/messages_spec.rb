@@ -110,7 +110,6 @@ describe "Messages" do
             new_user.name.should == "map"
             new_user.age.should == 27
             new_user.location.city.should == "Phnom Penh"
-            new_user.looking_for.should == "f"
             new_user.gender.should == "m"
 
             reply_to(new_user).should be_nil
@@ -136,7 +135,6 @@ describe "Messages" do
             alex.name.should == "alex"
             alex.age.should == 23
             alex.gender.should == "f"
-            alex.looking_for.should == "m"
 
             reply_to(alex).should be_nil
             reply_to(dave).body.should =~ /#{spec_translate(:forward_message_approx, dave.locale, alex.screen_id)}/

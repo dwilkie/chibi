@@ -713,7 +713,7 @@ describe User do
     end
   end
 
-  describe "#update_profile" do
+  describe "#update_profile(info)" do
     def keywords(*keys)
       options = keys.extract_options!
       options[:user] ||= user
@@ -783,465 +783,225 @@ describe User do
       end
     end
 
-    def assert_looking_for(options = {})
-      # the info indicates the user is looking for a guy
-      registration_examples(
-        keywords(:could_mean_boy_or_boyfriend),
-        { :expected_looking_for => :male }.merge(options)
-      )
-
-      # the info indicates the user is looking for a girl
-      registration_examples(
-        keywords(:could_mean_girl_or_girlfriend),
-        { :expected_looking_for => :female }.merge(options)
-      )
-
-      # the info indicates the user is looking for a friend
-      registration_examples(
-        keywords(:friend),
-        { :expected_looking_for => :either}.merge(options)
-      )
-
-      # can't determine what he/she is looking for from the info
-      registration_examples(
-        ["hello", "", "laskhdg"],
-        { :expected_looking_for => options[:expected_looking_for_when_undetermined] }.merge(options)
-      )
-    end
-
-    def assert_gender(options = {})
+    it "should try to determine the profile from the info provided" do
       # the info indicates a guy is texting
       registration_examples(
-        keywords(:boy, :could_mean_boy_or_boyfriend),
-        { :expected_gender => :male }.merge(options)
+        keywords(:boy),
+        :expected_gender => :male
       )
 
       # the info indicates a girl is texting
       registration_examples(
-        keywords(:girl, :could_mean_girl_or_girlfriend),
-        { :expected_gender => :female }.merge(options)
+        keywords(:girl),
+        :expected_gender => :female
       )
-    end
 
-    context "for users with a gender and looking for preference" do
-      let(:user_with_gender_and_looking_for_preference) do
-        create(:user, :with_gender, :with_looking_for_preference)
-      end
+      # the info indicates a guy is gay
+      registration_examples(
+        keywords(:guy_looking_for_a_guy),
+        :expected_gender => :male,
+        :expected_looking_for => :male
+      )
 
-      it "should update the profile with the new information" do
-        # im a girl
-        registration_examples(
-          keywords(:im_a_girl),
-          :user => user_with_gender_and_looking_for_preference,
-          :gender => :male,
-          :looking_for => :female,
-          :expected_gender => :female,
-          :expected_looking_for => :female
-        )
+      # the info indicates a girl looking for girl
+      registration_examples(
+        keywords(:girl_looking_for_a_girl),
+        :expected_gender => :female,
+        :expected_looking_for => :female
+      )
 
-        # im a boy
-        registration_examples(
-          keywords(:im_a_boy),
-          :user => user_with_gender_and_looking_for_preference,
-          :gender => :female,
-          :looking_for => :male,
-          :expected_gender => :male,
-          :expected_looking_for => :male
-        )
+      # guy named frank
+      registration_examples(
+        keywords(:guy_named_frank),
+        :expected_name => "frank",
+        :expected_gender => :male
+      )
 
-        # im looking for a guy
-        registration_examples(
-          keywords(:im_looking_for_a_guy),
-          :user => user_with_gender_and_looking_for_preference,
-          :looking_for => :female,
-          :gender => :female,
-          :expected_gender => :female,
-          :expected_looking_for => :male
-        )
+      # girl named mara
+      registration_examples(
+        keywords(:girl_named_mara),
+        :expected_name => "mara",
+        :expected_gender => :female
+      )
 
-        # im looking for a girl
-        registration_examples(
-          keywords(:im_looking_for_a_girl),
-          :user => user_with_gender_and_looking_for_preference,
-          :looking_for => :male,
-          :gender => :female,
-          :expected_gender => :female,
-          :expected_looking_for => :female
-        )
-      end
-    end
+      # 23 year old
+      registration_examples(
+        keywords(:"23_year_old"),
+        :expected_age => 23
+      )
 
-    context "for users with a missing looking for preference" do
-      it "should determine the looking for preference from the info" do
-        registration_examples(
-          keywords(:boy),
-          :expected_gender => :male,
-          :user => male,
-        )
-      end
-    end
+      # davo 28 guy wants friend
+      registration_examples(
+        keywords(:davo_28_guy_wants_friend),
+        :expected_age => 28,
+        :expected_name => "davo",
+        :expected_gender => :male
+      )
 
-    context "for users with a missing gender or sexual preference" do
-      it "should determine the missing details from the info" do
-        # a guy is texting
-        assert_looking_for(
-          :gender => :male,
-          :expected_gender => :male
-        )
+      # not an age
+      registration_examples(
+        keywords(:not_an_age)
+      )
 
-        # a gay guy is texting
-        assert_looking_for(
-          :gender => :male,
-          :expected_gender => :male,
-          :looking_for => :male,
-          :expected_looking_for_when_undetermined => :male
-        )
+      # put location based examples below here
 
-        # a straight guy is texting
-        assert_looking_for(
-          :gender => :male,
-          :expected_gender => :male,
-          :looking_for => :female,
-          :expected_looking_for_when_undetermined => :female
-        )
+      # Phnom Penhian
+      registration_examples(
+        keywords(:phnom_penhian),
+        :expected_city => "Phnom Penh",
+        :vcr => {:expect_results => true}
+      )
 
-        # a bi guy is texting
-        assert_looking_for(
-          :gender => :male,
-          :expected_gender => :male,
-          :looking_for => :either,
-          :expected_looking_for_when_undetermined => :either
-        )
+      # mara 25 phnom penh wants friend
+      registration_examples(
+        keywords(:mara_25_pp_wants_friend),
+        :expected_age => 25,
+        :expected_city => "Phnom Penh",
+        :expected_name => "mara",
+        :vcr => {:expect_results => true}
+      )
 
-        # a girl is texting
-        assert_looking_for(
-          :gender => :female,
-          :expected_gender => :female,
-        )
+      # someone from siem reap wants to meet a girl
+      registration_examples(
+        keywords(:sr_wants_girl),
+        :expected_city => "Siem Reap",
+        :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
+      )
 
-        # a gay girl is texting
-        assert_looking_for(
-          :gender => :female,
-          :expected_gender => :female,
-          :looking_for => :female,
-          :expected_looking_for_when_undetermined => :female
-        )
+      # kunthia 23 siem reap girl wants boy
+      registration_examples(
+        keywords(:kunthia_23_sr_girl_wants_boy),
+        :expected_age => 23,
+        :expected_gender => :female,
+        :expected_city => "Siem Reap",
+        :expected_name => "kunthia",
+        :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
+      )
 
-        # a straight girl is texting
-        assert_looking_for(
-          :gender => :female,
-          :expected_gender => :female,
-          :looking_for => :male,
-          :expected_looking_for_when_undetermined => :male
-        )
+      # tongleehey 29 phnom penh guy wants girl
+      registration_examples(
+        keywords(:tongleehey),
+        :expected_age => 29,
+        :expected_gender => :male,
+        :expected_city => "Phnom Penh",
+        :expected_name => "tongleehey",
+        :vcr => {:expect_results => true}
+      )
 
-        # a bi girl is texting
-        assert_looking_for(
-          :gender => :female,
-          :expected_gender => :female,
-          :looking_for => :either,
-          :expected_looking_for_when_undetermined => :either
-        )
+      # find me a girl!
+      registration_examples(
+        keywords(:find_me_a_girl)
+      )
 
-        # a user with a unknown gender looking for a guy is texting
-        assert_gender(
-          :looking_for => :male,
-          :expected_looking_for => :male
-        )
+      # I'm vanna 26 guy from kampong thom Want to find a girl.
+      registration_examples(
+        keywords(:vanna_kampong_thom),
+        :expected_name => "vanna",
+        :expected_gender => :male,
+        :expected_age => 26,
+        :expected_city => "Kampong Thom",
+        :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
+      )
 
-        # a user with a unknown gender looking for a girl is texting
-        assert_gender(
-          :looking_for => :female,
-          :expected_looking_for => :female
-        )
+      # veasna: 30 years from kandal want a girl
+      registration_examples(
+        keywords(:veasna),
+        :expected_name => "veasna",
+        :expected_age => 30,
+        :expected_city => "S'ang",
+        :vcr => {:expect_results => true, :cassette => "kh/kandaal"}
+      )
 
-        # a user with a unknown gender looking for a friend is texting
-        assert_gender(
-          :looking_for => :either,
-          :expected_looking_for => :either
-        )
-      end
-    end
+      # sopheak: hello girl607 can u give me ur phone number ?
+      registration_examples(
+        keywords(:sopheak)
+      )
 
-    context "for new users" do
-      it "should try to determine as much as possible from the info provided" do
-        # the info indicates a guy is texting
-        registration_examples(
-          keywords(:boy, :could_mean_boy_or_boyfriend),
-          :expected_gender => :male
-        )
+      # i'm ok, i'm fine, i'm 5 etc
+      registration_examples(
+        keywords(:im_something_other_than_a_name)
+      )
 
-        # the info indicates a girl is texting
-        registration_examples(
-          keywords(:girl, :could_mean_girl_or_girlfriend),
-          :expected_gender => :female
-        )
+      # my name veayo 21 female from pp want to find friend bõy and gril. Can call or sms.
+      registration_examples(
+        keywords(:veayo),
+        :expected_name => "veayo",
+        :expected_age => 21,
+        :expected_city => "Phnom Penh",
+        :expected_gender => :female,
+        :vcr => {:expect_results => true}
+      )
 
-        # the info indicates the user is looking for a girl
-        registration_examples(
-          keywords(:girlfriend),
-          :expected_looking_for => :female
-        )
+      # 070 83 85 48, 070-83-85-48
+      registration_examples(
+        keywords(:telephone_number)
+      )
 
-        # the info indicates the user is looking for a guy
-        registration_examples(
-          keywords(:boyfriend),
-          :expected_looking_for => :male
-        )
+      # hi . name me vannak . a yu nhom 19 chnam
+      registration_examples(
+        keywords(:vannak),
+        :expected_name => "vannak",
+        :expected_age => 19
+      )
 
-        # the info indicates the user is looking for a friend
-        registration_examples(
-          keywords(:friend),
-          :expected_looking_for => :either
-        )
+      # boy or girl
+      registration_examples(
+        keywords(:boy_or_girl)
+      )
 
-        # the info indicates a guy is texting looking for a girl
-        registration_examples(
-          keywords(:guy_looking_for_a_girl),
-          :expected_gender => :male,
-          :expected_looking_for => :female
-        )
+      # hi ! my name vanny.i'm 17 yearold.i'm boy.I live in pailin. thank q... o:)
+      registration_examples(
+        keywords(:vanny),
+        :expected_name => "vanny",
+        :expected_age => 17,
+        :expected_city => "Pailin",
+        :expected_gender => :male,
+        :vcr => {:expect_results => true, :cassette => "kh/krong_pailin"}
+      )
 
-        # the info indicates a girl is texting looking for a guy
-        registration_examples(
-          keywords(:girl_looking_for_a_guy),
-          :expected_gender => :female,
-          :expected_looking_for => :male
-        )
+      # live in siem reap n u . m 093208006
+      registration_examples(
+        keywords(:not_a_man_from_siem_reap),
+        :expected_city => "Siem Reap",
+        :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
+      )
 
-        # the info indicates a guy looking for guy
-        registration_examples(
-          keywords(:guy_looking_for_a_guy),
-          :expected_gender => :male,
-          :expected_looking_for => :male
-        )
+      # kimlong
+      registration_examples(
+        keywords(:kimlong),
+        :expected_name => "kimlong",
+        :expected_age => 17,
+      )
 
-        # the info indicates a girl looking for girl
-        registration_examples(
-          keywords(:girl_looking_for_a_girl),
-          :expected_gender => :female,
-          :expected_looking_for => :female
-        )
+      # phearak
+      registration_examples(
+        keywords(:phearak),
+        :expected_name => "phearak",
+        :expected_age => 30,
+        :expected_city => "Phnom Penh",
+        :expected_gender => :male,
+        :vcr => {:expect_results => true}
+      )
 
-        # the info indicates a guy looking for friend
-        registration_examples(
-          keywords(:guy_looking_for_a_friend),
-          :expected_gender => :male,
-          :expected_looking_for => :either
-        )
+      # name : makara age : 21year live : pp boy : finegirl number : 010524369
+      registration_examples(
+        keywords(:makara),
+        :expected_name => "makara",
+        :expected_age => 21,
+        :expected_city => "Phnom Penh",
+        :expected_gender => :male,
+        :vcr => {:expect_results => true}
+      )
 
-        # the info indicates a girl looking for friend
-        registration_examples(
-          keywords(:girl_looking_for_a_friend),
-          :expected_gender => :female,
-          :expected_looking_for => :either
-        )
-
-        # guy named frank
-        registration_examples(
-          keywords(:guy_named_frank),
-          :expected_name => "frank",
-          :expected_gender => :male
-        )
-
-        # girl named mara
-        registration_examples(
-          keywords(:girl_named_mara),
-          :expected_name => "mara",
-          :expected_gender => :female
-        )
-
-        # 23 year old
-        registration_examples(
-          keywords(:"23_year_old"),
-          :expected_age => 23
-        )
-
-        # davo 28 guy wants friend
-        registration_examples(
-          keywords(:davo_28_guy_wants_friend),
-          :expected_age => 28,
-          :expected_name => "davo",
-          :expected_gender => :male,
-          :expected_looking_for => :either
-        )
-
-        # not an age
-        registration_examples(
-          keywords(:not_an_age)
-        )
-
-        # put location based examples below here
-
-        # Phnom Penhian
-        registration_examples(
-          keywords(:phnom_penhian),
-          :expected_city => "Phnom Penh",
-          :vcr => {:expect_results => true}
-        )
-
-        # mara 25 phnom penh wants friend
-        registration_examples(
-          keywords(:mara_25_pp_wants_friend),
-          :expected_age => 25,
-          :expected_city => "Phnom Penh",
-          :expected_name => "mara",
-          :expected_looking_for => :either,
-          :vcr => {:expect_results => true}
-        )
-
-        # someone from siem reap wants to meet a girl
-        registration_examples(
-          keywords(:sr_wants_girl),
-          :expected_city => "Siem Reap",
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
-        )
-
-        # kunthia 23 siem reap girl wants boy
-        registration_examples(
-          keywords(:kunthia_23_sr_girl_wants_boy),
-          :expected_age => 23,
-          :expected_gender => :female,
-          :expected_city => "Siem Reap",
-          :expected_name => "kunthia",
-          :expected_looking_for => :male,
-          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
-        )
-
-        # tongleehey 29 phnom penh guy wants girl
-        registration_examples(
-          keywords(:tongleehey),
-          :expected_age => 29,
-          :expected_gender => :male,
-          :expected_city => "Phnom Penh",
-          :expected_name => "tongleehey",
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true}
-        )
-
-        # find me a girl!
-        registration_examples(
-          keywords(:find_me_a_girl),
-          :expected_looking_for => :female
-        )
-
-        # I'm vanna 26 guy from kampong thom Want to find a girl.
-        registration_examples(
-          keywords(:vanna_kampong_thom),
-          :expected_name => "vanna",
-          :expected_gender => :male,
-          :expected_age => 26,
-          :expected_city => "Kampong Thom",
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
-        )
-
-        # veasna: 30 years from kandal want a girl
-        registration_examples(
-          keywords(:veasna),
-          :expected_name => "veasna",
-          :expected_age => 30,
-          :expected_city => "S'ang",
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true, :cassette => "kh/kandaal"}
-        )
-
-        # sopheak: hello girl607 can u give me ur phone number ?
-        registration_examples(
-          keywords(:sopheak)
-        )
-
-        # i'm ok, i'm fine, i'm 5 etc
-        registration_examples(
-          keywords(:im_something_other_than_a_name)
-        )
-
-        # my name veayo 21 female from pp want to find friend bõy and gril. Can call or sms.
-        registration_examples(
-          keywords(:veayo),
-          :expected_name => "veayo",
-          :expected_age => 21,
-          :expected_city => "Phnom Penh",
-          :expected_looking_for => :either,
-          :expected_gender => :female,
-          :vcr => {:expect_results => true}
-        )
-
-        # 070 83 85 48, 070-83-85-48
-        registration_examples(
-          keywords(:telephone_number)
-        )
-
-        # hi . name me vannak . a yu nhom 19 chnam
-        registration_examples(
-          keywords(:vannak),
-          :expected_name => "vannak",
-          :expected_age => 19
-        )
-
-        # boy or girl
-        registration_examples(
-          keywords(:boy_or_girl)
-        )
-
-        # hi ! my name vanny.i'm 17 yearold.i'm boy.I live in pailin. thank q... o:)
-        registration_examples(
-          keywords(:vanny),
-          :expected_name => "vanny",
-          :expected_age => 17,
-          :expected_city => "Pailin",
-          :expected_gender => :male,
-          :vcr => {:expect_results => true, :cassette => "kh/krong_pailin"}
-        )
-
-        # live in siem reap n u . m 093208006
-        registration_examples(
-          keywords(:not_a_man_from_siem_reap),
-          :expected_city => "Siem Reap",
-          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
-        )
-
-        # kimlong
-        registration_examples(
-          keywords(:kimlong),
-          :expected_name => "kimlong",
-          :expected_age => 17,
-        )
-
-        # phearak
-        registration_examples(
-          keywords(:phearak),
-          :expected_name => "phearak",
-          :expected_age => 30,
-          :expected_city => "Phnom Penh",
-          :expected_gender => :male,
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true}
-        )
-
-        # name : makara age : 21year live : pp boy : finegirl number : 010524369
-        registration_examples(
-          keywords(:makara),
-          :expected_name => "makara",
-          :expected_age => 21,
-          :expected_city => "Phnom Penh",
-          :expected_gender => :male,
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true}
-        )
-
-        # "i bat chhmos ( bros hai ) phet bros rous nov kampong cham a yu 20,mit bros"
-        registration_examples(
-          keywords(:hai),
-          :expected_name => "hai",
-          :expected_age => 20,
-          :expected_city => "Krouch Chhmar",
-          :expected_gender => :male,
-          :expected_looking_for => :male,
-          :vcr => {:expect_results => true, :cassette => "kh/kampong_chaam"}
-        )
-      end
+      # "i bat chhmos ( bros hai ) phet bros rous nov kampong cham a yu 20,mit bros"
+      registration_examples(
+        keywords(:hai),
+        :expected_name => "hai",
+        :expected_age => 20,
+        :expected_city => "Krouch Chhmar",
+        :expected_gender => :male,
+        :vcr => {:expect_results => true, :cassette => "kh/kampong_chaam"}
+      )
     end
   end
 
