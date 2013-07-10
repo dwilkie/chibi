@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
   include Chibi::Twilio::ApiHelpers
   include Chibi::Communicable::HasCommunicableResources
 
-  has_communicable_resources :messages, :phone_calls, :replies
+  has_communicable_resources :phone_calls, :messages, :replies
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
   MALE = "m"

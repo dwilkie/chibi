@@ -1,6 +1,6 @@
 class Chat < ActiveRecord::Base
   include Chibi::Communicable::HasCommunicableResources
-  has_communicable_resources :messages, :phone_calls, :replies
+  has_communicable_resources :phone_calls, :messages, :replies
 
   belongs_to :user
   belongs_to :friend, :class_name => 'User'
