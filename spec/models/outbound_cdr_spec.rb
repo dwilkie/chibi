@@ -87,10 +87,6 @@ describe OutboundCdr do
 
       context "given there is an existing chat between the caller and the recipient" do
 
-        let!(:chat) {
-          create(:chat, :friend_active, :user => user, :friend => friend)
-        }
-
         let(:phone_call) { create(:phone_call, :user => user) }
 
         subject {
@@ -101,16 +97,34 @@ describe OutboundCdr do
           )
         }
 
-        it "should reactivate the chat" do
-          chat.should_not be_active
-          subject.save!
-          chat.reload.should be_active
+        context "which is not active" do
+          let!(:chat) {
+            create(:chat, :friend_active, :user => user, :friend => friend)
+          }
+
+
+          it "should reactivate the chat" do
+            chat.should_not be_active
+            subject.save!
+            chat.reload.should be_active
+          end
+
+          it "should send a canned message to the caller from the receiver and to the receiver from the caller" do
+            expect_message { subject.save! }
+            reply_to(user, chat).body.should =~ /#{spec_translate(:forward_message_approx, user.locale, friend.screen_id)}/
+            reply_to(friend, chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
+          end
         end
 
-        it "should send a canned message to the caller from the receiver and to the receiver from the caller" do
-          expect_message { subject.save! }
-          reply_to(user, chat).body.should =~ /#{spec_translate(:forward_message_approx, user.locale, friend.screen_id)}/
-          reply_to(friend, chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
+        context "which is currently active" do
+          let!(:chat) { create(:chat, :active, :user => user, :friend => friend) }
+          it "should not send any canned messages" do
+            chat.should be_active
+            subject.save!
+            chat.reload.should be_active
+            reply_to(user, chat).should be_nil
+            reply_to(friend, chat).should be_nil
+          end
         end
       end
     end
