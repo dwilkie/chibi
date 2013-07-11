@@ -1,8 +1,8 @@
 en:
   i_am:
-    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for |searching | searchimg )))(?:(?:i\\s*)?(?:\\b(?:am|i'm|\\bim|me|\\bm\\b))(?:\\s*(?:a))?)"
+    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for |searching | searchimg )))(?:(?:i\\s*)?(?:\\b(?:am|i'm|iam|\\bim|me|\\bm\\b))(?:\\s*(?:a))?)"
   name:
-    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|\\bim|\\bm\\b)\\s*"
+    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|iam|\\bim|\\bm\\b)\\s*"
   banned_names:
     - "available"
     - "currently"
@@ -109,6 +109,7 @@ en:
     - "alone"
     - "lonely"
     - "only"
+    - "birthday"
     - "happ?y"
     - "yes"
     - "top"
@@ -191,9 +192,9 @@ en:
     - "guy"
     - "man"
   girlfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|fri(?:e?nd)?s?|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:gir?l|wom(?:a|e)n)(?!\s*boy|guy|man))'
+    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:gir?l|wom(?:a|e)n)(?!\s*boy|guy|man))'
   boyfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|fri(?:e?nd)?s?|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:girl |gil |wom(?:a|e)n ))(?:boy|guy|man)(?!\s*gir?l|wom(?:a|e)n))'
+    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:girl |gil |wom(?:a|e)n ))(?:boy|guy|man)(?!\s*gir?l|wom(?:a|e)n))'
   gay_boy:
     - "boy loves? boy"
     - "man loves? man"

@@ -501,11 +501,13 @@ describe User do
 
     # Ordering
 
-    # 1. If his/her gender is known
-    #   a) For males
-    #     Prefer females
-    #   b) For females
-    #     Prefer males
+    # 1. Order by preferred gender
+    #    a) he/she is gay
+    #       i)  Prefer other gay users of the same gender
+    #       ii) Prefer other users of the same sex
+    #    b) he/she is not gay
+    #       i)  Gender is known - Prefer users of the opposite sex
+    #       ii) Gender is unknown - Skip
 
     # 2. Order by recent activity. Note: This should come AFTER ordering by gender
     #    for 2 reasons. Firstly, in the common situation where he is matched
@@ -520,22 +522,22 @@ describe User do
     # see spec/factories.rb for where users are defined
 
     # Alex has an empty profile last seen just now
+    # Chamroune is has an empty profile last seen just now
     # Jamie has an empty profile last seen 15 minutes ago
-    # Joy is a straight 27 year old female in Phnom Penh last seen 15 minutes ago
-    # Mara is a bisexual 25 year old female in Phnom Penh last seen 15 minutes ago
+    # Joy is a 27 year old female in Phnom Penh last seen 15 minutes ago
+    # Mara is a 25 year old female in Phnom Penh last seen 15 minutes ago
     # Pauline is a female last seen just now from a registered service provider
-    # Chamroune is looking for a female last seen just now
-    # Dave is a straight 28 year old male in Phnom Penh last seen just now
-    # Luke is a straight 25 year old male in Phnom Penh last seen just now
-    # Con is a straight 37 year old male in Siem Reap last seen 15 minutes ago with
-    # Paul is a straight 39 year old male in Phnom Penh last seen 15 minutes ago with
+    # Dave is a 28 year old male in Phnom Penh last seen just now
+    # Luke is a 25 year old male in Phnom Penh last seen just now
+    # Con is a 37 year old male in Siem Reap last seen 15 minutes ago with
+    # Paul is a 39 year old male in Phnom Penh last seen 15 minutes ago with
     # Harriet is a lesbian from Battambang last seen 15 minutes ago currently chatting with Eva
     # Eva is a lesbian from Siem Reap last seen 15 minutes ago currently chatting with Harriet
-    # Nok is a straight female from Chiang Mai last seen 15 minutes ago
-    # Michael is a bisexual 29 year old male from Chiang Mai last seen 15 minutes ago with
+    # Nok is a female from Chiang Mai last seen 15 minutes ago
+    # Michael is a 29 year old male from Chiang Mai last seen 15 minutes ago with
     # Hanh is a gay 28 year old male from Chiang Mai last seen 15 minutes ago
     # View is a gay 26 year old male from Chiang Mai last seen 15 minutes ago
-    # Reaksmey is bisexual who has never interacted (his last_interacted_at is nil)
+    # Reaksmey has never interacted (his last_interacted_at is nil)
 
     # Individual Match Explanations
 
@@ -546,8 +548,8 @@ describe User do
     # No Profile information is known about Jamie
     # Similar to Alex, ordering is based on recent activity only
 
-    # Chamroune is looking for a female but for now we are ignoring this data.
-    # Since his/her gender and location is unknown his matches are similar to Alex and Jamie's
+    # No Profile information is known abount Chamroune .
+    # Similar to Alex and Jamie, ordering is based on recent activity
 
     # Pauline is female so male users are matched first.
     # Luke and Dave are equal first because they're guys
@@ -603,20 +605,23 @@ describe User do
     # Con matches before Paul because he is closer in age to Luke than Paul
     # Reaksmey matches last because he has *never* interacted
 
-    # Harriet is a girl. Like the other girls she matches with the boys first.
+    # Harriet is a lesbian. Unlike the other girls she matches other lesbians first then the girls, followed by the boys.
     # Dave has already chatted with Harriet so he is eliminated from the results.
-    # Luke is matched first because of his recent activity
+    # Eva would have match first (because she is also a lesbian) but she is is eliminated because she is currently chatting with Harriet
+    # Pauline is matched first because she is a female with the most recent activity
+    # Mara and Joy are matched next because they are female
+    # Luke is matched next because of his recent activity and known location
+    # Chamroune and Alex are next due to their recent activity
     # Con is matched before Paul because he is closer (in Siem Reap) to Harriet (in Battambang) than
     # Paul (in Phnom Penh).
-    # Pauline, Chamroune and Alex are next due to their recent activity
-    # Followed by Mara, Joy, Jamie
+    # Followed by Jamie (who's location is unknown)
     # Reaksmey matches last because he has *never* interacted
-    # Eva is eliminated because she is currently chatting with Harriet
 
     # Eva is also in Siem Reap and gets a similar result to Harriet (with Dave included)
 
     # Hanh is a guy living in Thailand. He has already chatted with Nok.
-    # Michael and View match equal first
+    # View matches first because he is gay
+    # Followed by Michael who is male
 
     # View has previously chatted with Michael and Hanh is offline, so Nok is matched
 
@@ -646,9 +651,9 @@ describe User do
       :con => [:pauline, :joy, [:dave, :chamroune, :alex], :luke, [:paul, :jamie], :reaksmey],
       :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, [:con, :jamie], :reaksmey],
       :luke => [:pauline, :mara, :joy, [:dave, :alex, :chamroune], :jamie, :con, :paul, :reaksmey],
-      :harriet => [:luke, :con, :paul, [:pauline, :chamroune, :alex], [:mara, :joy, :jamie], :reaksmey],
-      :eva => [[:dave, :luke], :con, :paul, [:alex, :chamroune, :pauline], [:joy, :mara, :jamie], :reaksmey],
-      :hanh => [[:michael, :view]],
+      :harriet => [:pauline, [:mara, :joy], :luke, [:chamroune, :alex], :con, :paul, :jamie, :reaksmey],
+      :eva => [:pauline, [:mara, :joy], [:luke, :dave], [:chamroune, :alex], :con, :paul, :jamie, :reaksmey],
+      :hanh => [:view, :michael],
       :view => [:nok],
       :mara => [[:dave, :luke], :paul, [:chamroune, :alex, :pauline], [:joy, :jamie], :reaksmey],
       :michael => [:nok],
@@ -693,7 +698,6 @@ describe User do
         USER_MATCHES.each do |user, matches|
           results = subject.class.matches(send(user))
           result_names = results.map { |result| result.name.to_sym }
-
           result_index = 0
           matches.each do |expected_match|
             if expected_match.is_a?(Array)

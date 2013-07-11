@@ -471,14 +471,12 @@ FactoryGirl.define do
     # user with unknown gender
     factory :chamroune do
       name "chamroune"
-      looking_for "f"
       with_recent_interaction
     end
 
-    # bisexual, never interacted, with unknown gender
+    # never interacted, with unknown gender
     factory :reaksmey do
       name "reaksmey"
-      looking_for "e"
     end
 
     # user with unknown looking for preference
@@ -496,11 +494,10 @@ FactoryGirl.define do
       with_semi_recent_interaction
     end
 
-    # straight girls
+    # girls
     factory :nok do
       name "nok"
       gender "f"
-      looking_for "m"
       with_semi_recent_interaction
       thai
       association :location, :chiang_mai
@@ -513,12 +510,11 @@ FactoryGirl.define do
       end
     end
 
-    # straight guys
+    # guys
     factory :paul do
       name "paul"
       age 39
       gender "m"
-      looking_for "f"
       with_semi_recent_interaction
       association :location, :phnom_penh
 
@@ -571,21 +567,17 @@ FactoryGirl.define do
       end
     end
 
-    # bi girl
     factory :mara do
       name "mara"
       gender "f"
-      looking_for "e"
       age 25
       with_semi_recent_interaction
       association :location, :phnom_penh
     end
 
-    # bi guy
     factory :michael do
       name "michael"
       gender "m"
-      looking_for "e"
       age 29
       with_semi_recent_interaction
       thai
