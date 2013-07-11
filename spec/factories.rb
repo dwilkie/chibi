@@ -402,6 +402,16 @@ FactoryGirl.define do
       gender "f"
     end
 
+    trait :gay do
+      male
+      looking_for "m"
+    end
+
+    trait :lesbian do
+      female
+      looking_for "f"
+    end
+
     trait :with_invalid_mobile_number do
       sequence(:mobile_number, 8551234) {|n| n.to_s }
     end

@@ -127,7 +127,7 @@ class Reply < ActiveRecord::Base
   end
 
   def send_reminder!
-    self.body = random_canned_greeting(:recipient => user)
+    self.body = user.gay? ? canned_reply(:recipient => user).gay_reminder : random_canned_greeting(:recipient => user)
     prepend_screen_id(Faker::Name.first_name)
     deliver!
   end

@@ -11,6 +11,16 @@ class CannedReply
     random_sample(:greetings, interpolations)
   end
 
+  def gay_reminder
+    random_sample(
+      :gay_reminder,
+      interpolations.merge(
+        :on => @recipient.contact_me_number,
+        :gender => @recipient.gender == User::MALE ? "boy" : "girl"
+      )
+    )
+  end
+
   def contact_me
     random_sample(:contact_me, interpolations.merge(:on => contact_me_on, :call_sms => call_or_sms))
   end

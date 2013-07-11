@@ -20,6 +20,26 @@ describe CannedReply do
     result.should =~ /#{Regexp.escape(recipient.contact_me_number)}/
   end
 
+  describe "#gay_reminder" do
+    context "for boys" do
+      let(:recipient) { create(:user, :male, :name => "hanh") }
+      it "should generate a gay reminder message for males" do
+        assert_random(:gay_reminder) do |result|
+          result.should =~ /boys/
+        end
+      end
+    end
+
+    context "for girls" do
+      let(:recipient) { create(:user, :female, :name => "hanh") }
+      it "should generate a gay reminder message for females" do
+        assert_random(:gay_reminder) do |result|
+          result.should =~ /girls/
+        end
+      end
+    end
+  end
+
   describe "#greeting" do
     it "should generate a random greeting" do
       assert_random(:greeting)
