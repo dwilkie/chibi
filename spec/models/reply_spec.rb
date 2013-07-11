@@ -545,7 +545,7 @@ describe Reply do
     it "should send the user a reminder on how to use the service" do
       assert_reply(
         :send_reminder!, :anonymous_reminder, :approx => true,
-        :args => []
+        :args => [], :test_users => [local_users, create(:user, :gay), create(:user, :lesbian)].flatten
       )
     end
   end

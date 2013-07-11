@@ -107,3 +107,5 @@ en:
   call_me_back:
     - "Please call me back"
     - "Please call me"
+  gay_reminder:
+    - "Hi%{recipient_name}! I love %{gender}s! This service can introduce %{gender} & %{gender} together! Just text '%{gender} love %{gender}' to %{on}. Tell ur friends!"
