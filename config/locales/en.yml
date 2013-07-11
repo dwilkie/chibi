@@ -15,3 +15,97 @@ en:
       last_word_connector: ! ' & '
       two_words_connector: ! ' & '
       words_connector: ! ', '
+  i_ams:
+    - "i am"
+    - "i'm"
+    - "m"
+  name_announcements:
+    - "my name is"
+    - "my name's"
+  genders:
+    female:
+      - "girl"
+      - "woman"
+    male:
+      - "boy"
+      - "man"
+  greeting_starters:
+    - "hi"
+    - "hello"
+    - ";)"
+    - ":)"
+  greeting_punctuation_marks:
+    - "!"
+    - ","
+    - "."
+    - ""
+  name_questions:
+    - "what's ur name?"
+    - "can you tell me ur name?"
+  gender_questions:
+    - "boy or girl?"
+    - "girl or boy?"
+    - "man or woman?"
+    - "woman or man?"
+    - "b or g?"
+    - "g or b?"
+    - "f or m?"
+    - "m or f?"
+  you:
+    - "you"
+    - "u"
+  or:
+    - "or"
+  location_questions:
+    - "where do you live?"
+    - "come from?"
+    - "where are you?"
+  age_questions:
+    - "how old r u?"
+    - "how old?"
+  sms:
+    - "sms"
+  call:
+    - "call"
+  contact_me_prepositions:
+    - "on"
+  greetings:
+    - "%{recipient_greeting}..."
+    - "%{recipient_greeting}%{sender_introduction}%{recipient_questions}"
+    - "Oh %{recipient_greeting}"
+    - "Oh%{sender_introduction} can i make friend with you%{recipient_name}?%{recipient_questions}"
+    - "Hello how are you %{recipient_name}?"
+    - "%{recipient_greeting}%{sender_introduction}%{recipient_name} how are u 2 day?%{recipient_questions}"
+    - "%{recipient_greeting}%{sender_introduction} How could I know U?"
+    - "%{recipient_greeting}%{sender_introduction} m really happy 2 make friends with u.%{recipient_questions}"
+    - "%{recipient_greeting} nice to know u... H a u?"
+    - "%{recipient_greeting} nice to meet u"
+    - "nice 2 chat with you %{recipient_name}!"
+    - "%{recipient_greeting}%{sender_introduction} nice to know u.%{recipient_questions}"
+    - "%{recipient_greeting} same to you!%{sender_introduction}!"
+    - "%{recipient_greeting}%{sender_introduction} i want to play SMS! %{recipient_questions}"
+  contact_me:
+    - "Hi%{recipient_name} can you %{call_sms} back %{on}?"
+    - "%{recipient_name}, please %{call_sms} me. %{on}"
+  its_me:
+    - "Hi%{recipient_name} it's me here"
+  how_do_you_know_my_number:
+    - "Hey! Curious, how do you know my number?"
+    - "Hey! How u know my number?"
+  nice_to_know_you:
+    - "Nice to know you!"
+  thank_you_for_calling_me:
+    - "thank u for calling me%{recipient_name}!"
+  are_you_there:
+    - "Hello%{recipient_name}?"
+    - "Hello%{recipient_name}..are you there?"
+    - "%{recipient_name} are you there ? "
+    - "%{recipient_name} are you there?"
+    - "Hello%{recipient_name} a u there?"
+    - "Hi%{recipient_name}, a u there?"
+    - "R u there?"
+  call_me_back:
+    - "Please call me back"
+    - "Please call me"
+  gay_reminder:
+    - "Hi%{recipient_name}! I love %{gender}s! This service can introduce %{gender} & %{gender} together! Just text '%{gender} love %{gender}' to %{on}. Tell ur friends!"

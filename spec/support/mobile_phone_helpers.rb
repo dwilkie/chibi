@@ -12,6 +12,8 @@ module MobilePhoneHelpers
     :us => :american
   }
 
+  private
+
   def with_users_from_different_countries(&block)
     TESTED_NATIONALITIES.each do |country_code, localities|
       [localities].flatten.each do |locality|
@@ -42,11 +44,16 @@ module MobilePhoneHelpers
     super(:only_registered => ASSERTED_REGISTERED_OPERATORS, &block)
   end
 
-  def registered_operator_number
-    numbers = []
+  def registered_operator(type)
+    factory_generated_number = generate(:operator_number_with_voice)
+    numbers = {}
     with_operators do |number_parts, assertions|
-      numbers << number_parts.join if assertions["caller_id"]
+      number_without_padding = number_parts.join.gsub(/0+$/, "")
+      if assertions["caller_id"] && factory_generated_number =~ /^#{number_without_padding}/
+        numbers[factory_generated_number] = assertions
+        break
+      end
     end
-    numbers.first
+    type == :number ? numbers.keys.first : numbers.values.first[type.to_s]
   end
 end

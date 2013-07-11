@@ -1,17 +1,15 @@
 # encoding: utf-8
 
 class User < ActiveRecord::Base
-  include Analyzable
-  include Communicable::HasCommunicableResources
-  include TwilioHelpers
+  include Chibi::Analyzable
+  include Chibi::Twilio::ApiHelpers
+  include Chibi::Communicable::HasCommunicableResources
+
+  has_communicable_resources :phone_calls, :messages, :replies
 
   PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
-  DEFAULT_ALTERNATE_LOCALE = "en"
   MALE = "m"
   FEMALE = "f"
-  BISEXUAL = "e"
-  PROBABLE_GENDER = MALE
-  PROBABLE_LOOKING_FOR = FEMALE
   MINIMUM_MOBILE_NUMBER_LENGTH = 9
 
   has_one :location, :autosave => true
@@ -30,7 +28,7 @@ class User < ActiveRecord::Base
   validates :location, :screen_name, :presence => true
 
   validates :gender, :inclusion => {:in => [MALE, FEMALE], :allow_nil => true}
-  validates :looking_for, :inclusion => {:in => [MALE, FEMALE, BISEXUAL], :allow_nil => true}
+  validates :looking_for, :inclusion => {:in => [MALE, FEMALE], :allow_nil => true}
   validates :age, :inclusion => {:in => 10..99, :allow_nil => true}
 
   before_validation(:on => :create) do
@@ -78,11 +76,11 @@ class User < ActiveRecord::Base
       ).where_values.first
     end
 
-    scoped.joins(:location).update_all("name = NULL", banned_name_conditions.join(" OR "))
+    joins(:location).where(banned_name_conditions.join(" OR ")).update_all("name = NULL")
   end
 
   def self.online
-    scoped.where("\"#{table_name}\".\"state\" != ?", "offline")
+    where("\"#{table_name}\".\"state\" != ?", "offline")
   end
 
   def self.filter_by(params = {})
@@ -97,36 +95,36 @@ class User < ActiveRecord::Base
   end
 
   def self.between_the_ages(range)
-    scoped.where("date_of_birth <= ? AND date_of_birth > ?", range.min.years.ago, range.max.years.ago)
+    where("date_of_birth <= ? AND date_of_birth > ?", range.min.years.ago, range.max.years.ago)
   end
 
   def self.male
-    scoped.where(:gender => MALE)
+    where(:gender => MALE)
   end
 
   def self.female
-    scoped.where(:gender => FEMALE)
+    where(:gender => FEMALE)
   end
 
   def self.with_date_of_birth
-    scoped.where("date_of_birth IS NOT NULL")
+    where("date_of_birth IS NOT NULL")
   end
 
   def self.without_gender
-    scoped.where("gender IS NULL")
+    where("gender IS NULL")
   end
 
   def self.available
-    scoped.where(:active_chat_id => nil).online
+    where(:active_chat_id => nil).online
   end
 
   def self.remind!(options = {})
     within_hours(options) do
       limit = options.delete(:limit) || 100
 
-      users_to_remind = without_recent_interaction(
+      users_to_remind = not_contacted_recently(
         inactive_timestamp(options)
-      ).from_registered_service_providers.online.order(:updated_at).limit(limit)
+      ).from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(limit)
 
       users_to_remind.each do |user_to_remind|
         Resque.enqueue(UserReminderer, user_to_remind.id, options)
@@ -136,7 +134,7 @@ class User < ActiveRecord::Base
 
   def self.find_friends(options = {})
     within_hours(options) do
-      scoped.where(:state => "searching_for_friend").find_each do |user|
+      where(:state => "searching_for_friend").find_each do |user|
         enqueue_friend_messenger(user, options)
       end
     end
@@ -144,7 +142,7 @@ class User < ActiveRecord::Base
 
   def self.matches(user)
     # don't match the user being matched
-    match_scope = not_scope(scoped, :id => user.id, :include_nil => false)
+    match_scope = not_scope(all, :id => user.id, :include_nil => false)
 
     # exclude existing friends
     match_scope = exclude_existing_friends(user, match_scope)
@@ -152,17 +150,17 @@ class User < ActiveRecord::Base
     # only include available users
     match_scope = match_scope.available
 
-    # order by the user's preferred gender
-    match_scope = order_by_preferred_gender(user, match_scope)
-
-    # then by recent activity
-    match_scope = order_by_recent_activity(user, match_scope)
+    # order last by location
+    match_scope = filter_by_location(user, match_scope)
 
     # then by age difference
     match_scope = order_by_age_difference(user, match_scope)
 
-    # then by location
-    match_scope = filter_by_location(user, match_scope)
+    # then by recent activity
+    match_scope = order_by_recent_activity(user, match_scope)
+
+    # and first by the user's preferred gender
+    match_scope = order_by_preferred_gender(user, match_scope)
 
     # group by user and make sure the records are not read only
     match_scope.group(self.all_columns).readonly(false)
@@ -179,9 +177,12 @@ class User < ActiveRecord::Base
     end
   end
 
-  def locale
-    raw_locale = read_attribute(:locale)
-    raw_locale ? raw_locale.to_s.downcase.to_sym : country_code.to_sym
+  def contact_me_number
+    operator.short_code || twilio_outgoing_number
+  end
+
+  def can_call_short_code?
+    operator.caller_id.present?
   end
 
   def caller_id(requesting_api_version)
@@ -189,7 +190,7 @@ class User < ActiveRecord::Base
   end
 
   def dial_string(requesting_api_version)
-    adhearsion_twilio_requested?(requesting_api_version) ? (operator.dial_string(:number_to_dial => mobile_number) || default_pbx_dial_string(:number_to_dial => mobile_number)) : mobile_number
+    adhearsion_twilio_requested?(requesting_api_version) ? (operator.dial_string(:number_to_dial => mobile_number) || default_pbx_dial_string(:number_to_dial => mobile_number)) : twilio_formatted(mobile_number)
   end
 
   def find_friends!(options = {})
@@ -206,10 +207,6 @@ class User < ActiveRecord::Base
     gender == MALE
   end
 
-  def bisexual?
-    looking_for == BISEXUAL
-  end
-
   def opposite_gender
     if male?
       FEMALE
@@ -218,24 +215,12 @@ class User < ActiveRecord::Base
     end
   end
 
-  def opposite_looking_for
-    if looking_for_male?
-      FEMALE
-    elsif looking_for_female?
-      MALE
-    end
+  def gay?
+    gender.present? && gender == looking_for
   end
 
-  def probable_gender
-    gender.present? ? gender : (opposite_looking_for || PROBABLE_GENDER)
-  end
-
-  def probable_looking_for
-    looking_for.present? ? looking_for : (opposite_gender || PROBABLE_LOOKING_FOR)
-  end
-
-  def hetrosexual?
-    true
+  def locale
+    country_code.to_sym
   end
 
   def profile_complete?
@@ -271,8 +256,8 @@ class User < ActiveRecord::Base
     state != "offline"
   end
 
-  def available?(in_chat = nil)
-    online? && (!currently_chatting? || active_chat == in_chat || !active_chat.active?)
+  def available?
+    online? && (!currently_chatting? || !active_chat.active?)
   end
 
   def currently_chatting?
@@ -289,7 +274,7 @@ class User < ActiveRecord::Base
 
   def remind!(options = {})
     self.class.within_hours(options) do
-      replies.build.send_reminder! unless has_recent_interaction?(self.class.inactive_timestamp(options))
+      replies.build.send_reminder! unless contacted_recently?(self.class.inactive_timestamp(options))
     end
   end
 
@@ -297,37 +282,18 @@ class User < ActiveRecord::Base
     fire_events(:login)
   end
 
-  def logout!(options = {})
+  def logout!
     if currently_chatting?
       partner = active_chat.partner(self)
-      notify = partner if options[:notify_chat_partner]
-      active_chat.deactivate!(:active_user => partner, :notify => notify)
+      active_chat.deactivate!(:active_user => partner)
     end
 
     fire_events(:logout)
-
-    replies.build.logout!(partner) if options[:notify]
-  end
-
-  def welcome!
-    replies.build.welcome!
   end
 
   def search_for_friend!
     fire_events(:search_for_friend)
     nil
-  end
-
-  def update_locale!(locale, options = {})
-    updating_to_same_locale = (locale.to_s.to_sym == self.locale)
-
-    if (locale == DEFAULT_ALTERNATE_LOCALE || locale == country_code) && !updating_to_same_locale
-      update_successful = update_attributes!(:locale => locale)
-      replies.last_delivered.try(:deliver_alternate_translation!) if options[:notify]
-      update_successful
-    else
-      updating_to_same_locale
-    end
   end
 
   def matches
@@ -340,10 +306,16 @@ class User < ActiveRecord::Base
 
   private
 
-  # don't worry about the user's looking for anymore
-  # just assume they're straight
   def self.order_by_preferred_gender(user, scope)
-    scope = order_by_case(scope, self.where(:gender => user.opposite_gender), 1) if user.opposite_gender.present?
+    if user.gay?
+      # prefer other gays of the same gender
+      # then prefer all others of the same gender
+      order_scope = where(:looking_for => user.gender).where(:gender => user.looking_for)
+    else
+      # prefer the opposite sex (if known)
+      order_scope = where(:gender => user.opposite_gender) if user.opposite_gender.present?
+    end
+    scope = order_by_case(scope, order_scope, 2) if order_scope
     scope
   end
 
@@ -434,78 +406,38 @@ class User < ActiveRecord::Base
 
   # ordering is as follows:
 
-  # 0 for latest_interaction after 0.25 hours ago
-  # 1 for latest_interaction after 0.50 hours ago
-  # 2 for latest_interaction after 1 hour ago
-  # 3 for latest_interaction after 2 hours ago
-  # 4 for latest_interaction after 4 hours ago
-  # 5 for latest_interaction after 8.hours.ago
-  # 6 for latest_interaction after 16.hours.ago
-  # 7 for latest_interaction after 32.hours.ago
-  # 8 for latest_interaction after 64.hours.ago
-  # 9 for latest_interaction after 128.hours.ago
-  # 10 for latest_interaction after 256.hours.ago
-  # 11 for latest_interaction after 512 hours ago
-  # 12 for latest_interaction after 1024 hours ago
-  # 13 for latest_interaction before or equal to 1024 hours ago
+  # 0 for last_interaction_at after 0.25 hours ago
+  # 1 for last_interaction_at after 0.50 hours ago
+  # 2 for last_interaction_at after 1 hour ago
+  # 3 for last_interaction_at after 2 hours ago
+  # 4 for last_interaction_at after 4 hours ago
+  # 5 for last_interaction_at after 8.hours.ago
+  # 6 for last_interaction_at after 16.hours.ago
+  # 7 for last_interaction_at after 32.hours.ago
+  # 8 for last_interaction_at after 64.hours.ago
+  # 9 for last_interaction_at after 128.hours.ago
+  # 10 for last_interaction_at after 256.hours.ago
+  # 11 for last_interaction_at after 512 hours ago
+  # 12 for last_interaction_at after 1024 hours ago
+  # 13 for last_interaction_at before or equal to 1024 hours ago
 
   def self.order_by_recent_activity(user, scope)
-    # the timestamp to use if the user has had no interaction at all e.g. no phone calls
+    # the timestamp to use if the user has had no last_interaction
     # which is the same as 1024 hours ago
     coalesce_timestamp = ((2 ** (NUM_INACTIVITY_PERIODS - 1)) * SMALLEST_INACTIVITY_PERIOD).hours.ago
-
-    latest_activity_scope = self
-    latest_activity_subscope = self
-
-    # ACTIVE_COMMUNICABLE_RESOURCES (ACR) are communication mechanisms that are user initiated
-    ACTIVE_COMMUNICABLE_RESOURCES.each do |communicable_resource|
-      # This needs to be a LEFT JOIN because we need to get all the users even if there are no
-      # active resources, e.g. a user may have messages but no phone calls
-      latest_activity_scope = latest_activity_scope.joins(
-        "LEFT JOIN \"#{communicable_resource}\" ON #{quoted_attribute(:id)} = \"#{communicable_resource}\".\"user_id\""
-      )
-
-      # store the maximum created at value of the ACM in a scope so we can use AR sanitization
-      # using the collesce timestamp if there is no ACM for this user
-      latest_activity_subscope = latest_activity_subscope.where(
-        "COALESCE(MAX(#{communicable_resource}.created_at), ?)", coalesce_timestamp
-      )
-    end
-
-    latest_interaction_alias = "latest_interaction"
-
-    # Get the greatest value created at value from the users ACRs
-    latest_activity_condition = "GREATEST(#{latest_activity_subscope.where_values.join(', ')}) #{latest_interaction_alias}"
-
-    # select all of the user fields as well as the MAX value of their recent interaction
-    # and group by this since it's now an attribute of user.
-    latest_activity_scope = latest_activity_scope.select(
-      "\"#{table_name}\".*, #{latest_activity_condition}"
-    ).from(
-      "\"#{table_name}\""
-    ).group("#{quoted_attribute(:id)}")
-
-    # the global select statement should now select from the query we just created
-    # so that we have access to latest_interaction in the order by clause.
-    # note that we use the table alias 'users' so that the rest of the conditions can be based
-    # off of the results from this subquery
-    scope = scope.from(
-      "(#{latest_activity_scope.to_sql}) \"#{table_name}\""
-    ).group(latest_interaction_alias)
 
     inactivity_period = SMALLEST_INACTIVITY_PERIOD
     inactivity_scope = self
 
-    # use the latest interaction time to create
-    # case statements for recent interaction
+    # use the last_interacted_at timestamp to create case statements for recent interaction
     NUM_INACTIVITY_PERIODS.times do
       inactivity_scope = inactivity_scope.where(
-        "latest_interaction > ?", inactivity_period.hours.ago
+        "COALESCE(#{quoted_attribute(:last_interacted_at)}, ?) > ?", coalesce_timestamp, inactivity_period.hours.ago
       )
       inactivity_period *= 2
     end
 
-    # finally order by the case
+    # order by the case
     order_by_case(scope, inactivity_scope, NUM_INACTIVITY_PERIODS)
   end
 
@@ -552,15 +484,19 @@ class User < ActiveRecord::Base
       condition_values << "#{prefix}%"
     end
 
-    scoped.where(condition_statements.join(" OR "), *condition_values)
+    where(condition_statements.join(" OR "), *condition_values)
   end
 
   def self.inactive_timestamp(options = {})
     (options[:inactivity_period] || 5.days).ago
   end
 
-  def self.without_recent_interaction(inactivity_timestamp)
-    scoped.where("updated_at < ?", inactivity_timestamp)
+  def self.not_contacted_recently(inactivity_timestamp)
+    where("#{coalesce_last_contacted_at} < ?", inactivity_timestamp)
+  end
+
+  def self.coalesce_last_contacted_at
+    "COALESCE(#{quoted_attribute(:last_contacted_at)}, #{quoted_attribute(:updated_at)})"
   end
 
   def self.quoted_attribute(attribute)
@@ -571,6 +507,7 @@ class User < ActiveRecord::Base
     do_find = true
 
     if between = options[:between]
+      between = Range.new(*(between.split("..")).map(&:to_i)) if between.is_a?(String)
       now = Time.now
       do_find = (now >= time_at(between.min) && now <= time_at(between.max))
     end
@@ -631,12 +568,17 @@ class User < ActiveRecord::Base
     nil
   end
 
-  def has_recent_interaction?(inactivity_timestamp)
-    updated_at >= inactivity_timestamp
+  def contacted_recently?(inactivity_timestamp)
+    last_contacted_timestamp = last_contacted_at || updated_at
+    last_contacted_timestamp >= inactivity_timestamp
   end
 
   def assign_location
-    build_location(:country_code => torasup_number.country_id, :address => torasup_number.location.area) if location.blank?
+    if location.blank?
+      build_location
+      location.country_code = torasup_number.country_id
+      location.address = torasup_number.location.area
+    end
   end
 
   def set_gender_related_attribute(attribute, value)
@@ -668,13 +610,22 @@ class User < ActiveRecord::Base
   end
 
   def extract_gender_and_looking_for(info)
+    return if gay_from?(info)
     gender_question?(info) # removes gender question
-    found_gender = extract_gender(info, :explicit_only => true)
-    found_looking_for = extract_looking_for(info)
-    unless (found_gender && found_looking_for) || includes_gender_and_looking_for?(info)
-      extract_looking_for(info, :include_shared_gender_words => gender.present?) unless found_looking_for
-      extract_gender(info)
+    return if extract_gender(info, :explicit_only => true)
+    suggests_looking_for?(info) # removes gender preference
+    extract_gender(info)
+  end
+
+  def gay_from?(info)
+    if strip_match!(info, /#{profile_keywords(:gay_boy)}/)
+      self.gender = MALE
+      self.looking_for = MALE
+    elsif(strip_match!(info, /#{profile_keywords(:gay_girl)}/))
+      self.gender = FEMALE
+      self.looking_for = FEMALE
     end
+    gender && looking_for
   end
 
   def extract_date_of_birth(info)
@@ -697,47 +648,13 @@ class User < ActiveRecord::Base
     strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?#{result}/) if result
   end
 
-  def includes_gender_and_looking_for?(info)
-    tmp_info = info.dup
-    if sex = determine_gender(tmp_info, :only_first => true)
-      if wants = determine_looking_for(tmp_info, :use_only_shared_gender_words => true)
-        # we have the sex and looking for already so remove all references to
-        # gender and looking for from the message
-        unless gender_question?(info)
-          determine_gender(info, :only_first => true)
-          determine_looking_for(info, :include_shared_gender_words => true)
-          self.gender = sex
-          self.looking_for = wants
-          updated = true
-        end
-        info = tmp_info
-      end
-    end
-    updated
-  end
-
-  def extract_looking_for(info, options = {})
-    user_looking_for = determine_looking_for(info, options)
-    self.looking_for = user_looking_for if user_looking_for
-  end
-
   def extract_gender(info, options = {})
     sex = determine_gender(info, options)
     self.gender = sex if sex
   end
 
-  def determine_looking_for(info, options = {})
-    if info_suggests_looking_for_girl?(info, options)
-      FEMALE
-    elsif info_suggests_looking_for_boy?(info, options)
-      MALE
-    elsif !options[:use_only_shared_gender_words] && info_suggests_looking_for_friend?(info)
-      BISEXUAL
-    end
-  end
-
   def determine_gender(info, options = {})
-    text = (options[:explicit_only] || options[:only_first]) ? includes_gender?(info, options).try(:[], 0).to_s : info
+    text = options[:explicit_only] ? includes_gender?(info, options).try(:[], 0).to_s : info
     if info_suggests_from_girl?(text, options)
       FEMALE
     elsif info_suggests_from_boy?(text, options)
@@ -745,27 +662,8 @@ class User < ActiveRecord::Base
     end
   end
 
-  def info_suggests_looking_for?(sex, info, options)
-    if options[:include_shared_gender_words]
-      regexp = /\b#{gender_keywords(sex, :desired => true)}\b/
-    elsif options[:use_only_shared_gender_words]
-      regexp = /\b#{gender_keywords(sex, :desired => true, :strict => false)}\b/
-    else
-      regexp = /\b#{gender_keywords(sex, :desired => true, :strict => true)}\b/
-    end
-    strip_match!(info, regexp)
-  end
-
-  def info_suggests_looking_for_girl?(info, options = {})
-    info_suggests_looking_for?(:girl, info, options)
-  end
-
-  def info_suggests_looking_for_boy?(info, options = {})
-   info_suggests_looking_for?(:boy, info, options)
-  end
-
-  def info_suggests_looking_for_friend?(info)
-    strip_match!(info, /\b#{profile_keywords(:friend)}\b/)
+  def suggests_looking_for?(info)
+    strip_match!(info, /\b#{gender_keywords(:desired => true)}\b/)
   end
 
   def includes_gender?(info, options)
@@ -782,13 +680,11 @@ class User < ActiveRecord::Base
     keywords_to_lookup = []
     sexes.each do |sex|
       if options[:desired]
-        keywords_to_lookup << "#{sex}friend".to_sym if options[:strict] || options[:strict].nil?
+        keywords_to_lookup << "#{sex}friend".to_sym
       else
         keywords_to_lookup << sex
         keywords_to_lookup << "#{sex}_gender_clues".to_sym unless options[:clues] == false
       end
-
-      keywords_to_lookup << "could_mean_#{sex}_or_#{sex}friend".to_sym if options[:strict].nil? || options[:strict] == false
     end
     profile_keywords(*keywords_to_lookup)
   end

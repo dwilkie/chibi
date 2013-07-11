@@ -1,8 +1,8 @@
 en:
   i_am:
-    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for |searching | searchimg )))(?:(?:i\\s*)?(?:\\b(?:am|i'm|\\bim|me|\\bm\\b))(?:\\s*(?:a))?)"
+    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for |searching | searchimg )))(?:(?:i\\s*)?(?:\\b(?:am|i'm|iam|\\bim|me|\\bm\\b))(?:\\s*(?:a))?)"
   name:
-    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|\\bim|\\bm\\b)\\s*"
+    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|iam|\\bim|\\bm\\b)\\s*"
   banned_names:
     - "available"
     - "currently"
@@ -109,6 +109,7 @@ en:
     - "alone"
     - "lonely"
     - "only"
+    - "birthday"
     - "happ?y"
     - "yes"
     - "top"
@@ -180,28 +181,25 @@ en:
     - '\w+ing'
   years_old:
     - "(?:years?(?: old)?|yo|y\\-olds?|y)"
-  girlfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|fri(?:e?nd)?s?|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:gir?l|wom(?:a|e)n)(?!\s*boy|guy|man))'
-    - 'gir?l\s?fri(?:e?nd)?s?'
-    - "gf"
   girl:
     - "(?<!')f"
-  could_mean_girl_or_girlfriend:
     - "g(?:i|r)(?:i|r)?ll?"
     - "wom(?:a|e)n"
     - "f(?:a|e)m(?:a|e)?le"
-  boyfriend:
-    - '(?:meet|fin(?:d|e)|chat|have|talk|fri(?:e?nd)?s?|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:girl |gil |wom(?:a|e)n ))(?:boy|guy|man)(?!\s*gir?l|wom(?:a|e)n))'
-    - 'boy\s?fri(?:e?nd)?s?'
-    - bf
   boy:
     - "m(?:a|e)le"
-  could_mean_boy_or_boyfriend:
-    - boy
-    - guy
+    - "boy"
+    - "guy"
     - "man"
-  friend:
-    - '(?:(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*)?(?<!(?:your |ur ))fri(?:e?nds?)?'
+  girlfriend:
+    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:gir?l|wom(?:a|e)n)(?!\s*boy|guy|man))'
+  boyfriend:
+    - '(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g).*(?:(?<!(?:girl |gil |wom(?:a|e)n ))(?:boy|guy|man)(?!\s*gir?l|wom(?:a|e)n))'
+  gay_boy:
+    - "boy loves? boy"
+    - "man loves? man"
+  gay_girl:
+    - "girl loves? girl"
 kh:
   i_am:
     - "(?:k?(?<!p|h)n(?:h|y)?(?:o|u)m)"
@@ -214,6 +212,7 @@ kh:
     - "(?:ah?)?y(?:o|u)k?"
     - "e(?:i|y)"
     - "leng"
+    - "v(?:e|i)ng"
     - "cf"
     - "loy"
     - "jeng"
@@ -263,17 +262,15 @@ kh:
     - "smart"
   years_old:
     - "(?:chnaa?m)"
-  girlfriend:
-    - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!(?:boy |(?:p|b)ros ))(?:srey|gir?l|\bf\b)(?!\s*boy|(?:p|b)ros))'
   girl_gender_clues:
     - '(?:ch|j)as?'
-  could_mean_girl_or_girlfriend:
-    - srey
-  boyfriend:
-    - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l|\bf\b))'
+  girl:
+    - "srey"
   boy_gender_clues:
     - 'bar?t'
-  could_mean_boy_or_boyfriend:
+  boy:
     - '(?:b|p)ros'
-  friend:
-    - '(?:(?:rou?k).+)?m(?:i|e)r?t'
+  girlfriend:
+    - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!(?:boy |(?:p|b)ros ))(?:srey|gir?l|\bf\b)(?!\s*boy|(?:p|b)ros))'
+  boyfriend:
+    - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l|\bf\b))'

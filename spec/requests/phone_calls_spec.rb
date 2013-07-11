@@ -3,9 +3,12 @@ require 'spec_helper'
 describe "PhoneCalls" do
   describe "POST /phone_calls.xml" do
     include PhoneCallHelpers
-    include PhoneCallHelpers::Twilio
+    include PhoneCallHelpers::TwilioHelpers
     include MobilePhoneHelpers
+    include TranslationHelpers
+    include ResqueHelpers
 
+    include_context "replies"
     include_context "existing users"
     include_context "twiml"
 
@@ -32,12 +35,18 @@ describe "PhoneCalls" do
       assert_redirect_to_current_url
     end
 
-    def assert_dial_to_current_url(number, options = {})
-      assert_dial(twiml_response, phone_call_callback_url, number, options)
+    def assert_dial_to_current_url(number, dial_options = {}, number_options = {})
+      numbers = [number].flatten
+      assert_dial(twiml_response, phone_call_callback_url, dial_options) do |dial_response|
+        numbers.each_with_index do |number, index|
+          assert_number(dial_response, number, number_options.merge(:index => index))
+        end
+      end
     end
 
     def assert_ask_for_input(prompt, twiml_options = {})
       twiml_options[:numDigits] ||= 1
+      twiml_options[:numDigits] = twiml_options[:numDigits].to_s
       assert_gather(twiml_response, twiml_options) do |gather|
         assert_play(gather, "kh/#{filename_with_extension(prompt)}")
       end
@@ -49,23 +58,117 @@ describe "PhoneCalls" do
       update_call_status(options)
     end
 
-    shared_examples_for "a phone call without voice prompts" do
-      context "given that I'm already in a chat session" do
-        let!(:active_chat) { create(:active_chat) }
+    def friends_numbers(friends, calling_to)
+      friends.map { |friend|
+        number = friend.mobile_number
+        calling_to == :twilio ? asserted_number_formatted_for_twilio(number) : asserted_default_pbx_dial_string(:number_to_dial => number)
+      }.reverse
+    end
 
-        context "when I call" do
+    shared_examples_for "calling while in chat" do |new_call|
+      context "given that I'm already in a chat session" do
+        context "and my partner is available" do
+          let!(:chat) { create(:chat, :active, :user => caller) }
+
+          context(new_call ? "when I call" : "if I hold the line") do
+            before do
+              new_call ? call(:from => caller) : update_current_call_status
+            end
+
+            it "should connect me with my friend" do
+              assert_dial_to_current_url(
+                asserted_number_formatted_for_twilio(chat.friend.mobile_number),
+                :callerId => twilio_number
+              )
+            end
+          end
+        end
+
+        context "but my partner is not available" do
+          let!(:chat) { create(:chat, :initiator_active, :user => caller) }
+
           before do
-            call(:from => active_chat.user)
+            create(:chat, :active, :friend => chat.friend)
           end
 
-          it "should connect me with my friend" do
-            assert_dial_to_current_url(active_chat.friend.mobile_number)
+          context(new_call ? "when I call" : "if I hold the line") do
+            before do
+              new_call ? call(:from => caller) : update_current_call_status
+            end
+
+            it "should find me some new friends" do
+              assert_redirect_to_current_url
+            end
+
+            it "should queue a message to my partner to call me back" do
+              reply = reply_to(chat.friend, chat)
+              reply.body.should =~ Regexp.new(
+                spec_translate(
+                  :contact_me, chat.friend.locale, chat.user.screen_id,
+                  Regexp.escape(twilio_number)
+                )
+              )
+              reply.should_not be_delivered
+            end
           end
         end
       end
+    end
+
+    shared_examples_for "hanging up" do |options|
+      it "should hangup on me" do
+        assert_hangup(twiml_response)
+      end
+
+      if options[:from_twilio]
+        def expect_twilio_cdr_fetch(options = {}, &block)
+          super
+        end
+
+        let(:new_inbound_twilio_cdr) { Chibi::Twilio::InboundCdr.last }
+
+        if options[:from_connected_user]
+          let(:new_outbound_twilio_cdr) { Chibi::Twilio::OutboundCdr.last }
+
+          before do
+            expect_twilio_cdr_fetch(:call_sid => current_call) do
+              expect_twilio_cdr_fetch(
+                :cassette => "get_outbound_call",
+                :call_sid => dial_call_sid,
+                :parent_call_sid => current_call,
+                :direction => :outbound
+              ) { perform_background_job(:twilio_cdr_fetcher_queue) }
+            end
+          end
+
+          it "should create a Twilio Inbound CDR" do
+            new_inbound_twilio_cdr.should be_present
+          end
+
+          it "should create a Twilio Outbound CDR" do
+            new_outbound_twilio_cdr.should be_present
+          end
+        else
+          before do
+            expect_twilio_cdr_fetch(:call_sid => current_call) do
+              perform_background_job(:twilio_cdr_fetcher_queue)
+            end
+          end
+
+          it "should create a Twilio Inbound CDR" do
+            new_inbound_twilio_cdr.should be_present
+          end
+        end
+      end
+    end
+
+    shared_examples_for "a phone call without voice prompts" do
+      it_should_behave_like "calling while in chat", true do
+        let(:caller) { create(:user) }
+      end
 
       context "given there are new friends online" do
-        let(:friends) { caller.matches.all }
+        let(:friends) { caller.matches }
         let(:caller) { User.first }
 
         before do
@@ -79,34 +182,60 @@ describe "PhoneCalls" do
             call(:from => caller.mobile_number)
           end
 
-          it "should try to find me a new friend" do
+          it "should try to find me some new friends" do
             assert_redirect_to_current_url
           end
 
-          context "after a girl is found for me" do
+          context "after some new friends are found for me" do
             context "given I'm calling to Twilio" do
               before do
                 update_current_call_status
               end
 
-              it "should try to connect me with her through Twilio" do
-                assert_dial_to_current_url(friends[0].mobile_number)
+              it "should try to connect me with them through Twilio" do
+                numbers = friends_numbers(friends, :twilio)
+                assert_dial_to_current_url(numbers, :callerId => twilio_number)
               end
 
-              context "if she answers" do
+              context "if someone answers" do
                 context "and hangs up first" do
+                  let(:dial_call_sid) { "dial_call_sid" }
+
                   before do
-                    update_current_call_status(:dial_call_status => :completed)
+                    do_background_task(:queue_only => true) do
+                      update_current_call_status(
+                        :dial_call_status => :completed, :dial_call_sid => dial_call_sid
+                      )
+                    end
                   end
 
-                  context "if I hold the line" do
+                  context "when I hold the line" do
                     before do
                       update_current_call_status
                     end
 
-                    it "should connect me with a new friend" do
-                      assert_dial_to_current_url(friends[1].mobile_number)
-                    end
+                    it_should_behave_like "hanging up", :from_twilio => true, :from_connected_user => true
+                  end
+                end
+              end
+
+              context "if nobody answers" do
+                before do
+                  update_current_call_status(:dial_call_status => :no_answer)
+                end
+
+                it "should find me some new friends" do
+                  assert_redirect_to_current_url
+                end
+
+                context "and I hold the line" do
+                  before do
+                    update_current_call_status
+                  end
+
+                  it "should connnect me with my new friends" do
+                    numbers = friends_numbers(friends, :twilio)
+                    assert_dial_to_current_url(numbers, :callerId => twilio_number)
                   end
                 end
               end
@@ -118,9 +247,8 @@ describe "PhoneCalls" do
               end
 
               it "should try to connect me with her through the default PBX dial string" do
-                assert_dial_to_current_url(
-                  asserted_default_pbx_dial_string(:number_to_dial => friends[0].mobile_number)
-                )
+                dial_strings = friends_numbers(friends, :pbx)
+                assert_dial_to_current_url(dial_strings, {}, :callerId => twilio_number)
               end
             end
           end
@@ -231,18 +359,8 @@ describe "PhoneCalls" do
             end
           end
 
-          context "given that I'm already in a chat session" do
-            let!(:active_chat) { create(:active_chat, :user => new_user) }
-
-            context "if I hold the line" do
-              before do
-                update_current_call_status
-              end
-
-              it "should connect me with my friend" do
-                assert_dial_to_current_url(active_chat.friend.mobile_number)
-              end
-            end
+          it_should_behave_like "calling while in chat", false do
+            let(:caller) { new_user }
           end
 
           context "given there are no new friends online" do
@@ -269,9 +387,7 @@ describe "PhoneCalls" do
                     update_current_call_status
                   end
 
-                  it "should hang up" do
-                    assert_hangup(twiml_response)
-                  end
+                  it_should_behave_like "hanging up", :from_twilio => true
                 end
               end
             end
@@ -290,22 +406,23 @@ describe "PhoneCalls" do
                 update_current_call_status
               end
 
-              it "should try to find me a new friend" do
+              it "should try to find some new friends" do
                 assert_redirect_to_current_url
               end
 
-              context "after a girl is found for me" do
+              context "after some friends are found for me" do
                 context "given I'm calling to Twilio" do
                   before do
                     update_current_call_status
                   end
 
-                  it "should try to connect me with her through Twilio" do
-                    assert_dial_to_current_url(friends[0].mobile_number)
+                  it "should try to connect me with them through Twilio" do
+                    numbers = friends_numbers(friends, :twilio)
+                    assert_dial_to_current_url(numbers, :callerId => twilio_number)
                   end
 
-                  context "if she answers" do
-                    context "and hangs up first" do
+                  context "if one of them answers" do
+                    context "and hangs up" do
                       before do
                         update_current_call_status(:dial_call_status => :completed)
                       end
@@ -326,12 +443,12 @@ describe "PhoneCalls" do
                     end
                   end
 
-                  context "but she does not answer" do
+                  context "but nobody answers" do
                     before do
                       update_current_call_status(:dial_call_status => :no_answer)
                     end
 
-                    it "should find me a new friend" do
+                    it "should find me some new friends" do
                       assert_redirect_to_current_url
                     end
 
@@ -340,8 +457,9 @@ describe "PhoneCalls" do
                         update_current_call_status
                       end
 
-                      it "should connnect me with my new friend" do
-                        assert_dial_to_current_url(friends[1].mobile_number)
+                      it "should connnect me with my new friends" do
+                        numbers = friends_numbers(friends, :twilio)
+                        assert_dial_to_current_url(numbers, :callerId => twilio_number)
                       end
                     end
                   end
@@ -352,10 +470,9 @@ describe "PhoneCalls" do
                     update_current_call_status(:api_version => sample_adhearsion_twilio_api_version)
                   end
 
-                  it "should try and connect me with her through the default PBX dial string" do
-                    assert_dial_to_current_url(
-                      asserted_default_pbx_dial_string(:number_to_dial => friends[0].mobile_number)
-                    )
+                  it "should try and connect me my friends through the default PBX dial string" do
+                    numbers = friends_numbers(friends, :pbx)
+                    assert_dial_to_current_url(numbers, {}, :callerId => twilio_number)
                   end
                 end
               end

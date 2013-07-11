@@ -1,7 +1,7 @@
 class Reply < ActiveRecord::Base
-  include Communicable
-  include Communicable::Chatable
-  include Analyzable
+  include Chibi::Communicable
+  include Chibi::Communicable::Chatable
+  include Chibi::Analyzable
 
   has_many :delivery_receipts
 
@@ -51,15 +51,15 @@ class Reply < ActiveRecord::Base
   end
 
   def self.delivered
-    scoped.where("delivered_at IS NOT NULL")
+    where("delivered_at IS NOT NULL")
   end
 
   def self.last_delivered
-    scoped.delivered.order(:delivered_at).last
+    delivered.order(:delivered_at).last
   end
 
   def self.undelivered
-    scoped.where(:delivered_at => nil).order(:created_at)
+    where(:delivered_at => nil).order(:created_at)
   end
 
   def self.query_queued!
@@ -84,8 +84,8 @@ class Reply < ActiveRecord::Base
 
   def fix_blank!
     if body.blank? && chat.present?
-      replies = chat.replies.order(:id).all
-      if message_to_forward = chat.messages.order(:id).all[replies.index(self) - 1]
+      replies = chat.replies.order(:id)
+      if message_to_forward = chat.messages.order(:id)[replies.index(self) - 1]
         set_forward_message(message_to_forward.user, message_to_forward.body)
         undeliver!
       end
@@ -96,33 +96,8 @@ class Reply < ActiveRecord::Base
     read_attribute(:body).to_s
   end
 
-  def locale
-    raw_locale = read_attribute(:locale)
-    raw_locale.to_s.downcase.to_sym if raw_locale
-  end
-
   def delivered?
     delivered_at.present?
-  end
-
-  def logout!(partner = nil)
-    explain_how_to_start_a_new_chat!(:logout, :partner => partner)
-  end
-
-  def end_chat!(partner, options = {})
-    explain_how_to_start_a_new_chat!(:no_answer, options)
-  end
-
-  def instructions_for_new_chat!
-    explain_how_to_start_a_new_chat!(:no_answer, :skip_update_profile_instructions => true)
-  end
-
-  def explain_could_not_find_a_friend!
-    explain_how_to_start_a_new_chat!(:could_not_find_a_friend)
-  end
-
-  def explain_friend_is_unavailable!(partner)
-    explain_how_to_start_a_new_chat!(:friend_unavailable, :partner => partner)
   end
 
   def forward_message(from, message)
@@ -135,36 +110,26 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
-  def introduce!(partner, to_initiator, introduction = nil)
-    if to_initiator
-      translate(
-        "replies.new_chat_started",
-        :users_name => user.name,
-        :friends_screen_name => partner.screen_id
-      )
-    else
-      introduction ||= default_translation("replies.greeting", user.locale, :friend => partner, :recipient => user)
-      set_forward_message(partner, introduction)
-    end
+  def contact_me(from)
+    self.body = canned_reply(:recipient => user).contact_me
+    prepend_screen_id(from.screen_id)
+    save
+  end
+
+  def follow_up!(from, options)
+    set_forward_message(from, canned_reply(:recipient => user, :sender => from).follow_up(options))
+    deliver!
+  end
+
+  def introduce!(partner)
+    set_forward_message(partner, random_canned_greeting(:sender => partner, :recipient => user))
     deliver!
   end
 
   def send_reminder!
-    translate("replies.greeting", :recipient => user)
+    self.body = user.gay? ? canned_reply(:recipient => user).gay_reminder : random_canned_greeting(:recipient => user)
     prepend_screen_id(Faker::Name.first_name)
     deliver!
-  end
-
-  def welcome!
-    translate("replies.welcome", :default_locale => user.country_code.to_sym)
-    deliver!
-  end
-
-  def deliver_alternate_translation!
-    if delivered? && alternate_translation? && locale?
-      delivery = locale == user.locale ? body : alternate_translation
-      perform_delivery!(delivery)
-    end
   end
 
   def deliver!
@@ -181,8 +146,17 @@ class Reply < ActiveRecord::Base
 
   private
 
+  def random_canned_greeting(options = {})
+    reply = canned_reply(options)
+    rand < (1.0/2) ? reply.greeting : reply.contact_me
+  end
+
+  def canned_reply(options = {})
+    CannedReply.new(user.locale, options)
+  end
+
   def self.queued_for_smsc_delivery
-    scoped.where(:state => "queued_for_smsc_delivery").where("token IS NOT NULL")
+    where(:state => "queued_for_smsc_delivery").where("token IS NOT NULL")
   end
 
   def undeliver!
@@ -194,10 +168,9 @@ class Reply < ActiveRecord::Base
     return save if @force_state_update
     if valid?
       state_attribute = self.class.state_machine.attribute
-      self.class.update_all(
-        { state_attribute => state },
-        { self.class.primary_key => id, state_attribute => state_was }
-      ) == 1
+      self.class.where(
+        self.class.primary_key => id
+      ).where(state_attribute => state_was).update_all(state_attribute => state) == 1
     end
   end
 
@@ -209,33 +182,10 @@ class Reply < ActiveRecord::Base
   def prepend_screen_id(name, message = nil)
     message ||= body
     self.body = message_with_prepended_screen_name(name, message)
-    self.alternate_translation = message_with_prepended_screen_name(name, alternate_translation) if alternate_translation
   end
 
   def message_with_prepended_screen_name(name, message)
     "#{name}: #{message}"
-  end
-
-  def translate(key, interpolations = {})
-    user_locale = user.locale
-    users_default_locale = user.country_code.to_sym
-
-    # if the user's locale == their default locale
-    # the alternate translation locale will be nil
-    # I18n will therefore automatically drop back to English
-    alternate_translation_locale = users_default_locale unless user_locale == users_default_locale
-
-    self.locale = user_locale
-    set_from_translation(key, user_locale, alternate_translation_locale, interpolations)
-  end
-
-  def set_from_translation(key, user_locale, alternate_translation_locale, interpolations = {})
-    self.body = default_translation(key, user_locale, interpolations)
-    self.alternate_translation = I18n.t(key, interpolations.merge(:locale => alternate_translation_locale))
-  end
-
-  def default_translation(key, user_locale, interpolations = {})
-    I18n.t(key, interpolations.merge(:locale => user_locale))
   end
 
   def set_destination
@@ -252,18 +202,6 @@ class Reply < ActiveRecord::Base
 
   def delivery_confirmed?
     @delivery_state == CONFIRMED
-  end
-
-  def explain_how_to_start_a_new_chat!(action, options = {})
-    missing_profile_attributes = user.missing_profile_attributes unless options[:skip_update_profile_instructions]
-    translate(
-      "replies.how_to_start_a_new_chat",
-      :action => action,
-      :users_name => user.name,
-      :friends_screen_name => options[:partner].try(:screen_id),
-      :missing_profile_attributes => missing_profile_attributes
-    )
-    deliver!
   end
 
   def torasup_number

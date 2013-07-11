@@ -10,7 +10,7 @@ describe CallDataRecordCreator do
   describe ".perform(body)" do
     let(:call_data_record) { mock_model(CallDataRecord) }
     let(:inbound_cdr) { mock_model(InboundCdr) }
-    let(:save_stub) { inbound_cdr.stub(:save) }
+    let(:save_stub) { inbound_cdr.stub(:save!) }
     let(:body) { "foo" }
 
     before do
@@ -19,9 +19,9 @@ describe CallDataRecordCreator do
       save_stub
     end
 
-    it "should create the CDR with a bang!" do
+    it "should create the CDR" do
       CallDataRecord.should_receive(:new).with(:body => body)
-      inbound_cdr.should_receive(:save)
+      inbound_cdr.should_receive(:save!)
       subject.class.perform(body)
     end
 

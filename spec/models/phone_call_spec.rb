@@ -1,9 +1,10 @@
 require 'spec_helper'
 
-include PhoneCallHelpers::States
-include PhoneCallHelpers::Twilio
-
 describe PhoneCall do
+  include PhoneCallHelpers::States
+  include PhoneCallHelpers::TwilioHelpers
+  include ResqueHelpers
+
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
 
@@ -26,6 +27,16 @@ describe PhoneCall do
   it "should not be valid with a duplicate sid" do
     new_phone_call.sid = phone_call.sid
     new_phone_call.should_not be_valid
+  end
+
+  it "should not be valid with a duplicate dial_call_sid" do
+    phone_call = create(:phone_call, :with_dial_call_sid)
+    new_phone_call.dial_call_sid = phone_call.dial_call_sid
+    new_phone_call.should_not be_valid
+  end
+
+  it_should_behave_like "a chat starter" do
+    let(:starter) { phone_call }
   end
 
   it_should_behave_like "communicable" do
@@ -75,66 +86,18 @@ describe PhoneCall do
     # phone calls should behave the same whether they were initiated by the user or not
     it "should override #from=(value) if present" do
       # test override
-      subject.from = "+1-2345-2222"
-      subject.to = "+1-2345-3333"
-      subject.from.should == "123453333"
+      subject.from = "+1-234-567-8910"
+      subject.to = "+1-229-876-5432"
+      subject.from.should == "12298765432"
 
       # test no override for blank 'to'
       subject.to = ""
-      subject.from.should == "123453333"
+      subject.from.should == "12298765432"
     end
 
     it "should be mass assignable" do
-      new_phone_call = subject.class.new(:from => "+1-2345-2222", :to => "+1-2345-3333")
-      new_phone_call.from.should == "123453333"
-    end
-  end
-
-  describe "#from=(value)" do
-    it "should ignore leading 1's generated from Twilio" do
-      # double leading 1 (Cambodia)
-      subject.from = "+1185512808814"
-      subject.from.should == "85512808814"
-
-      # single leading 1 (Cambodia)
-      subject.from = "+185512808814"
-      subject.from.should == "85512808814"
-
-      # no leading 1 (Cambodia)
-      subject.from = "+85512808814"
-      subject.from.should == "85512808814"
-
-      # single leading 1 (Thai)
-      subject.from = "+166814417695"
-      subject.from.should == "66814417695"
-
-      # no leading 1 (Thai)
-      subject.from = "+66814417695"
-      subject.from.should == "66814417695"
-
-      # single leading 1 (Australia)
-      subject.from = "+161412345678"
-      subject.from.should == "61412345678"
-
-      # no leading 1 (Australia)
-      subject.from = "+61412345678"
-      subject.from.should == "61412345678"
-
-      # test normal US number
-      subject.from = "+17378742833"
-      subject.from.should == "17378742833"
-
-      # test Twilio number
-      subject.from = "+1-2345-2222"
-      twilio_numbers.each do |number|
-        subject.from = number
-        subject.from.should == "123452222"
-      end
-
-      # test invalid number
-      subject.from = "+1-2345-2222"
-      subject.from = build(:user, :with_invalid_mobile_number).mobile_number
-      subject.from.should == "123452222"
+      new_phone_call = subject.class.new(:from => "+1-234-567-8910", :to => "+1-229-876-5432")
+      new_phone_call.from.should == "12298765432"
     end
   end
 
@@ -154,6 +117,35 @@ describe PhoneCall do
     end
   end
 
+  describe "#fetch_inbound_twilio_cdr!" do
+    it "should create a Chibi Twilio Inbound CDR" do
+      expect_twilio_cdr_fetch(:call_sid => phone_call.sid) { phone_call.fetch_inbound_twilio_cdr! }
+      Chibi::Twilio::InboundCdr.last.phone_call.should == phone_call
+    end
+  end
+
+  describe "#fetch_outbound_twilio_cdr!" do
+    context "given the phone call has a dial_call_sid" do
+      let(:phone_call) { create(:phone_call, :with_dial_call_sid) }
+
+      it "should create a Chibi Twilio Outbound CDR" do
+        expect_twilio_cdr_fetch(
+          :call_sid => phone_call.dial_call_sid, :direction => :outbound,
+          :parent_call_sid => phone_call.sid
+        ) { phone_call.fetch_outbound_twilio_cdr! }
+
+        Chibi::Twilio::OutboundCdr.last.phone_call.should == phone_call
+      end
+    end
+
+    context "given the phone call does not have a dial_call_sid" do
+      it "should not create a Chibi Twilio Outbound CDR" do
+        phone_call.fetch_outbound_twilio_cdr!
+        Chibi::Twilio::OutboundCdr.last.should be_nil
+      end
+    end
+  end
+
   describe ".find_or_create_and_process_by" do
     include PhoneCallHelpers
 
@@ -169,7 +161,7 @@ describe PhoneCall do
     it "should find or create the phone call and process it returning the phone call if valid" do
       params = sample_params
 
-      subject.class.stub(:find_or_create_by_sid).and_return(phone_call)
+      subject.class.stub(:find_or_create_by).and_return(phone_call)
 
       phone_call.should_receive(:login_user!)
       phone_call.should_receive(:process!)
@@ -179,26 +171,43 @@ describe PhoneCall do
       phone_call.digits.should == params[:Digits].to_i
       phone_call.call_status.should == params[:CallStatus]
       phone_call.dial_status.should == params[:DialCallStatus]
+      phone_call.dial_call_sid.should == params[:DialCallSid]
       phone_call.api_version.should == params[:ApiVersion]
 
       subject.should_not_receive(:login_user!)
       subject.should_not_receive(:process!)
-      subject.class.stub(:find_or_create_by_sid).and_return(subject)
+      subject.class.stub(:find_or_create_by).and_return(subject)
+      subject.stub(:new_record?).and_return(false)
       subject.class.find_or_create_and_process_by(params.dup, "http://example.com").should be_nil
     end
   end
 
   describe "#process!" do
+    include TranslationHelpers
+
+    include_context "replies"
+
     def assert_phone_call_can_be_completed(reference_phone_call)
       reference_phone_call.call_status = "completed"
-      reference_phone_call.process!
+      do_background_task(:queue_only => true) { reference_phone_call.process! }
       reference_phone_call.should be_completed
+      TwilioCdrFetcher.should have_queued(reference_phone_call.id)
+    end
 
-      # assert chat is expired for caller
-      if chat = reference_phone_call.chat
-        chat.should_not be_active
-        chat.active_users.should_not include(phone_call.user)
-      end
+    def assert_message_queued_for_partner(phone_call)
+      caller = phone_call.user.reload
+      old_chat = phone_call.chat
+      old_partner = old_chat.partner(caller)
+      reply = reply_to(old_partner, old_chat)
+      reply.body.should =~ Regexp.new(
+        spec_translate(
+          :contact_me, old_partner.locale, caller.screen_id,
+          Regexp.escape(old_partner.caller_id(phone_call.api_version))
+        )
+      )
+      reply.should_not be_delivered
+      caller.should_not be_currently_chatting
+      phone_call.triggered_chats.should_not be_empty
     end
 
     def assert_phone_call_attributes(resource, expectations)
@@ -206,7 +215,13 @@ describe PhoneCall do
         if value.is_a?(Hash)
           assert_phone_call_attributes(resource.send(attribute), value)
         else
-          resource.send(attribute).should == value
+          if attribute == "assertions"
+            value.each do |assertion|
+              send("assert_#{assertion}", resource)
+            end
+          else
+            resource.send(attribute).should == value
+          end
         end
       end
     end
@@ -255,13 +270,20 @@ describe PhoneCall do
       parse_twiml(resource.to_twiml)
     end
 
-    def assert_dial_to_redirect_url(phone_call, options = {})
-      twiml_options = options.dup
-      user_to_dial = phone_call.chat.partner(phone_call.user)
-      number_to_dial = user_to_dial.dial_string(nil)
-
-      twiml_options[:callerId] ||= twiml_options.delete(:twilio_number) ? user_to_dial.twilio_number : user_to_dial.caller_id(nil)
-      assert_dial(twiml_response(phone_call), redirect_url, number_to_dial, twiml_options)
+    def assert_dial_to_redirect_url(twiml, asserted_numbers, dial_options = {}, number_options = {})
+      assert_dial(twiml, redirect_url, dial_options) do |dial_twiml|
+        if asserted_numbers.is_a?(String)
+          assert_number(dial_twiml, asserted_numbers, number_options)
+        elsif asserted_numbers.is_a?(Array)
+          asserted_numbers.each_with_index do |asserted_number, index|
+            assert_number(dial_twiml, asserted_number, number_options.merge(:index => index))
+          end
+        elsif asserted_numbers.is_a?(Hash)
+          asserted_numbers.each_with_index do |(asserted_number, asserted_number_options), index|
+            assert_number(dial_twiml, asserted_number, asserted_number_options.merge(:index => index))
+          end
+        end
+      end
     end
 
     def assert_play_languages(phone_call, filename, options = {})
@@ -273,15 +295,14 @@ describe PhoneCall do
       assert_play(twiml, "#{user.locale}/#{filename_with_extension}", options)
       assert_redirect(twiml, redirect_url, options)
 
-      original_location = user.location
-      user.location = build(:united_states)
+      phone_call.user = create(:user, :american)
 
       flunk(
         "choose a location with no translation to test the default locale"
-      ) if I18n.available_locales.include?(user.locale)
+      ) if I18n.available_locales.include?(phone_call.user.locale)
 
       assert_play(twiml_response(phone_call), "en/#{filename_with_extension}", options)
-      user.location = original_location
+      phone_call.user = user
     end
 
     def assert_ask_for_input(phone_call, prompt, twiml_options = {})
@@ -289,7 +310,10 @@ describe PhoneCall do
       assert_play_languages(phone_call, prompt)
       filename_with_extension = filename_with_extension(prompt)
 
-      twiml_options["numDigits"] ||= 1
+      twiml_options.symbolize_keys!
+
+      twiml_options[:numDigits] ||= 1
+      twiml_options[:numDigits] = twiml_options[:numDigits].to_s
       assert_gather(twiml_response(phone_call), twiml_options) do |gather|
         assert_play(gather, "#{phone_call.user.locale}/#{filename_with_extension}")
       end
@@ -307,20 +331,89 @@ describe PhoneCall do
       assert_hangup(twiml_response(phone_call))
     end
 
-    def assert_dial_friend(phone_call)
-      # load some users
-      load_users
+    def find_friends(phone_call, with_mobile_numbers)
+      with_mobile_numbers.each do |mobile_number|
+        create(
+          :chat, :friend_active,
+          :user => phone_call.user, :starter => phone_call,
+          :friend => create(:user, :mobile_number => mobile_number)
+        )
+      end
+    end
 
-      # assert dial from the twilio number for users from a service provider without short code
-      assert_dial_to_redirect_url(phone_call, :twilio_number => true)
+    def assert_dial_friends(phone_call)
+      # assert correct TwiML for Twilio request
 
-      # assert dial from the user's friend's short code for users from registered service provider
-      phone_call.chat = create(
-        :active_chat, :user => phone_call.user,
-        :friend => create(:user, :mobile_number => registered_operator_number)
+      non_registered_operator_number = generate(:mobile_number)
+      registered_operator_number = registered_operator(:number)
+
+      sample_numbers = [non_registered_operator_number, registered_operator_number]
+
+      find_friends(phone_call, sample_numbers)
+      asserted_numbers = sample_numbers.map { |sample_number| asserted_number_formatted_for_twilio(sample_number) }.reverse
+
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_numbers, :callerId => twilio_number
       )
 
-      assert_dial_to_redirect_url(phone_call)
+      # Simulate an adhearsion-twilio request
+      phone_call.api_version = sample_adhearsion_twilio_api_version
+
+      asserted_registered_operator_dial_string = interpolated_assertion(
+        registered_operator(:dial_string), :number_to_dial => registered_operator_number
+      )
+
+      asserted_non_registered_operator_dial_string = asserted_default_pbx_dial_string(
+        :number_to_dial => non_registered_operator_number
+      )
+
+      asserted_numbers = {
+        asserted_registered_operator_dial_string => {
+          :callerId => registered_operator(:caller_id)
+        },
+        asserted_non_registered_operator_dial_string => {
+          :callerId => twilio_number
+        }
+      }
+
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_numbers
+      )
+    end
+
+    def assert_dial_partner(phone_call)
+      # assert correct TwiML for Twilio request
+      user_to_dial = phone_call.chat.partner(phone_call.user)
+      asserted_number = asserted_number_formatted_for_twilio(user_to_dial.mobile_number)
+
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_number, :callerId => twilio_number
+      )
+
+      # Simulate an adhearsion-twilio request
+      phone_call.api_version = sample_adhearsion_twilio_api_version
+
+      # assert correct TwiML when dialing to a user from an unregistered service provider
+      asserted_number = asserted_default_pbx_dial_string(:number_to_dial => user_to_dial.mobile_number)
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_number, {}, :callerId => twilio_number
+      )
+
+      # assert correct TwiML when dialing to a user from registered service provider
+      partners_number = registered_operator(:number)
+      asserted_number = interpolated_assertion(
+        registered_operator(:dial_string), :number_to_dial => partners_number
+      )
+
+      phone_call.chat = create(
+        :chat, :active, :user => phone_call.user,
+        :friend => create(:user, :mobile_number => partners_number),
+        :starter => phone_call
+      )
+
+      assert_dial_to_redirect_url(
+        twiml_response(phone_call), asserted_number, {}, :callerId => registered_operator(:caller_id)
+      )
     end
 
     def assert_twiml_response(phone_call, expectation)
@@ -337,12 +430,12 @@ describe PhoneCall do
 
     def assert_correct_twiml(options = {})
       with_phone_call_states(options) do |state, traits, next_state, expectation|
-        assert_twiml_response(create_phone_call(state, *traits, :build => true), expectation)
+        assert_twiml_response(create_phone_call(state, *traits), expectation)
       end
     end
 
     context "given the redirect url has been set" do
-      it "should return the correct twiml" do
+      it "should return the correct TwiML" do
         assert_correct_twiml(:voice_prompts => false)
       end
     end

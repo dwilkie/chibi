@@ -1,6 +1,11 @@
 HireFire::Resource.configure do |config|
   config.dyno(:urgent_task_worker) do
-    HireFire::Macro::Resque.queue(:message_processor_queue, :dialer_queue)
+    HireFire::Macro::Resque.queue(
+      :message_processor_queue,
+      :dialer_queue,
+      :call_data_record_creator_queue,
+      :twilio_cdr_fetcher_queue
+    )
   end
 
   config.dyno(:non_essential_task_worker) do
@@ -13,7 +18,6 @@ HireFire::Resource.configure do |config|
       :friend_finder_queue,
       :user_reminderer_queue,
       :reminderer_queue,
-      :call_data_record_creator_queue,
       :nuntium_ao_queryer_queue,
       :blank_reply_fixer_queue
     )

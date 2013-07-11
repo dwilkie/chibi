@@ -41,7 +41,7 @@ class UserDemographicPresenter < BasePresenter
   end
 
   def gender_demographic(options = {})
-    demographic = User.scoped
+    demographic = User.all
     case options.keys.first
     when :available
       demographic = demographic.available

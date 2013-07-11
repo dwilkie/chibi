@@ -6,56 +6,31 @@ describe Chat do
   include MessagingHelpers
   include ResqueHelpers
 
-  let(:user) do
-    create(:user, :english)
-  end
+  let(:user) { create(:user, :english) }
+  let(:new_partner_for_user) { create(:user, :english) }
+  let(:new_partner_for_friend) { create(:user) }
+  let(:friend) { create(:user, :cambodian) }
 
-  let(:new_partner_for_user) do
-    create(:user, :english)
-  end
+  let(:chat) { create_chat }
 
-  let(:friend) do
-    create(:user, :cambodian)
-  end
+  let(:new_chat) { create_chat(:build => true) }
+  let(:active_chat) { create_chat(:active) }
+  let(:unique_active_chat) { create(:chat, :active) }
 
-  let(:chat) do
-    create(:chat, :user => user, :friend => friend)
-  end
+  let(:active_chat_with_inactivity) { create_chat(:active, :with_inactivity) }
+  let(:active_chat_with_single_user_with_inactivity) { create(:chat, :initiator_active, :with_inactivity) }
+  let(:active_chat_with_single_user) { create_chat(:initiator_active) }
+  let(:active_chat_with_single_friend) { create_chat(:friend_active) }
 
-  let(:new_chat) do
-    build(:chat, :user => user, :friend => friend)
-  end
+  let(:reply_to_user) { reply_to(user, active_chat) }
+  let(:reply_to_friend) { reply_to(friend, active_chat) }
 
-  let(:active_chat) do
-    create(:active_chat, :user => user, :friend => friend)
-  end
-
-  let(:unique_active_chat) do
-    create(:active_chat)
-  end
-
-  let(:active_chat_with_inactivity) do
-    create(:chat, :active, :with_inactivity, :user => user, :friend => friend)
-  end
-
-  let(:active_chat_with_single_user_with_inactivity) do
-    create(:chat, :initiator_active, :with_inactivity)
-  end
-
-  let(:active_chat_with_single_user) do
-    create(:active_chat_with_single_user, :user => user, :friend => friend)
-  end
-
-  let(:active_chat_with_single_friend) do
-    create(:active_chat_with_single_friend, :user => user, :friend => friend)
-  end
-
-  let(:reply_to_user) do
-    reply_to(user, active_chat)
-  end
-
-  let(:reply_to_friend) do
-    reply_to(friend, active_chat)
+  def create_chat(*traits)
+    options = traits.extract_options!
+    build = options.delete(:build)
+    args = ([:chat] << [*traits]).flatten
+    options = {:user => user, :friend => friend}.merge(options)
+    build ? build(*args, options) : create(*args, options)
   end
 
   describe "factory" do
@@ -107,7 +82,7 @@ describe Chat do
     end
   end
 
-  describe "#activate!" do
+  describe "#activate!(options = {})" do
     shared_examples_for "activating a chat" do
       it "should set the active users and save the chat" do
         reference_chat.activate!
@@ -144,18 +119,6 @@ describe Chat do
           reply_to(user, reference_chat).should be_nil
           reply_to(friend, reference_chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
         end
-
-        context "and :notify_initator => true" do
-          it "should introduce the initiator as well" do
-            expect_message { reference_chat.activate!(:notify => true, :notify_initiator => true) }
-
-            reply_to(friend, reference_chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
-
-            reply_to(user, reference_chat).body.should == spec_translate(
-              :anonymous_new_friend_found, user.locale, friend.screen_id
-            )
-          end
-        end
       end
 
       context "passing no options" do
@@ -177,9 +140,21 @@ describe Chat do
       end
     end
 
+    context "passing :starter" do
+      [:message, :phone_call].each do |starter|
+        context "=> #<#{starter.to_s.classify}...>" do
+          it "should set the starter as the #{starter}" do
+            chat_starter = create(starter)
+            chat.activate!(:starter => chat_starter)
+            chat.starter.should == chat_starter
+          end
+        end
+      end
+    end
+
     context "given the user is currently in another chat" do
       let(:current_chat_partner) { create(:user) }
-      let(:current_active_chat) { create(:active_chat, :user => user, :friend => current_chat_partner) }
+      let(:current_active_chat) { create(:chat, :active, :user => user, :friend => current_chat_partner) }
 
       before do
         current_active_chat
@@ -196,22 +171,6 @@ describe Chat do
           expect_message { new_chat.activate!(:notify => true) }
           reply_to(current_chat_partner, current_active_chat).should be_nil
           reply_to(user, current_active_chat).should be_nil
-        end
-
-        context "and :notify_previous_partner => true" do
-          it "should inform the previous chat partner how to find a new friend" do
-            expect_message { new_chat.activate!(:notify => true, :notify_previous_partner => true) }
-            reply_to(current_chat_partner, current_active_chat).body.should == spec_translate(
-              :chat_has_ended, current_chat_partner.locale
-            )
-          end
-        end
-      end
-
-      context "passing no options" do
-        it "should not inform the current chat partner how to find a new friend" do
-          new_chat.activate!
-          reply_to(current_chat_partner, current_active_chat).should be_nil
         end
       end
     end
@@ -256,18 +215,7 @@ describe Chat do
         end
 
         context "passing :notify => true" do
-          it "should notify the user that there are no matches at this time" do
-            expect_message { subject.activate!(:notify => true) }
-            reply_to(user).body.should == spec_translate(:anonymous_could_not_find_a_friend, user.locale)
-          end
-
-          context "with :notify_no_match => false" do
-            before do
-              subject.activate!(:notify => true, :notify_no_match => false)
-            end
-
-            it_should_behave_like "not notifying the user of no match"
-          end
+          it_should_behave_like "not notifying the user of no match"
         end
 
         context "passing no options" do
@@ -313,7 +261,7 @@ describe Chat do
       end
 
       context "but one or more of the chat partners is not available" do
-        let(:friends_new_chat) { create(:active_chat, :friend => friend) }
+        let(:friends_new_chat) { create(:chat, :active, :friend => friend) }
 
         before do
           active_chat_with_single_user
@@ -368,8 +316,6 @@ describe Chat do
     end
 
     context "passing :activate_new_chats => true" do
-      let(:new_partner_for_friend) { create(:user) }
-
       def assert_new_chat_created(reference_user, new_friend)
         reference_user.reload
 
@@ -407,23 +353,13 @@ describe Chat do
       context "but #<User...B> is now currently chatting with #<User...C>" do
         before do
           active_chat_with_single_user
-          create(:active_chat, :user => friend)
+          create(:chat, :active, :user => friend)
         end
 
         it "should deactivate the chat for both #<User...A> and #<User...B>" do
           # so that they are available to chat with someone else
           active_chat_with_single_user.deactivate!(:active_user => user)
           active_chat_with_single_user.active_users.should == []
-        end
-      end
-
-      context ":notify => #<User...B>" do
-        it "should inform User B how to start a new chat" do
-          expect_message { active_chat.deactivate!(:active_user => user, :notify => friend) }
-          reply_to_friend.body.should == spec_translate(
-            :chat_has_ended, friend.locale
-          )
-          reply_to_user.should be_nil
         end
       end
     end
@@ -490,7 +426,7 @@ describe Chat do
           message_from_old_friend = create(:reply, :user => user, :chat => users_old_chat, :body => "Hi buddy")
 
           # activate a new chat for the user
-          chat_to_deactivate = create(:active_chat, :user => user)
+          chat_to_deactivate = create(:chat, :active, :user => user)
           [users_old_chat, message_from_old_friend, chat_to_deactivate]
         end
 
@@ -557,32 +493,14 @@ describe Chat do
         end
 
         it "should not reactivate the chat if the initiator in the old chat is chatting with somebody else" do
-          create(:active_chat, :user => user)
+          create(:chat, :active, :user => user)
           assert_chat_not_reactivated(friend, chat, :active_user => true, :reactivate_previous_chat => true)
         end
 
         it "should not reactivate the chat if the friend in the old chat is is chatting with somebody else" do
-          create(:active_chat, :friend => friend)
+          create(:chat, :active, :friend => friend)
           assert_chat_not_reactivated(user, chat, :active_user => true, :reactivate_previous_chat => true)
         end
-      end
-    end
-
-    context ":notify => true" do
-      it "should inform both active users how to find a new friend" do
-        expect_message { active_chat.deactivate!(:notify => true) }
-        assert_active_users_cleared
-        reply_to_user.body.should == spec_translate(:anonymous_chat_has_ended, user.locale)
-        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale)
-      end
-    end
-
-    context ":notify => #<User...>" do
-      it "should inform the user specified how to find a new friend" do
-        expect_message { active_chat.deactivate!(:notify => friend) }
-        assert_active_users_cleared
-        reply_to_friend.body.should == spec_translate(:anonymous_chat_has_ended, friend.locale)
-        reply_to_user.should be_nil
       end
     end
 
@@ -671,6 +589,7 @@ describe Chat do
 
             user.reload.should_not be_currently_chatting
             new_partner_for_user.reload.should be_currently_chatting
+            new_partner_for_user.active_chat.starter.should == message
 
             reply_to(new_partner_for_user).body.should =~ /#{spec_translate(:forward_message_approx, new_partner_for_user.locale, user.screen_id)}/
           end
@@ -679,31 +598,48 @@ describe Chat do
     end
 
     context "given the friend is unavailable to chat" do
-      def assert_new_friend_for_sender(recipient_name, unavailable_user)
+      def assert_new_friend_for_sender(sender_name, unavailable_user)
         # create a new active chat for the unavailable user so they're unavailable
-        create(:active_chat, :user => unavailable_user)
+        create(:chat, :active, :user => unavailable_user)
 
-        recipient = send(recipient_name)
-        chat_session = send("active_chat_with_single_#{recipient_name}")
+        # create a user to be the sender's new friend
+        new_partner_for_sender = send("new_partner_for_#{sender_name}")
 
-        message = create_message(recipient)
+        # create the sender
+        sender = send(sender_name)
 
-        recipient.reload.active_chat.should == chat_session
+        # create a chat session for the sender
+        chat_session = send("active_chat_with_single_#{sender_name}")
 
+        # create a message from the sender
+        message = create_message(sender)
+
+        # assert that the sender is currently in the chat session
+        sender.active_chat.should == chat_session
+
+        # forward the message
         expect_message { chat_session.forward_message(message) }
 
-        new_chat = recipient.reload.active_chat
-        new_chat.should_not == chat_session
+        sender.reload
 
-        if new_friend = new_chat.try(:friend)
-          reply_to(new_chat.friend).body.should =~ /#{spec_translate(:forward_message_approx, new_friend.locale, recipient.screen_id)}/
-        end
+        # assert that the sender is now not in the chat session
+        sender.active_chat.should be_nil
 
-        reply_to(recipient).try(:body).should_not == spec_translate(
-          :friend_unavailable, recipient.locale, unavailable_user.screen_id
-        )
+        new_chat_session = message.triggered_chats.first
+
+        # assert that the sender's message triggered another chat
+        new_chat_session.should be_present
+
+        # assert that the new chat session is not the current chat session
+        new_chat_session.should_not == chat_session
+
+        # assert that an introduction was sent to the new friend
+        reply_to(new_partner_for_sender).body.should =~ /#{spec_translate(:forward_message_approx, new_partner_for_sender.locale, sender.screen_id)}/
+
+        # assert that the original message was queued for forwarding to the
+        # unavailable user
         assert_forward_message_to(
-          unavailable_user, recipient, chat_session, message, :delivered => false
+          unavailable_user, sender, chat_session, message, :delivered => false
         )
       end
 
@@ -789,7 +725,7 @@ describe Chat do
     let(:chris) { create(:user, :name => "chris") }
 
     let(:chat_with_bob) { create(:chat, :user => user, :friend => bob) }
-    let(:chat_with_dave) { create(:active_chat_with_single_user, :user => dave, :friend => user) }
+    let(:chat_with_dave) { create(:chat, :initiator_active, :user => dave, :friend => user) }
     let(:chat_with_chris) { create(:chat, :user => user, :friend => chris) }
 
     let(:reply_from_bob) { create(:reply, :chat => chat_with_bob, :user => user) }
@@ -1000,21 +936,6 @@ describe Chat do
       it "should deactivate all chats with inactivity" do
         active_chat_with_inactivity.should_not be_active
         active_chat_with_single_user_with_inactivity.active_users.count.should be_zero
-      end
-    end
-
-    context "passing :notify => true" do
-      before do
-        do_background_task { expect_message { subject.class.end_inactive(:notify => true) } }
-      end
-
-      it "should notify both users that their chat has ended" do
-        reply_to(user, active_chat_with_inactivity).body.should == spec_translate(
-          :anonymous_chat_has_ended, user.locale
-        )
-        reply_to(friend, active_chat_with_inactivity).body.should == spec_translate(
-          :anonymous_chat_has_ended, friend.locale
-        )
       end
     end
 

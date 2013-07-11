@@ -1,10 +1,8 @@
 class MissedCall < ActiveRecord::Base
-  include Communicable
-  include Communicable::FromUser
-  include TwilioHelpers
+  include Chibi::Communicable
+  include Chibi::Communicable::FromUser
 
   attr_accessor :subject
-  attr_accessible :subject, :plain
 
   alias_attribute :plain, :subject
 
@@ -28,10 +26,6 @@ class MissedCall < ActiveRecord::Base
   end
 
   private
-
-  def twilio_client
-    @client ||= Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
-  end
 
   def default_country_code
     ENV['MISSED_CALL_COUNTRY_CODE']

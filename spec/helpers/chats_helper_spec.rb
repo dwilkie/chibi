@@ -4,7 +4,7 @@ describe ChatsHelper do
   let(:chat) { create(:chat) }
 
   describe "#chat_user_link" do
-    let(:active_chat_with_single_user) { create(:active_chat_with_single_user) }
+    let(:active_chat_with_single_user) { create(:chat, :initiator_active) }
 
     def assert_chat_user_link(reference_chat, user_type, options = {})
       result = helper.chat_user_link(reference_chat, user_type)

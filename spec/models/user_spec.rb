@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe User do
   include MobilePhoneHelpers
-  include PhoneCallHelpers::Twilio
+  include PhoneCallHelpers::TwilioHelpers
   include TranslationHelpers
   include MessagingHelpers
   include ResqueHelpers
@@ -14,7 +14,7 @@ describe User do
   let(:new_user) { build(:user) }
   let(:cambodian) { build(:user, :cambodian) }
   let(:friend) { create(:user) }
-  let(:active_chat) { create(:active_chat, :user => user, :friend => friend) }
+  let(:active_chat) { create(:chat, :active, :user => user, :friend => friend) }
   let(:offline_user) { create(:user, :offline) }
   let(:user_with_complete_profile) { build(:user, :with_complete_profile) }
   let(:male) { create(:user, :male) }
@@ -46,7 +46,6 @@ describe User do
 
   shared_examples_for "within hours" do |background_job|
     context "passing :between => 2..14" do
-
       context "given the current time is not between 02:00 UTC and 14:00 UTC" do
         it "should not perform the task" do
           Timecop.freeze(Time.new(2012, 1, 7, 1)) do
@@ -305,7 +304,6 @@ describe User do
   end
 
   describe ".find_friends" do
-
     def do_find_friends(options = {})
       do_background_task(options) { subject.class.find_friends(options) }
     end
@@ -359,21 +357,21 @@ describe User do
   end
 
   describe ".remind!(options = {})" do
-    let(:user_without_recent_interaction) { create(:user, :without_recent_interaction) }
+    let(:user_not_contacted_recently) { create(:user, :not_contacted_recently) }
 
-    let(:registered_sp_user_without_recent_interaction) do
-      create(:user, :from_registered_service_provider, :without_recent_interaction)
+    let(:registered_sp_user_not_contacted_recently) do
+      create(:user, :from_registered_service_provider, :not_contacted_recently)
     end
 
-    let(:registered_sp_user_without_recent_interaction_for_a_longer_time) do
+    let(:registered_sp_user_not_contacted_for_a_long_time) do
       create(
-        :user, :from_registered_service_provider, :without_recent_interaction_for_a_longer_time
+        :user, :from_registered_service_provider, :not_contacted_for_a_long_time
       )
     end
 
-    let(:registered_sp_user_without_recent_interaction_for_a_shorter_time) do
+    let(:registered_sp_user_not_contacted_for_a_short_time) do
       create(
-        :user, :from_registered_service_provider, :without_recent_interaction_for_a_shorter_time
+        :user, :from_registered_service_provider, :not_contacted_for_a_short_time
       )
     end
 
@@ -382,11 +380,11 @@ describe User do
     end
 
     def create_actors
-      registered_sp_user_without_recent_interaction
-      registered_sp_user_without_recent_interaction_for_a_longer_time
-      registered_sp_user_without_recent_interaction_for_a_shorter_time
+      registered_sp_user_not_contacted_recently
+      registered_sp_user_not_contacted_for_a_long_time
+      registered_sp_user_not_contacted_for_a_short_time
       registered_sp_user_with_recent_interaction
-      user_without_recent_interaction
+      user_not_contacted_recently
     end
 
     def do_remind(options = {})
@@ -404,37 +402,37 @@ describe User do
     end
 
     def assert_reminded
-      assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_longer_time)
-      assert_user_reminded(registered_sp_user_without_recent_interaction)
+      assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
+      assert_user_reminded(registered_sp_user_not_contacted_recently)
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
-      reply_to(user_without_recent_interaction).should be_nil
+      reply_to(user_not_contacted_recently).should be_nil
     end
 
     def assert_not_reminded
-      reply_to(registered_sp_user_without_recent_interaction_for_a_longer_time).should be_nil
-      reply_to(registered_sp_user_without_recent_interaction).should be_nil
+      reply_to(registered_sp_user_not_contacted_for_a_long_time).should be_nil
+      reply_to(registered_sp_user_not_contacted_recently).should be_nil
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
-      reply_to(user_without_recent_interaction).should be_nil
+      reply_to(user_not_contacted_recently).should be_nil
     end
 
-    it "should only remind users without interaction within the last 5 days" do
+    it "should only remind users that have not been contacted in the last 5 days" do
       do_remind
       assert_reminded
     end
 
     context "passing :inactivity_period => 3.days" do
-      it "should remind users without recent interaction within the last 3 days" do
+      it "should remind users that have not been contacted in the last 3 days" do
         do_remind(:inactivity_period => 3.days)
         assert_reminded
-        assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_shorter_time)
+        assert_user_reminded(registered_sp_user_not_contacted_for_a_short_time)
       end
     end
 
     context "passing :limit => 1" do
-      it "should only remind the user with the longest inactivity period" do
+      it "should only remind the user who was contacted least recently" do
         do_remind(:limit => 1)
-        assert_user_reminded(registered_sp_user_without_recent_interaction_for_a_longer_time)
-        reply_to(registered_sp_user_without_recent_interaction.reload).should be_nil
+        assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
+        reply_to(registered_sp_user_not_contacted_recently.reload).should be_nil
       end
     end
 
@@ -447,7 +445,7 @@ describe User do
   end
 
   describe "#remind!(options = {})" do
-    let(:user) { create(:user, :without_recent_interaction) }
+    let(:user) { create(:user, :not_contacted_recently) }
 
     def do_remind(options = {})
       expect_message { user.remind!(options) }
@@ -503,11 +501,13 @@ describe User do
 
     # Ordering
 
-    # 1. If his/her gender is known
-    #   a) For males
-    #     Prefer females
-    #   b) For females
-    #     Prefer males
+    # 1. Order by preferred gender
+    #    a) he/she is gay
+    #       i)  Prefer other gay users of the same gender
+    #       ii) Prefer other users of the same sex
+    #    b) he/she is not gay
+    #       i)  Gender is known - Prefer users of the opposite sex
+    #       ii) Gender is unknown - Skip
 
     # 2. Order by recent activity. Note: This should come AFTER ordering by gender
     #    for 2 reasons. Firstly, in the common situation where he is matched
@@ -522,22 +522,22 @@ describe User do
     # see spec/factories.rb for where users are defined
 
     # Alex has an empty profile last seen just now
+    # Chamroune is has an empty profile last seen just now
     # Jamie has an empty profile last seen 15 minutes ago
-    # Joy is a straight 27 year old female in Phnom Penh last seen 15 minutes ago
-    # Mara is a bisexual 25 year old female in Phnom Penh last seen 15 minutes ago
+    # Joy is a 27 year old female in Phnom Penh last seen 15 minutes ago
+    # Mara is a 25 year old female in Phnom Penh last seen 15 minutes ago
     # Pauline is a female last seen just now from a registered service provider
-    # Chamroune is looking for a female last seen just now
-    # Dave is a straight 28 year old male in Phnom Penh last seen just now
-    # Luke is a straight 25 year old male in Phnom Penh last seen just now
-    # Con is a straight 37 year old male in Siem Reap last seen 15 minutes ago with
-    # Paul is a straight 39 year old male in Phnom Penh last seen 15 minutes ago with
+    # Dave is a 28 year old male in Phnom Penh last seen just now
+    # Luke is a 25 year old male in Phnom Penh last seen just now
+    # Con is a 37 year old male in Siem Reap last seen 15 minutes ago with
+    # Paul is a 39 year old male in Phnom Penh last seen 15 minutes ago with
     # Harriet is a lesbian from Battambang last seen 15 minutes ago currently chatting with Eva
     # Eva is a lesbian from Siem Reap last seen 15 minutes ago currently chatting with Harriet
-    # Nok is a straight female from Chiang Mai last seen 15 minutes ago
-    # Michael is a bisexual 29 year old male from Chiang Mai last seen 15 minutes ago with
+    # Nok is a female from Chiang Mai last seen 15 minutes ago
+    # Michael is a 29 year old male from Chiang Mai last seen 15 minutes ago with
     # Hanh is a gay 28 year old male from Chiang Mai last seen 15 minutes ago
     # View is a gay 26 year old male from Chiang Mai last seen 15 minutes ago
-    # Reaksmey is bisexual last seen 15 minutes ago
+    # Reaksmey has never interacted (his last_interacted_at is nil)
 
     # Individual Match Explanations
 
@@ -548,8 +548,8 @@ describe User do
     # No Profile information is known about Jamie
     # Similar to Alex, ordering is based on recent activity only
 
-    # Chamroune is looking for a female but for now we are ignoring this data.
-    # Since his/her gender and location is unknown his matches are similar to Alex and Jamie's
+    # No Profile information is known abount Chamroune .
+    # Similar to Alex and Jamie, ordering is based on recent activity
 
     # Pauline is female so male users are matched first.
     # Luke and Dave are equal first because they're guys
@@ -577,14 +577,16 @@ describe User do
     # Pauline is the female seen most recently so she is matched first.
     # Mara and Joy are equal second as they are the two remaining females.
     # Luke, Chamroune and Alex are equal third because of their more recent activity
-    # Followed by Con, Jamie and Reaksmey who were all seen more than 15 mins ago
-    # Paul is matched last because he is more than 10 years older than Dave
+    # Followed by Con and Jamie who were both seen more than 15 mins ago
+    # Paul is matched next because he is more than 10 years older than Dave
+    # Reaksmey matches last because he has *never* interacted
 
     # Con is also a guy in Cambodia. Con has already chatted with Mara so she is eliminated
     # Pauline and Joy match first and second similar to the previous example.
     # In contrast to the previous example, Con matches with Dave, Chamroune and Alex before Luke
     # because Luke is 12 years younger than Con and the age of Chamroune and Alex is not known
-    # Paul, Jamie and Reaksmey are matched last because of their less recent activity
+    # Paul and Jamie are matched next because of their less recent activity
+    # Reaksmey matches last because he has *never* interacted
 
     # Paul is also a guy in Cambodia.
     # Similar to the previous example Pauline matches first.
@@ -598,23 +600,28 @@ describe User do
     # Again Pauline matches first.
     # Mara is next because she is closer in age than Joy.
     # Dave, Alex and Chamroune are next because of their recent activity
-    # Reaksmey and Jamie matched before Con and Paul because even though their age is unknown,
+    # Jamie is matched before Con and Paul because even though his/her age is unknown,
     # Con and Paul are more than 10 years older than Luke.
     # Con matches before Paul because he is closer in age to Luke than Paul
+    # Reaksmey matches last because he has *never* interacted
 
-    # Harriet is a girl. Like the other girls she matches with the boys first.
+    # Harriet is a lesbian. Unlike the other girls she matches other lesbians first then the girls, followed by the boys.
     # Dave has already chatted with Harriet so he is eliminated from the results.
-    # Luke is matched first because of his recent activity
+    # Eva would have match first (because she is also a lesbian) but she is is eliminated because she is currently chatting with Harriet
+    # Pauline is matched first because she is a female with the most recent activity
+    # Mara and Joy are matched next because they are female
+    # Luke is matched next because of his recent activity and known location
+    # Chamroune and Alex are next due to their recent activity
     # Con is matched before Paul because he is closer (in Siem Reap) to Harriet (in Battambang) than
     # Paul (in Phnom Penh).
-    # Pauline, Chamroune and Alex are next due to their recent activity
-    # Followed by Mara, Joy, Jamie and Reaksmey.
-    # Eva is eliminated because she is currently chatting with Harriet
+    # Followed by Jamie (who's location is unknown)
+    # Reaksmey matches last because he has *never* interacted
 
     # Eva is also in Siem Reap and gets a similar result to Harriet (with Dave included)
 
     # Hanh is a guy living in Thailand. He has already chatted with Nok.
-    # Michael and View match equal first
+    # View matches first because he is gay
+    # Followed by Michael who is male
 
     # View has previously chatted with Michael and Hanh is offline, so Nok is matched
 
@@ -629,28 +636,29 @@ describe User do
 
     # Kris is offline and his/her gender is unknown however his/her age is known.
     # Luke, Dave, Pauline, Chamroune and Alex match first because of their recent activity
-    # Followed by Joy, Mara, Reaksmey and Jamie
-    # Con and Paul finish last again because of their age difference with Kris
+    # Followed by Joy, Mara and Jamie
+    # Con and Paul finish next because of their age difference with Kris
+    # Reaksmey matches last because he has *never* interacted
 
     USER_MATCHES = {
-      :alex => [[:chamroune, :luke, :pauline, :dave], [:mara, :paul, :jamie, :reaksmey, :con, :joy]],
-      :jamie => [[:chamroune, :luke, :pauline, :dave, :alex], [:mara, :paul, :reaksmey, :con, :joy]],
-      :chamroune => [[:luke, :pauline, :dave, :alex], [:mara, :paul, :reaksmey, :con, :joy, :jamie]],
+      :alex => [[:chamroune, :luke, :pauline, :dave], [:mara, :paul, :jamie, :con, :joy], :reaksmey],
+      :jamie => [[:chamroune, :luke, :pauline, :dave, :alex], [:mara, :paul, :con, :joy], :reaksmey],
+      :chamroune => [[:luke, :pauline, :dave, :alex], [:mara, :paul, :con, :joy, :jamie], :reaksmey],
       :pauline => [[:luke, :dave], [:con, :paul], [:alex, :chamroune], [:joy, :mara, :jamie]],
       :nok => [[:michael, :view]],
-      :joy => [:dave, :luke, :con, :paul, [:chamroune, :pauline, :alex], [:mara, :jamie, :reaksmey]],
-      :dave => [:pauline, [:mara, :joy], [:luke, :chamroune, :alex], [:con, :jamie, :reaksmey], :paul],
-      :con => [:pauline, :joy, [:dave, :chamroune, :alex], :luke, [:paul, :jamie, :reaksmey]],
-      :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, [:con, :reaksmey, :jamie]],
-      :luke => [:pauline, :mara, :joy, [:dave, :alex, :chamroune], [:reaksmey, :jamie], :con, :paul],
-      :harriet => [:luke, :con, :paul, [:pauline, :chamroune, :alex], [:mara, :joy, :jamie, :reaksmey]],
-      :eva => [[:dave, :luke], :con, :paul, [:alex, :chamroune, :pauline], [:joy, :mara, :reaksmey, :jamie]],
-      :hanh => [[:michael, :view]],
+      :joy => [:dave, :luke, :con, :paul, [:chamroune, :pauline, :alex], [:mara, :jamie], :reaksmey],
+      :dave => [:pauline, [:mara, :joy], [:luke, :chamroune, :alex], [:con, :jamie], :paul, :reaksmey],
+      :con => [:pauline, :joy, [:dave, :chamroune, :alex], :luke, [:paul, :jamie], :reaksmey],
+      :paul => [:pauline, :joy, :mara, [:alex, :chamroune], :dave, :luke, [:con, :jamie], :reaksmey],
+      :luke => [:pauline, :mara, :joy, [:dave, :alex, :chamroune], :jamie, :con, :paul, :reaksmey],
+      :harriet => [:pauline, [:mara, :joy], :luke, [:chamroune, :alex], :con, :paul, :jamie, :reaksmey],
+      :eva => [:pauline, [:mara, :joy], [:luke, :dave], [:chamroune, :alex], :con, :paul, :jamie, :reaksmey],
+      :hanh => [:view, :michael],
       :view => [:nok],
-      :mara => [[:dave, :luke], :paul, [:chamroune, :alex, :pauline], [:joy, :jamie, :reaksmey]],
+      :mara => [[:dave, :luke], :paul, [:chamroune, :alex, :pauline], [:joy, :jamie], :reaksmey],
       :michael => [:nok],
       :reaksmey => [[:luke, :chamroune, :dave, :alex], [:mara, :joy, :con, :jamie, :paul]],
-      :kris => [[:luke, :dave, :pauline, :chamroune, :alex], [:joy, :mara, :reaksmey, :jamie], :con, :paul]
+      :kris => [[:luke, :dave, :pauline, :chamroune, :alex], [:joy, :mara, :jamie], :con, :paul, :reaksmey]
     }
 
     USER_MATCHES.each do |user, matches|
@@ -663,7 +671,7 @@ describe User do
       end
 
       # create some chats
-      create(:active_chat, :user => eva,        :friend => harriet)
+      create(:chat, :active,  :user => eva,     :friend => harriet)
       create(:chat,        :user => michael,    :friend => view)
       create(:chat,        :user => dave,       :friend => harriet)
       create(:chat,        :user => con,        :friend => mara)
@@ -690,7 +698,6 @@ describe User do
         USER_MATCHES.each do |user, matches|
           results = subject.class.matches(send(user))
           result_names = results.map { |result| result.name.to_sym }
-
           result_index = 0
           matches.each do |expected_match|
             if expected_match.is_a?(Array)
@@ -710,7 +717,7 @@ describe User do
     end
   end
 
-  describe "#update_profile" do
+  describe "#update_profile(info)" do
     def keywords(*keys)
       options = keys.extract_options!
       options[:user] ||= user
@@ -780,465 +787,225 @@ describe User do
       end
     end
 
-    def assert_looking_for(options = {})
-      # the info indicates the user is looking for a guy
-      registration_examples(
-        keywords(:could_mean_boy_or_boyfriend),
-        { :expected_looking_for => :male }.merge(options)
-      )
-
-      # the info indicates the user is looking for a girl
-      registration_examples(
-        keywords(:could_mean_girl_or_girlfriend),
-        { :expected_looking_for => :female }.merge(options)
-      )
-
-      # the info indicates the user is looking for a friend
-      registration_examples(
-        keywords(:friend),
-        { :expected_looking_for => :either}.merge(options)
-      )
-
-      # can't determine what he/she is looking for from the info
-      registration_examples(
-        ["hello", "", "laskhdg"],
-        { :expected_looking_for => options[:expected_looking_for_when_undetermined] }.merge(options)
-      )
-    end
-
-    def assert_gender(options = {})
+    it "should try to determine the profile from the info provided" do
       # the info indicates a guy is texting
       registration_examples(
-        keywords(:boy, :could_mean_boy_or_boyfriend),
-        { :expected_gender => :male }.merge(options)
+        keywords(:boy),
+        :expected_gender => :male
       )
 
       # the info indicates a girl is texting
       registration_examples(
-        keywords(:girl, :could_mean_girl_or_girlfriend),
-        { :expected_gender => :female }.merge(options)
+        keywords(:girl),
+        :expected_gender => :female
       )
-    end
 
-    context "for users with a gender and looking for preference" do
-      let(:user_with_gender_and_looking_for_preference) do
-        create(:user, :with_gender, :with_looking_for_preference)
-      end
+      # the info indicates a guy is gay
+      registration_examples(
+        keywords(:guy_looking_for_a_guy),
+        :expected_gender => :male,
+        :expected_looking_for => :male
+      )
 
-      it "should update the profile with the new information" do
-        # im a girl
-        registration_examples(
-          keywords(:im_a_girl),
-          :user => user_with_gender_and_looking_for_preference,
-          :gender => :male,
-          :looking_for => :female,
-          :expected_gender => :female,
-          :expected_looking_for => :female
-        )
+      # the info indicates a girl looking for girl
+      registration_examples(
+        keywords(:girl_looking_for_a_girl),
+        :expected_gender => :female,
+        :expected_looking_for => :female
+      )
 
-        # im a boy
-        registration_examples(
-          keywords(:im_a_boy),
-          :user => user_with_gender_and_looking_for_preference,
-          :gender => :female,
-          :looking_for => :male,
-          :expected_gender => :male,
-          :expected_looking_for => :male
-        )
+      # guy named frank
+      registration_examples(
+        keywords(:guy_named_frank),
+        :expected_name => "frank",
+        :expected_gender => :male
+      )
 
-        # im looking for a guy
-        registration_examples(
-          keywords(:im_looking_for_a_guy),
-          :user => user_with_gender_and_looking_for_preference,
-          :looking_for => :female,
-          :gender => :female,
-          :expected_gender => :female,
-          :expected_looking_for => :male
-        )
+      # girl named mara
+      registration_examples(
+        keywords(:girl_named_mara),
+        :expected_name => "mara",
+        :expected_gender => :female
+      )
 
-        # im looking for a girl
-        registration_examples(
-          keywords(:im_looking_for_a_girl),
-          :user => user_with_gender_and_looking_for_preference,
-          :looking_for => :male,
-          :gender => :female,
-          :expected_gender => :female,
-          :expected_looking_for => :female
-        )
-      end
-    end
+      # 23 year old
+      registration_examples(
+        keywords(:"23_year_old"),
+        :expected_age => 23
+      )
 
-    context "for users with a missing looking for preference" do
-      it "should determine the looking for preference from the info" do
-        registration_examples(
-          keywords(:boy),
-          :expected_gender => :male,
-          :user => male,
-        )
-      end
-    end
+      # davo 28 guy wants friend
+      registration_examples(
+        keywords(:davo_28_guy_wants_friend),
+        :expected_age => 28,
+        :expected_name => "davo",
+        :expected_gender => :male
+      )
 
-    context "for users with a missing gender or sexual preference" do
-      it "should determine the missing details from the info" do
-        # a guy is texting
-        assert_looking_for(
-          :gender => :male,
-          :expected_gender => :male
-        )
+      # not an age
+      registration_examples(
+        keywords(:not_an_age)
+      )
 
-        # a gay guy is texting
-        assert_looking_for(
-          :gender => :male,
-          :expected_gender => :male,
-          :looking_for => :male,
-          :expected_looking_for_when_undetermined => :male
-        )
+      # put location based examples below here
 
-        # a straight guy is texting
-        assert_looking_for(
-          :gender => :male,
-          :expected_gender => :male,
-          :looking_for => :female,
-          :expected_looking_for_when_undetermined => :female
-        )
+      # Phnom Penhian
+      registration_examples(
+        keywords(:phnom_penhian),
+        :expected_city => "Phnom Penh",
+        :vcr => {:expect_results => true}
+      )
 
-        # a bi guy is texting
-        assert_looking_for(
-          :gender => :male,
-          :expected_gender => :male,
-          :looking_for => :either,
-          :expected_looking_for_when_undetermined => :either
-        )
+      # mara 25 phnom penh wants friend
+      registration_examples(
+        keywords(:mara_25_pp_wants_friend),
+        :expected_age => 25,
+        :expected_city => "Phnom Penh",
+        :expected_name => "mara",
+        :vcr => {:expect_results => true}
+      )
 
-        # a girl is texting
-        assert_looking_for(
-          :gender => :female,
-          :expected_gender => :female,
-        )
+      # someone from siem reap wants to meet a girl
+      registration_examples(
+        keywords(:sr_wants_girl),
+        :expected_city => "Siem Reap",
+        :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
+      )
 
-        # a gay girl is texting
-        assert_looking_for(
-          :gender => :female,
-          :expected_gender => :female,
-          :looking_for => :female,
-          :expected_looking_for_when_undetermined => :female
-        )
+      # kunthia 23 siem reap girl wants boy
+      registration_examples(
+        keywords(:kunthia_23_sr_girl_wants_boy),
+        :expected_age => 23,
+        :expected_gender => :female,
+        :expected_city => "Siem Reap",
+        :expected_name => "kunthia",
+        :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
+      )
 
-        # a straight girl is texting
-        assert_looking_for(
-          :gender => :female,
-          :expected_gender => :female,
-          :looking_for => :male,
-          :expected_looking_for_when_undetermined => :male
-        )
+      # tongleehey 29 phnom penh guy wants girl
+      registration_examples(
+        keywords(:tongleehey),
+        :expected_age => 29,
+        :expected_gender => :male,
+        :expected_city => "Phnom Penh",
+        :expected_name => "tongleehey",
+        :vcr => {:expect_results => true}
+      )
 
-        # a bi girl is texting
-        assert_looking_for(
-          :gender => :female,
-          :expected_gender => :female,
-          :looking_for => :either,
-          :expected_looking_for_when_undetermined => :either
-        )
+      # find me a girl!
+      registration_examples(
+        keywords(:find_me_a_girl)
+      )
 
-        # a user with a unknown gender looking for a guy is texting
-        assert_gender(
-          :looking_for => :male,
-          :expected_looking_for => :male
-        )
+      # I'm vanna 26 guy from kampong thom Want to find a girl.
+      registration_examples(
+        keywords(:vanna_kampong_thom),
+        :expected_name => "vanna",
+        :expected_gender => :male,
+        :expected_age => 26,
+        :expected_city => "Kampong Thom",
+        :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
+      )
 
-        # a user with a unknown gender looking for a girl is texting
-        assert_gender(
-          :looking_for => :female,
-          :expected_looking_for => :female
-        )
+      # veasna: 30 years from kandal want a girl
+      registration_examples(
+        keywords(:veasna),
+        :expected_name => "veasna",
+        :expected_age => 30,
+        :expected_city => "S'ang",
+        :vcr => {:expect_results => true, :cassette => "kh/kandaal"}
+      )
 
-        # a user with a unknown gender looking for a friend is texting
-        assert_gender(
-          :looking_for => :either,
-          :expected_looking_for => :either
-        )
-      end
-    end
+      # sopheak: hello girl607 can u give me ur phone number ?
+      registration_examples(
+        keywords(:sopheak)
+      )
 
-    context "for new users" do
-      it "should try to determine as much as possible from the info provided" do
-        # the info indicates a guy is texting
-        registration_examples(
-          keywords(:boy, :could_mean_boy_or_boyfriend),
-          :expected_gender => :male
-        )
+      # i'm ok, i'm fine, i'm 5 etc
+      registration_examples(
+        keywords(:im_something_other_than_a_name)
+      )
 
-        # the info indicates a girl is texting
-        registration_examples(
-          keywords(:girl, :could_mean_girl_or_girlfriend),
-          :expected_gender => :female
-        )
+      # my name veayo 21 female from pp want to find friend bõy and gril. Can call or sms.
+      registration_examples(
+        keywords(:veayo),
+        :expected_name => "veayo",
+        :expected_age => 21,
+        :expected_city => "Phnom Penh",
+        :expected_gender => :female,
+        :vcr => {:expect_results => true}
+      )
 
-        # the info indicates the user is looking for a girl
-        registration_examples(
-          keywords(:girlfriend),
-          :expected_looking_for => :female
-        )
+      # 070 83 85 48, 070-83-85-48
+      registration_examples(
+        keywords(:telephone_number)
+      )
 
-        # the info indicates the user is looking for a guy
-        registration_examples(
-          keywords(:boyfriend),
-          :expected_looking_for => :male
-        )
+      # hi . name me vannak . a yu nhom 19 chnam
+      registration_examples(
+        keywords(:vannak),
+        :expected_name => "vannak",
+        :expected_age => 19
+      )
 
-        # the info indicates the user is looking for a friend
-        registration_examples(
-          keywords(:friend),
-          :expected_looking_for => :either
-        )
+      # boy or girl
+      registration_examples(
+        keywords(:boy_or_girl)
+      )
 
-        # the info indicates a guy is texting looking for a girl
-        registration_examples(
-          keywords(:guy_looking_for_a_girl),
-          :expected_gender => :male,
-          :expected_looking_for => :female
-        )
+      # hi ! my name vanny.i'm 17 yearold.i'm boy.I live in pailin. thank q... o:)
+      registration_examples(
+        keywords(:vanny),
+        :expected_name => "vanny",
+        :expected_age => 17,
+        :expected_city => "Pailin",
+        :expected_gender => :male,
+        :vcr => {:expect_results => true, :cassette => "kh/krong_pailin"}
+      )
 
-        # the info indicates a girl is texting looking for a guy
-        registration_examples(
-          keywords(:girl_looking_for_a_guy),
-          :expected_gender => :female,
-          :expected_looking_for => :male
-        )
+      # live in siem reap n u . m 093208006
+      registration_examples(
+        keywords(:not_a_man_from_siem_reap),
+        :expected_city => "Siem Reap",
+        :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
+      )
 
-        # the info indicates a guy looking for guy
-        registration_examples(
-          keywords(:guy_looking_for_a_guy),
-          :expected_gender => :male,
-          :expected_looking_for => :male
-        )
+      # kimlong
+      registration_examples(
+        keywords(:kimlong),
+        :expected_name => "kimlong",
+        :expected_age => 17,
+      )
 
-        # the info indicates a girl looking for girl
-        registration_examples(
-          keywords(:girl_looking_for_a_girl),
-          :expected_gender => :female,
-          :expected_looking_for => :female
-        )
+      # phearak
+      registration_examples(
+        keywords(:phearak),
+        :expected_name => "phearak",
+        :expected_age => 30,
+        :expected_city => "Phnom Penh",
+        :expected_gender => :male,
+        :vcr => {:expect_results => true}
+      )
 
-        # the info indicates a guy looking for friend
-        registration_examples(
-          keywords(:guy_looking_for_a_friend),
-          :expected_gender => :male,
-          :expected_looking_for => :either
-        )
+      # name : makara age : 21year live : pp boy : finegirl number : 010524369
+      registration_examples(
+        keywords(:makara),
+        :expected_name => "makara",
+        :expected_age => 21,
+        :expected_city => "Phnom Penh",
+        :expected_gender => :male,
+        :vcr => {:expect_results => true}
+      )
 
-        # the info indicates a girl looking for friend
-        registration_examples(
-          keywords(:girl_looking_for_a_friend),
-          :expected_gender => :female,
-          :expected_looking_for => :either
-        )
-
-        # guy named frank
-        registration_examples(
-          keywords(:guy_named_frank),
-          :expected_name => "frank",
-          :expected_gender => :male
-        )
-
-        # girl named mara
-        registration_examples(
-          keywords(:girl_named_mara),
-          :expected_name => "mara",
-          :expected_gender => :female
-        )
-
-        # 23 year old
-        registration_examples(
-          keywords(:"23_year_old"),
-          :expected_age => 23
-        )
-
-        # davo 28 guy wants friend
-        registration_examples(
-          keywords(:davo_28_guy_wants_friend),
-          :expected_age => 28,
-          :expected_name => "davo",
-          :expected_gender => :male,
-          :expected_looking_for => :either
-        )
-
-        # not an age
-        registration_examples(
-          keywords(:not_an_age)
-        )
-
-        # put location based examples below here
-
-        # Phnom Penhian
-        registration_examples(
-          keywords(:phnom_penhian),
-          :expected_city => "Phnom Penh",
-          :vcr => {:expect_results => true}
-        )
-
-        # mara 25 phnom penh wants friend
-        registration_examples(
-          keywords(:mara_25_pp_wants_friend),
-          :expected_age => 25,
-          :expected_city => "Phnom Penh",
-          :expected_name => "mara",
-          :expected_looking_for => :either,
-          :vcr => {:expect_results => true}
-        )
-
-        # someone from siem reap wants to meet a girl
-        registration_examples(
-          keywords(:sr_wants_girl),
-          :expected_city => "Siem Reap",
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
-        )
-
-        # kunthia 23 siem reap girl wants boy
-        registration_examples(
-          keywords(:kunthia_23_sr_girl_wants_boy),
-          :expected_age => 23,
-          :expected_gender => :female,
-          :expected_city => "Siem Reap",
-          :expected_name => "kunthia",
-          :expected_looking_for => :male,
-          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
-        )
-
-        # tongleehey 29 phnom penh guy wants girl
-        registration_examples(
-          keywords(:tongleehey),
-          :expected_age => 29,
-          :expected_gender => :male,
-          :expected_city => "Phnom Penh",
-          :expected_name => "tongleehey",
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true}
-        )
-
-        # find me a girl!
-        registration_examples(
-          keywords(:find_me_a_girl),
-          :expected_looking_for => :female
-        )
-
-        # I'm vanna 26 guy from kampong thom Want to find a girl.
-        registration_examples(
-          keywords(:vanna_kampong_thom),
-          :expected_name => "vanna",
-          :expected_gender => :male,
-          :expected_age => 26,
-          :expected_city => "Kampong Thom",
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
-        )
-
-        # veasna: 30 years from kandal want a girl
-        registration_examples(
-          keywords(:veasna),
-          :expected_name => "veasna",
-          :expected_age => 30,
-          :expected_city => "S'ang",
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true, :cassette => "kh/kandaal"}
-        )
-
-        # sopheak: hello girl607 can u give me ur phone number ?
-        registration_examples(
-          keywords(:sopheak)
-        )
-
-        # i'm ok, i'm fine, i'm 5 etc
-        registration_examples(
-          keywords(:im_something_other_than_a_name)
-        )
-
-        # my name veayo 21 female from pp want to find friend bõy and gril. Can call or sms.
-        registration_examples(
-          keywords(:veayo),
-          :expected_name => "veayo",
-          :expected_age => 21,
-          :expected_city => "Phnom Penh",
-          :expected_looking_for => :either,
-          :expected_gender => :female,
-          :vcr => {:expect_results => true}
-        )
-
-        # 070 83 85 48, 070-83-85-48
-        registration_examples(
-          keywords(:telephone_number)
-        )
-
-        # hi . name me vannak . a yu nhom 19 chnam
-        registration_examples(
-          keywords(:vannak),
-          :expected_name => "vannak",
-          :expected_age => 19
-        )
-
-        # boy or girl
-        registration_examples(
-          keywords(:boy_or_girl)
-        )
-
-        # hi ! my name vanny.i'm 17 yearold.i'm boy.I live in pailin. thank q... o:)
-        registration_examples(
-          keywords(:vanny),
-          :expected_name => "vanny",
-          :expected_age => 17,
-          :expected_city => "Pailin",
-          :expected_gender => :male,
-          :vcr => {:expect_results => true, :cassette => "kh/krong_pailin"}
-        )
-
-        # live in siem reap n u . m 093208006
-        registration_examples(
-          keywords(:not_a_man_from_siem_reap),
-          :expected_city => "Siem Reap",
-          :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
-        )
-
-        # kimlong
-        registration_examples(
-          keywords(:kimlong),
-          :expected_name => "kimlong",
-          :expected_age => 17,
-        )
-
-        # phearak
-        registration_examples(
-          keywords(:phearak),
-          :expected_name => "phearak",
-          :expected_age => 30,
-          :expected_city => "Phnom Penh",
-          :expected_gender => :male,
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true}
-        )
-
-        # name : makara age : 21year live : pp boy : finegirl number : 010524369
-        registration_examples(
-          keywords(:makara),
-          :expected_name => "makara",
-          :expected_age => 21,
-          :expected_city => "Phnom Penh",
-          :expected_gender => :male,
-          :expected_looking_for => :female,
-          :vcr => {:expect_results => true}
-        )
-
-        # "i bat chhmos ( bros hai ) phet bros rous nov kampong cham a yu 20,mit bros"
-        registration_examples(
-          keywords(:hai),
-          :expected_name => "hai",
-          :expected_age => 20,
-          :expected_city => "Krouch Chhmar",
-          :expected_gender => :male,
-          :expected_looking_for => :male,
-          :vcr => {:expect_results => true, :cassette => "kh/kampong_chaam"}
-        )
-      end
+      # "i bat chhmos ( bros hai ) phet bros rous nov kampong cham a yu 20,mit bros"
+      registration_examples(
+        keywords(:hai),
+        :expected_name => "hai",
+        :expected_age => 20,
+        :expected_city => "Krouch Chhmar",
+        :expected_gender => :male,
+        :vcr => {:expect_results => true, :cassette => "kh/kampong_chaam"}
+      )
     end
   end
 
@@ -1307,7 +1074,7 @@ describe User do
 
       context "but his chat is not active" do
         let(:active_chat_with_single_friend) do
-          create(:active_chat_with_single_friend, :friend => user)
+          create(:chat, :friend_active, :friend => user)
         end
 
         before do
@@ -1317,14 +1084,6 @@ describe User do
         it "should be true" do
           user.should be_available
         end
-      end
-    end
-
-    context "passing a chat" do
-      it "should return true if the users is currently chatting in the passed chat" do
-        active_chat
-        user.available?(friend.active_chat).should be_true
-        user.available?(create(:chat)).should be_false
       end
     end
   end
@@ -1352,17 +1111,9 @@ describe User do
   end
 
   describe "#locale" do
-    it "should return a lowercase symbol of the locale" do
-      subject.locale = :EN
-      subject.locale.should == :en
-    end
-
-    context "if the locale is nil" do
-      it "should delegate to #country_code and convert it to a symbol" do
-        user.locale = nil
-        user.country_code.should be_present
-        user.locale.should == user.country_code.to_sym
-      end
+    it "should delegate to #country_code and convert it to a symbol" do
+      user.country_code.should be_present
+      user.locale.should == user.country_code.to_sym
     end
   end
 
@@ -1494,207 +1245,17 @@ describe User do
     end
   end
 
-  describe "#opposite_looking_for" do
-    context "looking for is 'f'" do
-      before do
-        subject.looking_for = "f"
-      end
-
-      it "should == 'm'" do
-        subject.opposite_looking_for.should == "m"
-      end
-    end
-
-    context "looking for is 'm'" do
-      before do
-        subject.looking_for = "m"
-      end
-
-      it "should == 'f'" do
-        subject.opposite_looking_for.should == "f"
-      end
-    end
-
-    context "looking for is 'e'" do
-      before do
-        subject.looking_for = "e"
-      end
-
-      it "should be nil" do
-        subject.opposite_looking_for.should be_nil
-      end
-    end
-
-    context "looking for is not set" do
-      it "should be nil" do
-        subject.opposite_looking_for.should be_nil
-      end
-    end
-  end
-
-  describe "#probable_gender" do
-    context "gender is unknown" do
-      context "and looking for is unknown" do
-        it "should == 'm' (assume the user is a straight male)" do
-          subject.probable_gender.should == "m"
-        end
-      end
-
-      context "and looking for is either" do
-        before do
-          subject.looking_for = "e"
-        end
-
-        it "should == 'm' (assume the user is a bi male)" do
-          subject.probable_gender.should == "m"
-        end
-      end
-
-      context "and looking for is male" do
-        before do
-          subject.looking_for = "m"
-        end
-
-        it "should == 'f' (assume the user is straight)" do
-          subject.probable_gender.should == "f"
-        end
-      end
-
-      context "and looking for is female" do
-        before do
-          subject.looking_for = "f"
-        end
-
-        it "should == 'm' (assume the user is straight)" do
-          subject.probable_gender.should == "m"
-        end
-      end
-    end
-
-    context "gender is male" do
-      before do
-        subject.gender = "m"
-      end
-
-      it "should == 'm'" do
-        subject.probable_gender.should == "m"
-      end
-    end
-
-    context "gender is female" do
-      before do
-        subject.gender = "f"
-      end
-
-      it "should == 'f'" do
-        subject.probable_gender.should == "f"
-      end
-    end
-  end
-
-  describe "#probable_looking_for" do
-    context "looking for is unknown" do
-      context "and gender is unknown" do
-        it "should == 'f' (assume the user is a straight male)" do
-          subject.probable_looking_for.should == "f"
-        end
-      end
-
-      context "and gender is male" do
-        before do
-          subject.gender = "m"
-        end
-
-        it "should == 'f' (assume the user is straight)" do
-          subject.probable_looking_for.should == "f"
-        end
-      end
-
-      context "and gender is female" do
-        before do
-          subject.gender = "f"
-        end
-
-        it "should == 'm' (assume the user is straight)" do
-          subject.probable_looking_for.should == "m"
-        end
-      end
-    end
-
-    context "looking for a male" do
-      before do
-        subject.looking_for = "m"
-      end
-
-      it "should == 'm'" do
-        subject.probable_looking_for.should == "m"
-      end
-    end
-
-    context "looking for a female" do
-      before do
-        subject.looking_for = "f"
-      end
-
-      it "should == 'f'" do
-        subject.probable_looking_for.should == "f"
-      end
-    end
-
-    context "looking for either" do
-      before do
-        subject.looking_for = "e"
-      end
-
-      it "should == 'e'" do
-        subject.probable_looking_for.should == "e"
-      end
-    end
-  end
-
-  describe "#bisexual?" do
-    it "should be true only if the user is explicitly bisexual" do
-      subject.should_not be_bisexual
-
-      subject.looking_for = "e"
-      subject.should be_bisexual
-
+  describe "#gay?" do
+    it "should only return try for gay males and females" do
+      subject.should_not be_gay
       subject.gender = "m"
+      subject.should_not be_gay
       subject.looking_for = "m"
-      subject.should_not be_bisexual
-    end
-  end
-
-  describe "#hetrosexual?" do
-    it "should be true all the time (don't handle gays for now)" do
-      # unknown sexual preference
-      subject.should be_hetrosexual
-
-      # gay guy
-      subject.gender = "m"
-      subject.looking_for = "m"
-      subject.should be_hetrosexual
-
-      # bi guy
-      subject.looking_for = "e"
-      subject.should be_hetrosexual
-
-      # straight guy
+      subject.should be_gay
       subject.looking_for = "f"
-      subject.should be_hetrosexual
-
-      # gay girl
+      subject.should_not be_gay
       subject.gender = "f"
-      subject.looking_for = "f"
-      subject.should be_hetrosexual
-
-      # bi girl
-      subject.looking_for = "e"
-      subject.should be_hetrosexual
-
-      # straight girl
-      subject.looking_for = "m"
-      subject.should be_hetrosexual
+      subject.should be_gay
     end
   end
 
@@ -1738,7 +1299,7 @@ describe User do
       end
 
       it "should set the user's date of birth to 15 years ago" do
-        subject.date_of_birth.should == 15.years.ago.utc
+        subject.date_of_birth.should == 15.years.ago.to_date
       end
     end
 
@@ -1767,6 +1328,31 @@ describe User do
     context "given the user is not in an active chat session" do
       it "should be false" do
         user.should_not be_currently_chatting
+      end
+    end
+  end
+
+  describe "#can_call_short_code?" do
+    it "should return true only if the user belongs to a operator supporting voice" do
+      user.should_not be_can_call_short_code
+
+      with_operators do |number_parts, assertions|
+        number = number_parts.join
+        new_user = build(:user, :mobile_number => number)
+        if assertions["caller_id"]
+          new_user.should be_can_call_short_code
+        else
+          new_user.should_not be_can_call_short_code
+        end
+      end
+    end
+  end
+
+  describe "#contact_me_number" do
+    it "should retun the user's operator's SMS short code or the twilio number" do
+      user.contact_me_number.should == twilio_number
+      with_operators do |number_parts, assertions|
+        build(:user, :mobile_number => number_parts.join).contact_me_number.should == assertions["short_code"]
       end
     end
   end
@@ -1801,13 +1387,13 @@ describe User do
   describe "#dial_string(requesting_api_version)" do
     def assert_dial_string(requesting_api_version, assert_only_number)
       factory_user = build(:user)
-      factory_asserted_dial_string = assert_only_number ? factory_user.mobile_number : asserted_default_pbx_dial_string(:number_to_dial => factory_user.mobile_number)
+      factory_asserted_dial_string = assert_only_number ? asserted_number_formatted_for_twilio(factory_user.mobile_number) : asserted_default_pbx_dial_string(:number_to_dial => factory_user.mobile_number)
       factory_user.dial_string(requesting_api_version).should == factory_asserted_dial_string
 
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
-        asserted_dial_string = assert_only_number ? new_user.mobile_number : (interpolated_assertion(assertions["dial_string"], :number_to_dial => number) || asserted_default_pbx_dial_string(:number_to_dial => number))
+        asserted_dial_string = assert_only_number ? asserted_number_formatted_for_twilio(new_user.mobile_number) : (interpolated_assertion(assertions["dial_string"], :number_to_dial => number) || asserted_default_pbx_dial_string(:number_to_dial => number))
         new_user.dial_string(requesting_api_version).should == asserted_dial_string
       end
     end
@@ -1908,7 +1494,7 @@ describe User do
       user.should_not be_online
     end
 
-    context "passing no options" do
+    context "given the user is not currently chatting" do
       before do
         user.logout!
       end
@@ -1916,15 +1502,6 @@ describe User do
       it "should not create any notifications" do
         reply.should be_nil
         reply_to_partner.should be_nil
-      end
-    end
-
-    context ":notify => true" do
-      it "should notify the user that they are now offline and inform him how to meet someone new" do
-        expect_message do
-          user.logout!(:notify => true)
-        end
-        reply.body.should == spec_translate(:anonymous_logged_out, user.locale)
       end
     end
 
@@ -1944,36 +1521,6 @@ describe User do
         friend.should_not be_currently_chatting
         friend.should be_online
       end
-
-      context "passing :notify => true" do
-        it "should notify the user that they are now offline and inform them how to chat again" do
-          expect_message do
-            user.logout!(:notify => true)
-          end
-          reply.body.should == spec_translate(:logged_out_from_chat, user.locale, friend.screen_id)
-        end
-      end
-
-      context "passing :notify_chat_partner => true" do
-        it "should notify the chat partner that their chat has ended" do
-          expect_message do
-            user.logout!(:notify_chat_partner => true)
-          end
-          reply_to_partner.body.should == spec_translate(
-            :anonymous_chat_has_ended, friend.locale
-          )
-          reply.should be_nil
-        end
-      end
-    end
-  end
-
-  describe "#welcome!" do
-    it "should welcome the user" do
-      expect_message do
-        user.welcome!
-      end
-      reply_to(user).body.should == spec_translate(:welcome, [user.locale, user.country_code])
     end
   end
 
@@ -2010,72 +1557,6 @@ describe User do
       let(:positive_assertion) { :assert_friend_found }
       let(:negative_assertion) { :assert_friend_not_found }
       let(:task) { :do_find_friends }
-    end
-  end
-
-  describe "#update_locale!" do
-    def setup_redelivery_scenario(subject, options = {})
-      body = "something"
-
-      # create a delivered reply with an alternate translation
-      # to test that this reply is redelivered with the alternative translation
-      delivered_reply_with_alternate_translation = create(
-        :reply, :delivered, :with_alternate_translation, :user => subject, :body => body
-      )
-
-      # create an undelivered reply with an alternate translation to test
-      # that this reply should not be redelivered when updating the locale
-      create(:reply, :with_alternate_translation, :user => subject, :body => body)
-
-      # create another delivered reply without an alternate translation
-      # to test that no resend is performed when updating the locale when the last
-      # reply has no alternate translation
-      delivered_reply = create(
-        :reply, :delivered, :user => subject, :body => body
-      ) if options[:later_no_alternate_translation_reply]
-
-      delivered_reply || delivered_reply_with_alternate_translation
-    end
-
-    def assert_update_locale(with_locale, options = {})
-      options[:success] = true unless options[:success] == false
-      success = options.delete(:success)
-      assert_notify = options.delete(:assert_notify)
-      later_no_alternate_translation_reply = options.delete(:later_no_alternate_translation_reply)
-
-      subject = create(:user)
-
-      reply_to_redeliver = setup_redelivery_scenario(
-        subject, :later_no_alternate_translation_reply => later_no_alternate_translation_reply
-      ) if options[:notify]
-
-      if assert_notify
-        expect_message { subject.update_locale!(with_locale, options).should send("be_#{success}") }
-        assert_deliver(:body => reply_to_redeliver.alternate_translation)
-      else
-        # this will raise an error if a reply is delivered
-        subject.update_locale!(with_locale, options).should send("be_#{success}")
-      end
-
-      subject.reload # ensure changes are saved
-      success ? subject.locale.should == with_locale.downcase.to_sym : subject.locale.should == subject.country_code.to_sym
-    end
-
-    it "should only update the locale of the user for valid locales" do
-      assert_update_locale("en")
-      assert_update_locale(user.country_code)
-      assert_update_locale("us", :success => false)
-      assert_update_locale("hi im tom what are you doing", :success => false)
-    end
-
-    context "passing :notify" do
-      it "should try to resend the last message in the new locale only if :notify => true" do
-        assert_update_locale("en", :notify => true, :assert_notify => true)
-        assert_update_locale(user.country_code, :notify => true, :assert_notify => false)
-        assert_update_locale(
-          "en", :notify => true, :assert_notify => false, :later_no_alternate_translation_reply => true
-        )
-      end
     end
   end
 end

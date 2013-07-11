@@ -1,8 +1,10 @@
 class Chat < ActiveRecord::Base
-  include Communicable::HasCommunicableResources
+  include Chibi::Communicable::HasCommunicableResources
+  has_communicable_resources :phone_calls, :messages, :replies
 
   belongs_to :user
   belongs_to :friend, :class_name => 'User'
+  belongs_to :starter, :polymorphic => true
 
   has_many :active_users, :class_name => 'User', :foreign_key => "active_chat_id"
 
@@ -50,7 +52,7 @@ class Chat < ActiveRecord::Base
       WHERE (\"replies\".\"user_id\" = ?
       AND \"replies\".\"chat_id\" = \"#{table_name}\".\"id\")
       LIMIT 1) IS NOT NULL", sender.id
-    ).order("\"#{table_name}\".\"created_at\" DESC").limit(options[:num_recent_chats]).includes(:user, :friend)
+    ).order("\"#{table_name}\".\"created_at\" DESC").limit(options[:num_recent_chats]).includes(:user, :friend).references(:replies, table_name)
 
     normalized_message = message.body.downcase
     intended_chat = nil
@@ -66,26 +68,19 @@ class Chat < ActiveRecord::Base
   end
 
   def activate!(options = {})
+    self.starter ||= options[:starter]
     self.friend ||= user.match
     active_users << user unless options[:activate_user] == false
 
     active_users << friend if friend
 
     if user.currently_chatting?
-      current_chat = user.active_chat
-      current_partner = current_chat.partner(user) if options[:notify] && options[:notify_previous_partner]
-      current_chat.deactivate!(
-        :active_user => user, :notify => current_partner, :reactivate_previous_chat => false
-      )
+      user.active_chat.deactivate!(:active_user => user, :reactivate_previous_chat => false)
     end
 
     if friend.present?
       save!
-      introduce_participants(options) if options[:notify]
-    else
-      replies.build(
-        :user => user
-      ).explain_could_not_find_a_friend! if options[:notify] && options[:notify_no_match] != false
+      replies.build(:user => friend).introduce!(user) if options[:notify]
     end
 
     user.search_for_friend!
@@ -117,19 +112,9 @@ class Chat < ActiveRecord::Base
       # create new chats for users who have been deactivated from the chat
       users_to_leave_chat.each do |user|
         self.class.activate_multiple!(
-          user, :notify => true, :notify_no_match => false
+          user, :notify => true
         ) unless user.reload.currently_chatting?
       end
-    end
-
-    # notify the users skipping the instructions to update the users profile if
-    # they still remain activated in this chat
-    if notify = options[:notify]
-      notify = in_this_chat?(notify) ? [notify] : users_to_notify
-
-      reply_chat_was_deactivated!(
-        *notify, :skip_update_profile_instructions => notify.include?(user_to_remain_in_chat)
-      )
     end
   end
 
@@ -157,10 +142,9 @@ class Chat < ActiveRecord::Base
 
       # start a new chat for the sender of the message
       self.class.activate_multiple!(
-        reference_user.reload, :notify => true, :notify_no_match => false
+        reference_user.reload, :starter => message, :notify => true
       )
     end
-
   end
 
   def reactivate!(options = {})
@@ -199,7 +183,7 @@ class Chat < ActiveRecord::Base
     # return chats that have undelivered messages and the chat participants
     # are available to chat
 
-    scoped.joins(
+    joins(
       :user, :friend, :replies
     ).participant_available(
       :users
@@ -211,7 +195,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.participant_available(participant)
-    scoped.where(
+    where(
       "#{participant}.active_chat_id IS NULL
       OR #{participant}.active_chat_id = #{table_name}.id
       OR (
@@ -275,16 +259,6 @@ class Chat < ActiveRecord::Base
     updated_at < self.class.inactive_timestamp(options)
   end
 
-  def introduce_participants(options = {})
-    users_to_notify = [friend]
-    users_to_notify << user if options[:notify_initiator]
-    users_to_notify.each do |reference_user|
-      replies.build(:user => reference_user).introduce!(
-        partner(reference_user), reference_user == user, options[:introduction]
-      )
-    end
-  end
-
   def reactivate_expired_chats(users)
     users_to_notify = []
 
@@ -308,13 +282,6 @@ class Chat < ActiveRecord::Base
       users_to_leave_chat = [user, friend]
     end
     users_to_leave_chat
-  end
-
-  def reply_chat_was_deactivated!(*destination_users)
-    options = destination_users.extract_options!
-    destination_users.each do |destination_user|
-      replies.build(:user => destination_user).end_chat!(partner(destination_user), options)
-    end
   end
 
   def user_with_inactivity

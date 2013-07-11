@@ -1,8 +1,4 @@
-require "#{Rails.root}/spec/support/phone_call_helpers"
-require "#{Rails.root}/spec/support/mobile_phone_helpers"
-
 FactoryGirl.define do
-
   trait :from_last_month do
     created_at {1.month.ago}
   end
@@ -25,6 +21,14 @@ FactoryGirl.define do
   end
 
   sequence :mobile_number, 85597000000 do |n|
+    n.to_s
+  end
+
+  sequence :registered_operator_number, 85560000000 do |n|
+    n.to_s
+  end
+
+  sequence :operator_number_with_voice, 85510000000 do |n|
     n.to_s
   end
 
@@ -69,8 +73,8 @@ FactoryGirl.define do
   end
 
   factory :phone_call do
-    from { FactoryGirl.generate(:mobile_number) }
-    sid { FactoryGirl.generate(:guid) }
+    from { generate(:mobile_number) }
+    sid { generate(:guid) }
 
     trait :answered do
       state "answered"
@@ -96,8 +100,12 @@ FactoryGirl.define do
       state "asking_for_looking_for_in_menu"
     end
 
-    trait :finding_new_friend do
-      state "finding_new_friend"
+    trait :finding_new_friends do
+      state "finding_new_friends"
+    end
+
+    trait :dialing_friends do
+      state "dialing_friends"
     end
 
     trait :connecting_user_with_friend do
@@ -121,15 +129,30 @@ FactoryGirl.define do
     end
 
     trait :already_in_chat do
-      association :chat, :factory => :active_chat
-      user { chat.user }
+      after(:create) do |phone_call|
+        create(:chat, :active, :user => phone_call.user)
+      end
+    end
+
+    trait :with_active_chat do
+      after(:create) do |phone_call|
+        chat = create(:chat, :active, :user => phone_call.user)
+        phone_call.chat = chat
+      end
     end
 
     trait :to_unavailable_user do
-      before(:create) do |phone_call|
-        chat = FactoryGirl.create(:active_chat_with_single_user)
-        FactoryGirl.create(:active_chat, :user => chat.friend)
-        phone_call.user = chat.user
+      after(:create) do |phone_call|
+        chat = create(:chat, :initiator_active, :user => phone_call.user)
+        create(:chat, :active, :user => chat.friend)
+      end
+    end
+
+    trait :found_friends do
+      after(:create) do |phone_call|
+        create_list(
+          :chat, 5, :friend_active, :user => phone_call.user, :starter => phone_call
+        )
       end
     end
 
@@ -149,6 +172,10 @@ FactoryGirl.define do
       dial_status "completed"
     end
 
+    trait :with_dial_call_sid do
+      dial_call_sid { generate(:guid) }
+    end
+
     trait :from_offline_user do
       association :user, :factory => [:user, :offline]
     end
@@ -158,19 +185,6 @@ FactoryGirl.define do
     user
     body "body"
     to { user.mobile_number }
-
-    trait :with_alternate_translation do
-      alternate_translation "alternate translation"
-      with_locale
-    end
-
-    trait :without_locale do
-      locale nil
-    end
-
-    trait :with_locale do
-      locale { user.locale }
-    end
 
     trait :delivered do
       delivered_at { Time.now }
@@ -224,6 +238,13 @@ FactoryGirl.define do
       end
     end
 
+    trait :friend_active do
+      after(:create) do |chat|
+        chat.active_users << chat.friend
+        chat.save
+      end
+    end
+
     trait :with_message do
       after(:create) do |chat|
         chat.messages << FactoryGirl.create(:message, :user => chat.friend)
@@ -232,34 +253,11 @@ FactoryGirl.define do
 
     trait :active do
       initiator_active
-
-      after(:create) do |chat|
-        chat.active_users << chat.friend
-        chat.save
-      end
+      friend_active
     end
 
     trait :with_inactivity do
       updated_at { 10.minutes.ago }
-    end
-
-    # a chat where only the friend is active
-    factory :active_chat_with_single_friend do
-      after(:create) do |chat|
-        chat.active_users << chat.friend
-      end
-    end
-
-    # a chat where only the initator is active
-    factory :active_chat_with_single_user do
-      initiator_active
-
-      factory :active_chat do
-        after(:create) do |chat|
-          chat.active_users << chat.friend
-          chat.save
-        end
-      end
     end
   end
 
@@ -328,37 +326,32 @@ FactoryGirl.define do
   factory :user do
     cambodian
 
-    trait :without_recent_interaction do
-      created_at { 6.days.ago }
-      updated_at { 6.days.ago }
+    trait :with_recent_interaction do
+      last_interacted_at { Time.now }
     end
 
-    trait :without_recent_interaction_for_a_longer_time do
-      created_at { 8.days.ago }
-      updated_at { 7.days.ago }
+    trait :with_semi_recent_interaction do
+      last_interacted_at { 15.minutes.ago }
     end
 
-    trait :without_recent_interaction_for_a_shorter_time do
-      created_at { 8.days.ago }
+    trait :not_contacted_recently do
+      last_contacted_at { 6.days.ago }
+    end
+
+    trait :not_contacted_for_a_long_time do
+      last_contacted_at { 8.days.ago }
+    end
+
+    trait :not_contacted_for_a_short_time do
       updated_at { 3.days.ago }
     end
 
-    trait :with_a_semi_recent_message do
-      after(:create) do |user|
-        FactoryGirl.create(:message, :user => user, :created_at => 15.minutes.ago)
-        user.updated_at = 15.minutes.ago
-        user.save!
-      end
-    end
-
-    trait :with_a_recent_phone_call do
-      after(:create) do |user|
-        FactoryGirl.create(:phone_call, :user => user)
-      end
-    end
-
     trait :from_registered_service_provider do
-      sequence(:mobile_number, 85510000000) {|n| n.to_s }
+      mobile_number { generate(:registered_operator_number) }
+    end
+
+    trait :from_operator_with_voice do
+      mobile_number { generate(:operator_number_with_voice) }
     end
 
     trait :searching_for_friend do
@@ -407,6 +400,16 @@ FactoryGirl.define do
 
     trait :female do
       gender "f"
+    end
+
+    trait :gay do
+      male
+      looking_for "m"
+    end
+
+    trait :lesbian do
+      female
+      looking_for "f"
     end
 
     trait :with_invalid_mobile_number do
@@ -467,33 +470,30 @@ FactoryGirl.define do
     # users with unknown details
     factory :alex do
       name "alex"
-      with_a_recent_phone_call
+      with_recent_interaction
     end
 
     factory :jamie do
       name "jamie"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
     end
 
     # user with unknown gender
     factory :chamroune do
       name "chamroune"
-      looking_for "f"
-      with_a_recent_phone_call
+      with_recent_interaction
     end
 
-    # bisexual with unknown gender
+    # never interacted, with unknown gender
     factory :reaksmey do
       name "reaksmey"
-      looking_for "e"
-      with_a_semi_recent_message
     end
 
     # user with unknown looking for preference
     factory :pauline do
       name "pauline"
       gender "f"
-      with_a_recent_phone_call
+      with_recent_interaction
       from_registered_service_provider
     end
 
@@ -501,15 +501,14 @@ FactoryGirl.define do
     factory :kris do
       name "kris"
       age 25
-      with_a_semi_recent_message
+      with_semi_recent_interaction
     end
 
-    # straight girls
+    # girls
     factory :nok do
       name "nok"
       gender "f"
-      looking_for "m"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
 
@@ -521,13 +520,12 @@ FactoryGirl.define do
       end
     end
 
-    # straight guys
+    # guys
     factory :paul do
       name "paul"
       age 39
       gender "m"
-      looking_for "f"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :phnom_penh
 
       factory :con do
@@ -539,13 +537,13 @@ FactoryGirl.define do
       factory :dave do
         name "dave"
         age 28
-        with_a_recent_phone_call
+        with_recent_interaction
       end
 
       factory :luke do
         name "luke"
         age 25
-        with_a_recent_phone_call
+        with_recent_interaction
       end
     end
 
@@ -554,7 +552,7 @@ FactoryGirl.define do
       name "harriet"
       gender "f"
       looking_for "f"
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :battambang
 
       factory :eva do
@@ -569,7 +567,7 @@ FactoryGirl.define do
       gender "m"
       looking_for "m"
       age 28
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
 
@@ -579,23 +577,19 @@ FactoryGirl.define do
       end
     end
 
-    # bi girl
     factory :mara do
       name "mara"
       gender "f"
-      looking_for "e"
       age 25
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       association :location, :phnom_penh
     end
 
-    # bi guy
     factory :michael do
       name "michael"
       gender "m"
-      looking_for "e"
       age 29
-      with_a_semi_recent_message
+      with_semi_recent_interaction
       thai
       association :location, :chiang_mai
     end
@@ -603,50 +597,47 @@ FactoryGirl.define do
 
   factory :call_data_record do
     ignore do
-      variables false
+      cdr_variables false
+      user_who_called nil
+      user_who_was_called nil
+      phone_call nil
 
       default_body <<-CDR
         <?xml version="1.0"?>
         <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
-          <variables>
-            <direction>inbound</direction>
-            <uuid>some_uuid</uuid>
-            <duration>20</duration>
-            <billsec>15</billsec>
-          </variables>
         </cdr>
       CDR
     end
 
     body do
       dynamic_body = MultiXml.parse(default_body)["cdr"]
-      related_user = User.first || FactoryGirl.create(:user)
+      calling_user = user_who_called || FactoryGirl.create(:user)
 
-      dynamic_variables = variables || {}
+      dynamic_cdr = cdr_variables || {}
+      dynamic_cdr_variables = dynamic_cdr["variables"] ||= {}
 
-      dynamic_variables["direction"] ||= "inbound"
-      dynamic_variables["duration"] ||= "20"
-      dynamic_variables["billsec"] ||= "15"
+      dynamic_cdr_callflow = dynamic_cdr["callflow"] ||= {}
+      dynamic_cdr_callflow_caller_profile = dynamic_cdr_callflow["caller_profile"] ||= {}
 
-      if dynamic_variables["direction"] == "inbound"
-        related_phone_call = PhoneCall.first || FactoryGirl.create(:phone_call, :user => related_user)
+      dynamic_cdr_variables["direction"] ||= "inbound"
+      dynamic_cdr_variables["duration"] ||= "20"
+      dynamic_cdr_variables["billsec"] ||= "15"
 
-        dynamic_variables["sip_from_user"] ||= related_user.mobile_number
-        dynamic_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{related_user.mobile_number}")
+      if dynamic_cdr_variables["direction"] == "inbound"
 
-        dynamic_variables["uuid"] ||= related_phone_call.sid
-        dynamic_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
+        dynamic_cdr_variables["sip_from_user"] ||= calling_user.mobile_number
+        dynamic_cdr_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{calling_user.mobile_number}")
+
+        dynamic_cdr_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
+        dynamic_cdr_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
       else
-        related_inbound_cdr = InboundCdr.first || CallDataRecord.create!(
-          :body => build(:call_data_record).body
-        )
-
-        dynamic_variables["uuid"] ||= FactoryGirl.generate(:guid)
-        dynamic_variables["sip_to_user"] ||= related_user.mobile_number
-        dynamic_variables["bridge_uuid"] ||= related_inbound_cdr.uuid
+        called_user = user_who_was_called || FactoryGirl.create(:user)
+        dynamic_cdr_variables["uuid"] ||= FactoryGirl.generate(:guid)
+        dynamic_cdr_variables["sip_to_user"] ||= called_user.mobile_number
+        dynamic_cdr_callflow_caller_profile["destination_number"] ||= called_user.mobile_number
       end
 
-      dynamic_body["variables"].merge!(dynamic_variables)
+      dynamic_body.deep_merge!(dynamic_cdr)
       dynamic_body.to_xml(:root => "cdr")
     end
   end

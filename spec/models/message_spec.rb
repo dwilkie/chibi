@@ -6,7 +6,7 @@ describe Message do
   let(:new_friend) { create(:user, :cambodian) }
   let(:message) { create(:message, :user => user) }
   let(:new_message) { build(:message, :user => user) }
-  let(:chat) { create(:active_chat, :user => user, :friend => friend) }
+  let(:chat) { create(:chat, :active, :user => user, :friend => friend) }
   let(:message_with_guid) { create(:message, :with_guid, :user => user) }
   let(:processed_message) { create(:message, :processed, :created_at => 10.minutes.ago, :user => user) }
   let(:subject) { build(:message, :without_user) }
@@ -20,6 +20,10 @@ describe Message do
   it "should not be valid with a duplicate a guid" do
     new_message.guid = message_with_guid.guid
     new_message.should_not be_valid
+  end
+
+  it_should_behave_like "a chat starter" do
+    let(:starter) { message }
   end
 
   it_should_behave_like "analyzable"
@@ -88,20 +92,15 @@ describe Message do
     end
   end
 
-  describe "#guid" do
-    it "should be mass assignable" do
-      message = subject.class.new(:guid => "1234")
-      message.guid.should == "1234"
-    end
-  end
-
   describe "#origin" do
     it "should be an alias for the attribute '#from'" do
-      subject.from = "123"
-      subject.origin.should == "123"
+      sample_number = generate(:mobile_number)
+      subject.from = sample_number
+      subject.origin.should == sample_number
 
-      subject.origin = "456"
-      subject.from.should == "456"
+      sample_number = generate(:mobile_number)
+      subject.origin = sample_number
+      subject.from.should == sample_number
     end
   end
 
@@ -209,35 +208,9 @@ describe Message do
             )
           end
         end
-      end
-    end
 
-    shared_examples_for "updating the user's locale" do
-      def assert_update_locale(body, asserted_locale, expect_reply)
-        user.locale.should_not == :en
-        message.body = body
-
-        last_reply = create(:reply, :delivered, :with_alternate_translation, :user => user)
-
-        if expect_reply
-          expect_message { message.process! }
-          assert_deliver(:body => last_reply.alternate_translation)
-        else
-          message.process!
-        end
-        user.locale.should == asserted_locale
-        message.should be_processed
-      end
-
-      context "if the message body is same as the user's current locale" do
-        it "should not update the user's locale nor resend the last reply" do
-          assert_update_locale(user.locale.to_s, user.locale, false)
-        end
-      end
-
-      context "if the message body is different from the user's current locale and is valid" do
-        it "should update the user's locale and resend the last reply in the new locale" do
-          assert_update_locale("en", :en, true)
+        it "should trigger a new chat" do
+          message.triggered_chats.should == [Chat.last]
         end
       end
     end
@@ -287,34 +260,35 @@ describe Message do
         chat
       end
 
-      it_should_behave_like "updating the user's locale"
       it_should_behave_like "forwarding the message to a previous chat partner"
 
       context "and the message body is" do
-        context "'stop'" do
-          before do
-            message.body = "stop"
-            expect_message { message.process! }
-          end
+        ["stop", "off", "stop all"].each do |stop_variation|
+          context "'#{stop_variation}'" do
+            before do
+              message.body = stop_variation
+              expect_message { message.process! }
+            end
 
-          def assert_logout
-            user.should be_offline
-            message.should be_processed
-          end
+            def assert_logout
+              user.should be_offline
+              message.should be_processed
+            end
 
-          it "should logout the user but not notify him that he is now offline" do
-            assert_logout
-            reply_to(user).should be_nil
-            reply_to(friend).should be_nil
-            user.should be_currently_chatting
-          end
+            it "should logout the user but not notify him that he is now offline" do
+              assert_logout
+              reply_to(user).should be_nil
+              reply_to(friend).should be_nil
+              user.should be_currently_chatting
+            end
 
-          it "should not inform the user's partner how to update their profile" do
-            assert_logout
-            reply_to(friend, chat).should be_nil
-            friend.reload
-            friend.should_not be_currently_chatting
-            friend.should be_online
+            it "should not inform the user's partner how to update their profile" do
+              assert_logout
+              reply_to(friend, chat).should be_nil
+              friend.reload
+              friend.should_not be_currently_chatting
+              friend.should be_online
+            end
           end
         end
 
@@ -357,7 +331,6 @@ describe Message do
 
     context "given the user is not currently chatting" do
 
-      it_should_behave_like "updating the user's locale"
       it_should_behave_like "forwarding the message to a previous chat partner"
 
       context "and the message body is" do

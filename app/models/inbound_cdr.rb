@@ -1,17 +1,23 @@
 class InboundCdr < CallDataRecord
-  validates :phone_call, :rfc2822_date, :presence => true
-  validates :phone_call_id, :uniqueness => true
+  validates :rfc2822_date, :presence => true
 
-  before_validation(:on => :create) do
-    set_inbound_cdr_attributes
-  end
+  before_validation :set_inbound_cdr_attributes, :on => :create
+
+  has_many :outbound_cdrs
 
   private
 
   def set_inbound_cdr_attributes
     if body.present?
       self.rfc2822_date ||= unescaped_variable("RFC2822_DATE")
-      self.phone_call ||= PhoneCall.find_by_sid(uuid)
     end
+  end
+
+  def cdr_from
+    valid_source("sip_from_user") || valid_source("sip_P_Asserted_Identity")
+  end
+
+  def find_related_phone_call
+    PhoneCall.find_by_sid(uuid)
   end
 end

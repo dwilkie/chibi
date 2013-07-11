@@ -85,36 +85,6 @@ describe "Messages" do
           end
 
           it_should_behave_like "welcoming me"
-
-          context "then I text 'en'" do
-            before do
-              send_message(:from => my_number, :body => "en")
-            end
-
-            it "should set my locale to English" do
-              new_user.locale.should == :en
-            end
-
-            context "then I text 'kh'" do
-              before do
-                send_message(:from => my_number, :body => "kh")
-              end
-
-              it "should set my locale back to Khmer" do
-                new_user.locale.should == :kh
-              end
-            end
-
-            context "then I text 'th'" do
-              before do
-                send_message(:from => my_number, :body => "th")
-              end
-
-              it "should leave my locale in English" do
-                new_user.locale.should == :en
-              end
-            end
-          end
         end
 
         context "'stop'" do
@@ -140,7 +110,6 @@ describe "Messages" do
             new_user.name.should == "map"
             new_user.age.should == 27
             new_user.location.city.should == "Phnom Penh"
-            new_user.looking_for.should == "f"
             new_user.gender.should == "m"
 
             reply_to(new_user).should be_nil
@@ -166,7 +135,6 @@ describe "Messages" do
             alex.name.should == "alex"
             alex.age.should == 23
             alex.gender.should == "f"
-            alex.looking_for.should == "m"
 
             reply_to(alex).should be_nil
             reply_to(dave).body.should =~ /#{spec_translate(:forward_message_approx, dave.locale, alex.screen_id)}/
@@ -316,11 +284,7 @@ describe "Messages" do
             send_message(:from => mara, :body => "Hi Dave")
           end
 
-          it "should find new friends for him but it should not send a message to the other user saying i'm busy'" do
-            reply_to(mara).body.should_not == spec_translate(
-              :friend_unavailable, mara.locale, dave.screen_id
-            )
-
+          it "should find new friends for him" do
             reply_to(luke).body.should =~ /#{spec_translate(:forward_message_approx, luke.locale, mara.screen_id)}/
 
             reply_to_dave = reply_to(dave)
@@ -419,18 +383,6 @@ describe "Messages" do
             end
 
             it_should_behave_like "finding me a new friend"
-
-            context "and I text 'new' again" do
-              before do
-                send_message(:from => dave, :body => "new")
-              end
-
-              it "should not tell me that there is nobody currently available" do
-                reply_to(dave).body.should_not == spec_translate(
-                  :could_not_find_a_friend, dave.locale
-                )
-              end
-            end
           end
 
           context "'stop'" do
@@ -438,14 +390,8 @@ describe "Messages" do
               send_message(:from => dave, :body => "stop")
             end
 
-            it "should log me out but not notify my friend" do
-              reply_to(dave).body.should_not == spec_translate(
-                :logged_out_from_chat, dave.locale, joy.screen_id
-              )
-
-              reply_to(joy).body.should_not == spec_translate(
-                :chat_has_ended, joy.locale
-              )
+            it "should log me out" do
+              dave.reload.should_not be_online
             end
           end
 
@@ -476,20 +422,15 @@ describe "Messages" do
             send_message(:from => joy, :body => "hello")
           end
 
-          shared_examples_for "ending my current chat" do
-            it "should end my current chat but not give me instructions on how to start a new one" do
-              reply_to(dave).body.should_not == spec_translate(
-                :chat_has_ended, dave.locale
-              )
-            end
-          end
-
           context "'new'" do
             before do
               send_message(:from => joy, :body => "new")
             end
 
-            it_should_behave_like "ending my current chat"
+            it "should keep me in the chat with joy" do
+              dave.reload.should be_currently_chatting
+              joy.reload.should_not be_currently_chatting
+            end
           end
 
           context "'stop'" do
@@ -497,7 +438,10 @@ describe "Messages" do
               send_message(:from => joy, :body => "stop")
             end
 
-            it_should_behave_like "ending my current chat"
+            it "should keep joy in the chat with me" do
+              dave.reload.should_not be_currently_chatting
+              joy.reload.should be_currently_chatting
+            end
           end
 
           context "'Sara: Hi Dave, knyom sara bong nov na?'" do

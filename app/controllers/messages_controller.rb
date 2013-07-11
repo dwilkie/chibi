@@ -4,7 +4,7 @@ class MessagesController < ApplicationController
   before_filter :authenticate_message
 
   def create
-    message = Message.new(params[:message].slice(:from, :body, :guid))
+    message = Message.new(message_params.slice(:from, :body, :guid))
     if message.save
       message.queue_for_processing!
       status = :created
@@ -18,5 +18,9 @@ class MessagesController < ApplicationController
 
   def authenticate_message
     authenticate(:message)
+  end
+
+  def message_params
+    params.require(:message).permit(:body, :guid, :from)
   end
 end

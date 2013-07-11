@@ -4,6 +4,7 @@ describe Reply do
   include TranslationHelpers
   include MessagingHelpers
   include ResqueHelpers
+  include PhoneCallHelpers::TwilioHelpers
 
   let(:user) { build(:user) }
 
@@ -48,7 +49,7 @@ describe Reply do
   end
 
   def create_race_condition(reference_reply, state)
-    Reply.update_all({:state => state}, :id => reference_reply.id)
+    Reply.where(:id => reference_reply.id).update_all(:state => state)
   end
 
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
@@ -72,34 +73,16 @@ describe Reply do
     options[:args] ||= []
     options[:interpolations] || []
     (options[:test_users] || local_users).each do |local_user|
-      users_default_locale = local_user.country_code.to_sym
-      {:en => users_default_locale, users_default_locale => :en}.each do |user_locale, alternate_locale|
-        reply = subject.class.new
-        local_user.locale = user_locale
-        user_country_code = local_user.country_code
-        reply.user = local_user
-        expect_message { reply.send(method, *options[:args]) }
-        asserted_reply = spec_translate(key, [user_locale, user_country_code], *options[:interpolations])
-        if options[:approx]
-          reply.body.should =~ /#{asserted_reply}/
-        else
-          reply.body.should == asserted_reply
-        end
-
-        if options[:no_alternate_translation]
-          reply.locale.should be_nil
-          reply.alternate_translation.should be_nil
-        else
-          reply.locale.should == local_user.locale
-          asserted_alternate_translation = spec_translate(key, [alternate_locale, user_country_code], *options[:interpolations])
-          if options[:approx]
-            reply.alternate_translation.should =~ /#{asserted_alternate_translation}/
-          else
-            reply.alternate_translation.should == asserted_alternate_translation
-          end
-        end
-        assert_persisted_and_delivered(reply, local_user.mobile_number, options)
+      reply = build(:reply, :user => local_user)
+      expect_message { reply.send(method, *options[:args]) }
+      asserted_reply = spec_translate(key, local_user.locale, *options[:interpolations])
+      if options[:approx]
+        reply.body.should =~ /#{asserted_reply}/
+      else
+        reply.body.should == asserted_reply
       end
+
+      assert_persisted_and_delivered(reply, local_user.mobile_number, options)
     end
   end
 
@@ -162,14 +145,16 @@ describe Reply do
   end
 
   describe ".undelivered" do
+    let(:another_reply) { create(:reply) }
+
     before do
       reply
+      another_reply
       delivered_reply
     end
 
     it "should return only the undelivered replies" do
-      subject.class.undelivered.should == [reply]
-      subject.class.undelivered.order_values.should == [:created_at]
+      subject.class.undelivered.should == [reply, another_reply]
     end
   end
 
@@ -359,14 +344,6 @@ describe Reply do
     end
   end
 
-  describe "#locale" do
-    it "should return a lowercase symbol of the locale if set" do
-      subject.locale.should be_nil
-      subject.locale = :EN
-      subject.locale.should == :en
-    end
-  end
-
   describe "#delivered?" do
     it "should return true if the message has been delivered" do
       reply.should_not be_delivered
@@ -546,82 +523,21 @@ describe Reply do
     end
   end
 
-  describe "#deliver_alternate_translation!" do
-    def assert_deliver_alternate_translation(*traits)
-      options = traits.extract_options!
-      deliver = options.delete(:deliver)
-      reply = build(:reply, *traits, options)
-
-      if deliver
-        expect_message { reply.deliver_alternate_translation! }
-        assert_deliver(:body => reply.send(deliver))
-      else
-        # will raise an error if it delivers because the message is not expected
-        reply.deliver_alternate_translation!
-      end
-    end
-
-    it "should deliver the alternate translation based off the users locale if available" do
-      # assert no deliver for reply without alternate translation
-      assert_deliver_alternate_translation(:delivered)
-
-      # assert no delivery for a reply with an alternate translation but no locale
-      assert_deliver_alternate_translation(:delivered, :with_alternate_translation, :without_locale)
-
-      # assert no delivery for a reply with an alternate translation that has not been delivered yet
-      assert_deliver_alternate_translation(:with_alternate_translation)
-
-      # assert delivery of the body for a delivered reply with an alternate translation
-      # when the user's locale is the same as the original delivered reply
-      assert_deliver_alternate_translation(:delivered, :with_alternate_translation, :deliver => :body)
-
-      # assert delivery of the alternate translation for a
-      # delivered reply with an alternate translation
-      # when the user's locale is different from the original delivered reply
-      assert_deliver_alternate_translation(
-        :delivered, :with_alternate_translation, :deliver => :alternate_translation, :locale => "en"
+  describe "#contact_me(from)" do
+    it "should ask the recipient to sms and/or call back to contactable number" do
+      assert_reply(
+        :contact_me, :contact_me, :approx => true, :deliver => false,
+        :args => [partner], :interpolations => [partner.screen_id, Regexp.escape(twilio_number)]
       )
     end
   end
 
-  describe "#end_chat!" do
-    it "should inform the user how to find a new friend" do
-      method = :end_chat!
-      args = [partner]
-      interpolations = []
-
-      assert_reply(method, :anonymous_chat_has_ended, :args => args, :interpolations => interpolations)
-      args << {:skip_update_profile_instructions => true}
-      assert_reply(method, :chat_has_ended, :args => args, :interpolations => interpolations)
-    end
-  end
-
-  describe "#instructions_for_new_chat!" do
-    it "should inform the user how to find a new friend" do
-      assert_reply(:instructions_for_new_chat!, :chat_has_ended)
-    end
-  end
-
-  describe "#logout!" do
-    it "should confirm the user that they have been logged out and explain how to find a new friend" do
-      assert_reply(:logout!, :anonymous_logged_out)
-      assert_reply(:logout!, :logged_out_from_chat, :args => [partner], :interpolations => [partner.screen_id])
-    end
-
-    context "given an english user is only missing their sexual preference" do
-      # special case
-
-      let(:english_user_only_missing_sexual_preference) do
-        build(:user, :with_complete_profile, :from_england, :looking_for => nil)
-      end
-
-      it "should tell them to text their preferred gender" do
-        assert_reply(
-          :logout!,
-          :only_missing_sexual_preference_logged_out,
-          :test_users => [english_user_only_missing_sexual_preference]
-        )
-      end
+  describe "#follow_up!(from, options)" do
+    it "should send canned follow up message to the recipient from the given user" do
+      assert_reply(
+        :follow_up!, :forward_message_approx, :approx => true,
+        :args => [partner, {:to => :caller, :after => :conversation}], :interpolations => [partner.screen_id]
+      )
     end
   end
 
@@ -629,22 +545,7 @@ describe Reply do
     it "should send the user a reminder on how to use the service" do
       assert_reply(
         :send_reminder!, :anonymous_reminder, :approx => true,
-        :args => []
-      )
-    end
-  end
-
-  describe "#explain_could_not_find_a_friend!" do
-    it "should tell the user that their chat could not be started at this time" do
-      assert_reply(:explain_could_not_find_a_friend!, :anonymous_could_not_find_a_friend)
-    end
-  end
-
-  describe "#explain_friend_is_unavailable!" do
-    it "should send a message from the friend saying that they're busy" do
-      assert_reply(
-        :explain_friend_is_unavailable!, :friend_unavailable,
-        :args => [partner], :interpolations => [partner.screen_id]
+        :args => [], :test_users => [local_users, create(:user, :gay), create(:user, :lesbian)].flatten
       )
     end
   end
@@ -654,7 +555,7 @@ describe Reply do
       assert_reply(
         :forward_message, :forward_message,
         :args => [partner, "#{partner.screen_id}: hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"],
-        :deliver => false, :no_alternate_translation => true
+        :deliver => false
       )
     end
   end
@@ -663,48 +564,18 @@ describe Reply do
     it "should deliver the forwarded message" do
       assert_reply(
         :forward_message!, :forward_message,
-        :args => [partner, "#{partner.screen_id.downcase}  :  hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"],
-        :no_alternate_translation => true
+        :args => [partner, "#{partner.screen_id.downcase}  :  hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"]
       )
     end
   end
 
   describe "#introduce!" do
-    context "for the chat initiator" do
-      it "should tell her that we have found a friend for her" do
-        assert_reply(
-          :introduce!, :anonymous_new_friend_found,
-          :args => [partner, true], :interpolations => [partner.screen_id]
-        )
-      end
-    end
-
-    context "for the chat partner" do
-      context "with no introduction" do
-        it "should imitate the user by sending a fake greeting to the new chat partner" do
-          assert_reply(
-            :introduce!, :forward_message_approx,
-            :args => [partner, false], :interpolations => [partner.screen_id],
-            :no_alternate_translation => true, :approx => true
-          )
-        end
-      end
-
-      context "with an introduction" do
-        it "should send the introduction to the new chat partner" do
-          assert_reply(
-            :introduce!, :forward_message,
-            :args => [partner, false, "Hello Bobby"], :interpolations => [partner.screen_id, "Hello Bobby"],
-            :no_alternate_translation => true
-          )
-        end
-      end
-    end
-  end
-
-  describe "#welcome!" do
-    it "should welcome the user" do
-      assert_reply(:welcome!, :welcome)
+    it "should imitate the user by sending a fake greeting to the new chat partner" do
+      assert_reply(
+        :introduce!, :forward_message_approx,
+        :args => [partner], :interpolations => [partner.screen_id],
+        :approx => true
+      )
     end
   end
 end

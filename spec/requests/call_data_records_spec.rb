@@ -18,9 +18,8 @@ describe "Call Data Records" do
   end
 
   describe "POST /call_data_records.xml" do
-
     def build_cdr(*args)
-      cdr = super.typed
+      cdr = super
       cdr.valid?
       cdr
     end
@@ -35,36 +34,44 @@ describe "Call Data Records" do
       end
 
       context "when the job is run" do
-        before do
-          perform_background_job(:call_data_record_creator_queue)
+        let(:new_cdr) { CallDataRecord.find_by_uuid(sample_cdr.uuid) }
+
+        def perform_background_job
+          super(:call_data_record_creator_queue)
         end
 
-        # this tests that the correct type of CDR was created (and therefore was valid)
         it "should create the CDR with the correct fields" do
-          new_cdr = CallDataRecord.find_by_uuid(sample_cdr.uuid)
-          asserted_cdr_type.nil? ? new_cdr.should(be_nil) : asserted_cdr_type.last.should(eq(new_cdr))
+          if asserted_cdr_type.present?
+            perform_background_job
+            new_cdr.should be_present
+            new_cdr.should be_valid
+            asserted_cdr_type.last.should == new_cdr
+          else
+            expect { perform_background_job }.to raise_error(ActiveRecord::RecordInvalid)
+            new_cdr.should be_nil
+          end
         end
       end
     end
 
     context "for an inbound cdr" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_cdr(:variables => {"direction" => "inbound"} ) }
+        let(:sample_cdr) { build_cdr(:cdr_variables => {"variables" => {"direction" => "inbound"} } ) }
         let(:asserted_cdr_type) { InboundCdr }
       end
     end
 
     context "for an outbound cdr" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_cdr(:variables => {"direction" => "outbound"} ) }
+        let(:sample_cdr) { build_cdr(:cdr_variables => {"variables" => {"direction" => "outbound"}} ) }
         let(:asserted_cdr_type) { OutboundCdr }
       end
     end
 
     context "for an outbound cdr with an invalid bridge_uid" do
       it_should_behave_like "creating a CDR" do
-        let(:sample_cdr) { build_cdr(:variables => {"direction" => "outbound", "bridge_uuid" => "invalid"} ) }
-        let(:asserted_cdr_type) { nil }
+        let(:sample_cdr) { build_cdr(:cdr_variables => {"variables" => {"direction" => "outbound", "bridge_uuid" => "invalid"}})}
+        let(:asserted_cdr_type) { OutboundCdr }
       end
     end
   end
