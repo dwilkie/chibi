@@ -21,7 +21,7 @@ class OutboundCdr < CallDataRecord
     caller = phone_call.try(:user)
     called_user = user
     chat = Chat.find_by_user_id_and_friend_id(caller.id, called_user.id) if caller
-    if chat
+    if chat && !chat.active?
       chat.reactivate!(:force => true)
       conversation_type = bill_sec >= MIN_CONVERSATION_TIME ? :conversation : :short_conversation
       chat.replies.build(:user => caller).follow_up!(called_user, :to => :caller, :after => conversation_type)
