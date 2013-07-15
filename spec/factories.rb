@@ -358,6 +358,10 @@ FactoryGirl.define do
       state "searching_for_friend"
     end
 
+    trait :number_inactive do
+      state "number_inactive"
+    end
+
     trait :offline do
       state "offline"
     end

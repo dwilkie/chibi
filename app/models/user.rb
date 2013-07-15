@@ -41,7 +41,7 @@ class User < ActiveRecord::Base
   delegate :city, :country_code, :to => :location, :allow_nil => true
 
   state_machine :initial => :online do
-    state :offline, :searching_for_friend
+    state :offline, :searching_for_friend, :number_inactive
 
     event :login do
       transition(:offline => :online)
@@ -81,6 +81,28 @@ class User < ActiveRecord::Base
 
   def self.online
     where("\"#{table_name}\".\"state\" != ?", "offline")
+  end
+
+  def self.set_number_inactive!(options = {})
+    options[:num_last_failed_replies] ||= 5
+    inactive_number_state = "number_inactive"
+
+    # find the most recent replies for a particular user
+    recent_replies_subquery = "(#{Reply.where("#{User.quoted_attribute(:user_id, :replies)} = #{User.quoted_attribute(:id)}").reverse_order.limit(options[:num_last_failed_replies]).to_sql}) recent_replies"
+
+    # count the most recent replies that are failed
+    num_recently_failed_replies_subquery = "(#{Reply.select('COUNT (*)').from(recent_replies_subquery).where("#{quoted_attribute(:state, :recent_replies)} = 'failed'").to_sql})"
+
+    # update the users's who do not have a number_inactive state and who's most recent replies all failed
+    joins(:replies).where(
+      "#{num_recently_failed_replies_subquery} = ?", options[:num_last_failed_replies]
+    ).where(
+      "#{quoted_attribute(:state)} != '#{inactive_number_state}'"
+    ).where(
+      "#{quoted_attribute(:state)} != 'offline'"
+    ).uniq.update_all(
+      :state => inactive_number_state
+    )
   end
 
   def self.filter_by(params = {})
@@ -217,6 +239,10 @@ class User < ActiveRecord::Base
 
   def gay?
     gender.present? && gender == looking_for
+  end
+
+  def number_active?
+    !number_inactive?
   end
 
   def locale
@@ -499,8 +525,8 @@ class User < ActiveRecord::Base
     "COALESCE(#{quoted_attribute(:last_contacted_at)}, #{quoted_attribute(:updated_at)})"
   end
 
-  def self.quoted_attribute(attribute)
-    "\"#{table_name}\".\"#{attribute}\""
+  def self.quoted_attribute(attribute, table = nil)
+    "\"#{table || table_name}\".\"#{attribute}\""
   end
 
   def self.within_hours(options = {}, &block)
