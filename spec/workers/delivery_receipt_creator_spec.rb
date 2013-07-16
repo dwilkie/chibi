@@ -9,7 +9,7 @@ describe DeliveryReceiptCreator do
 
   describe ".perform(params)" do
     let(:reply) { mock_model(Reply) }
-    let(:find_stub) { Reply.stub(:find_by_token!) }
+    let(:find_stub) { Reply.stub(:find_by_token) }
     let(:params) { { :token => :token, :state => :state} }
 
     before do
@@ -18,7 +18,7 @@ describe DeliveryReceiptCreator do
     end
 
     it "should update the delivery state of the reply" do
-      Reply.should_receive(:find_by_token!).with(:token)
+      Reply.should_receive(:find_by_token).with(:token)
       reply.should_receive(:update_delivery_state) do |options|
         options[:state].should == :state
         options[:force].should be_true
