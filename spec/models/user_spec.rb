@@ -303,27 +303,24 @@ describe User do
     end
   end
 
-  describe ".set_number_inactive!" do
-    let(:offline_user) { create(:user, :offline) }
-
+  describe ".logout_users_with_inactive_numbers!" do
     before do
-      user_already_marked_as_number_inactive = create(:user, :number_inactive)
+      offline_user = create(:user, :offline)
       create_list(:reply, 4, :failed, :user => user)
       create_list(:reply, 5, :failed, :user => offline_user)
-      create_list(:reply, 5, :failed, :user => user_already_marked_as_number_inactive)
     end
 
     it "should return a list users who's recent MT messages failed to deliver" do
-      subject.class.set_number_inactive!.should == 0
-      user.reload.should_not be_number_inactive
+      subject.class.logout_users_with_inactive_numbers!.should == 0
+      user.reload.should be_online
 
       create(:reply, :failed, :user => user)
-      subject.class.set_number_inactive!(:num_last_failed_replies => 6).should == 0
-      user.reload.should_not be_number_inactive
+      subject.class.logout_users_with_inactive_numbers!(:num_last_failed_replies => 6).should == 0
+      user.reload.should be_online
 
-      subject.class.set_number_inactive!.should == 1
-      offline_user.should_not be_number_inactive
-      user.reload.should be_number_inactive
+      create(:reply, :rejected, :user => user)
+      subject.class.logout_users_with_inactive_numbers!.should == 1
+      user.reload.should_not be_online
     end
   end
 
@@ -1177,7 +1174,6 @@ describe User do
   end
 
   shared_examples_for "setting a gender related attribute" do |attribute_reader|
-
     attribute_writer = "#{attribute_reader}="
 
     context "1" do

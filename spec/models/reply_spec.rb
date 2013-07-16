@@ -123,7 +123,7 @@ describe Reply do
   end
 
   describe "callbacks" do
-    describe "when saving the reply" do
+    describe "before_validation(:on => :create)" do
       context "if the destination is nil" do
         it "should be set as the user's mobile number" do
           new_reply.should be_valid
@@ -438,6 +438,33 @@ describe Reply do
       reply = create(:reply, :confirmed)
       reply.update_delivery_state(:state => "failed")
       reply.should be_confirmed
+    end
+
+    context "the reply failed to deliver" do
+      let(:user) { create(:user) }
+      let(:reply) { create(:reply, :queued_for_smsc_delivery, :user => user) }
+
+      before do
+        create_list(:reply, previous_consecutive_failed_replies, :failed, :user => user)
+        reply.update_delivery_state(:state => "failed")
+      end
+
+      context "and this also happened the last 4 times for this number" do
+      let(:previous_consecutive_failed_replies) { 4 }
+        it "should logout the intended recipient" do
+          user.should_not be_online
+        end
+      end
+
+      context "and this also happened the last 3 times for this number" do
+        let(:previous_consecutive_failed_replies) { 3 }
+        it "should not yet logout the recipient" do
+          user.should be_online
+          another_reply = create(:reply, :delivered_by_smsc, :user => user)
+          another_reply.update_delivery_state(:state => "failed")
+          user.should_not be_online
+        end
+      end
     end
   end
 
