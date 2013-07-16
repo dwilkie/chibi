@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe "Delivery Receipts" do
   include AuthenticationHelpers
+  include ResqueHelpers
 
   let(:reply) { create(:reply, :with_token, :delivered, :queued_for_smsc_delivery) }
   let(:new_delivery_receipt) { DeliveryReceipt.last }
@@ -23,7 +24,7 @@ describe "Delivery Receipts" do
     context "when a delivery receipt is received" do
       context "for a previously sent reply" do
         before do
-          post_delivery_receipt(:reply => reply)
+          do_background_task { post_delivery_receipt(:reply => reply) }
         end
 
         it "should mark the reply as delivered by smsc" do

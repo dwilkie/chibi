@@ -4,7 +4,8 @@ HireFire::Resource.configure do |config|
       :message_processor_queue,
       :dialer_queue,
       :call_data_record_creator_queue,
-      :twilio_cdr_fetcher_queue
+      :twilio_cdr_fetcher_queue,
+      :delivery_receipt_creator_queue
     )
   end
 
