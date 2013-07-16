@@ -1,4 +1,6 @@
 class Reply < ActiveRecord::Base
+  before_validation :set_destination, :on => :create
+
   include Chibi::Communicable
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
@@ -8,6 +10,7 @@ class Reply < ActiveRecord::Base
   DELIVERED = "delivered"
   FAILED = "failed"
   CONFIRMED = "confirmed"
+  NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER = 5
 
   TWILIO_CHANNEL = "twilio"
 
@@ -16,8 +19,6 @@ class Reply < ActiveRecord::Base
 
   alias_attribute :destination, :to
 
-  before_validation :set_destination
-
   state_machine :initial => :pending_delivery, :action => :save_with_state_check do
     state :pending_delivery,
           :queued_for_smsc_delivery,
@@ -25,6 +26,8 @@ class Reply < ActiveRecord::Base
           :rejected,
           :failed,
           :confirmed
+
+    after_transition any => [:failed, :rejected], :do => :logout_user
 
     event :update_delivery_status do
       transition(
@@ -202,6 +205,17 @@ class Reply < ActiveRecord::Base
 
   def delivery_confirmed?
     @delivery_state == CONFIRMED
+  end
+
+  def logout_user
+    number_inactive = true
+    recent_replies = user.replies.reverse_order.limit(NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER).pluck(:state)
+    return unless recent_replies.count == NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER
+    recent_replies.each do |reply_state|
+      number_inactive &&= (reply_state == "failed" || reply_state == "rejected")
+      break unless number_inactive
+    end
+    user.logout! if number_inactive
   end
 
   def torasup_number

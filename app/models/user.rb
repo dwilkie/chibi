@@ -83,6 +83,25 @@ class User < ActiveRecord::Base
     where("\"#{table_name}\".\"state\" != ?", "offline")
   end
 
+  def self.logout_users_with_inactive_numbers!(options = {})
+    options[:num_last_failed_replies] ||= 5
+
+    # find the most recent replies for a particular user
+    recent_replies_subquery = "(#{Reply.where("#{User.quoted_attribute(:user_id, :replies)} = #{User.quoted_attribute(:id)}").reverse_order.limit(options[:num_last_failed_replies]).to_sql}) recent_replies"
+
+    # count the most recent replies that are failed
+    num_recently_failed_replies_subquery = "(#{Reply.select('COUNT (*)').from(recent_replies_subquery).where("#{quoted_attribute(:state, :recent_replies)} = 'failed' OR #{quoted_attribute(:state, :recent_replies)} = 'rejected'").to_sql})"
+
+    # logout the users who's most recent replies all failed
+    joins(:replies).where(
+      "#{num_recently_failed_replies_subquery} = ?", options[:num_last_failed_replies]
+    ).where(
+      "#{quoted_attribute(:state)} != 'offline'"
+    ).uniq.update_all(
+      :state => "offline"
+    )
+  end
+
   def self.filter_by(params = {})
     super(params).includes(:location)
   end
@@ -499,8 +518,8 @@ class User < ActiveRecord::Base
     "COALESCE(#{quoted_attribute(:last_contacted_at)}, #{quoted_attribute(:updated_at)})"
   end
 
-  def self.quoted_attribute(attribute)
-    "\"#{table_name}\".\"#{attribute}\""
+  def self.quoted_attribute(attribute, table = nil)
+    "\"#{table || table_name}\".\"#{attribute}\""
   end
 
   def self.within_hours(options = {}, &block)

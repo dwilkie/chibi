@@ -303,6 +303,27 @@ describe User do
     end
   end
 
+  describe ".logout_users_with_inactive_numbers!" do
+    before do
+      offline_user = create(:user, :offline)
+      create_list(:reply, 4, :failed, :user => user)
+      create_list(:reply, 5, :failed, :user => offline_user)
+    end
+
+    it "should return a list users who's recent MT messages failed to deliver" do
+      subject.class.logout_users_with_inactive_numbers!.should == 0
+      user.reload.should be_online
+
+      create(:reply, :failed, :user => user)
+      subject.class.logout_users_with_inactive_numbers!(:num_last_failed_replies => 6).should == 0
+      user.reload.should be_online
+
+      create(:reply, :rejected, :user => user)
+      subject.class.logout_users_with_inactive_numbers!.should == 1
+      user.reload.should_not be_online
+    end
+  end
+
   describe ".find_friends" do
     def do_find_friends(options = {})
       do_background_task(options) { subject.class.find_friends(options) }
@@ -1153,7 +1174,6 @@ describe User do
   end
 
   shared_examples_for "setting a gender related attribute" do |attribute_reader|
-
     attribute_writer = "#{attribute_reader}="
 
     context "1" do
