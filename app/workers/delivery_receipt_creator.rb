@@ -3,9 +3,9 @@ class DeliveryReceiptCreator
 
   def self.perform(params)
     params = params.with_indifferent_access
-    reply = Reply.find_by_token!(params[:token])
-    p reply
-    reply.update_delivery_state(:state => params[:state], :force => true)
+    if reply = Reply.find_by_token(params[:token])
+      reply.update_delivery_state(:state => params[:state], :force => true)
+    end
   rescue Resque::TermException
     Resque.enqueue(self, params)
   end

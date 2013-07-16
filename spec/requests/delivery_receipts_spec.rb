@@ -31,6 +31,16 @@ describe "Delivery Receipts" do
           reply.reload.should be_delivered_by_smsc
         end
       end
+
+      context "for a reply that was not sent from this app" do
+        before do
+          do_background_task { post_delivery_receipt }
+        end
+
+        it "should ignore the delivery receipt" do
+          Reply.count.should == 0
+        end
+      end
     end
   end
 end
