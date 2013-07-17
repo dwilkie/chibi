@@ -137,6 +137,22 @@ class User < ActiveRecord::Base
     where(:active_chat_id => nil).online
   end
 
+  def self.import!(data)
+    user_data = JSON.parse(data)
+    existing_numbers = Hash[
+      User.where(
+        :mobile_number => user_data.keys
+      ).pluck(
+        :mobile_number
+      ).map { |mobile_number| [mobile_number, true] }
+    ]
+    user_data.reject! { |mobile_number, metadata| existing_numbers[mobile_number] }
+
+    user_data.each do |mobile_number, metadata|
+      Resque.enqueue(UserCreator, mobile_number, metadata)
+    end
+  end
+
   def self.remind!(options = {})
     within_hours(options) do
       limit = options.delete(:limit) || 100

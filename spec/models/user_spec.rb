@@ -377,6 +377,16 @@ describe User do
     end
   end
 
+  describe ".import!(data)" do
+    let(:data) {
+"{\"#{user.mobile_number}\":{\"gender\":\"m\",\"name\":\"sarit\",\"age\":\"25\",\"location\":\"Phnom Penh\"},\"85570761161\":{\"gender\":null,\"name\":\"narea\",\"age\":\"20\",\"location\":\"Siem Reap\"},\"855765017456\":{\"gender\":\"m\",\"name\":null,\"age\":\"27\",\"location\":\"Battambang\"},\"85586649123\":{\"gender\":\"f\",\"name\":\"saou\",\"age\":null,\"location\":\"Kratie\"},\"85586649656\":{\"gender\":\"f\",\"name\":\"saou\",\"age\":\"\",\"location\":null}}"
+    }
+
+    it "should queue a job to create a new user for each user that does not exist" do
+      subject.class.import!(data)
+    end
+  end
+
   describe ".remind!(options = {})" do
     let(:user_not_contacted_recently) { create(:user, :not_contacted_recently) }
 
