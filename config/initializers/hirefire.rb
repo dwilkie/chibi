@@ -20,7 +20,9 @@ HireFire::Resource.configure do |config|
       :user_reminderer_queue,
       :reminderer_queue,
       :nuntium_ao_queryer_queue,
-      :blank_reply_fixer_queue
+      :blank_reply_fixer_queue,
+      :user_importer_queue,
+      :user_creator_queue
     )
   end
 end

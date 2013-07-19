@@ -41,10 +41,10 @@ class User < ActiveRecord::Base
   delegate :city, :country_code, :to => :location, :allow_nil => true
 
   state_machine :initial => :online do
-    state :offline, :searching_for_friend
+    state :offline, :searching_for_friend, :unactivated
 
     event :login do
-      transition(:offline => :online)
+      transition([:offline, :unactivated] => :online)
     end
 
     event :logout do
@@ -77,6 +77,10 @@ class User < ActiveRecord::Base
     end
 
     joins(:location).where(banned_name_conditions.join(" OR ")).update_all("name = NULL")
+  end
+
+  def self.activated
+    where("\"#{table_name}\".\"state\" != ?", "unactivated")
   end
 
   def self.online
@@ -134,7 +138,33 @@ class User < ActiveRecord::Base
   end
 
   def self.available
-    where(:active_chat_id => nil).online
+    where(:active_chat_id => nil).online.activated
+  end
+
+  def self.import!(data)
+    existing_numbers = Hash[
+      User.where(
+        :mobile_number => data.keys
+      ).pluck(
+        :mobile_number
+      ).map { |mobile_number| [mobile_number, true] }
+    ]
+    user_data = data.reject { |mobile_number, metadata| existing_numbers[mobile_number] }
+
+    user_data.each do |mobile_number, metadata|
+      Resque.enqueue(UserCreator, mobile_number, metadata)
+    end
+  end
+
+  def self.create_unactivated!(mobile_number, metadata)
+    user = self.new
+    user.mobile_number = mobile_number
+    user.name = metadata["name"]
+    user.gender = metadata["gender"]
+    user.age = metadata["age"].to_i if metadata["age"].present?
+    user.state = :unactivated
+    user.assign_location(metadata["location"])
+    user.save!
   end
 
   def self.remind!(options = {})
@@ -275,8 +305,12 @@ class User < ActiveRecord::Base
     state != "offline"
   end
 
+  def activated?
+    state != "unactivated"
+  end
+
   def available?
-    online? && (!currently_chatting? || !active_chat.active?)
+    online? && activated? && (!currently_chatting? || !active_chat.active?)
   end
 
   def currently_chatting?
@@ -321,6 +355,14 @@ class User < ActiveRecord::Base
 
   def match
     matches.first
+  end
+
+  def assign_location(address = nil)
+    unless location
+      build_location
+      location.country_code = torasup_number.country_id
+      location.address = address.present? ? address : torasup_number.location.area
+    end
   end
 
   private
@@ -590,14 +632,6 @@ class User < ActiveRecord::Base
   def contacted_recently?(inactivity_timestamp)
     last_contacted_timestamp = last_contacted_at || updated_at
     last_contacted_timestamp >= inactivity_timestamp
-  end
-
-  def assign_location
-    if location.blank?
-      build_location
-      location.country_code = torasup_number.country_id
-      location.address = torasup_number.location.area
-    end
   end
 
   def set_gender_related_attribute(attribute, value)

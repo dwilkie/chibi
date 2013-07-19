@@ -334,6 +334,10 @@ FactoryGirl.define do
       last_interacted_at { 15.minutes.ago }
     end
 
+    trait :never_contacted do
+      updated_at { 10.days.ago }
+    end
+
     trait :not_contacted_recently do
       last_contacted_at { 6.days.ago }
     end
@@ -360,6 +364,10 @@ FactoryGirl.define do
 
     trait :offline do
       state "offline"
+    end
+
+    trait :unactivated do
+      state "unactivated"
     end
 
     trait :with_name do
@@ -476,6 +484,11 @@ FactoryGirl.define do
     factory :jamie do
       name "jamie"
       with_semi_recent_interaction
+    end
+
+    factory :peter do
+      name "peter"
+      unactivated
     end
 
     # user with unknown gender
