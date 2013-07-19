@@ -440,7 +440,7 @@ describe User do
           UserCreator.should have_queued(mobile_number, metadata)
         end
         perform_background_job(:user_creator_queue)
-        User.count.should == sample[:data].size
+        User.count.should == data.size
       end
     end
 

@@ -149,9 +149,9 @@ class User < ActiveRecord::Base
         :mobile_number
       ).map { |mobile_number| [mobile_number, true] }
     ]
-    data.reject! { |mobile_number, metadata| existing_numbers[mobile_number] }
+    user_data = data.reject { |mobile_number, metadata| existing_numbers[mobile_number] }
 
-    data.each do |mobile_number, metadata|
+    user_data.each do |mobile_number, metadata|
       Resque.enqueue(UserCreator, mobile_number, metadata)
     end
   end
