@@ -16,6 +16,7 @@ describe User do
   let(:friend) { create(:user) }
   let(:active_chat) { create(:chat, :active, :user => user, :friend => friend) }
   let(:offline_user) { create(:user, :offline) }
+  let(:unactivated_user) { create(:user, :unactivated) }
   let(:user_with_complete_profile) { build(:user, :with_complete_profile) }
   let(:male) { create(:user, :male) }
   let(:female) { create(:user, :female) }
@@ -166,7 +167,7 @@ describe User do
       end
     end
 
-    context "before validation on create" do
+    context "before_validation(:on => :create)" do
       it "should generate a screen name" do
         new_user.screen_name.should be_nil
         new_user.valid?
@@ -174,14 +175,11 @@ describe User do
       end
 
       context "given a mobile number is present" do
-        it "should build a location from the mobile number and assign it to itself" do
-          with_users_from_different_countries do |nationality, country_code, address|
-            user = build(:user, nationality, :location => nil)
-            user.location.should be_nil
-            user.valid?
-            user.location.country_code.should == country_code.to_s
-            user.location.address.should == address
-          end
+        subject { build(:user, :location => nil) }
+
+        it "should assign a location" do
+          subject.should_receive(:assign_location).with(no_args)
+          subject.valid?
         end
       end
 
@@ -260,11 +258,24 @@ describe User do
       male
       user
       offline_user
+      unactivated_user
       active_chat
     end
 
     it "should only return users who are online and not currently chatting" do
       User.available.should == [male]
+    end
+  end
+
+  describe ".activated" do
+    before do
+      offline_user
+      unactivated_user
+      user
+    end
+
+    it "should only return users who are activated" do
+      subject.class.activated.should == [offline_user, user]
     end
   end
 
@@ -377,13 +388,87 @@ describe User do
     end
   end
 
-  describe ".import!(data)" do
-    let(:data) {
-"{\"#{user.mobile_number}\":{\"gender\":\"m\",\"name\":\"sarit\",\"age\":\"25\",\"location\":\"Phnom Penh\"},\"85570761161\":{\"gender\":null,\"name\":\"narea\",\"age\":\"20\",\"location\":\"Siem Reap\"},\"855765017456\":{\"gender\":\"m\",\"name\":null,\"age\":\"27\",\"location\":\"Battambang\"},\"85586649123\":{\"gender\":\"f\",\"name\":\"saou\",\"age\":null,\"location\":\"Kratie\"},\"85586649656\":{\"gender\":\"f\",\"name\":\"saou\",\"age\":\"\",\"location\":null}}"
+  context "importing users" do
+
+    let(:sample) {
+      {
+        :data => {
+          "85570761161" => {
+            "gender" => nil,
+            "name" => "narea",
+            "age" => "20",
+            "location" => "Siem Reap"
+          },
+          "855765017456" => {
+            "gender" => "m",
+            "name" => nil,
+            "age" => "27",
+            "location"=>"Battambang"
+          },
+          "85586649123" => {
+            "gender" => "f",
+            "name" => "saou",
+            "age" => nil,
+            "location" => "Kratie"
+          },
+          "85586649656" => {
+            "gender" => "f",
+            "name" => "saou",
+            "age" => "",
+            "location" => nil
+          }
+        }
+      }
     }
 
-    it "should queue a job to create a new user for each user that does not exist" do
-      subject.class.import!(data)
+    let(:data) {
+      {
+        user.mobile_number => {
+          "gender" => "m",
+          "name" => "sarit",
+          "age" => "25",
+          "location" => "Phnom Penh"
+        }
+      }.merge(sample[:data])
+    }
+
+    describe ".import!(data)" do
+      it "should queue a job to create a new user for each user that does not already exist" do
+        do_background_task(:queue_only => true) { subject.class.import!(data) }
+        UserCreator.should have_queue_size_of(sample[:data].size)
+        sample[:data].each do |mobile_number, metadata|
+          UserCreator.should have_queued(mobile_number, metadata)
+        end
+        perform_background_job(:user_creator_queue)
+        User.count.should == sample[:data].size
+      end
+    end
+
+    describe ".create_unactivated!(mobile_number, metadata)" do
+      let(:users) { User.all }
+      let(:locations) {
+        ResqueSpec.queues["locator_queue"].map { |queue| queue[:args][1] }
+      }
+
+      it "should create an unactivated user" do
+        sample[:data].each do |mobile_number, metadata|
+          subject.class.create_unactivated!(mobile_number, metadata)
+        end
+
+        sample[:data].each_with_index do |(mobile_number, metadata), index|
+          created_user = users[index]
+          created_user.should be_present
+          created_user.should be_unactivated
+          created_user.mobile_number.should == mobile_number
+          created_user.name.should == metadata["name"]
+
+          created_user.age.should == (
+            metadata["age"].present? ? metadata["age"].to_i : nil
+          )
+          created_user.gender.should == metadata["gender"]
+          locations.should(include(metadata["location"])) if metadata["location"]
+        end
+      end
     end
   end
 
@@ -410,7 +495,12 @@ describe User do
       create(:user, :from_registered_service_provider)
     end
 
+    let(:unactivated_user) do
+      create(:user, :from_registered_service_provider, :unactivated, :never_contacted)
+    end
+
     def create_actors
+      unactivated_user
       registered_sp_user_not_contacted_recently
       registered_sp_user_not_contacted_for_a_long_time
       registered_sp_user_not_contacted_for_a_short_time
@@ -433,6 +523,7 @@ describe User do
     end
 
     def assert_reminded
+      assert_user_reminded(unactivated_user)
       assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
       assert_user_reminded(registered_sp_user_not_contacted_recently)
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
@@ -440,6 +531,7 @@ describe User do
     end
 
     def assert_not_reminded
+      reply_to(unactivated_user).should be_nil
       reply_to(registered_sp_user_not_contacted_for_a_long_time).should be_nil
       reply_to(registered_sp_user_not_contacted_recently).should be_nil
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
@@ -462,8 +554,8 @@ describe User do
     context "passing :limit => 1" do
       it "should only remind the user who was contacted least recently" do
         do_remind(:limit => 1)
-        assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
-        reply_to(registered_sp_user_not_contacted_recently.reload).should be_nil
+        assert_user_reminded(unactivated_user)
+        reply_to(registered_sp_user_not_contacted_for_a_long_time.reload).should be_nil
       end
     end
 
@@ -529,6 +621,7 @@ describe User do
     # 1. Don't match him with himself
     # 2. Exclude users who he has already chatted with
     # 3. Exclude users who are offline
+    # 4. Exclude users who are unactivated
 
     # Ordering
 
@@ -569,6 +662,7 @@ describe User do
     # Hanh is a gay 28 year old male from Chiang Mai last seen 15 minutes ago
     # View is a gay 26 year old male from Chiang Mai last seen 15 minutes ago
     # Reaksmey has never interacted (his last_interacted_at is nil)
+    # Peter is unactivated (he's in the system but he never interacted)
 
     # Individual Match Explanations
 
@@ -689,7 +783,8 @@ describe User do
       :mara => [[:dave, :luke], :paul, [:chamroune, :alex, :pauline], [:joy, :jamie], :reaksmey],
       :michael => [:nok],
       :reaksmey => [[:luke, :chamroune, :dave, :alex], [:mara, :joy, :con, :jamie, :paul]],
-      :kris => [[:luke, :dave, :pauline, :chamroune, :alex], [:joy, :mara, :jamie], :con, :paul, :reaksmey]
+      :kris => [[:luke, :dave, :pauline, :chamroune, :alex], [:joy, :mara, :jamie], :con, :paul, :reaksmey],
+      :peter => []
     }
 
     USER_MATCHES.each do |user, matches|
@@ -1071,6 +1166,35 @@ describe User do
     end
   end
 
+  describe "#assign_location(address = nil)" do
+    def assert_location_assigned(user, asserted_country_code, asserted_address)
+      user.location.country_code.should == asserted_country_code.to_s
+      user.location.address.should == asserted_address
+    end
+
+    it "should assign a location derived the mobile number" do
+      with_users_from_different_countries do |nationality, country_code, address|
+        user = build(:user, nationality, :location => nil)
+        user.assign_location
+        assert_location_assigned(user, country_code, address)
+
+        # test assigning a location with a blank address
+        user.location = nil
+        user.assign_location("")
+        assert_location_assigned(user, country_code, address)
+
+        # test assigning a location with an address
+        user.location = nil
+        user.assign_location("Red Esky Town")
+        assert_location_assigned(user, country_code, "Red Esky Town")
+
+        # test assigning a location to a user who already has a location
+        user.assign_location
+        assert_location_assigned(user, country_code, "Red Esky Town")
+      end
+    end
+  end
+
   describe "#online?" do
     it "should only return false for offline users" do
       offline_user.should_not be_online
@@ -1079,10 +1203,25 @@ describe User do
     end
   end
 
+  describe "#activated?" do
+    it "should only return false for unactivated users" do
+      unactivated_user.should_not be_activated
+      offline_user.should be_activated
+      user.should be_activated
+      user_searching_for_friend.should be_activated
+    end
+  end
+
   describe "#available?" do
     context "he is offline" do
       it "should be false" do
         offline_user.should_not be_available
+      end
+    end
+
+    context "he is unactivated" do
+      it "should be false" do
+        unactivated_user.should_not be_available
       end
     end
 
@@ -1506,6 +1645,11 @@ describe User do
       offline_user.should_not be_online
       offline_user.login!
       offline_user.should be_online
+
+      unactivated_user.should_not be_activated
+      unactivated_user.login!
+      unactivated_user.should be_activated
+      unactivated_user.should be_online
 
       # test that we simply return for user's who are already online
       duplicate_user = build(:user, :mobile_number => offline_user.mobile_number)

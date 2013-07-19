@@ -9,13 +9,13 @@ describe UserImporter do
 
   describe ".perform(data)" do
     let(:import_stub) { User.stub(:import!) }
-    let(:data) { "some data" }
+    let(:data) { { "some" => "data" } }
 
     before do
       import_stub
     end
 
-    it "should instruct the user to import the data" do
+    it "should import the data" do
       User.should_receive(:import!).with(data)
       subject.class.perform(data)
     end
