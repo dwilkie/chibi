@@ -2,9 +2,20 @@
   %td#id
     = user.id
   %td#created_at
-    = "#{time_ago_in_words(user.created_at)} ago"
-  %td#updated_at
-    = "#{time_ago_in_words(user.updated_at)} ago"
+    = time_ago_in_words(user.created_at)
+    ago
+  %td#activated_at
+    - if user.activated_at
+      = time_ago_in_words(user.activated_at)
+      ago
+  %td#last_interacted_at
+    - if user.last_interacted_at
+      = time_ago_in_words(user.last_interacted_at)
+      ago
+  %td#last_contacted_at
+    - last_contacted_at = user.last_contacted_at || user.updated_at
+    = time_ago_in_words(last_contacted_at)
+    ago
   %td#name
     = user.name
   %td#screen_name
@@ -19,8 +30,8 @@
     = user.city
   %td#looking_for
     = user.looking_for
-  %td#online
-    = user.online?
+  %td#state
+    = user.state
   %td#locale
     = user.locale
   = communicable_links(user)
