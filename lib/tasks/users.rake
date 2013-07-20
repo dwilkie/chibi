@@ -6,6 +6,11 @@ namespace :users do
 
   desc "Finds new friends for users who are searching"
   task :find_friends => :environment do
-    Resque.enqueue(FriendFinder, :notify => true, :notify_no_match => false, :between => 1..16)
+    Resque.enqueue(FriendFinder, :notify => true, :notify_no_match => false, :between => 0..17)
+  end
+
+  desc "Sets User#activated_at to User#created_at for already activated users"
+  task :set_activated_at => :environment do
+    User.set_activated_at
   end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130705025726) do
+ActiveRecord::Schema.define(version: 20130720000848) do
 
   create_table "call_data_records", force: true do |t|
     t.text     "body"
@@ -137,6 +137,7 @@ ActiveRecord::Schema.define(version: 20130705025726) do
     t.string   "state",                        default: "online", null: false
     t.datetime "last_interacted_at"
     t.datetime "last_contacted_at"
+    t.datetime "activated_at"
   end
 
   add_index "users", ["active_chat_id"], name: "index_users_on_active_chat_id", using: :btree

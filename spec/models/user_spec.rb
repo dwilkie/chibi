@@ -6,6 +6,7 @@ describe User do
   include TranslationHelpers
   include MessagingHelpers
   include ResqueHelpers
+  include AnalyzableExamples
 
   include_context "replies"
 
@@ -148,7 +149,7 @@ describe User do
   end
 
   describe "callbacks" do
-    context "before save" do
+    context "before_save" do
       context "if the user is currently chatting and also searching" do
         let(:chat_with_user_searching_for_friend) do
           create(:chat, :with_user_searching_for_friend, :user => user_searching_for_friend)
@@ -163,6 +164,17 @@ describe User do
           user_searching_for_friend.reload.should be_searching_for_friend
           active_chat_with_user_searching_for_friend
           user_searching_for_friend.reload.should_not be_searching_for_friend
+        end
+      end
+    end
+
+    context "after_create" do
+      it "should set the activated_at to the created_at if activated and activated_at is not set" do
+        Timecop.freeze(Time.now) do
+          user = create(:user, :created_at => 5.days.ago)
+          user.activated_at.should == 5.days.ago
+
+          unactivated_user.activated_at.should be_nil
         end
       end
     end
@@ -192,7 +204,10 @@ describe User do
     end
   end
 
-  it_should_behave_like "analyzable", true
+  it_should_behave_like "analyzable", true do
+    let(:group_by_column) { :activated_at }
+    let(:excluded_resource) { unactivated_user }
+  end
 
   it_should_behave_like "filtering with communicable resources" do
     let(:resources) { [user, friend] }
@@ -310,6 +325,30 @@ describe User do
         thai_with_invalid_cambodian_name.reload.name.should be_present
         cambodian_with_invalid_cambodian_name.reload.name.should be_nil
         cambodian_with_valid_cambodian_name.reload.name.should be_present
+      end
+    end
+  end
+
+  describe ".set_activated_at" do
+    let(:activated_user) { create(:user, :created_at => 5.days.ago) }
+    let(:user_who_should_be_activated) {
+      user = create(:user, :created_at => 10.days.ago)
+      user.update_attribute(:activated_at, nil)
+      user
+    }
+
+    it "should set the activated_at column to the created_at column for activated users" do
+      Timecop.freeze(Time.now) do
+        activated_user.activated_at.should == 5.days.ago
+        unactivated_user.activated_at.should be_nil
+        user_who_should_be_activated.created_at.should == 10.days.ago
+        user_who_should_be_activated.activated_at.should be_nil
+
+        subject.class.set_activated_at
+
+        activated_user.reload.activated_at.should == 5.days.ago
+        unactivated_user.reload.activated_at.should be_nil
+        user_who_should_be_activated.reload.activated_at.should == 10.days.ago
       end
     end
   end
@@ -1647,8 +1686,10 @@ describe User do
       offline_user.should be_online
 
       unactivated_user.should_not be_activated
+      unactivated_user.activated_at.should be_nil
       unactivated_user.login!
       unactivated_user.should be_activated
+      unactivated_user.activated_at.should be_present
       unactivated_user.should be_online
 
       # test that we simply return for user's who are already online

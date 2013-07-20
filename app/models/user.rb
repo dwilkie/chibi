@@ -38,10 +38,14 @@ class User < ActiveRecord::Base
 
   before_save :cancel_searching_for_friend_if_chatting
 
+  after_create :set_activated_at
+
   delegate :city, :country_code, :to => :location, :allow_nil => true
 
   state_machine :initial => :online do
     state :offline, :searching_for_friend, :unactivated
+
+    after_transition :unactivated => :online, :do => :touch_activated_at
 
     event :login do
       transition([:offline, :unactivated] => :online)
@@ -79,6 +83,16 @@ class User < ActiveRecord::Base
     joins(:location).where(banned_name_conditions.join(" OR ")).update_all("name = NULL")
   end
 
+  def self.set_activated_at
+    where(
+      :activated_at => nil
+    ).where.not(
+      :state => :unactivated
+    ).update_all(
+      "activated_at = created_at"
+    )
+  end
+
   def self.activated
     where("\"#{table_name}\".\"state\" != ?", "unactivated")
   end
@@ -104,6 +118,10 @@ class User < ActiveRecord::Base
     ).uniq.update_all(
       :state => "offline"
     )
+  end
+
+  def self.overview_of_created(options = {})
+    super(options.merge(:group_by_column => :activated_at))
   end
 
   def self.filter_by(params = {})
@@ -614,6 +632,14 @@ class User < ActiveRecord::Base
 
   def self.enqueue_friend_messenger(user, options = {})
     Resque.enqueue(FriendMessenger, user.id, options)
+  end
+
+  def touch_activated_at
+    touch(:activated_at)
+  end
+
+  def set_activated_at
+    update_attribute(:activated_at, created_at) if activated? && activated_at.nil?
   end
 
   def torasup_number

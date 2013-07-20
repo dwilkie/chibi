@@ -5,6 +5,7 @@ describe Reply do
   include MessagingHelpers
   include ResqueHelpers
   include PhoneCallHelpers::TwilioHelpers
+  include AnalyzableExamples
 
   let(:user) { build(:user) }
 
@@ -106,7 +107,10 @@ describe Reply do
     let(:chatable_resource) { reply }
   end
 
-  it_should_behave_like "analyzable"
+  it_should_behave_like "analyzable" do
+    let(:group_by_column) { :created_at }
+    let(:excluded_resource) { nil }
+  end
 
   it "should not be valid without a destination" do
     user.mobile_number = nil
