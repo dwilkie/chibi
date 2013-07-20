@@ -5,14 +5,17 @@ module Chibi
     module ClassMethods
       # this returns the data in the format required by HighStocks
       def overview_of_created(options = {})
+        group_by_column = options[:group_by_column] ||= :created_at
+        timeframe = options[:timeframe]
+
         count_args = "DISTINCT(#{table_name}.user_id)" if options[:by_user]
-        date_sql = options[:timeframe] ? "DATE_TRUNC('#{options[:timeframe]}', created_at)" : "DATE(created_at)"
+        date_sql = timeframe ? "DATE_TRUNC('#{timeframe}', #{group_by_column})" : "DATE(#{group_by_column})"
         group_by_sql = "EXTRACT(EPOCH FROM #{date_sql}) * 1000"
 
-        scope = all
+        scope = where.not(group_by_column => nil)
 
         scope = scope.where(
-          "#{table_name}.created_at >= ?", options[:least_recent].ago
+          "#{table_name}.#{group_by_column} >= ?", options[:least_recent].ago
         ) if options[:least_recent]
 
         # hack to get the table alias name

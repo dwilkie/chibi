@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe Message do
+  include AnalyzableExamples
+
   let(:user) { create(:user) }
   let(:friend) { create(:user, :english) }
   let(:new_friend) { create(:user, :cambodian) }
@@ -26,7 +28,10 @@ describe Message do
     let(:starter) { message }
   end
 
-  it_should_behave_like "analyzable"
+  it_should_behave_like "analyzable" do
+    let(:group_by_column) { :created_at }
+    let(:excluded_resource) { nil }
+  end
 
   it_should_behave_like "communicable" do
     let(:communicable_resource) { message }
