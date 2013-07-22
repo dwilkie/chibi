@@ -84,6 +84,11 @@ en:
     - "%{recipient_greeting}%{sender_introduction} nice to know u.%{recipient_questions}"
     - "%{recipient_greeting} same to you!%{sender_introduction}!"
     - "%{recipient_greeting}%{sender_introduction} i want to play SMS! %{recipient_questions}"
+  gay_greetings:
+    - "I'm a %{gender}. m gay!%{recipient_questions}"
+    - "I'm a %{gender}. I'm Gay! Love %{gender}. Can I know you?"
+    - "I'm %{gender} love %{gender}!%{recipient_questions}"
+    - "%{recipient_greeting} me %{gender} love %{gender}!"
   contact_me:
     - "Hi%{recipient_name} can you %{call_sms} back %{on}?"
     - "%{recipient_name}, please %{call_sms} me. %{on}"

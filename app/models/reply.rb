@@ -125,7 +125,11 @@ class Reply < ActiveRecord::Base
   end
 
   def introduce!(partner)
-    set_forward_message(partner, random_canned_greeting(:sender => partner, :recipient => user))
+    greeting_options = {:sender => partner, :recipient => user}
+    canned_message = user.gay? && partner.gay? ?
+      canned_reply.greeting(greeting_options.merge(:gay => true)) :
+      random_canned_greeting(greeting_options)
+    set_forward_message(partner, canned_message)
     deliver!
   end
 

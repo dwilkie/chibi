@@ -7,8 +7,10 @@ class CannedReply
     @recipient_name = screen_name(@recipient)
   end
 
-  def greeting
-    random_sample(:greetings, interpolations)
+  def greeting(options = {})
+    options[:gay] ?
+      random_sample(:gay_greetings, interpolations.merge(:gender => gay_gender)) :
+      random_sample(:greetings, interpolations)
   end
 
   def gay_reminder
@@ -16,7 +18,7 @@ class CannedReply
       :gay_reminder,
       interpolations.merge(
         :on => @recipient.contact_me_number,
-        :gender => @recipient.gender == User::MALE ? "boy" : "girl"
+        :gender => gay_gender
       )
     )
   end
@@ -46,6 +48,10 @@ class CannedReply
       :sender_name => @sender_name,
       :sender_city => city(@sender)
     }
+  end
+
+  def gay_gender
+    @recipient.gender == User::MALE ? "boy" : "girl"
   end
 
   def screen_name(user)

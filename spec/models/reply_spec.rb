@@ -605,6 +605,7 @@ describe Reply do
       assert_reply(
         :introduce!, :forward_message_approx,
         :args => [partner], :interpolations => [partner.screen_id],
+        :test_users => [local_users, create(:user, :gay), create(:user, :lesbian)].flatten,
         :approx => true
       )
     end
