@@ -44,6 +44,14 @@ describe CannedReply do
     it "should generate a random greeting" do
       assert_random(:greeting)
     end
+
+    context "passing :gay => true" do
+      it "should generate a greeting aimed at gay users" do
+        assert_random(:greeting, :gay => true) do |result|
+          result.should =~ /(?:love|gay)/i
+        end
+      end
+    end
   end
 
   describe "#follow_up(options)" do
