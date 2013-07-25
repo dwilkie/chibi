@@ -23,6 +23,14 @@ GIT
   specs:
     spork (1.0.0rc3)
 
+GIT
+  remote: git@github.com:colszowka/simplecov.git
+  revision: a3387f7b25100939df6a5af339580cbe3055cdc6
+  specs:
+    simplecov (0.8.0.pre)
+      multi_json
+      simplecov-html (~> 0.7.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -222,6 +230,7 @@ GEM
       railties (>= 4.0.0.beta, < 5.0)
       sass (>= 3.1.10)
       sprockets-rails (~> 2.0.0)
+    simplecov-html (0.7.1)
     sinatra (1.4.3)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -305,6 +314,7 @@ DEPENDENCIES
   resque_spec
   rspec-rails
   sass-rails (~> 4.0.0)
+  simplecov!
   spork!
   state_machine
   timecop
