@@ -346,9 +346,9 @@ describe User do
 
         subject.class.set_activated_at
 
-        activated_user.reload.activated_at.should == 5.days.ago
+        activated_user.reload.activated_at.to_i.should == 5.days.ago.to_i
         unactivated_user.reload.activated_at.should be_nil
-        user_who_should_be_activated.reload.activated_at.should == 10.days.ago
+        user_who_should_be_activated.reload.activated_at.to_i.should == 10.days.ago.to_i
       end
     end
   end
@@ -1190,21 +1190,6 @@ describe User do
     end
   end
 
-  describe "#profile_complete?" do
-    it "should only be true if all the profile attributes are present" do
-      user_with_complete_profile.should be_profile_complete
-
-      ["name", "date_of_birth", "gender", "looking_for"].each do |attribute|
-        reference_user = build(:user, :with_complete_profile)
-        reference_user.send("#{attribute}=", nil)
-        reference_user.should_not be_profile_complete
-      end
-
-      user_with_complete_profile.location.city = nil
-      user_with_complete_profile.should_not be_profile_complete
-    end
-  end
-
   describe "#assign_location(address = nil)" do
     def assert_location_assigned(user, asserted_country_code, asserted_address)
       user.location.country_code.should == asserted_country_code.to_s
@@ -1294,28 +1279,6 @@ describe User do
           user.should be_available
         end
       end
-    end
-  end
-
-  describe "#first_message?" do
-    it "should return true only if the user has one message" do
-      user.first_message?.should be_false
-
-      create(:message, :user => user)
-      user.first_message?.should be_true
-
-      create(:message, :user => user)
-      user.first_message?.should be_false
-    end
-  end
-
-  describe "#missing_profile_attributes" do
-    it "should return the missing attributes of the user" do
-      subject.missing_profile_attributes.should == [:name, :date_of_birth, :gender, :city, :looking_for]
-      user_with_complete_profile.missing_profile_attributes.should == []
-
-      user_with_complete_profile.date_of_birth = nil
-      user_with_complete_profile.missing_profile_attributes.should == [:date_of_birth]
     end
   end
 

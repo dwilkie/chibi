@@ -7,7 +7,6 @@ class User < ActiveRecord::Base
 
   has_communicable_resources :phone_calls, :messages, :replies
 
-  PROFILE_ATTRIBUTES = [:name, :date_of_birth, :gender, :city, :looking_for]
   MALE = "m"
   FEMALE = "f"
   MINIMUM_MOBILE_NUMBER_LENGTH = 9
@@ -290,27 +289,6 @@ class User < ActiveRecord::Base
     country_code.to_sym
   end
 
-  def profile_complete?
-    profile_complete = true
-
-    PROFILE_ATTRIBUTES.each do |attribute|
-      profile_complete = send(attribute).present?
-      break unless profile_complete
-    end
-
-    profile_complete
-  end
-
-  def missing_profile_attributes
-    profile_attributes = []
-
-    PROFILE_ATTRIBUTES.each do |attribute|
-      profile_attributes << attribute unless send(attribute).present?
-    end
-
-    profile_attributes
-  end
-
   def age
     Time.now.utc.year - date_of_birth.year if date_of_birth?
   end
@@ -333,10 +311,6 @@ class User < ActiveRecord::Base
 
   def currently_chatting?
     active_chat_id?
-  end
-
-  def first_message?
-    messages.count == 1
   end
 
   def screen_id
@@ -672,14 +646,6 @@ class User < ActiveRecord::Base
     write_attribute(attribute, value)
   end
 
-  def looking_for_male?
-    looking_for == MALE
-  end
-
-  def looking_for_female?
-    looking_for == FEMALE
-  end
-
   def extract(info)
     stripped_info = info.dup
     extract_gender_and_looking_for(stripped_info)
@@ -788,9 +754,5 @@ class User < ActiveRecord::Base
 
   def profile_keywords(*keys)
     self.class.profile_keywords(*keys, :locale => country_code)
-  end
-
-  def missing_only?(*attributes)
-    missing_profile_attributes == attributes
   end
 end

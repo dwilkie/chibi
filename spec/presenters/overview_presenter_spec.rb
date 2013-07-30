@@ -13,7 +13,7 @@ describe OverviewPresenter do
   end
 
   let(:overview) do
-    mock(Overview, sample_data)
+    double(Overview, sample_data)
   end
 
   let(:presenter) { OverviewPresenter.new(overview, view) }

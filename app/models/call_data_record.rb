@@ -50,10 +50,6 @@ class CallDataRecord < ActiveRecord::Base
     normalized_value if normalized_value =~ /\A\+?\d+\z/
   end
 
-  def inbound?
-    direction == "inbound"
-  end
-
   def variables
     parsed_body["variables"]
   end
