@@ -11,7 +11,7 @@ describe Resque::WorkerBoss do
     end
 
     def build_worker(job)
-      mock(Resque::Worker, :job => job, :idle? => false)
+      double(Resque::Worker, :job => job, :idle? => false)
     end
 
     let(:stale_worker) { build_worker(build_job(11.minutes.ago)) }
