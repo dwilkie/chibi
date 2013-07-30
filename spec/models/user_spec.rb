@@ -340,7 +340,6 @@ describe User do
     it "should set the activated_at column to the created_at column for activated users" do
       Timecop.freeze(Time.now) do
         activated_user.activated_at.should == 5.days.ago
-        activated_user.activated_at == 5.days.ago
         unactivated_user.activated_at.should be_nil
         user_who_should_be_activated.created_at.should == 10.days.ago
         user_who_should_be_activated.activated_at.should be_nil
