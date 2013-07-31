@@ -8,7 +8,7 @@ kh:
         nuntium_channel: "smart"
         mt_message_queue: "smart_mt_message_queue"
         caller_id: "2442"
-        dial_string: "sofia/internal/%{number_to_dial}@27.109.112.12"
+        dial_string: "sofia/internal/%{number_to_dial}@27.109.112.80"
     beeline:
       metadata:
         short_code: "2442"
@@ -21,7 +21,7 @@ kh:
         nuntium_channel: "hello"
         mt_message_queue: "hello_mt_message_queue"
         caller_id: "2442"
-        dial_string: "sofia/internal/%{number_to_dial}@27.109.112.12"
+        dial_string: "sofia/internal/%{number_to_dial}@27.109.112.80"
       prefixes:
       - '15'
       - '16'
