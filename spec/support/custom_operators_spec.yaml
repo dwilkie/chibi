@@ -15,18 +15,3 @@ kh:
         nuntium_channel: "beeline"
         mt_message_queue: "beeline_mt_message_queue"
         short_code: "2442"
-    hello:
-      assertions:
-        name: Hello
-        nuntium_channel: "hello"
-        mt_message_queue: "hello_mt_message_queue"
-        short_code: "2442"
-        caller_id: "2442"
-        dial_string: "sofia/internal/%{number_to_dial}@27.109.112.80"
-      prefixes:
-      - '15'
-      - '16'
-      - '81'
-      - '87'
-      area_code_prefixes:
-      - '45'
