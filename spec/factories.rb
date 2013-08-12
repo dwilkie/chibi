@@ -441,35 +441,35 @@ FactoryGirl.define do
     end
 
     trait :cambodian do
-      sequence(:mobile_number) { |n| "85597000000#{n}" }
+      mobile_number
     end
 
     trait :from_kampong_thom do
-      sequence(:mobile_number) { |n| "85562000000#{n}" }
+      sequence(:mobile_number, 85562000000) { |n| n.to_s }
     end
 
     trait :from_phnom_penh do
-      sequence(:mobile_number) { |n| "85523000000#{n}" }
+      sequence(:mobile_number, 85523000000) { |n| n.to_s }
     end
 
     trait :from_battambang do
-      sequence(:mobile_number) { |n| "85553000000#{n}" }
+      sequence(:mobile_number, 85553000000) { |n| n.to_s }
     end
 
     trait :from_siem_reap do
-      sequence(:mobile_number) { |n| "85563000000#{n}" }
+      sequence(:mobile_number, 85563000000) { |n| n.to_s }
     end
 
     trait :english do
-      sequence(:mobile_number) { |n| "4412000000#{n}" }
+      sequence(:mobile_number, 447624000000) { |n| n.to_s }
     end
 
     trait :american do
-      sequence(:mobile_number) { |n| "141600000#{n}" }
+      sequence(:mobile_number, 14160000000) { |n| n.to_s }
     end
 
     trait :thai do
-      sequence(:mobile_number) { |n| "6689000000#{n}" }
+      sequence(:mobile_number, 66814000000) { |n| n.to_s }
     end
 
     # do not reorder these factories because the tests rely on

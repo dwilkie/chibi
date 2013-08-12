@@ -137,6 +137,24 @@ describe User do
     it "should be valid" do
       new_user.should be_valid
     end
+
+    describe "english" do
+      it "should be valid" do
+        build(:user, :english).should be_valid
+      end
+    end
+
+    describe "american" do
+      it "should be valid" do
+        build(:user, :american).should be_valid
+      end
+    end
+
+    describe "thai" do
+      it "should be valid" do
+        build(:user, :thai).should be_valid
+      end
+    end
   end
 
   describe "associations" do
