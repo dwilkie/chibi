@@ -112,6 +112,11 @@ describe User do
 
   it "should not be valid with an invalid mobile number e.g. a short code" do
     build(:user, :with_invalid_mobile_number).should_not be_valid
+
+    ["8559878917", "8559620617899"].each do |invalid_number|
+      user = build(:user, :mobile_number => invalid_number)
+      user.should_not be_valid
+    end
   end
 
   it "should not be valid without a screen name" do
