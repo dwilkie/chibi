@@ -80,4 +80,15 @@ describe Overview do
       subject.inbound_cdrs(options)
     end
   end
+
+  describe "#phone_calls" do
+    before do
+      stub_overview(PhoneCall, [])
+    end
+
+    it "should return an overview of the phone calls" do
+      PhoneCall.should_receive(:overview_of_created).with(options)
+      subject.phone_calls(options)
+    end
+  end
 end

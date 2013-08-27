@@ -40,4 +40,8 @@ class Overview
   def inbound_cdrs(options = {})
     InboundCdr.overview_of_created(options)
   end
+
+  def phone_calls(options = {})
+    PhoneCall.overview_of_created(options)
+  end
 end

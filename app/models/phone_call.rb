@@ -3,6 +3,7 @@ class PhoneCall < ActiveRecord::Base
   include Chibi::Communicable::FromUser
   include Chibi::Communicable::Chatable
   include Chibi::ChatStarter
+  include Chibi::Analyzable
 
   # The maximum number of concurrent outbound dials to trigger
   MAX_SIMULTANEOUS_OUTBOUND_DIALS = 5

@@ -4,6 +4,7 @@ describe PhoneCall do
   include PhoneCallHelpers::States
   include PhoneCallHelpers::TwilioHelpers
   include ResqueHelpers
+  include AnalyzableExamples
 
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
@@ -16,6 +17,15 @@ describe PhoneCall do
   describe "factory" do
     it "should be valid" do
       new_phone_call.should be_valid
+    end
+  end
+
+  it_should_behave_like "analyzable" do
+    let(:group_by_column) { :created_at }
+    let(:excluded_resource) { nil }
+
+    def create_resources(count, *args)
+      create_list(:phone_call, count, *args)
     end
   end
 
