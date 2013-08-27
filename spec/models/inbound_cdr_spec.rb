@@ -2,9 +2,19 @@ require 'spec_helper'
 
 describe InboundCdr do
   include CdrHelpers
+  include AnalyzableExamples
 
   let(:cdr) { create_cdr }
   subject { build_cdr }
+
+  it_should_behave_like "analyzable" do
+    let(:group_by_column) { :created_at }
+    let(:excluded_resource) { nil }
+
+    def create_resources(count, *args)
+      create_cdrs(count, *args)
+    end
+  end
 
   describe "factory" do
     it "should be valid" do

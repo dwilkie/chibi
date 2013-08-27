@@ -611,6 +611,7 @@ FactoryGirl.define do
   factory :call_data_record do
     ignore do
       cdr_variables false
+      user nil
       user_who_called nil
       user_who_was_called nil
       phone_call nil
@@ -624,7 +625,7 @@ FactoryGirl.define do
 
     body do
       dynamic_body = MultiXml.parse(default_body)["cdr"]
-      calling_user = user_who_called || FactoryGirl.create(:user)
+      calling_user = user_who_called || user || FactoryGirl.create(:user)
 
       dynamic_cdr = cdr_variables || {}
       dynamic_cdr_variables = dynamic_cdr["variables"] ||= {}

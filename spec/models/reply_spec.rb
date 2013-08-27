@@ -110,6 +110,10 @@ describe Reply do
   it_should_behave_like "analyzable" do
     let(:group_by_column) { :created_at }
     let(:excluded_resource) { nil }
+
+    def create_resources(count, *args)
+      create_list(:reply, count, *args)
+    end
   end
 
   it "should not be valid without a destination" do

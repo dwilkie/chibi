@@ -36,4 +36,8 @@ class Overview
     end
     revenue_in_dollars
   end
+
+  def inbound_cdrs(options = {})
+    InboundCdr.overview_of_created(options)
+  end
 end

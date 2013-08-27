@@ -230,6 +230,10 @@ describe User do
   it_should_behave_like "analyzable", true do
     let(:group_by_column) { :activated_at }
     let(:excluded_resource) { unactivated_user }
+
+    def create_resources(count, *args)
+      create_list(:user, count, *args)
+    end
   end
 
   it_should_behave_like "filtering with communicable resources" do

@@ -69,4 +69,15 @@ describe Overview do
       subject.revenue(options).should == [[1360886400000, 842.25], [1361232000000, 828.35]]
     end
   end
+
+  describe "#inbound_cdrs" do
+    before do
+      stub_overview(InboundCdr, [])
+    end
+
+    it "should return an overview of the inbound cdrs" do
+      InboundCdr.should_receive(:overview_of_created).with(options)
+      subject.inbound_cdrs(options)
+    end
+  end
 end

@@ -1,7 +1,5 @@
 module AnalyzableExamples
   shared_examples_for "analyzable" do |skip_by_user|
-    let(:resource_name) { subject.class.to_s.underscore }
-
     describe ".overview_of_created" do
       def two_months_and_one_day_ago
         2.months.ago - 1.day
@@ -21,9 +19,15 @@ module AnalyzableExamples
 
       before do
         Timecop.freeze(Time.now)
-        create_list(resource_name, 3)
-        create_list(resource_name, 2, group_by_column => eight_days_ago)
-        create(resource_name, group_by_column => two_months_and_one_day_ago)
+        create_resources(3)
+
+        create_resources(2).each do |resource|
+          resource.update_attribute(group_by_column, eight_days_ago)
+        end
+
+        create_resources(1).each do |resource|
+          resource.update_attribute(group_by_column, two_months_and_one_day_ago)
+        end
       end
 
       after do
@@ -70,7 +74,9 @@ module AnalyzableExamples
         context "passing :by_user => true" do
           before do
             user = create(:user)
-            create_list(resource_name, 3, :user => user, group_by_column => 7.days.ago)
+            create_resources(3, :user => user).each do |resource|
+              resource.update_attribute(group_by_column, 7.days.ago)
+            end
           end
 
           it "should return an overview of the resources created in the last 2 months by user" do

@@ -9,6 +9,7 @@ class OverviewPresenter < BasePresenter
       :messages_received => overview.messages_received(options),
       :users_texting => overview.users_texting(options),
       :return_users => overview.return_users(options),
+      :inbound_cdrs => overview.inbound_cdrs(options),
       :revenue => overview.revenue(options)
     )
   end

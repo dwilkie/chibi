@@ -8,6 +8,7 @@ describe OverviewPresenter do
       :messages_received => [6644, 4],
       :users_texting => [1122, 5],
       :return_users => [1122, 0],
+      :inbound_cdrs => [1112, 7],
       :revenue => [6644, 0.06]
     }
   end

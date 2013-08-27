@@ -5,6 +5,8 @@ class InboundCdr < CallDataRecord
 
   has_many :outbound_cdrs
 
+  include Chibi::Analyzable
+
   private
 
   def set_inbound_cdr_attributes
