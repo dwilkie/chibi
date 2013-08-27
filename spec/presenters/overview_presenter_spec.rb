@@ -10,6 +10,7 @@ describe OverviewPresenter do
       :return_users => [1122, 0],
       :phone_calls => [1112, 6],
       :inbound_cdrs => [1112, 7],
+      :ivr_minutes => [1112, 443],
       :revenue => [6644, 0.06]
     }
   end

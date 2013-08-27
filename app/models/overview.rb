@@ -44,4 +44,8 @@ class Overview
   def phone_calls(options = {})
     PhoneCall.overview_of_created(options)
   end
+
+  def ivr_minutes(options = {})
+    InboundCdr.overview_of_duration(options)
+  end
 end

@@ -70,7 +70,7 @@ describe Overview do
     end
   end
 
-  describe "#inbound_cdrs" do
+  describe "#inbound_cdrs(options = {})" do
     before do
       stub_overview(InboundCdr, [])
     end
@@ -81,7 +81,7 @@ describe Overview do
     end
   end
 
-  describe "#phone_calls" do
+  describe "#phone_calls(options = {})" do
     before do
       stub_overview(PhoneCall, [])
     end
@@ -89,6 +89,17 @@ describe Overview do
     it "should return an overview of the phone calls" do
       PhoneCall.should_receive(:overview_of_created).with(options)
       subject.phone_calls(options)
+    end
+  end
+
+  describe "#ivr_minutes(options = {})" do
+    before do
+      InboundCdr.stub(:overview_of_duration)
+    end
+
+    it "should return an overview of the duration of phone calls" do
+      InboundCdr.should_receive(:overview_of_duration).with(options)
+      subject.ivr_minutes(options)
     end
   end
 end

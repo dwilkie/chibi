@@ -11,6 +11,7 @@ class OverviewPresenter < BasePresenter
       :return_users => overview.return_users(options),
       :phone_calls => overview.phone_calls(options),
       :inbound_cdrs => overview.inbound_cdrs(options),
+      :ivr_minutes => overview.ivr_minutes(options),
       :revenue => overview.revenue(options)
     )
   end
