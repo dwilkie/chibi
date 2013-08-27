@@ -24,8 +24,8 @@ describe PhoneCall do
     let(:group_by_column) { :created_at }
     let(:excluded_resource) { nil }
 
-    def create_resources(count, *args)
-      create_list(:phone_call, count, *args)
+    def create_resource(*args)
+      create(:phone_call, *args)
     end
   end
 

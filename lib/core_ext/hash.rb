@@ -6,9 +6,9 @@ class Hash
     self
   end
 
-  def integerify_keys!
-    keys.each do |key|
-      self[key.to_i] = delete(key)
+  def integerify!
+    dup.each do |key, value|
+      self[key.to_i] = delete(key).to_i
     end
     self
   end

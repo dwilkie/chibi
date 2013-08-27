@@ -32,8 +32,8 @@ describe Message do
     let(:group_by_column) { :created_at }
     let(:excluded_resource) { nil }
 
-    def create_resources(count, *args)
-      create_list(:message, count, *args)
+    def create_resource(*args)
+      create(:message, *args)
     end
   end
 

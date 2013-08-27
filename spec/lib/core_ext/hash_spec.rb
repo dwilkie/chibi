@@ -10,12 +10,12 @@ describe Hash do
     end
   end
 
-  describe "#integerify_keys!" do
-    let(:hash) { { "1" => "hello_world" } }
+  describe "#integerify!" do
+    let(:hash) { { "1" => "1" } }
 
-    it "should make the keys integers" do
-      hash.integerify_keys!
-      hash.should have_key(1)
+    it "should make the keys and values integers" do
+      hash.integerify!
+      hash[1].should == 1
     end
   end
 end

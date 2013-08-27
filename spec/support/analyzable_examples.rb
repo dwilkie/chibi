@@ -1,16 +1,16 @@
 module AnalyzableExamples
+  def miliseconds_since_epoch(date)
+    (date.to_date.to_datetime.to_i * 1000)
+  end
+
+  def eight_days_ago
+    8.days.ago
+  end
+
   shared_examples_for "analyzable" do |skip_by_user|
     describe ".overview_of_created" do
       def two_months_and_one_day_ago
         2.months.ago - 1.day
-      end
-
-      def eight_days_ago
-        8.days.ago
-      end
-
-      def miliseconds_since_epoch(date)
-        (date.to_date.to_datetime.to_i * 1000)
       end
 
       def eight_days_ago_was_in_this_month
@@ -19,15 +19,9 @@ module AnalyzableExamples
 
       before do
         Timecop.freeze(Time.now)
-        create_resources(3)
-
-        create_resources(2).each do |resource|
-          resource.update_attribute(group_by_column, eight_days_ago)
-        end
-
-        create_resources(1).each do |resource|
-          resource.update_attribute(group_by_column, two_months_and_one_day_ago)
-        end
+        3.times { create_resource }
+        2.times { create_resource.update_attribute(group_by_column, eight_days_ago) }
+        create_resource.update_attribute(group_by_column, two_months_and_one_day_ago)
       end
 
       after do
@@ -74,9 +68,7 @@ module AnalyzableExamples
         context "passing :by_user => true" do
           before do
             user = create(:user)
-            create_resources(3, :user => user).each do |resource|
-              resource.update_attribute(group_by_column, 7.days.ago)
-            end
+            3.times { create_resource(:user => user).update_attribute(group_by_column, 7.days.ago) }
           end
 
           it "should return an overview of the resources created in the last 2 months by user" do

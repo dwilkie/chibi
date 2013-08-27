@@ -11,12 +11,6 @@ module CdrHelpers
     typed_cdr
   end
 
-  def create_cdrs(count, *args)
-    cdrs = []
-    count.times { cdrs << create_cdr(*args) }
-    cdrs
-  end
-
   def typed_cdr(*args)
     CallDataRecord.new(:body => cdr_body(args)).typed
   end

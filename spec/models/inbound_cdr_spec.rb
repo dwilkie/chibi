@@ -11,8 +11,8 @@ describe InboundCdr do
     let(:group_by_column) { :created_at }
     let(:excluded_resource) { nil }
 
-    def create_resources(count, *args)
-      create_cdrs(count, *args)
+    def create_resource(*args)
+      create_cdr(*args)
     end
   end
 
@@ -68,6 +68,27 @@ describe InboundCdr do
           subject.phone_call.should == phone_call
         end
       end
+    end
+  end
+
+  describe ".overview_of_duration(options = {})" do
+    before do
+      Timecop.freeze(Time.now)
+      cdr
+      2.times do
+        create_cdr(
+          :cdr_variables => {"variables" => {"duration" => "59"}}
+        ).update_attribute(:created_at, 8.days.ago)
+      end
+    end
+
+    after do
+      Timecop.return
+    end
+
+    it "should return the sum of duration in mins" do
+      overview = InboundCdr.overview_of_duration
+      overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
     end
   end
 end

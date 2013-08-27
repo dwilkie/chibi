@@ -231,8 +231,8 @@ describe User do
     let(:group_by_column) { :activated_at }
     let(:excluded_resource) { unactivated_user }
 
-    def create_resources(count, *args)
-      create_list(:user, count, *args)
+    def create_resource(*args)
+      create(:user, *args)
     end
   end
 

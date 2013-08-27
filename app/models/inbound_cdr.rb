@@ -7,6 +7,10 @@ class InboundCdr < CallDataRecord
 
   include Chibi::Analyzable
 
+  def self.overview_of_duration(options = {})
+    highcharts_array(group_by_timeframe(options).sum("(duration / 60) + 1"))
+  end
+
   private
 
   def set_inbound_cdr_attributes

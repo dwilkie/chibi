@@ -111,8 +111,8 @@ describe Reply do
     let(:group_by_column) { :created_at }
     let(:excluded_resource) { nil }
 
-    def create_resources(count, *args)
-      create_list(:reply, count, *args)
+    def create_resource(*args)
+      create(:reply, *args)
     end
   end
 

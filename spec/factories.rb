@@ -610,7 +610,7 @@ FactoryGirl.define do
 
   factory :call_data_record do
     ignore do
-      cdr_variables false
+      cdr_variables nil
       user nil
       user_who_called nil
       user_who_was_called nil
