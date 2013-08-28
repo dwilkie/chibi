@@ -46,6 +46,10 @@ class Overview
   end
 
   def ivr_minutes(options = {})
-    InboundCdr.overview_of_duration(options)
+    InboundCdr.overview_of_duration(:duration, options)
+  end
+
+  def ivr_bill_minutes(options = {})
+    InboundCdr.overview_of_duration(:bill_sec, options)
   end
 end

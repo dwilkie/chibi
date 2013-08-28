@@ -71,13 +71,13 @@ describe InboundCdr do
     end
   end
 
-  describe ".overview_of_duration(options = {})" do
+  describe ".overview_of_duration(duration_column, options = {})" do
     before do
       Timecop.freeze(Time.now)
       cdr
       2.times do
         create_cdr(
-          :cdr_variables => {"variables" => {"duration" => "59"}}
+          :cdr_variables => {"variables" => {"duration" => "60", "billsec" => "59"}}
         ).update_attribute(:created_at, 8.days.ago)
       end
     end
@@ -86,9 +86,18 @@ describe InboundCdr do
       Timecop.return
     end
 
-    it "should return the sum of duration in mins" do
-      overview = InboundCdr.overview_of_duration
-      overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
+    context "passing :duration" do
+      it "should return the sum of duration in mins" do
+        overview = InboundCdr.overview_of_duration(:duration)
+        overview.should include([miliseconds_since_epoch(eight_days_ago), 4])
+      end
+    end
+
+    context "passing :bill_sec" do
+      it "should return the sum of bill_sec in mins" do
+        overview = InboundCdr.overview_of_duration(:bill_sec)
+        overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
+      end
     end
   end
 end

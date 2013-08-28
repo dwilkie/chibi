@@ -11,6 +11,7 @@ describe OverviewPresenter do
       :phone_calls => [1112, 6],
       :inbound_cdrs => [1112, 7],
       :ivr_minutes => [1112, 443],
+      :ivr_bill_minutes => [1112, 440],
       :revenue => [6644, 0.06]
     }
   end
@@ -22,7 +23,6 @@ describe OverviewPresenter do
   let(:presenter) { OverviewPresenter.new(overview, view) }
 
   def assert_highchart(identifier, result, assertions = {})
-
     highchart_options = JSON.parse(
       result.text.match(/options\s*=\s*(.+)\;/)[1]
     )
@@ -66,14 +66,14 @@ describe OverviewPresenter do
 
   describe "#timeline" do
     context "passing no options" do
-      it "should render a StockChart showing new users, messages and users texting by day" do
+      it "should render a StockChart showing an overview by day" do
         assert_overview_methods
         assert_overview_section(:timeline_by_day, presenter.timeline)
       end
     end
 
     context "passing :timeframe => :month" do
-      it "should render a StockChart showing new users, messages and users texting by month" do
+      it "should render a StockChart showing an overview by month" do
         assert_overview_methods(:timeframe => :month)
         assert_overview_section(:timeline_by_month, presenter.timeline(:timeframe => :month))
       end

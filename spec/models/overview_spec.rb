@@ -98,8 +98,19 @@ describe Overview do
     end
 
     it "should return an overview of the duration of phone calls" do
-      InboundCdr.should_receive(:overview_of_duration).with(options)
+      InboundCdr.should_receive(:overview_of_duration).with(:duration, options)
       subject.ivr_minutes(options)
+    end
+  end
+
+  describe "#ivr_bill_minutes(options = {})" do
+    before do
+      InboundCdr.stub(:overview_of_duration)
+    end
+
+    it "should return an overview of the bill minutes of phone calls" do
+      InboundCdr.should_receive(:overview_of_duration).with(:bill_sec, options)
+      subject.ivr_bill_minutes(options)
     end
   end
 end

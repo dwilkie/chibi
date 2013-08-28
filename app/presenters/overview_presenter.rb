@@ -12,6 +12,7 @@ class OverviewPresenter < BasePresenter
       :phone_calls => overview.phone_calls(options),
       :inbound_cdrs => overview.inbound_cdrs(options),
       :ivr_minutes => overview.ivr_minutes(options),
+      :ivr_bill_minutes => overview.ivr_bill_minutes(options),
       :revenue => overview.revenue(options)
     )
   end
