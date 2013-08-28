@@ -12,8 +12,7 @@ describe OverviewPresenter do
       :phone_calls => [1112, 6],
       :inbound_cdrs => [1112, 7],
       :ivr_minutes => [1112, 443],
-      :ivr_bill_minutes => [1112, 440],
-
+      :ivr_bill_minutes => [1112, 440]
     }
   end
 

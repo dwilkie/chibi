@@ -40,8 +40,8 @@ module MobilePhoneHelpers
     asserted_dial_string
   end
 
-  def with_operators(&block)
-    super(:only_registered => ASSERTED_REGISTERED_OPERATORS, &block)
+  def with_operators(options = {}, &block)
+    super({:only_registered => ASSERTED_REGISTERED_OPERATORS}.merge(options), &block)
   end
 
   def registered_operator(type)

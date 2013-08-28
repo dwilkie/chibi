@@ -46,7 +46,10 @@ class User < ActiveRecord::Base
 
   before_validation(:on => :create) do
     self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
-    assign_location if mobile_number.present?
+    if mobile_number.present?
+      set_operator_name
+      assign_location
+    end
   end
 
   before_save :cancel_searching_for_friend_if_chatting
@@ -104,6 +107,22 @@ class User < ActiveRecord::Base
     ).update_all(
       "activated_at = created_at"
     )
+  end
+
+  def self.set_operator_name
+    Torasup::Operator.all["kh"].each do |operator_id, operator_metadata|
+      condition_statements = []
+      condition_values = []
+
+      operator_metadata["prefixes"].each do |prefix|
+        condition_statements << "\"#{table_name}\".\"mobile_number\" LIKE ?"
+        condition_values << "#{prefix}%"
+      end
+
+      where(:operator_name => nil).where(condition_statements.join(" OR "), *condition_values).update_all(
+        :operator_name => operator_id
+      )
+    end
   end
 
   def self.activated
@@ -628,6 +647,10 @@ class User < ActiveRecord::Base
 
   def set_activated_at
     update_attribute(:activated_at, created_at) if activated? && activated_at.nil?
+  end
+
+  def set_operator_name
+    self.operator_name = operator.id
   end
 
   def torasup_number

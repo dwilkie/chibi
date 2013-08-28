@@ -13,4 +13,9 @@ namespace :users do
   task :set_activated_at => :environment do
     User.set_activated_at
   end
+
+  desc "Sets User#operator_name for users who's operator is unknown"
+  task :set_operator_name => :environment do
+    User.set_operator_name
+  end
 end

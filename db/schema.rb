@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130720000848) do
+ActiveRecord::Schema.define(version: 20130828074659) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -141,6 +141,7 @@ ActiveRecord::Schema.define(version: 20130720000848) do
     t.datetime "last_interacted_at"
     t.datetime "last_contacted_at"
     t.datetime "activated_at"
+    t.string   "operator_name"
   end
 
   add_index "users", ["active_chat_id"], name: "index_users_on_active_chat_id", using: :btree
@@ -148,6 +149,7 @@ ActiveRecord::Schema.define(version: 20130720000848) do
   add_index "users", ["gender"], name: "index_users_on_gender", using: :btree
   add_index "users", ["looking_for"], name: "index_users_on_looking_for", using: :btree
   add_index "users", ["mobile_number"], name: "index_users_on_mobile_number", unique: true, using: :btree
+  add_index "users", ["operator_name"], name: "index_users_on_operator_name", using: :btree
   add_index "users", ["state"], name: "index_users_on_state", using: :btree
 
 end

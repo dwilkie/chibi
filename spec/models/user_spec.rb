@@ -216,12 +216,22 @@ describe User do
           subject.should_receive(:assign_location).with(no_args)
           subject.valid?
         end
+
+        it "should try to assign an operator" do
+          subject.valid?
+          subject.operator_name.should be_present
+        end
       end
 
       context "given a mobile number is not present" do
         it "should not try to build a location" do
           subject.valid?
           subject.location.should be_nil
+        end
+
+        it "should not try to assign an operator" do
+          subject.valid?
+          subject.operator_name.should be_nil
         end
       end
     end
@@ -376,6 +386,31 @@ describe User do
         activated_user.reload.activated_at.to_i.should == 5.days.ago.to_i
         unactivated_user.reload.activated_at.should be_nil
         user_who_should_be_activated.reload.activated_at.to_i.should == 10.days.ago.to_i
+      end
+    end
+  end
+
+  describe ".set_operator_name" do
+    it "should set the operator_name column for users without one set" do
+      asserted_operator_names = {}
+
+      with_operators(:only_registered => false) do |number_parts, assertions|
+        number = number_parts.join
+        user = create(:user, :mobile_number => number)
+        user.update_attribute(:operator_name, nil)
+        user.operator_name.should be_nil
+        asserted_operator_names[user] == assertions["id"]
+      end
+
+      user_with_operator_name = create(:user, :mobile_number => "85512345678")
+      user_with_operator_name.update_attribute(:operator_name, "foo")
+      user_with_operator_name.operator_name.should == "foo"
+
+      subject.class.set_operator_name
+
+      user_with_operator_name.reload.operator_name.should == "foo"
+      asserted_operator_names.each do |user, asserted_operator_name|
+        user.reload.operator_name.should == asserted_operator_name
       end
     end
   end
