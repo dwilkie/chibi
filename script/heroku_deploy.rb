@@ -16,7 +16,7 @@ puts `heroku scale urgent_task_worker=0 #{heroku_app}`
 puts `git push #{git_remote}`
 puts `heroku scale non_essential_task_worker=0 #{heroku_app}`
 puts `heroku scale urgent_task_worker=0 #{heroku_app}`
-`heroku run rake db:migrate #{heroku_app}`
+puts `heroku run rake db:migrate #{heroku_app}`
 
 # Enter any custom Rake tasks here: e.g.
 #`heroku run rake users:set_operator_name #{heroku_app}`
