@@ -53,6 +53,8 @@ describe OverviewPresenter do
     section = result.find("##{identifier}")
     section.should have_selector(".chart_title", :text => title)
     assert_highchart(identifier, section, :title => title)
+    result.should have_link("All", :href => overview_path(:all => true))
+    result.should have_link("6 Months", :href => overview_path)
     result.should have_selector(".separator")
   end
 
