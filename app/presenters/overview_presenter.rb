@@ -6,14 +6,14 @@ class OverviewPresenter < BasePresenter
     high_stock_chart_for(
       "timeline_by_#{timeframe}",
       :new_users => overview.new_users(options),
-      :messages_received => overview.messages_received(options),
-      :users_texting => overview.users_texting(options),
       :return_users => overview.return_users(options),
+      :users_texting => overview.users_texting(options),
+      :revenue => overview.revenue(options),
+      :messages_received => overview.messages_received(options),
       :phone_calls => overview.phone_calls(options),
       :inbound_cdrs => overview.inbound_cdrs(options),
       :ivr_minutes => overview.ivr_minutes(options),
-      :ivr_bill_minutes => overview.ivr_bill_minutes(options),
-      :revenue => overview.revenue(options)
+      :ivr_bill_minutes => overview.ivr_bill_minutes(options)
     )
   end
 
