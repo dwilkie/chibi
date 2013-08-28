@@ -22,4 +22,5 @@ puts `heroku run rake db:migrate #{heroku_app}`
 #`heroku run rake users:set_operator_name #{heroku_app}`
 
 puts `heroku maintenance:off #{heroku_app}`
+puts `heroku restart #{heroku_app}`
 puts `heroku scale urgent_task_worker=1 #{heroku_app}` if ARGV[0] == "chibi"
