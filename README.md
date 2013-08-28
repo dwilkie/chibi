@@ -53,7 +53,7 @@ This command tells git that you want to push from your local `staging` branch to
 
 ## Pull remote data to local database
 
-    curl -o latest.dump `heroku pgbackups:url`
+    curl -o latest.dump `heroku pgbackups:url --app chibi`
     pg_restore --verbose --clean --no-acl --no-owner -h localhost -U dave -d chibi_development latest.dump
     rm latest.dump
 
