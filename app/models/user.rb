@@ -563,14 +563,21 @@ class User < ActiveRecord::Base
 
   def self.from_registered_service_providers
     condition_statements = []
-    condition_values = []
+    values = []
 
-    Torasup::Operator.registered_prefixes.each do |prefix|
-      condition_statements << "\"#{table_name}\".\"mobile_number\" LIKE ?"
-      condition_values << "#{prefix}%"
+    Torasup::Operator.registered.each do |country_code, operator_names|
+      country_condition = "\"#{Location.table_name}\".\"country_code\" = ?"
+      values << country_code
+      operator_conditions = []
+      operator_names.each do |operator_name|
+        operator_conditions << "\"#{table_name}\".\"operator_name\" = ?"
+        values << operator_name
+      end
+      operator_condition = "(#{operator_conditions.join(' OR ')})"
+      condition_statements << "(#{country_condition} AND #{operator_condition})"
     end
 
-    where(condition_statements.join(" OR "), *condition_values)
+    joins(:location).where(condition_statements.join(' OR '), *values)
   end
 
   def self.inactive_timestamp(options = {})
