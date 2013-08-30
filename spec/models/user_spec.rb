@@ -241,6 +241,14 @@ describe User do
     let(:group_by_column) { :activated_at }
     let(:excluded_resource) { unactivated_user }
 
+    def operator_name
+      resource.operator_name
+    end
+
+    def country_code
+      resource.country_code
+    end
+
     def create_resource(*args)
       create(:user, *args)
     end

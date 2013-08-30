@@ -392,6 +392,14 @@ class User < ActiveRecord::Base
 
   private
 
+  def self.by_operator_joins
+    joins(:location)
+  end
+
+  def self.by_operator_name_joins_conditions(options)
+    by_operator_name_conditions(options)
+  end
+
   def self.order_by_preferred_gender(user, scope)
     if user.gay?
       # prefer other gays of the same gender

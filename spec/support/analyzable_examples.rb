@@ -7,6 +7,14 @@ module AnalyzableExamples
     8.days.ago
   end
 
+  def operator_name
+    resource.user.operator_name
+  end
+
+  def country_code
+    resource.user.country_code
+  end
+
   shared_examples_for "analyzable" do |skip_by_user|
     describe ".overview_of_created" do
       def two_months_and_one_day_ago
@@ -17,11 +25,13 @@ module AnalyzableExamples
         (Time.now.month == eight_days_ago.month)
       end
 
+      let(:resource) { create_resource }
+
       before do
         Timecop.freeze(Time.now)
         3.times { create_resource }
         2.times { create_resource.update_attribute(group_by_column, eight_days_ago) }
-        create_resource.update_attribute(group_by_column, two_months_and_one_day_ago)
+        resource.update_attribute(group_by_column, two_months_and_one_day_ago)
       end
 
       after do
@@ -61,6 +71,22 @@ module AnalyzableExamples
           subject.class.overview_of_created(
             :timeframe => :month
           ).should(include(assertion))
+        end
+      end
+
+      context "passing :operator => '<operator>', :country_code => '<country_code>'" do
+        it "should filter by the given operator" do
+          subject.class.overview_of_created(
+            :operator => "foo", :country_code => country_code
+          ).should be_empty
+
+          subject.class.overview_of_created(
+            :operator => operator_name, :country_code => "different"
+          ).should be_empty
+
+          subject.class.overview_of_created(
+            :operator => operator_name, :country_code => country_code
+          ).should_not be_empty
         end
       end
 
