@@ -1,5 +1,4 @@
 %h1 Overview
 - present @overview do |overview_presenter|
-  - timeline_options = params[:all] ? {} : {:least_recent => 6.months}
-  = overview_presenter.timeline(timeline_options)
-  = overview_presenter.timeline(timeline_options.merge(:timeframe => :month))
+  = overview_presenter.timeline
+  = overview_presenter.timeline(:timeframe => :month)

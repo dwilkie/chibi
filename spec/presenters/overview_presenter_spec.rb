@@ -58,23 +58,37 @@ describe OverviewPresenter do
     result.should have_selector(".separator")
   end
 
-  def assert_overview_methods(options = {})
+  def assert_overview_methods
     sample_data.keys.each do |method|
-      overview.should_receive(method).with(options)
+      overview.should_receive(method)
     end
   end
 
   describe "#timeline" do
+    before do
+      overview.stub(:timeframe=)
+    end
+
     context "passing no options" do
+      before do
+        overview.stub(:timeframe).and_return(:day)
+      end
+
       it "should render a StockChart showing an overview by day" do
+        overview.should_receive(:timeframe=).with(:day)
         assert_overview_methods
         assert_overview_section(:timeline_by_day, presenter.timeline)
       end
     end
 
     context "passing :timeframe => :month" do
+      before do
+        overview.stub(:timeframe).and_return(:month)
+      end
+
       it "should render a StockChart showing an overview by month" do
-        assert_overview_methods(:timeframe => :month)
+        overview.should_receive(:timeframe=).with(:month)
+        assert_overview_methods
         assert_overview_section(:timeline_by_month, presenter.timeline(:timeframe => :month))
       end
     end

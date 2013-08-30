@@ -1,55 +1,67 @@
 class Overview
-  def initialize
+  attr_accessor :timeframe, :options
+
+  def initialize(params = {})
+    self.options = params.slice(:operator, :country_code)
+    options.merge!(:least_recent => 6.months) unless params[:all]
     @new_users = {}
     @messages_received = {}
     @users_texting = {}
+    @inbound_cdrs = {}
+    @phone_calls = {}
+    @ivr_minutes = {}
+    @ivr_bill_minutes = {}
   end
 
-  def new_users(options = {})
-    @new_users[options] ||= User.overview_of_created(options)
+  def timeframe=(value)
+    options.merge!(:timeframe => value)
+    @timeframe = value
   end
 
-  def messages_received(options = {})
-    @messages_received[options] ||= Message.overview_of_created(options)
+  def new_users
+    @new_users[timeframe] ||= User.overview_of_created(options)
   end
 
-  def users_texting(options = {})
-    new_options = options.merge(:by_user => true)
-    @users_texting[new_options] ||= Message.overview_of_created(new_options)
+  def messages_received
+    @messages_received[timeframe] ||= Message.overview_of_created(options)
   end
 
-  def return_users(options = {})
+  def users_texting
+    @users_texting[timeframe] ||= Message.overview_of_created(options.merge(:by_user => true))
+  end
+
+  def return_users
     users = []
-    new_users_hash = Hash[new_users(options)]
+    new_users_hash = Hash[new_users]
     new_users_hash.default = 0
-    users_texting(options).each do |timestamp_with_count|
+    users_texting.each do |timestamp_with_count|
       timestamp = timestamp_with_count[0]
       users << [timestamp, timestamp_with_count[1] - new_users_hash[timestamp]]
     end
     users
   end
 
-  def revenue(options = {})
+  def revenue
     revenue_in_dollars = []
-    messages_received(options).each do |timestamp_with_count|
+    messages_received.each do |timestamp_with_count|
       revenue_in_dollars << [timestamp_with_count[0], (timestamp_with_count[1] * ENV['REVENUE_PER_SMS'].to_f).round(2)]
     end
     revenue_in_dollars
   end
 
-  def inbound_cdrs(options = {})
-    InboundCdr.overview_of_created(options)
+  def inbound_cdrs
+    @inbound_cdrs[timeframe] ||= InboundCdr.overview_of_created(options)
   end
 
-  def phone_calls(options = {})
-    PhoneCall.overview_of_created(options)
+  def phone_calls
+    @phone_calls[timeframe] ||= PhoneCall.overview_of_created(options)
   end
 
-  def ivr_minutes(options = {})
-    InboundCdr.overview_of_duration(:duration, options)
+  def ivr_minutes
+    @ivr_minutes[timeframe] ||= InboundCdr.overview_of_duration(:duration, options)
   end
 
-  def ivr_bill_minutes(options = {})
-    InboundCdr.overview_of_duration(:bill_sec, options)
+  def ivr_bill_minutes
+    @ivr_bill_minutes[timeframe] ||= InboundCdr.overview_of_duration(:bill_sec, options)
   end
 end

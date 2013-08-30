@@ -1,52 +1,136 @@
 require 'spec_helper'
 
 describe Overview do
-  let(:options) { { :some => :option } }
+  let(:options) { { :operator => "operator", :country_code => "country_code" } }
+
+  def asserted_options(overridden = {})
+    options.merge(:least_recent => 6.months).merge(overridden)
+  end
+
+  subject { Overview.new(options) }
 
   def stub_overview(resource, value = [])
-    resource.stub(:overview_of_created).and_return(value)
+    resource.stub(asserted_message_expectation).and_return(value)
+  end
+
+  def asserted_message_expectation
+    :overview_of_created
+  end
+
+  def asserted_message_args(overridden_options = {})
+    [asserted_options.merge(overridden_options)]
+  end
+
+  describe "#timeframe=(value)" do
+    it "should update the options" do
+      subject.timeframe = :day
+      subject.options[:timeframe].should == :day
+      subject.timeframe.should == :day
+    end
+  end
+
+  shared_examples_for "an overview method" do
+    before do
+      stub_overview(klass_to_overview)
+    end
+
+    it "should return an overview" do
+      klass_to_overview.should_receive(asserted_message_expectation).with(*asserted_message_args).once
+      2.times { run_overview }
+      subject.timeframe = :month
+      klass_to_overview.should_receive(asserted_message_expectation).with(*asserted_message_args(:timeframe => :month)).once
+      2.times { run_overview }
+    end
   end
 
   describe "#new_users" do
-    before do
-      stub_overview(User)
-    end
+    let(:klass_to_overview) { User }
 
-    it "should return the overview of all new users" do
-      User.should_receive(:overview_of_created).with(options).once
-      User.should_receive(:overview_of_created).once
-      subject.new_users(options)
-      subject.new_users(options)
+    def run_overview
       subject.new_users
     end
+
+    it_should_behave_like "an overview method"
   end
 
   describe "#messages_received" do
-    before do
-      stub_overview(Message)
-    end
+    let(:klass_to_overview) { Message }
 
-    it "should return the overview of all messages received" do
-      Message.should_receive(:overview_of_created).with(options).once
-      Message.should_receive(:overview_of_created).once
-      subject.messages_received(options)
-      subject.messages_received(options)
+    def run_overview
       subject.messages_received
     end
+
+    it_should_behave_like "an overview method"
   end
 
   describe "#users_texting" do
-    before do
-      stub_overview(Message)
-    end
+    let(:klass_to_overview) { Message }
 
-    it "should return the overview of all active users" do
-      Message.should_receive(:overview_of_created).with(hash_including(options.merge(:by_user => true))).once
-      Message.should_receive(:overview_of_created).once
-      subject.users_texting(options)
-      subject.users_texting(options)
+    def run_overview
       subject.users_texting
     end
+
+    def asserted_options(overridden = {})
+      super.merge(:by_user => true)
+    end
+
+    it_should_behave_like "an overview method"
+  end
+
+  describe "#inbound_cdrs" do
+    let(:klass_to_overview) { InboundCdr }
+
+    def run_overview
+      subject.inbound_cdrs
+    end
+
+    it_should_behave_like "an overview method"
+  end
+
+  describe "#phone_calls" do
+    let(:klass_to_overview) { PhoneCall }
+
+    def run_overview
+      subject.phone_calls
+    end
+
+    it_should_behave_like "an overview method"
+  end
+
+  describe "#ivr_minutes" do
+    let(:klass_to_overview) { InboundCdr }
+
+    def run_overview
+      subject.ivr_minutes
+    end
+
+    def asserted_message_expectation
+      :overview_of_duration
+    end
+
+    def asserted_message_args(overridden_options = {})
+      [:duration, *super]
+    end
+
+    it_should_behave_like "an overview method"
+  end
+
+  describe "#ivr_bill_minutes" do
+    let(:klass_to_overview) { InboundCdr }
+
+    def run_overview
+      subject.ivr_bill_minutes
+    end
+
+    def asserted_message_expectation
+      :overview_of_duration
+    end
+
+    def asserted_message_args(overridden_options = {})
+      [:bill_sec, *super]
+    end
+
+    it_should_behave_like "an overview method"
   end
 
   describe "#return_users" do
@@ -56,7 +140,7 @@ describe Overview do
     end
 
     it "should return an overview of the active users who are not new" do
-      subject.return_users(options).should == [[1360886400000, 3], [1361232000000, 2]]
+      subject.return_users.should == [[1360886400000, 3], [1361232000000, 2]]
     end
   end
 
@@ -66,51 +150,7 @@ describe Overview do
     end
 
     it "should an overview of the revenue" do
-      subject.revenue(options).should == [[1360886400000, 842.25], [1361232000000, 828.35]]
-    end
-  end
-
-  describe "#inbound_cdrs(options = {})" do
-    before do
-      stub_overview(InboundCdr, [])
-    end
-
-    it "should return an overview of the inbound cdrs" do
-      InboundCdr.should_receive(:overview_of_created).with(options)
-      subject.inbound_cdrs(options)
-    end
-  end
-
-  describe "#phone_calls(options = {})" do
-    before do
-      stub_overview(PhoneCall, [])
-    end
-
-    it "should return an overview of the phone calls" do
-      PhoneCall.should_receive(:overview_of_created).with(options)
-      subject.phone_calls(options)
-    end
-  end
-
-  describe "#ivr_minutes(options = {})" do
-    before do
-      InboundCdr.stub(:overview_of_duration)
-    end
-
-    it "should return an overview of the duration of phone calls" do
-      InboundCdr.should_receive(:overview_of_duration).with(:duration, options)
-      subject.ivr_minutes(options)
-    end
-  end
-
-  describe "#ivr_bill_minutes(options = {})" do
-    before do
-      InboundCdr.stub(:overview_of_duration)
-    end
-
-    it "should return an overview of the bill minutes of phone calls" do
-      InboundCdr.should_receive(:overview_of_duration).with(:bill_sec, options)
-      subject.ivr_bill_minutes(options)
+      subject.revenue.should == [[1360886400000, 842.25], [1361232000000, 828.35]]
     end
   end
 end
