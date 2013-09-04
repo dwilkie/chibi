@@ -573,13 +573,13 @@ class User < ActiveRecord::Base
     condition_statements = []
     values = []
 
-    Torasup::Operator.registered.each do |country_code, operator_names|
+    Torasup::Operator.registered.each do |country_code, operators|
       country_condition = "\"#{Location.table_name}\".\"country_code\" = ?"
       values << country_code
       operator_conditions = []
-      operator_names.each do |operator_name|
+      operators.each do |operator_id, operator_metadata|
         operator_conditions << "\"#{table_name}\".\"operator_name\" = ?"
-        values << operator_name
+        values << operator_id
       end
       operator_condition = "(#{operator_conditions.join(' OR ')})"
       condition_statements << "(#{country_condition} AND #{operator_condition})"
