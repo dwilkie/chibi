@@ -17,7 +17,28 @@ class OverviewPresenter < BasePresenter
     )
   end
 
+  def menu
+    content_tag(:div, :class => :menu) do
+      content_tag(:ul) do
+        content_tag(:li) do
+          report_link
+        end
+      end
+    end
+  end
+
   private
+
+  def report_link
+    time_last_month = (Time.now - 1.month)
+    last_month = time_last_month.month
+    last_month_year = time_last_month.year
+    link_to(
+      "create report for #{time_last_month.strftime('%B %Y')}",
+      report_path(:report => {:year => last_month_year, :month => last_month}),
+      :method => :post
+    )
+  end
 
   def high_stock_chart_for(identifier, data_sets)
     title = identifier.titleize

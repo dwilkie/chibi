@@ -2,7 +2,7 @@ module MobilePhoneHelpers
   include Torasup::Test::Helpers
 
   ASSERTED_REGISTERED_OPERATORS = {
-    "kh" => %w{smart beeline hello}
+    "kh" => %w{smart beeline}
   }
 
   TESTED_NATIONALITIES = {

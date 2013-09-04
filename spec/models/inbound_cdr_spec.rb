@@ -71,7 +71,7 @@ describe InboundCdr do
     end
   end
 
-  describe ".overview_of_duration(duration_column, options = {})" do
+  describe ".overview_of_duration(duration_column, options = {})", :focus do
     before do
       Timecop.freeze(Time.now)
       cdr
@@ -97,6 +97,13 @@ describe InboundCdr do
       it "should return the sum of bill_sec in mins" do
         overview = InboundCdr.overview_of_duration(:bill_sec)
         overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
+      end
+    end
+
+    context "passing :format => :report" do
+      it "should return a hash" do
+        overview = InboundCdr.overview_of_duration(:duration, :format => :report)
+        overview.should be_a(Hash)
       end
     end
   end

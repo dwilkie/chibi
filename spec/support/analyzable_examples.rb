@@ -51,8 +51,16 @@ module AnalyzableExamples
         end
       end
 
+      context "passing :format => :report" do
+        it "should return an overview of all the created resources (in Report format)" do
+          subject.class.overview_of_created(
+            :format => :report
+          ).should be_a(Hash)
+        end
+      end
+
       context "passing :least_recent => 2.months" do
-        it "should return an overview of the resources created in the last 2 months (in HighStocks format)" do
+        it "should return an overview of the resources created in the last 2 months" do
           subject.class.overview_of_created(
             :least_recent => 2.months
           ).should_not(
@@ -60,6 +68,14 @@ module AnalyzableExamples
               [miliseconds_since_epoch(two_months_and_one_day_ago), 1]
             )
           )
+        end
+      end
+
+      context "passing :between => 3.months.ago..2.month.ago" do
+        it "should return an overview of the resources created in the timeline given" do
+          subject.class.overview_of_created(
+            :between => 3.months.ago..2.months.ago
+          ).should == [[miliseconds_since_epoch(two_months_and_one_day_ago), 1]]
         end
       end
 

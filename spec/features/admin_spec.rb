@@ -225,6 +225,40 @@ describe "Admin" do
           end
         end
       end
+
+      context "given it's March 2014", :focus do
+        include TimecopHelpers
+        include ResqueHelpers
+
+        before do
+          Timecop.freeze(sometime_in(:year => 2014, :month => 3))
+        end
+
+        after do
+          Timecop.return
+        end
+
+        context "and I create an IVR report" do
+          before do
+            visit overview_path
+            do_background_task(:queue_only => true) { click_link("create report for February 2014") }
+          end
+
+          it "should queue a job for an IVR report to be created" do
+            page.should have_content "Generating report. Check your email"
+            ReportGenerator.should have_queued("year" => "2014", "month" => "2")
+          end
+
+          context "when the job has run" do
+            before do
+              perform_background_job(:report_generator_queue)
+            end
+
+            it "should have generated a report" do
+            end
+          end
+        end
+      end
     end
 
     context "given some chats" do

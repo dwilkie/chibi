@@ -8,7 +8,8 @@ class InboundCdr < CallDataRecord
   include Chibi::Analyzable
 
   def self.overview_of_duration(duration_column, options = {})
-    highcharts_array(group_by_timeframe(options).sum("(#{duration_column} / 60) + 1"))
+    result = group_by_timeframe(options).sum("(#{duration_column} / 60) + 1").integerify!
+    options[:format] == :report ? result : result.to_a
   end
 
   private

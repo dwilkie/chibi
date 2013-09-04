@@ -33,8 +33,7 @@ FactoryGirl.define do
   end
 
   factory :message do
-    user
-    from { user.mobile_number }
+    from { generate(:mobile_number) }
 
     trait :with_guid do
       guid
