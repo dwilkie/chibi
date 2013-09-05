@@ -226,11 +226,13 @@ describe "Admin" do
         end
       end
 
-      context "given it's March 2014", :focus do
+      context "given it's March 2014" do
         include TimecopHelpers
         include ResqueHelpers
+        include ReportHelpers
 
         before do
+          stub_redis
           Timecop.freeze(sometime_in(:year => 2014, :month => 3))
         end
 
@@ -238,23 +240,31 @@ describe "Admin" do
           Timecop.return
         end
 
-        context "and I create an IVR report" do
+        context "and I create a report for February 2014" do
           before do
             visit overview_path
             do_background_task(:queue_only => true) { click_link("create report for February 2014") }
           end
 
-          it "should queue a job for an IVR report to be created" do
-            page.should have_content "Generating report. Check your email"
+          it "should queue a job for a report to be created and tell me to refresh" do
+            page.should have_content "Generating report. Refresh at will"
             ReportGenerator.should have_queued("year" => "2014", "month" => "2")
           end
 
-          context "when the job has run" do
+          context "given the job has finished" do
             before do
               perform_background_job(:report_generator_queue)
             end
 
-            it "should have generated a report" do
+            context "when I visit '/report'" do
+              before do
+                visit report_path
+              end
+
+              it "should download my report" do
+                response_headers["Content-Type"].should == asserted_report_type
+                response_headers["Content-Disposition"].should == "attachment; filename=\"#{asserted_report_filename(:february, 2014)}\""
+              end
             end
           end
         end

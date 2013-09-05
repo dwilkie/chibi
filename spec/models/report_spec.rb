@@ -1,12 +1,93 @@
 require 'spec_helper'
 
 describe Report do
+  include ReportHelpers
+
+  let(:base_report_data) { { "month" => 1, "year" => 2014 } }
+  subject { Report.new(base_report_data) }
+
+  def set_report
+    REDIS.set("report", base_report_data.to_json)
+  end
+
+  def asserted_report(options = {})
+    return "{}" if options[:empty]
+    base_report_data.to_json
+  end
+
+  def report
+    subject.class
+  end
+
+  before do
+    stub_redis
+  end
+
+  describe "singleton methods" do
+    before do
+      set_report
+    end
+
+    describe ".clear" do
+      it "should clear the report" do
+        report.clear
+        report.data.should == asserted_report(:empty => true)
+      end
+    end
+
+    describe ".year" do
+      it "should return the report year" do
+        report.year.should == base_report_data["year"]
+      end
+    end
+
+    describe ".month" do
+      it "should return the report month" do
+        report.month.should == base_report_data["month"]
+      end
+    end
+
+    describe ".filename" do
+      it "should return a filename from the month and the date" do
+        report.filename.should == asserted_report_filename(:january, 2014)
+      end
+    end
+
+    describe ".type" do
+      it "should return 'application/json'" do
+        report.type.should == asserted_report_type
+      end
+    end
+
+    describe ".data" do
+      it "should return the report data" do
+        report.data.should == asserted_report
+      end
+    end
+
+    describe ".generated?" do
+      context "given the report has been generated" do
+        it "should return true" do
+          report.should be_generated
+        end
+      end
+
+      context "given the report has not been generated (or has been cleared)" do
+        before do
+          report.clear
+        end
+
+        it "should return false" do
+          report.should_not be_generated
+        end
+      end
+    end
+  end
+
   describe "#generate!" do
     include MobilePhoneHelpers
     include TimecopHelpers
     include CdrHelpers
-
-    subject { Report.new(:month => 1, :year => 2014) }
 
     def increment_daily_interactions(daily_report, key, options = {})
       options[:by] ||= 1
@@ -47,16 +128,18 @@ describe Report do
     end
 
     let(:asserted_report) do
-      report = {}
+      report = base_report_data
       create_sample_interaction(:day => 1, :month => 1, :year => 2014, :report => report)
       create_sample_interaction(:day => 31, :month => 1, :year => 2014, :report => report)
       create_sample_interaction(:day => 15, :month => 12, :year => 2013, :report => report)
-      report
+      JSON.parse(report.to_json)
     end
 
-    it "should generate a report", :focus do
+    it "should generate a report" do
       asserted_report
-      subject.generate!.should == asserted_report
+      report.should_not be_generated
+      JSON.parse(subject.generate!).should == asserted_report
+      report.should be_generated
     end
   end
 end

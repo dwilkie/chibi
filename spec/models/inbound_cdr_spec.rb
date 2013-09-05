@@ -71,7 +71,7 @@ describe InboundCdr do
     end
   end
 
-  describe ".overview_of_duration(duration_column, options = {})", :focus do
+  describe ".overview_of_duration(duration_column, options = {})" do
     before do
       Timecop.freeze(Time.now)
       cdr

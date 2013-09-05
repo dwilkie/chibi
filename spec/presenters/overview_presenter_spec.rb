@@ -94,7 +94,7 @@ describe OverviewPresenter do
     end
   end
 
-  describe "#menu", :focus do
+  describe "#menu" do
     include TimecopHelpers
 
     context "given it's January 2014" do
@@ -108,9 +108,10 @@ describe OverviewPresenter do
 
       it "should return a link to create a report for December 2013" do
         result = capybara_string(presenter.menu)
-        p result.find_link("create report for December 2013")
         result.should have_link(
-          "create report for December 2013", :href => report_path(:year => 2013, :month => 12)
+          "create report for December 2013", :href => report_path(
+            :report => {:month => 12, :year => 2013}
+          )
         )
       end
     end
@@ -127,7 +128,9 @@ describe OverviewPresenter do
       it "should return a link to create a report for March 2014" do
         result = capybara_string(presenter.menu)
         result.should have_link(
-          "create report for March 2014", :href => report_path(:year => 2014, :month => 3)
+          "create report for March 2014", :href => report_path(
+            :report => {:year => 2014, :month => 3}
+          )
         )
       end
     end

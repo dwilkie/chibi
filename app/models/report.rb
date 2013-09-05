@@ -1,9 +1,39 @@
 class Report
+  REDIS_KEY = "report"
+
   attr_accessor :month, :year
 
-  def initialize(options)
-    self.month = options[:month]
-    self.year = options[:year]
+  def initialize(options = {})
+    self.month = options["month"]
+    self.year = options["year"]
+  end
+
+  def self.clear
+    REDIS.del(REDIS_KEY)
+  end
+
+  def self.data
+    REDIS.get(REDIS_KEY) || "{}"
+  end
+
+  def self.month
+    parsed_data["month"]
+  end
+
+  def self.year
+    parsed_data["year"]
+  end
+
+  def self.filename
+    "chibi_report_" + Time.new(year, month).strftime("%B_%Y").downcase + ".json"
+  end
+
+  def self.type
+    "application/json"
+  end
+
+  def self.generated?
+    month && year
   end
 
   # generates a JSON report for the registered operators for the month and year such as:
@@ -29,7 +59,7 @@ class Report
   #  "th" => ...
 
   def generate!
-    report = {}
+    report = {"month" => month, "year" => year}
     Torasup::Operator.registered.each do |country_id, operators|
       country_report = report[country_id] ||= {}
       operators.each do |operator_id, operator_metadata|
@@ -40,10 +70,19 @@ class Report
         generate_ivr_report!(daily_report, operator_options) if operator_metadata["dial_string"]
       end
     end
-    report
+    store_report(report)
+    self.class.data
   end
 
   private
+
+  def self.parsed_data
+    JSON.parse(data)
+  end
+
+  def store_report(value)
+    REDIS.set(REDIS_KEY, value.to_json)
+  end
 
   def generate_messages_report!(daily_report, operator_options)
     daily_report["messages"] ||= Message.overview_of_created(report_options(operator_options))
@@ -60,12 +99,9 @@ class Report
   end
 
   def report_options(options = {})
+    time_of_month = Time.new(year, month)
     {
       :format => :report, :between => time_of_month.beginning_of_month..time_of_month.end_of_month
     }.merge(options)
-  end
-
-  def time_of_month
-    @time_of_month ||= Time.new(year, month)
   end
 end
