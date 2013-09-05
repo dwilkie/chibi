@@ -46,6 +46,7 @@ end
 group :test do
   gem 'factory_girl'
   gem 'spork', :git => 'git://github.com/sporkrb/spork.git'
+  gem 'mock_redis', :git => 'git@github.com:causes/mock_redis.git'
   gem 'fakeweb'
   gem 'vcr', :git => 'git://github.com/myronmarston/vcr.git'
   gem 'guard-rspec'

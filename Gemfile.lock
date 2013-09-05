@@ -31,6 +31,12 @@ GIT
   specs:
     spork (1.0.0rc3)
 
+GIT
+  remote: git@github.com:causes/mock_redis.git
+  revision: 481b4c35f3c903792d787b9544cca61c7faa3ec2
+  specs:
+    mock_redis (0.9.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -301,6 +307,7 @@ DEPENDENCIES
   kaminari
   launchy
   lazy_high_charts
+  mock_redis!
   multi_xml
   nuntium_api
   parallel_tests
