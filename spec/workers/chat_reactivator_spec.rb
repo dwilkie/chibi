@@ -8,37 +8,23 @@ describe ChatReactivator do
     end
   end
 
-  describe ".perform(chat_id = nil)" do
-    let(:job_stub) { Chat.stub(:reactivate_stagnant!) }
+  describe ".perform(chat_id)" do
+    let(:find_stub) { Chat.stub(:find) }
+    let(:chat) { mock_model(Chat) }
 
-    context "with no chat id" do
-      before do
-        job_stub
-      end
-
-      it "should reactivate all stagnant chats" do
-        Chat.should_receive(:reactivate_stagnant!)
-        subject.class.perform
-      end
+    before do
+      chat.stub(:reactivate!)
+      find_stub.and_return(chat)
     end
 
-    context "with a chat id" do
-      let(:chat) { mock_model(Chat) }
-
-      before do
-        chat.stub(:reactivate!)
-        Chat.stub(:find).and_return(chat)
-      end
-
-      it "should tell the chat to reactivate itself" do
-        chat.should_receive(:reactivate!)
-        subject.class.perform(1)
-      end
+    it "should tell the chat to reactivate itself" do
+      chat.should_receive(:reactivate!)
+      subject.class.perform(1)
     end
 
     it_should_behave_like "rescheduling SIGTERM exceptions" do
-      let(:args) { [nil] }
-      let(:error_stub) { job_stub }
+      let(:args) { [1] }
+      let(:error_stub) { find_stub }
     end
   end
 end

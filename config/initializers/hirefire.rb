@@ -14,6 +14,7 @@ HireFire::Resource.configure do |config|
     HireFire::Macro::Resque.queue(
       :locator_queue,
       :chat_reactivator_queue,
+      :chat_reinvigorator_queue,
       :chat_deactivator_queue,
       :chat_expirer_queue,
       :friend_messenger_queue,

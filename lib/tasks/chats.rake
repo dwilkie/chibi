@@ -11,6 +11,6 @@ namespace :chats do
 
   desc "Reactivates stagnant chats which have pending messages"
   task :reactivate_stagnant => :environment do
-    Resque.enqueue(ChatReactivator)
+    Resque.enqueue(ChatReinvigorator)
   end
 end
