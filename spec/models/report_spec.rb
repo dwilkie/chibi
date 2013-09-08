@@ -84,6 +84,31 @@ describe Report do
     end
   end
 
+  describe "#initialize(options = {})" do
+    before do
+      set_report
+    end
+
+    it "should clear the report" do
+      subject
+      report.data.should == asserted_report(:empty => true)
+    end
+  end
+
+  describe "#valid?" do
+    context "given it has a month and a year" do
+      it "should return true" do
+        subject.should be_valid
+      end
+    end
+
+    context "given is does not have a month or a year" do
+      it "should return false" do
+        Report.new(:year => 2014).should_not be_valid
+      end
+    end
+  end
+
   describe "#generate!" do
     include MobilePhoneHelpers
     include TimecopHelpers

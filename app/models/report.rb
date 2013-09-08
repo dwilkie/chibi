@@ -6,6 +6,7 @@ class Report
   def initialize(options = {})
     self.month = options["month"]
     self.year = options["year"]
+    self.class.clear
   end
 
   def self.clear
@@ -33,6 +34,10 @@ class Report
   end
 
   def self.generated?
+    month && year
+  end
+
+  def valid?
     month && year
   end
 
