@@ -1,4 +1,5 @@
 class ReportsController < ApplicationController
+  protect_from_forgery :except => [:create, :show]
   before_filter :authenticate_admin
 
   def create

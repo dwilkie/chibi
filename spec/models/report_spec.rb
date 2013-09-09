@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Report do
+describe Report, :focus do
   include ReportHelpers
 
   let(:base_report_data) { { "month" => 1, "year" => 2014 } }
@@ -25,6 +25,7 @@ describe Report do
 
   describe "singleton methods" do
     before do
+      report
       set_report
     end
 
