@@ -34,7 +34,7 @@ class Report
   end
 
   def self.generated?
-    month && year
+    parsed_data.any?
   end
 
   def valid?
@@ -43,46 +43,57 @@ class Report
 
   # generates a JSON report for the registered operators for the month and year such as:
   # {
-  #   "year" => 2014,
-  #   "month" => 1,
-  #   "kh" => {
-  #     "smart" => {
-  #       "daily" => {
-  #         "messages" => {1 => 1023, 2 => 1345, ..., 31 => 1234},
-  #         "ivr" => {
-  #           "duration" => {1 => 234, 2 => 321, ..., 31 => 422},
-  #           "bill_sec" => {1 => 232, 2 => 319, ..., 31 => 421,
+  #   "report" => {
+  #     "year" => 2014,
+  #     "month" => 1,
+  #     "countries" => {
+  #       "kh" => {
+  #         "operators" => {
+  #           "smart" => {
+  #             "daily" => {
+  #               "messages" => {1 => 1023, 2 => 1345, ..., 31 => 1234},
+  #               "ivr" => {
+  #                 "duration" => {1 => 234, 2 => 321, ..., 31 => 422},
+  #                 "bill_sec" => {1 => 232, 2 => 319, ..., 31 => 421}
+  #               }
+  #             }
+  #           },
+  #           "beeline" => {
+  #             "daily" => {
+  #               "messages" => {1 => 1023, 2 => 1345, ..., 31 => 1234}
+  #             }
   #           }
   #         }
+  #       },
+  #       "th" => {
+  #         ...
   #       }
-  #     },
-  #     "beeline" => {
-  #       "daily" => {
-  #         "messages" => {1 => 1023, 2 => 1345, ..., 31 => 1234}
-  #       }
-  #     },
-  #  "th" => ...
+  #     }
+  #   }
+  # }
 
   def generate!
-    report = {"month" => month, "year" => year}
+    report_data = {"month" => month, "year" => year}
+    countries_report = report_data["countries"] ||= {}
     Torasup::Operator.registered.each do |country_id, operators|
-      country_report = report[country_id] ||= {}
+      country_report = countries_report[country_id] ||= {}
+      operators_report = country_report["operators"] ||= {}
       operators.each do |operator_id, operator_metadata|
-        operator_report = country_report[operator_id] ||= {}
+        operator_report = operators_report[operator_id] ||= {}
         daily_report = operator_report["daily"] ||= {}
         operator_options = {:operator => operator_id, :country_code => country_id}
         generate_messages_report!(daily_report, operator_options)
         generate_ivr_report!(daily_report, operator_options) if operator_metadata["dial_string"]
       end
     end
-    store_report(report)
+    store_report("report" => report_data)
     self.class.data
   end
 
   private
 
   def self.parsed_data
-    JSON.parse(data)
+    JSON.parse(data)["report"] || {}
   end
 
   def store_report(value)

@@ -3,8 +3,13 @@ require 'spec_helper'
 describe Report do
   include ReportHelpers
 
-  let(:base_report_data) { { "month" => 1, "year" => 2014 } }
-  subject { Report.new(base_report_data) }
+  let(:base_report_data) do
+    {
+      "report" => {"month" => 1, "year" => 2014}
+    }
+  end
+
+  subject { Report.new(base_report_data["report"]) }
 
   def set_report
     REDIS.set("report", base_report_data.to_json)
@@ -38,13 +43,13 @@ describe Report do
 
     describe ".year" do
       it "should return the report year" do
-        report.year.should == base_report_data["year"]
+        report.year.should == base_report_data["report"]["year"]
       end
     end
 
     describe ".month" do
       it "should return the report month" do
-        report.month.should == base_report_data["month"]
+        report.month.should == base_report_data["report"]["month"]
       end
     end
 
@@ -124,7 +129,7 @@ describe Report do
     end
 
     def create_sample_interaction(options)
-      report = options[:report] ||= {}
+      report_data = options[:report]["report"]
       Timecop.freeze(sometime_in(options)) do
         with_operators do |number_parts, assertions|
           full_number = number_parts.join
@@ -139,8 +144,10 @@ describe Report do
           )
 
           next unless subject.month == options[:month] && options[:year] == options[:year]
-          country_report = report[assertions["country_id"]] ||= {}
-          operator_report = country_report[assertions["id"]] ||= {}
+          countries_report = report_data["countries"] ||= {}
+          country_report = countries_report[assertions["country_id"]] ||= {}
+          operators_report = country_report["operators"] ||= {}
+          operator_report = operators_report[assertions["id"]] ||= {}
           daily_report = operator_report["daily"] ||= {}
 
           increment_daily_interactions(daily_report, "messages", options)
