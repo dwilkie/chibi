@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Report, :focus do
+describe Report do
   include ReportHelpers
 
   let(:base_report_data) { { "month" => 1, "year" => 2014 } }

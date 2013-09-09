@@ -19,7 +19,7 @@ Chibi::Application.routes.draw do
     resource :interaction, :only => :show
   end
 
-  resource :report, :only => [:create, :show]
+  resource :report, :only => [:create, :show, :destroy]
 
   mount Resque::Server, :at => "/resque"
 end

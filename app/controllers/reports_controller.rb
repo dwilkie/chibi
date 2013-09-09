@@ -1,5 +1,5 @@
 class ReportsController < ApplicationController
-  protect_from_forgery :except => [:create, :show]
+  protect_from_forgery :except => [:create, :show, :destroy]
   before_filter :authenticate_admin
 
   def create
@@ -22,6 +22,15 @@ class ReportsController < ApplicationController
 
       format.json do
         Report.generated? ? render(:json => Report.data) : render(:nothing => true, :status => :not_found)
+      end
+    end
+  end
+
+  def destroy
+    Report.clear
+    respond_to do |format|
+      format.json do
+        render(:nothing => true, :status => :ok)
       end
     end
   end

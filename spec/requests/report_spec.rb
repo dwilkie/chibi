@@ -29,6 +29,20 @@ describe "Report" do
     )
   end
 
+  def get_report
+    get(
+      report_path,
+      {},
+      authentication_params
+    )
+  end
+
+  def post_wait_and_retrieve_report(params)
+    post_report(params)
+    perform_background_job(:report_generator_queue)
+    get_report
+  end
+
   describe "POST '/report.json'" do
     context "with valid params" do
       before do
@@ -60,14 +74,6 @@ describe "Report" do
   end
 
   describe "GET '/report.json'" do
-    def get_report
-      get(
-        report_path,
-        {},
-        authentication_params
-      )
-    end
-
     context "given the report has not yet been generated" do
       before do
         get_report
@@ -80,9 +86,7 @@ describe "Report" do
 
     context "given the report has already been generated" do
       before do
-        post_report(:year => 2014, :month => 1)
-        perform_background_job(:report_generator_queue)
-        get_report
+        post_wait_and_retrieve_report(:year => 2014, :month => 1)
       end
 
       it "should return a 200" do
@@ -94,6 +98,32 @@ describe "Report" do
         parsed_response["month"].should == "1"
         parsed_response["year"].should == "2014"
       end
+    end
+  end
+
+  describe "'DELETE' /report.json" do
+    def delete_report
+      delete(
+        report_path,
+        {},
+        authentication_params
+      )
+    end
+
+    before do
+      delete_report
+    end
+
+    it "should return a 200" do
+      response.status.should be(200)
+    end
+
+    it "should delete the report" do
+      post_wait_and_retrieve_report(:month => 1, :year => 2014)
+      response.status.should be(200)
+      delete_report
+      get_report
+      response.status.should be(404)
     end
   end
 end
