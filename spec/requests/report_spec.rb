@@ -94,7 +94,7 @@ describe "Report" do
       end
 
       it "should return the generated report" do
-        parsed_response = JSON.parse(response.body)
+        parsed_response = JSON.parse(response.body)["report"]
         parsed_response["month"].should == "1"
         parsed_response["year"].should == "2014"
       end
