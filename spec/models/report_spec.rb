@@ -120,12 +120,17 @@ describe Report do
     include TimecopHelpers
     include CdrHelpers
 
-    def increment_daily_interactions(daily_report, key, options = {})
+    def increment_interactions(service_report, key, options = {})
       options[:by] ||= 1
-
-      interaction_report = daily_report[key] ||= {}
-      interaction_report[options[:day]] ||= 0
-      interaction_report[options[:day]] += options[:by]
+      [:day, :month].each do |period|
+        interaction_report = service_report["by_#{period}"] ||= {}
+        interaction_report = interaction_report[key] ||= {}
+        interaction_report[options[period]] ||= 0
+        interaction_report[options[period]] += options[:by]
+        if options[:increment_quantity] && period == :month
+          service_report["quantity"] = service_report["by_month"][key].values.first
+        end
+      end
     end
 
     def create_sample_interaction(options)
@@ -148,13 +153,17 @@ describe Report do
           country_report = countries_report[assertions["country_id"]] ||= {}
           operators_report = country_report["operators"] ||= {}
           operator_report = operators_report[assertions["id"]] ||= {}
-          daily_report = operator_report["daily"] ||= {}
-
-          increment_daily_interactions(daily_report, "messages", options)
-          if assertions["dial_string"]
-            ivr_report = daily_report["ivr"] ||= {}
-            increment_daily_interactions(ivr_report, "duration", options.merge(:by => 2))
-            increment_daily_interactions(ivr_report, "bill_sec", options)
+          operator_report["billing"] ||= assertions["billing"].dup
+          operator_report["payment_instructions"] ||= assertions["payment_instructions"].dup
+          services_report = operator_report["services"] ||= assertions["services"].dup
+          increment_interactions(
+            services_report["sms"], "count", options.merge(:increment_quantity => true)
+          )
+          if ivr_report = services_report["ivr"]
+            increment_interactions(
+              ivr_report, "duration", options.merge(:by => 2, :increment_quantity => true)
+            )
+            increment_interactions(ivr_report, "bill_sec", options)
           end
         end
       end

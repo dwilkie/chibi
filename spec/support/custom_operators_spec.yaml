@@ -10,8 +10,59 @@ kh:
         short_code: "2442"
         caller_id: "2442"
         dial_string: "sofia/internal/%{number_to_dial}@27.109.112.80"
+        billing:
+          recipients:
+            "eng.makara@smart.com.kh":
+              name: "Makara"
+          attention: "Finance Department"
+          vat_tin: "100071112"
+          address: "464A Preah Monivong Blvd,\nSangkat Tonle Bassac,\nKhan Chamkarmorn,\nPhnom Penh"
+          name:  "Latelz Co., Ltd"
+        payment_instructions:
+          bank_name: "Advanced Bank of Asia Limited (ABA)"
+          account_name: "Chatterbox Dating Mobile"
+          account_number: "000070412"
+          swift_code: "ABAAKHPP"
+          bank_address: "148 Preah Sihanouk Blvd,\nSangkat Boeung Keng Kang 1,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
+        services:
+          sms:
+            name: "iFriendship SMS"
+            short_code: "2442"
+            unit_cost: "0.05"
+            specific_tax: "0.03"
+            vat: "0.1"
+            revenue_share: "0.3"
+          ivr:
+            name: "iFriendship IVR"
+            short_code: "2442"
+            unit_cost: "0.1"
+            specific_tax: "0.03"
+            vat: "0.1"
+            revenue_share: "0.35"
     beeline:
       assertions:
         nuntium_channel: "beeline"
         mt_message_queue: "beeline_mt_message_queue"
         short_code: "2442"
+        billing:
+          recipients:
+            "pith@beeline.com.kh":
+              name: "Phalkun"
+          attention: "Mr. Ith Phalkun"
+          vat_tin: "100099351"
+          address: "15E2 Norodom Blvd,\nPhnom Penh"
+          name:  "SOTELCO Ltd"
+        payment_instructions:
+          bank_name: "ANZ Royal Bank"
+          account_name: "Chatterbox Dating Mobile"
+          account_number: "2588103"
+          swift_code: "ANZBKHPP"
+          bank_address: "100 Preah Sihanouk Blvd,\nSangkat Boeung Keng Kang 1,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
+        services:
+          sms:
+            name: "Chibi SMS Chat"
+            short_code: "2442"
+            unit_cost: "0.05"
+            specific_tax: "0.03"
+            vat: "0.1"
+            revenue_share: "0.3"

@@ -41,37 +41,6 @@ class Report
     month && year
   end
 
-  # generates a JSON report for the registered operators for the month and year such as:
-  # {
-  #   "report" => {
-  #     "year" => 2014,
-  #     "month" => 1,
-  #     "countries" => {
-  #       "kh" => {
-  #         "operators" => {
-  #           "smart" => {
-  #             "daily" => {
-  #               "messages" => {1 => 1023, 2 => 1345, ..., 31 => 1234},
-  #               "ivr" => {
-  #                 "duration" => {1 => 234, 2 => 321, ..., 31 => 422},
-  #                 "bill_sec" => {1 => 232, 2 => 319, ..., 31 => 421}
-  #               }
-  #             }
-  #           },
-  #           "beeline" => {
-  #             "daily" => {
-  #               "messages" => {1 => 1023, 2 => 1345, ..., 31 => 1234}
-  #             }
-  #           }
-  #         }
-  #       },
-  #       "th" => {
-  #         ...
-  #       }
-  #     }
-  #   }
-  # }
-
   def generate!
     report_data = {"month" => month, "year" => year}
     countries_report = report_data["countries"] ||= {}
@@ -80,10 +49,12 @@ class Report
       operators_report = country_report["operators"] ||= {}
       operators.each do |operator_id, operator_metadata|
         operator_report = operators_report[operator_id] ||= {}
-        daily_report = operator_report["daily"] ||= {}
+        operator_report["billing"] = operator_metadata["billing"].dup
+        operator_report["payment_instructions"] = operator_metadata["payment_instructions"].dup
+        services_report = operator_report["services"] = operator_metadata["services"].dup
         operator_options = {:operator => operator_id, :country_code => country_id}
-        generate_messages_report!(daily_report, operator_options)
-        generate_ivr_report!(daily_report, operator_options) if operator_metadata["dial_string"]
+        generate_sms_report!(services_report["sms"], operator_options)
+        generate_ivr_report!(services_report["ivr"], operator_options) if services_report["ivr"]
       end
     end
     store_report("report" => report_data)
@@ -100,18 +71,30 @@ class Report
     REDIS.set(REDIS_KEY, value.to_json)
   end
 
-  def generate_messages_report!(daily_report, operator_options)
-    daily_report["messages"] ||= Message.overview_of_created(report_options(operator_options))
+  def generate_sms_report!(sms_report, operator_options)
+    with_interaction_report(sms_report) do |interaction_report, timeframe|
+      interaction_report["count"] = Message.overview_of_created(
+        report_options(operator_options.merge(:timeframe => timeframe))
+      )
+    end
+    set_quantity(sms_report, "count")
   end
 
-  def generate_ivr_report!(daily_report, operator_options)
-    ivr_report = daily_report["ivr"] ||= {}
-    ivr_report["duration"] ||= InboundCdr.overview_of_duration(
-      :duration, report_options(operator_options)
-    )
-    ivr_report["bill_sec"] ||= InboundCdr.overview_of_duration(
-      :bill_sec, report_options(operator_options)
-    )
+  def generate_ivr_report!(ivr_report, operator_options)
+    with_interaction_report(ivr_report) do |interaction_report, timeframe|
+      ["duration", "bill_sec"].each do |ivr_report_type|
+        interaction_report[ivr_report_type] = InboundCdr.overview_of_duration(
+          ivr_report_type, report_options(operator_options.merge(:timeframe => timeframe))
+        )
+      end
+    end
+    set_quantity(ivr_report, "duration")
+  end
+
+  def with_interaction_report(service_report)
+    [:day, :month].each do |timeframe|
+      yield(service_report["by_#{timeframe}"] ||= {}, timeframe)
+    end
   end
 
   def report_options(options = {})
@@ -119,5 +102,9 @@ class Report
     {
       :format => :report, :between => time_of_month.beginning_of_month..time_of_month.end_of_month
     }.merge(options)
+  end
+
+  def set_quantity(service_report, by_month_field)
+    service_report["quantity"] = service_report["by_month"][by_month_field].values.first
   end
 end
