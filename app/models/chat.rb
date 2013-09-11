@@ -105,8 +105,8 @@ class Chat < ActiveRecord::Base
     # find the users to leave this chat
     users_to_leave_chat = set_active_users(user_to_remain_in_chat)
 
-    # find the users to notify about this change
-    users_to_notify = options[:reactivate_previous_chat] ? reactivate_expired_chats(users_to_leave_chat) : users_to_leave_chat
+    # reactivate expired chats
+    reactivate_expired_chats(users_to_leave_chat) if options[:reactivate_previous_chat]
 
     if options[:activate_new_chats]
       # create new chats for users who have been deactivated from the chat
@@ -180,51 +180,8 @@ class Chat < ActiveRecord::Base
   end
 
   def self.with_undelivered_messages
-    # return chats that have undelivered messages and the chat participants
-    # are available to chat
-
-    joins(
-      :user, :friend, :replies
-    ).participant_available(
-      :users
-    ).participant_available(
-      :friends_chats
-    ).where(
-      :replies => {:delivered_at => nil}
-    ).includes(:replies).readonly(false)
-  end
-
-  def self.participant_available(participant)
-    where(
-      "#{participant}.active_chat_id IS NULL
-      OR #{participant}.active_chat_id = #{table_name}.id
-      OR (
-        SELECT #{table_name}.id FROM #{table_name} AS #{participant}_active_chat
-        INNER JOIN users AS #{participant}_active_chat_user
-        ON #{participant}_active_chat_user.id = #{participant}_active_chat.user_id
-        INNER JOIN users AS #{participant}_active_chat_friend
-        ON #{participant}_active_chat_friend.id = #{participant}_active_chat.friend_id
-        WHERE #{participant}_active_chat.id = #{participant}.active_chat_id
-        AND (
-          CASE WHEN (
-            #{participant}_active_chat_user.id = users.id
-          )
-          THEN (
-            #{participant}_active_chat_friend.active_chat_id IS NULL
-            OR #{participant}_active_chat_friend.active_chat_id != #{participant}_active_chat.id
-            OR #{participant}_active_chat_friend.state = 'offline'
-          )
-          ELSE (
-            #{participant}_active_chat_user.active_chat_id IS NULL
-            OR #{participant}_active_chat_user.active_chat_id != #{participant}_active_chat.id
-            OR #{participant}_active_chat_user.state = 'offline'
-          )
-          END
-        ) LIMIT 1
-      ) IS NOT NULL"
-    ).where(
-      "#{participant}.state != ?", "offline"
-    )
+    # return chats that have undelivered messages
+    joins(:replies).where(:replies => {:delivered_at => nil}).readonly(false)
   end
 
   def self.with_undelivered_messages_for(user)
@@ -260,13 +217,10 @@ class Chat < ActiveRecord::Base
   end
 
   def reactivate_expired_chats(users)
-    users_to_notify = []
-
     users.each do |user|
       chat_to_reactivate = self.class.with_undelivered_messages_for(user).first
-      chat_to_reactivate ? chat_to_reactivate.reactivate! : users_to_notify << user
+      chat_to_reactivate.reactivate! if chat_to_reactivate
     end
-    users_to_notify
   end
 
   def in_this_chat?(reference_user)
