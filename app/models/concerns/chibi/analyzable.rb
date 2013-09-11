@@ -26,11 +26,7 @@ module Chibi
           "#{group_by_column} >= ?", options[:least_recent].ago
         ) if options[:least_recent]
 
-        scope = scope.where(
-          "#{group_by_column} >= ?", options[:between].min
-        ).where(
-          "#{group_by_column} < ?", options[:between].max
-        ) if options[:between]
+        scope = scope.between_dates(options.merge(:date_column => group_by_column))
 
         scope = scope.by_operator(options)
 
@@ -38,6 +34,16 @@ module Chibi
         table_alias = scope.send(:column_alias_for, group_by_sql)
 
         scope.order(table_alias).group(group_by_sql)
+      end
+
+      def between_dates(options)
+        return all unless options[:between]
+        options[:date_column] ||= "#{table_name}.created_at"
+        where(
+          "#{options[:date_column]} >= ?", options[:between].min
+        ).where(
+          "#{options[:date_column]} <= ?", options[:between].max
+        )
       end
 
       def by_operator(options = {})

@@ -81,13 +81,16 @@ class Report
   end
 
   def generate_ivr_report!(ivr_report, operator_options)
+    report_constraints = report_options(operator_options)
     with_interaction_report(ivr_report) do |interaction_report, timeframe|
+      interaction_constraints = report_constraints.merge(:timeframe => timeframe)
       ["duration", "bill_sec"].each do |ivr_report_type|
         interaction_report[ivr_report_type] = InboundCdr.overview_of_duration(
-          ivr_report_type, report_options(operator_options.merge(:timeframe => timeframe))
+          ivr_report_type, interaction_constraints
         )
       end
     end
+    ivr_report["cdr"] = InboundCdr.cdr_report(report_constraints)
     set_quantity(ivr_report, "duration")
   end
 

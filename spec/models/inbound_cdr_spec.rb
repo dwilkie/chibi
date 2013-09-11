@@ -71,14 +71,18 @@ describe InboundCdr do
     end
   end
 
-  describe ".overview_of_duration(duration_column, options = {})" do
+  describe "reporting" do
+    let(:cdrs) {[]}
+
     before do
       Timecop.freeze(Time.now)
-      cdr
+      cdrs << cdr
       2.times do
-        create_cdr(
+        new_cdr = create_cdr(
           :cdr_variables => {"variables" => {"duration" => "60", "billsec" => "59"}}
-        ).update_attribute(:created_at, 8.days.ago)
+        )
+        new_cdr.update_attribute(:created_at, 8.days.ago)
+        cdrs << new_cdr
       end
     end
 
@@ -86,24 +90,50 @@ describe InboundCdr do
       Timecop.return
     end
 
-    context "passing :duration" do
-      it "should return the sum of duration in mins" do
-        overview = InboundCdr.overview_of_duration(:duration)
-        overview.should include([miliseconds_since_epoch(eight_days_ago), 4])
+    describe ".overview_of_duration(duration_column, options = {})" do
+      context "passing :duration" do
+        it "should return the sum of duration in mins" do
+          overview = InboundCdr.overview_of_duration(:duration)
+          overview.should include([miliseconds_since_epoch(eight_days_ago), 4])
+        end
+      end
+
+      context "passing :bill_sec" do
+        it "should return the sum of bill_sec in mins" do
+          overview = InboundCdr.overview_of_duration(:bill_sec)
+          overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
+        end
+      end
+
+      context "passing :format => :report" do
+        it "should return a hash" do
+          overview = InboundCdr.overview_of_duration(:duration, :format => :report)
+          overview.should be_a(Hash)
+        end
       end
     end
 
-    context "passing :bill_sec" do
-      it "should return the sum of bill_sec in mins" do
-        overview = InboundCdr.overview_of_duration(:bill_sec)
-        overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
+    describe ".cdr_report(options = {})" do
+      def asserted_cdr(index)
+        [cdrs[index].from, cdrs[index].rfc2822_date, cdrs[index].duration, cdrs[index].bill_sec]
       end
-    end
 
-    context "passing :format => :report" do
-      it "should return a hash" do
-        overview = InboundCdr.overview_of_duration(:duration, :format => :report)
-        overview.should be_a(Hash)
+      it "should return only the relevant cdr columns" do
+        InboundCdr.cdr_report.each_with_index do |reported_cdr, index|
+          reported_cdr.should == asserted_cdr(index)
+        end
+      end
+
+      context "passing :operator => '<operator>', :country_code => '<country_code>'" do
+        it "should filter by the operator" do
+          InboundCdr.cdr_report(:operator => :foo, :country_code => :kh).should be_empty
+        end
+      end
+
+      context "passing :between => 7.days.ago..Time.now" do
+        it "should filter by the given timeline" do
+          InboundCdr.cdr_report(:between => 7.days.ago..Time.now).should == [asserted_cdr(0)]
+        end
       end
     end
   end

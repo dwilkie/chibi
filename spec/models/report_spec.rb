@@ -140,7 +140,7 @@ describe Report do
           full_number = number_parts.join
 
           create(:message, :from => full_number)
-          create_cdr(
+          cdr = create_cdr(
             :cdr_variables => {
               "variables" => {
                 "sip_from_user" => full_number, "duration" => "60", "billsec" => "59"
@@ -164,6 +164,8 @@ describe Report do
               ivr_report, "duration", options.merge(:by => 2, :increment_quantity => true)
             )
             increment_interactions(ivr_report, "bill_sec", options)
+            cdr_report = ivr_report["cdr"] ||= []
+            cdr_report << [cdr.from, cdr.rfc2822_date, cdr.duration, cdr.bill_sec]
           end
         end
       end
@@ -171,9 +173,10 @@ describe Report do
 
     let(:asserted_report) do
       report = base_report_data
-      create_sample_interaction(:day => 1, :month => 1, :year => 2014, :report => report)
-      create_sample_interaction(:day => 31, :month => 1, :year => 2014, :report => report)
-      create_sample_interaction(:day => 15, :month => 12, :year => 2013, :report => report)
+      interaction_options = {:report => report, :day => 1, :month => 1, :year => 2014}
+      create_sample_interaction(interaction_options)
+      create_sample_interaction(interaction_options.merge(:day => 31))
+      create_sample_interaction(interaction_options.merge(:day => 15, :month => 12, :year => 2013))
       JSON.parse(report.to_json)
     end
 

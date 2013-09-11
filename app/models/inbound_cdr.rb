@@ -12,6 +12,10 @@ class InboundCdr < CallDataRecord
     options[:format] == :report ? result : result.to_a
   end
 
+  def self.cdr_report(options = {})
+    by_operator(options).between_dates(options).order(:rfc2822_date, :id).pluck(:from, :rfc2822_date, :duration, :bill_sec)
+  end
+
   private
 
   def set_inbound_cdr_attributes
