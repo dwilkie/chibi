@@ -66,3 +66,39 @@ kh:
             specific_tax: "0.03"
             vat: "0.1"
             revenue_share: "0.3"
+    qb:
+      assertions:
+        short_code: "2442"
+        nuntium_channel: "qb"
+        mt_message_queue: "qb_mt_message_queue"
+        caller_id: "2442"
+        dial_string: "sofia/internal/%{number_to_dial}@117.55.252.146"
+        billing:
+          recipients:
+            "someone@qb.com.kh":
+              name: "Someone"
+          attention: "qb"
+          vat_tin: "100012345"
+          address: "qb Address"
+          name:  "Qb"
+        payment_instructions:
+          bank_name: "Advanced Bank of Asia Limited (ABA)"
+          account_name: "Chatterbox Dating Mobile"
+          account_number: "000070412"
+          swift_code: "ABAAKHPP"
+          bank_address: "148 Preah Sihanouk Blvd,\nSangkat Boeung Keng Kang 1,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
+        services:
+          sms:
+            name: "qb Friends SMS"
+            short_code: "2442"
+            unit_cost: "0.05"
+            specific_tax: "0.03"
+            vat: "0.1"
+            revenue_share: "0.4"
+          ivr:
+            name: "qb Friends IVR"
+            short_code: "2442"
+            unit_cost: "0.1"
+            specific_tax: "0.03"
+            vat: "0.1"
+            revenue_share: "0.4"
