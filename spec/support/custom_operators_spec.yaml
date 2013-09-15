@@ -69,18 +69,17 @@ kh:
     qb:
       assertions:
         short_code: "2442"
-        nuntium_channel: "qb"
         mt_message_queue: "qb_mt_message_queue"
         caller_id: "2442"
         dial_string: "sofia/internal/%{number_to_dial}@117.55.252.146"
         billing:
           recipients:
-            "someone@qb.com.kh":
-              name: "Someone"
-          attention: "qb"
+            "sophak.lim@qbmore.com":
+              name: "Sophak"
+          attention: "Mr. Sophak Lim"
           vat_tin: "100012345"
-          address: "qb Address"
-          name:  "Qb"
+          address: "825 ABC Preah Monivong Blvd,\nSangkat Phsar Damthkov,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
+          name:  "(Cambodia) Advance Communication Co., Ltd (CADCOMMS)"
         payment_instructions:
           bank_name: "Advanced Bank of Asia Limited (ABA)"
           account_name: "Chatterbox Dating Mobile"
