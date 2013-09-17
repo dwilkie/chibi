@@ -68,6 +68,7 @@ kh:
     qb:
       metadata:
         short_code: "2442"
+        nuntium_channel: "qb"
         mt_message_queue: "qb_mt_message_queue"
         caller_id: "2442"
         dial_string: "sofia/internal/%{number_to_dial}@117.55.252.146"
