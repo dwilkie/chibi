@@ -138,7 +138,7 @@ describe Message do
     include_context "replies"
 
     def stub_match_for_user
-      user.stub(:match).and_return(new_friend)
+      new_friend
     end
 
     context "if an exception is raised during the processing" do
@@ -364,7 +364,7 @@ describe Message do
             it "should introduce the user to the match by imitating the user" do
               non_introducable_examples.each do |example|
                 message = build(:message, :user => user, :body => example.upcase)
-                expect_message  { message.process! }
+                expect_message { message.process! }
                 reply_to(new_friend).body.should =~ /#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
               end
             end

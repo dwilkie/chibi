@@ -275,7 +275,7 @@ describe "Messages" do
           end
         end
 
-        context "and somebody else tries to text me" do
+        context "and Mara tries to text me" do
           # A new match for Mara
           let(:luke) { create(:luke) }
 
@@ -284,10 +284,11 @@ describe "Messages" do
             send_message(:from => mara, :body => "Hi Dave")
           end
 
-          it "should find new friends for him" do
+          let(:reply_to_dave) { reply_to(dave) }
+
+          it "should find new friends for her" do
             reply_to(luke).body.should =~ /#{spec_translate(:forward_message_approx, luke.locale, mara.screen_id)}/
 
-            reply_to_dave = reply_to(dave)
             reply_to_dave.body.should == spec_translate(
               :forward_message, dave.locale, mara.screen_id, "Hi Dave"
             )
@@ -302,75 +303,42 @@ describe "Messages" do
               send_message(:from => dave, :body => "Hi Joy")
             end
 
-            shared_examples_for "forwarding the message" do
+            shared_examples_for "forwarding the message" do |options|
+              options ||= {}
+
               it "should send the message to my current friend" do
                 reply_to(joy).body.should == spec_translate(
                   :forward_message, joy.locale, dave.screen_id, "Hi Joy"
                 )
+                reply_to(pauline).should be_nil
               end
 
-              it "should detect whether I want to meet a new friend" do
-                reply_to_pauline = reply_to(pauline)
-                if start_new_chat_for_sender
-                  reply_to_pauline.body.should =~ /#{spec_translate(:forward_message_approx, pauline.locale, dave.screen_id)}/
-                else
-                  reply_to_pauline.should be_nil
+              if options[:deliver_message_from_mara]
+                it "should now deliver Mara's message to me" do
+                  reply_to_dave.should be_delivered
+                end
+              else
+                it "should not deliver Mara's message to me" do
+                  reply_to_dave.should_not be_delivered
                 end
               end
             end
 
-            it_should_behave_like "forwarding the message" do
-              let(:start_new_chat_for_sender) { false }
-            end
+            it_should_behave_like "forwarding the message"
 
             context "and another" do
               before do
                 send_message(:from => dave, :body => "Hi Joy")
               end
 
-              it_should_behave_like "forwarding the message" do
-                let(:start_new_chat_for_sender) { false }
-              end
+              it_should_behave_like "forwarding the message"
 
               context "and another" do
                 before do
                   send_message(:from => dave, :body => "Hi Joy")
                 end
 
-                it_should_behave_like "forwarding the message" do
-                  let(:start_new_chat_for_sender) { true }
-                end
-              end
-            end
-          end
-
-          context "when I later become available" do
-            context "but my old friend is now currently chatting" do
-              before do
-                send_message(:from => luke, :body => "Hi Mara")
-                expect_message { dave.reload.active_chat.deactivate!(:active_user => dave) }
-              end
-
-              it "should not send the message that my friend previously sent" do
-                reply = reply_to(dave)
-                reply.body.should == spec_translate(
-                  :forward_message, dave.locale, mara.screen_id, "Hi Dave"
-                )
-                reply.should_not be_delivered
-              end
-            end
-
-            context "and my old friend is also available" do
-              before do
-                expect_message { dave.reload.active_chat.deactivate!(:active_user => dave) }
-              end
-
-              it "should send me the message that my old friend previously sent" do
-                reply = reply_to(dave)
-                reply.body.should == spec_translate(
-                  :forward_message, dave.locale, mara.screen_id, "Hi Dave"
-                )
-                reply.should be_delivered
+                it_should_behave_like "forwarding the message", :deliver_message_from_mara => true
               end
             end
           end

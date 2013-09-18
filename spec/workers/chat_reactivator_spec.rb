@@ -13,12 +13,12 @@ describe ChatReactivator do
     let(:chat) { mock_model(Chat) }
 
     before do
-      chat.stub(:reactivate!)
+      chat.stub(:reinvigorate!)
       find_stub.and_return(chat)
     end
 
-    it "should tell the chat to reactivate itself" do
-      chat.should_receive(:reactivate!)
+    it "should tell the chat to reinvigorate itself" do
+      chat.should_receive(:reinvigorate!)
       subject.class.perform(1)
     end
 
