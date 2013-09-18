@@ -2,7 +2,7 @@ class ChatReinvigorator
   @queue = :chat_reinvigorator_queue
 
   def self.perform
-    Chat.reactivate_stagnant!
+    Chat.reinvigorate!
   rescue Resque::TermException
     Resque.enqueue(self)
   end

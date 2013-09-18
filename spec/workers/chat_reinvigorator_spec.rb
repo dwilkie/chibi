@@ -8,14 +8,14 @@ describe ChatReinvigorator do
   end
 
   describe ".perform" do
-    let(:job_stub) { Chat.stub(:reactivate_stagnant!) }
+    let(:job_stub) { Chat.stub(:reinvigorate!) }
 
     before do
       job_stub
     end
 
     it "should reactivate all stagnant chats" do
-      Chat.should_receive(:reactivate_stagnant!)
+      Chat.should_receive(:reinvigorate!)
       subject.class.perform
     end
 

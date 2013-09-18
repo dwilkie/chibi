@@ -9,6 +9,7 @@ class Chat < ActiveRecord::Base
   has_many :active_users, :class_name => 'User', :foreign_key => "active_chat_id"
 
   validates :user, :friend, :presence => true
+  validates :friend_id, :uniqueness => {:scope => :user_id}
 
   alias_attribute :initiator, :user
 
@@ -18,7 +19,7 @@ class Chat < ActiveRecord::Base
     end
   end
 
-  def self.reactivate_stagnant!
+  def self.reinvigorate!
     with_undelivered_messages.find_each do |chat|
       Resque.enqueue(ChatReactivator, chat.id)
     end
@@ -106,7 +107,7 @@ class Chat < ActiveRecord::Base
     users_to_leave_chat = set_active_users(user_to_remain_in_chat)
 
     # reactivate expired chats
-    reactivate_expired_chats(users_to_leave_chat) if options[:reactivate_previous_chat]
+    reinvigorate_expired_chats(users_to_leave_chat) if options[:reactivate_previous_chat]
 
     if options[:activate_new_chats]
       # create new chats for users who have been deactivated from the chat
@@ -129,7 +130,7 @@ class Chat < ActiveRecord::Base
     chat_deactivation = {}
 
     if active? || chat_partner.available?
-      reactivate!(:force => true)
+      reactivate!
       reply_to_chat_partner.forward_message!(reference_user, message_body)
       one_sided? ? chat_deactivation.merge!(:active_user => reference_user) : chat_deactivation = nil
     else
@@ -138,24 +139,33 @@ class Chat < ActiveRecord::Base
 
     if chat_deactivation
       # remove the sender of the message from current chat
+      # this can cause a previous chat to be reinvigorated
       deactivate!(chat_deactivation)
 
-      # start a new chat for the sender of the message
+      # start a new chat for the sender of the message if they're still available
       self.class.activate_multiple!(
-        reference_user.reload, :starter => message, :notify => true
-      )
+        reference_user, :starter => message, :notify => true
+      ) if reference_user.reload.available?(:not_currently_chatting => true)
     end
   end
 
-  def reactivate!(options = {})
+  def reactivate!
     return if active?
 
-    if options[:force] || (user.available? && friend.available?)
-      self.active_users = [user, friend]
-      save
+    self.active_users = [user, friend]
+    save
 
-      replies.undelivered.each do |undelivered_reply|
-        undelivered_reply.deliver!
+    replies.undelivered.each do |undelivered_reply|
+      undelivered_reply.deliver!
+    end
+  end
+
+  def reinvigorate!
+    [user, friend].each do |user_in_chat|
+      undelivered_replies = replies.undelivered.where(:replies => {:user_id => user_in_chat})
+      if user_in_chat.available?(:not_currently_chatting => true) && undelivered_replies.any?
+        self.active_users << user_in_chat
+        undelivered_replies.each { |undelivered_reply| undelivered_reply.deliver! }
       end
     end
   end
@@ -181,7 +191,7 @@ class Chat < ActiveRecord::Base
 
   def self.with_undelivered_messages
     # return chats that have undelivered messages
-    joins(:replies).where(:replies => {:delivered_at => nil}).readonly(false)
+    joins(:replies).where(:replies => {:delivered_at => nil}).order(:id).readonly(false)
   end
 
   def self.with_undelivered_messages_for(user)
@@ -216,10 +226,11 @@ class Chat < ActiveRecord::Base
     updated_at < self.class.inactive_timestamp(options)
   end
 
-  def reactivate_expired_chats(users)
+  def reinvigorate_expired_chats(users)
     users.each do |user|
-      chat_to_reactivate = self.class.with_undelivered_messages_for(user).first
-      chat_to_reactivate.reactivate! if chat_to_reactivate
+      self.class.with_undelivered_messages_for(user).each do |chat_to_reinvigorate|
+        chat_to_reinvigorate.reinvigorate!
+      end
     end
   end
 

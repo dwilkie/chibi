@@ -17,13 +17,9 @@ describe Chat do
   let(:active_chat) { create_chat(:active) }
   let(:unique_active_chat) { create(:chat, :active) }
 
-  let(:active_chat_with_inactivity) { create_chat(:active, :with_inactivity) }
+  let(:active_chat_with_inactivity) { create(:chat, :active, :with_inactivity, :user => user) }
   let(:active_chat_with_single_user_with_inactivity) { create(:chat, :initiator_active, :with_inactivity) }
   let(:active_chat_with_single_user) { create_chat(:initiator_active) }
-  let(:active_chat_with_single_friend) { create_chat(:friend_active) }
-
-  let(:reply_to_user) { reply_to(user, active_chat) }
-  let(:reply_to_friend) { reply_to(friend, active_chat) }
 
   def create_chat(*traits)
     options = traits.extract_options!
@@ -52,6 +48,8 @@ describe Chat do
 
     it "should not be valid with a duplicate user and friend" do
       chat
+      new_chat.user = chat.user
+      new_chat.friend = chat.friend
       new_chat.should_not be_valid
     end
   end
@@ -248,50 +246,30 @@ describe Chat do
     end
 
     context "the chat is not active" do
-      context "and both chat partners are available" do
-        it "should reactivate the chat" do
-          new_chat.should_not be_active
-          new_chat.reactivate!
-          new_chat.should be_active
-          new_chat.should be_persisted
-        end
-
-        context "and there are undelivered messages" do
-          let(:reply) { create(:reply, :chat => chat) }
-
-          it "should deliver the replies" do
-            reply.should_not be_delivered
-            expect_message { chat.reactivate! }
-            reply.reload.should be_delivered
-          end
-        end
+      before do
+        active_chat_with_single_user
+        create(:chat, :active, :friend => friend)
       end
 
-      context "but one or more of the chat partners is not available" do
-        let(:friends_new_chat) { create(:chat, :active, :friend => friend) }
+      it "should force reactivate the chat" do
+        active_chat_with_single_user.should_not be_active
+        active_chat_with_single_user.reactivate!
+        active_chat_with_single_user.should be_active
+      end
 
-        before do
-          active_chat_with_single_user
-          friends_new_chat
-        end
+      context "and there are undelivered messages" do
+        let(:reply) { create(:reply, :chat => active_chat_with_single_user) }
 
-        it "should not reactivate the chat" do
-          active_chat_with_single_user.reactivate!
-          active_chat_with_single_user.should_not be_active
-        end
-
-        context "passing :force => true" do
-          it "should reactivate the chat" do
-            active_chat_with_single_user.reactivate!(:force => true)
-            active_chat_with_single_user.should be_active
-          end
+        it "should deliver the replies" do
+          reply.should_not be_delivered
+          expect_message { active_chat_with_single_user.reactivate! }
+          reply.reload.should be_delivered
         end
       end
     end
   end
 
   describe "#deactivate!" do
-
     def assert_active_users_cleared
       active_chat.active_users.should be_empty
       active_chat.should_not be_active
@@ -424,89 +402,63 @@ describe Chat do
         end
       end
 
-      context "given there are undelivered messages for the deactivated users" do
-        def setup_chat_reactivation_scenario(user, users_old_relationship)
-          # create an old chat
-          users_old_chat = users_old_relationship.is_a?(subject.class) ? users_old_relationship : send("active_chat_with_single_#{users_old_relationship}")
+      context "given there are undelivered replies for the deactivated users" do
+        let(:expired_chats) { create_list(:chat, 2, :user => user) }
 
-          # create an undelivered reply to the old chat
-          message_from_old_friend = create(:reply, :user => user, :chat => users_old_chat, :body => "Hi buddy")
-
-          # activate a new chat for the user
-          chat_to_deactivate = create(:chat, :active, :user => user)
-          [users_old_chat, message_from_old_friend, chat_to_deactivate]
+        let(:pending_replies) do
+          [create(:reply, :user => user, :chat => expired_chats[0]), create(:reply, :user => user, :chat => expired_chats[1])]
         end
 
-        def assert_chat_reactivated(user, users_old_relationship, args = {})
+        let(:chat_to_deactivate) { create(:chat, :user => user) }
 
-          users_old_chat, message_from_old_friend, chat_to_deactivate = setup_chat_reactivation_scenario(
-            user, users_old_relationship
-          )
-
-          # deactivate the new chat
-          expect_message { chat_to_deactivate.deactivate!(args.merge(:notify => true)) }
-
-          # assert the delivery of the message from the old friend
-          message_from_old_friend.reload.should be_delivered
-
-          # assert that the old chat has been reactivated
-          users_old_chat.reload
-          users_old_chat.should be_active
-
-          reply_to(user).body.should == "Hi buddy"
+        def do_deactivate!(options = {})
+          chat_to_deactivate.deactivate!(options)
         end
 
-        def assert_chat_not_reactivated(user, users_old_relationship, args = {})
-          users_old_chat, message_from_old_friend, chat_to_deactivate = setup_chat_reactivation_scenario(
-            user, users_old_relationship
-          )
-
-          chat_to_deactivate.deactivate!({:reactivate_previous_chat => false}.merge(args))
-
-          # assert the delivery of the message from the old friend
-          message_from_old_friend.reload.should_not be_delivered
-
-          # assert that the old chat has been reactivated
-          users_old_chat.reload
-          users_old_chat.should_not be_active
+        def assert_chat_reactivated
+          user.reload.active_chat.should == expired_chats[0]
+          pending_replies[0].reload.should be_delivered
+          pending_replies[1].reload.should_not be_delivered
         end
 
-        def assert_chat_reactivation(activate)
-          assertion = "_not" unless activate
-          send("assert_chat#{assertion}_reactivated", user, :friend, :active_user => true)
-          send("assert_chat#{assertion}_reactivated", user, :friend, :active_user => user)
-          send("assert_chat#{assertion}_reactivated", friend, :user, :active_user => friend)
-          send("assert_chat#{assertion}_reactivated", friend, :user, :active_user => true)
-        end
+        def assert_chat_not_reactivated
+          user.reload
+          expired_chats.each do |expired_chat|
+            user.active_chat.should_not == expired_chat
+          end
 
-        it "should deliver the messages and reactivate the chats" do
-          assert_chat_reactivation(true)
-        end
-
-        context "passing :reactivate_previous_chat => false" do
-          it "should not deliver any messages or reactivate the chats" do
-            assert_chat_reactivation(false)
+          pending_replies.each do |pending_reply|
+            pending_reply.reload.should_not be_delivered
           end
         end
 
-        it "should not reactivate the chat if the initator in the old chat is logged out" do
+        before do
+          chat_to_deactivate
+          pending_replies
+        end
+
+        it "should deliver undelivered replies by default" do
+          do_deactivate!
+          assert_chat_reactivated
+        end
+
+        context "passing :reactivate_previous_chat => false" do
+          it "should not deliver any replies" do
+            do_deactivate!(:reactivate_previous_chat => false)
+            assert_chat_not_reactivated
+          end
+        end
+
+        it "should not deliver replies to a logged out user" do
           user.logout!
-          assert_chat_not_reactivated(friend, chat, :active_user => true, :reactivate_previous_chat => true)
+          do_deactivate!
+          assert_chat_not_reactivated
         end
 
-        it "should not reactivate the chat if the friend in the old chat is logged out" do
-          friend.logout!
-          assert_chat_not_reactivated(user, chat, :active_user => true, :reactivate_previous_chat => true)
-        end
-
-        it "should not reactivate the chat if the initiator in the old chat is chatting with somebody else" do
+        it "should not deliver replies a user who is in a chat" do
           create(:chat, :active, :user => user)
-          assert_chat_not_reactivated(friend, chat, :active_user => true, :reactivate_previous_chat => true)
-        end
-
-        it "should not reactivate the chat if the friend in the old chat is is chatting with somebody else" do
-          create(:chat, :active, :friend => friend)
-          assert_chat_not_reactivated(user, chat, :active_user => true, :reactivate_previous_chat => true)
+          do_deactivate!
+          assert_chat_not_reactivated
         end
       end
     end
@@ -519,27 +471,81 @@ describe Chat do
     end
   end
 
+  describe "#reinvigorate!" do
+    let(:chat) { create(:chat, :user => user) }
+
+    def do_reinvigorate!
+      chat.reinvigorate!
+    end
+
+    context "given there are undelivered replies for the participants in this chat" do
+      let(:undelivered_replies) { create_list(:reply, 2, :user => user, :chat => chat) }
+
+      before do
+        undelivered_replies
+      end
+
+      context "and the participants are not currently chatting" do
+        before do
+          do_reinvigorate!
+        end
+
+        it "should deliver the replies to the participants and mark this as their active chat" do
+          chat.active_users.should == [user] # just make the chat active for the recipient of the reply
+          undelivered_replies.each do |undelivered_reply|
+            undelivered_reply.reload.should be_delivered
+          end
+        end
+      end
+
+      context "and the participants are busy chatting with someone else" do
+        before do
+          create(:chat, :active, :user => user)
+          do_reinvigorate!
+        end
+
+        it "should not delivery the replies or mark this as their active chat" do
+          chat.active_users.should be_empty
+          undelivered_replies.each do |undelivered_reply|
+            undelivered_reply.reload.should_not be_delivered
+          end
+        end
+      end
+    end
+
+    context "given there are no undelivered replies for the participants in this chat" do
+      before do
+        do_reinvigorate!
+      end
+
+      it "should not reinvigorate the chat" do
+        chat.active_users.should be_empty
+      end
+    end
+  end
+
   describe "#inactive_user" do
     it "should return the active user if he is the only active user in the chat" do
-      active_chat_with_single_user.inactive_user.should == active_chat_with_single_user.user
-      active_chat_with_single_friend.inactive_user.should == active_chat_with_single_friend.friend
-      active_chat.inactive_user.should be_nil
-      chat.inactive_user.should be_nil
+      create(:chat, :initiator_active, :user => user).inactive_user.should == user
+      create(:chat, :friend_active, :friend => friend).inactive_user.should == friend
+      create(:chat, :active).inactive_user.should be_nil
+      create(:chat).inactive_user.should be_nil # expired
     end
   end
 
   describe "#forward_message" do
     def create_message(user, chat = nil)
-      create(:message, :user => user, :body => "#{user.screen_id}: hello", :chat => chat)
+      create(:message, :user => user, :body => "#{user.screen_id}: #{message_body}", :chat => chat)
     end
 
+    let(:message_body) { "hello" }
     let(:message) { create_message(user) }
 
     def assert_forward_message_to(recipient, originator, chat_session, message, options = {})
       chat_session.reload.messages.should include(message)
       reply = reply_to(recipient, chat_session)
       reply.body.should == spec_translate(
-        :forward_message, recipient.locale, originator.screen_id, "hello"
+        :forward_message, recipient.locale, originator.screen_id, message_body
       )
 
       options[:delivered] = true unless options[:delivered] == false
@@ -595,54 +601,72 @@ describe Chat do
     end
 
     context "given the friend is unavailable to chat" do
-      def assert_new_friend_for_sender(sender_name, unavailable_user)
-        # create a new active chat for the unavailable user so they're unavailable
-        create(:chat, :active, :user => unavailable_user)
+      let(:sender) { user }
+      let(:unavailable_user) { friend }
+      let(:current_chat_session) { create(:chat, :initiator_active, :user => sender, :friend => unavailable_user) }
+      let(:message_to_be_forwarded) { create(:message, :user => sender, :body => message_body) }
 
-        # create a user to be the sender's new friend
-        new_partner_for_sender = send("new_partner_for_#{sender_name}")
-
-        # create the sender
-        sender = send(sender_name)
-
-        # create a chat session for the sender
-        chat_session = send("active_chat_with_single_#{sender_name}")
-
-        # create a message from the sender
-        message = create_message(sender)
-
-        # assert that the sender is currently in the chat session
-        sender.active_chat.should == chat_session
-
-        # forward the message
-        expect_message { chat_session.forward_message(message) }
-
-        sender.reload
-
-        # assert that the sender is now not in the chat session
-        sender.active_chat.should be_nil
-
-        new_chat_session = message.triggered_chats.first
-
-        # assert that the sender's message triggered another chat
-        new_chat_session.should be_present
-
-        # assert that the new chat session is not the current chat session
-        new_chat_session.should_not == chat_session
-
-        # assert that an introduction was sent to the new friend
-        reply_to(new_partner_for_sender).body.should =~ /#{spec_translate(:forward_message_approx, new_partner_for_sender.locale, sender.screen_id)}/
-
-        # assert that the original message was queued for forwarding to the
-        # unavailable user
-        assert_forward_message_to(
-          unavailable_user, sender, chat_session, message, :delivered => false
-        )
+      def do_forward_message
+        expect_message { current_chat_session.forward_message(message) }
       end
 
-      it "should save the message for sending later and find new friends for the sender" do
-        assert_new_friend_for_sender(:user, friend)
-        assert_new_friend_for_sender(:friend, user)
+      def assert_forward_message_to
+        super(unavailable_user, sender, current_chat_session, message, :delivered => false)
+      end
+
+      before do
+        # create a new active chat for the unavailable user so they're unavailable
+        create(:chat, :active, :user => unavailable_user)
+      end
+
+      context "and there are no pending replies for the sender" do
+        let(:new_partner_for_sender) { new_partner_for_user }
+
+        before do
+          new_partner_for_sender
+          do_forward_message
+        end
+
+        it "should save the message for sending later and find new friends for the sender" do
+          # assert that the sender is now not in the chat session
+          sender.active_chat.should be_nil
+
+          new_chat_session = message.triggered_chats.first
+
+          # assert that the sender's message triggered another chat
+          new_chat_session.should be_present
+
+          # assert that the new chat session is not the current chat session
+          new_chat_session.should_not == current_chat_session
+
+          # assert that an introduction was sent to the new friend
+          reply_to(new_partner_for_sender).body.should =~ /#{spec_translate(:forward_message_approx, new_partner_for_sender.locale, sender.screen_id)}/
+
+          # assert that the original message was queued for forwarding to the
+          # unavailable user
+          assert_forward_message_to
+        end
+      end
+
+      context "and there are pending replies for the sender" do
+        let(:expired_chat_with_sender) { create(:chat, :friend => sender) }
+
+        let(:pending_reply_from_expired_chat) do
+          create(:reply, :user => sender, :chat => expired_chat_with_sender)
+        end
+
+        before do
+          pending_reply_from_expired_chat
+          do_forward_message
+        end
+
+        it "should reinvigorate the chat with pending replies" do
+          sender.active_chat.should == expired_chat_with_sender
+          reply = reply_to(sender)
+          reply.should == pending_reply_from_expired_chat
+          reply.should be_delivered
+          assert_forward_message_to
+        end
       end
     end
   end
@@ -807,7 +831,7 @@ describe Chat do
     end
   end
 
-  describe ".reactivate_stagnant!" do
+  describe ".reinvigorate!" do
     context "with pending replies" do
 
       def pending_reply(reference_chat)
@@ -819,11 +843,11 @@ describe Chat do
 
         before do
           reference_reply
-          do_background_task { expect_message { subject.class.reactivate_stagnant! }}
+          do_background_task { expect_message { subject.class.reinvigorate! }}
         end
 
-        it "should be reactivated" do
-          reference_chat.reload.should be_active
+        it "should be reinvigorated" do
+          reference_chat.reload.active_users.should == [user]
           reference_reply.reload.should be_delivered
         end
       end
@@ -836,30 +860,17 @@ describe Chat do
 
       context "where the initiator is currently chatting" do
         let(:chat_with_pending_messages) { create(:chat, :user => user) }
+        let(:reference_reply) { pending_reply(chat_with_pending_messages) }
 
-        context "and his chat is active" do
-          let(:reference_reply) { pending_reply(chat_with_pending_messages) }
-
-          before do
-            reference_reply
-            active_chat
-          end
-
-          it "should not be reactivated" do
-            do_background_task { subject.class.reactivate_stagnant! }
-            chat_with_pending_messages.reload.should_not be_active
-            reference_reply.reload.should_not be_delivered
-          end
+        before do
+          reference_reply
+          create(:chat, :active, :user => user)
         end
 
-        context "but his chat is not active" do
-          before do
-            active_chat_with_single_user
-          end
-
-          it_should_behave_like "reactivating the chats" do
-            let(:reference_chat) { chat_with_pending_messages }
-          end
+        it "should not be reinvigorated" do
+          do_background_task { subject.class.reinvigorate! }
+          chat_with_pending_messages.reload.should_not be_active
+          reference_reply.reload.should_not be_delivered
         end
       end
     end
@@ -869,6 +880,7 @@ describe Chat do
     before do
       chat.should_not be_active
       unique_active_chat.should be_active
+
       active_chat_with_inactivity.should be_active
       active_chat_with_single_user_with_inactivity.active_users.count.should == 1
     end
@@ -895,11 +907,6 @@ describe Chat do
         it "should deactivate chats with more than 10 minutes of inactivity" do
           active_chat_with_inactivity.should_not be_active
           active_chat_with_single_user_with_inactivity.active_users.count.should == 1
-        end
-
-        it "should not notify the users that their chat has ended" do
-          reply_to_user.should be_nil
-          reply_to_friend.should be_nil
         end
       end
 

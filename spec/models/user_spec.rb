@@ -1306,7 +1306,7 @@ describe User do
     end
   end
 
-  describe "#available?" do
+  describe "#available?(options = {})" do
     context "he is offline" do
       it "should be false" do
         offline_user.should_not be_available
@@ -1347,6 +1347,12 @@ describe User do
 
         it "should be true" do
           user.should be_available
+        end
+
+        context "passing :not_currently_chatting => true" do
+          it "should be false" do
+            user.should_not be_available(:not_currently_chatting => true)
+          end
         end
       end
     end

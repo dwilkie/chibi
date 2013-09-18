@@ -338,8 +338,8 @@ class User < ActiveRecord::Base
     state != "unactivated"
   end
 
-  def available?
-    online? && activated? && (!currently_chatting? || !active_chat.active?)
+  def available?(options = {})
+    online? && activated? && (!currently_chatting? || !options[:not_currently_chatting] && !active_chat.active?)
   end
 
   def currently_chatting?
