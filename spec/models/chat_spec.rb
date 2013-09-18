@@ -39,14 +39,21 @@ describe Chat do
     end
   end
 
-  it "should not be valid without a user" do
-    new_chat.user = nil
-    new_chat.should_not be_valid
-  end
+  describe "validations" do
+    it "should not be valid without a user" do
+      new_chat.user = nil
+      new_chat.should_not be_valid
+    end
 
-  it "should not be valid without a friend" do
-    new_chat.friend = nil
-    new_chat.should_not be_valid
+    it "should not be valid without a friend" do
+      new_chat.friend = nil
+      new_chat.should_not be_valid
+    end
+
+    it "should not be valid with a duplicate user and friend" do
+      chat
+      new_chat.should_not be_valid
+    end
   end
 
   describe "#active?" do
@@ -534,16 +541,6 @@ describe Chat do
       reply.body.should == spec_translate(
         :forward_message, recipient.locale, originator.screen_id, "hello"
       )
-
-      reply_to_originator = reply_to(originator)
-
-      if options[:send_originator_instructions]
-        reply_to_originator.body.should == spec_translate(
-          :chat_has_ended, originator.locale
-        )
-      else
-        reply_to_originator.try(:delivered?).should be_false
-      end
 
       options[:delivered] = true unless options[:delivered] == false
 

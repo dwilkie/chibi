@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130828074659) do
+ActiveRecord::Schema.define(version: 20130918033327) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -53,6 +53,7 @@ ActiveRecord::Schema.define(version: 20130828074659) do
   add_index "chats", ["friend_id"], name: "index_chats_on_friend_id", using: :btree
   add_index "chats", ["starter_type", "starter_id"], name: "index_chats_on_starter_type_and_starter_id", using: :btree
   add_index "chats", ["updated_at"], name: "index_chats_on_updated_at", using: :btree
+  add_index "chats", ["user_id", "friend_id"], name: "index_chats_on_user_id_and_friend_id", unique: true, using: :btree
   add_index "chats", ["user_id"], name: "index_chats_on_user_id", using: :btree
 
   create_table "locations", force: true do |t|
