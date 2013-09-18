@@ -834,43 +834,35 @@ describe Chat do
   describe ".reinvigorate!" do
     context "with pending replies" do
 
-      def pending_reply(reference_chat)
-        create(:reply, :user => user, :chat => reference_chat)
+      let(:pending_reply) { create(:reply, :user => user, :chat => chat) }
+
+      def do_reinvigorate!
+        do_background_task(:queue_only => true) { subject.class.reinvigorate! }
       end
 
-      shared_examples_for "reactivating the chats" do
-        let(:reference_reply) { pending_reply(reference_chat) }
+      before do
+        pending_reply
+      end
 
+      context "even if the reply recipient is currently chatting" do
         before do
-          reference_reply
-          do_background_task { expect_message { subject.class.reinvigorate! }}
-        end
-
-        it "should be reinvigorated" do
-          reference_chat.reload.active_users.should == [user]
-          reference_reply.reload.should be_delivered
-        end
-      end
-
-      context "where both the initiator and the friend are not currently chatting" do
-        it_should_behave_like "reactivating the chats" do
-          let(:reference_chat) { chat }
-        end
-      end
-
-      context "where the initiator is currently chatting" do
-        let(:chat_with_pending_messages) { create(:chat, :user => user) }
-        let(:reference_reply) { pending_reply(chat_with_pending_messages) }
-
-        before do
-          reference_reply
           create(:chat, :active, :user => user)
         end
 
-        it "should not be reinvigorated" do
-          do_background_task { subject.class.reinvigorate! }
-          chat_with_pending_messages.reload.should_not be_active
-          reference_reply.reload.should_not be_delivered
+        it "should still queue a job to try and reinvigorate the chat" do
+          do_reinvigorate!
+          ChatReactivator.should have_queued(chat.id)
+        end
+      end
+
+      context "the reply recipient is offline" do
+        before do
+          user.logout!
+        end
+
+        it "should not queue a job to reinvigorate the chat" do
+          do_reinvigorate!
+          ChatReactivator.should_not have_queued(chat.id)
         end
       end
     end

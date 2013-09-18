@@ -191,7 +191,7 @@ class Chat < ActiveRecord::Base
 
   def self.with_undelivered_messages
     # return chats that have undelivered messages
-    joins(:replies).where(:replies => {:delivered_at => nil}).order(:id).readonly(false)
+    joins(:replies => :user).where(:replies => {:delivered_at => nil}).where.not(:users => {:state => :offline}).order(:id).readonly(false)
   end
 
   def self.with_undelivered_messages_for(user)
