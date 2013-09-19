@@ -72,7 +72,7 @@ kh:
         nuntium_channel: "qb"
         mt_message_queue: "qb_mt_message_queue"
         caller_id: "2442"
-        dial_string: "sofia/internal/%{number_to_dial}@117.55.252.146"
+        dial_string: "sofia/internal/2442%{number_to_dial}@117.55.252.146"
         billing:
           recipients:
             "sophak.lim@qbmore.com":
