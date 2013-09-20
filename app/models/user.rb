@@ -289,7 +289,7 @@ class User < ActiveRecord::Base
   end
 
   def dial_string(requesting_api_version)
-    adhearsion_twilio_requested?(requesting_api_version) ? (operator.dial_string(:number_to_dial => mobile_number) || default_pbx_dial_string(:number_to_dial => mobile_number)) : twilio_formatted(mobile_number)
+    adhearsion_twilio_requested?(requesting_api_version) ? (operator.dial_string(:number_to_dial => mobile_number, :dial_string_number_prefix => operator.dial_string_number_prefix, :voip_gateway_host => operator.voip_gateway_host) || default_pbx_dial_string(:number_to_dial => mobile_number)) : twilio_formatted(mobile_number)
   end
 
   def find_friends!(options = {})

@@ -370,7 +370,10 @@ describe PhoneCall do
       phone_call.api_version = sample_adhearsion_twilio_api_version
 
       asserted_registered_operator_dial_string = interpolated_assertion(
-        registered_operator(:dial_string), :number_to_dial => registered_operator_number
+        registered_operator(:dial_string),
+        :number_to_dial => registered_operator_number,
+        :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
+        :voip_gateway_host => registered_operator(:voip_gateway_host)
       )
 
       asserted_non_registered_operator_dial_string = asserted_default_pbx_dial_string(
@@ -412,7 +415,10 @@ describe PhoneCall do
       # assert correct TwiML when dialing to a user from registered service provider
       partners_number = registered_operator(:number)
       asserted_number = interpolated_assertion(
-        registered_operator(:dial_string), :number_to_dial => partners_number
+        registered_operator(:dial_string),
+        :number_to_dial => partners_number,
+        :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
+        :voip_gateway_host => registered_operator(:voip_gateway_host)
       )
 
       phone_call.chat = create(

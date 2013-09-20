@@ -1640,7 +1640,18 @@ describe User do
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
-        asserted_dial_string = assert_only_number ? asserted_number_formatted_for_twilio(new_user.mobile_number) : (interpolated_assertion(assertions["dial_string"], :number_to_dial => number) || asserted_default_pbx_dial_string(:number_to_dial => number))
+        if assert_only_number
+          asserted_dial_string = asserted_number_formatted_for_twilio(new_user.mobile_number)
+        else
+          asserted_dial_string = (
+            interpolated_assertion(
+              assertions["dial_string"],
+              :number_to_dial => number,
+              :dial_string_number_prefix => assertions["dial_string_number_prefix"],
+              :voip_gateway_host => assertions["voip_gateway_host"]
+            ) || asserted_default_pbx_dial_string(:number_to_dial => number)
+          )
+        end
         new_user.dial_string(requesting_api_version).should == asserted_dial_string
       end
     end

@@ -41,7 +41,9 @@ class CallDataRecord < ActiveRecord::Base
 
   def unescaped_variable(*keys)
     options = keys.extract_options!
-    raw_value = keys.unshift(options[:root] || "variables").inject(parsed_body) {|acc, e| acc[e] if acc.is_a?(Hash)}
+    raw_value = keys.unshift(options[:root] || "variables").inject(parsed_body) do |config, key|
+      config[key] if config.is_a?(Hash)
+    end
     Rack::Utils.unescape(raw_value).strip if raw_value
   end
 
