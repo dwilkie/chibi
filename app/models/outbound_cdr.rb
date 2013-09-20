@@ -56,10 +56,12 @@ class OutboundCdr < CallDataRecord
       Torasup::Operator.registered.each do |country_id, operators|
         operators.each do |operator_id, operator_data|
           if operator_data["voip_gateway_host"] == sip_to_host
-            return @dial_string_number_prefix = operator_data["dial_string_number_prefix"]
+            @dial_string_number_prefix = operator_data["dial_string_number_prefix"]
+            break
           end
         end
       end
+      @dial_string_number_prefix
     end
   end
 end
