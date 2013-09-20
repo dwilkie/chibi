@@ -74,6 +74,39 @@ describe OutboundCdr do
             subject.phone_call.should == phone_call
           end
         end
+
+        context "when parsing the destination number" do
+          include MobilePhoneHelpers
+
+          def build_cdr(options = {})
+            super(
+              :cdr_variables => {
+                "variables" => {
+                  "sip_to_user" => options[:sip_to_user],
+                  "sip_to_host" => options[:sip_to_host],
+                },
+                "callflow" => {
+                  "caller_profile" => {"network_addr" => options[:network_addr]}
+                }
+              }
+            )
+          end
+
+          it "should strip off the dial string number prefix" do
+            with_operators do |number_parts, assertions|
+              number = number_parts.join
+              default_cdr_options = {:sip_to_user => assertions["dial_string_number_prefix"].to_s + number}
+
+              cdr = build_cdr(default_cdr_options.merge(:sip_to_host => assertions["voip_gateway_host"]))
+              cdr.valid?
+              cdr.from.should == number
+
+              cdr = build_cdr(default_cdr_options.merge(:sip_to_host => "invalid", :network_addr => assertions["voip_gateway_host"]))
+              cdr.valid?
+              cdr.from.should == number
+            end
+          end
+        end
       end
     end
 

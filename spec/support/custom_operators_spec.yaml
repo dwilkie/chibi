@@ -9,7 +9,8 @@ kh:
         mt_message_queue: "smart_mt_message_queue"
         short_code: "2442"
         caller_id: "2442"
-        dial_string: "sofia/internal/%{number_to_dial}@27.109.112.80"
+        voip_gateway_host: "27.109.112.80"
+        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
         billing:
           recipients:
             "eng.makara@smart.com.kh":
@@ -72,7 +73,9 @@ kh:
         nuntium_channel: "qb"
         mt_message_queue: "qb_mt_message_queue"
         caller_id: "2442"
-        dial_string: "sofia/internal/2442%{number_to_dial}@117.55.252.146"
+        dial_string_number_prefix: "2442"
+        voip_gateway_host: "117.55.252.146"
+        dial_string: "sofia/internal/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
         billing:
           recipients:
             "sophak.lim@qbmore.com":

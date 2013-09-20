@@ -645,9 +645,12 @@ FactoryGirl.define do
         dynamic_cdr_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
       else
         called_user = user_who_was_called || FactoryGirl.create(:user)
+        default_host = "27.109.112.12"
         dynamic_cdr_variables["uuid"] ||= FactoryGirl.generate(:guid)
         dynamic_cdr_variables["sip_to_user"] ||= called_user.mobile_number
+        dynamic_cdr_variables["sip_to_host"] ||= default_host
         dynamic_cdr_callflow_caller_profile["destination_number"] ||= called_user.mobile_number
+        dynamic_cdr_callflow_caller_profile["network_addr"] ||= default_host
       end
 
       dynamic_body.deep_merge!(dynamic_cdr)
