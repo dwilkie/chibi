@@ -868,6 +868,47 @@ describe Chat do
     end
   end
 
+  describe ".cleanup!" do
+    let(:time_considered_old) { 30.days.ago }
+
+    def create_old_chat(*args)
+      options = args.extract_options!
+      interaction = options.delete(:interaction)
+      user = options.delete(:user)
+      factory_options = {:created_at => time_considered_old, :updated_at => time_considered_old}.merge(options)
+      chat = create(:chat, *args, factory_options)
+      create(interaction, :chat => chat) if interaction
+      chat.update_attribute(:updated_at, time_considered_old)
+      chat
+    end
+
+    let(:old_active_chat) { create_old_chat(:active) }
+    let(:old_chat_with_initiator_active) { create_old_chat(:initiator_active) }
+    let(:old_chat_with_friend_active) { create_old_chat(:friend_active) }
+    let(:old_chat_with_message) { create_old_chat(:interaction => :message) }
+    let(:old_chat_with_phone_call) { create_old_chat(:interaction => :phone_call) }
+
+    before do
+      chat
+      unique_active_chat
+      old_active_chat
+      old_chat_with_message
+      old_chat_with_phone_call
+      old_chat_with_initiator_active
+      old_chat_with_friend_active
+      create_old_chat(:interaction => :reply)
+      create_old_chat
+    end
+
+    it "should cleanup any chats without interaction that are older than 30 days" do
+      subject.class.cleanup!
+      Chat.all.should =~ [
+        chat, unique_active_chat, old_active_chat, old_chat_with_initiator_active,
+        old_chat_with_friend_active, old_chat_with_message, old_chat_with_phone_call
+      ]
+    end
+  end
+
   describe ".end_inactive" do
     before do
       chat.should_not be_active

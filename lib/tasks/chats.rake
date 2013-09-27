@@ -13,4 +13,9 @@ namespace :chats do
   task :reactivate_stagnant => :environment do
     Resque.enqueue(ChatReinvigorator)
   end
+
+  desc "Removes old chats that have no interaction"
+  task :cleanup => :environment do
+    Chat.cleanup!
+  end
 end
