@@ -25,6 +25,30 @@ class Chat < ActiveRecord::Base
     end
   end
 
+  def self.cleanup!
+    joins(
+      :user
+    ).joins(
+      :friend
+    ).joins(
+      "LEFT OUTER JOIN messages ON messages.chat_id = #{table_name}.id"
+    ).joins(
+      "LEFT OUTER JOIN phone_calls ON phone_calls.chat_id = #{table_name}.id"
+    ).where(
+      "users.active_chat_id IS NULL OR users.active_chat_id != #{table_name}.id"
+    ).where(
+      "friends_chats.active_chat_id IS NULL OR friends_chats.active_chat_id != #{table_name}.id"
+    ).where(
+      :messages => {:id => nil}
+    ).where(
+      :phone_calls => {:id => nil}
+    ).where(
+      "#{table_name}.created_at < ?", 30.days.ago
+    ).where(
+      "#{table_name}.updated_at < ?", 30.days.ago
+    ).delete_all
+  end
+
   def self.filter_by(params = {})
     super(params).includes(:user, :friend, :active_users)
   end
