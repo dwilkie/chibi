@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe ChatReactivator do
-
   context "@queue" do
     it "should == :chat_reactivator_queue" do
       subject.class.instance_variable_get(:@queue).should == :chat_reactivator_queue
@@ -24,7 +23,6 @@ describe ChatReactivator do
 
     it_should_behave_like "rescheduling SIGTERM exceptions" do
       let(:args) { [1] }
-      let(:error_stub) { find_stub }
     end
   end
 end

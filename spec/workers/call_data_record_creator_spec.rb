@@ -27,7 +27,6 @@ describe CallDataRecordCreator do
 
     it_should_behave_like "rescheduling SIGTERM exceptions" do
       let(:args) { [body] }
-      let(:error_stub) { save_stub }
     end
   end
 end

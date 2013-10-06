@@ -23,7 +23,6 @@ describe UserCreator do
 
     it_should_behave_like "rescheduling SIGTERM exceptions" do
       let(:args) { [mobile_number, metadata] }
-      let(:error_stub) { create_stub }
     end
   end
 end

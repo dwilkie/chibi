@@ -27,7 +27,6 @@ describe ChatDeactivator do
 
     it_should_behave_like "rescheduling SIGTERM exceptions" do
       let(:args) { [1, {}] }
-      let(:error_stub) { find_stub }
     end
   end
 end

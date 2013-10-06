@@ -22,7 +22,6 @@ describe UserImporter do
 
     it_should_behave_like "rescheduling SIGTERM exceptions" do
       let(:args) { [data] }
-      let(:error_stub) { import_stub }
     end
   end
 end
