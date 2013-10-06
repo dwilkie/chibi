@@ -21,7 +21,6 @@ describe ChatReinvigorator do
 
     it_should_behave_like "rescheduling SIGTERM exceptions" do
       let(:args) { [] }
-      let(:error_stub) { job_stub }
     end
   end
 end

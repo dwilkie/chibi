@@ -28,7 +28,6 @@ describe DeliveryReceiptCreator do
 
     it_should_behave_like "rescheduling SIGTERM exceptions" do
       let(:args) { [params.with_indifferent_access] }
-      let(:error_stub) { find_stub }
     end
   end
 end
