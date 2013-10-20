@@ -1,3 +1,5 @@
+require "resque_web"
+
 Chibi::Application.routes.draw do
   root "welcome#index"
 
@@ -21,5 +23,5 @@ Chibi::Application.routes.draw do
 
   resource :report, :only => [:create, :show, :destroy]
 
-  mount Resque::Server, :at => "/resque"
+  mount ResqueWeb::Engine => "/resque"
 end

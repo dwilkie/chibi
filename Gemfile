@@ -12,6 +12,7 @@ gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countri
 gem "faker"
 gem "hirefire-resource"
 gem "resque"
+gem 'resque-web', :require => 'resque_web', :git => "git://github.com/resque/resque-web"
 gem "unicorn"
 gem "rack-timeout"
 gem "redis"
