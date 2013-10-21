@@ -637,9 +637,9 @@ FactoryGirl.define do
       dynamic_cdr_variables["billsec"] ||= "15"
 
       if dynamic_cdr_variables["direction"] == "inbound"
-        dynamic_cdr_variables["sip_from_user_stripped"] ||= calling_user.mobile_number
         dynamic_cdr_variables["sip_from_user"] ||= calling_user.mobile_number
-        dynamic_cdr_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{calling_user.mobile_number}")
+        dynamic_cdr_variables["sip_from_user_stripped"] ||= dynamic_cdr_variables["sip_from_user"]
+        dynamic_cdr_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{dynamic_cdr_variables["sip_from_user"]}")
 
         dynamic_cdr_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
         dynamic_cdr_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
