@@ -39,7 +39,9 @@ describe InboundCdr do
     build_cdr(
       :cdr_variables => {
         "variables" => {
-          "sip_from_user" => "invalid", "sip_P-Asserted-Identity" => "invalid"
+          "sip_from_user_stripped" => "invalid",
+          "sip_from_user" => "invalid",
+          "sip_P-Asserted-Identity" => "invalid"
         }
       }
     ).should_not be_valid

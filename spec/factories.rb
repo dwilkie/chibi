@@ -637,7 +637,7 @@ FactoryGirl.define do
       dynamic_cdr_variables["billsec"] ||= "15"
 
       if dynamic_cdr_variables["direction"] == "inbound"
-
+        dynamic_cdr_variables["sip_from_user_stripped"] ||= calling_user.mobile_number
         dynamic_cdr_variables["sip_from_user"] ||= calling_user.mobile_number
         dynamic_cdr_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{calling_user.mobile_number}")
 

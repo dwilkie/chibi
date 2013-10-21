@@ -25,7 +25,7 @@ class InboundCdr < CallDataRecord
   end
 
   def cdr_from
-    valid_source("sip_from_user") || valid_source("sip_P_Asserted_Identity")
+    valid_source("sip_from_user_stripped") || valid_source("sip_from_user") || valid_source("sip_P_Asserted_Identity")
   end
 
   def find_related_phone_call
