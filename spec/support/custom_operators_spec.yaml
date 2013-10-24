@@ -107,7 +107,10 @@ kh:
             revenue_share: "0.4"
     cootel:
       assertions:
-        caller_id: "2442"
+        short_code: "855383838380"
+        nuntium_channel: "cootel"
+        mt_message_queue: "cootel_mt_message_queue"
+        caller_id: "855383838380"
         voip_gateway_host: "103.5.126.33"
         dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
         billing:
