@@ -1599,7 +1599,7 @@ describe User do
     it "should retun the user's operator's SMS short code or the twilio number" do
       user.contact_me_number.should == twilio_number
       with_operators do |number_parts, assertions|
-        build(:user, :mobile_number => number_parts.join).contact_me_number.should == assertions["short_code"]
+        build(:user, :mobile_number => number_parts.join).contact_me_number.should == (assertions["short_code"] || twilio_number)
       end
     end
   end

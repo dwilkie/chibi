@@ -105,3 +105,40 @@ kh:
             specific_tax: "0.03"
             vat: "0.1"
             revenue_share: "0.4"
+    cootel:
+      assertions:
+        short_code: "855383838380"
+        nuntium_channel: "cootel"
+        mt_message_queue: "cootel_mt_message_queue"
+        caller_id: "855383838380"
+        voip_gateway_host: "103.5.126.33"
+        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
+        billing:
+          recipients:
+            "yamchhim@kh.cootel.com":
+              name: "Chhim"
+          attention: "Mr. Chhim Yam"
+          vat_tin: "100012345"
+          address: "No. B3 & C3-1, St. 169,\nSangkat Veal Vong,\nKhan 7 Makara,\nPhnom Penh,\nCambodia"
+          name:  "Xinwei (Cambodia) Telecom Co., Ltd."
+        payment_instructions:
+          bank_name: "Advanced Bank of Asia Limited (ABA)"
+          account_name: "Chatterbox Dating Mobile"
+          account_number: "000070412"
+          swift_code: "ABAAKHPP"
+          bank_address: "148 Preah Sihanouk Blvd,\nSangkat Boeung Keng Kang 1,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
+        services:
+          ivr:
+            name: "Cootel Friends IVR"
+            short_code: "2442"
+            unit_cost: "0.1"
+            specific_tax: "0.03"
+            vat: "0.1"
+            revenue_share: "0.4"
+          sms:
+            name: "Cootel Friends SMS"
+            short_code: "2442"
+            unit_cost: "0.05"
+            specific_tax: "0.03"
+            vat: "0.1"
+            revenue_share: "0.4"
