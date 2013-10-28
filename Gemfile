@@ -12,6 +12,7 @@ gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countri
 gem "faker"
 gem "hirefire-resource"
 gem "resque"
+gem 'resque-web', :require => 'resque_web', :git => "git://github.com/dwilkie/resque-web"
 gem "unicorn"
 gem "rack-timeout"
 gem "redis"
@@ -36,16 +37,13 @@ gem 'rails_12factor', :group => :production
 
 group :test, :development do
   gem 'rspec-rails'
-end
-
-group :development do
   gem "parallel_tests"
   gem "foreman"
 end
 
 group :test do
   gem 'factory_girl'
-  gem 'spork', :git => 'git://github.com/sporkrb/spork.git'
+  gem 'spork-rails', :git => 'git://github.com/sporkrb/spork-rails.git'
   gem 'mock_redis'
   gem 'fakeweb'
   gem 'vcr', :git => 'git://github.com/myronmarston/vcr.git'
