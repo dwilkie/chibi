@@ -111,7 +111,7 @@ kh:
         mt_message_queue: "cootel_mt_message_queue"
         caller_id: "855383838380"
         voip_gateway_host: "103.5.126.33"
-        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
+        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}:5061"
         billing:
           recipients:
             "yamchhim@kh.cootel.com":
