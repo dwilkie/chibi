@@ -49,24 +49,6 @@ FactoryGirl.define do
     end
   end
 
-  factory :delivery_receipt do
-    association :reply, :delivered, :with_token
-    delivered
-    token { reply.token }
-
-    trait :delivered do
-      state "delivered"
-    end
-
-    trait :failed do
-      state "failed"
-    end
-
-    trait :confirmed do
-      state "confirmed"
-    end
-  end
-
   factory :missed_call do
     subject { "You have a missed call from 062000000" }
   end

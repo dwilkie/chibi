@@ -5,8 +5,6 @@ class Reply < ActiveRecord::Base
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
 
-  has_many :delivery_receipts
-
   DELIVERED = "delivered"
   FAILED = "failed"
   CONFIRMED = "confirmed"
@@ -69,6 +67,10 @@ class Reply < ActiveRecord::Base
     queued_for_smsc_delivery.where("delivered_at < ?", 10.minutes.ago).where("body IS NOT NULL").find_each do |reply|
       Resque.enqueue(NuntiumAoQueryer, reply.id)
     end
+  end
+
+  def self.cleanup!
+    where.not(:delivered_at => nil).where("updated_at < ?", 1.month.ago).delete_all
   end
 
   def self.fix_blank!

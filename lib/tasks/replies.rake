@@ -8,4 +8,9 @@ namespace :replies do
   task :fix_blank => :environment do
     Reply.fix_blank!
   end
+
+  desc "Removes old delivered replies"
+  task :cleanup => :environment do
+    Reply.cleanup!
+  end
 end
