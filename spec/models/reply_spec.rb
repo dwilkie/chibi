@@ -191,6 +191,34 @@ describe Reply do
     end
   end
 
+  describe ".cleanup!" do
+    let(:time_considered_old) { 1.month.ago }
+
+    def create_old_reply(*args)
+      options = args.extract_options!
+      create(:reply, *args, {:created_at => time_considered_old, :updated_at => time_considered_old}.merge(options))
+    end
+
+    let(:old_undelivered_reply) { create_old_reply }
+    let(:old_delivered_reply) { create_old_reply(:delivered) }
+    let(:new_undelivered_reply) { create(:reply) }
+    let(:new_delivered_reply) { create(:reply, :delivered) }
+
+    before do
+      old_undelivered_reply
+      old_delivered_reply
+      new_undelivered_reply
+      new_delivered_reply
+    end
+
+    it "should remove any delivered replies that are older than 1 month" do
+      subject.class.cleanup!
+      Reply.all.should =~ [
+        old_undelivered_reply, new_undelivered_reply, new_delivered_reply
+      ]
+    end
+  end
+
   describe "querying ao messages from nuntium" do
     let(:recently_queued_reply) { create_reply(:delivered_at => Time.now) }
     let(:less_recently_queued_reply) { create_reply }
