@@ -12,17 +12,21 @@ class Message < ActiveRecord::Base
   validates :guid, :uniqueness => true, :allow_nil => true
 
   state_machine :initial => :received do
-    state :processed
+    state :processed, :awaiting_charge_result, :ignored
 
     event :process do
       transition(:received => :processed)
+    end
+
+    event :await_charge_result do
+      transition(:received => :awaiting_charge_result)
     end
   end
 
   def self.queue_unprocessed(options = {})
     options[:timeout] ||= 30.seconds.ago
     unprocessed = where(
-      "state != 'processed'"
+      :state => :received
     ).where("created_at <= ?", options[:timeout])
     unprocessed.where(:chat_id => nil).find_each do |message|
       message.queue_for_processing!
@@ -43,6 +47,8 @@ class Message < ActiveRecord::Base
     if user_wants_to_logout?
       user.logout!
     else
+      return await_charge_result unless user.charge!(self)
+
       start_new_chat = true
 
       unless user_wants_to_chat_with_someone_new?

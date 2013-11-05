@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130918033327) do
+ActiveRecord::Schema.define(version: 20131105145926) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -40,6 +40,21 @@ ActiveRecord::Schema.define(version: 20130918033327) do
   add_index "call_data_records", ["phone_call_id", "type"], name: "index_call_data_records_on_phone_call_id_and_type", unique: true, using: :btree
   add_index "call_data_records", ["user_id"], name: "index_call_data_records_on_user_id", using: :btree
   add_index "call_data_records", ["uuid"], name: "index_call_data_records_on_uuid", unique: true, using: :btree
+
+  create_table "charge_requests", force: true do |t|
+    t.string   "result"
+    t.string   "state"
+    t.string   "operator"
+    t.boolean  "notify_requester", default: false, null: false
+    t.integer  "requester_id"
+    t.string   "requester_type"
+    t.integer  "user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "charge_requests", ["requester_type", "requester_id"], name: "index_charge_requests_on_requester_type_and_requester_id", using: :btree
+  add_index "charge_requests", ["user_id"], name: "index_charge_requests_on_user_id", using: :btree
 
   create_table "chats", force: true do |t|
     t.integer  "user_id"
@@ -133,21 +148,23 @@ ActiveRecord::Schema.define(version: 20130918033327) do
     t.string   "name"
     t.string   "screen_name"
     t.date     "date_of_birth"
-    t.string   "gender",             limit: 1
-    t.string   "looking_for",        limit: 1
+    t.string   "gender",                   limit: 1
+    t.string   "looking_for",              limit: 1
     t.integer  "active_chat_id"
-    t.datetime "created_at",                                      null: false
-    t.datetime "updated_at",                                      null: false
-    t.string   "state",                        default: "online", null: false
+    t.datetime "created_at",                                            null: false
+    t.datetime "updated_at",                                            null: false
+    t.string   "state",                              default: "online", null: false
     t.datetime "last_interacted_at"
     t.datetime "last_contacted_at"
     t.datetime "activated_at"
     t.string   "operator_name"
+    t.integer  "latest_charge_request_id"
   end
 
   add_index "users", ["active_chat_id"], name: "index_users_on_active_chat_id", using: :btree
   add_index "users", ["date_of_birth"], name: "index_users_on_date_of_birth", using: :btree
   add_index "users", ["gender"], name: "index_users_on_gender", using: :btree
+  add_index "users", ["latest_charge_request_id"], name: "index_users_on_latest_charge_request_id", using: :btree
   add_index "users", ["looking_for"], name: "index_users_on_looking_for", using: :btree
   add_index "users", ["mobile_number"], name: "index_users_on_mobile_number", unique: true, using: :btree
   add_index "users", ["operator_name"], name: "index_users_on_operator_name", using: :btree

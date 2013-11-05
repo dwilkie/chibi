@@ -32,6 +32,49 @@ FactoryGirl.define do
     n.to_s
   end
 
+  sequence :chargeable_operator_number, 85513000000 do |n|
+    n.to_s
+  end
+
+  factory :charge_request do
+    association :user, :factory => [:user, :from_chargeable_operator]
+    qb
+
+    after(:build) do |charge_request|
+      user = charge_request.user
+      user.latest_charge_request = charge_request
+      user.save!
+    end
+
+    trait :awaiting_result do
+      state "awaiting_result"
+    end
+
+    trait :successful do
+      state "successful"
+    end
+
+    trait :errored do
+      state "errored"
+    end
+
+    trait :failed do
+      state "failed"
+    end
+
+    trait :qb do
+      operator "qb"
+    end
+
+    trait :from_message do
+      association :requester, :factory => :message
+    end
+
+    trait :from_phone_call do
+      association :requester, :factory => :phone_call
+    end
+  end
+
   factory :message do
     from { generate(:mobile_number) }
 
@@ -41,6 +84,14 @@ FactoryGirl.define do
 
     trait :processed do
       state "processed"
+    end
+
+    trait :ignored do
+      state "ignored"
+    end
+
+    trait :awaiting_charge_result do
+      state "awaiting_charge_result"
     end
 
     trait :without_user do
@@ -337,6 +388,10 @@ FactoryGirl.define do
 
     trait :from_operator_with_voice do
       mobile_number { generate(:operator_number_with_voice) }
+    end
+
+    trait :from_chargeable_operator do
+      mobile_number { generate(:chargeable_operator_number) }
     end
 
     trait :searching_for_friend do

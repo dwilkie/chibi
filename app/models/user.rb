@@ -30,7 +30,10 @@ class User < ActiveRecord::Base
   has_many :participating_chats, :class_name => "Chat", :foreign_key => "friend_id"
   has_many :chat_friends, :through => :participating_chats, :source => :user
 
+  has_many :charge_requests
+
   belongs_to :active_chat, :class_name => "Chat"
+  belongs_to :latest_charge_request, :class_name => "ChargeRequest"
 
   validates :mobile_number,
             :presence => true,
@@ -276,6 +279,26 @@ class User < ActiveRecord::Base
     end
   end
 
+  def charge!(requester)
+    return true unless operator.chargeable
+    if latest_charge_request
+      if latest_charge_request.successful?
+        if latest_charge_request.updated_at < 24.hours.ago
+          create_charge_request!(requester)
+        else
+          true
+        end
+      elsif latest_charge_request.failed?
+        create_charge_request!(requester, true)
+        false
+      else
+        latest_charge_request.awaiting_result? || latest_charge_request.created? || (latest_charge_request.errored? && create_charge_request!(requester))
+      end
+    else
+      create_charge_request!(requester)
+    end
+  end
+
   def contact_me_number
     operator.short_code || twilio_outgoing_number
   end
@@ -391,6 +414,16 @@ class User < ActiveRecord::Base
   end
 
   private
+
+  def create_charge_request!(requester, notify_requester = false)
+    self.latest_charge_request = ChargeRequest.new(
+      :requester => requester,
+      :notify_requester => notify_requester,
+      :operator => operator_name
+    )
+    charge_requests << latest_charge_request
+    save!
+  end
 
   def self.by_operator_joins
     joins(:location)

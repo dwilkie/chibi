@@ -676,6 +676,104 @@ describe User do
     end
   end
 
+  describe "#charge!(requester)" do
+    subject { create(:user, :from_chargeable_operator) }
+    let(:requester) { Random.new.rand(0..1).zero? ? create(:message, :user => subject) : create(:phone_call, :user => subject) }
+    let(:latest_charge_request) { subject.latest_charge_request }
+    let(:expired_time_before_new_charge) { 24.hours }
+
+    def create_charge_request(*args)
+      options = args.extract_options!
+      create(:charge_request, *args, {:user => subject}.merge(options))
+    end
+
+    shared_examples_for "charging the user" do |options|
+      options ||= {}
+      options[:expected_return_value]
+      it "should create a charge request with notify_requester => #{options[:notify_requester]} and return #{options[:expected_return_value]}" do
+        subject.charge!(requester).should == options[:expected_return_value]
+        subject.charge_requests.should include(latest_charge_request)
+        latest_charge_request.requester.should == requester
+        latest_charge_request.notify_requester.should == options[:notify_requester]
+        latest_charge_request.operator.should == subject.operator_name
+      end
+    end
+
+    shared_examples_for "not charging the user" do
+      before do
+        latest_charge_request
+      end
+
+      it "should not create a new charge request and it should return true" do
+        subject.charge!(requester).should == true
+        subject.charge_requests.should == [latest_charge_request]
+        subject.latest_charge_request.should == latest_charge_request
+      end
+    end
+
+    context "given the user does not need to be charged" do
+      subject { user }
+
+      it "should not charge the user" do
+        subject.charge!(requester).should == true
+        subject.charge_requests.should be_empty
+        subject.latest_charge_request.should be_nil
+      end
+    end
+
+    context "given the user has never been charged before" do
+      it_should_behave_like "charging the user", :expected_return_value => true, :notify_requester => false
+    end
+
+    context "given the user's last charge was just created (our fault - too many requests)" do
+      it_should_behave_like "not charging the user" do
+        let(:latest_charge_request) { create_charge_request }
+      end
+    end
+
+    context "given the user's last charge is still awaiting the result (our fault - it shouldn't take that long)" do
+      it_should_behave_like "not charging the user" do
+        let(:latest_charge_request) { create_charge_request(:awaiting_result) }
+      end
+    end
+
+    context "given the user's last charge was errored (our fault)" do
+      before do
+        create_charge_request(:errored)
+      end
+
+      it_should_behave_like "charging the user", :expected_return_value => true, :notify_requester => false
+    end
+
+    context "given the user's last charge was successful" do
+      context "and it was less than 24 hours ago" do
+        it_should_behave_like "not charging the user" do
+          let(:latest_charge_request) { create_charge_request(:successful) }
+        end
+      end
+
+      context "but it was more than 24 hours ago" do
+        before do
+          create_charge_request(
+            :successful,
+            :created_at => expired_time_before_new_charge.ago,
+            :updated_at => expired_time_before_new_charge.ago
+          )
+        end
+
+        it_should_behave_like "charging the user", :expected_return_value => true, :notify_requester => false
+      end
+    end
+
+    context "given the user's last charge was unsuccessful" do
+      before do
+        create_charge_request(:failed)
+      end
+
+      it_should_behave_like "charging the user", :expected_return_value => false, :notify_requester => true
+    end
+  end
+
   describe "#remind!(options = {})" do
     let(:user) { create(:user, :not_contacted_recently) }
 
