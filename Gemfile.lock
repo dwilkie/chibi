@@ -22,7 +22,7 @@ GIT
 
 GIT
   remote: git://github.com/dwilkie/torasup.git
-  revision: 87daf1423a727d0f879e1d929027208090a7653f
+  revision: 61756ad1d24e07cec70493cdb5adedcf7548c771
   specs:
     torasup (0.0.7)
       countries
