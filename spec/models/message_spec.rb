@@ -214,7 +214,7 @@ describe Message do
 
       context "charging the user" do
         it "should try to charge the sender" do
-          user.should_receive(:charge!)
+          user.should_receive(:charge!).with(subject)
           subject.process!
         end
 

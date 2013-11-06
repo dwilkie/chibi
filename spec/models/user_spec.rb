@@ -676,6 +676,16 @@ describe User do
     end
   end
 
+  describe "#operator" do
+    it "should return the operator derived from the mobile number" do
+      with_operators do |number_parts, assertions|
+        number = number_parts.join
+        new_user = build(:user, :mobile_number => number)
+        new_user.operator.id.should == assertions["id"]
+      end
+    end
+  end
+
   describe "#charge!(requester)" do
     subject { create(:user, :from_chargeable_operator) }
     let(:requester) { Random.new.rand(0..1).zero? ? create(:message, :user => subject) : create(:phone_call, :user => subject) }
@@ -699,15 +709,35 @@ describe User do
       end
     end
 
-    shared_examples_for "not charging the user" do
+    shared_examples_for "not charging the user" do |options|
+      options ||= {}
+
       before do
         latest_charge_request
       end
 
-      it "should not create a new charge request and it should return true" do
-        subject.charge!(requester).should == true
+      it "should not create a new charge request and it should return #{options[:expected_return_value]}" do
+        subject.charge!(requester).should == options[:expected_return_value]
         subject.charge_requests.should == [latest_charge_request]
         subject.latest_charge_request.should == latest_charge_request
+      end
+    end
+
+    shared_examples_for "a timed charge request" do
+      context "latest charge request is slow" do
+        before do
+          latest_charge_request.stub(:slow?).and_return(true)
+        end
+
+        it_should_behave_like "not charging the user", :expected_return_value => true
+      end
+
+      context "latest charge request is not slow" do
+        before do
+          latest_charge_request.stub(:slow?).and_return(false)
+        end
+
+        it_should_behave_like "not charging the user", :expected_return_value => false
       end
     end
 
@@ -725,14 +755,14 @@ describe User do
       it_should_behave_like "charging the user", :expected_return_value => true, :notify_requester => false
     end
 
-    context "given the user's last charge was just created (our fault - too many requests)" do
-      it_should_behave_like "not charging the user" do
+    context "given the user's last charge was just created" do
+      it_should_behave_like "a timed charge request" do
         let(:latest_charge_request) { create_charge_request }
       end
     end
 
-    context "given the user's last charge is still awaiting the result (our fault - it shouldn't take that long)" do
-      it_should_behave_like "not charging the user" do
+    context "given the user's last charge is still awaiting the result" do
+      it_should_behave_like "a timed charge request" do
         let(:latest_charge_request) { create_charge_request(:awaiting_result) }
       end
     end
@@ -747,7 +777,7 @@ describe User do
 
     context "given the user's last charge was successful" do
       context "and it was less than 24 hours ago" do
-        it_should_behave_like "not charging the user" do
+        it_should_behave_like "not charging the user", :expected_return_value => true do
           let(:latest_charge_request) { create_charge_request(:successful) }
         end
       end

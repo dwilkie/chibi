@@ -292,7 +292,7 @@ class User < ActiveRecord::Base
         create_charge_request!(requester, true)
         false
       else
-        latest_charge_request.awaiting_result? || latest_charge_request.created? || (latest_charge_request.errored? && create_charge_request!(requester))
+        (latest_charge_request.errored? && create_charge_request!(requester)) || latest_charge_request.slow?
       end
     else
       create_charge_request!(requester)
@@ -413,13 +413,17 @@ class User < ActiveRecord::Base
     end
   end
 
+  def operator
+    torasup_number.operator
+  end
+
   private
 
   def create_charge_request!(requester, notify_requester = false)
     self.latest_charge_request = ChargeRequest.new(
       :requester => requester,
       :notify_requester => notify_requester,
-      :operator => operator_name
+      :operator => operator.id
     )
     charge_requests << latest_charge_request
     save!
@@ -703,10 +707,6 @@ class User < ActiveRecord::Base
 
   def torasup_number
     @torasup_number ||= Torasup::PhoneNumber.new(mobile_number)
-  end
-
-  def operator
-    torasup_number.operator
   end
 
   def cancel_searching_for_friend_if_chatting
