@@ -77,16 +77,6 @@ describe Message do
       Timecop.return
     end
 
-    it "should leave mark messages with chats as processed" do
-      do_background_task { subject.class.queue_unprocessed }
-      ignored_message.reload.should_not be_processed
-      unprocessed_message.reload.should_not be_processed
-      processed_message.reload.should be_processed
-      recently_received_message.reload.should_not be_processed
-      unprocessed_message_with_chat.reload.should be_processed
-      message.reload.should_not be_processed
-    end
-
     context "passing no options" do
       before do
         do_background_task(:queue_only => true) { subject.class.queue_unprocessed }
@@ -96,6 +86,22 @@ describe Message do
         MessageProcessor.should have_queued(unprocessed_message.id)
         MessageProcessor.should have_queued(recently_received_message.id)
         MessageProcessor.should have_queue_size_of(2)
+      end
+
+      context "after the job has run" do
+        before do
+          perform_background_job(:message_processor_queue)
+        end
+
+        it "should process the messages" do
+          ignored_message.reload.should_not be_processed
+          message_awaiting_charge_result.reload.should_not be_processed
+          unprocessed_message.reload.should be_processed
+          processed_message.reload.should be_processed
+          recently_received_message.reload.should be_processed
+          unprocessed_message_with_chat.reload.should be_processed
+          message.reload.should_not be_processed
+        end
       end
     end
 
