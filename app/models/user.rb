@@ -249,17 +249,17 @@ class User < ActiveRecord::Base
     # only include available users
     match_scope = match_scope.available
 
-    # order last by location
-    match_scope = filter_by_location(user, match_scope)
-
-    # then by age difference
-    match_scope = order_by_age_difference(user, match_scope)
+    # order first by the user's preferred gender
+    match_scope = order_by_preferred_gender(user, match_scope)
 
     # then by recent activity
     match_scope = order_by_recent_activity(user, match_scope)
 
-    # and first by the user's preferred gender
-    match_scope = order_by_preferred_gender(user, match_scope)
+    # then by age difference
+    match_scope = order_by_age_difference(user, match_scope)
+
+    # order last by location
+    match_scope = filter_by_location(user, match_scope)
 
     # group by user and make sure the records are not read only
     match_scope.group(self.all_columns).readonly(false)
