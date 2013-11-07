@@ -2,6 +2,7 @@ class CreateChargeRequests < ActiveRecord::Migration
   def change
     create_table :charge_requests do |t|
       t.string     :result
+      t.string     :reason
       t.string     :state
       t.string     :operator
       t.boolean    :notify_requester, :default => false, :null => false

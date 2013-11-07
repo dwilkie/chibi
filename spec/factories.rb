@@ -73,6 +73,10 @@ FactoryGirl.define do
     trait :from_phone_call do
       association :requester, :factory => :phone_call
     end
+
+    trait :notify_requester do
+      notify_requester true
+    end
   end
 
   factory :message do
@@ -144,6 +148,10 @@ FactoryGirl.define do
       state "connecting_user_with_friend"
     end
 
+    trait :telling_user_they_dont_have_enough_credit do
+      state "telling_user_they_dont_have_enough_credit"
+    end
+
     trait :telling_user_their_chat_has_ended do
       state "telling_user_their_chat_has_ended"
     end
@@ -185,6 +193,12 @@ FactoryGirl.define do
         create_list(
           :chat, 5, :friend_active, :user => phone_call.user, :starter => phone_call
         )
+      end
+    end
+
+    trait :with_failed_charge_request do
+      after(:build) do |phone_call|
+        create(:charge_request, :failed, :requester => phone_call)
       end
     end
 

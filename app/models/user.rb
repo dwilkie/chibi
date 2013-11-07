@@ -379,6 +379,10 @@ class User < ActiveRecord::Base
     end
   end
 
+  def reply_not_enough_credit!
+    replies.build.not_enough_credit!
+  end
+
   def login!
     fire_events(:login)
   end

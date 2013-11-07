@@ -686,6 +686,21 @@ describe User do
     end
   end
 
+  describe "#reply_not_enough_credit!" do
+    subject { create(:user) }
+    let(:reply) { mock_model(Reply) }
+
+    before do
+      reply.stub(:not_enough_credit!)
+      subject.stub_chain(:replies, :build).and_return(reply)
+    end
+
+    it "should delegate to a new reply" do
+      reply.should_receive(:not_enough_credit!)
+      subject.reply_not_enough_credit!
+    end
+  end
+
   describe "#charge!(requester)" do
     subject { create(:user, :from_chargeable_operator) }
     let(:requester) { Random.new.rand(0..1).zero? ? create(:message, :user => subject) : create(:phone_call, :user => subject) }
@@ -705,7 +720,7 @@ describe User do
         subject.charge_requests.should include(latest_charge_request)
         latest_charge_request.requester.should == requester
         latest_charge_request.notify_requester.should == options[:notify_requester]
-        latest_charge_request.operator.should == subject.operator_name
+        latest_charge_request.operator.should == subject.operator.id
       end
     end
 

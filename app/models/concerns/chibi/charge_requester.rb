@@ -5,5 +5,8 @@ module Chibi
     included do
       has_one :charge_request, :as => :requester
     end
+
+    def charge_request_updated!
+    end
   end
 end

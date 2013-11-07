@@ -4,6 +4,8 @@ describe Message do
   include AnalyzableExamples
   include ResqueHelpers
 
+  include_context "replies"
+
   let(:user) { create(:user) }
   let(:friend) { create(:user, :english) }
   let(:new_friend) { create(:user, :cambodian) }
@@ -129,6 +131,15 @@ describe Message do
     end
   end
 
+  describe "#charge_request_updated!" do
+    subject { create(:message) }
+
+    it "should queue the message for processing" do
+      do_background_task(:queue_only => true) { subject.charge_request_updated! }
+      MessageProcessor.should have_queued(subject.id)
+    end
+  end
+
   describe "#body" do
     it "should return an empty string if it is nil" do
       subject.body = nil
@@ -137,21 +148,35 @@ describe Message do
   end
 
   describe "queue_for_processing!" do
-    before do
-      ResqueSpec.reset!
+    it "queue the message for processing" do
+      do_background_task(:queue_only => true) { message.queue_for_processing! }
+      MessageProcessor.should have_queued(message.id)
+    end
+  end
+
+  describe "#process" do
+    context "state is 'received'" do
+      subject { create(:message) }
+
+      it "should update the state to 'processed'" do
+        subject.process
+        subject.state.should == "processed"
+      end
     end
 
-    it "queue the message for processing" do
-      message.queue_for_processing!
-      MessageProcessor.should have_queued(message.id)
+    context "state is 'awaiting_charge_result'" do
+      subject { create(:message, :awaiting_charge_result) }
+
+      it "should update the state to 'processed'" do
+        subject.process
+        subject.state.should == "processed"
+      end
     end
   end
 
   describe "#process!" do
     include TranslationHelpers
     include MessagingHelpers
-
-    include_context "replies"
 
     describe "before the message is processed" do
       context "if the message was already processed" do

@@ -43,6 +43,7 @@ ActiveRecord::Schema.define(version: 20131105145926) do
 
   create_table "charge_requests", force: true do |t|
     t.string   "result"
+    t.string   "reason"
     t.string   "state"
     t.string   "operator"
     t.boolean  "notify_requester", default: false, null: false

@@ -135,6 +135,11 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
+  def not_enough_credit!
+    self.body = I18n.t(:not_enough_credit, :locale => user.locale)
+    deliver!
+  end
+
   def send_reminder!
     self.body = user.gay? ? canned_reply(:recipient => user).gay_reminder : random_canned_greeting(:recipient => user)
     prepend_screen_id(Faker::Name.first_name)

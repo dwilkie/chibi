@@ -2,6 +2,15 @@ require 'spec_helper'
 
 describe ChargeRequest do
   subject { create(:charge_request) }
+  let(:skip_callback_request_charge) { false }
+
+  before do
+    ChargeRequest.skip_callback(:create, :after, :request_charge!) if skip_callback_request_charge
+  end
+
+  after do
+    ChargeRequest.set_callback(:create, :after, :request_charge!)
+  end
 
   describe "factory" do
     it "should be valid" do
@@ -56,6 +65,8 @@ describe ChargeRequest do
     end
 
     context "the charge request is 'created'" do
+      let(:skip_callback_request_charge) { true }
+
       it_should_behave_like "determining if a charge request is slow"
     end
 
@@ -68,14 +79,78 @@ describe ChargeRequest do
     end
   end
 
+  describe "#set_result!(result, reason)" do
+    SAMPLE_RESULTS = {
+      "successful" => {:reason => nil},
+      "failed" => {:reason => "insufficient_funds"},
+      "error" => {:reason => "bad_request", :asserted_state => "errored"}
+    }
+
+    SAMPLE_RESULTS.each do |result, assertions|
+      context "where result: '#{result}', reason: '#{assertions[:reason]}'" do
+        def do_set_result!(result, assertions)
+          subject.set_result!(result, assertions[:reason])
+        end
+
+        context "state is 'awaiting_result'" do
+          it "should update the charge request's result, reason and state" do
+            do_set_result!(result, assertions)
+            subject.reload
+            subject.state.should == (assertions[:asserted_state] || result)
+            subject.result.should == result
+            subject.reason.should == assertions[:reason]
+          end
+
+          context "requester is set" do
+            let(:requester) { create(:message) }
+
+            context "notify_requester is 'true'" do
+              subject { create(:charge_request, :notify_requester, :requester => requester) }
+
+              it "should notify the requester" do
+                requester.should_receive(:charge_request_updated!)
+                do_set_result!(result, assertions)
+              end
+            end
+
+            context "notify_requester is 'false'" do
+              subject { create(:charge_request, :requester => requester) }
+
+              it "should not notify the requester" do
+                requester.should_not_receive(:charge_request_updated!)
+                do_set_result!(result, assertions)
+              end
+            end
+          end
+        end
+
+        context "state is 'successful'" do
+          subject { create(:charge_request, :successful) }
+
+          it "should not update the charge request" do
+            previous_result = subject.result
+            previous_reason = subject.reason
+            do_set_result!(result, assertions)
+            subject.reload
+            subject.should be_successful
+            subject.result.should == previous_result
+            subject.reason.should == previous_reason
+          end
+        end
+      end
+    end
+  end
+
   describe "callbacks" do
     describe "after_create" do
+      subject { build(:charge_request) }
+
       include ResqueHelpers
 
       let(:job) { ResqueSpec.queues[ENV["CHIBI_BILLER_CHARGE_REQUEST_QUEUE"]].first }
 
       before do
-        do_background_task(:queue_only => true) { subject }
+        do_background_task(:queue_only => true) { subject.save! }
       end
 
       it "should queue a job for processing the charge request" do

@@ -1,4 +1,5 @@
 kh:
+  not_enough_credit: "Sousdey! Want to meet a new friend? Please top up your account and we'll find you a friend chup chup nas."
   play_path_prefix: "kh"
   language: Khmer
   activerecord:

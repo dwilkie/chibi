@@ -6,6 +6,7 @@ class Message < ActiveRecord::Base
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
   include Chibi::ChatStarter
+  include Chibi::ChargeRequester
 
   alias_attribute :origin, :from
 
@@ -15,7 +16,7 @@ class Message < ActiveRecord::Base
     state :processed, :awaiting_charge_result, :ignored
 
     event :process do
-      transition(:received => :processed)
+      transition([:received, :awaiting_charge_result] => :processed)
     end
 
     event :await_charge_result do
@@ -65,7 +66,11 @@ class Message < ActiveRecord::Base
       activate_chats! if start_new_chat
     end
 
-    fire_events(:process)
+    process
+  end
+
+  def charge_request_updated!
+    queue_for_processing!
   end
 
   def queue_for_processing!

@@ -9,6 +9,11 @@ without_voice_prompts:
             expectations:
               assertions:
               - message_queued_for_partner
+          with_failed_charge_request: telling_user_they_dont_have_enough_credit
+  - telling_user_they_dont_have_enough_credit:
+      completed:
+        twiml_expectation:
+          play_languages: not_enough_credit
   - finding_new_friends:
       completed:
         twiml_expectation: redirect_to_current_url

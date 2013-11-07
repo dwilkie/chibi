@@ -65,6 +65,12 @@ class PhoneCall < ActiveRecord::Base
       end
     end
 
+    state :telling_user_they_dont_have_enough_credit do
+      def to_twiml
+        play(:not_enough_credit)
+      end
+    end
+
     # Menu prompts
     with_prompt_states do |attribute, prompt_state, options|
       before_transition prompt_state => any, :do => :set_profile_from_digits
@@ -125,6 +131,14 @@ class PhoneCall < ActiveRecord::Base
     event :process! do
       # complete the call if it has finished
       transition(any => :completed, :if => :complete?)
+
+      # tell him that he doesn't have enough credit if the charge failed
+      transition(
+        :answered => :telling_user_they_dont_have_enough_credit,
+        :if => :charge_failed?
+      )
+
+      transition(:telling_user_they_dont_have_enough_credit => :completed)
 
       if PromptStates::VOICE_PROMPTS
         # welcome the user
@@ -224,6 +238,10 @@ class PhoneCall < ActiveRecord::Base
   end
 
   private
+
+  def charge_failed?
+    charge_request.try(:failed?)
+  end
 
   def from_adhearsion_twilio?
     adhearsion_twilio_requested?(api_version)

@@ -9,8 +9,16 @@ class ChargeRequest < ActiveRecord::Base
   state_machine :initial => :created do
     state :awaiting_result, :successful, :errored, :failed
 
+    after_transition :awaiting_result => [:successful, :failed, :errored], :do => :notify_requester!
+
     event :await_result do
       transition(:created => :awaiting_result)
+    end
+
+    event :process_result do
+      transition(:awaiting_result => :successful, :if => :result_successful?)
+      transition(:awaiting_result => :failed, :if => :result_failed?)
+      transition(:awaiting_result => :errored)
     end
   end
 
@@ -20,7 +28,17 @@ class ChargeRequest < ActiveRecord::Base
     (!awaiting_result? && !created?) || updated_at < timeout.ago
   end
 
+  def set_result!(result, reason)
+    self.result = result
+    self.reason = reason
+    process_result
+  end
+
   private
+
+  def notify_requester!
+    requester.charge_request_updated! if requester.present? && notify_requester?
+  end
 
   def request_charge!
     Resque::Job.create(
@@ -31,5 +49,13 @@ class ChargeRequest < ActiveRecord::Base
       user.mobile_number
     )
     await_result
+  end
+
+  def result_successful?
+    result == "successful"
+  end
+
+  def result_failed?
+    result == "failed"
   end
 end
