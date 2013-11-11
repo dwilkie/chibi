@@ -1,5 +1,5 @@
 module ResqueHelpers
-  EXTERNAL_QUEUES = [:charge_request_queue]
+  EXTERNAL_QUEUES = [ENV["CHIBI_BILLER_CHARGE_REQUEST_QUEUE"]]
 
   def do_background_task(options = {}, &block)
     ResqueSpec.reset!
