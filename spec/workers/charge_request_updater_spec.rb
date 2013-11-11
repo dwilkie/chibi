@@ -9,18 +9,24 @@ describe ChargeRequestUpdater do
     end
   end
 
-  describe ".perform(charge_request_id, result, reason)" do
+  describe ".perform(charge_request_id, result, responder, reason = nil)" do
     let(:charge_request) { mock_model(ChargeRequest) }
-    let(:find_stub) { ChargeRequest.stub(:find) }
+    let(:find_stub) { ChargeRequest.stub(:where) }
+    let(:relation) { double(ActiveRecord::Relation) }
     let(:result) { "result" }
-    let(:args) { [1, result] }
+    let(:responder) { "responder" }
+    let(:id) { 1 }
+    let(:args) { [id, result, responder] }
 
     before do
-      charge_request.stub(:update!)
-      find_stub.and_return(charge_request)
+      find_stub.and_return(relation)
+      relation.stub(:first!).and_return(charge_request)
+      charge_request.stub(:set_result!)
     end
 
-    it "should update the charge request" do
+    it "should set the result on the charge request" do
+      ChargeRequest.should_receive(:where).with(:id => id, :operator => responder)
+      relation.should_receive(:first!)
       charge_request.should_receive(:set_result!).with(result, nil)
       subject.class.perform(*args)
     end
@@ -36,11 +42,12 @@ describe ChargeRequestUpdater do
     include_context "replies"
 
     let(:user) { create(:user) }
+    let(:responder) { "qb" }
     let(:requester) { create(:message, :awaiting_charge_result, :user => user) }
-    let(:charge_request) { create(:charge_request, :notify_requester, :requester => requester) }
+    let(:charge_request) { create(:charge_request, :notify_requester, :requester => requester, :operator => responder) }
 
     def enqueue_job
-      Resque.enqueue(ChargeRequestUpdater, charge_request.id, "failed")
+      Resque.enqueue(ChargeRequestUpdater, charge_request.id, "failed", responder)
     end
 
     it "should update the charge request" do
