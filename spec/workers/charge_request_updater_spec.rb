@@ -13,8 +13,7 @@ describe ChargeRequestUpdater do
     let(:charge_request) { mock_model(ChargeRequest) }
     let(:find_stub) { ChargeRequest.stub(:find) }
     let(:result) { "result" }
-    let(:reason) { "reason" }
-    let(:args) { [1, result, reason] }
+    let(:args) { [1, result] }
 
     before do
       charge_request.stub(:update!)
@@ -22,7 +21,7 @@ describe ChargeRequestUpdater do
     end
 
     it "should update the charge request" do
-      charge_request.should_receive(:set_result!).with(result, reason)
+      charge_request.should_receive(:set_result!).with(result, nil)
       subject.class.perform(*args)
     end
 
@@ -30,18 +29,27 @@ describe ChargeRequestUpdater do
   end
 
   describe "performing the job" do
-    include ResqueHelpers
+    # this is an integration test
 
-    let(:requester) { create(:message) }
+    include ResqueHelpers
+    include TranslationHelpers
+    include_context "replies"
+
+    let(:user) { create(:user) }
+    let(:requester) { create(:message, :awaiting_charge_result, :user => user) }
     let(:charge_request) { create(:charge_request, :notify_requester, :requester => requester) }
 
     def enqueue_job
-      Resque.enqueue(ChargeRequestUpdater, charge_request.id, "failed", nil)
+      Resque.enqueue(ChargeRequestUpdater, charge_request.id, "failed")
     end
 
     it "should update the charge request" do
-      do_background_task(:queue_only => true) { enqueue_job }
+      do_background_task { enqueue_job }
       perform_background_job(asserted_queue)
+      perform_background_job(:message_processor_queue)
+      reply_to(user).body.should == spec_translate(
+        :not_enough_credit, user.locale
+      )
     end
   end
 end

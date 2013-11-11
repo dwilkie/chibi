@@ -216,7 +216,7 @@ class PhoneCall < ActiveRecord::Base
       phone_call.api_version = params[:api_version]
       phone_call.save!
       charge_request = phone_call.charge_request
-      phone_call.process! if (charge_request.nil? && phone_call.user_charge!(phone_call)) || charge_request.try(:slow?)
+      phone_call.process! if (charge_request.nil? && phone_call.user_charge!(phone_call)) || (charge_request && charge_request.slow?)
       phone_call
     end
   end
@@ -240,7 +240,7 @@ class PhoneCall < ActiveRecord::Base
   private
 
   def charge_failed?
-    charge_request.try(:failed?)
+    charge_request && charge_request.failed?
   end
 
   def from_adhearsion_twilio?

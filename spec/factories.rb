@@ -90,10 +90,6 @@ FactoryGirl.define do
       state "processed"
     end
 
-    trait :ignored do
-      state "ignored"
-    end
-
     trait :awaiting_charge_result do
       state "awaiting_charge_result"
     end
