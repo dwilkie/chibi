@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ChargeRequestUpdater do
-  let(:asserted_queue) { :charge_request_updater }
+  let(:asserted_queue) { :charge_request_updater_queue }
 
   context "@queue" do
     it "should == :charge_request_updater_queue" do
