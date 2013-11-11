@@ -595,6 +595,12 @@ describe Reply do
     end
   end
 
+  describe "#not_enough_credit!" do
+    it "should tell the recipient that they don't have enough credit" do
+      assert_reply(:not_enough_credit!, :not_enough_credit)
+    end
+  end
+
   describe "#follow_up!(from, options)" do
     it "should send canned follow up message to the recipient from the given user" do
       assert_reply(

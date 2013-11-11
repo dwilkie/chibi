@@ -2,6 +2,7 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
+  not_enough_credit: "Hello! Want to meet a new friend? Please top up your account and we'll find you a friend ASAP."
   play_path_prefix: "en"
   language: English
   activerecord:

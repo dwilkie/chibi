@@ -1,7 +1,7 @@
 without_voice_prompts:
   - answered:
       finding_new_friends:
-        twiml_expectation: no_response
+        twiml_expectation: redirect_to_current_url
         substates:
           already_in_chat: connecting_user_with_friend
           to_unavailable_user:
@@ -9,6 +9,11 @@ without_voice_prompts:
             expectations:
               assertions:
               - message_queued_for_partner
+          with_failed_charge_request: telling_user_they_dont_have_enough_credit
+  - telling_user_they_dont_have_enough_credit:
+      completed:
+        twiml_expectation:
+          play_languages: not_enough_credit
   - finding_new_friends:
       completed:
         twiml_expectation: redirect_to_current_url
@@ -30,7 +35,7 @@ without_voice_prompts:
 with_voice_prompts:
   - answered:
       welcoming_user:
-        twiml_expectation: no_response
+        twiml_expectation: redirect_to_current_url
   - welcoming_user:
       offering_menu:
         twiml_expectation:

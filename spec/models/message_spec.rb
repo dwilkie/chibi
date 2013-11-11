@@ -2,6 +2,9 @@ require 'spec_helper'
 
 describe Message do
   include AnalyzableExamples
+  include ResqueHelpers
+
+  include_context "replies"
 
   let(:user) { create(:user) }
   let(:friend) { create(:user, :english) }
@@ -50,13 +53,21 @@ describe Message do
   end
 
   describe ".queue_unprocessed" do
-    let(:unprocessed_message) { create(:message, :created_at => 5.minutes.ago) }
-    let(:recently_received_message) { create(:message, :created_at => 2.minutes.ago) }
-    let(:unprocessed_message_with_chat) { create(:message, :chat => chat, :created_at => 5.minutes.ago) }
+    def create_unprocessed_message(*args)
+      options = args.extract_options!
+      create(:message, *args, {:created_at => 5.minutes.ago}.merge(options))
+    end
+
+    let(:unprocessed_message) { create_unprocessed_message }
+    let(:recently_received_message) { create_unprocessed_message(:created_at => 2.minutes.ago) }
+    let(:unprocessed_message_with_chat) { create_unprocessed_message(:chat => chat) }
+    let(:message_awaiting_charge_result_for_too_long) { create_unprocessed_message(:awaiting_charge_result) }
+    let(:message_awaiting_charge_result) { create_unprocessed_message(:created_at => Time.now) }
 
     before do
-      ResqueSpec.reset!
       Timecop.freeze(Time.now)
+      message_awaiting_charge_result_for_too_long
+      message_awaiting_charge_result
       unprocessed_message
       processed_message
       recently_received_message
@@ -68,35 +79,44 @@ describe Message do
       Timecop.return
     end
 
-    it "should leave mark messages with chats as processed" do
-      subject.class.queue_unprocessed
-      unprocessed_message.reload.should_not be_processed
-      processed_message.reload.should be_processed
-      recently_received_message.reload.should_not be_processed
-      unprocessed_message_with_chat.reload.should be_processed
-      message.reload.should_not be_processed
-    end
-
     context "passing no options" do
       before do
-        subject.class.queue_unprocessed
+        do_background_task(:queue_only => true) { subject.class.queue_unprocessed }
       end
 
       it "should queue for processing any non processed messages with no chat that were created more than 30 secs ago" do
         MessageProcessor.should have_queued(unprocessed_message.id)
         MessageProcessor.should have_queued(recently_received_message.id)
-        MessageProcessor.should have_queue_size_of(2)
+        MessageProcessor.should have_queued(message_awaiting_charge_result_for_too_long.id)
+        MessageProcessor.should have_queue_size_of(3)
+      end
+
+      context "after the job has run" do
+        before do
+          perform_background_job(:message_processor_queue)
+        end
+
+        it "should process the messages" do
+          message_awaiting_charge_result_for_too_long.reload.should be_processed
+          message_awaiting_charge_result.reload.should_not be_processed
+          unprocessed_message.reload.should be_processed
+          processed_message.reload.should be_processed
+          recently_received_message.reload.should be_processed
+          unprocessed_message_with_chat.reload.should be_processed
+          message.reload.should_not be_processed
+        end
       end
     end
 
     context "passing :timeout => 5.minutes.ago" do
       before do
-        subject.class.queue_unprocessed(:timeout => 5.minutes.ago)
+        do_background_task(:queue_only => true) { subject.class.queue_unprocessed(:timeout => 5.minutes.ago) }
       end
 
       it "should queue for processing any non processed message that was created more than 5 mins ago" do
         MessageProcessor.should have_queued(unprocessed_message.id)
-        MessageProcessor.should have_queue_size_of(1)
+        MessageProcessor.should have_queued(message_awaiting_charge_result_for_too_long.id)
+        MessageProcessor.should have_queue_size_of(2)
       end
     end
   end
@@ -113,6 +133,15 @@ describe Message do
     end
   end
 
+  describe "#charge_request_updated!" do
+    subject { create(:message) }
+
+    it "should queue the message for processing" do
+      do_background_task(:queue_only => true) { subject.charge_request_updated! }
+      MessageProcessor.should have_queued(subject.id)
+    end
+  end
+
   describe "#body" do
     it "should return an empty string if it is nil" do
       subject.body = nil
@@ -121,285 +150,289 @@ describe Message do
   end
 
   describe "queue_for_processing!" do
-    before do
-      ResqueSpec.reset!
-    end
-
     it "queue the message for processing" do
-      message.queue_for_processing!
+      do_background_task(:queue_only => true) { message.queue_for_processing! }
       MessageProcessor.should have_queued(message.id)
     end
   end
 
-  describe "#process!" do
-    include TranslationHelpers
-    include MessagingHelpers
-
-    include_context "replies"
-
-    def stub_match_for_user
-      new_friend
-    end
-
-    context "if an exception is raised during the processing" do
-      before do
-        user.stub(:match).and_raise(Resque::TermException.new("SIGTERM"))
-      end
-
-      it "should not mark the message as 'processed'" do
-        message.should be_received
-        expect { message.process! }.to raise_error
-        message.should_not be_processed
-      end
-    end
-
-    context "unless an exception is raised during the processing" do
-      it "should mark the message as 'processed'" do
-        message.should be_received
-        expect_message { message.process! }
-        message.should be_processed
-      end
-    end
-
-    context "for an already processed message" do
-      before do
-        stub_match_for_user
-      end
-
-      it "should not do anything" do
-        processed_message.process!
-        reply_to(new_friend).should be_nil
-      end
-    end
-
-    context "for a message that already belongs to a chat" do
-      let(:message_in_chat) { create(:message, :user => user, :chat => chat) }
-
-      before do
-        stub_match_for_user
-      end
-
-      it "should not do anything" do
-        message_in_chat.process!
-        message_in_chat.should_not be_processed
-      end
+  describe "#process" do
+    def create_message(*args)
+      options = args.extract_options!
+      create(:message, *args, {:user => user}.merge(options))
     end
 
     shared_examples_for "starting a new chat" do
-      context "given there is no match for this user" do
-        before do
-          expect_message { message.process! }
-        end
-
-        it "should not reply saying there are no matches at this time" do
-          reply_to(user).should be_nil
-          user.reload.should_not be_currently_chatting
-        end
-      end
-
-      context "given there is a match for this user" do
-        before do
-          stub_match_for_user
-          expect_message { message.process! }
-        end
-
-        it "should not introduce the match to the partner" do
-          reply_to(user, message.chat).should be_nil
-        end
-
-        it "should introduce the user to the match" do
-          reply = reply_to(new_friend, message.chat).body
-          if imitate_user
-            reply.should =~ /#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
-          else
-            reply.should == spec_translate(
-              :forward_message, new_friend.locale, user.screen_id, message.body
-            )
-          end
-        end
-
-        it "should trigger a new chat" do
-          message.triggered_chats.should == [Chat.last]
-        end
-      end
-    end
-
-    shared_examples_for "forwarding the message to a previous chat partner" do
-      context "if the message body contains the screen id of a recent previous chat partner" do
-        let(:bob) { create(:user, :name => "bob") }
-        let(:chat_with_bob) { create(:chat, :user => user, :friend => bob) }
-        let(:reply_from_bob) { create(:reply, :user => user, :chat => chat_with_bob) }
-
-        before do
-          reply_from_bob
-          message.body = "Hi bob how are you?"
-        end
-
-        it "should forward the message to the previous chat partner" do
-          expect_locate { expect_message { message.process! } }
-
-          message.reload.chat.should == chat_with_bob
-
-          reply_to(bob, chat_with_bob).body.should == spec_translate(
-            :forward_message, bob.locale, user.screen_id, "Hi bob how are you?"
-          )
-        end
-      end
-    end
-
-    context "given the message body is anything other than 'stop'" do
-      let(:offline_user) { create(:user, :offline) }
-      let(:message_from_offline_user) { create(:message, :user => offline_user) }
-
       before do
-        create(:message, :user => offline_user)
-        message_from_offline_user
+        Chat.stub(:activate_multiple!)
       end
 
-      it "should put the user online" do
-        offline_user.should_not be_online
-        expect_message { message_from_offline_user.process! }
-        offline_user.should be_online
+      it "should try to activate multiple new chats" do
+        Chat.should_receive(:activate_multiple!).with(user, :starter => subject, :notify => true)
+        subject.process
       end
     end
 
-    context "given the user is currently chatting" do
-      before do
-        create(:message, :user => user)
-        chat
-      end
-
-      it_should_behave_like "forwarding the message to a previous chat partner"
-
-      context "and the message body is" do
-        ["stop", "off", "stop all"].each do |stop_variation|
-          context "'#{stop_variation}'" do
-            before do
-              message.body = stop_variation
-              expect_message { message.process! }
-            end
-
-            def assert_logout
-              user.should be_offline
-              message.should be_processed
-            end
-
-            it "should logout the user but not notify him that he is now offline" do
-              assert_logout
-              reply_to(user).should be_nil
-              reply_to(friend).should be_nil
-              user.should be_currently_chatting
-            end
-
-            it "should not inform the user's partner how to update their profile" do
-              assert_logout
-              reply_to(friend, chat).should be_nil
-              friend.reload
-              friend.should_not be_currently_chatting
-              friend.should be_online
-            end
-          end
-        end
-
-        ["new", "'new'", "\"new\""].each do |new_variation|
-          context "#{new_variation}" do
-            before do
-              message.body = new_variation
-            end
-
-            it_should_behave_like "starting a new chat" do
-              let(:imitate_user) { true }
-            end
-
-            it "should not inform the user's partner how find a new friend" do
-              reply_to(friend, chat).should be_nil
-              friend.reload
-              friend.should be_currently_chatting
-              friend.should be_online
-            end
-          end
-        end
-
-        context "anything else but 'stop' or 'new'" do
-          before do
-            message.body = "hello"
-            expect_locate { expect_message { message.process! } }
-          end
-
-          it "should forward the message to the other chat participant and save the message in the chat" do
-            # reload message to make sure it's saved
-            message.reload.chat.should == chat
-
-            reply_to(friend, chat).body.should == spec_translate(
-              :forward_message, friend.locale, user.screen_id, "hello"
-            )
-          end
-        end
+    shared_examples_for "not starting a new chat" do
+      it "should not start a new chat" do
+        Chat.should_not_receive(:activate_multiple!)
+        subject.process
       end
     end
 
-    context "given the user is not currently chatting" do
+    shared_examples_for "routing the message" do
+      it_should_behave_like "starting a new chat"
+    end
 
-      it_should_behave_like "forwarding the message to a previous chat partner"
+    shared_examples_for "not routing the message" do
+      it "should not try to route the message" do
+        Chat.should_not_receive(:intended_for)
+        subject.process
+      end
+    end
 
-      context "and the message body is" do
-        context "'stop'" do
-          before do
-            message.body = "stop"
-            expect_message { message.process! }
+    context "state is 'received'" do
+      subject { create_message }
+
+      def stub_user_charge!(result = nil)
+        user.stub(:charge!).and_return(result)
+      end
+
+      def stub_user_update_profile
+        user.stub(:update_profile)
+      end
+
+      context "pre-processing" do
+        context "the message already belongs to a chat" do
+          subject { create_message(:chat => chat, :pre_process => true) }
+
+          after do
+            subject.should be_processed
           end
 
-          it "should logout the user but not notify him that he is now offline" do
-            reply_to(user).should be_nil
-            user.should_not be_online
-          end
-        end
+          it_should_behave_like "not routing the message"
+        end # context "the message already belongs to a chat"
 
-        context "not introducable" do
-          context "and a match is found for the user" do
-            before do
-              stub_match_for_user
-            end
+        context "the message body is" do
+          ["stop", "off", "stop all"].each do |stop_variation|
+            context "'#{stop_variation}'" do
+              subject { create_message(:body => stop_variation) }
 
-            it "should introduce the user to the match by imitating the user" do
-              non_introducable_examples.each do |example|
-                message = build(:message, :user => user, :body => example.upcase)
-                expect_message { message.process! }
-                reply_to(new_friend).body.should =~ /#{spec_translate(:forward_message_approx, new_friend.locale, user.screen_id)}/
+              before do
+                user.stub(:logout!)
               end
-            end
-          end
-        end
 
-        context "anything else but 'stop'" do
-          before do
-            message.body = "hello"
-            user.stub(:update_profile)
-          end
+              it "should logout the user" do
+                user.should_receive(:logout!)
+                subject.process
+                subject.should be_processed
+              end
+            end # context "'#{stop_variation}'"
+          end # ["stop", "off", "stop all"]
 
-          it_should_behave_like "starting a new chat" do
-            let(:imitate_user) { true }
-          end
-
-          it "should try to update the users profile from the message text" do
-            user.should_receive(:update_profile).with("hello")
-            expect_message { message.process! }
-          end
-
-          context "and the user is offline" do
-            let(:offline_user) { build(:user, :offline) }
-
+          context "indicates the sender wants to use the service" do
             before do
-              message.body = ""
-              message.user = offline_user
-              expect_message { message.process! }
+              user.stub(:login!)
+              stub_user_charge!
+            end
+
+            it "should try to charge the user" do
+              user.should_receive(:charge!).with(subject)
+              subject.process
             end
 
             it "should login the user" do
-              offline_user.reload.should be_online
+              user.should_receive(:login!)
+              subject.process
             end
+
+            context "the charge request returns true" do
+              before do
+                stub_user_charge!(true)
+              end
+
+              it "should update the state to 'processed'" do
+                subject.process
+                subject.should be_processed
+              end
+            end # context "the charge request returns true"
+
+            context "the charge request returns false" do
+              before do
+                stub_user_charge!(false)
+              end
+
+              it "should update the state to 'awaiting_charge_result'" do
+                subject.process
+                subject.should be_awaiting_charge_result
+              end
+            end # context "the charge request returns false"
+          end # context "indicates the sender wants to use the service"
+        end # context "the message body is"
+      end # context "pre-processing"
+
+      context "processing" do
+        before do
+          stub_user_charge!(true)
+        end
+
+        context "if an exception is raised" do
+          before do
+            Chat.stub(:activate_multiple!).and_raise(Resque::TermException.new("SIGTERM"))
+          end
+
+          it "should leave the message as 'received'" do
+            expect { subject.process }.to raise_error
+            subject.should_not be_processed
           end
         end
+
+        context "unless an exception is raised" do
+          after do
+            subject.should be_processed
+          end
+
+          context "if the message body is" do
+            ["new", "'new'", "\"new\""].each do |new_variation|
+              context "#{new_variation}" do
+                subject { create_message(:body => new_variation) }
+                it_should_behave_like "starting a new chat"
+              end # context "#{new_variation}"
+            end # ["new", "'new'", "\"new\""]
+
+            context "indicates that the sender is not trying to explicitly start a new chat" do
+              def stub_chat_intended_for(return_value = nil)
+                Chat.stub(:intended_for).and_return(return_value  )
+              end
+
+              def stub_user_active_chat(return_value = nil)
+                user.stub(:active_chat).and_return(return_value)
+              end
+
+              def stub_chat_forward_message
+                chat.stub(:forward_message)
+              end
+
+              before do
+                stub_user_update_profile
+              end
+
+              shared_examples_for "forwarding the message" do
+                before do
+                  stub_chat_forward_message
+                end
+
+                it "should forward the message to a particular chat" do
+                  chat.should_receive(:forward_message).with(subject)
+                  subject.process
+                end
+              end
+
+              it "should try to update the users profile from the message text" do
+                user.should_receive(:update_profile).with(subject.body)
+                subject.process
+              end
+
+              it "should try to determine who the message is intended for" do
+                Chat.should_receive(:intended_for).with(subject, :num_recent_chats => 10)
+                subject.process
+              end
+
+              context "if the receipient cannot be determined" do
+                before do
+                  stub_chat_intended_for
+                end
+
+                it "try to get the sender's active chat" do
+                  user.should_receive(:active_chat)
+                  subject.process
+                end
+
+                context "if the sender is not currently chatting" do
+                  before do
+                    stub_user_active_chat
+                  end
+
+                  it_should_behave_like "starting a new chat"
+                end # context "if the sender does not have an active chat"
+
+                context "if the sender is currently chatting" do
+                  before do
+                    stub_user_active_chat(chat)
+                  end
+
+                  it_should_behave_like "forwarding the message"
+                  it_should_behave_like "not starting a new chat"
+                end # context "if the sender is currently chatting"
+              end # context "if the receipient cannot be determined"
+
+              context "if the recipient can be determined" do
+                before do
+                  stub_chat_intended_for(chat)
+                end
+
+                it_should_behave_like "forwarding the message"
+                it_should_behave_like "not starting a new chat"
+              end
+            end # context "indicates that the sender is not trying to explicitly start a new chat"
+          end # context "if the message body is"
+        end # context "unless an exception is raised"
+      end # context "processing"
+    end # context "state is 'received'"
+
+    context "state is 'awaiting_charge_result'" do
+      subject { create_message(:awaiting_charge_result) }
+
+      def create_charge_request(*args)
+        options = args.extract_options!
+        create(:charge_request, *args, options.merge(:requester => subject))
+      end
+
+      after do
+        subject.should be_processed
+      end
+
+      context "if the charge request failed" do
+        before do
+          create_charge_request(:failed)
+          user.stub(:reply_not_enough_credit!)
+        end
+
+        it "should tell the sender they don't have enough credit" do
+          user.should_receive(:reply_not_enough_credit!)
+          subject.process
+        end
+
+        it_should_behave_like "not routing the message"
+      end
+
+      context "if the charge request is not present" do
+        it_should_behave_like "routing the message"
+      end
+
+      context "if the charge request was successful" do
+        before do
+          create_charge_request(:successful)
+        end
+
+        it_should_behave_like "routing the message"
+      end
+
+      context "if the charge request was errored" do
+        before do
+          create_charge_request(:errored)
+        end
+
+        it_should_behave_like "routing the message"
+      end
+    end
+
+    context "state is 'processed'" do
+      subject { create_message(:processed) }
+
+      it "should leave the state as 'processed'" do
+        expect { subject.process }.not_to change { subject.updated_at }
+        subject.should be_processed
       end
     end
   end

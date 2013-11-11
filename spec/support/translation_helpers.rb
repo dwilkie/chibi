@@ -18,6 +18,11 @@ module TranslationHelpers
     :anonymous_reminder => {
       :en => "^(?:.+)\\:\\s.+",
       :kh => "^(?:.+)\\:\\s.+"
+    },
+
+    :not_enough_credit => {
+      :en => "Hello! Want to meet a new friend? Please top up your account and we'll find you a friend ASAP.",
+      :kh => "Sousdey! Want to meet a new friend? Please top up your account and we'll find you a friend chup chup nas."
     }
   }
 

@@ -118,15 +118,6 @@ describe PhoneCall do
     end
   end
 
-  describe "#login_user!" do
-    let(:phone_call_from_offline_user) { create(:phone_call, :from_offline_user) }
-
-    it "should delegate to user#login!" do
-      phone_call_from_offline_user.login_user!
-      phone_call_from_offline_user.user.should be_online
-    end
-  end
-
   describe "#fetch_inbound_twilio_cdr!" do
     it "should create a Chibi Twilio Inbound CDR" do
       expect_twilio_cdr_fetch(:call_sid => phone_call.sid) { phone_call.fetch_inbound_twilio_cdr! }
@@ -156,8 +147,16 @@ describe PhoneCall do
     end
   end
 
-  describe ".find_or_create_and_process_by" do
+  describe ".find_or_create_and_process_by(params, redirect_url)" do
     include PhoneCallHelpers
+
+    let(:redirect_url) { "http://example.com" }
+    let(:call_sid) { generate(:guid) }
+    let(:from) { generate(:mobile_number) }
+    let(:to) { "2441" }
+    let(:params) { sample_params(:from => from, :to => to, :call_sid => call_sid) }
+    let(:user) { create(:user) }
+    let(:phone_call) { create(:phone_call, :user => user) }
 
     def sample_params(options = {})
       options[:digits] ||= 1
@@ -168,27 +167,124 @@ describe PhoneCall do
       params
     end
 
-    it "should find or create the phone call and process it returning the phone call if valid" do
-      params = sample_params
+    context "phone call is valid" do
+      def do_find_or_create_and_process
+        subject.class.find_or_create_and_process_by(params.dup, redirect_url)
+      end
+      before do
+        subject.class.stub(:find_or_initialize_by).and_return(phone_call)
+      end
 
-      subject.class.stub(:find_or_create_by).and_return(phone_call)
+      it "should update the phone call" do
+        do_find_or_create_and_process
 
-      phone_call.should_receive(:login_user!)
-      phone_call.should_receive(:process!)
-      subject.class.find_or_create_and_process_by(params.dup, "http://example.com").should == phone_call
+        phone_call.redirect_url.should == redirect_url
+        phone_call.digits.should == params[:Digits].to_i
+        phone_call.call_status.should == params[:CallStatus]
+        phone_call.dial_status.should == params[:DialCallStatus]
+        phone_call.dial_call_sid.should == params[:DialCallSid]
+        phone_call.api_version.should == params[:ApiVersion]
+      end
 
-      phone_call.redirect_url.should == "http://example.com"
-      phone_call.digits.should == params[:Digits].to_i
-      phone_call.call_status.should == params[:CallStatus]
-      phone_call.dial_status.should == params[:DialCallStatus]
-      phone_call.dial_call_sid.should == params[:DialCallSid]
-      phone_call.api_version.should == params[:ApiVersion]
+      it "should log in the user" do
+        user.should_receive(:login!)
+        do_find_or_create_and_process
+      end
 
-      subject.should_not_receive(:login_user!)
-      subject.should_not_receive(:process!)
-      subject.class.stub(:find_or_create_by).and_return(subject)
-      subject.stub(:new_record?).and_return(false)
-      subject.class.find_or_create_and_process_by(params.dup, "http://example.com").should be_nil
+      context "there's a charge request for this call" do
+        let(:charge_request) { create(:charge_request, :requester => phone_call) }
+
+        before do
+          phone_call.stub(:charge_request).and_return(charge_request)
+          charge_request.stub(:slow?)
+        end
+
+        it "should ask if the charge request is slow" do
+          charge_request.should_receive(:slow?)
+          do_find_or_create_and_process
+        end
+
+        context "and it's slow (see charge_request#slow?)" do
+          before do
+            charge_request.stub(:slow?).and_return(true)
+          end
+
+          it "should process the phone call" do
+            phone_call.should_receive(:process!)
+            do_find_or_create_and_process
+          end
+        end
+
+        context "but it's not slow" do
+          before do
+            charge_request.stub(:slow?).and_return(false)
+          end
+
+          it "should not process the phone call" do
+            phone_call.should_not_receive(:process!)
+            do_find_or_create_and_process
+          end
+        end
+      end
+
+      context "there's no charge request for this call" do
+        it "should try to charge the caller" do
+          user.should_receive(:charge!).with(phone_call)
+          do_find_or_create_and_process
+        end
+
+        context "given the charge request returns true" do
+          before do
+            user.stub(:charge!).and_return(true)
+          end
+
+          it "should process the phone call" do
+            phone_call.should_receive(:process!)
+            do_find_or_create_and_process
+          end
+        end
+
+        context "given the charge request returns nil" do
+          before do
+            user.stub(:charge!).and_return(nil)
+          end
+
+          it "should not process the phone call" do
+            phone_call.should_not_receive(:process!)
+            do_find_or_create_and_process
+          end
+        end
+      end
+    end
+
+    context "phone call is invalid" do
+      let(:params) { sample_params(:from => "+2441", :to => "+2441") }
+
+      it "should not process the phone call" do
+        subject.class.find_or_create_and_process_by(params.dup, redirect_url).should be_nil
+      end
+    end
+
+    context "phone call is new" do
+      it "should save the phone call" do
+        phone_call = subject.class.find_or_create_and_process_by(params, redirect_url)
+        phone_call.should be_persisted
+        phone_call.sid.should == call_sid
+        phone_call.from.should == from
+      end
+    end
+
+    context "phone call already exists" do
+      before do
+        create(:phone_call, :sid => call_sid)
+      end
+
+      it "should not update the from field" do
+        phone_call = subject.class.find_or_create_and_process_by(params, redirect_url)
+        phone_call.should be_persisted
+        phone_call.sid.should == call_sid
+        phone_call.from.should_not == from
+      end
     end
   end
 

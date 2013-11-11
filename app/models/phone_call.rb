@@ -3,6 +3,7 @@ class PhoneCall < ActiveRecord::Base
   include Chibi::Communicable::FromUser
   include Chibi::Communicable::Chatable
   include Chibi::ChatStarter
+  include Chibi::ChargeRequester
   include Chibi::Analyzable
 
   # The maximum number of concurrent outbound dials to trigger
@@ -47,18 +48,26 @@ class PhoneCall < ActiveRecord::Base
   validates :sid, :presence => true, :uniqueness => true
   validates :dial_call_sid, :uniqueness => true, :allow_nil => true
 
+  delegate :charge!, :login!, :to => :user, :prefix => true
+
   state_machine :initial => :answered do
     extend PromptStates
 
     state :answered do
       def to_twiml
-        nil.to_s
+        redirect
       end
     end
 
     state :welcoming_user do
       def to_twiml
         play(:welcome)
+      end
+    end
+
+    state :telling_user_they_dont_have_enough_credit do
+      def to_twiml
+        play(:not_enough_credit)
       end
     end
 
@@ -123,6 +132,14 @@ class PhoneCall < ActiveRecord::Base
       # complete the call if it has finished
       transition(any => :completed, :if => :complete?)
 
+      # tell him that he doesn't have enough credit if the charge failed
+      transition(
+        :answered => :telling_user_they_dont_have_enough_credit,
+        :if => :charge_failed?
+      )
+
+      transition(:telling_user_they_dont_have_enough_credit => :completed)
+
       if PromptStates::VOICE_PROMPTS
         # welcome the user
         transition(:answered => :welcoming_user)
@@ -184,14 +201,13 @@ class PhoneCall < ActiveRecord::Base
   def self.find_or_create_and_process_by(params, redirect_url)
     params.underscorify_keys!
 
-    phone_call = find_or_create_by(:sid => params[:call_sid])
-    if phone_call.new_record?
-      phone_call.from = params[:from]
-      phone_call.to = params[:to]
+    phone_call = find_or_initialize_by(:sid => params[:call_sid]) do |pc|
+      pc.from = params[:from]
+      pc.to = params[:to]
     end
 
     if phone_call.valid?
-      phone_call.login_user!
+      phone_call.user_login!
       phone_call.redirect_url = redirect_url
       phone_call.digits = params[:digits]
       phone_call.call_status = params[:call_status]
@@ -199,7 +215,8 @@ class PhoneCall < ActiveRecord::Base
       phone_call.dial_call_sid ||= params[:dial_call_sid]
       phone_call.api_version = params[:api_version]
       phone_call.save!
-      phone_call.process!
+      charge_request = phone_call.charge_request
+      phone_call.process! if (charge_request.nil? && phone_call.user_charge!(phone_call)) || (charge_request && charge_request.slow?)
       phone_call
     end
   end
@@ -212,10 +229,6 @@ class PhoneCall < ActiveRecord::Base
     self.from = value if value.present?
   end
 
-  def login_user!
-    user.login!
-  end
-
   def fetch_inbound_twilio_cdr!
     Chibi::Twilio::InboundCdr.create(:uuid => sid)
   end
@@ -225,6 +238,10 @@ class PhoneCall < ActiveRecord::Base
   end
 
   private
+
+  def charge_failed?
+    charge_request && charge_request.failed?
+  end
 
   def from_adhearsion_twilio?
     adhearsion_twilio_requested?(api_version)
