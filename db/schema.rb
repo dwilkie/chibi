@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131105145926) do
+ActiveRecord::Schema.define(version: 20131112155555) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -55,6 +55,7 @@ ActiveRecord::Schema.define(version: 20131105145926) do
   end
 
   add_index "charge_requests", ["requester_type", "requester_id"], name: "index_charge_requests_on_requester_type_and_requester_id", using: :btree
+  add_index "charge_requests", ["updated_at", "state"], name: "index_charge_requests_on_updated_at_and_state", using: :btree
   add_index "charge_requests", ["user_id"], name: "index_charge_requests_on_user_id", using: :btree
 
   create_table "chats", force: true do |t|

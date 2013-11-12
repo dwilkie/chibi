@@ -51,7 +51,7 @@ describe ChargeRequestUpdater do
     end
 
     it "should update the charge request" do
-      do_background_task { enqueue_job }
+      do_background_task(:queue_only => true) { enqueue_job }
       perform_background_job(asserted_queue)
       perform_background_job(:message_processor_queue)
       reply_to(user).body.should == spec_translate(
