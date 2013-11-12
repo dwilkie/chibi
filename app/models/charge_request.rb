@@ -22,6 +22,15 @@ class ChargeRequest < ActiveRecord::Base
     end
   end
 
+  def self.timeout!
+    # timeout must be at least 24 hours to avoid the possibility of charging the user twice
+    where(
+      "state = ? OR state = ?", "awaiting_result", "created"
+    ).where(
+      "updated_at < ?", 24.hours.ago
+    ).update_all(:state => "errored", :reason => "timeout")
+  end
+
   # only returns false if the charge request is awaiting a result and the timeout has not been reached
   def slow?
     timeout = 5.seconds

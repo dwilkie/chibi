@@ -4,6 +4,11 @@ describe ChargeRequest do
   subject { create(:charge_request) }
   let(:skip_callback_request_charge) { false }
 
+  def create_charge_request(*args)
+    options = args.extract_options!
+    create(:charge_request, *args, options)
+  end
+
   before do
     ChargeRequest.skip_callback(:create, :after, :request_charge!) if skip_callback_request_charge
   end
@@ -30,11 +35,45 @@ describe ChargeRequest do
     end
   end
 
-  describe "#slow?" do
+  describe ".timeout!" do
+    let(:time_considered_old) { 24.hours }
+    let(:skip_callback_request_charge) { true }
+
+    let(:old_charge_request_awaiting_result) { create_charge_request(:awaiting_result) }
+    let(:charge_request_awaiting_result) { create_charge_request(:awaiting_result, :updated_at => 23.hours.ago) }
+    let(:old_charge_request_errored) { create_charge_request(:errored) }
+    let(:old_charge_request_failed) { create_charge_request(:failed) }
+    let(:old_charge_request_successful) { create_charge_request(:successful) }
+    let(:old_charge_request_created) { create_charge_request }
+
     def create_charge_request(*args)
       options = args.extract_options!
-      create(:charge_request, *args, options)
+      super(*args, {:updated_at => time_considered_old.ago, :created_at => time_considered_old.ago}.merge(options))
     end
+
+    before do
+      charge_request_awaiting_result
+      old_charge_request_awaiting_result
+      old_charge_request_errored
+      old_charge_request_failed
+      old_charge_request_successful
+      old_charge_request_created
+    end
+
+    it "should only mark old charge requests that are 'awaiting_result' or 'created' as 'errored'" do
+      subject.class.timeout!
+      charge_request_awaiting_result.reload.should be_awaiting_result
+      old_charge_request_awaiting_result.reload.should be_errored
+      old_charge_request_awaiting_result.reason.should == "timeout"
+      old_charge_request_errored.reload.should be_errored
+      old_charge_request_failed.reload.should be_failed
+      old_charge_request_successful.reload.should be_successful
+      old_charge_request_created.reload.should be_errored
+      old_charge_request_created.reason.should == "timeout"
+    end
+  end
+
+  describe "#slow?" do
 
     let(:default_timeout) { 5.seconds }
 
