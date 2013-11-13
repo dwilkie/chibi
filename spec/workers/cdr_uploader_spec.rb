@@ -15,7 +15,7 @@ describe CdrUploader do
     let(:body) { "body" }
 
     before do
-      cdr.stub(:save!)
+      cdr.stub(:save)
       cdr.stub(:read_attribute).and_return(body)
       cdr.stub(:set_cdr_data)
       find_stub.and_return(cdr)
@@ -23,7 +23,7 @@ describe CdrUploader do
 
     it "should tell the cdr to upload itself" do
       CallDataRecord.should_receive(:find).with(id)
-      cdr.should_receive(:save!)
+      cdr.should_receive(:save)
       cdr.should_receive(:read_attribute).with(:body)
       cdr.should_receive(:set_cdr_data).with(body)
       subject.class.perform(id)
