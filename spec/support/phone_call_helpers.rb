@@ -43,11 +43,11 @@ module PhoneCallHelpers
 
         it "should fetch the body from the Twilio API" do
           expect_twilio_cdr_fetch(:call_sid => uuid, :direction => direction) { subject.body }
-          body = subject.body
-          body["variables"]["duration"].should be_present
-          body["variables"]["billsec"].should be_present
+          parsed_body = MultiXml.parse(subject.body)["cdr"]
+          parsed_body["variables"]["duration"].should be_present
+          parsed_body["variables"]["billsec"].should be_present
           assertions.each do |assertion_key, assertion_value|
-            actual_value = body["variables"][assertion_key]
+            actual_value = parsed_body["variables"][assertion_key]
             if assertion_value == true
               actual_value.should be_present
             else

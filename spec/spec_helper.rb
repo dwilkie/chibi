@@ -11,6 +11,9 @@ Spork.prefork do
   # This file is copied to spec/ when you run 'rails generate rspec:install'
   ENV["RAILS_ENV"] ||= 'test'
 
+  # load environment vars before loading the application
+  require_relative "./support/dotenv"
+
   # Prevent main application to eager_load in the prefork block (do not load files in autoload_paths)
   require 'rails/application'
   Spork.trap_method(Rails::Application, :eager_load!)

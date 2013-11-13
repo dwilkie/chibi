@@ -8,14 +8,10 @@ module Chibi
         serialize :body, Hash
       end
 
+      # this should always return a string
       def body
-        returned_body = read_attribute(:body)
-        if returned_body.empty?
-          write_attribute(:body, parsed_body)
-          parsed_body
-        else
-          returned_body
-        end
+        write_attribute(:body, parsed_body) if read_attribute(:body).empty?
+        read_attribute(:body).to_xml(:root => "cdr")
       end
 
       private
