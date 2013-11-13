@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131112155555) do
+ActiveRecord::Schema.define(version: 20131113063908) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(version: 20131112155555) do
     t.string   "bridge_uuid"
     t.string   "from"
     t.integer  "user_id"
+    t.string   "cdr_data"
   end
 
   add_index "call_data_records", ["bridge_uuid"], name: "index_call_data_records_on_bridge_uuid", using: :btree

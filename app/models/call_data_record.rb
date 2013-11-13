@@ -1,8 +1,11 @@
 class CallDataRecord < ActiveRecord::Base
   VALID_TYPES = %w{InboundCdr OutboundCdr Chibi::Twilio::InboundCdr Chibi::Twilio::OutboundCdr}
 
-  after_initialize :set_type
+  mount_uploader :cdr_data, CdrDataUploader
+
+  after_initialize  :set_type
   before_validation :set_cdr_attributes, :on => :create
+  after_validation  :clear_body,         :on => :create
 
   include Chibi::Communicable
   include Chibi::Communicable::FromUser
@@ -10,10 +13,18 @@ class CallDataRecord < ActiveRecord::Base
   belongs_to :phone_call
   belongs_to :inbound_cdr
 
-  validates :body, :duration, :bill_sec, :uuid, :type, :direction, :presence => true
+  validates :duration, :bill_sec, :uuid, :type, :direction, :presence => true
   validates :uuid, :uniqueness => true
   validates :phone_call_id, :uniqueness => {:scope => :type}, :allow_nil => true
   validates :type,  :inclusion => { :in => VALID_TYPES }
+
+  attr_accessor :body
+
+  def self.upload_cdr_data!
+    where.not(:body => nil).where(:cdr_data => nil).pluck(:id).each do |cdr_id|
+      Resque.enqueue(CdrUploader, cdr_id)
+    end
+  end
 
   def typed
     VALID_TYPES.include?(type) ? type.constantize.new(:body => body) : self
@@ -36,7 +47,16 @@ class CallDataRecord < ActiveRecord::Base
       self.bridge_uuid ||= variables["bridge_uuid"]
       self.from ||= cdr_from
       self.phone_call ||= find_related_phone_call
+      set_cdr_data(body)
     end
+  end
+
+  def set_cdr_data(data)
+    self.cdr_data = Chibi::StringIO.new("#{uuid}.cdr.xml", data)
+  end
+
+  def clear_body
+    write_attribute(:body, nil)
   end
 
   def unescaped_variable(*keys)
