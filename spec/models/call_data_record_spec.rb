@@ -106,6 +106,7 @@ describe CallDataRecord do
   # this can be removed when all cdrs have uploads
   describe ".upload_cdr_data!" do
     include ResqueHelpers
+    include PhoneCallHelpers::TwilioHelpers
 
     def reset_callbacks
       CallDataRecord.set_callback(:validation, :after, :clear_body)
@@ -121,6 +122,7 @@ describe CallDataRecord do
       options = args.extract_options!
       create_with_body = options.delete(:with_body)
       create_with_upload = options.delete(:with_upload)
+      twilio = options.delete(:twilio)
       CallDataRecord.skip_callback(:validation, :after, :clear_body) if create_with_body
 
       if create_with_upload == false
@@ -128,40 +130,60 @@ describe CallDataRecord do
         CallDataRecord.skip_callback(:save, :before, :write_cdr_data_identifier)
       end
 
-      cdr = super(*args, options)
+      if twilio
+        cdr = expect_twilio_cdr_fetch(:call_sid => uuid) { Chibi::Twilio::InboundCdr.create!(:uuid => uuid) }
+        body = cdr.send(:parsed_body)
+      else
+        cdr = super(*args, options)
+        body = cdr.body
+      end
 
       if create_with_body
-        cdr.send(:write_attribute, :body, cdr.body)
+        cdr.send(:write_attribute, :body, body)
         cdr.save!
       end
       reset_callbacks
       cdr
     end
 
+    let(:uuid) { generate(:guid) }
+
     let(:cdr_with_body_and_upload) { create_cdr(:with_body => true) }
     let(:cdr_with_body_and_no_upload) { create_cdr(:with_body => true, :with_upload => false) }
     let(:cdr_without_body) { create_cdr }
+    let(:twilio_cdr_with_body_and_no_upload) { create_cdr(:twilio => true, :with_body => true, :with_upload => false) }
+
+    let(:asserted_queued_cdrs) { [cdr_with_body_and_no_upload, twilio_cdr_with_body_and_no_upload] }
 
     before do
       cdr_with_body_and_upload
-      cdr_with_body_and_no_upload
       cdr_without_body
+      asserted_queued_cdrs
     end
 
     it "should queue cdrs without uploads to be uploaded" do
-      cdr = CallDataRecord.find(cdr_with_body_and_no_upload.id)
-      cdr.read_attribute(:body).should be_present
-      cdr.cdr_data.url.should be_nil
-
       do_background_task(:queue_only => true) { CallDataRecord.upload_cdr_data! }
-      CdrUploader.should have_queued(cdr.id)
-      CdrUploader.should have_queue_size_of(1)
 
+      asserted_queued_cdrs.each do |asserted_queued_cdr|
+        cdr = CallDataRecord.find(asserted_queued_cdr.id)
+        cdr.read_attribute(:body).should be_present
+        cdr.cdr_data.url.should be_nil
+        CdrUploader.should have_queued(cdr.id)
+      end
+
+      CdrUploader.should have_queue_size_of(asserted_queued_cdrs.size)
 
       perform_background_job(:cdr_uploader_queue)
-      cdr = CallDataRecord.find(cdr_with_body_and_no_upload.id)
-      cdr.read_attribute(:body).should be_nil
-      cdr.cdr_data.url.should be_present
+
+      asserted_queued_cdrs.each do |asserted_queued_cdr|
+        cdr = CallDataRecord.find(asserted_queued_cdr.id)
+        if cdr.is_a?(Chibi::Twilio::InboundCdr)
+          cdr.read_attribute(:body).should be_empty
+        else
+          cdr.read_attribute(:body).should be_nil
+        end
+        cdr.cdr_data.url.should be_present
+      end
     end
   end
 

@@ -10,7 +10,7 @@ module Chibi
 
       # this should always return a string
       def body
-        write_attribute(:body, parsed_body) if read_attribute(:body).empty?
+        write_attribute(:body, parsed_body) if read_attribute(:body).empty? && new_record?
         read_attribute(:body).to_xml(:root => "cdr")
       end
 

@@ -4,7 +4,9 @@ class CdrUploader
 
   def self.perform(cdr_id)
     cdr = CallDataRecord.find(cdr_id)
-    cdr.send(:set_cdr_data, cdr.read_attribute(:body))
+    cdr_body = cdr.read_attribute(:body)
+    cdr_body = cdr.body if cdr_body.is_a?(Hash)
+    cdr.send(:set_cdr_data, cdr_body)
     cdr.save
   end
 end
