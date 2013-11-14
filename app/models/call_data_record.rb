@@ -5,7 +5,6 @@ class CallDataRecord < ActiveRecord::Base
 
   after_initialize  :set_type
   before_validation :set_cdr_attributes, :on => :create
-  after_validation  :clear_body,         :on => :create
 
   include Chibi::Communicable
   include Chibi::Communicable::FromUser
@@ -47,16 +46,12 @@ class CallDataRecord < ActiveRecord::Base
       self.bridge_uuid ||= variables["bridge_uuid"]
       self.from ||= cdr_from
       self.phone_call ||= find_related_phone_call
-      set_cdr_data(body)
+      set_cdr_data
     end
   end
 
-  def set_cdr_data(data)
-    self.cdr_data = Chibi::StringIO.new("#{uuid}.cdr.xml", data)
-  end
-
-  def clear_body
-    write_attribute(:body, nil)
+  def set_cdr_data
+    self.cdr_data = Chibi::StringIO.new("#{uuid}.cdr.xml", body)
   end
 
   def unescaped_variable(*keys)

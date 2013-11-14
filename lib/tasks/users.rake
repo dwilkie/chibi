@@ -9,11 +9,6 @@ namespace :users do
     Resque.enqueue(FriendFinder, :notify => true, :notify_no_match => false, :between => 0..17)
   end
 
-  desc "Sets User#activated_at to User#created_at for already activated users"
-  task :set_activated_at => :environment do
-    User.set_activated_at
-  end
-
   desc "Sets User#operator_name for users who's operator is unknown"
   task :set_operator_name => :environment do
     User.set_operator_name

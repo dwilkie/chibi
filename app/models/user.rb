@@ -102,16 +102,6 @@ class User < ActiveRecord::Base
     joins(:location).where(banned_name_conditions.join(" OR ")).update_all("name = NULL")
   end
 
-  def self.set_activated_at
-    where(
-      :activated_at => nil
-    ).where.not(
-      :state => :unactivated
-    ).update_all(
-      "activated_at = created_at"
-    )
-  end
-
   def self.set_operator_name
     Torasup::Operator.all["kh"].each do |operator_id, operator_metadata|
       condition_statements = []

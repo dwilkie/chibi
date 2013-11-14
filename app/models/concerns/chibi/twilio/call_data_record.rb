@@ -4,14 +4,9 @@ module Chibi
       include ApiHelpers
       extend ActiveSupport::Concern
 
-      included do
-        serialize :body, Hash
-      end
-
       # this should always return a string
       def body
-        write_attribute(:body, parsed_body) if read_attribute(:body).empty? && new_record?
-        read_attribute(:body).to_xml(:root => "cdr")
+        (super || parsed_body.to_xml(:root => "cdr")) if new_record?
       end
 
       private

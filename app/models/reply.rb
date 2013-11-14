@@ -63,38 +63,8 @@ class Reply < ActiveRecord::Base
     where(:delivered_at => nil).order(:created_at)
   end
 
-  def self.query_queued!
-    queued_for_smsc_delivery.where("delivered_at < ?", 10.minutes.ago).where("body IS NOT NULL").find_each do |reply|
-      Resque.enqueue(NuntiumAoQueryer, reply.id)
-    end
-  end
-
   def self.cleanup!
     where.not(:delivered_at => nil).where("updated_at < ?", 1.month.ago).delete_all
-  end
-
-  def self.fix_blank!
-    queued_for_smsc_delivery.where(:body => nil).find_each do |reply|
-      Resque.enqueue(BlankReplyFixer, reply.id)
-    end
-  end
-
-  def query_nuntium_ao!
-    if token.present? && body.present?
-      ao = nuntium.get_ao(token).first
-      undeliver! if ao["body"].blank?
-      update_delivery_state(:state => ao["state"])
-    end
-  end
-
-  def fix_blank!
-    if body.blank? && chat.present?
-      replies = chat.replies.order(:id)
-      if message_to_forward = chat.messages.order(:id)[replies.index(self) - 1]
-        set_forward_message(message_to_forward.user, message_to_forward.body)
-        undeliver!
-      end
-    end
   end
 
   def body
