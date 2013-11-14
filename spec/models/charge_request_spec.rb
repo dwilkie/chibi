@@ -75,7 +75,7 @@ describe ChargeRequest do
 
   describe "#slow?" do
 
-    let(:default_timeout) { 5.seconds }
+    let(:default_timeout) { 20.seconds }
 
     shared_examples_for "determining if a charge request is slow" do
       subject { create_charge_request }

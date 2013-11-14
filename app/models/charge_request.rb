@@ -33,7 +33,7 @@ class ChargeRequest < ActiveRecord::Base
 
   # only returns false if the charge request is awaiting a result and the timeout has not been reached
   def slow?
-    timeout = 5.seconds
+    timeout = 20.seconds # only applies if previous charge failed (see user#charge!)
     (!awaiting_result? && !created?) || updated_at < timeout.ago
   end
 
