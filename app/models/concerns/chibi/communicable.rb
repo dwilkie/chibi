@@ -26,33 +26,40 @@ module Chibi
       def from=(value)
         # this method is overriden because Twilio adds
         # random 1's to the start of phone numbers
-        if value.present?
-          # remove any non-digits then replace multiple leading ones
-          # to produce a more valid looking E.164 number
-          sanitized_value = value.gsub(/\D/, "").gsub(/\A1+/, "1")
-          sanitized_value = Phony.normalize(sanitized_value)
 
-          if !twilio_number?(sanitized_value, :formatted => false) && sanitized_value.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH
-            # remove non digits
-            # remove all leading ones
-            non_us_number = sanitized_value.gsub(/\A1+/, "")
+        return write_attribute(:from, value) if value.blank?
 
-            # add the default country code if the number is an invalid US Number
-            sanitized_value = Phony.normalize(
-              ENV['DEFAULT_COUNTRY_CODE'] + non_us_number
-            ) unless Phony.plausible?(sanitized_value)
+        # remove any non-digits then replace multiple leading ones
+        # to produce a more valid looking E.164 number
+        sanitized_value = value.gsub(/\D/, "").gsub(/\A1+/, "1")
+        sanitized_value = Phony.normalize(sanitized_value)
 
-            # if the non-us number is too long
-            # then assume it's an international number with the country code already included
-            sanitized_value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
-            write_attribute(:from, sanitized_value)
-          end
-        else
-          write_attribute(:from, value)
-        end
+        # don't do anything if it's a twilio number or it's too short
+        return if twilio_number?(sanitized_value, :formatted => false) || (sanitized_value.length < User::MINIMUM_MOBILE_NUMBER_LENGTH - 1)
+
+        # if the number is plausible now write it to from
+        return write_from(sanitized_value) if sanitized_value.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH && Phony.plausible?(sanitized_value)
+
+        # assume it's a local number with the incorrect US country code added
+        # Twilio does this sometimes
+        local_number = sanitized_value.gsub(/\A1+/, "")
+        number_with_country_code = Phony.normalize(ENV['DEFAULT_COUNTRY_CODE'] + local_number)
+        return write_from(number_with_country_code) if Phony.plausible?(number_with_country_code)
+
+        # assume it's a normal local number
+        number_with_country_code = Phony.normalize(ENV['DEFAULT_COUNTRY_CODE'] + sanitized_value)
+        return write_from(number_with_country_code) if Phony.plausible?(number_with_country_code)
+
+        non_us_number = sanitized_value.gsub(/\A1+/, "")
+        sanitized_value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
+        write_from(sanitized_value)
       end
 
       private
+
+      def write_from(value)
+        write_attribute(:from, value)
+      end
 
       def record_user_interaction
         user.touch(:last_interacted_at) if self.class.user_interaction?
