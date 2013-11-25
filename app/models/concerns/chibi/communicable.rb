@@ -34,19 +34,17 @@ module Chibi
 
           if !twilio_number?(sanitized_value, :formatted => false) && sanitized_value.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH
             # remove non digits
-            if sanitized_value.first == "1"
-              # remove all leading ones
-              non_us_number = sanitized_value.gsub(/\A1+/, "")
+            # remove all leading ones
+            non_us_number = sanitized_value.gsub(/\A1+/, "")
 
-              # add the default country code if the number is an invalid US Number
-              sanitized_value = Phony.normalize(
-                ENV['DEFAULT_COUNTRY_CODE'] + non_us_number
-              ) unless Phony.plausible?(sanitized_value)
+            # add the default country code if the number is an invalid US Number
+            sanitized_value = Phony.normalize(
+              ENV['DEFAULT_COUNTRY_CODE'] + non_us_number
+            ) unless Phony.plausible?(sanitized_value)
 
-              # if the non-us number is too long
-              # then assume it's an international number with the country code already included
-              sanitized_value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
-            end
+            # if the non-us number is too long
+            # then assume it's an international number with the country code already included
+            sanitized_value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
             write_attribute(:from, sanitized_value)
           end
         else
