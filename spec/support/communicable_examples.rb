@@ -47,6 +47,7 @@ shared_examples_for "communicable from user" do |options|
 
   describe "#from=(value)" do
     include PhoneCallHelpers::TwilioHelpers
+    include MobilePhoneHelpers
 
     it "should sanitize the number and remove multiple leading ones" do
       communicable_resource.from = "+1111-737-874-2833"
@@ -91,6 +92,18 @@ shared_examples_for "communicable from user" do |options|
       twilio_numbers.each do |number|
         communicable_resource.from = number
         communicable_resource.from.should == "12345678912"
+      end
+
+      # test all numbers in Torasup Gem
+      with_operators(:only_registered => false) do |number_parts, assertions|
+        country_code = number_parts.shift
+        local_number = number_parts.join
+        full_number = country_code + local_number
+        communicable_resource.from = nil
+        communicable_resource.from = "+#{local_number}"
+        communicable_resource.from.should == "855#{local_number}"
+        communicable_resource.from = "+#{full_number}"
+        communicable_resource.from.should == full_number
       end
 
       # test invalid number

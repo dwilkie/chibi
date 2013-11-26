@@ -9,6 +9,13 @@ GIT
       simplecov-html (~> 0.7.1)
 
 GIT
+  remote: git://github.com/dwilkie/phony.git
+  revision: 60fea643438209c5362087318f40d6f74a8d7989
+  branch: more_accurate_khmer_numbers
+  specs:
+    phony (2.0.0.beta12)
+
+GIT
   remote: git://github.com/dwilkie/resque
   revision: d74bdf33bf1a25c8f20b4294a567ae2fbfd4582e
   branch: prevent_resque_failure_1-x-stable
@@ -28,12 +35,6 @@ GIT
       countries
       deep_merge
       phony
-
-GIT
-  remote: git://github.com/floere/phony.git
-  revision: 9c4573e2693a7fac969f344fb93300c0f4d5e7da
-  specs:
-    phony (2.0.0.beta12)
 
 GIT
   remote: git://github.com/hexorx/countries.git
