@@ -18,7 +18,7 @@ class User < ActiveRecord::Base
 
   MALE = "m"
   FEMALE = "f"
-  MINIMUM_MOBILE_NUMBER_LENGTH = 9
+  MINIMUM_MOBILE_NUMBER_LENGTH = 10
 
   has_one :location, :autosave => true
 

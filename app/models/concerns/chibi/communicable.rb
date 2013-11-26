@@ -15,6 +15,7 @@ module Chibi
       # without the country code
       # note: this is only used to determine whether Twilio added an extra 1 or not
       MAX_LOCAL_NUMBER_LENGTH = 10
+      MIN_LOCAL_NUMBER_LENGTH = 8
 
       included do
         before_validation :assign_to_user, :on => :create
@@ -29,20 +30,20 @@ module Chibi
 
         return write_attribute(:from, value) if value.blank?
 
-        # remove any non-digits then replace multiple leading ones
-        # to produce a more valid looking E.164 number
-        sanitized_value = value.gsub(/\D/, "").gsub(/\A1+/, "1")
-        sanitized_value = Phony.normalize(sanitized_value)
+        # remove any non-digits and leading 0's to produce a more valid looking E.164 number
+        sanitized_value = value.gsub(/\D/, "").gsub(/\A0+/, "")
 
+        number_with_country_code = Phony.normalize(sanitized_value)
         # don't do anything if it's a twilio number or it's too short
-        return if twilio_number?(sanitized_value, :formatted => false) || (sanitized_value.length < User::MINIMUM_MOBILE_NUMBER_LENGTH - 1)
+        return if twilio_number?(number_with_country_code, :formatted => false) || sanitized_value.length < MIN_LOCAL_NUMBER_LENGTH
 
         # if the number is plausible now write it to from
-        return write_from(sanitized_value) if sanitized_value.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH && Phony.plausible?(sanitized_value)
+        number_with_country_code = Phony.normalize(sanitized_value)
+        return write_from(number_with_country_code) if number_with_country_code.length >= User::MINIMUM_MOBILE_NUMBER_LENGTH && Phony.plausible?(number_with_country_code)
 
         # assume it's a local number with the incorrect US country code added
         # Twilio does this sometimes
-        local_number = sanitized_value.gsub(/\A1+/, "")
+        local_number = sanitized_value.gsub(/\A1{1}/, "")
         number_with_country_code = Phony.normalize(ENV['DEFAULT_COUNTRY_CODE'] + local_number)
         return write_from(number_with_country_code) if Phony.plausible?(number_with_country_code)
 
@@ -50,6 +51,8 @@ module Chibi
         number_with_country_code = Phony.normalize(ENV['DEFAULT_COUNTRY_CODE'] + sanitized_value)
         return write_from(number_with_country_code) if Phony.plausible?(number_with_country_code)
 
+        # assume it's in internaltional number with the incorrect US country code added
+        # Twilio does this sometimes
         non_us_number = sanitized_value.gsub(/\A1+/, "")
         sanitized_value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
         write_from(sanitized_value)
