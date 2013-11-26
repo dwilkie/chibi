@@ -49,7 +49,7 @@ shared_examples_for "communicable from user" do |options|
     include PhoneCallHelpers::TwilioHelpers
     include MobilePhoneHelpers
 
-    it "should sanitize the number and remove multiple leading ones" do
+    it "should sanitize the number" do
       communicable_resource.from = "+1111-737-874-2833"
       communicable_resource.from.should == "17378742833"
       communicable_resource.from = nil
@@ -142,6 +142,10 @@ shared_examples_for "communicable from user" do |options|
       # test no country code starting with 08
       communicable_resource.from = "+089830237"
       communicable_resource.from.should == "85589830237"
+
+      # test added 0's
+      communicable_resource.from = "+100855388880112"
+      communicable_resource.from.should == "855388880112"
     end
   end
 

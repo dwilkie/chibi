@@ -53,9 +53,9 @@ module Chibi
 
         # assume it's in internaltional number with the incorrect US country code added
         # Twilio does this sometimes
-        non_us_number = sanitized_value.gsub(/\A1+/, "")
+        non_us_number = Phony.normalize(sanitized_value.gsub(/\A1+/, ""))
         sanitized_value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
-        write_from(sanitized_value)
+        write_from(Phony.normalize(sanitized_value))
       end
 
       private
