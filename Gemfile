@@ -7,7 +7,7 @@ gem 'pg'
 gem 'kaminari'
 gem "lazy_high_charts"
 gem "geocoder"
-gem "phony", :git => "git://github.com/dwilkie/phony.git", :branch => "more_accurate_khmer_numbers"
+gem "phony", :git => "git://github.com/floere/phony.git"
 gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countries.git"
 gem "faker"
 gem "hirefire-resource"
