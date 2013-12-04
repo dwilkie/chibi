@@ -161,7 +161,7 @@ class User < ActiveRecord::Base
   end
 
   def self.between_the_ages(range)
-    where("date_of_birth <= ? AND date_of_birth > ?", range.min.years.ago, range.max.years.ago)
+    where("date_of_birth <= ? AND date_of_birth > ?", range.min.years.ago.to_date, range.max.years.ago.to_date)
   end
 
   def self.male
@@ -336,11 +336,11 @@ class User < ActiveRecord::Base
   end
 
   def age
-    Time.now.utc.year - date_of_birth.year if date_of_birth?
+    Time.now.year - date_of_birth.year if date_of_birth?
   end
 
   def age=(value)
-    self.date_of_birth = value.nil? ? value : value.years.ago.utc
+    self.date_of_birth = value.nil? ? value : value.years.ago
   end
 
   def online?

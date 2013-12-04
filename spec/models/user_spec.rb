@@ -259,12 +259,16 @@ describe User do
   end
 
   describe ".between_the_ages(ranges)" do
-    let!(:thirteen_year_old)  { create(:user, :date_of_birth => 13.years.ago) }
-    let!(:seventeen_year_old) { create(:user, :date_of_birth => 17.years.ago + 1.day) }
-    let!(:eighteen_year_old)  { create(:user, :date_of_birth => 17.years.ago) }
+    let(:thirteen_year_old)  { create(:user, :date_of_birth => 13.years.ago) }
+    let(:seventeen_year_old) { create(:user, :date_of_birth => 17.years.ago + 1.day) }
+    let(:eighteen_year_old)  { create(:user, :date_of_birth => 17.years.ago) }
+
+    let(:users) { [thirteen_year_old, seventeen_year_old, eighteen_year_old] }
 
     it "should return the users whos age is in the given range" do
-      User.between_the_ages(13..17).should =~ [thirteen_year_old, seventeen_year_old]
+      Timecop.freeze(Time.now) do
+        User.between_the_ages(13..17).should =~ [thirteen_year_old, seventeen_year_old]
+      end
     end
   end
 
@@ -1655,17 +1659,11 @@ describe User do
 
   describe "#age=" do
     context "15" do
-      before do
-        Timecop.freeze(Time.now)
-        subject.age = 15
-      end
-
-      after do
-        Timecop.return
-      end
-
       it "should set the user's date of birth to 15 years ago" do
-        subject.date_of_birth.should == 15.years.ago.to_date
+        Timecop.freeze(Time.now) do
+          subject.age = 15
+          subject.date_of_birth.should == 15.years.ago.to_date
+        end
       end
     end
 
