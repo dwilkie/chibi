@@ -77,21 +77,24 @@ class Report
     ).to_a
 
     service_metadata["quantity"] = daily_data.inject(0) { |sum, daily_total| sum + daily_total.last }
-    service_metadata["data"] = daily_data.unshift(["day", "total_mo"])
+    service_metadata["headers"] = ["day", "total_mo"]
+    service_metadata["data"] = daily_data
   end
 
   def generate_ivr_report!(service_metadata, operator_options)
     cdr_report = InboundCdr.cdr_report(report_options(operator_options))
 
     service_metadata["quantity"] = cdr_report.inject(0) { |sum, cdr_detail| sum + cdr_detail.last }
-    service_metadata["data"] = cdr_report.unshift(InboundCdr.cdr_report_columns(:header => true))
+    service_metadata["headers"] = InboundCdr.cdr_report_columns(:header => true)
+    service_metadata["data"] = cdr_report
   end
 
   def generate_charge_report!(service_metadata, operator_options)
     charge_report = ChargeRequest.charge_report(report_options(operator_options))
 
     service_metadata["quantity"] = charge_report.count
-    service_metadata["data"] = charge_report.unshift(ChargeRequest.charge_report_columns(:header => true))
+    service_metadata["headers"] = ChargeRequest.charge_report_columns(:header => true)
+    service_metadata["data"] = charge_report
   end
 
   def report_options(options = {})

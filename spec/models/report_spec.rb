@@ -121,7 +121,9 @@ describe Report do
     include CdrHelpers
 
     def increment_sms(service_metadata, options = {})
-      data = service_metadata["data"] ||= [asserted_sms_report_headers]
+      service_metadata["headers"] ||= asserted_sms_report_headers
+
+      data = service_metadata["data"] ||= []
       day = data.find { |day_row| day_row[0] == options[:day]}
       day ? day.replace([day[0], day[1] + 1]) : data << [options[:day], 1]
 
@@ -131,8 +133,9 @@ describe Report do
 
     def increment_ivr(service_metadata, options = {})
       cdr = options[:cdr]
+      service_metadata["headers"] ||= asserted_cdr_report_headers
 
-      data = service_metadata["data"] ||= [asserted_cdr_report_headers]
+      data = service_metadata["data"] ||= []
       data_row = asserted_cdr_data_row(cdr)
       data << data_row
 
@@ -142,8 +145,9 @@ describe Report do
 
     def increment_charge(service_metadata, options = {})
       charge_request = options[:charge_request]
+      service_metadata["headers"] ||= asserted_charge_report_headers
 
-      data = service_metadata["data"] ||= [asserted_charge_report_headers]
+      data = service_metadata["data"] ||= []
       data_row = asserted_charge_request_data_row(charge_request)
       data << data_row
 
