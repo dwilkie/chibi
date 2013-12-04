@@ -2,6 +2,8 @@ class ChargeRequest < ActiveRecord::Base
   belongs_to :user
   belongs_to :requester, :polymorphic => true
 
+  include Chibi::Analyzable
+
   validates :user, :operator, :presence => true
 
   after_create :request_charge!
@@ -20,6 +22,12 @@ class ChargeRequest < ActiveRecord::Base
       transition(:awaiting_result => :failed, :if => :result_failed?)
       transition(:awaiting_result => :errored)
     end
+  end
+
+  def self.charge_report(options = {})
+    by_operator(options).between_dates(options).includes(:user).where(
+      :state => :successful
+    ).order(:id).pluck(*charge_report_columns)
   end
 
   def self.timeout!
@@ -44,6 +52,16 @@ class ChargeRequest < ActiveRecord::Base
   end
 
   private
+
+  def self.charge_report_columns(options = {})
+    columns = {
+      "transaction_id" => :id,
+      "number" => "users.mobile_number",
+      "timestamp" => :created_at,
+      "result" => :state
+    }
+    options[:header] ? columns.keys : columns.values
+  end
 
   def notify_requester!
     requester.charge_request_updated! if requester.present? && notify_requester?

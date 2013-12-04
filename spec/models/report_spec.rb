@@ -120,17 +120,35 @@ describe Report do
     include TimecopHelpers
     include CdrHelpers
 
-    def increment_interactions(service_report, key, options = {})
-      options[:by] ||= 1
-      [:day, :month].each do |period|
-        interaction_report = service_report["by_#{period}"] ||= {}
-        interaction_report = interaction_report[key] ||= {}
-        interaction_report[options[period]] ||= 0
-        interaction_report[options[period]] += options[:by]
-        if options[:increment_quantity] && period == :month
-          service_report["quantity"] = service_report["by_month"][key].values.first
-        end
-      end
+    def increment_sms(service_metadata, options = {})
+      data = service_metadata["data"] ||= [asserted_sms_report_headers]
+      day = data.find { |day_row| day_row[0] == options[:day]}
+      day ? day.replace([day[0], day[1] + 1]) : data << [options[:day], 1]
+
+      service_metadata["quantity"] ||= 0
+      service_metadata["quantity"] += 1
+    end
+
+    def increment_ivr(service_metadata, options = {})
+      cdr = options[:cdr]
+
+      data = service_metadata["data"] ||= [asserted_cdr_report_headers]
+      data_row = asserted_cdr_data_row(cdr)
+      data << data_row
+
+      service_metadata["quantity"] ||= 0
+      service_metadata["quantity"] += data_row.last
+    end
+
+    def increment_charge(service_metadata, options = {})
+      charge_request = options[:charge_request]
+
+      data = service_metadata["data"] ||= [asserted_charge_report_headers]
+      data_row = asserted_charge_request_data_row(charge_request)
+      data << data_row
+
+      service_metadata["quantity"] ||= 0
+      service_metadata["quantity"] += 1
     end
 
     def create_sample_interaction(options)
@@ -139,33 +157,32 @@ describe Report do
         with_operators do |number_parts, assertions|
           full_number = number_parts.join
 
-          create(:message, :from => full_number)
+          user = User.find_by_mobile_number(full_number) || create(:user, :mobile_number => full_number)
+
+          create(:message, :from => full_number, :user => user)
+
           cdr = create_cdr(
             :cdr_variables => {
               "variables" => {
-                "sip_from_user" => full_number, "duration" => "60", "billsec" => "59"
+                "sip_from_user" => full_number, "billsec" => "60"
               }
-            }
+            },
+            :user => user
           )
+
+          charge_request = create(:charge_request, :successful, :user => user)
 
           next unless subject.month == options[:month] && options[:year] == options[:year]
           countries_report = report_data["countries"] ||= {}
           country_report = countries_report[assertions["country_id"]] ||= {}
           operators_report = country_report["operators"] ||= {}
           operator_report = operators_report[assertions["id"]] ||= {}
-          operator_report["billing"] ||= assertions["billing"].dup
-          operator_report["payment_instructions"] ||= assertions["payment_instructions"].dup
           services_report = operator_report["services"] ||= assertions["services"].dup
-          increment_interactions(
-            services_report["sms"], "count", options.merge(:increment_quantity => true)
-          )
-          if ivr_report = services_report["ivr"]
-            increment_interactions(
-              ivr_report, "duration", options.merge(:by => 2, :increment_quantity => true)
-            )
-            increment_interactions(ivr_report, "bill_sec", options)
-            cdr_report = ivr_report["cdr"] ||= []
-            cdr_report << [cdr.from, cdr.rfc2822_date, cdr.duration, cdr.bill_sec]
+          services_report.each do |service, service_metadata|
+            service_type = service_metadata["type"]
+            send("increment_#{service_type}",
+            service_metadata,
+            options.merge(:cdr => cdr, :charge_request => charge_request))
           end
         end
       end
@@ -183,7 +200,8 @@ describe Report do
     it "should generate a report" do
       asserted_report
       report.should_not be_generated
-      JSON.parse(subject.generate!).should == asserted_report
+      generated_report = JSON.parse(subject.generate!)
+      generated_report.should == asserted_report
       report.should be_generated
     end
   end

@@ -49,5 +49,9 @@ module Chibi
     # heroku requires this to be false
     # see: http://guides.rubyonrails.org/asset_pipeline.html#precompiling-assets
     config.assets.initialize_on_precompile = false
+
+    # sets the default time zone for the application and enables
+    # time zone awareness for Active Record.
+    config.time_zone = 'Bangkok'
   end
 end

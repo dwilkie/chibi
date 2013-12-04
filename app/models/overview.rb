@@ -9,7 +9,6 @@ class Overview
     @users_texting = {}
     @inbound_cdrs = {}
     @phone_calls = {}
-    @ivr_minutes = {}
     @ivr_bill_minutes = {}
   end
 
@@ -57,11 +56,7 @@ class Overview
     @phone_calls[timeframe] ||= PhoneCall.overview_of_created(options)
   end
 
-  def ivr_minutes
-    @ivr_minutes[timeframe] ||= InboundCdr.overview_of_duration(:duration, options)
-  end
-
   def ivr_bill_minutes
-    @ivr_bill_minutes[timeframe] ||= InboundCdr.overview_of_duration(:bill_sec, options)
+    @ivr_bill_minutes[timeframe] ||= InboundCdr.overview_of_duration(options)
   end
 end

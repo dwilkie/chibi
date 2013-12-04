@@ -12,7 +12,6 @@ class OverviewPresenter < BasePresenter
       :messages_received => overview.messages_received,
       :phone_calls => overview.phone_calls,
       :inbound_cdrs => overview.inbound_cdrs,
-      :ivr_minutes => overview.ivr_minutes,
       :ivr_bill_minutes => overview.ivr_bill_minutes
     )
   end

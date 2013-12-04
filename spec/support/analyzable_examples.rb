@@ -15,6 +15,22 @@ module AnalyzableExamples
     resource.user.country_code
   end
 
+  shared_examples_for "filtering by operator" do
+    context "passing :operator => '<operator>', :country_code => '<country_code>'" do
+      it "should filter by the operator" do
+        run_filter(:operator => :foo, :country_code => :kh).should be_empty
+      end
+    end
+  end
+
+  shared_examples_for "filtering by time" do
+    context "passing :between => start_time..end_time" do
+      it "should filter by the given timeline" do
+        run_filter(:between => time_period).to_json.should == filtered_by_time_results.to_json
+      end
+    end
+  end
+
   shared_examples_for "analyzable" do |skip_by_user|
     describe ".overview_of_created" do
       def two_months_and_one_day_ago

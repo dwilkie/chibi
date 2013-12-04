@@ -47,20 +47,20 @@ describe User do
   end
 
   shared_examples_for "within hours" do |background_job|
-    context "passing :between => 2..14" do
-      context "given the current time is not between 02:00 UTC and 14:00 UTC" do
+    context "passing :between => 9..22" do
+      context "given the current time is not between 09:00 ICT and 22:00 ICT" do
         it "should not perform the task" do
-          Timecop.freeze(Time.new(2012, 1, 7, 1)) do
-            send(task, :between => 2..14)
+          Timecop.freeze(Time.new(2012, 1, 7, 8)) do
+            send(task, :between => 9..22)
             send(negative_assertion)
           end
         end
       end
 
-      context "given the current time is between 02:00 UTC and 14:00 UTC" do
+      context "given the current time is between 09:00 ICT and 22:00 ICT" do
         before do
-          Timecop.freeze(Time.new(2012, 1, 7, 14))
-          send(task, :between => 2..14, :queue_only => background_job)
+          Timecop.freeze(Time.new(2012, 1, 7, 22))
+          send(task, :between => 9..22, :queue_only => background_job)
         end
 
         after do
@@ -68,16 +68,16 @@ describe User do
         end
 
         if background_job
-          context "and @ the time the task is run it's still between 02:00 UTC and 14:00 UTC" do
+          context "and @ the time the task is run it's still between 09:00 ICT and 22:00 ICT" do
             it "should perform the task" do
               perform_background_job
               send(positive_assertion)
             end
           end
 
-          context "and @ the time the task is run it's no longer between 02:00 UTC and 14:00 UTC" do
+          context "and @ the time the task is run it's no longer between 09:00 ICT and 22:00 ICT" do
             it "should not perform the task" do
-              Timecop.freeze(Time.new(2012, 1, 7, 14, 1)) do
+              Timecop.freeze(Time.new(2012, 1, 7, 22, 1)) do
                 perform_background_job
                 send(negative_assertion)
               end

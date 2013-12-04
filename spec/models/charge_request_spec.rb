@@ -1,6 +1,9 @@
 require 'spec_helper'
 
 describe ChargeRequest do
+  include AnalyzableExamples
+  include ReportHelpers
+
   subject { create(:charge_request) }
   let(:skip_callback_request_charge) { false }
 
@@ -15,6 +18,15 @@ describe ChargeRequest do
 
   after do
     ChargeRequest.set_callback(:create, :after, :request_charge!)
+  end
+
+  it_should_behave_like "analyzable", true do
+    let(:group_by_column) { :created_at }
+    let(:excluded_resource) { nil }
+
+    def create_resource(*args)
+      create_charge_request(*args)
+    end
   end
 
   describe "factory" do
@@ -32,6 +44,44 @@ describe ChargeRequest do
     it "should not be valid without an operator" do
       subject.operator = nil
       subject.should_not be_valid
+    end
+  end
+
+  describe ".charge_report_columns(:header => true)" do
+    it "should return the column headers for the charge report" do
+      ChargeRequest.charge_report_columns(:header => true).should == asserted_charge_report_headers
+    end
+  end
+
+  describe ".charge_report" do
+    let(:charge_requests) { [cr_1, cr_2, cr_3, cr_4, cr_5] }
+
+    let(:cr_1) { create_charge_request(:successful) }
+    let(:cr_2) { create_charge_request(:successful, :created_at => 4.days.ago) }
+    let(:cr_3) { create_charge_request }
+    let(:cr_4) { create_charge_request(:failed) }
+    let(:cr_5) { create_charge_request(:errored) }
+
+    before do
+      Timecop.freeze(Time.now) { charge_requests }
+    end
+
+    def run_filter(options = {})
+      ChargeRequest.charge_report(options)
+    end
+
+    it "should only return only the relevant charge request columns" do
+      results = run_filter
+      results.size.should == 2
+      results[0].to_json.should == asserted_charge_request_data_row(cr_1).to_json
+      results[1].to_json.should == asserted_charge_request_data_row(cr_2).to_json
+    end
+
+    it_should_behave_like "filtering by operator"
+
+    it_should_behave_like "filtering by time" do
+      let(:time_period) { 4.days.ago..Time.now }
+      let(:filtered_by_time_results) { [asserted_charge_request_data_row(cr_1)] }
     end
   end
 

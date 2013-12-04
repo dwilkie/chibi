@@ -7,16 +7,42 @@ class InboundCdr < CallDataRecord
 
   include Chibi::Analyzable
 
-  def self.overview_of_duration(duration_column, options = {})
-    result = group_by_timeframe(options).sum("(#{duration_column} / 60) + 1").integerify!
-    options[:format] == :report ? result : result.to_a
+  def self.overview_of_duration(options = {})
+    group_by_timeframe(
+      {:group_by_column => default_date_column}.merge(options)
+    ).billable.sum(rounded_mins_sql).integerify!.to_a
   end
 
   def self.cdr_report(options = {})
-    by_operator(options).between_dates(options).order(:rfc2822_date, :id).pluck(:from, :rfc2822_date, :duration, :bill_sec)
+    by_operator(options).between_dates(
+      {:date_column => default_date_column}.merge(options)
+    ).billable.order(default_date_column, :id).pluck(*cdr_report_columns)
+  end
+
+  def self.cdr_report_columns(options = {})
+    columns = {
+      "id" => :id,
+      "number" => :from,
+      "timestamp" => default_date_column,
+      "duration" => :bill_sec,
+      "rounded_mins" => rounded_mins_sql
+    }
+    options[:header] ? columns.keys : columns.values
   end
 
   private
+
+  def self.billable
+    where("bill_sec > ?", 0)
+  end
+
+  def self.rounded_mins_sql
+    "(bill_sec / 60) + 1"
+  end
+
+  def self.default_date_column
+    :rfc2822_date
+  end
 
   def set_inbound_cdr_attributes
     if body.present?

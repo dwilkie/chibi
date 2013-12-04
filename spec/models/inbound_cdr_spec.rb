@@ -3,6 +3,7 @@ require 'spec_helper'
 describe InboundCdr do
   include CdrHelpers
   include AnalyzableExamples
+  include ReportHelpers
 
   let(:cdr) { create_cdr }
   subject { build_cdr }
@@ -70,68 +71,61 @@ describe InboundCdr do
   end
 
   describe "reporting" do
-    let(:cdrs) {[]}
+    def create_cdr(options = {})
+      return super if options.delete(:standard)
+      super(
+        :cdr_variables => {
+          "variables" => {
+            "duration" => "60",
+            "billsec" => options[:billsec] || "59",
+            "RFC2822_DATE" => Rack::Utils.escape((options[:rfc2822_date] || (8.days.ago - 1.second)).rfc2822)
+          }
+        }
+      )
+    end
+
+    let(:cdrs) { [cdr_1, cdr_2, cdr_3, cdr_4] }
+
+    let(:cdr_1) { create_cdr(:standard => true) }
+    let(:cdr_2) { create_cdr }
+    let(:cdr_3) { create_cdr }
+    let(:cdr_4) { create_cdr(:billsec => "0") }
 
     before do
-      Timecop.freeze(Time.now)
-      cdrs << cdr
-      2.times do
-        new_cdr = create_cdr(
-          :cdr_variables => {"variables" => {"duration" => "60", "billsec" => "59"}}
-        )
-        new_cdr.update_attribute(:created_at, 8.days.ago)
-        cdrs << new_cdr
+      Timecop.freeze(Time.now) { cdrs }
+    end
+
+    describe ".overview_of_duration(options = {})" do
+      it "should return the sum of bill_sec in mins" do
+        overview = InboundCdr.overview_of_duration
+        overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
       end
     end
 
-    after do
-      Timecop.return
-    end
-
-    describe ".overview_of_duration(duration_column, options = {})" do
-      context "passing :duration" do
-        it "should return the sum of duration in mins" do
-          overview = InboundCdr.overview_of_duration(:duration)
-          overview.should include([miliseconds_since_epoch(eight_days_ago), 4])
-        end
-      end
-
-      context "passing :bill_sec" do
-        it "should return the sum of bill_sec in mins" do
-          overview = InboundCdr.overview_of_duration(:bill_sec)
-          overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
-        end
-      end
-
-      context "passing :format => :report" do
-        it "should return a hash" do
-          overview = InboundCdr.overview_of_duration(:duration, :format => :report)
-          overview.should be_a(Hash)
-        end
+    describe ".cdr_report_columns(:header => true)" do
+      it "should return the column headers for the cdr report" do
+        InboundCdr.cdr_report_columns(:header => true).should == asserted_cdr_report_headers
       end
     end
 
     describe ".cdr_report(options = {})" do
-      def asserted_cdr(index)
-        [cdrs[index].from, cdrs[index].rfc2822_date, cdrs[index].duration, cdrs[index].bill_sec]
+      def run_filter(options = {})
+        InboundCdr.cdr_report(options)
       end
 
       it "should return only the relevant cdr columns" do
-        InboundCdr.cdr_report.each_with_index do |reported_cdr, index|
-          reported_cdr.should == asserted_cdr(index)
-        end
+        results = run_filter
+        results[0].should == asserted_cdr_data_row(cdr_2)
+        results[1].should == asserted_cdr_data_row(cdr_3)
+        results[2].should == asserted_cdr_data_row(cdr_1)
+        results.should_not include(asserted_cdr_data_row(cdr_4))
       end
 
-      context "passing :operator => '<operator>', :country_code => '<country_code>'" do
-        it "should filter by the operator" do
-          InboundCdr.cdr_report(:operator => :foo, :country_code => :kh).should be_empty
-        end
-      end
+      it_should_behave_like "filtering by operator"
 
-      context "passing :between => 7.days.ago..Time.now" do
-        it "should filter by the given timeline" do
-          InboundCdr.cdr_report(:between => 7.days.ago..Time.now).should == [asserted_cdr(0)]
-        end
+      it_should_behave_like "filtering by time" do
+        let(:time_period) { 8.days.ago..Time.now }
+        let(:filtered_by_time_results) { [asserted_cdr_data_row(cdr_1)] }
       end
     end
   end

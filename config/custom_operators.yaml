@@ -10,61 +10,30 @@ kh:
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
         dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
-        billing:
-          recipients:
-            "eng.makara@smart.com.kh":
-              name: "Makara"
-          attention: "Finance Department"
-          vat_tin: "100071112"
-          address: "464A Preah Monivong Blvd,\nSangkat Tonle Bassac,\nKhan Chamkarmorn,\nPhnom Penh"
-          name:  "Latelz Co., Ltd"
-        payment_instructions:
-          bank_name: "Advanced Bank of Asia Limited (ABA)"
-          account_name: "Chatterbox Dating Mobile"
-          account_number: "000070412"
-          swift_code: "ABAAKHPP"
-          bank_address: "148 Preah Sihanouk Blvd,\nSangkat Boeung Keng Kang 1,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
         services:
-          sms:
+          ifriendship_sms:
+            type: "sms"
             name: "iFriendship SMS"
             short_code: "2442"
             unit_cost: "0.05"
-            specific_tax: "0.03"
-            vat: "0.1"
             revenue_share: "0.3"
-          ivr:
+          ifriendship_ivr:
+            type: "ivr"
             name: "iFriendship IVR"
             short_code: "2442"
             unit_cost: "0.1"
-            specific_tax: "0.03"
-            vat: "0.1"
             revenue_share: "0.35"
     beeline:
       metadata:
         short_code: "2442"
         nuntium_channel: "beeline"
         mt_message_queue: "beeline_mt_message_queue"
-        billing:
-          recipients:
-            "pith@beeline.com.kh":
-              name: "Phalkun"
-          attention: "Mr. Ith Phalkun"
-          vat_tin: "100099351"
-          address: "15E2 Norodom Blvd,\nPhnom Penh"
-          name:  "SOTELCO Ltd"
-        payment_instructions:
-          bank_name: "ANZ Royal Bank"
-          account_name: "Chatterbox Dating Mobile"
-          account_number: "2588103"
-          swift_code: "ANZBKHPP"
-          bank_address: "100 Preah Sihanouk Blvd,\nSangkat Boeung Keng Kang 1,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
         services:
-          sms:
+          bee_friends:
+            type: "sms"
             name: "Chibi SMS Chat"
             short_code: "2442"
             unit_cost: "0.05"
-            specific_tax: "0.03"
-            vat: "0.1"
             revenue_share: "0.3"
     qb:
       metadata:
@@ -76,34 +45,12 @@ kh:
         dial_string: "sofia/internal/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
         dial_string_number_prefix: "2442"
         chargeable: true
-        billing:
-          recipients:
-            "sophak.lim@qbmore.com":
-              name: "Sophak"
-          attention: "Mr. Sophak Lim"
-          vat_tin: "100012345"
-          address: "825 ABC Preah Monivong Blvd,\nSangkat Phsar Damthkov,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
-          name:  "(Cambodia) Advance Communication Co., Ltd (CADCOMMS)"
-        payment_instructions:
-          bank_name: "Advanced Bank of Asia Limited (ABA)"
-          account_name: "Chatterbox Dating Mobile"
-          account_number: "000070412"
-          swift_code: "ABAAKHPP"
-          bank_address: "148 Preah Sihanouk Blvd,\nSangkat Boeung Keng Kang 1,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
         services:
-          sms:
-            name: "qb Friends SMS"
+          qb_friends:
+            type: "charge"
+            name: "qb Friends"
             short_code: "2442"
-            unit_cost: "0.05"
-            specific_tax: "0.03"
-            vat: "0.1"
-            revenue_share: "0.4"
-          ivr:
-            name: "qb Friends IVR"
-            short_code: "2442"
-            unit_cost: "0.1"
-            specific_tax: "0.03"
-            vat: "0.1"
+            unit_cost: "0.07"
             revenue_share: "0.4"
     cootel:
       metadata:
@@ -113,32 +60,10 @@ kh:
         caller_id: "2442"
         voip_gateway_host: "103.5.126.33"
         dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}:5061"
-        billing:
-          recipients:
-            "yamchhim@kh.cootel.com":
-              name: "Chhim"
-          attention: "Mr. Chhim Yam"
-          vat_tin: "100012345"
-          address: "No. B3 & C3-1, St. 169,\nSangkat Veal Vong,\nKhan 7 Makara,\nPhnom Penh,\nCambodia"
-          name:  "Xinwei (Cambodia) Telecom Co., Ltd."
-        payment_instructions:
-          bank_name: "Advanced Bank of Asia Limited (ABA)"
-          account_name: "Chatterbox Dating Mobile"
-          account_number: "000070412"
-          swift_code: "ABAAKHPP"
-          bank_address: "148 Preah Sihanouk Blvd,\nSangkat Boeung Keng Kang 1,\nKhan Chamkarmorn,\nPhnom Penh,\nCambodia"
         services:
-          ivr:
-            name: "Cootel Friends IVR"
-            short_code: "2442"
-            unit_cost: "0.1"
-            specific_tax: "0.03"
-            vat: "0.1"
-            revenue_share: "0.4"
-          sms:
-            name: "Cootel Friends SMS"
+          coo_friends:
+            type: "charge"
+            name: "CooFriends"
             short_code: "2442"
             unit_cost: "0.05"
-            specific_tax: "0.03"
-            vat: "0.1"
             revenue_share: "0.4"

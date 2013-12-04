@@ -49,12 +49,12 @@ class Report
       operators_report = country_report["operators"] ||= {}
       operators.each do |operator_id, operator_metadata|
         operator_report = operators_report[operator_id] ||= {}
-        operator_report["billing"] = operator_metadata["billing"].dup
-        operator_report["payment_instructions"] = operator_metadata["payment_instructions"].dup
         services_report = operator_report["services"] = operator_metadata["services"].dup
         operator_options = {:operator => operator_id, :country_code => country_id}
-        generate_sms_report!(services_report["sms"], operator_options)
-        generate_ivr_report!(services_report["ivr"], operator_options) if services_report["ivr"]
+        operator_report["services"].each do |service, service_metadata|
+          service_type = service_metadata["type"]
+          send("generate_#{service_type}_report!", service_metadata, operator_options)
+        end
       end
     end
     store_report("report" => report_data)
@@ -71,33 +71,27 @@ class Report
     REDIS.set(REDIS_KEY, value.to_json)
   end
 
-  def generate_sms_report!(sms_report, operator_options)
-    with_interaction_report(sms_report) do |interaction_report, timeframe|
-      interaction_report["count"] = Message.overview_of_created(
-        report_options(operator_options.merge(:timeframe => timeframe))
-      )
-    end
-    set_quantity(sms_report, "count")
+  def generate_sms_report!(service_metadata, operator_options)
+    daily_data = Message.overview_of_created(
+      report_options(operator_options.merge(:timeframe => :day))
+    ).to_a
+
+    service_metadata["quantity"] = daily_data.inject(0) { |sum, daily_total| sum + daily_total.last }
+    service_metadata["data"] = daily_data.unshift(["day", "total_mo"])
   end
 
-  def generate_ivr_report!(ivr_report, operator_options)
-    report_constraints = report_options(operator_options)
-    with_interaction_report(ivr_report) do |interaction_report, timeframe|
-      interaction_constraints = report_constraints.merge(:timeframe => timeframe)
-      ["duration", "bill_sec"].each do |ivr_report_type|
-        interaction_report[ivr_report_type] = InboundCdr.overview_of_duration(
-          ivr_report_type, interaction_constraints
-        )
-      end
-    end
-    ivr_report["cdr"] = InboundCdr.cdr_report(report_constraints)
-    set_quantity(ivr_report, "duration")
+  def generate_ivr_report!(service_metadata, operator_options)
+    cdr_report = InboundCdr.cdr_report(report_options(operator_options))
+
+    service_metadata["quantity"] = cdr_report.inject(0) { |sum, cdr_detail| sum + cdr_detail.last }
+    service_metadata["data"] = cdr_report.unshift(InboundCdr.cdr_report_columns(:header => true))
   end
 
-  def with_interaction_report(service_report)
-    [:day, :month].each do |timeframe|
-      yield(service_report["by_#{timeframe}"] ||= {}, timeframe)
-    end
+  def generate_charge_report!(service_metadata, operator_options)
+    charge_report = ChargeRequest.charge_report(report_options(operator_options))
+
+    service_metadata["quantity"] = charge_report.count
+    service_metadata["data"] = charge_report.unshift(ChargeRequest.charge_report_columns(:header => true))
   end
 
   def report_options(options = {})
@@ -105,9 +99,5 @@ class Report
     {
       :format => :report, :between => time_of_month.beginning_of_month..time_of_month.end_of_month
     }.merge(options)
-  end
-
-  def set_quantity(service_report, by_month_field)
-    service_report["quantity"] = service_report["by_month"][by_month_field].values.first
   end
 end

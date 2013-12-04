@@ -97,24 +97,6 @@ describe Overview do
     it_should_behave_like "an overview method"
   end
 
-  describe "#ivr_minutes" do
-    let(:klass_to_overview) { InboundCdr }
-
-    def run_overview
-      subject.ivr_minutes
-    end
-
-    def asserted_message_expectation
-      :overview_of_duration
-    end
-
-    def asserted_message_args(overridden_options = {})
-      [:duration, *super]
-    end
-
-    it_should_behave_like "an overview method"
-  end
-
   describe "#ivr_bill_minutes" do
     let(:klass_to_overview) { InboundCdr }
 
@@ -124,10 +106,6 @@ describe Overview do
 
     def asserted_message_expectation
       :overview_of_duration
-    end
-
-    def asserted_message_args(overridden_options = {})
-      [:bill_sec, *super]
     end
 
     it_should_behave_like "an overview method"
