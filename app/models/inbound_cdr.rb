@@ -8,8 +8,7 @@ class InboundCdr < CallDataRecord
   include Chibi::Analyzable
 
   def self.overview_of_duration(options = {})
-    group_by_options = {:group_by_column => default_date_column, :include_columns => "bill_sec"}.merge(options)
-    billable.group_by_timeframe(group_by_options) { |cdr| (cdr["bill_sec"] / 60) + 1 }.to_a
+    group_by_timeframe({:group_by_column => default_date_column}.merge(options)).billable.sum(rounded_mins_sql).integerify!.to_a
   end
 
   def self.cdr_report(options = {})

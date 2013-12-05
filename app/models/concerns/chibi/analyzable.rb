@@ -5,7 +5,8 @@ module Chibi
     module ClassMethods
       # this returns the data in the format required by HighStocks
       def overview_of_created(options = {})
-        group_by_timeframe(options).to_a
+        count_args = "DISTINCT(#{table_name}.user_id)" if options[:by_user]
+        group_by_timeframe(options).count(count_args).integerify!.to_a
       end
 
       def group_by_timeframe(options = {}, &block)
@@ -26,8 +27,8 @@ module Chibi
 
         # hack to get the table alias name
         table_alias = scope.send(:column_alias_for, group_by_sql)
-        count_args = "DISTINCT(#{table_name}.user_id)" if options[:by_user]
-        scope.order(table_alias).group(group_by_sql).count(count_args).integerify!
+
+        scope.order(table_alias).group(group_by_sql)
       end
 
       def recent(options)
