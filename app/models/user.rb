@@ -648,7 +648,7 @@ class User < ActiveRecord::Base
   end
 
   def self.time_at(hour)
-    Time.new(Time.current.year, Time.current.month, Time.current.day, hour)
+    Time.local(Time.current.year, Time.current.month, Time.current.day, hour)
   end
 
   def self.order_by_case(scope, conditions_scope, else_value)

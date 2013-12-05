@@ -50,7 +50,7 @@ describe User do
     context "passing :between => 9..22" do
       context "given the current time is not between 09:00 ICT and 22:00 ICT" do
         it "should not perform the task" do
-          Timecop.freeze(Time.new(2012, 1, 7, 8)) do
+          Timecop.freeze(Time.local(2012, 1, 7, 8)) do
             send(task, :between => 9..22)
             send(negative_assertion)
           end
@@ -59,7 +59,7 @@ describe User do
 
       context "given the current time is between 09:00 ICT and 22:00 ICT" do
         before do
-          Timecop.freeze(Time.new(2012, 1, 7, 22))
+          Timecop.freeze(Time.local(2012, 1, 7, 22))
           send(task, :between => 9..22, :queue_only => background_job)
         end
 
@@ -77,7 +77,7 @@ describe User do
 
           context "and @ the time the task is run it's no longer between 09:00 ICT and 22:00 ICT" do
             it "should not perform the task" do
-              Timecop.freeze(Time.new(2012, 1, 7, 22, 1)) do
+              Timecop.freeze(Time.local(2012, 1, 7, 22, 1)) do
                 perform_background_job
                 send(negative_assertion)
               end
