@@ -1806,10 +1806,7 @@ describe User do
     end
 
     context "when the user's date of birth is 23 years ago" do
-      before do
-        subject.date_of_birth = 23.years.ago.utc.to_date
-      end
-
+      subject { create(:user, :date_of_birth => 23.years.ago) }
       it "should return 23" do
         subject.age.should == 23
       end

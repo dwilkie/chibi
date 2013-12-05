@@ -1,6 +1,6 @@
 module AnalyzableExamples
   def miliseconds_since_epoch(date)
-    (date.to_date.to_datetime.to_i * 1000)
+    (date.beginning_of_day.to_i * 1000)
   end
 
   def eight_days_ago
@@ -134,7 +134,7 @@ module AnalyzableExamples
               [miliseconds_since_epoch(two_months_and_one_day_ago), 1],
               [miliseconds_since_epoch(eight_days_ago), 2],
               [miliseconds_since_epoch(7.days.ago), 1],
-              [miliseconds_since_epoch(Time.now.utc), 3]
+              [miliseconds_since_epoch(Time.now), 3]
             ]
           end
         end

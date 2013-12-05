@@ -5,20 +5,16 @@ module Chibi
     module ClassMethods
       # this returns the data in the format required by HighStocks
       def overview_of_created(options = {})
-        count_args = "DISTINCT(#{table_name}.user_id)" if options[:by_user]
         format = options[:format] ||= :highcharts
-        result = group_by_timeframe(options).count(count_args).integerify!
+        result = group_by_timeframe(options)
         format == :report ? result : result.to_a
       end
 
-      def group_by_timeframe(options = {})
+      def group_by_timeframe(options = {}, &block)
         group_by_column = options[:group_by_column] ||= :created_at
         group_by_column = "#{table_name}.#{group_by_column}"
 
-        timeframe = options[:timeframe]
-
-        date_sql = timeframe ? "DATE_TRUNC('#{timeframe}', #{group_by_column})" : "DATE(#{group_by_column})"
-        group_by_sql = options[:format] == :report ? "EXTRACT(DAY FROM #{date_sql})" : "EXTRACT(EPOCH FROM #{date_sql}) * 1000"
+        timeframe = options[:timeframe] || :day
 
         scope = where.not(group_by_column => nil)
 
@@ -26,14 +22,33 @@ module Chibi
           "#{group_by_column} >= ?", options[:least_recent].ago
         ) if options[:least_recent]
 
-        scope = scope.between_dates(options.merge(:date_column => group_by_column))
+        scope = scope.between_dates(
+          options.merge(:date_column => group_by_column)
+        ).by_operator(options).order(group_by_column)
 
-        scope = scope.by_operator(options)
+        include_columns = [options[:include_columns] || []].flatten
 
-        # hack to get the table alias name
-        table_alias = scope.send(:column_alias_for, group_by_sql)
+        if options[:by_user]
+          include_columns << "user_id"
+          users = {}
+        end
 
-        scope.order(table_alias).group(group_by_sql)
+        mapping_keys = include_columns.dup.prepend(group_by_column)
+
+        # Use ruby so that the timezone is respected
+        scope.pluck(group_by_column, *include_columns).inject(Hash.new(0)) do |h, e|
+          element = [e].flatten
+          column_mappings = Hash[mapping_keys.zip(element)]
+          ms_since_epoch = column_mappings[group_by_column].send("beginning_of_#{timeframe}").to_i * 1000
+          unless options[:by_user] && users[ms_since_epoch].try(:[], column_mappings["user_id"])
+            h[ms_since_epoch] += block_given? ? yield(column_mappings) : 1
+            if options[:by_user]
+              users[ms_since_epoch] ||= {}
+              users[ms_since_epoch][column_mappings["user_id"]] = true
+            end
+          end
+          h
+        end
       end
 
       def between_dates(options)
