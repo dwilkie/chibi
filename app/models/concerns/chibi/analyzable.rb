@@ -13,42 +13,26 @@ module Chibi
         group_by_column = "#{table_name}.#{group_by_column}"
 
         timeframe = options[:timeframe] || :day
-        timeframe_format = options[:timeframe_format] ||= :highcharts
+        timeframe_format = options[:timeframe_format] ||= :highstocks
 
-        scope = where.not(group_by_column => nil)
+        local_timezone = Time.zone.tzinfo.identifier
+        local_time_sql = "(TIMESTAMPTZ(#{group_by_column}) AT TIME ZONE '#{local_timezone}')"
 
-        scope = scope.where(
-          "#{group_by_column} >= ?", options[:least_recent].ago
-        ) if options[:least_recent]
+        date_sql = timeframe == :day ? "DATE(#{local_time_sql})" : "DATE_TRUNC('#{timeframe}', #{local_time_sql})"
+        group_by_sql = timeframe_format == :highstocks ? "EXTRACT(EPOCH FROM #{date_sql}) * 1000" : "EXTRACT(DAY FROM #{date_sql})"
 
-        scope = scope.between_dates(
-          options.merge(:date_column => group_by_column)
-        ).by_operator(options).order(group_by_column)
+        date_options = options.merge(:date_column => group_by_column)
+        scope = between_dates(date_options).recent(date_options).by_operator(options).where.not(group_by_column => nil)
 
-        include_columns = [options[:include_columns] || []].flatten
+        # hack to get the table alias name
+        table_alias = scope.send(:column_alias_for, group_by_sql)
+        count_args = "DISTINCT(#{table_name}.user_id)" if options[:by_user]
+        scope.order(table_alias).group(group_by_sql).count(count_args).integerify!
+      end
 
-        if options[:by_user]
-          include_columns << "user_id"
-          users = {}
-        end
-
-        mapping_keys = include_columns.dup.prepend(group_by_column)
-
-        # Use ruby so that the timezone is respected
-        scope.pluck(group_by_column, *include_columns).inject(Hash.new(0)) do |h, e|
-          element = [e].flatten
-          column_mappings = Hash[mapping_keys.zip(element)]
-          timestamp = column_mappings[group_by_column]
-          group_by_key = timeframe_format == :highcharts ? timestamp.send("beginning_of_#{timeframe}").to_i * 1000 : timestamp.send(timeframe)
-          unless options[:by_user] && users[group_by_key].try(:[], column_mappings["user_id"])
-            h[group_by_key] += block_given? ? yield(column_mappings) : 1
-            if options[:by_user]
-              users[group_by_key] ||= {}
-              users[group_by_key][column_mappings["user_id"]] = true
-            end
-          end
-          h
-        end
+      def recent(options)
+        return all unless options[:least_recent]
+        where("#{options[:date_column]} >= ?", options[:least_recent].ago)
       end
 
       def between_dates(options)

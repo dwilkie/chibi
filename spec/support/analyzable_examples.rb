@@ -1,6 +1,7 @@
 module AnalyzableExamples
+  # this must return a UTC time
   def miliseconds_since_epoch(date)
-    (date.beginning_of_day.to_i * 1000)
+    (date.to_date.to_datetime.beginning_of_day.to_i * 1000)
   end
 
   def eight_days_ago
