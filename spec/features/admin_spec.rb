@@ -4,6 +4,7 @@ describe "Admin" do
   include MessagingHelpers
   include AdminHelpers
   include CommunicableExampleHelpers
+  include CdrHelpers
 
   let(:user) { create(:user, :male) }
   let(:another_user) { create(:user, :female) }
@@ -20,11 +21,14 @@ describe "Admin" do
   let(:phone_call) { create(:phone_call, :user => another_user, :chat => another_chat) }
   let(:another_phone_call) { create(:phone_call, :user => user, :chat => chat) }
 
+  let(:inbound_cdr) { create_cdr(:cdr_variables => {"variables" => {"billsec" => "159"}}) }
+
   let(:users) { [another_user, user] }
   let(:messages) { [message, another_message] }
   let(:replies) { [reply, another_reply] }
   let(:phone_calls) { [phone_call, another_phone_call] }
   let(:chats) { [another_chat, chat] }
+  let(:inbound_cdrs) { inbound_cdr }
 
   let(:communicable_resources) { [messages, replies, phone_calls] }
 
@@ -214,6 +218,7 @@ describe "Admin" do
         reply_from_last_month
         users
         user_from_last_month
+        inbound_cdrs
         visit overview_path
       end
 
