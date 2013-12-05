@@ -26,7 +26,7 @@ class Report
   end
 
   def self.filename
-    "chibi_report_" + Time.local(year, month).strftime("%B_%Y").downcase + ".json"
+    "chibi_report_" + Time.zone.local(year, month).strftime("%B_%Y").downcase + ".json"
   end
 
   def self.type
@@ -98,7 +98,7 @@ class Report
   end
 
   def report_options(options = {})
-    time_of_month = Time.local(year, month)
+    time_of_month = Time.zone.local(year, month)
     {
       :timeframe_format => :report, :between => time_of_month.beginning_of_month..time_of_month.end_of_month
     }.merge(options)
