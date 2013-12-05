@@ -18,11 +18,11 @@ class Overview
   end
 
   def new_users
-    @new_users[timeframe] ||= User.overview_of_created(options)
+    @new_users[timeframe] ||= User.overview_of_created(options.dup)
   end
 
   def messages_received
-    @messages_received[timeframe] ||= Message.overview_of_created(options)
+    @messages_received[timeframe] ||= Message.overview_of_created(options.dup)
   end
 
   def users_texting
@@ -49,14 +49,14 @@ class Overview
   end
 
   def inbound_cdrs
-    @inbound_cdrs[timeframe] ||= InboundCdr.overview_of_created(options)
+    @inbound_cdrs[timeframe] ||= InboundCdr.overview_of_created(options.dup)
   end
 
   def phone_calls
-    @phone_calls[timeframe] ||= PhoneCall.overview_of_created(options)
+    @phone_calls[timeframe] ||= PhoneCall.overview_of_created(options.dup)
   end
 
   def ivr_bill_minutes
-    @ivr_bill_minutes[timeframe] ||= InboundCdr.overview_of_duration(options)
+    @ivr_bill_minutes[timeframe] ||= InboundCdr.overview_of_duration(options.dup)
   end
 end
