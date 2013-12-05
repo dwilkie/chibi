@@ -67,11 +67,11 @@ module AnalyzableExamples
         end
       end
 
-      context "passing :format => :report" do
-        it "should return an overview of all the created resources (in Report format)" do
+      context "passing :timeframe_format => :report" do
+        it "should return an overview of all the created resources (using the DOW format)" do
           subject.class.overview_of_created(
-            :format => :report
-          ).should be_a(Hash)
+            :timeframe_format => :report
+          ).should include([two_months_and_one_day_ago.day, 1])
         end
       end
 

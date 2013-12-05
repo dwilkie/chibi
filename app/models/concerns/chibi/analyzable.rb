@@ -5,9 +5,7 @@ module Chibi
     module ClassMethods
       # this returns the data in the format required by HighStocks
       def overview_of_created(options = {})
-        format = options[:format] ||= :highcharts
-        result = group_by_timeframe(options)
-        format == :report ? result : result.to_a
+        group_by_timeframe(options).to_a
       end
 
       def group_by_timeframe(options = {}, &block)
@@ -15,6 +13,7 @@ module Chibi
         group_by_column = "#{table_name}.#{group_by_column}"
 
         timeframe = options[:timeframe] || :day
+        timeframe_format = options[:timeframe_format] ||= :highcharts
 
         scope = where.not(group_by_column => nil)
 
@@ -39,12 +38,13 @@ module Chibi
         scope.pluck(group_by_column, *include_columns).inject(Hash.new(0)) do |h, e|
           element = [e].flatten
           column_mappings = Hash[mapping_keys.zip(element)]
-          ms_since_epoch = column_mappings[group_by_column].send("beginning_of_#{timeframe}").to_i * 1000
-          unless options[:by_user] && users[ms_since_epoch].try(:[], column_mappings["user_id"])
-            h[ms_since_epoch] += block_given? ? yield(column_mappings) : 1
+          timestamp = column_mappings[group_by_column]
+          group_by_key = timeframe_format == :highcharts ? timestamp.send("beginning_of_#{timeframe}").to_i * 1000 : timestamp.send(timeframe)
+          unless options[:by_user] && users[group_by_key].try(:[], column_mappings["user_id"])
+            h[group_by_key] += block_given? ? yield(column_mappings) : 1
             if options[:by_user]
-              users[ms_since_epoch] ||= {}
-              users[ms_since_epoch][column_mappings["user_id"]] = true
+              users[group_by_key] ||= {}
+              users[group_by_key][column_mappings["user_id"]] = true
             end
           end
           h
