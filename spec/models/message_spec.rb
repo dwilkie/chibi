@@ -62,10 +62,10 @@ describe Message do
     let(:recently_received_message) { create_unprocessed_message(:created_at => 2.minutes.ago) }
     let(:unprocessed_message_with_chat) { create_unprocessed_message(:chat => chat) }
     let(:message_awaiting_charge_result_for_too_long) { create_unprocessed_message(:awaiting_charge_result) }
-    let(:message_awaiting_charge_result) { create_unprocessed_message(:created_at => Time.now) }
+    let(:message_awaiting_charge_result) { create_unprocessed_message(:created_at => Time.current) }
 
     before do
-      Timecop.freeze(Time.now)
+      Timecop.freeze(Time.current)
       message_awaiting_charge_result_for_too_long
       message_awaiting_charge_result
       unprocessed_message

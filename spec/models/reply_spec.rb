@@ -428,7 +428,7 @@ describe Reply do
       context "given there is a race condition for when the state is updated" do
         before do
           reply.stub(:touch).with(:delivered_at) do
-            reply.update_attribute(:delivered_at, Time.now)
+            reply.update_attribute(:delivered_at, Time.current)
             create_race_condition(reply, :delivered_by_smsc)
           end
         end

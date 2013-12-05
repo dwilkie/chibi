@@ -336,7 +336,7 @@ class User < ActiveRecord::Base
   end
 
   def age
-    Time.now.year - date_of_birth.year if date_of_birth?
+    Time.current.year - date_of_birth.year if date_of_birth?
   end
 
   def age=(value)
@@ -640,15 +640,15 @@ class User < ActiveRecord::Base
 
     if between = options[:between]
       between = Range.new(*(between.split("..")).map(&:to_i)) if between.is_a?(String)
-      now = Time.now
-      do_find = (now >= time_at(between.min) && now <= time_at(between.max))
+      current_time = Time.current
+      do_find = (current_time >= time_at(between.min) && current_time <= time_at(between.max))
     end
 
     yield if do_find
   end
 
   def self.time_at(hour)
-    Time.new(Time.now.year, Time.now.month, Time.now.day, hour)
+    Time.new(Time.current.year, Time.current.month, Time.current.day, hour)
   end
 
   def self.order_by_case(scope, conditions_scope, else_value)

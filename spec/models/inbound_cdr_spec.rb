@@ -51,9 +51,9 @@ describe InboundCdr do
   describe "callbacks" do
     describe "before_validation(:on => :create)" do
       it "should populate the required attributes" do
-        Timecop.freeze(Time.now) do
+        Timecop.freeze(Time.current) do
           subject.valid?
-          subject.rfc2822_date.to_i.should == Time.now.to_i
+          subject.rfc2822_date.to_i.should == Time.current.to_i
           subject.phone_call.should be_nil
         end
       end
@@ -92,7 +92,7 @@ describe InboundCdr do
     let(:cdr_4) { create_cdr(:billsec => "0") }
 
     before do
-      Timecop.freeze(Time.now) { cdrs }
+      Timecop.freeze(Time.current) { cdrs }
     end
 
     describe ".overview_of_duration(options = {})" do
@@ -124,7 +124,7 @@ describe InboundCdr do
       it_should_behave_like "filtering by operator"
 
       it_should_behave_like "filtering by time" do
-        let(:time_period) { 8.days.ago..Time.now }
+        let(:time_period) { 8.days.ago..Time.current }
         let(:filtered_by_time_results) { [asserted_cdr_data_row(cdr_1)] }
       end
     end

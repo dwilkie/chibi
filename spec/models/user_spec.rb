@@ -193,7 +193,7 @@ describe User do
 
     context "after_create" do
       it "should set the activated_at to the created_at if activated and activated_at is not set" do
-        Timecop.freeze(Time.now) do
+        Timecop.freeze(Time.current) do
           user = create(:user, :created_at => 5.days.ago)
           user.activated_at.should == 5.days.ago
 
@@ -266,7 +266,7 @@ describe User do
     let(:users) { [thirteen_year_old, seventeen_year_old, eighteen_year_old] }
 
     it "should return the users whos age is in the given range" do
-      Timecop.freeze(Time.now) do
+      Timecop.freeze(Time.current) do
         User.between_the_ages(13..17).should =~ [thirteen_year_old, seventeen_year_old]
       end
     end
@@ -1127,7 +1127,7 @@ describe User do
 
       cassette = info if cassette == :info
 
-      Timecop.freeze(Time.now) do
+      Timecop.freeze(Time.current) do
         VCR.use_cassette(cassette, match_requests_on.merge(:erb => true)) do
           user.update_profile(info)
         end
@@ -1660,7 +1660,7 @@ describe User do
   describe "#age=" do
     context "15" do
       it "should set the user's date of birth to 15 years ago" do
-        Timecop.freeze(Time.now) do
+        Timecop.freeze(Time.current) do
           subject.age = 15
           subject.date_of_birth.should == 15.years.ago.to_date
         end
@@ -1788,7 +1788,7 @@ describe User do
 
   describe "#age" do
     before do
-      Timecop.freeze(Time.now)
+      Timecop.freeze(Time.current)
     end
 
     after do

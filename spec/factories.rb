@@ -229,7 +229,7 @@ FactoryGirl.define do
     to { user.mobile_number }
 
     trait :delivered do
-      delivered_at { Time.now }
+      delivered_at { Time.current }
     end
 
     trait :queued_for_smsc_delivery do
@@ -369,7 +369,7 @@ FactoryGirl.define do
     cambodian
 
     trait :with_recent_interaction do
-      last_interacted_at { Time.now }
+      last_interacted_at { Time.current }
     end
 
     trait :with_semi_recent_interaction do
@@ -689,7 +689,7 @@ FactoryGirl.define do
         dynamic_cdr_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{dynamic_cdr_variables["sip_from_user"]}")
 
         dynamic_cdr_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
-        dynamic_cdr_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.now.rfc2822)
+        dynamic_cdr_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.current.rfc2822)
       else
         called_user = user_who_was_called || FactoryGirl.create(:user)
         default_host = "27.109.112.12"

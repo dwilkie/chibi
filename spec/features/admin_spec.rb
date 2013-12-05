@@ -116,7 +116,7 @@ describe "Admin" do
     end
 
     def time_ago_in_words(created_at = nil)
-      minutes_ago = ((Time.now - created_at.to_i.minutes.ago) / 60).round
+      minutes_ago = ((Time.current - created_at.to_i.minutes.ago) / 60).round
       minutes_ago.zero? ? "less than a minute ago" : "#{minutes_ago} minutes ago"
     end
 

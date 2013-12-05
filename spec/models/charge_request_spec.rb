@@ -63,7 +63,7 @@ describe ChargeRequest do
     let(:cr_5) { create_charge_request(:errored) }
 
     before do
-      Timecop.freeze(Time.now) { charge_requests }
+      Timecop.freeze(Time.current) { charge_requests }
     end
 
     def run_filter(options = {})
@@ -80,7 +80,7 @@ describe ChargeRequest do
     it_should_behave_like "filtering by operator"
 
     it_should_behave_like "filtering by time" do
-      let(:time_period) { 4.days.ago..Time.now }
+      let(:time_period) { 4.days.ago..Time.current }
       let(:filtered_by_time_results) { [asserted_charge_request_data_row(cr_1)] }
     end
   end

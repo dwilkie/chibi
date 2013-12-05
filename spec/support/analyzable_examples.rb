@@ -38,13 +38,13 @@ module AnalyzableExamples
       end
 
       def eight_days_ago_was_in_this_month
-        (Time.now.month == eight_days_ago.month)
+        (Time.current.month == eight_days_ago.month)
       end
 
       let(:resource) { create_resource }
 
       before do
-        Timecop.freeze(Time.now)
+        Timecop.freeze(Time.current)
         3.times { create_resource }
         2.times { create_resource.update_attribute(group_by_column, eight_days_ago) }
         resource.update_attribute(group_by_column, two_months_and_one_day_ago)
@@ -134,7 +134,7 @@ module AnalyzableExamples
               [miliseconds_since_epoch(two_months_and_one_day_ago), 1],
               [miliseconds_since_epoch(eight_days_ago), 2],
               [miliseconds_since_epoch(7.days.ago), 1],
-              [miliseconds_since_epoch(Time.now), 3]
+              [miliseconds_since_epoch(Time.current), 3]
             ]
           end
         end

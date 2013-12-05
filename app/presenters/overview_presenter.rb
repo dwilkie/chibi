@@ -29,7 +29,7 @@ class OverviewPresenter < BasePresenter
   private
 
   def report_link
-    time_last_month = (Time.now - 1.month)
+    time_last_month = (Time.current - 1.month)
     last_month = time_last_month.month
     last_month_year = time_last_month.year
     link_to(
