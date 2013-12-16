@@ -1,13 +1,4 @@
 GIT
-  remote: git://github.com/colszowka/simplecov.git
-  revision: a38915db28552cf1a51748f104d34d86a2e897bc
-  specs:
-    simplecov (0.8.2)
-      docile (~> 1.1.0)
-      multi_json
-      simplecov-html (~> 0.8.0)
-
-GIT
   remote: git://github.com/dwilkie/resque
   revision: d74bdf33bf1a25c8f20b4294a567ae2fbfd4582e
   branch: prevent_resque_failure_1-x-stable
@@ -123,7 +114,6 @@ GEM
     database_cleaner (1.2.0)
     deep_merge (1.0.0)
     diff-lcs (1.2.5)
-    docile (1.1.1)
     dotenv (0.9.0)
     erubis (2.7.0)
     excon (0.28.0)
@@ -280,7 +270,6 @@ GEM
       railties (>= 4.0.0, < 5.0)
       sass (>= 3.1.10)
       sprockets-rails (~> 2.0.0)
-    simplecov-html (0.8.0)
     sinatra (1.4.4)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -371,7 +360,6 @@ DEPENDENCIES
   resque_spec
   rspec-rails
   sass-rails (~> 4.0.0)
-  simplecov!
   spork-rails!
   state_machine
   timecop
