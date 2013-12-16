@@ -408,7 +408,8 @@ describe Reply do
           expect_message { reply.deliver! }
           assert_persisted_and_delivered(reply, number, :suggested_channel => assertions["nuntium_channel"])
         end
-        reply = create(:reply)
+        user = create(:user, :from_unknown_operator)
+        reply = create(:reply, :user => user)
         expect_message { reply.deliver! }
         assert_persisted_and_delivered(reply, reply.destination, :suggested_channel => "twilio")
       end
