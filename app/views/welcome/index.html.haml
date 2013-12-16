@@ -1,160 +1,83 @@
-#fancy
-  .wrap
-    .intro
-      = link_to(image_tag("logo.png", :alt => "Chibi"), "#about", :class => "highlight_chibi", :id => "logo")
-      %h1
-        meet new friends
-      %p
-        = link_to("Chibi", "#about", :class => "highlight_chibi")
-        is a mobile dating and networking service that helps you find new friends.
-        = link_to("Chibi", "#about", :class => "highlight_chibi")
-        is 100% anonymous, works on all phones and does not require an Internet connection. Just
-        = link_to("call", "#try_it", :class => "highlight_try_it")
-        or
-        = link_to("text", "#try_it", :class => "highlight_try_it")
-        to register and start chatting immediately.
-
-    .preview
-      = image_tag("preview.jpg", :alt => "preview")
-    .titleSeparator
-      %h2
-        How it works
-    = link_to("", "#", :rel => "prev", :class => "arrow arrowLeft")
-    #how_it_works.sliderContainer
-      %ul.slider
-        %li
-          .twoOfFour
-            %h4 Call or SMS
-            %p
-              You can contact
-              = link_to("Chibi", "#about", :class => "highlight_chibi")
-              using your mobile phone by either
-              = link_to("calling", "#try_it", :class => "highlight_try_it")
-              or sending a
-              = link_to("SMS", "#try_it", :class => "highlight_try_it")
-              to one of the
-              = link_to("numbers", "#try_it", :class => "highlight_try_it")
-              below.
-              = link_to("Chibi", "#about", :class => "highlight_chibi")
-              will instantly find you a new friend to chat with. You can continue to chat with your new friend or choose to find a new one at anytime.
-          .oneOfFour
-            = image_tag("girl_texting.jpg", :alt => "Registration & Chat", :title => "Registration & Chat")
-          %div{:class => "oneOfFour last"}
-            = image_tag("guy_texting.jpg", :alt => "Registration & Chat", :title => "Registration & Chat")
-        %li
-          .oneOfFour
-            = image_tag("natural_language.jpg", :alt => "Natural Language", :title => "Natural Language")
-          %div{:class => "threeOfFour last"}
-            %h4
-              Natural Language
-            %p
-              = link_to("Chibi", "#about", :class => "highlight_chibi")
-              speaks your language. When
-              = link_to("calling", "#try_it", :class => "highlight_try_it")
-              or sending a
-              = link_to("SMS", "#try_it", :class => "highlight_try_it")
-              ,
-              = link_to("Chibi", "#about", :class => "highlight_chibi")
-              will reply in your language. Futhermore,
-              = link_to("Chibi", "#about", :class => "highlight_chibi")
-              tries to figure out what you mean. For example, if you want to meet a girl, just
-              = link_to("write", "#try_it", :class => "highlight_try_it")
-              &quot;I want to meet a girl&quot; or &quot;find me a girl!&quot; etc.
-              It even recognizes your language. For example if you're
-              = link_to("texting", "#try_it", :class => "highlight_try_it")
-              from Cambodia, you can
-              = link_to("write", "#try_it", :class => "highlight_try_it")
-              &quot;khnom jong rok met srey&quot; or &quot;rok met srey oy nyom!&quot; etc. No more complicated commands. Just
-              = link_to("say", "#try_it", :class => "highlight_try_it")
-              what you want.
-
-        %li
-          %div{:class => "threeOfFour last"}
-            %h4
-              Anonymous
-            %p
-              = link_to("Chibi", "#about", :class => "highlight_chibi")
-              will never give out your number to anybody. When
-              = link_to("chatting,", "#try_it", :class => "highlight_try_it")
-              your number is blocked from your friend, who can only see your screen id.
-          %div{:class => "oneOfFour"}
-            = image_tag("anonymous.jpg", :alt => "Anonymous", :title => "Anonymous")
-      %ul.sliderController
-    = link_to("", "#", :rel => "next", :class => "arrow arrowRight")
-
-    .clear
-
-    .titleSeparator
-      %h2.try_it
-        Try it now!
-
-    %ul#try_it.faq
-      %li
-        %h5
-          Cambodia
-        %p
-          Call or SMS your name, age, sex &amp; location to:
-        %p
-          %span.number
-            2442
-          E.x. 'im Mara girl 26 PP'
-        %p.note
-          * Smart &amp; Beeline customers only.
-      %li.even
-        %h5
-          International (beta)
-        %p
-          For international users, SMS or call:
-        %p
-          %span.number
-            +1 415-692-6280
-
-    .titleSeparator
-      %h2.chibi
-        About Chibi
-
-    %ul#about.faq
-      %li
-        %h5
-          Winner of the Cambodian Startup Weekend, 2011
-        = mail_to("dave@chibitxt.me", image_tag("startup_weekend_winner.jpg", :alt => "Startup Weekend Winner"))
-        %p
-          = link_to("Chibi", "#about", :class => "highlight_chibi")
-          won the
-          = link_to("Cambodian Startup Weekend Competition", "http://cambodia.startupweekend.org/2012/04/02/cambodias-first-startup-weekend-winner-about-to-launch/")
-          held in Phnom Penh between 9th and 12th September, 2011. Click the picture to
-          = mail_to("dave@chibitxt.me", "contact")
-          the founders.
-      %li.even
-        %h5
-          What does Chibi look like?
-        %p
-          = link_to(image_tag("chibi_portrait.png", :alt => "Chibi Portrait"), "#about", :class => "highlight_chibi")
-          Although numerous sightings of
-          = link_to("Chibi", "#about", :class => "highlight_chibi")
-          have been reported, this is only known photograph. It's thought that she mainly keeps to herself although recently it has been rumored that she may be dating
-          = link_to("Astro Boy.", "http://en.wikipedia.org/wiki/Astro_Boy")
-
-    .titleSeparator
-      %h2.chibi
-        Press
-
-    %ul#press.faq
-      %li
-        %p
-          = link_to(image_tag("phnom_penh_post_article.jpg", :alt => "Phnom Penh Post Article"), "http://www.opendevelopmentcambodia.net/news-source/the-phnom-penh-post/mobile-dating-finds-cambodia/")
-          = link_to("Mobile Dating Finds Cambodia", "http://www.opendevelopmentcambodia.net/news-source/the-phnom-penh-post/mobile-dating-finds-cambodia/")
-          Phnom Penh Post, 14 June 2012
+.center
+  = image_tag("logo_with_tagline.png", :alt => "Chibi", :id => "logo")
+  %p.tagline
+    Chibi ជួយអ្នករកមិត្តថ្មីៗ​
+  %p.tagline
+    Chibi helps you find new friends in Cambodia
+.wide
+  %p
+    ដេីម្បីរកមិត្តថ្មីភ្លាមៗ​តេឬផ្ញេីសារទៅលេខខាងក្រោម:
+  %p
+    To find new friends immediately, Call or SMS the numbers below:
+  %table
+    %tr
+      %th
+        ក្រុមហ៊ុន
         %br
-        %p
-          = link_to("Forget S'pore, Chibi founder finds Cambodia a great launchpad for Asia", "http://sgentrepreneurs.com/commentary/2012/04/09/forget-spore-chibi-founder-finds-cambodia-a-great-launchpad-for-asia/")
-          SG Entrepreneurs, 9 April 2012
-      %li.even
-        %p
-          = link_to("Cambodia's first Startup Weekend winner about to launch!", "http://cambodia.startupweekend.org/2012/04/02/cambodias-first-startup-weekend-winner-about-to-launch/")
-          Startup Weekend, 2 April 2012
-
-    #footer
-      &copy; 2013
-      = link_to("Chibi", "#about", :class => "highlight_chibi")
-      All rights reserved.
+        Company
+      %th
+        តេ
+        %br
+        Call to:
+      %th
+        ផ្ញេីសារ
+        %br
+        SMS to:
+    %tr
+      %td
+        Smart
+      %td
+        = link_to("2442", "tel:2442")
+      %td
+        = link_to("2442", "tel:2442")
+    %tr
+      %td
+        qb
+      %td
+        = link_to("2442", "tel:2442")
+      %td
+        = link_to("2442", "tel:2442")
+    %tr
+      %td
+        CooTel
+      %td
+        = link_to("2442", "tel:2442")
+      %td
+        = link_to("038 383 8380", "tel:+855383838380")
+    %tr
+      %td
+        Beeline
+      %td
+        = link_to("038 383 8380", "tel:+855383838380")
+      %td
+        = link_to("2442", "tel:2442")
+    %tr
+      %td
+        Mobitel
+      %td
+        = link_to("038 383 8380", "tel:+855383838380")
+      %td
+        = link_to("038 383 8380", "tel:+855383838380")
+    %tr
+      %td
+        Metfone
+      %td
+        = link_to("038 383 8380", "tel:+855383838380")
+      %td
+        = link_to("038 383 8380", "tel:+855383838380")
+    %tr
+      %td
+        Excell
+      %td
+        = link_to("038 383 8380", "tel:+855383838380")
+      %td
+        = link_to("038 383 8380", "tel:+855383838380")
+    %tr
+      %td
+        ក្រៅប្រទេស
+        %br
+        International (beta)
+      %td
+        = link_to("+1 415-692-6280", "tel:+14156926280")
+      %td
+        = link_to("+1 415-692-6280", "tel:+14156926280")
