@@ -22,7 +22,7 @@ module TranslationHelpers
 
     :not_enough_credit => {
       :en => "Hello! Want to meet a new friend? Please top up your account and we'll find you a friend ASAP.",
-      :kh => "Sousdey! Want to meet a new friend? Please top up your account and we'll find you a friend chup chup nas."
+      :kh => "Sousdey! Want to meet a new friend? Please top up your account and we'll find you a friend chup chup."
     }
   }
 

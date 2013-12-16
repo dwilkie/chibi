@@ -85,7 +85,8 @@ describe "PhoneCalls" do
         end
 
         context "but my partner is not available" do
-          let!(:chat) { create(:chat, :initiator_active, :user => caller) }
+          let(:friend) { create(:user, :from_unknown_operator) }
+          let!(:chat) { create(:chat, :initiator_active, :user => caller, :friend => friend) }
 
           before do
             create(:chat, :active, :friend => chat.friend)

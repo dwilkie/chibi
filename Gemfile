@@ -57,5 +57,4 @@ group :test do
   gem 'resque_spec'
   gem 'capybara'
   gem 'launchy'
-  gem 'simplecov', :git => 'git://github.com/colszowka/simplecov.git', :require => false
 end
