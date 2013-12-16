@@ -57,12 +57,12 @@ module AnalyzableExamples
 
       it "should not results where the group_by_column is nil" do
         excluded_resource
-        subject.class.overview_of_created.should_not include([0, 1])
+        resource.class.overview_of_created.should_not include([0, 1])
       end
 
       context "passing no args" do
         it "should return an overview of all the created resources (in HighStocks format)" do
-          subject.class.overview_of_created.should(
+          resource.class.overview_of_created.should(
             include([miliseconds_since_epoch(two_months_and_one_day_ago), 1])
           )
         end
@@ -70,7 +70,7 @@ module AnalyzableExamples
 
       context "passing :timeframe_format => :report" do
         it "should return an overview of all the created resources (using the DOW format)" do
-          subject.class.overview_of_created(
+          resource.class.overview_of_created(
             :timeframe_format => :report
           ).should include([two_months_and_one_day_ago.day, 1])
         end
@@ -78,7 +78,7 @@ module AnalyzableExamples
 
       context "passing :least_recent => 2.months" do
         it "should return an overview of the resources created in the last 2 months" do
-          subject.class.overview_of_created(
+          resource.class.overview_of_created(
             :least_recent => 2.months
           ).should_not(
             include(
@@ -90,7 +90,7 @@ module AnalyzableExamples
 
       context "passing :between => 3.months.ago..2.month.ago" do
         it "should return an overview of the resources created in the timeline given" do
-          subject.class.overview_of_created(
+          resource.class.overview_of_created(
             :between => 3.months.ago..2.months.ago
           ).should == [[miliseconds_since_epoch(two_months_and_one_day_ago), 1]]
         end
@@ -101,7 +101,7 @@ module AnalyzableExamples
           beginning_of_month = miliseconds_since_epoch(eight_days_ago.beginning_of_month)
           assertion = [beginning_of_month]
           eight_days_ago_was_in_this_month ? assertion << 5 : assertion << 2
-          subject.class.overview_of_created(
+          resource.class.overview_of_created(
             :timeframe => :month
           ).should(include(assertion))
         end
@@ -109,15 +109,15 @@ module AnalyzableExamples
 
       context "passing :operator => '<operator>', :country_code => '<country_code>'" do
         it "should filter by the given operator" do
-          subject.class.overview_of_created(
+          resource.class.overview_of_created(
             :operator => "foo", :country_code => country_code
           ).should be_empty
 
-          subject.class.overview_of_created(
+          resource.class.overview_of_created(
             :operator => operator_name, :country_code => "different"
           ).should be_empty
 
-          subject.class.overview_of_created(
+          resource.class.overview_of_created(
             :operator => operator_name, :country_code => country_code
           ).should_not be_empty
         end
@@ -131,7 +131,7 @@ module AnalyzableExamples
           end
 
           it "should return an overview of the resources created in the last 2 months by user" do
-            subject.class.overview_of_created(:by_user => true).should == [
+            resource.class.overview_of_created(:by_user => true).should == [
               [miliseconds_since_epoch(two_months_and_one_day_ago), 1],
               [miliseconds_since_epoch(eight_days_ago), 2],
               [miliseconds_since_epoch(7.days.ago), 1],
