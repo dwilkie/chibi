@@ -28,6 +28,10 @@ FactoryGirl.define do
     n.to_s
   end
 
+  sequence :unknown_operator_number, 85514000000 do |n|
+    n.to_s
+  end
+
   sequence :operator_number_with_voice, 85510000000 do |n|
     n.to_s
   end
@@ -179,7 +183,8 @@ FactoryGirl.define do
 
     trait :to_unavailable_user do
       after(:create) do |phone_call|
-        chat = create(:chat, :initiator_active, :user => phone_call.user)
+        friend = create(:user, :from_unknown_operator)
+        chat = create(:chat, :initiator_active, :user => phone_call.user, :friend => friend)
         create(:chat, :active, :user => chat.friend)
       end
     end
@@ -402,6 +407,10 @@ FactoryGirl.define do
 
     trait :from_chargeable_operator do
       mobile_number { generate(:chargeable_operator_number) }
+    end
+
+    trait :from_unknown_operator do
+      mobile_number { generate(:unknown_operator_number) }
     end
 
     trait :searching_for_friend do

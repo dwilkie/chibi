@@ -46,6 +46,11 @@ describe User do
     options[:searcher].searching_for_friend?.should == options[:still_searching]
   end
 
+  def create_user(*args)
+    options = args.extract_options!
+    create(:user, *args, options)
+  end
+
   shared_examples_for "within hours" do |background_job|
     context "passing :between => 9..22" do
       context "given the current time is not between 09:00 ICT and 22:00 ICT" do
@@ -562,7 +567,7 @@ describe User do
   end
 
   describe ".remind!(options = {})" do
-    let(:user_not_contacted_recently) { create(:user, :not_contacted_recently) }
+    let(:user_not_contacted_recently) { create(:user, :from_unknown_operator, :not_contacted_recently) }
 
     let(:registered_sp_user_not_contacted_recently) do
       create(:user, :from_registered_service_provider, :not_contacted_recently)
@@ -1714,7 +1719,7 @@ describe User do
 
   describe "#contact_me_number" do
     it "should retun the user's operator's SMS short code or the twilio number" do
-      user.contact_me_number.should == twilio_number
+      create_user(:from_unknown_operator).contact_me_number.should == twilio_number
       with_operators do |number_parts, assertions|
         build(:user, :mobile_number => number_parts.join).contact_me_number.should == (assertions["short_code"] || twilio_number)
       end
