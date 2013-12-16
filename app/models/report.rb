@@ -49,6 +49,7 @@ class Report
       operators_report = country_report["operators"] ||= {}
       operators.each do |operator_id, operator_metadata|
         operator_report = operators_report[operator_id] ||= {}
+        next unless operator_metadata["services"]
         services_report = operator_report["services"] = operator_metadata["services"].dup
         operator_options = {:operator => operator_id, :country_code => country_id}
         operator_report["services"].each do |service, service_metadata|

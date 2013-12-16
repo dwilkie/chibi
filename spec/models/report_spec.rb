@@ -180,6 +180,7 @@ describe Report do
           countries_report = report_data["countries"] ||= {}
           country_report = countries_report[assertions["country_id"]] ||= {}
           operators_report = country_report["operators"] ||= {}
+          next unless assertions["services"]
           operator_report = operators_report[assertions["id"]] ||= {}
           services_report = operator_report["services"] ||= assertions["services"].dup
           services_report.each do |service, service_metadata|
