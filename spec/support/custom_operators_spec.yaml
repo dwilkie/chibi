@@ -71,15 +71,15 @@ kh:
     mobitel:
       assertions:
         short_code: "0383838380"
-        nunium_channel: "cootel"
+        nuntium_channel: "cootel"
         mt_message_queue: "cootel_mt_message_queue"
     metfone:
       assertions:
         short_code: "0383838380"
-        nunium_channel: "cootel"
+        nuntium_channel: "cootel"
         mt_message_queue: "cootel_mt_message_queue"
     excell:
       assertions:
         short_code: "0383838380"
-        nunium_channel: "cootel"
+        nuntium_channel: "cootel"
         mt_message_queue: "cootel_mt_message_queue"
