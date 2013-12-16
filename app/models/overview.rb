@@ -40,14 +40,6 @@ class Overview
     users
   end
 
-  def revenue
-    revenue_in_dollars = []
-    messages_received.each do |timestamp_with_count|
-      revenue_in_dollars << [timestamp_with_count[0], (timestamp_with_count[1] * ENV['REVENUE_PER_SMS'].to_f).round(2)]
-    end
-    revenue_in_dollars
-  end
-
   def inbound_cdrs
     @inbound_cdrs[timeframe] ||= InboundCdr.overview_of_created(options.dup)
   end

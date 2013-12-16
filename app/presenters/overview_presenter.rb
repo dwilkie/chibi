@@ -8,7 +8,6 @@ class OverviewPresenter < BasePresenter
       :new_users => overview.new_users,
       :return_users => overview.return_users,
       :users_texting => overview.users_texting,
-      :revenue => overview.revenue,
       :messages_received => overview.messages_received,
       :phone_calls => overview.phone_calls,
       :inbound_cdrs => overview.inbound_cdrs,

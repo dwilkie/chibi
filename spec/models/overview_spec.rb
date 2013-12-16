@@ -121,14 +121,4 @@ describe Overview do
       subject.return_users.should == [[1360886400000, 3], [1361232000000, 2]]
     end
   end
-
-  describe "#revenue" do
-    before do
-      stub_overview(Message, [[1360886400000, 16845], [1361232000000, 16567]])
-    end
-
-    it "should an overview of the revenue" do
-      subject.revenue.should == [[1360886400000, 842.25], [1361232000000, 828.35]]
-    end
-  end
 end

@@ -7,7 +7,6 @@ describe OverviewPresenter do
       :new_users => [1122, 5],
       :return_users => [1122, 0],
       :users_texting => [1122, 5],
-      :revenue => [6644, 0.06],
       :messages_received => [6644, 4],
       :phone_calls => [1112, 6],
       :inbound_cdrs => [1112, 7],
