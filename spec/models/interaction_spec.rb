@@ -8,36 +8,6 @@ describe Interaction do
   let(:reply) { create(:reply) }
   let(:phone_call) { create(:phone_call) }
 
-  describe "#total_messages" do
-    before do
-      message
-    end
-
-    it "should return the total number of messages" do
-      subject.total_messages.should == 1
-    end
-  end
-
-  describe "#total_replies" do
-    before do
-      reply
-    end
-
-    it "should return the total number of replies" do
-      subject.total_replies.should == 1
-    end
-  end
-
-  describe "#total_phone_calls" do
-    before do
-      phone_call
-    end
-
-    it "should return the total number of replies" do
-      subject.total_phone_calls.should == 1
-    end
-  end
-
   describe "#paginated_interactions" do
     let(:another_reply) { create(:reply) }
 
@@ -49,7 +19,7 @@ describe Interaction do
     end
 
     it "should return the paginated interactions" do
-      subject.paginated_interactions.should == [another_reply, phone_call, reply, message]
+      subject.paginated_interactions.should == [message, phone_call]
     end
   end
 end

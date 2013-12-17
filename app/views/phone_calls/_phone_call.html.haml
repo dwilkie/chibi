@@ -1,9 +1,11 @@
-%div{:id => "phone_call_#{phone_call_counter + 1}", :class => "interaction-element even offset-right"}
-  %p.meta-data
-    phone call from:
-    = link_to phone_call.from, user_path(phone_call.user_id)
-  %p
-    = phone_call.state.humanize
-  %p.meta-data
-    = time_ago_in_words(phone_call.created_at)
-    ago
+.center
+  - position = phone_call.user_id == left_user ? :left : :right
+  %div{:id => "interaction_#{phone_call_counter + 1}", :class => "bubble-#{position}"}
+    %p.metadata
+      = link_to(phone_call.from, user_path(phone_call.user_id))
+    %p
+      Call:
+      = phone_call.state.humanize
+    %p.metadata
+      = time_ago_in_words(phone_call.created_at)
+      ago

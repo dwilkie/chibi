@@ -169,14 +169,8 @@ describe "Admin" do
     end
 
     def assert_show_interaction
-      within "#overview" do
-        page.should have_content "1 message"
-        page.should have_content "1 reply"
-        page.should have_content "1 phone call"
-      end
-
-      [:phone_call, :reply, :message].each_with_index do |resource, index|
-        within "##{resource}_#{index + 1}" do
+      [:message, :phone_call].each_with_index do |resource, index|
+        within "#interaction_#{index + 1}" do
           send("assert_#{resource}_show", send("another_#{resource}"))
         end
       end

@@ -1,9 +1,2 @@
 #interaction
-  %ul#overview
-    %li
-      = pluralize(@interaction.total_messages, "message")
-    %li
-      = pluralize(@interaction.total_replies, "reply")
-    %li
-      = pluralize(@interaction.total_phone_calls, "phone call")
-  = render @interaction.paginated_interactions
+  = render(@interaction.paginated_interactions, :left_user => @interaction.paginated_interactions.first.try(:user_id))

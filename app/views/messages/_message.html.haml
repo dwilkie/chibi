@@ -1,9 +1,10 @@
-%div{:id => "message_#{message_counter + 1}", :class => "interaction-element even offset-right"}
-  %p.meta-data
-    message from:
-    = link_to message.from, user_path(message.user_id)
-  %p
-    = message.body
-  %p.meta-data
-    = time_ago_in_words(message.created_at)
-    ago
+.center
+  - position = message.user_id == left_user ? :left : :right
+  %div{:id => "interaction_#{message_counter + 1}", :class => "bubble-#{position}"}
+    %p.metadata
+      = link_to message.from, user_path(message.user_id)
+    %p
+      = message.body
+    %p.metadata
+      = time_ago_in_words(message.created_at)
+      ago

@@ -1,11 +1,10 @@
 body {
   background-color: #b0e0e6;
-  font-size: 200%;
   text-align: center;
 }
 
 p.tagline {
-  font-size: 150%;
+  font-size: 200%;
 }
 
 .wide {
@@ -36,3 +35,50 @@ table, th, td
 }
 
 tr:hover { background: #FFF; }
+
+.bubble-right
+{
+  position: relative;
+  right: -10%;
+  width: 100%;
+  background: #D45E13;
+  border-radius: 10px;
+  font-size: 16px;
+  text-align: right;
+  padding-right: 5px;
+}
+
+.bubble-right:after
+{
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: -6px;
+  border-style: solid;
+  border-width: 6px 0 6px 6px;
+  border-color: transparent #D45E13;
+  display: block;
+  width: 0;
+  z-index: 1;
+}
+
+.bubble-left
+{
+  @extend .bubble-right;
+  background: #FFFF66;
+  right: 10%;
+  padding-left: 5px;
+  text-align: left;
+}
+
+.bubble-left:after
+{
+  @extend .bubble-right:after;
+  left: -6px;
+  border-width: 6px 6px 6px 0;
+  border-color: transparent #FFFF66;
+}
+
+p.metadata{
+  font-size: 10px;
+}
