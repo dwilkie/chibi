@@ -48,8 +48,8 @@ module MobilePhoneHelpers
     factory_generated_number = generate(:operator_number_with_voice)
     numbers = {}
     with_operators do |number_parts, assertions|
-      number_without_padding = number_parts.join.gsub(/0+$/, "")
-      if assertions["caller_id"] && factory_generated_number =~ /^#{number_without_padding}/
+      number = number_parts.join
+      if assertions["caller_id"] && number =~ /^#{factory_generated_number[0..6]}/
         numbers[factory_generated_number] = assertions
         break
       end

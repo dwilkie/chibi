@@ -402,13 +402,13 @@ class User < ActiveRecord::Base
   def assign_location(address = nil)
     unless location
       build_location
-      location.country_code = torasup_number.country_id
-      location.address = address.present? ? address : torasup_number.location.area
+      location.country_code = torasup_number && torasup_number.country_id
+      location.address = address.present? ? address : torasup_number && torasup_number.location.area
     end
   end
 
   def operator
-    torasup_number.operator
+    torasup_number && torasup_number.operator
   end
 
   private
@@ -696,11 +696,12 @@ class User < ActiveRecord::Base
   end
 
   def set_operator_name
-    self.operator_name = operator.id
+    self.operator_name = operator && operator.id
   end
 
   def torasup_number
-    @torasup_number ||= Torasup::PhoneNumber.new(mobile_number)
+    return @torasup_number if @torasup_number
+    @torasup_number = Torasup::PhoneNumber.new(mobile_number) if valid_mobile_number?
   end
 
   def cancel_searching_for_friend_if_chatting
@@ -833,5 +834,9 @@ class User < ActiveRecord::Base
 
   def profile_keywords(*keys)
     self.class.profile_keywords(*keys, :locale => country_code)
+  end
+
+  def valid_mobile_number?
+    Phony.plausible?(mobile_number)
   end
 end

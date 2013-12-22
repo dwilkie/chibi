@@ -20,23 +20,23 @@ FactoryGirl.define do
     "123abc84-a82e-23a1-b691-b2c19834bce#{n}"
   end
 
-  sequence :mobile_number, 85597000000 do |n|
+  sequence :mobile_number, 855972345678 do |n|
     n.to_s
   end
 
-  sequence :registered_operator_number, 85560000000 do |n|
+  sequence :registered_operator_number, 85560234567 do |n|
     n.to_s
   end
 
-  sequence :unknown_operator_number, 85514000000 do |n|
+  sequence :unknown_operator_number, 85523481234 do |n|
     n.to_s
   end
 
-  sequence :operator_number_with_voice, 85510000000 do |n|
+  sequence :operator_number_with_voice, 85510234567 do |n|
     n.to_s
   end
 
-  sequence :chargeable_operator_number, 85513000000 do |n|
+  sequence :chargeable_operator_number, 85513234567 do |n|
     n.to_s
   end
 
@@ -100,7 +100,7 @@ FactoryGirl.define do
 
     trait :without_user do
       user nil
-      from "85597000000"
+      from { generate(:mobile_number) }
     end
   end
 

@@ -112,20 +112,20 @@ shared_examples_for "communicable from user" do |options|
       communicable_resource.from.should == "12345678912"
 
       # test invalid E.164 number
-      communicable_resource.from = "855010123456"
-      communicable_resource.from.should == "85510123456"
+      communicable_resource.from = "855010234567"
+      communicable_resource.from.should == "85510234567"
 
       # test invalid long E.164 number
-      communicable_resource.from = "8550961234567"
-      communicable_resource.from.should == "855961234567"
+      communicable_resource.from = "8550962345678"
+      communicable_resource.from.should == "855962345678"
 
       # test incorrect country code
       communicable_resource.from = "198786779"
       communicable_resource.from.should == "85598786779"
 
       # test another incorrect country code
-      communicable_resource.from = "110123456"
-      communicable_resource.from.should == "85510123456"
+      communicable_resource.from = "110234567"
+      communicable_resource.from.should == "85510234567"
 
       # test incorrect country code with leading '0'
       communicable_resource.from = "1098786779"
