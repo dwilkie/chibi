@@ -105,7 +105,7 @@ FactoryGirl.define do
   end
 
   factory :missed_call do
-    subject { "You have a missed call from 062000000" }
+    subject { "You have a missed call from 010234567" }
   end
 
   factory :phone_call do
@@ -500,31 +500,31 @@ FactoryGirl.define do
     end
 
     trait :from_kampong_thom do
-      sequence(:mobile_number, 85562000000) { |n| n.to_s }
+      sequence(:mobile_number, 85562234567) { |n| n.to_s }
     end
 
     trait :from_phnom_penh do
-      sequence(:mobile_number, 85523000000) { |n| n.to_s }
+      sequence(:mobile_number, 85523234567) { |n| n.to_s }
     end
 
     trait :from_battambang do
-      sequence(:mobile_number, 85553000000) { |n| n.to_s }
+      sequence(:mobile_number, 85553234567) { |n| n.to_s }
     end
 
     trait :from_siem_reap do
-      sequence(:mobile_number, 85563000000) { |n| n.to_s }
+      sequence(:mobile_number, 85563234567) { |n| n.to_s }
     end
 
     trait :english do
-      sequence(:mobile_number, 447624000000) { |n| n.to_s }
+      sequence(:mobile_number, 447624234567) { |n| n.to_s }
     end
 
     trait :american do
-      sequence(:mobile_number, 14160000000) { |n| n.to_s }
+      sequence(:mobile_number, 14162345678) { |n| n.to_s }
     end
 
     trait :thai do
-      sequence(:mobile_number, 66814000000) { |n| n.to_s }
+      sequence(:mobile_number, 66814234567) { |n| n.to_s }
     end
 
     # do not reorder these factories because the tests rely on
