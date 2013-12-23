@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/dwilkie/phony.git
-  revision: 64c8d8873f83c54bef0ca478ac4f6fcc3aecff7d
+  revision: 69776726b946a5ba2aaa307efe20852660d4423e
   branch: more_accurate_khmer_numbers
   specs:
     phony (2.0.2)
@@ -173,7 +173,7 @@ GEM
     kgio (2.8.1)
     launchy (2.4.2)
       addressable (~> 2.3)
-    lazy_high_charts (1.5.0)
+    lazy_high_charts (1.5.1)
       bundler (>= 1.0)
       hash-deep-merge
     listen (2.4.0)
