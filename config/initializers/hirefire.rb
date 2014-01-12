@@ -13,6 +13,7 @@ HireFire::Resource.configure do |config|
 
   config.dyno(:urgent_task_worker_3) do
     HireFire::Macro::Resque.queue(
+      :charge_request_updater_queue,
       :message_processor_queue
     )
   end
