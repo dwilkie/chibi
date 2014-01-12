@@ -1,37 +1,11 @@
 HireFire::Resource.configure do |config|
-  config.dyno(:urgent_task_worker_1) do
+  config.dyno(:urgent_task_worker) do
     HireFire::Macro::Resque.queue(
-      :charge_request_updater_queue
-    )
-  end
-
-  config.dyno(:urgent_task_worker_2) do
-    HireFire::Macro::Resque.queue(
-      :call_data_record_creator_queue
-    )
-  end
-
-  config.dyno(:urgent_task_worker_3) do
-    HireFire::Macro::Resque.queue(
+      :call_data_record_creator_queue,
       :charge_request_updater_queue,
-      :message_processor_queue
-    )
-  end
-
-  config.dyno(:urgent_task_worker_4) do
-    HireFire::Macro::Resque.queue(
-      :twilio_cdr_fetcher_queue
-    )
-  end
-
-  config.dyno(:urgent_task_worker_5) do
-    HireFire::Macro::Resque.queue(
-      :delivery_receipt_creator_queue
-    )
-  end
-
-  config.dyno(:urgent_task_worker_6) do
-    HireFire::Macro::Resque.queue(
+      :message_processor_queue,
+      :twilio_cdr_fetcher_queue,
+      :delivery_receipt_creator_queue,
       :dialer_queue
     )
   end
