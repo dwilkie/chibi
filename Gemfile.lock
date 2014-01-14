@@ -1,11 +1,4 @@
 GIT
-  remote: git://github.com/dwilkie/phony.git
-  revision: 69776726b946a5ba2aaa307efe20852660d4423e
-  branch: more_accurate_khmer_numbers
-  specs:
-    phony (2.0.2)
-
-GIT
   remote: git://github.com/dwilkie/resque
   revision: d74bdf33bf1a25c8f20b4294a567ae2fbfd4582e
   branch: prevent_resque_failure_1-x-stable
@@ -25,6 +18,12 @@ GIT
       countries
       deep_merge
       phony
+
+GIT
+  remote: git://github.com/floere/phony.git
+  revision: f408df69d67dbc65da04b687ec0d0b0540c72272
+  specs:
+    phony (2.1.2)
 
 GIT
   remote: git://github.com/hexorx/countries.git
