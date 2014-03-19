@@ -54,7 +54,7 @@ kh:
             revenue_share: "0.4"
     cootel:
       metadata:
-        short_code: "0383838380"
+        short_code: "2442"
         nuntium_channel: "cootel"
         mt_message_queue: "cootel_mt_message_queue"
         caller_id: "2442"
@@ -67,18 +67,3 @@ kh:
             short_code: "2442"
             unit_cost: "0.05"
             revenue_share: "0.4"
-    mobitel:
-      metadata:
-        short_code: "0383838380"
-        nuntium_channel: "cootel"
-        mt_message_queue: "cootel_mt_message_queue"
-    metfone:
-      metadata:
-        short_code: "0383838380"
-        nuntium_channel: "cootel"
-        mt_message_queue: "cootel_mt_message_queue"
-    excell:
-      metadata:
-        short_code: "0383838380"
-        nuntium_channel: "cootel"
-        mt_message_queue: "cootel_mt_message_queue"
