@@ -62,9 +62,15 @@ kh:
         voip_gateway_host: "103.5.126.33"
         dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}:5061"
         services:
-          coo_friends:
-            type: "charge"
-            name: "CooFriends"
+          cool_chat_sms:
+            type: "sms"
+            name: "Cool Chat SMS"
             short_code: "2442"
-            unit_cost: "0.05"
+            unit_cost: "0.01"
+            revenue_share: "0.4"
+          cool_chat_ivr:
+            type: "ivr"
+            name: "Cool Chat IVR"
+            short_code: "2442"
+            unit_cost: "0.01"
             revenue_share: "0.4"
