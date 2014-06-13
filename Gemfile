@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
-ruby "2.0.0"
+ruby "2.1.2"
 
-gem 'rails', '4.0.2'
+gem 'rails', '4.1.1'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -45,12 +45,10 @@ end
 
 group :test do
   gem 'factory_girl'
-  gem 'spork-rails', :git => 'git://github.com/sporkrb/spork-rails.git'
   gem 'mock_redis'
   gem 'fakeweb'
-  gem 'vcr', :git => 'git://github.com/myronmarston/vcr.git'
+  gem 'vcr'
   gem 'guard-rspec'
-  gem 'guard-spork'
   gem 'rb-inotify'
   gem 'database_cleaner'
   gem 'timecop'

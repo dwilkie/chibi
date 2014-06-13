@@ -8,7 +8,7 @@ describe MessageProcessor do
   end
 
   describe ".perform(message_id)" do
-    let(:message) { mock_model(Message) }
+    let(:message) { double(Message) }
     let(:find_stub) { Message.stub(:find) }
 
     before do

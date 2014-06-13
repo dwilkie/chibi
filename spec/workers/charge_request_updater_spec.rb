@@ -10,7 +10,7 @@ describe ChargeRequestUpdater do
   end
 
   describe ".perform(charge_request_id, result, responder, reason = nil)" do
-    let(:charge_request) { mock_model(ChargeRequest) }
+    let(:charge_request) { double(ChargeRequest) }
     let(:find_stub) { ChargeRequest.stub(:where) }
     let(:relation) { double(ActiveRecord::Relation) }
     let(:result) { "result" }

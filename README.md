@@ -20,6 +20,14 @@ The staging branch contains the code on the staging server
 11. Run the tests on master
 12. Deploy to production
 
+## Testing
+
+Run the tests in parallel to save time.
+
+```
+bundle exec foreman run rake parallel:spec
+```
+
 ## Production Server
 
 ### Host

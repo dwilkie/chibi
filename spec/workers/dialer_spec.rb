@@ -8,7 +8,7 @@ describe Dialer do
   end
 
   describe ".perform(missed_call_id)" do
-    let(:missed_call) { mock_model(MissedCall) }
+    let(:missed_call) { double(MissedCall) }
     let(:find_stub) { MissedCall.stub(:find) }
 
     before do

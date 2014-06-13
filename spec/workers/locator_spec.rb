@@ -8,7 +8,7 @@ describe Locator do
   end
 
   describe ".perform(id, address)" do
-    let(:location) { mock_model(Location) }
+    let(:location) { double(Location) }
     let(:find_stub) { Location.stub(:find) }
 
     before do

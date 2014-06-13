@@ -673,7 +673,7 @@ describe User do
 
   describe "#reply_not_enough_credit!" do
     subject { create(:user) }
-    let(:reply) { mock_model(Reply) }
+    let(:reply) { double(Reply) }
 
     before do
       reply.stub(:not_enough_credit!)

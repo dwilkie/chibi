@@ -8,7 +8,7 @@ describe TwilioCdrFetcher do
   end
 
   describe ".perform(phone_call_id)" do
-    let(:phone_call) { mock_model(PhoneCall) }
+    let(:phone_call) { double(PhoneCall) }
     let(:find_stub) { PhoneCall.stub(:find) }
 
     before do

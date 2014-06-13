@@ -8,7 +8,7 @@ describe UserReminderer do
   end
 
   describe ".perform(user_id, options = {})" do
-    let(:user) { mock_model(User) }
+    let(:user) { double(User) }
     let(:find_stub) { User.stub(:find) }
 
     before do

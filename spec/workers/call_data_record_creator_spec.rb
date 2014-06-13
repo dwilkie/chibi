@@ -8,8 +8,8 @@ describe CallDataRecordCreator do
   end
 
   describe ".perform(body)" do
-    let(:call_data_record) { mock_model(CallDataRecord) }
-    let(:inbound_cdr) { mock_model(InboundCdr) }
+    let(:call_data_record) { double(CallDataRecord) }
+    let(:inbound_cdr) { double(InboundCdr) }
     let(:save_stub) { inbound_cdr.stub(:save!) }
     let(:body) { "foo" }
 

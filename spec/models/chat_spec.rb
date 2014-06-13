@@ -80,10 +80,10 @@ describe Chat do
 
     it "should return whether on not the chat is active" do
       subject.stub(:active?).and_return(true)
-      subject.activate.should be_true
+      subject.activate.should == true
 
       subject.stub(:active?).and_return(false)
-      subject.activate.should be_false
+      subject.activate.should == false
     end
   end
 
@@ -985,7 +985,7 @@ describe Chat do
       end
 
       it "should pass the options onto #deactivate!" do
-        active_chat_with_inactivity.should_receive(:deactivate!).with do |other_options|
+        active_chat_with_inactivity.should_receive(:deactivate!) do |other_options|
           other_options.should == HashWithIndifferentAccess.new(other_options)
         end
         do_background_task { subject.class.end_inactive({:inactivity_period => 10.minutes}.merge(other_options)) }

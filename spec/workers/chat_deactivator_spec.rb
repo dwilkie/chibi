@@ -8,7 +8,7 @@ describe ChatDeactivator do
   end
 
   describe ".perform(chat_id, options = {})" do
-    let(:chat) { mock_model(Chat) }
+    let(:chat) { double(Chat) }
     let(:find_stub) { Chat.stub(:find) }
 
     before do

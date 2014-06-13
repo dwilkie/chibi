@@ -51,11 +51,14 @@ module Chibi
         number_with_country_code = Phony.normalize(ENV['DEFAULT_COUNTRY_CODE'] + sanitized_value)
         return write_from(number_with_country_code) if Phony.plausible?(number_with_country_code)
 
-        # assume it's in internaltional number with the incorrect US country code added
+        # assume it's in international number with the incorrect US country code added
         # Twilio does this sometimes
         non_us_number = Phony.normalize(sanitized_value.gsub(/\A1+/, ""))
-        sanitized_value = non_us_number if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
-        write_from(Phony.normalize(sanitized_value))
+        return write_from(non_us_number) if non_us_number.length > MAX_LOCAL_NUMBER_LENGTH
+
+        # remove multiple leading 1s and write
+        us_number = Phony.normalize(sanitized_value.gsub(/\A1+/, "1"))
+        write_from(us_number)
       end
 
       private

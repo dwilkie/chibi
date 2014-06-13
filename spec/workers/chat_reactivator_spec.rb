@@ -9,7 +9,7 @@ describe ChatReactivator do
 
   describe ".perform(chat_id)" do
     let(:find_stub) { Chat.stub(:find) }
-    let(:chat) { mock_model(Chat) }
+    let(:chat) { double(Chat) }
 
     before do
       chat.stub(:reinvigorate!)
