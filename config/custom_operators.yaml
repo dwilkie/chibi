@@ -28,6 +28,7 @@ kh:
         short_code: "2442"
         nuntium_channel: "beeline"
         mt_message_queue: "beeline_mt_message_queue"
+        chargeable: true
         services:
           bee_friends:
             type: "sms"
