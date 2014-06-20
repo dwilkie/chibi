@@ -21,8 +21,8 @@ module TranslationHelpers
     },
 
     :not_enough_credit => {
-      :en => "Hello! Want to meet a new friend? Please top up your account and we'll find you a friend ASAP.",
-      :kh => "Sousdey! Want to meet a new friend? Please top up your account and we'll find you a friend chup chup."
+      :en => "Hello! Want to meet new friends? Please top up your account to get 24hrs free SMS on 2442",
+      :kh => "Sousdey! Want to meet new friends? Please top up your account to get 24hrs free SMS on 2442"
     }
   }
 
