@@ -161,8 +161,6 @@ GEM
     jquery-rails (3.1.2)
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
-    jquery-ui-rails (5.0.0)
-      railties (>= 3.2.16)
     json (1.8.1)
     jwt (1.0.0)
     kaminari (0.16.1)
@@ -303,6 +301,8 @@ GEM
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
+    turbolinks (2.3.0)
+      coffee-rails
     twilio-ruby (3.12.2)
       builder (>= 2.1.2)
       jwt (~> 1.0.0)
@@ -348,7 +348,6 @@ DEPENDENCIES
   haml
   hirefire-resource
   jquery-rails
-  jquery-ui-rails
   kaminari
   launchy
   lazy_high_charts
@@ -367,10 +366,11 @@ DEPENDENCIES
   resque-web!
   resque_spec
   rspec-rails
-  sass-rails (~> 4.0.0)
+  sass-rails (~> 4.0.3)
   state_machine
   timecop
   torasup!
+  turbolinks
   twilio-ruby
   uglifier (>= 1.3.0)
   unicorn
