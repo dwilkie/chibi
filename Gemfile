@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby "2.1.2"
 
-gem 'rails', '4.1.1'
+gem 'rails', '4.1.5'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -12,7 +12,7 @@ gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countri
 gem "faker"
 gem "hirefire-resource"
 gem "resque", :git => "git://github.com/dwilkie/resque", :branch => "prevent_resque_failure_1-x-stable"
-gem 'resque-web', :require => 'resque_web', :git => "git://github.com/resque/resque-web"
+gem 'resque-web', :require => 'resque_web'
 gem "unicorn"
 gem "rack-timeout"
 gem "redis"
@@ -28,12 +28,12 @@ gem "fog"
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
-gem 'jquery-ui-rails'
-gem 'sass-rails', "  ~> 4.0.0"
-gem 'coffee-rails', "~> 4.0.0"
-gem 'uglifier', ">= 1.3.0"
+gem 'sass-rails', '~> 4.0.3'
+gem 'coffee-rails', '~> 4.0.0'
+gem 'uglifier', '>= 1.3.0'
 
 gem 'jquery-rails'
+gem 'turbolinks'
 
 gem 'rails_12factor', :group => :production
 
