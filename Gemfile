@@ -28,12 +28,12 @@ gem "fog"
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
-gem 'sass-rails', '~> 4.0.3'
-gem 'coffee-rails', '~> 4.0.0'
-gem 'uglifier', '>= 1.3.0'
+gem 'jquery-ui-rails'
+gem 'sass-rails', "  ~> 4.0.0"
+gem 'coffee-rails', "~> 4.0.0"
+gem 'uglifier', ">= 1.3.0"
 
 gem 'jquery-rails'
-gem 'turbolinks'
 
 gem 'rails_12factor', :group => :production
 

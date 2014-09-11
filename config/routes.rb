@@ -1,6 +1,6 @@
 require "resque_web"
 
-Rails.application.routes.draw do
+Chibi::Application.routes.draw do
   root "welcome#index"
 
   resources :messages, :only => :create
