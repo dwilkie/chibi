@@ -32,17 +32,6 @@ GIT
     countries (0.9.3)
       currencies (~> 0.4.2)
 
-GIT
-  remote: git://github.com/resque/resque-web
-  revision: 962b5b079dbba3d091c960344e8e1287ac27719a
-  specs:
-    resque-web (0.0.6)
-      coffee-rails
-      jquery-rails
-      resque
-      sass-rails
-      twitter-bootstrap-rails
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -242,6 +231,12 @@ GEM
     redis (3.1.0)
     redis-namespace (1.5.1)
       redis (~> 3.0, >= 3.0.4)
+    resque-web (0.0.6)
+      coffee-rails
+      jquery-rails
+      resque
+      sass-rails
+      twitter-bootstrap-rails
     resque_spec (0.16.0)
       resque (>= 1.19.0)
       rspec-core (>= 3.0.0)
@@ -363,7 +358,7 @@ DEPENDENCIES
   rb-inotify
   redis
   resque!
-  resque-web!
+  resque-web
   resque_spec
   rspec-rails
   sass-rails (~> 4.0.3)
