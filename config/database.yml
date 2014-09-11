@@ -4,8 +4,13 @@ development: &development
   encoding: unicode
   host: localhost
   pool: 5
-  username: chibi
+  username: <%= ENV['CHIBI_DB_USERNAME'] %>
+  password: <%= ENV['CHIBI_DB_PASSWORD'] %>
 
 test:
   <<: *development
   database: chibi_test<%= ENV['TEST_ENV_NUMBER'] %>
+
+# This gets overriden by Heroku
+production:
+  <<: *development
