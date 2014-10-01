@@ -11,19 +11,21 @@ describe Resque::WorkerBoss do
     end
 
     def build_worker(job)
-      double(Resque::Worker, :job => job, :idle? => false)
+      double(Resque::Worker, :processing => job, :idle? => false)
     end
 
-    let(:stale_worker) { build_worker(build_job(11.minutes.ago)) }
-    let(:worker) { build_worker(build_job(9.minutes.ago)) }
+    let(:stale_worker) { build_worker(build_job(30.minutes.ago)) }
+    let(:worker) { build_worker(build_job(29.minutes.ago)) }
+    let(:old_worker) { build_worker({})}
 
     before do
-      Resque::Worker.stub(:working).and_return([stale_worker, worker])
+      Resque.stub(:workers).and_return([stale_worker, worker, old_worker])
     end
 
-    it "should mark stale workers as 'done_working'" do
-      stale_worker.should_receive(:done_working)
-      worker.should_not_receive(:done_working)
+    it "should unregister the stale workers" do
+      stale_worker.should_receive(:unregister_worker)
+      old_worker.should_receive(:unregister_worker)
+      worker.should_not_receive(:unregister_worker)
       subject.class.clean_stale_workers
     end
   end

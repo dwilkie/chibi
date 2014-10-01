@@ -1,19 +1,22 @@
 module Resque
   class WorkerBoss
-    def self.clean_stale_workers(options = {})
-      stale_worker_jobs.each do |worker, job|
-        worker.done_working
+    SLOWEST_JOB = (ENV["SLOWEST_WORKER"] || 30).to_i # minutes
+
+    def self.clean_stale_workers
+      Resque.workers.each do |worker|
+        worker.unregister_worker if old_worker?(worker)
       end
     end
 
     private
 
-    def self.stale_worker_jobs
-      workers = Resque::Worker.working
-      jobs = workers.collect {|w| w.job }
-      workers.zip(jobs).reject do |w, j|
-        w.idle? || j.empty? || j["run_at"].to_time > 10.minutes.ago
-      end
+    # only workers that are currently working will return processing info.
+    # Old jobs which have finished will return an empty hash
+
+    def self.old_worker?(worker)
+      worker.processing.empty? || Time.now - worker.processing["run_at"].to_time > 60 * SLOWEST_JOB
     end
+
+    private_class_method :old_worker?
   end
 end
