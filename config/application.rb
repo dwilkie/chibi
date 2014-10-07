@@ -23,5 +23,6 @@ module Chibi
     config.i18n.fallbacks = true
     config.time_zone = 'Bangkok'
     config.i18n.enforce_available_locales = false
+    config.i18n.default_locale = :en
   end
 end
