@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby "2.1.2"
 
-gem 'rails', '4.1.5'
+gem 'rails', '4.1.7'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -48,8 +48,6 @@ group :test do
   gem 'mock_redis'
   gem 'fakeweb'
   gem 'vcr'
-  gem 'guard-rspec'
-  gem 'rb-inotify'
   gem 'database_cleaner'
   gem 'timecop'
   gem 'resque_spec'
