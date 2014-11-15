@@ -1,5 +1,7 @@
 # Chibi
 
+[ ![Codeship Status for dwilkie/chibi](https://codeship.com/projects/4c47a5c0-4ea0-0132-eccb-323959f31113/status)](https://codeship.com/projects/47766)
+
 ## Version Control
 
 The master branch contains the code currently on the production server.
@@ -36,7 +38,9 @@ bundle exec foreman run rake parallel:spec
 
 ### Deployment
 
-    git push heroku master
+Chibi is now set up for CI. Deploy automatically when the tests pass by pushing to master:
+
+    git push origin master
 
 ## Staging Environment
 
