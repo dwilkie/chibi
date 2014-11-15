@@ -104,10 +104,6 @@ FactoryGirl.define do
     end
   end
 
-  factory :missed_call do
-    subject { "You have a missed call from 010234567" }
-  end
-
   factory :phone_call do
     from { generate(:mobile_number) }
     sid { generate(:guid) }
@@ -664,7 +660,7 @@ FactoryGirl.define do
   end
 
   factory :call_data_record do
-    ignore do
+    transient do
       cdr_variables nil
       user nil
       user_who_called nil
