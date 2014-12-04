@@ -16,7 +16,7 @@ kh:
             name: "iFriendship SMS"
             short_code: "2442"
             unit_cost: "0.05"
-            revenue_share: "0.3"
+            revenue_share: "0.35"
           ifriendship_ivr:
             type: "ivr"
             name: "iFriendship IVR"
