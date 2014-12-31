@@ -21,6 +21,8 @@ Rails.application.routes.draw do
     resource :interaction, :only => :show
   end
 
+  resources :test_messages, :only => [:new, :create]
+
   resource :report, :only => [:create, :show, :destroy]
 
   mount ResqueWeb::Engine => "/resque"
