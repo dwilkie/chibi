@@ -11,7 +11,7 @@ describe Reply do
 
   # add more users here as you get more languages
   let(:local_users) do
-    [create(:user, :cambodian, :from_unknown_operator), create(:user, :english)]
+    [create(:user, :cambodian, :from_unknown_operator), create(:user, :english), create(:user, :filipino)]
   end
 
   let(:new_reply) { build(:reply, :with_unset_destination, :user => user) }

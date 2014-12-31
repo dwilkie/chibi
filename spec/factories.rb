@@ -515,6 +515,10 @@ FactoryGirl.define do
       sequence(:mobile_number, 447624234567) { |n| n.to_s }
     end
 
+    trait :filipino do
+      sequence(:mobile_number, 639192636682) { |n| n.to_s }
+    end
+
     trait :american do
       sequence(:mobile_number, 14162345678) { |n| n.to_s }
     end
