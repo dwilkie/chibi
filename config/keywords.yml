@@ -740,6 +740,8 @@ ph:
     - "f(?:a|e)m(?:a|e)?le"
     - "baba(?:y)?e"
     - "chi(?:x|ck|k)"
+    - "(?:dalaga|dlga)"
+    - "(?:binata|bnta)"
   boy:
     - "\\bm(?:a|e)le"
     - "boy"
@@ -747,10 +749,10 @@ ph:
     - "\\bman"
     - "(?:la|l)?laki"
   girlfriend:
-    - "(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g|nangita|nngta|naghahanap|nghhanp|kailangan|kausap|kachat|gusto|luking 4|lukng 4|looking 4|luking for|seeking|serchng|searchng|serching).*(?:(?<!(?:boy |guy |man |laki |lalaki ))(?:gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks|cats)(?!\\s*boy|guy|man|laki|lalaki))"
+    - "(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g|nangita|nngta|naghahanap|nghhanp|kailangan|kausap|kachat|gusto|luking 4|lukng 4|looking 4|luking for|seeking|serchng|searchng|serching).*(?:(?<!(?:boy |guy |man |laki |lalaki ))(?:gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks)(?!\\s*boy|guy|man|laki|lalaki))"
   boyfriend:
-    - "(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g|nangita|nngta|naghahanap|nghhanp|kailangan|kausap|kachat|gusto|luking 4|lukng 4|looking 4|luking for|seeking|serchng|searchng|serching).*(?:(?<!(?:girl |gil |wom(?:a|e)n |babaye |babae| chix| chick| chicks|cats ))(?:boy|guy|man|(?:la)?laki)(?!\\s*gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks|cats))"
+    - "(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g|nangita|nngta|naghahanap|nghhanp|kailangan|kausap|kachat|gusto|luking 4|lukng 4|looking 4|luking for|seeking|serchng|searchng|serching).*(?:(?<!(?:girl |gil |wom(?:a|e)n |babaye |babae |chix |chick |chicks ))(?:boy|guy|man|(?:la)?laki)(?!\\s*gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks))"
   gay_boy:
     - "(?:guy|boy|man|laki|lalaki)\\s+(?:loves?)\\s+(?:guy|boy|man|laki|lalaki)"
   gay_girl:
-    - "(?:tomboy|tbird|lesbian|gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks|cats)\\s+(?:loves?)\\s+(?:tomboy|tbird|lesbian|gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks|cats)"
+    - "(?:tomboy|tbird|lesbian|gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks)\\s+(?:loves?)\\s+(?:tomboy|tbird|lesbian|gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks)"
