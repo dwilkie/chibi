@@ -38,6 +38,9 @@ ph:
       - "binata"
       - "bnta"
       - "gnoo"
+  softeners:
+    female:
+      - ""
   greeting_starters:
     - "qmusta?"
     - "kmusta?"

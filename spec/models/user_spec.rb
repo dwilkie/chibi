@@ -1375,6 +1375,14 @@ describe User do
         :expected_age => 23,
         :user => create(:user, :filipino)
       )
+
+      registration_examples(
+        keywords(:"24_year_old", :country_code => :ph),
+        :expected_age => 24,
+        :expected_gender => :female,
+        :expected_name => "annette",
+        :user => create(:user, :filipino)
+      )
     end
   end
 
