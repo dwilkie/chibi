@@ -6,7 +6,7 @@ ph:
     attributes:
       user:
         name: "pangalan"
-        date_of_birth: "edad"
+        date_of_birth: "petsa ng kapanganakan"
         gender: "kasarian"
         looking_for: "kasarian na hanap mo"
         city: "city"

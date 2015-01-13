@@ -276,9 +276,9 @@ kh:
     - '(?:(?:rou?k|m(?:i|e)r?t).+).*(?:(?<!srey |girl |gil )(?:boy|(?:p|b)ros)(?!\s*srey|gir?l|\bf\b))'
 ph:
   i_am:
-    - "(?:(?<!(?:meet |fin(?:d|e) |chat |have |talk |need |looking for |searching |searchimg |nangita |nngta |naghahanap |nghhanp |kailangan |kausap |kachat |gusto |luking 4 |lukng 4 |looking 4 |luking for |seeking |serchng |searchng |serching )))(?:(?:\\bi\\s*)?(?:\\b(?:am|i'm|iam|\\bim|me|\\bm\\b|ako|aq| ako ay))(?:\\s*(?:(a\\b|ay|i)))?)"
+    - "(?:(?<!(?:meet |fin(?:d|e) |babae |lalaki |chat |cht |have |talk |tok |need |nid |looking for |searching |searchimg |nangita |nngta |naghahanap |nghhanp |kailangan |kausap |kachat |kchat |kcht |gusto |gus2 |luking 4 |lukng 4 |looking 4 |luking for |seeking |serchng |searchng |serching)))(?:(?:i|I\\s*)?(?:\\b(?:am|(?:I|i)\\'?m|i'm|me|\\bm\\b)|ka?y|\\bi\\b|(?:a|A)(?:ko|q)n?g?)(?:\\s*(?:ay|a|i))?)"
   name:
-    - "(?:(?:my )?na(?:m|n)es?(?:'s)?(?:\\s*(?:is|m(?:e|y)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|iam|\\bim|\\bm\\b|ako ay si|ako c|ako i c|ako si|aq si|aq c|nako kay)\\s*|(?:(?:(?:my|aq|ako|ang|akong|aqng|ako ay)\\s+)?(?:name|nem|nym|pangalan|pngln|ngalan|ngln|ngan)\\s+(?:is|kay|ky|ko ay|q i|nako kay|nq ky|nko ky))\\s*"
+    - "(?:(?:my )?n(?:a|e)(?:m|n)e?s?(?:'s)?(?:\\s*(?:is|m(?:e|y)|(?:ko|q) (?:ay|i)))?(?:\\s*(?:\\(|\\:))?|i am|i'm|iam|\\bim|\\bm\\b|m|(?:ang )?pa?nga?la?n (?:ko|q) (?:ay|i)|(?:ako|aq) (?:ay |i )?(?:c|si)|si|c)\\s*"
   banned_names:
     - '(?:g)?wa(?:f|p)(?:a|o)'
     - '(?:wai|walang)\slo(?:a)?d'
@@ -732,27 +732,25 @@ ph:
     - 'yan lang'
     - 'yayay'
   years_old:
-    - "(?:y(?:ea)?rs?(?: old)?|yo|y\\-olds?|y\\b|an(?:y)?os|edad)"
+    - "(?:years?(?: old)?|(an|)?yr?s?\\-?\\s?o?(ld)?s?|taong?(?: gula?ng)?|(?:akong )?eda?d(?: kay)?)"
   girl:
     - "(?<!')f"
     - "g(?:i|r|u)(?:i|r)?ll?"
     - "wom(?:a|e)n"
     - "f(?:a|e)m(?:a|e)?le"
-    - "baba(?:y)?e"
-    - "chi(?:x|ck|k)"
     - "(?:dalaga|dlga)"
-    - "(?:binata|bnta)"
+    - "ba?(b|j)a?(?:y)?e|chi[cks]*"
   boy:
     - "\\bm(?:a|e)le"
     - "boy"
     - "guy"
-    - "\\bman"
-    - "(?:la|l)?laki"
+    - "\\bma?n"
+    - "(?:la|l)?la?k(i|e)"
   girlfriend:
-    - "(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g|nangita|nngta|naghahanap|nghhanp|kailangan|kausap|kachat|gusto|luking 4|lukng 4|looking 4|luking for|seeking|serchng|searchng|serching).*(?:(?<!(?:boy |guy |man |laki |lalaki ))(?:gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks)(?!\\s*boy|guy|man|laki|lalaki))"
+    - "(?:meet|fin(?:d|e)|(ka?)?cha?t|have?|ta?(l|o|u)k|ne?(e|i)d|lo?(o|u)king (for|4)|(gusto|ngita) (ng|og|ko)|serch og|(na?gha?)?ha?na?p (ng)?|sea?rchi(?:n|m)g).*(?:(?<!(?:boy|guy|man) )(?:g(i|u)?r?ls?|wom(?:a|e)n|ba?(b|j)a?(?:y)?e|chi[cks]*|da?la?ga|bab?a?y?(e|i))(?!\\s*boy|guy|man|(?:la|l)?la?k(i|e)|bi?na?ta))"
   boyfriend:
-    - "(?:meet|fin(?:d|e)|chat|have|talk|need|looking for|searchi(?:n|m)g|nangita|nngta|naghahanap|nghhanp|kailangan|kausap|kachat|gusto|luking 4|lukng 4|looking 4|luking for|seeking|serchng|searchng|serching).*(?:(?<!(?:girl |gil |wom(?:a|e)n |babaye |babae |chix |chick |chicks ))(?:boy|guy|man|(?:la)?laki)(?!\\s*gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks))"
+    - "(?:m(e|i|a)e?te?|fin(?:d|e)|(ka?)?cha?t|have|talk|need|lo?(o|u)ki?ng|serch|sea?rchi(?:n|m)g).*(?:(?<!(?:girl |gil |wom(?:a|e)n ))(?:boy|guy|ma?n|(la?)?la?ki|bi?na?ta|ma?le)(?!\\s*gir?l|wom(?:a|e)n))"
   gay_boy:
-    - "(?:guy|boy|man|laki|lalaki)\\s+(?:loves?)\\s+(?:guy|boy|man|laki|lalaki)"
+    - "(boy|ma?(n|le)|bi?na?ta|(la?)?la?ki).(l(o|u)ve?(s|z)?|l(i|y)ke?(s|z)?).(boy|ma?(n|le)|bi?na?ta|(la?)?la?ki)"
   gay_girl:
-    - "(?:tomboy|tbird|lesbian|gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks)\\s+(?:loves?)\\s+(?:tomboy|tbird|lesbian|gir?l|wom(?:a|e)n|babaye|babae|chix|chick|chicks)"
+    - "(g(i|u)?rl|f(e?male)?|wom(a|e)n).(l(o|u)ve?(s|z)?|l(i|y)ke?(s|z)?).(g(i|u)?rl|f(e?male)?|wom(a|e)n)"
