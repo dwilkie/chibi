@@ -1369,6 +1369,12 @@ describe User do
         :expected_gender => :male,
         :vcr => {:expect_results => true, :cassette => "kh/kampong_chaam"}
       )
+
+      registration_examples(
+        keywords(:"23_year_old", :country_code => :ph),
+        :expected_age => 23,
+        :user => create(:user, :filipino)
+      )
     end
   end
 
