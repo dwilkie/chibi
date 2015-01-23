@@ -19,51 +19,37 @@ GIT
       vegas (~> 0.1.2)
 
 GIT
-  remote: git://github.com/dwilkie/torasup.git
-  revision: cf470546774999c1c8d4bfc6b67806f3204b08f0
-  specs:
-    torasup (0.0.7)
-      countries
-      deep_merge
-      phony
-
-GIT
-  remote: git://github.com/floere/phony.git
-  revision: 00a947a97f0c35cdab76ededce324f63d44b89a9
-  specs:
-    phony (2.8.0)
-
-GIT
   remote: git://github.com/hexorx/countries.git
-  revision: fc0ac93aafdbd76a463c969361141ff64f4dd1b1
+  revision: 20e03f4387ea243e8a050adb4882c8e809f9f6aa
   specs:
-    countries (0.9.3)
+    countries (0.10.0)
       currencies (~> 0.4.2)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    actionmailer (4.1.7)
-      actionpack (= 4.1.7)
-      actionview (= 4.1.7)
+    CFPropertyList (2.3.0)
+    actionmailer (4.1.9)
+      actionpack (= 4.1.9)
+      actionview (= 4.1.9)
       mail (~> 2.5, >= 2.5.4)
-    actionpack (4.1.7)
-      actionview (= 4.1.7)
-      activesupport (= 4.1.7)
+    actionpack (4.1.9)
+      actionview (= 4.1.9)
+      activesupport (= 4.1.9)
       rack (~> 1.5.2)
       rack-test (~> 0.6.2)
-    actionview (4.1.7)
-      activesupport (= 4.1.7)
+    actionview (4.1.9)
+      activesupport (= 4.1.9)
       builder (~> 3.1)
       erubis (~> 2.7.0)
-    activemodel (4.1.7)
-      activesupport (= 4.1.7)
+    activemodel (4.1.9)
+      activesupport (= 4.1.9)
       builder (~> 3.1)
-    activerecord (4.1.7)
-      activemodel (= 4.1.7)
-      activesupport (= 4.1.7)
+    activerecord (4.1.9)
+      activemodel (= 4.1.9)
+      activesupport (= 4.1.9)
       arel (~> 5.0.0)
-    activesupport (4.1.7)
+    activesupport (4.1.9)
       i18n (~> 0.6, >= 0.6.9)
       json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
@@ -91,77 +77,117 @@ GEM
       execjs
     coffee-script-source (1.8.0)
     currencies (0.4.2)
-    database_cleaner (1.3.0)
+    database_cleaner (1.4.0)
     deep_merge (1.0.1)
     diff-lcs (1.2.5)
-    dotenv (0.11.1)
-      dotenv-deployment (~> 0.0.2)
-    dotenv-deployment (0.0.2)
+    dotenv (1.0.2)
     erubis (2.7.0)
-    excon (0.41.0)
+    excon (0.43.0)
     execjs (2.2.2)
     factory_girl (4.5.0)
       activesupport (>= 3.0.0)
     faker (1.4.3)
       i18n (~> 0.5)
     fakeweb (1.3.0)
-    fog (1.24.0)
-      fog-brightbox
-      fog-core (~> 1.23)
+    fission (0.5.0)
+      CFPropertyList (~> 2.2)
+    fog (1.27.0)
+      fog-atmos
+      fog-aws (~> 0.0)
+      fog-brightbox (~> 0.4)
+      fog-core (~> 1.27, >= 1.27.3)
+      fog-ecloud
       fog-json
+      fog-profitbricks
       fog-radosgw (>= 0.0.2)
       fog-sakuracloud (>= 0.0.4)
+      fog-serverlove
       fog-softlayer
+      fog-storm_on_demand
+      fog-terremark
+      fog-vmfusion
+      fog-voxel
+      fog-xml (~> 0.1.1)
       ipaddress (~> 0.5)
       nokogiri (~> 1.5, >= 1.5.11)
-    fog-brightbox (0.6.1)
+    fog-atmos (0.1.0)
+      fog-core
+      fog-xml
+    fog-aws (0.0.6)
+      fog-core (~> 1.27)
+      fog-json (~> 1.0)
+      fog-xml (~> 0.1)
+      ipaddress (~> 0.8)
+    fog-brightbox (0.7.1)
       fog-core (~> 1.22)
       fog-json
-      inflecto
-    fog-core (1.24.0)
+      inflecto (~> 0.0.2)
+    fog-core (1.27.3)
       builder
       excon (~> 0.38)
       formatador (~> 0.2)
       mime-types
       net-scp (~> 1.1)
       net-ssh (>= 2.1.3)
+    fog-ecloud (0.0.2)
+      fog-core
+      fog-xml
     fog-json (1.0.0)
       multi_json (~> 1.0)
+    fog-profitbricks (0.0.1)
+      fog-core
+      fog-xml
+      nokogiri
     fog-radosgw (0.0.3)
       fog-core (>= 1.21.0)
       fog-json
       fog-xml (>= 0.0.1)
-    fog-sakuracloud (0.1.1)
+    fog-sakuracloud (1.0.0)
       fog-core
       fog-json
-    fog-softlayer (0.3.24)
+    fog-serverlove (0.1.1)
       fog-core
       fog-json
+    fog-softlayer (0.3.30)
+      fog-core
+      fog-json
+    fog-storm_on_demand (0.1.0)
+      fog-core
+      fog-json
+    fog-terremark (0.0.3)
+      fog-core
+      fog-xml
+    fog-vmfusion (0.0.1)
+      fission
+      fog-core
+    fog-voxel (0.0.2)
+      fog-core
+      fog-xml
     fog-xml (0.1.1)
       fog-core
       nokogiri (~> 1.5, >= 1.5.11)
-    foreman (0.75.0)
-      dotenv (~> 0.11.1)
+    foreman (0.77.0)
+      dotenv (~> 1.0.2)
       thor (~> 0.19.1)
     formatador (0.2.5)
     geocoder (1.2.6)
-    haml (4.0.5)
+    haml (4.0.6)
       tilt
     hash-deep-merge (0.1.1)
     hike (1.2.3)
     hirefire-resource (0.3.4)
-    i18n (0.6.11)
+    i18n (0.7.0)
     inflecto (0.0.2)
     ipaddress (0.8.0)
     jquery-rails (3.1.2)
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
-    json (1.8.1)
+    json (1.8.2)
     jwt (1.0.0)
-    kaminari (0.16.1)
+    kaminari (0.16.2)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
-    kgio (2.9.2)
+    kgio (2.9.3)
     launchy (2.4.3)
       addressable (~> 2.3)
     lazy_high_charts (1.5.4)
@@ -172,51 +198,52 @@ GEM
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
     mime-types (2.4.3)
-    mini_portile (0.6.1)
-    minitest (5.4.3)
-    mock_redis (0.13.2)
+    mini_portile (0.6.2)
+    minitest (5.5.1)
+    mock_redis (0.14.0)
     mono_logger (1.1.0)
     multi_json (1.10.1)
     multi_xml (0.5.5)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
-    net-ssh (2.9.1)
-    netrc (0.8.0)
-    nokogiri (1.6.4.1)
+    net-ssh (2.9.2)
+    netrc (0.10.2)
+    nokogiri (1.6.6.1)
       mini_portile (~> 0.6.0)
     parallel (1.3.3)
-    parallel_tests (1.0.7)
+    parallel_tests (1.0.9)
       parallel
-    pg (0.17.1)
+    pg (0.18.1)
+    phony (2.10.2)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
-    rack-test (0.6.2)
+    rack-test (0.6.3)
       rack (>= 1.0)
-    rack-timeout (0.1.0)
-    rails (4.1.7)
-      actionmailer (= 4.1.7)
-      actionpack (= 4.1.7)
-      actionview (= 4.1.7)
-      activemodel (= 4.1.7)
-      activerecord (= 4.1.7)
-      activesupport (= 4.1.7)
+    rack-timeout (0.2.0)
+    rails (4.1.9)
+      actionmailer (= 4.1.9)
+      actionpack (= 4.1.9)
+      actionview (= 4.1.9)
+      activemodel (= 4.1.9)
+      activerecord (= 4.1.9)
+      activesupport (= 4.1.9)
       bundler (>= 1.3.0, < 2.0)
-      railties (= 4.1.7)
+      railties (= 4.1.9)
       sprockets-rails (~> 2.0)
     rails_12factor (0.0.3)
       rails_serve_static_assets
       rails_stdout_logging
-    rails_serve_static_assets (0.0.2)
+    rails_serve_static_assets (0.0.3)
     rails_stdout_logging (0.0.3)
-    railties (4.1.7)
-      actionpack (= 4.1.7)
-      activesupport (= 4.1.7)
+    railties (4.1.9)
+      actionpack (= 4.1.9)
+      activesupport (= 4.1.9)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     raindrops (0.13.0)
-    rake (10.3.2)
-    redis (3.1.0)
+    rake (10.4.2)
+    redis (3.2.0)
     redis-namespace (1.5.1)
       redis (~> 3.0, >= 3.0.4)
     resque-web (0.0.6)
@@ -250,21 +277,21 @@ GEM
       rspec-support (~> 3.1.0)
     rspec-support (3.1.2)
     sass (3.2.19)
-    sass-rails (4.0.4)
+    sass-rails (4.0.5)
       railties (>= 4.0.0, < 5.0)
       sass (~> 3.2.2)
-      sprockets (~> 2.8, < 2.12)
+      sprockets (~> 2.8, < 3.0)
       sprockets-rails (~> 2.0)
     sinatra (1.4.5)
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
-    sprockets (2.11.3)
+    sprockets (2.12.3)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
-    sprockets-rails (2.2.0)
+    sprockets-rails (2.2.4)
       actionpack (>= 3.0)
       activesupport (>= 3.0)
       sprockets (>= 2.8, < 4.0)
@@ -274,9 +301,13 @@ GEM
     thread_safe (0.3.4)
     tilt (1.4.1)
     timecop (0.7.1)
-    turbolinks (2.5.2)
+    torasup (0.0.8)
+      countries
+      deep_merge
+      phony (>= 2.10.2)
+    turbolinks (2.5.3)
       coffee-rails
-    twilio-ruby (3.14.0)
+    twilio-ruby (3.14.4)
       builder (>= 2.1.2)
       jwt (~> 1.0.0)
       multi_json (>= 1.3.0)
@@ -287,7 +318,7 @@ GEM
       railties (~> 4.1)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
-    uglifier (2.5.3)
+    uglifier (2.7.0)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
     unicorn (4.8.3)
@@ -328,9 +359,9 @@ DEPENDENCIES
   nuntium_api!
   parallel_tests
   pg
-  phony!
+  phony
   rack-timeout
-  rails (= 4.1.7)
+  rails (= 4.1.9)
   rails_12factor
   redis
   resque!
@@ -340,7 +371,7 @@ DEPENDENCIES
   sass-rails (~> 4.0.3)
   state_machine
   timecop
-  torasup!
+  torasup
   turbolinks
   twilio-ruby
   uglifier (>= 1.3.0)

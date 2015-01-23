@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
 ruby "2.1.5"
 
-gem 'rails', '4.1.7'
+gem 'rails', '4.1.9'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
 gem "lazy_high_charts"
 gem "geocoder"
-gem "phony", :git => "git://github.com/floere/phony.git"
+gem "phony"
 gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countries.git"
 gem "faker"
 gem "hirefire-resource"
@@ -16,7 +16,7 @@ gem 'resque-web', :require => 'resque_web'
 gem "unicorn"
 gem "rack-timeout"
 gem "redis"
-gem "torasup", :git => "git://github.com/dwilkie/torasup.git"
+gem "torasup"
 gem "nuntium_api", :github => "dwilkie/nuntium-api-ruby"
 gem "state_machine"
 gem "twilio-ruby"
