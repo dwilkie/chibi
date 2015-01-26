@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby "2.2.0"
 
-gem 'rails', '4.1.9'
+gem 'rails', '4.2.0'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -36,6 +36,10 @@ gem 'jquery-rails'
 gem 'turbolinks'
 
 gem 'rails_12factor', :group => :production
+
+group :development do
+  gem 'web-console', '~> 2.0'
+end
 
 group :test, :development do
   gem 'rspec-rails'
