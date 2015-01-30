@@ -7,21 +7,6 @@
 The master branch contains the code currently on the production server.
 The staging branch contains the code on the staging server
 
-## Development Method
-
-1. Create a new feature branch off of master
-2. Write some tests for the new functionality
-3. Implement the code to make the tests pass
-4. Run the tests on the feature branch
-5. Commit the change to the feature branch
-6. Merge the feature branch into staging
-7. Run the tests on the staging branch
-8. Deploy to staging
-9. Manually check that it works in staging
-10. Merge the feature branch into master
-11. Run the tests on master
-12. Deploy to production
-
 ## Testing
 
 Run the tests in parallel to save time.
@@ -38,9 +23,12 @@ bundle exec foreman run rake parallel:spec
 
 ### Deployment
 
-Chibi is now set up for CI. Deploy automatically when the tests pass by pushing to master:
+Chibi is now set up for CI. Deployment will happen automatically when the tests pass by pushing to master or staging:
 
-    git push origin master
+```
+git push origin master
+git push origin staging
+```
 
 ## Staging Environment
 
@@ -54,20 +42,17 @@ https://chibi-staging.herokuapp.com/test_messages/new
 
 ### Toggle Message Delivery
 
-    heroku config:add DELIVER_REPLIES=1
-    heroku config:add DELIVER_REPLIES=0
-
-### Deployment
-
-    git push staging staging:master
-
-This command tells git that you want to push from your local `staging` branch to the `master` branch of your `staging` remote.
-
+```
+heroku config:add DELIVER_REPLIES=1
+heroku config:add DELIVER_REPLIES=0
+```
 ## Pull remote data to local database
 
-    curl -o latest.dump `heroku pgbackups:url --app chibi`
-    pg_restore --verbose --clean --no-acl --no-owner -h localhost -U dave -d chibi_development latest.dump
-    rm latest.dump
+```
+curl -o latest.dump `heroku pgbackups:url --app chibi`
+pg_restore --verbose --clean --no-acl --no-owner -h localhost -U dave -d chibi_development latest.dump
+rm latest.dump
+```
 
 ## Usage
 
@@ -89,12 +74,12 @@ This command tells git that you want to push from your local `staging` branch to
     transfer-encoding: chunked
     Connection: keep-alive
 
-## Configuration
-
-## Nuntium
+## Nuntium Configuration
 
 ### Postback
 
 Under "Applications" select "edit" then under "Custom HTTP POST format" insert the following:
 
-    message[from]=${from_without_protocol}&message[to]=${to_without_protocol}&message[subject]=${subject}&message[guid]=${guid}&message[application]=${application}&message[channel]=${channel}&message[body]=${body}
+```
+message[from]=${from_without_protocol}&message[to]=${to_without_protocol}&message[subject]=${subject}&message[guid]=${guid}&message[application]=${application}&message[channel]=${channel}&message[body]=${body}
+```
