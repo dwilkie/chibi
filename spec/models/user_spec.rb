@@ -827,7 +827,7 @@ describe User do
 
       context "passing :inactivity_period => 8.days" do
         it "not send a reminder to the user" do
-          do_remind(:inactivity_period => 8.days)
+          do_remind(:inactivity_period => 8.days.ago.to_s)
           assert_not_reminded
         end
       end
@@ -1524,7 +1524,7 @@ describe User do
   describe "#search_for_friend!" do
     context "given he is not currently chatting" do
       it "should mark the user as searching for a friend" do
-        new_user.search_for_friend!.should be_nil
+        new_user.search_for_friend!
         new_user.reload.should be_searching_for_friend
         new_user.should be_persisted
       end
@@ -1536,7 +1536,7 @@ describe User do
       end
 
       it "should not mark the user as searching for a friend" do
-        user.search_for_friend!.should be_nil
+        user.search_for_friend!
         user.reload.should_not be_searching_for_friend
       end
     end
@@ -1565,7 +1565,7 @@ describe User do
         subject.send(attribute_reader).should == "3"
 
         subject.send(attribute_writer, :m)
-        subject.send(attribute_reader).should == :m
+        subject.send(attribute_reader).should == "m"
       end
     end
   end

@@ -428,10 +428,10 @@ class User < ActiveRecord::Base
     if user.gay?
       # prefer other gays of the same gender
       # then prefer all others of the same gender
-      order_scope = where(:looking_for => user.gender).where(:gender => user.looking_for)
+      order_scope = where("looking_for = ?", user.gender).where("gender = ?", user.looking_for)
     else
       # prefer the opposite sex (if known)
-      order_scope = where(:gender => user.opposite_gender) if user.opposite_gender.present?
+      order_scope = where("gender = ?", user.opposite_gender) if user.opposite_gender.present?
     end
     scope = order_by_case(scope, order_scope, 2) if order_scope
     scope
