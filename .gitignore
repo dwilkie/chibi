@@ -7,3 +7,4 @@ vendor/ruby
 *.swp
 latest.dump
 coverage
+remove_focus.rb
