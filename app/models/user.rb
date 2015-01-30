@@ -79,11 +79,7 @@ class User < ActiveRecord::Base
     end
 
     event :search_for_friend do
-      transitions(:to => :searching_for_friend) do
-        guard do
-          !currently_chatting?
-        end
-      end
+      transitions(:to => :searching_for_friend, :unless => :currently_chatting?)
     end
 
     event :cancel_searching_for_friend do

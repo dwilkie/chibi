@@ -21,8 +21,8 @@ class ChargeRequest < ActiveRecord::Base
     end
 
     event :process_result, :after => :notify_requester! do
-      transitions(:from => :awaiting_result, :to => :successful, :guard => :result_successful?)
-      transitions(:from => :awaiting_result, :to => :failed, :guard => :result_failed?)
+      transitions(:from => :awaiting_result, :to => :successful, :if => :result_successful?)
+      transitions(:from => :awaiting_result, :to => :failed, :if => :result_failed?)
       transitions(:from => :awaiting_result, :to => :errored)
     end
   end

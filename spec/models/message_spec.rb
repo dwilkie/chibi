@@ -169,14 +169,14 @@ describe Message do
 
       it "should try to activate multiple new chats" do
         Chat.should_receive(:activate_multiple!).with(user, :starter => subject, :notify => true)
-        subject.process
+        subject.process!
       end
     end
 
     shared_examples_for "not starting a new chat" do
       it "should not start a new chat" do
         Chat.should_not_receive(:activate_multiple!)
-        subject.process
+        subject.process!
       end
     end
 
@@ -187,7 +187,7 @@ describe Message do
     shared_examples_for "not routing the message" do
       it "should not try to route the message" do
         Chat.should_not_receive(:intended_for)
-        subject.process
+        subject.process!
       end
     end
 
@@ -224,7 +224,7 @@ describe Message do
 
               it "should logout the user" do
                 user.should_receive(:logout!)
-                subject.process
+                subject.process!
                 subject.should be_processed
               end
             end # context "'#{stop_variation}'"
@@ -238,12 +238,12 @@ describe Message do
 
             it "should try to charge the user" do
               user.should_receive(:charge!).with(subject)
-              subject.process
+              subject.process!
             end
 
             it "should login the user" do
               user.should_receive(:login!)
-              subject.process
+              subject.process!
             end
 
             context "the charge request returns true" do
@@ -252,7 +252,7 @@ describe Message do
               end
 
               it "should update the state to 'processed'" do
-                subject.process
+                subject.process!
                 subject.should be_processed
               end
             end # context "the charge request returns true"
@@ -263,7 +263,7 @@ describe Message do
               end
 
               it "should update the state to 'awaiting_charge_result'" do
-                subject.process
+                subject.process!
                 subject.should be_awaiting_charge_result
               end
             end # context "the charge request returns false"
@@ -282,7 +282,7 @@ describe Message do
           end
 
           it "should leave the message as 'received'" do
-            expect { subject.process }.to raise_error
+            expect { subject.process! }.to raise_error
             subject.should_not be_processed
           end
         end
@@ -324,18 +324,18 @@ describe Message do
 
                 it "should forward the message to a particular chat" do
                   chat.should_receive(:forward_message).with(subject)
-                  subject.process
+                  subject.process!
                 end
               end
 
               it "should try to update the users profile from the message text" do
                 user.should_receive(:update_profile).with(subject.body)
-                subject.process
+                subject.process!
               end
 
               it "should try to determine who the message is intended for" do
                 Chat.should_receive(:intended_for).with(subject, :num_recent_chats => 10)
-                subject.process
+                subject.process!
               end
 
               context "if the receipient cannot be determined" do
@@ -345,7 +345,7 @@ describe Message do
 
                 it "try to get the sender's active chat" do
                   user.should_receive(:active_chat)
-                  subject.process
+                  subject.process!
                 end
 
                 context "if the sender is not currently chatting" do
@@ -400,7 +400,7 @@ describe Message do
 
         it "should tell the sender they don't have enough credit" do
           user.should_receive(:reply_not_enough_credit!)
-          subject.process
+          subject.process!
         end
 
         it_should_behave_like "not routing the message"
@@ -431,7 +431,7 @@ describe Message do
       subject { create_message(:processed) }
 
       it "should leave the state as 'processed'" do
-        expect { subject.process }.not_to change { subject.updated_at }
+        expect { subject.process! }.not_to change { subject.updated_at }
         subject.should be_processed
       end
     end

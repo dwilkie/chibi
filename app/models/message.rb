@@ -8,22 +8,23 @@ class Message < ActiveRecord::Base
   include Chibi::ChatStarter
   include Chibi::ChargeRequester
 
+  include AASM
+
   attr_accessor :pre_process
 
   alias_attribute :origin, :from
 
   validates :guid, :uniqueness => true, :allow_nil => true
 
-  state_machine :initial => :received do
-
-    state :processed, :awaiting_charge_result
-
-    before_transition :received => :processed, :do => :route_to_destination
-    before_transition :awaiting_charge_result => :processed, :do => :examine_charge_result
+  aasm :column => :state, :whiny_transitions => false do
+    state :received, :initial => true
+    state :processed
+    state :awaiting_charge_result
 
     event :process do
-      transition(:received => :awaiting_charge_result, :unless => :user_charge!)
-      transition([:received, :awaiting_charge_result] => :processed)
+      transitions(:from => :received, :to => :awaiting_charge_result, :unless => :user_charge!)
+      transitions(:from => :received, :to => :processed, :after => :route_to_destination)
+      transitions(:from => :awaiting_charge_result, :to => :processed, :after => :examine_charge_result)
     end
   end
 
@@ -36,7 +37,7 @@ class Message < ActiveRecord::Base
       message.queue_for_processing!
     end
     unprocessed.where.not(:chat_id => nil).find_each do |message|
-      message.fire_events(:process)
+      message.process!
     end
   end
 
