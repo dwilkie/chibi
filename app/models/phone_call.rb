@@ -6,6 +6,8 @@ class PhoneCall < ActiveRecord::Base
   include Chibi::ChargeRequester
   include Chibi::Analyzable
 
+  include AASM
+
   # The maximum number of concurrent outbound dials to trigger
   MAX_SIMULTANEOUS_OUTBOUND_DIALS = 5
 
@@ -50,152 +52,86 @@ class PhoneCall < ActiveRecord::Base
 
   delegate :charge!, :login!, :to => :user, :prefix => true
 
-  state_machine :initial => :answered do
-    extend PromptStates
+  aasm :column => :state, :whiny_transitions => false do
+    state :answered, :initial => true
+    state :telling_user_they_dont_have_enough_credit
+    state :finding_new_friends
+    state :connecting_user_with_friend
+    state :dialing_friends
+    state :completed
 
-    state :answered do
-      def to_twiml
-        redirect
-      end
-    end
-
-    state :welcoming_user do
-      def to_twiml
-        play(:welcome)
-      end
-    end
-
-    state :telling_user_they_dont_have_enough_credit do
-      def to_twiml
-        play(:not_enough_credit)
-      end
-    end
-
-    # Menu prompts
-    with_prompt_states do |attribute, prompt_state, options|
-      before_transition prompt_state => any, :do => :set_profile_from_digits
-
-      state(prompt_state) do
-        define_method :to_twiml do
-          ask_for_input("ask_for_#{attribute}", options)
-        end
-      end
-    end
-
-    state :offering_menu do
-      def to_twiml
-        ask_for_input(:offer_menu)
-      end
-    end
-
-    state :finding_new_friends do
-      def to_twiml
-        redirect
-      end
-    end
-
-    state :telling_user_to_try_again_later do
-      def to_twiml
-        play(:tell_user_to_try_again_later)
-      end
-    end
-
-    before_transition any => :finding_new_friends, :do => :find_friends
-    before_transition any => :connecting_user_with_friend, :do => :set_or_update_current_chat
-    after_transition any => :completed, :do => :fetch_twilio_cdr
-
-    state :connecting_user_with_friend do
-      def to_twiml
-        dial(chat.partner(user))
-      end
-    end
-
-    state :dialing_friends do
-      def to_twiml
-        dial(*new_friends)
-      end
-    end
-
-    state :telling_user_their_chat_has_ended do
-      def to_twiml
-        play(:tell_user_their_chat_has_ended)
-      end
-    end
-
-    state :completed do
-      def to_twiml
-        hangup
-      end
-    end
-
-    event :process! do
+    event :process, :after_commit => :fetch_twilio_cdr do
       # complete the call if it has finished
-      transition(any => :completed, :if => :complete?)
+      transitions(
+        :from => [
+          :answered,
+          :telling_user_they_dont_have_enough_credit,
+          :finding_new_friends,
+          :connecting_user_with_friend,
+          :dialing_friends,
+        ],
+        :to => :completed,
+        :if => :complete?
+      )
 
       # tell him that he doesn't have enough credit if the charge failed
-      transition(
-        :answered => :telling_user_they_dont_have_enough_credit,
+      transitions(
+        :from => :answered,
+        :to => :telling_user_they_dont_have_enough_credit,
         :if => :charge_failed?
       )
 
-      transition(:telling_user_they_dont_have_enough_credit => :completed)
-
-      if PromptStates::VOICE_PROMPTS
-        # welcome the user
-        transition(:answered => :welcoming_user)
-
-        # offer him the menu
-        transition(:welcoming_user => :offering_menu)
-
-        # offer him the menu for more options
-        transition(:offering_menu => :asking_for_age_in_menu, :if => :wants_menu?)
-        transition(:asking_for_age_in_menu => :asking_for_gender_in_menu)
-        transition(:asking_for_gender_in_menu => :asking_for_looking_for_in_menu)
-        transition(:asking_for_looking_for_in_menu => :offering_menu)
-      end
+      transitions(
+        :from => :telling_user_they_dont_have_enough_credit,
+        :to => :completed
+      )
 
       # connect him with his existing friend
-      transition(
-        [:answered, :offering_menu] => :connecting_user_with_friend,
-        :if => :can_dial_to_partner?
+      transitions(
+        :from => :answered,
+        :to => :connecting_user_with_friend,
+        :if => :can_dial_to_partner?,
+        :after => :set_or_update_current_chat
       )
 
       # find him new friends
-      transition([:answered, :offering_menu] => :finding_new_friends)
+      transitions(
+        :from => :answered,
+        :to => :finding_new_friends,
+        :after => :find_friends
+      )
 
       # connect him with his new friend
-      transition(:finding_new_friends => :dialing_friends, :if => :friends_available?)
-
-      if PromptStates::VOICE_PROMPTS
-        # tell him his chat has ended
-        transition(
-          [:connecting_user_with_friend, :dialing_friends] => :telling_user_their_chat_has_ended,
-          :if => :connected?
-        )
-
-        # offer him the menu
-        transition(:telling_user_their_chat_has_ended => :offering_menu)
-      end
+      transitions(
+        :from => :finding_new_friends,
+        :to => :dialing_friends,
+        :if => :friends_available?
+      )
 
       # hangup if the call has ended
-      transition(
-        [:connecting_user_with_friend, :dialing_friends] => :completed,
+      transitions(
+        :from => [:connecting_user_with_friend, :dialing_friends],
+        :to => :completed,
         :if => :connected?
       )
 
       # find him a new friend
-      transition(
-        [:dialing_friends, :connecting_user_with_friend] => :finding_new_friends
+      transitions(
+        :from => [:dialing_friends, :connecting_user_with_friend],
+        :to => :finding_new_friends,
+        :after => :find_friends
       )
 
-      if PromptStates::VOICE_PROMPTS
-        # tell him to try again later (no friend available)
-        transition(:finding_new_friends => :telling_user_to_try_again_later)
-      end
-
       # complete call
-      transition([:finding_new_friends, :telling_user_to_try_again_later] => :completed)
+      transitions(
+        :from => :finding_new_friends,
+        :to => :completed,
+      )
     end
+  end
+
+  def to_twiml
+    send("twiml_for_#{state}")
   end
 
   def self.find_or_create_and_process_by(params, redirect_url)
@@ -239,6 +175,30 @@ class PhoneCall < ActiveRecord::Base
 
   private
 
+  def twiml_for_answered
+    redirect
+  end
+
+  def twiml_for_telling_user_they_dont_have_enough_credit
+    play(:not_enough_credit)
+  end
+
+  def twiml_for_finding_new_friends
+    redirect
+  end
+
+  def twiml_for_connecting_user_with_friend
+    dial(chat.partner(user))
+  end
+
+  def twiml_for_dialing_friends
+    dial(*new_friends)
+  end
+
+  def twiml_for_completed
+    hangup
+  end
+
   def charge_failed?
     charge_request && charge_request.failed?
   end
@@ -267,7 +227,7 @@ class PhoneCall < ActiveRecord::Base
     @current_chat ||= user.active_chat
   end
 
-  def find_friends(transition)
+  def find_friends
     set_or_update_current_chat
     ask_partner_to_contact_me if user.currently_chatting? && !can_dial_to_partner?
     Chat.activate_multiple!(user, :starter => self, :count => MAX_SIMULTANEOUS_OUTBOUND_DIALS)

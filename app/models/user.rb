@@ -74,7 +74,7 @@ class User < ActiveRecord::Base
       transitions(:from => :unactivated, :to => :online, :after => :touch_activated_at)
     end
 
-    event :logout, :after => :deactivate_chats! do
+    event :logout, :after_commit => :deactivate_chats! do
       transitions(:to => :offline)
     end
 
