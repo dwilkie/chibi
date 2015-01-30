@@ -637,9 +637,9 @@ describe User do
       assert_reminded
     end
 
-    context "passing :inactivity_period => 3.days" do
+    context "passing :inactivity_period => 3.days.ago" do
       it "should remind users that have not been contacted in the last 3 days" do
-        do_remind(:inactivity_period => 3.days)
+        do_remind(:inactivity_period => 3.days.ago)
         assert_reminded
         assert_user_reminded(registered_sp_user_not_contacted_for_a_short_time)
       end

@@ -390,7 +390,7 @@ FactoryGirl.define do
     end
 
     trait :not_contacted_for_a_short_time do
-      updated_at { 3.days.ago }
+      updated_at { 4.days.ago }
     end
 
     trait :from_registered_service_provider do

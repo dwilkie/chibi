@@ -14,6 +14,8 @@ class User < ActiveRecord::Base
   include Chibi::Twilio::ApiHelpers
   include Chibi::Communicable::HasCommunicableResources
 
+  include AASM
+
   has_communicable_resources :phone_calls, :messages, :replies
 
   MALE = "m"
@@ -61,25 +63,31 @@ class User < ActiveRecord::Base
 
   delegate :city, :country_code, :to => :location, :allow_nil => true
 
-  state_machine :initial => :online do
-    state :offline, :searching_for_friend, :unactivated
-
-    after_transition :unactivated => :online, :do => :touch_activated_at
+  aasm :column => :state, :whiny_transitions => false do
+    state :online, :initial => true
+    state :offline
+    state :searching_for_friend
+    state :unactivated
 
     event :login do
-      transition([:offline, :unactivated] => :online)
+      transitions(:from => :offline, :to => :online)
+      transitions(:from => :unactivated, :to => :online, :after => :tourch_activated_at)
     end
 
     event :logout do
-      transition(any => :offline)
+      transitions(:to => :offline, :after => :deactivate_chats!)
     end
 
     event :search_for_friend do
-      transition(any => :searching_for_friend, :unless => lambda {|user| user.currently_chatting?})
+      transitions(:to => :searching_for_friend) do
+        guard do
+          !currently_chatting?
+        end
+      end
     end
 
     event :cancel_searching_for_friend do
-      transition(:searching_for_friend => :online)
+      transitions(:from => :searching_for_friend, :to => :online)
     end
   end
 
@@ -373,22 +381,11 @@ class User < ActiveRecord::Base
     replies.build.not_enough_credit!
   end
 
-  def login!
-    fire_events(:login)
-  end
-
-  def logout!
+  def deactivate_chats!
     if currently_chatting?
       partner = active_chat.partner(self)
       active_chat.deactivate!(:active_user => partner)
     end
-
-    fire_events(:logout)
-  end
-
-  def search_for_friend!
-    fire_events(:search_for_friend)
-    nil
   end
 
   def matches
@@ -620,7 +617,7 @@ class User < ActiveRecord::Base
   end
 
   def self.inactive_timestamp(options = {})
-    (options[:inactivity_period] || 5.days).ago
+    options[:inactivity_period] || 5.days.ago
   end
 
   def self.not_contacted_recently(inactivity_timestamp)
@@ -705,7 +702,7 @@ class User < ActiveRecord::Base
   end
 
   def cancel_searching_for_friend_if_chatting
-    fire_events(:cancel_searching_for_friend) if currently_chatting?
+    cancel_searching_for_friend! if currently_chatting?
     nil
   end
 
