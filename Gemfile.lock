@@ -1,4 +1,10 @@
 GIT
+  remote: git://github.com/aasm/aasm.git
+  revision: f033ce0c2a12d815a7c184322c2e97f33ce6fe3b
+  specs:
+    aasm (4.0.8)
+
+GIT
   remote: git://github.com/dwilkie/nuntium-api-ruby.git
   revision: a7a14d15b529026e96e39ae7f3fa885a9272414d
   specs:
@@ -20,7 +26,7 @@ GIT
 
 GIT
   remote: git://github.com/hexorx/countries.git
-  revision: 9cd73ec9e014be6082cc47374cae928c1d823f90
+  revision: d7dc715f6f7e588100ada5272edaa1057df419bd
   specs:
     countries (0.10.0)
       currencies (~> 0.4.2)
@@ -81,13 +87,14 @@ GEM
       activesupport (>= 3.2.0)
       json (>= 1.7)
       mime-types (>= 1.16)
+    coderay (1.1.0)
     coffee-rails (4.0.1)
       coffee-script (>= 2.2.0)
       railties (>= 4.0.0, < 5.0)
     coffee-script (2.3.0)
       coffee-script-source
       execjs
-    coffee-script-source (1.8.0)
+    coffee-script-source (1.9.0)
     currencies (0.4.2)
     database_cleaner (1.4.0)
     debug_inspector (0.0.2)
@@ -126,7 +133,7 @@ GEM
     fog-atmos (0.1.0)
       fog-core
       fog-xml
-    fog-aws (0.0.7)
+    fog-aws (0.0.8)
       fog-core (~> 1.27)
       fog-json (~> 1.0)
       fog-xml (~> 0.1)
@@ -135,7 +142,7 @@ GEM
       fog-core (~> 1.22)
       fog-json
       inflecto (~> 0.0.2)
-    fog-core (1.27.3)
+    fog-core (1.27.4)
       builder
       excon (~> 0.38)
       formatador (~> 0.2)
@@ -161,7 +168,7 @@ GEM
     fog-serverlove (0.1.1)
       fog-core
       fog-json
-    fog-softlayer (0.3.30)
+    fog-softlayer (0.4.0)
       fog-core
       fog-json
     fog-storm_on_demand (0.1.0)
@@ -216,6 +223,7 @@ GEM
       systemu (~> 2.6.2)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
+    method_source (0.8.2)
     mime-types (2.4.3)
     mini_portile (0.6.2)
     minitest (5.5.1)
@@ -233,7 +241,11 @@ GEM
     parallel_tests (1.0.9)
       parallel
     pg (0.18.1)
-    phony (2.10.2)
+    phony (2.10.3)
+    pry (0.10.1)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
     rack (1.6.0)
     rack-protection (1.5.3)
       rack
@@ -262,7 +274,7 @@ GEM
     rails_12factor (0.0.3)
       rails_serve_static_assets
       rails_stdout_logging
-    rails_serve_static_assets (0.0.3)
+    rails_serve_static_assets (0.0.4)
     rails_stdout_logging (0.0.3)
     railties (4.2.0)
       actionpack (= 4.2.0)
@@ -314,6 +326,7 @@ GEM
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
+    slop (3.6.0)
     sprockets (2.12.3)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -370,6 +383,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  aasm!
   capybara
   carrierwave
   coffee-rails (~> 4.0.0)
@@ -393,6 +407,7 @@ DEPENDENCIES
   parallel_tests
   pg
   phony
+  pry
   rack-timeout
   rails (= 4.2.0)
   rails_12factor

@@ -18,6 +18,7 @@ gem "rack-timeout"
 gem "redis"
 gem "torasup"
 gem "nuntium_api", :github => "dwilkie/nuntium-api-ruby"
+gem "aasm", :github => "aasm/aasm"
 gem "state_machine"
 gem "twilio-ruby"
 gem "uuid"
@@ -43,8 +44,9 @@ end
 
 group :test, :development do
   gem 'rspec-rails'
-  gem "parallel_tests"
-  gem "foreman"
+  gem 'parallel_tests'
+  gem 'foreman'
+  gem 'pry'
 end
 
 group :test do
