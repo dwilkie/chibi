@@ -63,11 +63,11 @@ describe PhoneCall do
 
   describe "#call_sid" do
     it "should be an alias for the attribute '#sid'" do
-      subject.sid = 123
-      subject.call_sid.should == 123
+      subject.sid = "123"
+      subject.call_sid.should == "123"
 
-      subject.call_sid = 456
-      subject.sid.should == 456
+      subject.call_sid = "456"
+      subject.sid.should == "456"
     end
   end
 
@@ -294,10 +294,15 @@ describe PhoneCall do
     include_context "replies"
 
     def assert_phone_call_can_be_completed(reference_phone_call)
+      already_completed = reference_phone_call.completed?
       reference_phone_call.call_status = "completed"
       do_background_task(:queue_only => true) { reference_phone_call.process! }
       reference_phone_call.should be_completed
-      TwilioCdrFetcher.should have_queued(reference_phone_call.id)
+      if already_completed
+        TwilioCdrFetcher.should_not have_queued(reference_phone_call.id)
+      else
+        TwilioCdrFetcher.should have_queued(reference_phone_call.id)
+      end
     end
 
     def assert_message_queued_for_partner(phone_call)

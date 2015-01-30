@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
-ruby "2.1.5"
+ruby "2.2.0"
 
-gem 'rails', '4.1.7'
+gem 'rails', '4.2.0'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
 gem "lazy_high_charts"
 gem "geocoder"
-gem "phony", :git => "git://github.com/floere/phony.git"
+gem "phony"
 gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countries.git"
 gem "faker"
 gem "hirefire-resource"
@@ -16,9 +16,9 @@ gem 'resque-web', :require => 'resque_web'
 gem "unicorn"
 gem "rack-timeout"
 gem "redis"
-gem "torasup", :git => "git://github.com/dwilkie/torasup.git"
+gem "torasup"
 gem "nuntium_api", :github => "dwilkie/nuntium-api-ruby"
-gem "state_machine"
+gem "aasm", :github => "aasm/aasm"
 gem "twilio-ruby"
 gem "uuid"
 gem "multi_xml"
@@ -37,10 +37,15 @@ gem 'turbolinks'
 
 gem 'rails_12factor', :group => :production
 
+group :development do
+  gem 'web-console', '~> 2.0'
+end
+
 group :test, :development do
   gem 'rspec-rails'
-  gem "parallel_tests"
-  gem "foreman"
+  gem 'parallel_tests'
+  gem 'foreman'
+  gem 'pry'
 end
 
 group :test do

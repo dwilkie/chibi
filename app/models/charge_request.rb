@@ -3,24 +3,27 @@ class ChargeRequest < ActiveRecord::Base
   belongs_to :requester, :polymorphic => true
 
   include Chibi::Analyzable
+  include AASM
 
   validates :user, :operator, :presence => true
 
   after_create :request_charge!
 
-  state_machine :initial => :created do
-    state :awaiting_result, :successful, :errored, :failed
-
-    after_transition :awaiting_result => [:successful, :failed, :errored], :do => :notify_requester!
+  aasm :column => :state, :whiny_transitions => false do
+    state :created, :initial => true
+    state :awaiting_result
+    state :successful
+    state :errored
+    state :failed
 
     event :await_result do
-      transition(:created => :awaiting_result)
+      transitions(:from => :created, :to => :awaiting_result)
     end
 
-    event :process_result do
-      transition(:awaiting_result => :successful, :if => :result_successful?)
-      transition(:awaiting_result => :failed, :if => :result_failed?)
-      transition(:awaiting_result => :errored)
+    event :process_result, :after_commit => :notify_requester! do
+      transitions(:from => :awaiting_result, :to => :successful, :if => :result_successful?)
+      transitions(:from => :awaiting_result, :to => :failed, :if => :result_failed?)
+      transitions(:from => :awaiting_result, :to => :errored)
     end
   end
 
@@ -48,7 +51,7 @@ class ChargeRequest < ActiveRecord::Base
   def set_result!(result, reason)
     self.result = result
     self.reason = reason
-    process_result
+    process_result!
   end
 
   private
@@ -75,7 +78,7 @@ class ChargeRequest < ActiveRecord::Base
       operator,
       user.mobile_number
     )
-    await_result
+    await_result!
   end
 
   def result_successful?

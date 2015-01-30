@@ -111,7 +111,7 @@ describe ChargeRequest do
     end
 
     it "should only mark old charge requests that are 'awaiting_result' or 'created' as 'errored'" do
-      subject.class.timeout!
+      described_class.timeout!
       charge_request_awaiting_result.reload.should be_awaiting_result
       old_charge_request_awaiting_result.reload.should be_errored
       old_charge_request_awaiting_result.reason.should == "timeout"

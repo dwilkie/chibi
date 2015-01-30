@@ -141,12 +141,12 @@ describe Reply do
 
       context "if the destination is set" do
         before do
-          new_reply.destination = 1234
+          new_reply.destination = "1234"
         end
 
         it "should not be set as the user's mobile number" do
           new_reply.should be_valid
-          new_reply.destination.should == 1234
+          new_reply.destination.should == "1234"
         end
       end
     end
@@ -228,11 +228,11 @@ describe Reply do
 
   describe "#destination" do
     it "should be an alias for the attribute '#to'" do
-      subject.destination = 123
-      subject.to.should == 123
+      subject.destination = "123"
+      subject.to.should == "123"
 
-      subject.to = 456
-      subject.destination.should == 456
+      subject.to = "456"
+      subject.destination.should == "456"
     end
   end
 
@@ -264,7 +264,9 @@ describe Reply do
         reply.instance_variable_set(:@delivery_state, options[:state])
         reply.instance_variable_set(:@force_state_update, options[:force])
         reply.update_delivery_status
+        reply.send(:save_with_state_check)
       end
+
       reply.update_delivery_state
       reply.reload.should be_delivered_by_smsc
 
@@ -303,12 +305,15 @@ describe Reply do
         reply.instance_variable_set(:@delivery_state, options[:state])
         reply.instance_variable_set(:@force_state_update, options[:force])
         reply.update_delivery_status
+        reply.send(:save_with_state_check)
       end
+
       reply.update_delivery_state(:state => "delivered", :force => true)
       reply.reload.should be_delivered_by_smsc
 
       reply = create(:reply, :failed)
       reply.update_delivery_state(:state => "delivered")
+
       reply.should be_failed
 
       reply = create(:reply, :rejected)

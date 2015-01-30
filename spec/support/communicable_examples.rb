@@ -27,7 +27,7 @@ shared_examples_for "communicable" do
     context "when saving" do
       it "should record the user's last_contacted_at" do
         user_timestamp = communicable_resource.user.updated_at
-        communicable_resource.save
+        communicable_resource.touch
         communicable_resource.user.updated_at.should > user_timestamp
         communicable_resource.user.last_contacted_at.should > user_timestamp
       end

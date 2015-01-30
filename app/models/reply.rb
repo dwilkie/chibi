@@ -5,6 +5,8 @@ class Reply < ActiveRecord::Base
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
 
+  include AASM
+
   DELIVERED = "delivered"
   FAILED = "failed"
   CONFIRMED = "confirmed"
@@ -17,36 +19,31 @@ class Reply < ActiveRecord::Base
 
   alias_attribute :destination, :to
 
-  state_machine :initial => :pending_delivery, :action => :save_with_state_check do
-    state :pending_delivery,
-          :queued_for_smsc_delivery,
-          :delivered_by_smsc,
-          :rejected,
-          :failed,
-          :confirmed
-
-    after_transition any => [:failed, :rejected], :do => :logout_user
+  aasm :column => :state, :whiny_transitions => false do
+    state :pending_delivery, :initial => true
+    state :queued_for_smsc_delivery
+    state :delivered_by_smsc
+    state :rejected
+    state :failed
+    state :confirmed
 
     event :update_delivery_status do
-      transition(
-        [
-          :pending_delivery,
-          :queued_for_smsc_delivery
-        ] => :delivered_by_smsc, :if => :delivery_succeeded?
+      transitions(
+        :from => [:pending_delivery, :queued_for_smsc_delivery],
+        :to => :delivered_by_smsc,
+        :if => :delivery_succeeded?
       )
 
-      transition(:pending_delivery         => :queued_for_smsc_delivery)
-      transition(:queued_for_smsc_delivery => :rejected,          :if => :delivery_failed?)
-      transition(:delivered_by_smsc        => :failed,            :if => :delivery_failed?)
+      transitions(:from => :pending_delivery, :to => :queued_for_smsc_delivery)
+      transitions(:from => :queued_for_smsc_delivery, :to => :rejected, :if => :delivery_failed?)
+      transitions(:from => :delivered_by_smsc, :to => :failed, :if => :delivery_failed?)
+
       # the following handles the case where the delivery receipts were received out of order
-      transition(:rejected                 => :failed,            :if => :delivery_succeeded?)
-      transition(
-        [
-          :queued_for_smsc_delivery,
-          :delivered_by_smsc,
-          :rejected,
-          :failed
-        ] => :confirmed, :if => :delivery_confirmed?
+      transitions(:from => :rejected, :to => :failed, :if => :delivery_succeeded?)
+      transitions(
+        :from => [:queued_for_smsc_delivery, :delivered_by_smsc, :rejected, :failed],
+        :to => :confirmed,
+        :if => :delivery_confirmed?
       )
     end
   end
@@ -126,6 +123,7 @@ class Reply < ActiveRecord::Base
     @delivery_state = options[:state]
     @force_state_update = options[:force]
     update_delivery_status
+    save_with_state_check
   end
 
   private
@@ -149,13 +147,18 @@ class Reply < ActiveRecord::Base
   end
 
   def save_with_state_check
-    return save if @force_state_update
-    if valid?
-      state_attribute = self.class.state_machine.attribute
-      self.class.where(
-        self.class.primary_key => id
-      ).where(state_attribute => state_was).update_all(state_attribute => state) == 1
+    if @force_state_update
+      result = save
+    else
+      if valid?
+        state_attribute = :state
+        result = self.class.where(
+          self.class.primary_key => id
+        ).where(state_attribute => state_was).update_all(state_attribute => state) == 1
+      end
     end
+    logout_user_if_failed_consecutively
+    result
   end
 
   def set_forward_message(from, message)
@@ -188,7 +191,8 @@ class Reply < ActiveRecord::Base
     @delivery_state == CONFIRMED
   end
 
-  def logout_user
+  def logout_user_if_failed_consecutively
+    return unless failed? || rejected?
     number_inactive = true
     recent_replies = user.replies.reverse_order.limit(NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER).pluck(:state)
     return unless recent_replies.count == NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER
