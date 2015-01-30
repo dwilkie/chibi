@@ -236,7 +236,7 @@ describe ChargeRequest do
 
       include ResqueHelpers
 
-      let(:job) { ResqueSpec.queues[ENV["CHIBI_BILLER_CHARGE_REQUEST_QUEUE"]].first }
+      let(:job) { ResqueSpec.queues[Rails.application.secrets[:chibi_biller_charge_request_queue]].first }
 
       before do
         do_background_task(:queue_only => true) { subject.save! }
@@ -244,7 +244,7 @@ describe ChargeRequest do
 
       it "should queue a job for processing the charge request" do
         job.should_not be_nil
-        job[:class].should == ENV["CHIBI_BILLER_CHARGE_REQUEST_WORKER"]
+        job[:class].should == Rails.application.secrets[:chibi_biller_charge_request_worker]
         job[:args].should == [subject.id, subject.operator, subject.user.mobile_number]
       end
 

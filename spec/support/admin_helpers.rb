@@ -1,7 +1,8 @@
 module AdminHelpers
   def authorize
     page.driver.browser.basic_authorize(
-      ENV["HTTP_BASIC_AUTH_ADMIN_USER"], ENV["HTTP_BASIC_AUTH_ADMIN_PASSWORD"]
+      Rails.application.secrets[:http_basic_auth_admin_user],
+      Rails.application.secrets[:http_basic_auth_admin_password]
     )
   end
 end

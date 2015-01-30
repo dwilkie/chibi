@@ -102,7 +102,7 @@ class Message < ActiveRecord::Base
   end
 
   def user_wants_to_chat_with_someone_new?
-    ENV["TEXT_NEW_FOR_NEW_CHAT"].to_i == 1 && normalized_body.gsub(/["']/, "") == "new"
+    Rails.application.secrets[:text_new_for_new_chat].to_i == 1 && normalized_body.gsub(/["']/, "") == "new"
   end
 
   def normalized_body

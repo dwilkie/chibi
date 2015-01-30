@@ -246,10 +246,16 @@ class Reply < ActiveRecord::Base
   end
 
   def deliver_via_nuntium?
-    ENV["DELIVER_VIA_NUNTIUM"].nil? || ENV["DELIVER_VIA_NUNTIUM"] != "0"
+    deliver_via_nuntium = Rails.application.secrets[:deliver_via_nuntium]
+    deliver_via_nuntium.nil? || deliver_via_nuntium != "0"
   end
 
   def nuntium
-    @nuntium ||= Nuntium.new ENV['NUNTIUM_URL'], ENV['NUNTIUM_ACCOUNT'], ENV['NUNTIUM_APPLICATION'], ENV['NUNTIUM_PASSWORD']
+    @nuntium ||= Nuntium.new(
+      Rails.application.secrets[:nuntium_url],
+      Rails.application.secrets[:nuntium_account],
+      Rails.application.secrets[:nuntium_application],
+      Rails.application.secrets[:nuntium_password]
+    )
   end
 end

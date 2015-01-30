@@ -1,6 +1,6 @@
 module Resque
   class WorkerBoss
-    SLOWEST_JOB = (ENV["SLOWEST_WORKER"] || 30).to_i # minutes
+    SLOWEST_JOB = (Rails.application.secrets[:slowest_worker] || 30).to_i # minutes
 
     def self.clean_stale_workers
       Resque.workers.each do |worker|

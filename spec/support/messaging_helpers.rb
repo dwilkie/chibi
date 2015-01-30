@@ -96,10 +96,10 @@ module MessagingHelpers
 
   def nuntium_erb(options = {})
     {
-      :url => ENV["NUNTIUM_URL"],
-      :account => ENV["NUNTIUM_ACCOUNT"],
-      :application => ENV["NUNTIUM_APPLICATION"],
-      :password => ENV["NUNTIUM_PASSWORD"],
+      :url => Rails.application.secrets[:nuntium_url],
+      :account => Rails.application.secrets[:nuntium_account],
+      :application => Rails.application.secrets[:nuntium_application],
+      :password => Rails.application.secrets[:nuntium_password],
       :token => options.delete(:token) || generate(:token),
       :to => options.delete(:to) || generate(:mobile_number),
       :body => options.delete(:body) || "hello"
@@ -107,6 +107,6 @@ module MessagingHelpers
   end
 
   def nuntium_send_ao_path
-    "/#{ENV["NUNTIUM_ACCOUNT"]}/#{ENV["NUNTIUM_APPLICATION"]}/send_ao.json"
+    "/#{Rails.application.secrets[:nuntium_account]}/#{Rails.application.secrets[:nuntium_application]}/send_ao.json"
   end
 end

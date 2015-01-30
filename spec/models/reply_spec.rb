@@ -392,13 +392,14 @@ describe Reply do
     end
 
     context "via Nuntium" do
+      include EnvHelpers
+
       def assert_persisted_and_delivered(reply, mobile_number, options = {})
         super(reply, mobile_number, options.merge(:via => :nuntium))
       end
 
       before do
-        ENV.stub(:[]).and_call_original
-        ENV.stub(:[]).with("DELIVER_VIA_NUNTIUM").and_return("1")
+        stub_env(:deliver_via_nuntium, "1")
       end
 
       it "should deliver the message and save the token" do

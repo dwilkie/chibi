@@ -96,9 +96,9 @@ shared_context "twiml" do
 
   def authenticated_url(uri)
     url = URI.parse(uri)
-    authentication_key = "HTTP_BASIC_AUTH_PHONE_CALL"
-    url.user = ENV["#{authentication_key}_USER"]
-    url.password = ENV["#{authentication_key}_PASSWORD"]
+    authentication_key = "http_basic_auth_phone_call"
+    url.user = Rails.application.secrets["#{authentication_key}_user"]
+    url.password =  Rails.application.secrets["#{authentication_key}_password"]
     url.to_s
   end
 

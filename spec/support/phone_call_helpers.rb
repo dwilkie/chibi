@@ -62,9 +62,9 @@ module PhoneCallHelpers
 
     def twilio_cassette_erb(options = {})
       {
-        :account_sid => ENV['TWILIO_ACCOUNT_SID'],
-        :auth_token =>  ENV['TWILIO_AUTH_TOKEN'],
-        :application_sid => ENV['TWILIO_APPLICATION_SID'],
+        :account_sid => Rails.application.secrets[:twilio_account_sid],
+        :auth_token =>  Rails.application.secrets[:twilio_auth_token],
+        :application_sid =>  Rails.application.secrets[:twilio_application_sid],
       }.merge(options)
     end
 
@@ -90,7 +90,7 @@ module PhoneCallHelpers
     end
 
     def twilio_numbers(options = {})
-      twilio_numbers = ENV['TWILIO_OUTGOING_NUMBERS'].split(":")
+      twilio_numbers = Rails.application.secrets[:twilio_outgoing_numbers].split(":")
       return twilio_numbers if options[:formatted] == false
 
       formatted_numbers = []
