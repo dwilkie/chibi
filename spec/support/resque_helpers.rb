@@ -1,5 +1,7 @@
 module ResqueHelpers
-  EXTERNAL_QUEUES = [ENV["CHIBI_BILLER_CHARGE_REQUEST_QUEUE"]]
+  EXTERNAL_QUEUES = [
+    Rails.application.secrets[:chibi_biller_charge_request_queue]
+  ]
 
   def do_background_task(options = {}, &block)
     ResqueSpec.reset!

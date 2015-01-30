@@ -90,7 +90,7 @@ describe CallDataRecord do
       it "should upload the cdr data to S3" do
         subject.save!
         uri = URI.parse(subject.cdr_data.url)
-        uri.host.should == (ENV["AWS_FOG_DIRECTORY"] + ".s3.amazonaws.com")
+        uri.host.should == (Rails.application.secrets[:aws_fog_directory] + ".s3.amazonaws.com")
       end
     end
   end

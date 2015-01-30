@@ -11,8 +11,11 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate(resource)
-    authentication_key = "HTTP_BASIC_AUTH_#{resource.upcase}"
-    http_basic_authenticate(ENV["#{authentication_key}_USER"], ENV["#{authentication_key}_PASSWORD"])
+    authentication_key = "http_basic_auth_#{resource}"
+    http_basic_authenticate(
+      Rails.application.secrets[:"#{authentication_key}_user"],
+      Rails.application.secrets[:"#{authentication_key}_password"]
+    )
   end
 
   def http_basic_authenticate(username, password)

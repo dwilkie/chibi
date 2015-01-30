@@ -4,7 +4,10 @@ module Chibi
       private
 
       def twilio_client
-        @client ||= ::Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
+        @client ||= ::Twilio::REST::Client.new(
+          Rails.application.secrets[:twilio_account_sid],
+          Rails.application.secrets[:twilio_auth_token]
+        )
       end
 
       def twilio_formatted(number)
@@ -17,7 +20,7 @@ module Chibi
       end
 
       def twilio_outgoing_numbers(options = {})
-        twilio_numbers = ENV['TWILIO_OUTGOING_NUMBERS'].split(":")
+        twilio_numbers = Rails.application.secrets[:twilio_outgoing_numbers].split(":")
         return twilio_numbers if options[:formatted] == false
 
         formatted_numbers = []
@@ -40,7 +43,7 @@ module Chibi
       end
 
       def default_pbx_dial_string(interpolations = {})
-        dial_string = ENV['DEFAULT_PBX_DIAL_STRING'].dup
+        dial_string = Rails.application.secrets[:default_pbx_dial_string].dup
         interpolations.each do |interpolation, value|
           dial_string.gsub!("%{#{interpolation}}", value)
         end
