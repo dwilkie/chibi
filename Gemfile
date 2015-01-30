@@ -24,6 +24,7 @@ gem "uuid"
 gem "multi_xml"
 gem "carrierwave"
 gem "fog"
+gem "sidekiq"
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
