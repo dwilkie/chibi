@@ -4,7 +4,7 @@ class CallDataRecordsController < ApplicationController
   before_filter :authenticate_call_data_record
 
   def create
-    Resque.enqueue(CallDataRecordCreator, params["cdr"])
+    CallDataRecordCreatorJob.perform_later(params["cdr"])
     render :nothing => true, :status => :created
   end
 
