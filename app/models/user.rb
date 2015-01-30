@@ -71,11 +71,11 @@ class User < ActiveRecord::Base
 
     event :login do
       transitions(:from => :offline, :to => :online)
-      transitions(:from => :unactivated, :to => :online, :after => :tourch_activated_at)
+      transitions(:from => :unactivated, :to => :online, :after => :touch_activated_at)
     end
 
-    event :logout do
-      transitions(:to => :offline, :after => :deactivate_chats!)
+    event :logout, :after => :deactivate_chats! do
+      transitions(:to => :offline)
     end
 
     event :search_for_friend do
