@@ -8,7 +8,7 @@ gem 'kaminari'
 gem "lazy_high_charts"
 gem "geocoder"
 gem "phony"
-gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countries.git"
+gem "countries", :require => 'iso3166'
 gem "faker"
 gem "hirefire-resource"
 gem "unicorn"

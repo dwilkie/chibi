@@ -12,14 +12,6 @@ GIT
       json
       rest-client
 
-GIT
-  remote: git://github.com/hexorx/countries.git
-  revision: d7dc715f6f7e588100ada5272edaa1057df419bd
-  specs:
-    countries (0.10.0)
-      currencies (~> 0.4.2)
-      i18n_data (~> 0.6.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -86,6 +78,8 @@ GEM
       execjs
     coffee-script-source (1.9.0)
     connection_pool (2.1.1)
+    countries (0.10.0)
+      currencies (~> 0.4.2)
     currencies (0.4.2)
     database_cleaner (1.4.0)
     debug_inspector (0.0.2)
@@ -191,7 +185,6 @@ GEM
     hirefire-resource (0.3.4)
     hitimes (1.2.2)
     i18n (0.7.0)
-    i18n_data (0.6.0)
     inflecto (0.0.2)
     ipaddress (0.8.0)
     jquery-rails (4.0.3)
@@ -361,7 +354,7 @@ DEPENDENCIES
   capybara
   carrierwave
   coffee-rails (~> 4.0.0)
-  countries!
+  countries
   database_cleaner
   factory_girl
   faker
