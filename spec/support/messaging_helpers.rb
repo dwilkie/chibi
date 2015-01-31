@@ -1,11 +1,11 @@
 require_relative "authentication_helpers"
 require_relative "location_helpers"
-require_relative "resque_helpers"
+require_relative "active_job_helpers"
 
 module MessagingHelpers
   include AuthenticationHelpers
   include LocationHelpers
-  include ResqueHelpers
+  include ActiveJobHelpers
 
   EXAMPLES = YAML.load_file(File.join(File.dirname(__FILE__), 'message_examples.yaml'))
 
@@ -74,7 +74,7 @@ module MessagingHelpers
 
     expect_locate(options) do
       expect_message do
-        do_background_task do
+        trigger_job do
           post messages_path,
           {:message => {
             :from => options[:from],

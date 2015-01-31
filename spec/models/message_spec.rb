@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Message do
   include AnalyzableExamples
-  include ResqueHelpers
+  include ActiveJobHelpers
 
   include_context "replies"
 
@@ -64,6 +64,8 @@ describe Message do
     let(:message_awaiting_charge_result_for_too_long) { create_unprocessed_message(:awaiting_charge_result) }
     let(:message_awaiting_charge_result) { create_unprocessed_message(:created_at => Time.current) }
 
+    let(:job_args) { enqueued_jobs.map { |job| job[:args].first } }
+
     before do
       Timecop.freeze(Time.current)
       message_awaiting_charge_result_for_too_long
@@ -80,20 +82,19 @@ describe Message do
     end
 
     context "passing no options" do
-      before do
-        do_background_task(:queue_only => true) { subject.class.queue_unprocessed }
-      end
-
       it "should queue for processing any non processed messages with no chat that were created more than 30 secs ago" do
-        MessageProcessor.should have_queued(unprocessed_message.id)
-        MessageProcessor.should have_queued(recently_received_message.id)
-        MessageProcessor.should have_queued(message_awaiting_charge_result_for_too_long.id)
-        MessageProcessor.should have_queue_size_of(3)
+        trigger_job(:queue_only => true) { described_class.queue_unprocessed }
+        expect(enqueued_jobs.size).to eq(3)
+        expect(job_args).to contain_exactly(
+          unprocessed_message.id,
+          recently_received_message.id,
+          message_awaiting_charge_result_for_too_long.id
+        )
       end
 
       context "after the job has run" do
         before do
-          perform_background_job(:message_processor_queue)
+          trigger_job { described_class.queue_unprocessed }
         end
 
         it "should process the messages" do
@@ -110,13 +111,15 @@ describe Message do
 
     context "passing :timeout => 5.minutes.ago" do
       before do
-        do_background_task(:queue_only => true) { subject.class.queue_unprocessed(:timeout => 5.minutes.ago) }
+        trigger_job(:queue_only => true) { described_class.queue_unprocessed(:timeout => 5.minutes.ago) }
       end
 
       it "should queue for processing any non processed message that was created more than 5 mins ago" do
-        MessageProcessor.should have_queued(unprocessed_message.id)
-        MessageProcessor.should have_queued(message_awaiting_charge_result_for_too_long.id)
-        MessageProcessor.should have_queue_size_of(2)
+        expect(enqueued_jobs.size).to eq(2)
+        expect(job_args).to contain_exactly(
+          unprocessed_message.id,
+          message_awaiting_charge_result_for_too_long.id
+        )
       end
     end
   end
@@ -137,8 +140,9 @@ describe Message do
     subject { create(:message) }
 
     it "should queue the message for processing" do
-      do_background_task(:queue_only => true) { subject.charge_request_updated! }
-      MessageProcessor.should have_queued(subject.id)
+      trigger_job(:queue_only => true) { subject.charge_request_updated! }
+      job = enqueued_jobs.first
+      job[:args].first.should == subject.id
     end
   end
 
@@ -151,8 +155,9 @@ describe Message do
 
   describe "queue_for_processing!" do
     it "queue the message for processing" do
-      do_background_task(:queue_only => true) { message.queue_for_processing! }
-      MessageProcessor.should have_queued(message.id)
+      trigger_job(:queue_only => true) { message.queue_for_processing! }
+      job = enqueued_jobs.last
+      expect(job[:args].first).to eq(message.id)
     end
   end
 
