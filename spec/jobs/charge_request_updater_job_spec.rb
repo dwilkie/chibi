@@ -1,40 +1,36 @@
 require 'spec_helper'
 
-describe ChargeRequestUpdater do
-  let(:asserted_queue) { :charge_request_updater_queue }
-
-  context "@queue" do
-    it "should == :charge_request_updater_queue" do
-      subject.class.instance_variable_get(:@queue).should == asserted_queue
-    end
+describe ChargeRequestUpdaterJob do
+  describe "#queue_name" do
+    it { expect(subject.queue_name).to eq("charge_request_updater_queue") }
   end
 
   describe ".perform(charge_request_id, result, responder, reason = nil)" do
     let(:charge_request) { double(ChargeRequest) }
-    let(:find_stub) { ChargeRequest.stub(:where) }
     let(:relation) { double(ActiveRecord::Relation) }
     let(:result) { "result" }
     let(:responder) { "responder" }
     let(:id) { 1 }
     let(:args) { [id, result, responder] }
+    let(:finder_args) { {:id => id, :operator => responder} }
 
     before do
-      find_stub.and_return(relation)
-      relation.stub(:first!).and_return(charge_request)
-      charge_request.stub(:set_result!)
+      allow(ChargeRequest).to receive(:where).with(finder_args).and_return(relation)
+      allow(relation).to receive(:first!).and_return(charge_request)
+      allow(charge_request).to receive(:set_result!)
     end
 
     it "should set the result on the charge request" do
-      ChargeRequest.should_receive(:where).with(:id => id, :operator => responder)
-      relation.should_receive(:first!)
-      charge_request.should_receive(:set_result!).with(result, nil)
-      subject.class.perform(*args)
+      expect(charge_request).to receive(:set_result!).with(result, nil)
+      subject.perform(*args)
     end
   end
 
   describe "performing the job" do
     # this is an integration test
     include TranslationHelpers
+    include ActiveJobHelpers
+
     include_context "replies"
 
     let(:user) { create(:user) }
@@ -42,14 +38,17 @@ describe ChargeRequestUpdater do
     let(:requester) { create(:message, :awaiting_charge_result, :user => user) }
     let(:charge_request) { create(:charge_request, :notify_requester, :requester => requester, :operator => responder) }
 
+    before do
+      charge_request
+      clear_enqueued_jobs
+    end
+
     def enqueue_job
-      Resque.enqueue(ChargeRequestUpdater, charge_request.id, "failed", responder)
+      described_class.perform_later(charge_request.id, "failed", responder)
     end
 
     it "should update the charge request" do
-      do_background_task(:queue_only => true) { enqueue_job }
-      perform_background_job(asserted_queue)
-      perform_background_job(:message_processor_queue)
+      trigger_job { enqueue_job }
       reply_to(user).body.should == spec_translate(
         :not_enough_credit, user.locale
       )
