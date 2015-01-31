@@ -83,25 +83,6 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.purge_invalid_names!(options = {})
-    name_attribute = quoted_attribute(:name)
-    banned_name_conditions = [
-      where("#{name_attribute} ~ ?", "(?:^#{profile_keywords(:banned_names)}$)").where_values.first
-    ]
-
-    available_locales = I18n.available_locales.dup
-    available_locales.delete(:en)
-
-    available_locales.each do |locale|
-      locale_banned_names = "(?:^#{profile_keywords(:banned_names, :locale => locale, :en => false)}$)"
-      banned_name_conditions << where(
-        "(\"locations\".\"country_code\" = ? AND #{name_attribute} ~ ?)", locale, locale_banned_names
-      ).where_values.first
-    end
-
-    joins(:location).where(banned_name_conditions.join(" OR ")).update_all("name = NULL")
-  end
-
   def self.set_operator_name
     Torasup::Operator.all["kh"].each do |operator_id, operator_metadata|
       condition_statements = []
@@ -177,6 +158,7 @@ class User < ActiveRecord::Base
   end
 
   def self.remind!(options = {})
+    options = options.with_indifferent_access
     within_hours(options) do
       limit = options.delete(:limit) || 100
 
@@ -185,7 +167,7 @@ class User < ActiveRecord::Base
       ).from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(limit)
 
       users_to_remind.each do |user_to_remind|
-        Resque.enqueue(UserReminderer, user_to_remind.id, options)
+        UserRemindererJob.perform_later(user_to_remind.id, options)
       end
     end
   end

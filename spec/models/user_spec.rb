@@ -332,30 +332,6 @@ describe User do
     end
   end
 
-  describe ".purge_invalid_names!" do
-    let(:thai_with_invalid_english_name) { create(:user, :thai, :name => "want") }
-    let(:thai_with_invalid_cambodian_name) { create(:user, :thai, :name => "jong") }
-    let(:cambodian_with_invalid_cambodian_name) { create(:user, :cambodian, :name => "jong") }
-    let(:cambodian_with_valid_cambodian_name) { create(:user, :cambodian, :name => "abajongbab") }
-
-    before do
-      thai_with_invalid_english_name
-      thai_with_invalid_cambodian_name
-      cambodian_with_invalid_cambodian_name
-      cambodian_with_valid_cambodian_name
-    end
-
-    context "passing no options" do
-      it "should purge the all invalid english names and invalid names for the users country" do
-        do_background_task { subject.class.purge_invalid_names! }
-        thai_with_invalid_english_name.reload.name.should be_nil
-        thai_with_invalid_cambodian_name.reload.name.should be_present
-        cambodian_with_invalid_cambodian_name.reload.name.should be_nil
-        cambodian_with_valid_cambodian_name.reload.name.should be_present
-      end
-    end
-  end
-
   describe ".set_operator_name" do
     it "should set the operator_name column for users without one set" do
       asserted_operator_names = {}
@@ -425,7 +401,6 @@ describe User do
       let(:positive_assertion) { :assert_friend_found }
       let(:negative_assertion) { :assert_friend_not_found }
       let(:task) { :do_find_friends }
-      let(:queue_name) { :friend_messenger_queue }
     end
   end
 
@@ -488,11 +463,11 @@ describe User do
 
     def do_remind(options = {})
       create_actors unless options.delete(:skip_create_actors)
-      do_background_task(options) { expect_message { subject.class.remind!(options) } }
+      expect_message { trigger_job(options) { described_class.remind!(options) } }
     end
 
-    def perform_background_job
-      expect_message { super(queue_name) }
+    def perform_background_job(options = {})
+      do_remind(options)
     end
 
     def assert_user_reminded(reference_user)
@@ -519,17 +494,17 @@ describe User do
       assert_reminded
     end
 
-    context "passing :inactivity_period => 3.days.ago" do
+    context "passing 'inactivity_period' => 3.days.ago" do
       it "should remind users that have not been contacted in the last 3 days" do
-        do_remind(:inactivity_period => 3.days.ago)
+        do_remind("inactivity_period" => 3.days.ago)
         assert_reminded
         assert_user_reminded(registered_sp_user_not_contacted_for_a_short_time)
       end
     end
 
-    context "passing :limit => 1" do
+    context "passing 'limit' => 1" do
       it "should only remind the user who was contacted least recently" do
-        do_remind(:limit => 1)
+        do_remind("limit" => 1)
         assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
         expect(reply_to(registered_sp_user_not_contacted_recently)).to eq(nil)
       end
@@ -539,7 +514,6 @@ describe User do
       let(:positive_assertion) { :assert_reminded }
       let(:negative_assertion) { :assert_not_reminded }
       let(:task) { :do_remind }
-      let(:queue_name) { :user_reminderer_queue }
     end
   end
 
