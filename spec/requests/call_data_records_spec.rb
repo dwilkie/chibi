@@ -34,7 +34,6 @@ describe "Call Data Records" do
         expect(enqueued_jobs.size).to eq(1)
         job = enqueued_jobs.first
         expect(job[:args].first).to eq(sample_cdr.body)
-        expect(job[:queue]).to eq("call_data_record_creator_queue")
       end
 
       context "when the job is run" do
