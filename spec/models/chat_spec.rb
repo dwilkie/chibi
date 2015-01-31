@@ -831,38 +831,29 @@ describe Chat do
     end
   end
 
-  describe ".reinvigorate!" do
+  describe ".reinvigorate!", :active_job do
     context "with pending replies" do
-
       let(:pending_reply) { create(:reply, :user => user, :chat => chat) }
-
-      def do_reinvigorate!
-        do_background_task(:queue_only => true) { subject.class.reinvigorate! }
-      end
+      let(:job) { enqueued_jobs.first }
 
       before do
         pending_reply
+        trigger_job(:queue_only => true) { described_class.reinvigorate! }
       end
 
       context "even if the reply recipient is currently chatting" do
-        before do
-          create(:chat, :active, :user => user)
-        end
+        let(:chat) { create(:chat, :active, :user => user) }
 
         it "should still queue a job to try and reinvigorate the chat" do
-          do_reinvigorate!
-          ChatReactivator.should have_queued(chat.id)
+          expect(job[:args].first).to eq(chat.id)
         end
       end
 
       context "the reply recipient is offline" do
-        before do
-          user.logout!
-        end
+        let(:user) { create(:user, :offline) }
 
         it "should not queue a job to reinvigorate the chat" do
-          do_reinvigorate!
-          ChatReactivator.should_not have_queued(chat.id)
+          expect(job).to eq(nil)
         end
       end
     end
