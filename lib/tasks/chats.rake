@@ -6,7 +6,7 @@ namespace :chats do
 
   desc "Terminates all chats which have had no activity in the last 24 hours. (These chats cannot be restarted)"
   task :terminate_inactive => :environment do
-    Resque.enqueue(ChatExpirer, :all => true, :inactivity_period => 24.hours)
+    Resque.enqueue(ChatExpirer, :all => true, :inactivity_period => 24.hours.ago)
   end
 
   desc "Reactivates stagnant chats which have pending messages"

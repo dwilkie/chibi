@@ -283,10 +283,10 @@ describe Chat do
         end
       end
 
-      context "passing :inactivity_period => 11.minutes" do
+      context "passing :inactivity_period => 11.minutes.ago" do
         it "should not deactivate the chat" do
           active_chat_with_inactivity.deactivate!(
-            :with_inactivity => true, :inactivity_period => 11.minutes
+            :with_inactivity => true, :inactivity_period => 11.minutes.ago
           )
           active_chat_with_inactivity.should be_active
         end
@@ -957,7 +957,7 @@ describe Chat do
 
     context "passing :inactivity_period => 11.minutes" do
       before do
-        do_background_task { subject.class.end_inactive(:inactivity_period => 11.minutes) }
+        do_background_task { subject.class.end_inactive(:inactivity_period => 11.minutes.ago) }
       end
 
       it "should deactivate chats with more than 11 minutes of inactivity" do
@@ -988,7 +988,7 @@ describe Chat do
         active_chat_with_inactivity.should_receive(:deactivate!) do |other_options|
           other_options.should == HashWithIndifferentAccess.new(other_options)
         end
-        do_background_task { subject.class.end_inactive({:inactivity_period => 10.minutes}.merge(other_options)) }
+        do_background_task { subject.class.end_inactive({:inactivity_period => 10.minutes.ago}.merge(other_options)) }
       end
     end
   end

@@ -238,7 +238,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.inactive_timestamp(options = {})
-    (options[:inactivity_period] || 10.minutes).ago
+    options[:inactivity_period] || 10.minutes.ago
   end
 
   def one_sided?(num_messages = 3)
