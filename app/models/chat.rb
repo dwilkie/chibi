@@ -15,7 +15,7 @@ class Chat < ActiveRecord::Base
 
   def self.end_inactive(options = {})
     with_inactivity(options).find_each do |chat|
-      Resque.enqueue(ChatDeactivator, chat.id, options.merge(:with_inactivity => true))
+      ChatDeactivatorJob.perform_later(chat.id, options.merge(:with_inactivity => true))
     end
   end
 
@@ -117,6 +117,7 @@ class Chat < ActiveRecord::Base
   end
 
   def deactivate!(options = {})
+    options = options.with_indifferent_access
     return if options[:with_inactivity] && !has_inactivity?(options)
 
     # reactivate previous chats by default
