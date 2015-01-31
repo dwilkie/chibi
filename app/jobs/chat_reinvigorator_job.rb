@@ -1,5 +1,5 @@
 class ChatReinvigoratorJob < ActiveJob::Base
-  queue_as :chat_reinvigorator_queue
+  queue_as :default
 
   def perform
     Chat.reinvigorate!

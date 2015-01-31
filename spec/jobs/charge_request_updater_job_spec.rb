@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ChargeRequestUpdaterJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("charge_request_updater_queue") }
+    it { expect(subject.queue_name).to eq("critical") }
   end
 
   describe ".perform(charge_request_id, result, responder, reason = nil)" do

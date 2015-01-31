@@ -1,5 +1,5 @@
 class ChatReactivatorJob < ActiveJob::Base
-  queue_as :chat_reactivator_queue
+  queue_as :high
 
   def perform(chat_id)
     Chat.find(chat_id).reinvigorate!

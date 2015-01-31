@@ -1,5 +1,5 @@
 class CallDataRecordCreatorJob < ActiveJob::Base
-  queue_as :call_data_record_creator_queue
+  queue_as :very_high
 
   def perform(body)
     cdr = CallDataRecord.new(:body => body)

@@ -1,5 +1,5 @@
 class LocatorJob < ActiveJob::Base
-  queue_as :locator_queue
+  queue_as :high
 
   def perform(location_id, address)
     location = Location.find(location_id)

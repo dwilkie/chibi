@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe UserRemindererJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("user_reminderer_queue") }
+    it { expect(subject.queue_name).to eq("low") }
   end
 
   describe "#perform(user_id, options = {})" do

@@ -1,5 +1,5 @@
 class ChatDeactivatorJob < ActiveJob::Base
-  queue_as :chat_deactivator_queue
+  queue_as :high
 
   def perform(chat_id, options = {})
     Chat.find(chat_id).deactivate!(options)

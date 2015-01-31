@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ReportGeneratorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("report_generator_queue") }
+    it { expect(subject.queue_name).to eq("high") }
   end
 
   describe "#perform(options)" do
@@ -15,11 +15,7 @@ describe ReportGeneratorJob do
     end
 
     it "should generate a report" do
-      expect(Report).to receive(:new) do |options|
-        options["some"].should == :options
-        options[:some].should == :options
-        report
-      end
+      expect(Report).to receive(:new).with(options)
       expect(report).to receive(:generate!)
       subject.perform(options)
     end

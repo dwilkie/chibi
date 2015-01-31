@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe LocatorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("locator_queue") }
+    it { expect(subject.queue_name).to eq("high") }
   end
 
   describe "#perform(id, address)" do

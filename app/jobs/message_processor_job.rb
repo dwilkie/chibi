@@ -1,5 +1,5 @@
 class MessageProcessorJob < ActiveJob::Base
-  queue_as :message_processor_queue
+  queue_as :urgent
 
   def perform(message_id)
     Message.find(message_id).process!

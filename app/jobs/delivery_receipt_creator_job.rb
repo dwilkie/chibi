@@ -1,5 +1,5 @@
 class DeliveryReceiptCreatorJob < ActiveJob::Base
-  queue_as :delivery_receipt_creator_queue
+  queue_as :high
 
   def perform(params)
     if reply = Reply.find_by_token(params[:token])

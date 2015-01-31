@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe TwilioCdrFetcherJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("twilio_cdr_fetcher_queue") }
+    it { expect(subject.queue_name).to eq("high") }
   end
 
   describe "#perform(phone_call_id)" do

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe DeliveryReceiptCreatorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("delivery_receipt_creator_queue") }
+    it { expect(subject.queue_name).to eq("high") }
   end
 
   describe "#perform(params)" do

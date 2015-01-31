@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe CallDataRecordCreatorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("call_data_record_creator_queue") }
+    it { expect(subject.queue_name).to eq("very_high") }
   end
 
   describe "#perform(body)" do

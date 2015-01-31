@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe MessageProcessorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("message_processor_queue") }
+    it { expect(subject.queue_name).to eq("urgent") }
   end
 
   describe "#perform(message_id)" do

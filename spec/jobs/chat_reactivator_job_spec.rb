@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ChatReactivatorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("chat_reactivator_queue") }
+    it { expect(subject.queue_name).to eq("high") }
   end
 
   describe "#perform(chat_id)" do

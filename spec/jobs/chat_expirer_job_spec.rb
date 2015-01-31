@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ChatExpirerJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("chat_expirer_queue") }
+    it { expect(subject.queue_name).to eq("default") }
   end
 
   describe "#perform(options = {})" do

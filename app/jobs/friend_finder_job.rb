@@ -1,5 +1,5 @@
 class FriendFinderJob < ActiveJob::Base
-  queue_as :friend_finder_queue
+  queue_as :default
 
   def perform(options = {})
     User.find_friends(options)

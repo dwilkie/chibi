@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe FriendMessengerJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("friend_messenger_queue") }
+    it { expect(subject.queue_name).to eq("high") }
   end
 
   describe "#perform(user_id, options = {})" do
