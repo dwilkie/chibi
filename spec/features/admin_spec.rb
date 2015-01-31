@@ -83,7 +83,6 @@ describe "Admin" do
     def assert_user_show(reference_user)
       page.should have_css "#id", :text => reference_user.id.to_s
       page.should have_css "#created_at", :text => time_ago_in_words
-      page.should have_css "#activated_at", :text => time_ago_in_words
       page.should have_css "#name", :text => reference_user.name
       page.should have_css "#screen_name", :text => reference_user.screen_name
       page.should have_css "#date_of_birth", :text => reference_user.date_of_birth

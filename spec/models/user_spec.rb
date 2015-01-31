@@ -17,7 +17,6 @@ describe User do
   let(:friend) { create(:user) }
   let(:active_chat) { create(:chat, :active, :user => user, :friend => friend) }
   let(:offline_user) { create(:user, :offline) }
-  let(:unactivated_user) { create(:user, :unactivated) }
   let(:user_with_complete_profile) { build(:user, :with_complete_profile) }
   let(:male) { create(:user, :male) }
   let(:female) { create(:user, :female) }
@@ -196,17 +195,6 @@ describe User do
       end
     end
 
-    context "after_create" do
-      it "should set the activated_at to the created_at if activated and activated_at is not set" do
-        Timecop.freeze(Time.current) do
-          user = create(:user, :created_at => 5.days.ago)
-          user.activated_at.should == 5.days.ago
-
-          unactivated_user.activated_at.should be_nil
-        end
-      end
-    end
-
     context "before_validation(:on => :create)" do
       it "should generate a screen name" do
         new_user.screen_name.should be_nil
@@ -243,8 +231,7 @@ describe User do
   end
 
   it_should_behave_like "analyzable", true do
-    let(:group_by_column) { :activated_at }
-    let(:excluded_resource) { unactivated_user }
+    let(:group_by_column) { :created_at }
 
     def operator_name
       resource.operator_name
@@ -327,24 +314,11 @@ describe User do
       male
       user
       offline_user
-      unactivated_user
       active_chat
     end
 
     it "should only return users who are online and not currently chatting" do
       User.available.should == [male]
-    end
-  end
-
-  describe ".activated" do
-    before do
-      offline_user
-      unactivated_user
-      user
-    end
-
-    it "should only return users who are activated" do
-      subject.class.activated.should == [offline_user, user]
     end
   end
 
@@ -482,90 +456,6 @@ describe User do
     end
   end
 
-  context "importing users" do
-
-    let(:sample) {
-      {
-        :data => {
-          "85570761161" => {
-            "gender" => nil,
-            "name" => "narea",
-            "age" => "20",
-            "location" => "Siem Reap"
-          },
-          "855765017456" => {
-            "gender" => "m",
-            "name" => nil,
-            "age" => "27",
-            "location"=>"Battambang"
-          },
-          "85586649123" => {
-            "gender" => "f",
-            "name" => "saou",
-            "age" => nil,
-            "location" => "Kratie"
-          },
-          "85586649656" => {
-            "gender" => "f",
-            "name" => "saou",
-            "age" => "",
-            "location" => nil
-          }
-        }
-      }
-    }
-
-    let(:data) {
-      {
-        user.mobile_number => {
-          "gender" => "m",
-          "name" => "sarit",
-          "age" => "25",
-          "location" => "Phnom Penh"
-        }
-      }.merge(sample[:data])
-    }
-
-    describe ".import!(data)" do
-      it "should queue a job to create a new user for each user that does not already exist" do
-        do_background_task(:queue_only => true) { subject.class.import!(data) }
-        UserCreator.should have_queue_size_of(sample[:data].size)
-        sample[:data].each do |mobile_number, metadata|
-          UserCreator.should have_queued(mobile_number, metadata)
-        end
-        perform_background_job(:user_creator_queue)
-        User.count.should == data.size
-      end
-    end
-
-    describe ".create_unactivated!(mobile_number, metadata)" do
-      let(:users) { User.all }
-      let(:locations) {
-        ResqueSpec.queues["locator_queue"].map { |queue| queue[:args][1] }
-      }
-
-      it "should create an unactivated user" do
-        sample[:data].each do |mobile_number, metadata|
-          subject.class.create_unactivated!(mobile_number, metadata)
-        end
-
-        sample[:data].each_with_index do |(mobile_number, metadata), index|
-          created_user = users[index]
-          created_user.should be_present
-          created_user.should be_unactivated
-          created_user.mobile_number.should == mobile_number
-          created_user.name.should == metadata["name"]
-
-          created_user.age.should == (
-            metadata["age"].present? ? metadata["age"].to_i : nil
-          )
-          created_user.gender.should == metadata["gender"]
-          locations.should(include(metadata["location"])) if metadata["location"]
-        end
-      end
-    end
-  end
-
   describe ".remind!(options = {})" do
     let(:user_not_contacted_recently) { create(:user, :from_unknown_operator, :not_contacted_recently) }
 
@@ -589,12 +479,7 @@ describe User do
       create(:user, :from_registered_service_provider)
     end
 
-    let(:unactivated_user) do
-      create(:user, :from_registered_service_provider, :unactivated, :never_contacted)
-    end
-
     def create_actors
-      unactivated_user
       registered_sp_user_not_contacted_recently
       registered_sp_user_not_contacted_for_a_long_time
       registered_sp_user_not_contacted_for_a_short_time
@@ -617,7 +502,6 @@ describe User do
     end
 
     def assert_reminded
-      assert_user_reminded(unactivated_user)
       assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
       assert_user_reminded(registered_sp_user_not_contacted_recently)
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
@@ -625,7 +509,6 @@ describe User do
     end
 
     def assert_not_reminded
-      reply_to(unactivated_user).should be_nil
       reply_to(registered_sp_user_not_contacted_for_a_long_time).should be_nil
       reply_to(registered_sp_user_not_contacted_recently).should be_nil
       reply_to(registered_sp_user_with_recent_interaction).should be_nil
@@ -648,8 +531,8 @@ describe User do
     context "passing :limit => 1" do
       it "should only remind the user who was contacted least recently" do
         do_remind(:limit => 1)
-        assert_user_reminded(unactivated_user)
-        reply_to(registered_sp_user_not_contacted_for_a_long_time.reload).should be_nil
+        assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
+        expect(reply_to(registered_sp_user_not_contacted_recently)).to eq(nil)
       end
     end
 
@@ -858,7 +741,6 @@ describe User do
     # 1. Don't match him with himself
     # 2. Exclude users who he has already chatted with
     # 3. Exclude users who are offline
-    # 4. Exclude users who are unactivated
 
     # Ordering
 
@@ -899,7 +781,6 @@ describe User do
     # Hanh is a gay 28 year old male from Chiang Mai last seen 15 minutes ago
     # View is a gay 26 year old male from Chiang Mai last seen 15 minutes ago
     # Reaksmey has never interacted (his last_interacted_at is nil)
-    # Peter is unactivated (he's in the system but he never interacted)
 
     # Individual Match Explanations
 
@@ -1021,7 +902,6 @@ describe User do
       :michael => [:nok],
       :reaksmey => [[:luke, :chamroune, :dave, :alex], [:mara, :joy, :con, :jamie, :paul]],
       :kris => [[:luke, :dave, :pauline, :chamroune, :alex], [:joy, :mara, :jamie], :con, :paul, :reaksmey],
-      :peter => []
     }
 
     USER_MATCHES.each do |user, matches|
@@ -1439,25 +1319,10 @@ describe User do
     end
   end
 
-  describe "#activated?" do
-    it "should only return false for unactivated users" do
-      unactivated_user.should_not be_activated
-      offline_user.should be_activated
-      user.should be_activated
-      user_searching_for_friend.should be_activated
-    end
-  end
-
   describe "#available?(options = {})" do
     context "he is offline" do
       it "should be false" do
         offline_user.should_not be_available
-      end
-    end
-
-    context "he is unactivated" do
-      it "should be false" do
-        unactivated_user.should_not be_available
       end
     end
 
@@ -1867,13 +1732,6 @@ describe User do
       offline_user.should_not be_online
       offline_user.login!
       offline_user.should be_online
-
-      unactivated_user.should_not be_activated
-      unactivated_user.activated_at.should be_nil
-      unactivated_user.login!
-      unactivated_user.should be_activated
-      unactivated_user.activated_at.should be_present
-      unactivated_user.should be_online
 
       # test that we simply return for user's who are already online
       duplicate_user = build(:user, :mobile_number => offline_user.mobile_number)

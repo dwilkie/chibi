@@ -22,7 +22,6 @@ describe PhoneCall do
 
   it_should_behave_like "analyzable" do
     let(:group_by_column) { :created_at }
-    let(:excluded_resource) { nil }
 
     def create_resource(*args)
       create(:phone_call, *args)

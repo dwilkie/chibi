@@ -59,19 +59,15 @@ class User < ActiveRecord::Base
 
   before_save :cancel_searching_for_friend_if_chatting
 
-  after_create :set_activated_at
-
   delegate :city, :country_code, :to => :location, :allow_nil => true
 
   aasm :column => :state, :whiny_transitions => false do
     state :online, :initial => true
     state :offline
     state :searching_for_friend
-    state :unactivated
 
     event :login do
       transitions(:from => :offline, :to => :online)
-      transitions(:from => :unactivated, :to => :online, :after => :touch_activated_at)
     end
 
     event :logout, :after_commit => :deactivate_chats! do
@@ -122,10 +118,6 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.activated
-    where("\"#{table_name}\".\"state\" != ?", "unactivated")
-  end
-
   def self.online
     where("\"#{table_name}\".\"state\" != ?", "offline")
   end
@@ -147,10 +139,6 @@ class User < ActiveRecord::Base
     ).uniq.update_all(
       :state => "offline"
     )
-  end
-
-  def self.overview_of_created(options = {})
-    super(options.merge(:group_by_column => :activated_at))
   end
 
   def self.filter_by(params = {})
@@ -185,33 +173,7 @@ class User < ActiveRecord::Base
   end
 
   def self.available
-    where(:active_chat_id => nil).online.activated
-  end
-
-  def self.import!(data)
-    existing_numbers = Hash[
-      User.where(
-        :mobile_number => data.keys
-      ).pluck(
-        :mobile_number
-      ).map { |mobile_number| [mobile_number, true] }
-    ]
-    user_data = data.reject { |mobile_number, metadata| existing_numbers[mobile_number] }
-
-    user_data.each do |mobile_number, metadata|
-      Resque.enqueue(UserCreator, mobile_number, metadata)
-    end
-  end
-
-  def self.create_unactivated!(mobile_number, metadata)
-    user = self.new
-    user.mobile_number = mobile_number
-    user.name = metadata["name"]
-    user.gender = metadata["gender"]
-    user.age = metadata["age"].to_i if metadata["age"].present?
-    user.state = :unactivated
-    user.assign_location(metadata["location"])
-    user.save!
+    where(:active_chat_id => nil).online
   end
 
   def self.remind!(options = {})
@@ -351,12 +313,8 @@ class User < ActiveRecord::Base
     state != "offline"
   end
 
-  def activated?
-    state != "unactivated"
-  end
-
   def available?(options = {})
-    online? && activated? && (!currently_chatting? || !options[:not_currently_chatting] && !active_chat.active?)
+    online? && (!currently_chatting? || !options[:not_currently_chatting] && !active_chat.active?)
   end
 
   def currently_chatting?
@@ -678,14 +636,6 @@ class User < ActiveRecord::Base
 
   def self.enqueue_friend_messenger(user, options = {})
     Resque.enqueue(FriendMessenger, user.id, options)
-  end
-
-  def touch_activated_at
-    touch(:activated_at)
-  end
-
-  def set_activated_at
-    update_attribute(:activated_at, created_at) if activated? && activated_at.nil?
   end
 
   def set_operator_name

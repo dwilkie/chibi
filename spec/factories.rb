@@ -417,10 +417,6 @@ FactoryGirl.define do
       state "offline"
     end
 
-    trait :unactivated do
-      state "unactivated"
-    end
-
     trait :with_name do
       name "veronica"
     end
@@ -539,11 +535,6 @@ FactoryGirl.define do
     factory :jamie do
       name "jamie"
       with_semi_recent_interaction
-    end
-
-    factory :peter do
-      name "peter"
-      unactivated
     end
 
     # user with unknown gender

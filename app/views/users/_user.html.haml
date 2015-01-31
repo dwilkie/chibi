@@ -4,10 +4,6 @@
   %td#created_at
     = time_ago_in_words(user.created_at)
     ago
-  %td#activated_at
-    - if user.activated_at
-      = time_ago_in_words(user.activated_at)
-      ago
   %td#last_interacted_at
     - if user.last_interacted_at
       = time_ago_in_words(user.last_interacted_at)
