@@ -3,6 +3,7 @@ require 'spec_helper'
 describe ChargeRequest do
   include AnalyzableExamples
   include ReportHelpers
+  include ActiveJobHelpers
 
   subject { create(:charge_request) }
   let(:skip_callback_request_charge) { false }
@@ -233,16 +234,16 @@ describe ChargeRequest do
     describe "after_create" do
       subject { build(:charge_request) }
 
-      let(:job) { ResqueSpec.queues[Rails.application.secrets[:chibi_biller_charge_request_queue]].first }
+      let(:job) { enqueued_jobs.first }
 
       before do
-        do_background_task(:queue_only => true) { subject.save! }
+        trigger_job(:queue_only => true) { subject.save! }
       end
 
       it "should queue a job for processing the charge request" do
-        job.should_not be_nil
-        job[:class].should == Rails.application.secrets[:chibi_biller_charge_request_worker]
-        job[:args].should == [subject.id, subject.operator, subject.user.mobile_number]
+        expect(job).not_to eq(nil)
+        expect(job[:job]).to eq(ChargeRequesterJob)
+        expect(job[:args]).to eq([subject.id, subject.operator, subject.user.mobile_number])
       end
 
       it "should mark the charge_request as 'awaiting_result'" do
