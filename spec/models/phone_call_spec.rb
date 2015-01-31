@@ -287,7 +287,7 @@ describe PhoneCall do
     end
   end
 
-  describe "#process!", :active_job do
+  describe "#process!" do
     include TranslationHelpers
 
     include_context "replies"

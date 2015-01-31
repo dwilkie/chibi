@@ -17,7 +17,7 @@ describe "Call Data Records" do
     response.status.should be(options[:response] || 201)
   end
 
-  describe "POST /call_data_records.xml", :active_job do
+  describe "POST /call_data_records.xml" do
     def build_cdr(*args)
       cdr = super
       cdr.valid?

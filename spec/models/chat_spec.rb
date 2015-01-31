@@ -831,7 +831,7 @@ describe Chat do
     end
   end
 
-  describe ".reinvigorate!", :active_job do
+  describe ".reinvigorate!" do
     context "with pending replies" do
       let(:pending_reply) { create(:reply, :user => user, :chat => chat) }
       let(:job) { enqueued_jobs.first }

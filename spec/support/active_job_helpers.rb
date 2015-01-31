@@ -1,9 +1,3 @@
-RSpec.configure do |config|
-  config.before(:active_job => true) do
-    clear_enqueued_jobs
-  end
-end
-
 module ActiveJobHelpers
   include ActiveJob::TestHelper
 

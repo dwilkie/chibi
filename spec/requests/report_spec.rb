@@ -46,7 +46,7 @@ describe "Report" do
     get_report
   end
 
-  describe "POST '/report.json'", :active_job do
+  describe "POST '/report.json'" do
     context "with valid params" do
       before do
         do_post_report({:month => 1, :year => 2014}, :queue_only => true)
