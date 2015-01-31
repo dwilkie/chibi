@@ -1,28 +1,29 @@
 source 'https://rubygems.org'
-ruby "2.2.0"
+ruby '2.2.0'
 
 gem 'rails', '4.2.0'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
-gem "lazy_high_charts"
-gem "geocoder"
-gem "phony"
-gem "countries", :require => 'iso3166'
-gem "faker"
-gem "hirefire-resource"
-gem "unicorn"
-gem "rack-timeout"
-gem "redis"
-gem "torasup"
-gem "nuntium_api", :github => "dwilkie/nuntium-api-ruby"
-gem "aasm", :github => "aasm/aasm"
-gem "twilio-ruby"
-gem "uuid"
-gem "multi_xml"
-gem "carrierwave"
-gem "fog"
-gem "sidekiq"
+gem 'lazy_high_charts'
+gem 'geocoder'
+gem 'phony'
+gem 'countries', :require => 'iso3166'
+gem 'faker'
+gem 'hirefire-resource'
+gem 'unicorn'
+gem 'rack-timeout'
+gem 'redis'
+gem 'torasup'
+gem 'nuntium_api', :github => 'dwilkie/nuntium-api-ruby'
+gem 'aasm', :github => 'aasm/aasm'
+gem 'twilio-ruby'
+gem 'uuid'
+gem 'multi_xml'
+gem 'carrierwave'
+gem 'fog'
+gem 'sidekiq'
+gem 'sinatra'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'

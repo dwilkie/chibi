@@ -34,9 +34,9 @@ describe "Admin" do
 
   context "without the username and password" do
     it "should deny me access" do
-      [overview_path, users_path, chats_path, interaction_path].each do |path|
+      [overview_path, users_path, chats_path, interaction_path, sidekiq_web_path].each do |path|
         visit path
-        page.body.should have_content "Access denied"
+        expect(page.driver.response.status).to eq(401)
       end
     end
   end
@@ -329,6 +329,16 @@ describe "Admin" do
             assert_show_user(user)
           end
         end
+      end
+    end
+
+    describe "when I visit '/sidekiq'" do
+      before do
+        visit sidekiq_web_path
+      end
+
+      it "should allow me access" do
+        expect(page.driver.response.status).to eq(200)
       end
     end
   end
