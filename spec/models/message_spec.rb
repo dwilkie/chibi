@@ -282,7 +282,7 @@ describe Message do
 
         context "if an exception is raised" do
           before do
-            Chat.stub(:activate_multiple!).and_raise(Resque::TermException.new("SIGTERM"))
+            Chat.stub(:activate_multiple!).and_raise(ArgumentError)
           end
 
           it "should leave the message as 'received'" do
