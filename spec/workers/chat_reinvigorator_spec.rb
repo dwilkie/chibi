@@ -18,9 +18,5 @@ describe ChatReinvigorator do
       Chat.should_receive(:reinvigorate!)
       subject.class.perform
     end
-
-    it_should_behave_like "rescheduling SIGTERM exceptions" do
-      let(:args) { [] }
-    end
   end
 end

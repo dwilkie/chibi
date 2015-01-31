@@ -3,7 +3,6 @@ require 'spec_helper'
 describe Reply do
   include TranslationHelpers
   include MessagingHelpers
-  include ResqueHelpers
   include PhoneCallHelpers::TwilioHelpers
   include AnalyzableExamples
 

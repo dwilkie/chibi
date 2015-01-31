@@ -30,14 +30,10 @@ describe ChargeRequestUpdater do
       charge_request.should_receive(:set_result!).with(result, nil)
       subject.class.perform(*args)
     end
-
-    it_should_behave_like "rescheduling SIGTERM exceptions"
   end
 
   describe "performing the job" do
     # this is an integration test
-
-    include ResqueHelpers
     include TranslationHelpers
     include_context "replies"
 

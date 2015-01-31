@@ -1,5 +1,3 @@
-require "resque_web"
-
 Rails.application.routes.draw do
   root "welcome#index"
 
@@ -23,5 +21,5 @@ Rails.application.routes.draw do
 
   resource :report, :only => [:create, :show, :destroy]
 
-  mount ResqueWeb::Engine => "/resque"
+  #mount ResqueWeb::Engine => "/resque"
 end

@@ -19,9 +19,5 @@ describe FriendFinder do
 
       subject.class.perform(:some => :options)
     end
-
-    it_should_behave_like "rescheduling SIGTERM exceptions" do
-      let(:args) { [{}] }
-    end
   end
 end

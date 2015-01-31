@@ -233,8 +233,6 @@ describe ChargeRequest do
     describe "after_create" do
       subject { build(:charge_request) }
 
-      include ResqueHelpers
-
       let(:job) { ResqueSpec.queues[Rails.application.secrets[:chibi_biller_charge_request_queue]].first }
 
       before do

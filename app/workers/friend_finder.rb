@@ -1,5 +1,4 @@
 class FriendFinder
-  extend RetriedJob
   @queue = :friend_finder_queue
 
   def self.perform(options = {})

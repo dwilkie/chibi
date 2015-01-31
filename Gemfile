@@ -11,8 +11,6 @@ gem "phony"
 gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countries.git"
 gem "faker"
 gem "hirefire-resource"
-gem "resque", :git => "git://github.com/dwilkie/resque", :branch => "prevent_resque_failure_1-x-stable"
-gem 'resque-web', :require => 'resque_web'
 gem "unicorn"
 gem "rack-timeout"
 gem "redis"
@@ -56,7 +54,6 @@ group :test do
   gem 'vcr'
   gem 'database_cleaner'
   gem 'timecop'
-  gem 'resque_spec'
   gem 'capybara'
   gem 'launchy'
 end

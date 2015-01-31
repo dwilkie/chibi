@@ -1,5 +1,4 @@
 class ChargeRequestUpdater
-  extend RetriedJob
   @queue = :charge_request_updater_queue
 
   def self.perform(charge_request_id, result, responder, reason = nil)
