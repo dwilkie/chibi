@@ -283,10 +283,10 @@ describe Chat do
         end
       end
 
-      context "passing 'inactivity_period' => 11.minutes" do
+      context "passing 'inactivity_period' => 11.minutes.ago" do
         it "should not deactivate the chat" do
           active_chat_with_inactivity.deactivate!(
-            "with_inactivity" => true, "inactivity_period" => 11.minutes
+            "with_inactivity" => true, "inactivity_period" => 11.minutes.ago
           )
           active_chat_with_inactivity.should be_active
         end
@@ -925,9 +925,9 @@ describe Chat do
       end
     end
 
-    context "passing :inactivity_period => 11.minutes" do
+    context "passing :inactivity_period => 11.minutes.ago" do
       before do
-        trigger_job { described_class.end_inactive(:inactivity_period => 11.minutes) }
+        trigger_job { described_class.end_inactive(:inactivity_period => 11.minutes.ago) }
       end
 
       it "should deactivate chats with more than 11 minutes of inactivity" do
