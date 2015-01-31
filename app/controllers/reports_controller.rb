@@ -4,7 +4,7 @@ class ReportsController < ApplicationController
 
   def create
     report = Report.new(permitted_params)
-    Resque.enqueue(ReportGenerator, permitted_params) if report.valid?
+    ReportGeneratorJob.perform_later(permitted_params) if report.valid?
 
     respond_to do |format|
       format.html { redirect_to(report_path) }

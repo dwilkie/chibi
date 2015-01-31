@@ -55,11 +55,6 @@ module AnalyzableExamples
         Timecop.return
       end
 
-      it "should not results where the group_by_column is nil" do
-        excluded_resource
-        resource.class.overview_of_created.should_not include([0, 1])
-      end
-
       context "passing no args" do
         it "should return an overview of all the created resources (in HighStocks format)" do
           resource.class.overview_of_created.should(

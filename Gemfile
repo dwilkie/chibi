@@ -1,29 +1,29 @@
 source 'https://rubygems.org'
-ruby "2.2.0"
+ruby '2.2.0'
 
 gem 'rails', '4.2.0'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
-gem "lazy_high_charts"
-gem "geocoder"
-gem "phony"
-gem "countries", :require => 'iso3166', :git => "git://github.com/hexorx/countries.git"
-gem "faker"
-gem "hirefire-resource"
-gem "resque", :git => "git://github.com/dwilkie/resque", :branch => "prevent_resque_failure_1-x-stable"
-gem 'resque-web', :require => 'resque_web'
-gem "unicorn"
-gem "rack-timeout"
-gem "redis"
-gem "torasup"
-gem "nuntium_api", :github => "dwilkie/nuntium-api-ruby"
-gem "aasm", :github => "aasm/aasm"
-gem "twilio-ruby"
-gem "uuid"
-gem "multi_xml"
-gem "carrierwave"
-gem "fog"
+gem 'lazy_high_charts'
+gem 'geocoder'
+gem 'phony'
+gem 'countries', :require => 'iso3166'
+gem 'faker'
+gem 'hirefire-resource'
+gem 'unicorn'
+gem 'rack-timeout'
+gem 'redis'
+gem 'torasup'
+gem 'nuntium_api', :github => 'dwilkie/nuntium-api-ruby'
+gem 'aasm', :github => 'aasm/aasm'
+gem 'twilio-ruby'
+gem 'uuid'
+gem 'multi_xml'
+gem 'carrierwave'
+gem 'fog'
+gem 'sidekiq'
+gem 'sinatra'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -55,7 +55,6 @@ group :test do
   gem 'vcr'
   gem 'database_cleaner'
   gem 'timecop'
-  gem 'resque_spec'
   gem 'capybara'
   gem 'launchy'
 end

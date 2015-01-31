@@ -1,11 +1,11 @@
 require_relative "authentication_helpers"
 require_relative "location_helpers"
-require_relative "resque_helpers"
+require_relative "active_job_helpers"
 
 module MessagingHelpers
   include AuthenticationHelpers
   include LocationHelpers
-  include ResqueHelpers
+  include ActiveJobHelpers
 
   EXAMPLES = YAML.load_file(File.join(File.dirname(__FILE__), 'message_examples.yaml'))
 
@@ -57,9 +57,9 @@ module MessagingHelpers
       last_request_data["to"].should == "sms://#{options[:to]}" if options[:to].present?
       last_request_data["suggested_channel"].should == options[:suggested_channel] if options[:suggested_channel].present?
     else
-      MtMessageWorker.should have_queued(
-        options[:id], options[:short_code], options[:to], options[:body]
-      ).in(options[:mt_message_queue])
+      job = enqueued_jobs.last
+      expect(job[:args]).to eq([options[:id], options[:short_code], options[:to], options[:body]])
+      expect(job[:queue]).to eq(options[:mt_message_queue])
     end
   end
 
@@ -74,7 +74,7 @@ module MessagingHelpers
 
     expect_locate(options) do
       expect_message do
-        do_background_task do
+        trigger_job do
           post messages_path,
           {:message => {
             :from => options[:from],

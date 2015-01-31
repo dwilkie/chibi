@@ -15,13 +15,13 @@ class Chat < ActiveRecord::Base
 
   def self.end_inactive(options = {})
     with_inactivity(options).find_each do |chat|
-      Resque.enqueue(ChatDeactivator, chat.id, options.merge(:with_inactivity => true))
+      ChatDeactivatorJob.perform_later(chat.id, options.merge(:with_inactivity => true))
     end
   end
 
   def self.reinvigorate!
     with_undelivered_messages.find_each do |chat|
-      Resque.enqueue(ChatReactivator, chat.id)
+      ChatReactivatorJob.perform_later(chat.id)
     end
   end
 
@@ -54,6 +54,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.activate_multiple!(user, options = {})
+    options = options.with_indifferent_access
     num_new_chats = options[:count] || 5
 
     # do this at least once in order to deactivate any existing chats
@@ -117,6 +118,7 @@ class Chat < ActiveRecord::Base
   end
 
   def deactivate!(options = {})
+    options = options.with_indifferent_access
     return if options[:with_inactivity] && !has_inactivity?(options)
 
     # reactivate previous chats by default
@@ -226,6 +228,7 @@ class Chat < ActiveRecord::Base
   # a partially active chat chat (which has one or more active users)
   # with no activity in the past inactivity_period timeframe
   def self.with_inactivity(options = {})
+    options = options.with_indifferent_access
     condition = options.delete(:all) ? "OR" : "AND"
 
     joins(:user).joins(:friend).where(
@@ -238,7 +241,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.inactive_timestamp(options = {})
-    (options[:inactivity_period] || 10.minutes).ago
+    options[:inactivity_period] || 10.minutes.ago
   end
 
   def one_sided?(num_messages = 3)

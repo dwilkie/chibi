@@ -59,19 +59,15 @@ class User < ActiveRecord::Base
 
   before_save :cancel_searching_for_friend_if_chatting
 
-  after_create :set_activated_at
-
   delegate :city, :country_code, :to => :location, :allow_nil => true
 
   aasm :column => :state, :whiny_transitions => false do
     state :online, :initial => true
     state :offline
     state :searching_for_friend
-    state :unactivated
 
     event :login do
       transitions(:from => :offline, :to => :online)
-      transitions(:from => :unactivated, :to => :online, :after => :touch_activated_at)
     end
 
     event :logout, :after_commit => :deactivate_chats! do
@@ -85,25 +81,6 @@ class User < ActiveRecord::Base
     event :cancel_searching_for_friend do
       transitions(:from => :searching_for_friend, :to => :online)
     end
-  end
-
-  def self.purge_invalid_names!(options = {})
-    name_attribute = quoted_attribute(:name)
-    banned_name_conditions = [
-      where("#{name_attribute} ~ ?", "(?:^#{profile_keywords(:banned_names)}$)").where_values.first
-    ]
-
-    available_locales = I18n.available_locales.dup
-    available_locales.delete(:en)
-
-    available_locales.each do |locale|
-      locale_banned_names = "(?:^#{profile_keywords(:banned_names, :locale => locale, :en => false)}$)"
-      banned_name_conditions << where(
-        "(\"locations\".\"country_code\" = ? AND #{name_attribute} ~ ?)", locale, locale_banned_names
-      ).where_values.first
-    end
-
-    joins(:location).where(banned_name_conditions.join(" OR ")).update_all("name = NULL")
   end
 
   def self.set_operator_name
@@ -120,10 +97,6 @@ class User < ActiveRecord::Base
         :operator_name => operator_id
       )
     end
-  end
-
-  def self.activated
-    where("\"#{table_name}\".\"state\" != ?", "unactivated")
   end
 
   def self.online
@@ -147,10 +120,6 @@ class User < ActiveRecord::Base
     ).uniq.update_all(
       :state => "offline"
     )
-  end
-
-  def self.overview_of_created(options = {})
-    super(options.merge(:group_by_column => :activated_at))
   end
 
   def self.filter_by(params = {})
@@ -185,36 +154,11 @@ class User < ActiveRecord::Base
   end
 
   def self.available
-    where(:active_chat_id => nil).online.activated
-  end
-
-  def self.import!(data)
-    existing_numbers = Hash[
-      User.where(
-        :mobile_number => data.keys
-      ).pluck(
-        :mobile_number
-      ).map { |mobile_number| [mobile_number, true] }
-    ]
-    user_data = data.reject { |mobile_number, metadata| existing_numbers[mobile_number] }
-
-    user_data.each do |mobile_number, metadata|
-      Resque.enqueue(UserCreator, mobile_number, metadata)
-    end
-  end
-
-  def self.create_unactivated!(mobile_number, metadata)
-    user = self.new
-    user.mobile_number = mobile_number
-    user.name = metadata["name"]
-    user.gender = metadata["gender"]
-    user.age = metadata["age"].to_i if metadata["age"].present?
-    user.state = :unactivated
-    user.assign_location(metadata["location"])
-    user.save!
+    where(:active_chat_id => nil).online
   end
 
   def self.remind!(options = {})
+    options = options.with_indifferent_access
     within_hours(options) do
       limit = options.delete(:limit) || 100
 
@@ -223,7 +167,7 @@ class User < ActiveRecord::Base
       ).from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(limit)
 
       users_to_remind.each do |user_to_remind|
-        Resque.enqueue(UserReminderer, user_to_remind.id, options)
+        UserRemindererJob.perform_later(user_to_remind.id, options)
       end
     end
   end
@@ -351,12 +295,8 @@ class User < ActiveRecord::Base
     state != "offline"
   end
 
-  def activated?
-    state != "unactivated"
-  end
-
   def available?(options = {})
-    online? && activated? && (!currently_chatting? || !options[:not_currently_chatting] && !active_chat.active?)
+    online? && (!currently_chatting? || !options[:not_currently_chatting] && !active_chat.active?)
   end
 
   def currently_chatting?
@@ -629,6 +569,7 @@ class User < ActiveRecord::Base
   end
 
   def self.within_hours(options = {}, &block)
+    options = options.with_indifferent_access
     do_find = true
 
     if between = options[:between]
@@ -677,15 +618,7 @@ class User < ActiveRecord::Base
   end
 
   def self.enqueue_friend_messenger(user, options = {})
-    Resque.enqueue(FriendMessenger, user.id, options)
-  end
-
-  def touch_activated_at
-    touch(:activated_at)
-  end
-
-  def set_activated_at
-    update_attribute(:activated_at, created_at) if activated? && activated_at.nil?
+    FriendMessengerJob.perform_later(user.id, options)
   end
 
   def set_operator_name

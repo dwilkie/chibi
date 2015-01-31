@@ -3,7 +3,7 @@ require 'spec_helper'
 describe PhoneCall do
   include PhoneCallHelpers::States
   include PhoneCallHelpers::TwilioHelpers
-  include ResqueHelpers
+  include ActiveJobHelpers
   include AnalyzableExamples
 
   let(:phone_call) { create(:phone_call) }
@@ -22,7 +22,6 @@ describe PhoneCall do
 
   it_should_behave_like "analyzable" do
     let(:group_by_column) { :created_at }
-    let(:excluded_resource) { nil }
 
     def create_resource(*args)
       create(:phone_call, *args)
@@ -294,14 +293,16 @@ describe PhoneCall do
     include_context "replies"
 
     def assert_phone_call_can_be_completed(reference_phone_call)
-      already_completed = reference_phone_call.completed?
       reference_phone_call.call_status = "completed"
-      do_background_task(:queue_only => true) { reference_phone_call.process! }
+      already_complete = reference_phone_call.completed?
+      clear_enqueued_jobs
+      trigger_job(:queue_only => true) { reference_phone_call.process! }
       reference_phone_call.should be_completed
-      if already_completed
-        TwilioCdrFetcher.should_not have_queued(reference_phone_call.id)
+      job = enqueued_jobs.first
+      if already_complete
+        expect(job).to eq(nil)
       else
-        TwilioCdrFetcher.should have_queued(reference_phone_call.id)
+        expect(job[:args].first).to eq(reference_phone_call.id)
       end
     end
 

@@ -7,5 +7,4 @@ end
 
 unless Rails.env.test?
   REDIS = Redis.new(redis_url_options)
-  Resque.redis = REDIS
 end

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "Report" do
   include AuthenticationHelpers
-  include ResqueHelpers
+  include ActiveJobHelpers
   include ReportHelpers
 
   before do
@@ -37,20 +37,25 @@ describe "Report" do
     )
   end
 
+  def do_post_report(request_params = {}, options = {})
+    trigger_job(options) { post_report(request_params) }
+  end
+
   def post_wait_and_retrieve_report(params)
-    post_report(params)
-    perform_background_job(:report_generator_queue)
+    do_post_report(params)
     get_report
   end
 
   describe "POST '/report.json'" do
     context "with valid params" do
       before do
-        post_report(:month => 1, :year => 2014)
+        do_post_report({:month => 1, :year => 2014}, :queue_only => true)
       end
 
       it "should queue a job to generate a report" do
-        ReportGenerator.should have_queued("year" => "2014", "month" => "1")
+        expect(enqueued_jobs.size).to eq(1)
+        job = enqueued_jobs.first
+        job[:args].first.should == {"year" => "2014", "month" => "1"}
       end
 
       it "should return a 201" do
@@ -60,11 +65,11 @@ describe "Report" do
 
     context "with invalid params" do
       before do
-        post_report(:year => 2014)
+        do_post_report({:year => 2014}, :queue_only => true)
       end
 
       it "should not queue a job to generate a report" do
-        ReportGenerator.should_not have_queued("year" => "2014")
+        expect(enqueued_jobs.size).to eq(0)
       end
 
       it "should return a 400" do

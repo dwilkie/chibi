@@ -71,9 +71,7 @@ class ChargeRequest < ActiveRecord::Base
   end
 
   def request_charge!
-    Resque::Job.create(
-      Rails.application.secrets[:chibi_biller_charge_request_queue],
-      Rails.application.secrets[:chibi_biller_charge_request_worker],
+    ChargeRequesterJob.perform_later(
       id,
       operator,
       user.mobile_number

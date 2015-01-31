@@ -34,9 +34,9 @@ describe "Admin" do
 
   context "without the username and password" do
     it "should deny me access" do
-      [overview_path, users_path, chats_path, interaction_path].each do |path|
+      [overview_path, users_path, chats_path, interaction_path, sidekiq_web_path].each do |path|
         visit path
-        page.body.should have_content "Access denied"
+        expect(page.driver.response.status).to eq(401)
       end
     end
   end
@@ -83,7 +83,6 @@ describe "Admin" do
     def assert_user_show(reference_user)
       page.should have_css "#id", :text => reference_user.id.to_s
       page.should have_css "#created_at", :text => time_ago_in_words
-      page.should have_css "#activated_at", :text => time_ago_in_words
       page.should have_css "#name", :text => reference_user.name
       page.should have_css "#screen_name", :text => reference_user.screen_name
       page.should have_css "#date_of_birth", :text => reference_user.date_of_birth
@@ -227,7 +226,7 @@ describe "Admin" do
 
       context "given it's March 2014" do
         include TimecopHelpers
-        include ResqueHelpers
+        include ActiveJobHelpers
         include ReportHelpers
 
         before do
@@ -242,28 +241,17 @@ describe "Admin" do
         context "and I create a report for February 2014" do
           before do
             visit overview_path
-            do_background_task(:queue_only => true) { click_link("create report for February 2014") }
+            trigger_job { click_link("create report for February 2014") }
           end
 
-          it "should queue a job for a report to be created and tell me to refresh" do
-            page.should have_content "Generating report. Refresh at will"
-            ReportGenerator.should have_queued("year" => "2014", "month" => "2")
-          end
-
-          context "given the job has finished" do
+          context "when I visit '/report'" do
             before do
-              perform_background_job(:report_generator_queue)
+              visit report_path
             end
 
-            context "when I visit '/report'" do
-              before do
-                visit report_path
-              end
-
-              it "should download my report" do
-                response_headers["Content-Type"].should == asserted_report_type
-                response_headers["Content-Disposition"].should == "attachment; filename=\"#{asserted_report_filename(:february, 2014)}\""
-              end
+            it "should download my report" do
+              response_headers["Content-Type"].should == asserted_report_type
+              response_headers["Content-Disposition"].should == "attachment; filename=\"#{asserted_report_filename(:february, 2014)}\""
             end
           end
         end
@@ -341,6 +329,16 @@ describe "Admin" do
             assert_show_user(user)
           end
         end
+      end
+    end
+
+    describe "when I visit '/sidekiq'" do
+      before do
+        visit sidekiq_web_path
+      end
+
+      it "should allow me access" do
+        expect(page.driver.response.status).to eq(200)
       end
     end
   end

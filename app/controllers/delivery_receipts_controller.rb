@@ -4,7 +4,7 @@ class DeliveryReceiptsController < ApplicationController
   before_filter :authenticate_delivery_receipt
 
   def create
-    Resque.enqueue(DeliveryReceiptCreator, params)
+    DeliveryReceiptCreatorJob.perform_later(params)
     render(:nothing => true, :status => :created)
   end
 

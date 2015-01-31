@@ -1,4 +1,4 @@
-require "resque_web"
+require 'sidekiq/web'
 
 Rails.application.routes.draw do
   root "welcome#index"
@@ -25,5 +25,9 @@ Rails.application.routes.draw do
 
   resource :report, :only => [:create, :show, :destroy]
 
-  mount ResqueWeb::Engine => "/resque"
+  Sidekiq::Web.use(Rack::Auth::Basic) do |username, password|
+    username == Rails.application.secrets[:http_basic_auth_admin_user] && password == Rails.application.secrets[:http_basic_auth_admin_password]
+  end
+
+  mount Sidekiq::Web => '/sidekiq'
 end

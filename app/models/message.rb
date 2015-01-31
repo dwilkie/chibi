@@ -50,7 +50,7 @@ class Message < ActiveRecord::Base
   end
 
   def queue_for_processing!
-    Resque.enqueue(MessageProcessor, id)
+    MessageProcessorJob.perform_later(id)
   end
 
   private

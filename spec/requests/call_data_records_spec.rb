@@ -2,19 +2,19 @@ require 'spec_helper'
 
 describe "Call Data Records" do
   include AuthenticationHelpers
-  include ResqueHelpers
   include CdrHelpers
+  include ActiveJobHelpers
 
   def post_call_data_record(options = {})
-    queue_only = options.delete(:queue_only)
-    do_background_task(:queue_only => queue_only) do
-      post call_data_records_path, {
+    post(
+      call_data_records_path,
+      {
         "cdr" => sample_cdr.body,
         "uuid" => "a_#{sample_cdr.uuid}"
       },
       authentication_params(:call_data_record)
-      response.status.should be(options[:response] || 201)
-    end
+    )
+    response.status.should be(options[:response] || 201)
   end
 
   describe "POST /call_data_records.xml" do
@@ -25,31 +25,28 @@ describe "Call Data Records" do
     end
 
     shared_examples_for "creating a CDR" do
-      before do
-        post_call_data_record(:queue_only => true)
+      def do_request(options = {})
+        trigger_job(options) { post_call_data_record }
       end
 
-      it "should queue a job to Resque for saving the CDR and return immediately" do
-        CallDataRecordCreator.should have_queued(sample_cdr.body)
+      it "should queue a job for saving the CDR and return immediately" do
+        do_request(:queue_only => true)
+        expect(enqueued_jobs.size).to eq(1)
+        job = enqueued_jobs.first
+        expect(job[:args].first).to eq(sample_cdr.body)
       end
 
       context "when the job is run" do
         let(:new_cdr) { CallDataRecord.find_by_uuid(sample_cdr.uuid) }
 
-        def perform_background_job
-          super(:call_data_record_creator_queue)
+        before do
+          do_request
         end
 
         it "should create the CDR with the correct fields" do
-          if asserted_cdr_type.present?
-            perform_background_job
-            new_cdr.should be_present
-            new_cdr.should be_valid
-            asserted_cdr_type.last.should == new_cdr
-          else
-            expect { perform_background_job }.to raise_error(ActiveRecord::RecordInvalid)
-            new_cdr.should be_nil
-          end
+          new_cdr.should be_present
+          new_cdr.should be_valid
+          asserted_cdr_type.last.should == new_cdr
         end
       end
     end
