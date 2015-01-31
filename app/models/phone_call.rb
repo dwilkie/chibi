@@ -19,31 +19,6 @@ class PhoneCall < ActiveRecord::Base
     COMPLETED = "completed"
   end
 
-  module PromptStates
-    extend ActiveSupport::Concern
-
-    USER_INPUTS = {
-      :gender => {:manditory => false},
-      :looking_for => {:manditory => false},
-      :age => {:numDigits => 2}
-    }
-
-    # turn voice prompts on or off
-    VOICE_PROMPTS = false
-
-    private
-
-    def with_prompt_states(&block)
-      USER_INPUTS.dup.each do |attribute, options|
-        contexts = [:_in_menu]
-        contexts << nil if options.delete(:manditory)
-        contexts.each do |context|
-          yield(attribute, "asking_for_#{attribute}#{context}".to_sym, options)
-        end
-      end
-    end
-  end
-
   attr_accessor :redirect_url, :digits, :to, :dial_status, :call_status, :api_version
   alias_attribute :call_sid, :sid
 
@@ -212,7 +187,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def fetch_twilio_cdr
-    from_twilio? ? Resque.enqueue(TwilioCdrFetcher, id) : nil
+    from_twilio? ? TwilioCdrFetcherJob.perform_later(id) : nil
   end
 
   def can_dial_to_partner?

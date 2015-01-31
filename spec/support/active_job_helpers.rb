@@ -14,8 +14,4 @@ module ActiveJobHelpers
       perform_enqueued_jobs { yield }
     end
   end
-
-  def first_enqueued_job
-    @first_enqueued_job ||= enqueued_jobs.first
-  end
 end

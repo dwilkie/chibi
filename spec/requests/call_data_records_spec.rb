@@ -32,8 +32,9 @@ describe "Call Data Records" do
       it "should queue a job for saving the CDR and return immediately" do
         do_request(:queue_only => true)
         expect(enqueued_jobs.size).to eq(1)
-        expect(first_enqueued_job[:args].first).to eq(sample_cdr.body)
-        expect(first_enqueued_job[:queue]).to eq("call_data_record_creator_queue")
+        job = enqueued_jobs.first
+        expect(job[:args].first).to eq(sample_cdr.body)
+        expect(job[:queue]).to eq("call_data_record_creator_queue")
       end
 
       context "when the job is run" do
