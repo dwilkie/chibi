@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class Location < ActiveRecord::Base
   belongs_to :user
   before_save :normalize_country_code
@@ -44,7 +42,7 @@ class Location < ActiveRecord::Base
   end
 
   def locate
-    Resque.enqueue(Locator, id, address) if locatable?
+    LocatorJob.perform_later(id, address) if locatable?
   end
 
   def normalize_country_code

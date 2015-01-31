@@ -22,11 +22,11 @@ describe Location do
     end
 
     context "after_create" do
-      include ResqueHelpers
+      include ActiveJobHelpers
 
       it "should try to determine the location" do
         location.address = "foo"
-        expect_locate { do_background_task { location.save } }
+        expect_locate { trigger_job { location.save } }
       end
     end
   end

@@ -19,12 +19,6 @@ class CallDataRecord < ActiveRecord::Base
 
   attr_accessor :body
 
-  def self.upload_cdr_data!
-    where.not(:body => nil).where(:cdr_data => nil).pluck(:id).each do |cdr_id|
-      Resque.enqueue(CdrUploader, cdr_id)
-    end
-  end
-
   def typed
     VALID_TYPES.include?(type) ? type.constantize.new(:body => body) : self
   end
