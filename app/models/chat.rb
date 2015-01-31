@@ -228,6 +228,7 @@ class Chat < ActiveRecord::Base
   # a partially active chat chat (which has one or more active users)
   # with no activity in the past inactivity_period timeframe
   def self.with_inactivity(options = {})
+    options = options.with_indifferent_access
     condition = options.delete(:all) ? "OR" : "AND"
 
     joins(:user).joins(:friend).where(
