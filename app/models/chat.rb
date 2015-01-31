@@ -54,6 +54,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.activate_multiple!(user, options = {})
+    options = options.with_indifferent_access
     num_new_chats = options[:count] || 5
 
     # do this at least once in order to deactivate any existing chats

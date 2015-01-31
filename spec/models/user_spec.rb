@@ -5,7 +5,7 @@ describe User do
   include PhoneCallHelpers::TwilioHelpers
   include TranslationHelpers
   include MessagingHelpers
-  include ResqueHelpers
+  include ActiveJobHelpers
   include AnalyzableExamples
 
   include_context "replies"
@@ -51,11 +51,13 @@ describe User do
   end
 
   shared_examples_for "within hours" do |background_job|
-    context "passing :between => 9..22" do
+    context "passing 'between' => 9..22" do
+      let(:hour_range_options) { {"between" => 9..22} }
+
       context "given the current time is not between 09:00 ICT and 22:00 ICT" do
         it "should not perform the task" do
           Timecop.freeze(Time.zone.local(2012, 1, 7, 8)) do
-            send(task, :between => 9..22)
+            send(task, hour_range_options)
             send(negative_assertion)
           end
         end
@@ -64,31 +66,28 @@ describe User do
       context "given the current time is between 09:00 ICT and 22:00 ICT" do
         before do
           Timecop.freeze(Time.zone.local(2012, 1, 7, 22))
-          send(task, :between => 9..22, :queue_only => background_job)
         end
 
         after do
           Timecop.return
         end
 
-        if background_job
-          context "and @ the time the task is run it's still between 09:00 ICT and 22:00 ICT" do
-            it "should perform the task" do
-              perform_background_job
-              send(positive_assertion)
-            end
-          end
+        def do_task_in_background
+          perform_background_job(hour_range_options)
+        end
 
-          context "and @ the time the task is run it's no longer between 09:00 ICT and 22:00 ICT" do
-            it "should not perform the task" do
-              Timecop.freeze(Time.zone.local(2012, 1, 7, 22, 1)) do
-                perform_background_job
-                send(negative_assertion)
-              end
-            end
+        def do_task
+          send(task, hour_range_options)
+        end
+
+        if background_job
+          it "should perform the task" do
+            do_task_in_background
+            send(positive_assertion)
           end
         else
           it "should perform the task" do
+            do_task
             send(positive_assertion)
           end
         end
@@ -405,11 +404,11 @@ describe User do
 
   describe ".find_friends" do
     def do_find_friends(options = {})
-      do_background_task(options) { subject.class.find_friends(options) }
+      trigger_job(options) { described_class.find_friends(options) }
     end
 
-    def perform_background_job
-      expect_message { super(queue_name) }
+    def perform_background_job(options = {})
+      expect_message { do_find_friends(options) }
     end
 
     before do

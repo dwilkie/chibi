@@ -587,6 +587,7 @@ class User < ActiveRecord::Base
   end
 
   def self.within_hours(options = {}, &block)
+    options = options.with_indifferent_access
     do_find = true
 
     if between = options[:between]
@@ -635,7 +636,7 @@ class User < ActiveRecord::Base
   end
 
   def self.enqueue_friend_messenger(user, options = {})
-    Resque.enqueue(FriendMessenger, user.id, options)
+    FriendMessengerJob.perform_later(user.id, options)
   end
 
   def set_operator_name

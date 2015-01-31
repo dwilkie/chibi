@@ -226,7 +226,7 @@ describe "Admin" do
 
       context "given it's March 2014" do
         include TimecopHelpers
-        include ResqueHelpers
+        include ActiveJobHelpers
         include ReportHelpers
 
         before do
@@ -241,28 +241,17 @@ describe "Admin" do
         context "and I create a report for February 2014" do
           before do
             visit overview_path
-            do_background_task(:queue_only => true) { click_link("create report for February 2014") }
+            trigger_job { click_link("create report for February 2014") }
           end
 
-          it "should queue a job for a report to be created and tell me to refresh" do
-            page.should have_content "Generating report. Refresh at will"
-            ReportGenerator.should have_queued("year" => "2014", "month" => "2")
-          end
-
-          context "given the job has finished" do
+          context "when I visit '/report'" do
             before do
-              perform_background_job(:report_generator_queue)
+              visit report_path
             end
 
-            context "when I visit '/report'" do
-              before do
-                visit report_path
-              end
-
-              it "should download my report" do
-                response_headers["Content-Type"].should == asserted_report_type
-                response_headers["Content-Disposition"].should == "attachment; filename=\"#{asserted_report_filename(:february, 2014)}\""
-              end
+            it "should download my report" do
+              response_headers["Content-Type"].should == asserted_report_type
+              response_headers["Content-Disposition"].should == "attachment; filename=\"#{asserted_report_filename(:february, 2014)}\""
             end
           end
         end
