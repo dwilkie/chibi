@@ -221,9 +221,11 @@ class Reply < ActiveRecord::Base
 
     self.token = uuid.generate
     if queue = operator.mt_message_queue
-      Resque.enqueue_to(
-        queue, MtMessageWorker, token,
-        operator.short_code, destination, message
+      MtMessageSenderJob.set(:queue => queue).perform_later(
+        token,
+        operator.short_code,
+        destination,
+        message
       )
     else
       # queue message on Twilio...

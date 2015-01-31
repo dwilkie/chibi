@@ -57,9 +57,9 @@ module MessagingHelpers
       last_request_data["to"].should == "sms://#{options[:to]}" if options[:to].present?
       last_request_data["suggested_channel"].should == options[:suggested_channel] if options[:suggested_channel].present?
     else
-      MtMessageWorker.should have_queued(
-        options[:id], options[:short_code], options[:to], options[:body]
-      ).in(options[:mt_message_queue])
+      job = enqueued_jobs.last
+      expect(job[:args]).to eq([options[:id], options[:short_code], options[:to], options[:body]])
+      expect(job[:queue]).to eq(options[:mt_message_queue])
     end
   end
 

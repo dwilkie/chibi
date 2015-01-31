@@ -367,10 +367,6 @@ describe Reply do
     include MobilePhoneHelpers
 
     context "without Nuntium" do
-      before do
-        ResqueSpec.reset!
-      end
-
       it "should enqueue a MT message to be sent via SMPP" do
         with_operators do |number_parts, assertions|
           number = number_parts.join
