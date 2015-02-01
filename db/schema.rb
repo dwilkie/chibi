@@ -11,26 +11,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131114144110) do
+ActiveRecord::Schema.define(version: 20150201045715) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "call_data_records", force: true do |t|
-    t.string   "uuid"
+  create_table "call_data_records", force: :cascade do |t|
+    t.string   "uuid",           limit: 255
     t.integer  "duration"
     t.integer  "bill_sec"
     t.datetime "rfc2822_date"
-    t.string   "direction"
+    t.string   "direction",      limit: 255
     t.integer  "phone_call_id"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
-    t.string   "type"
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+    t.string   "type",           limit: 255
     t.integer  "inbound_cdr_id"
-    t.string   "bridge_uuid"
-    t.string   "from"
+    t.string   "bridge_uuid",    limit: 255
+    t.string   "from",           limit: 255
     t.integer  "user_id"
-    t.string   "cdr_data"
+    t.string   "cdr_data",       limit: 255
   end
 
   add_index "call_data_records", ["bridge_uuid"], name: "index_call_data_records_on_bridge_uuid", using: :btree
@@ -41,14 +41,14 @@ ActiveRecord::Schema.define(version: 20131114144110) do
   add_index "call_data_records", ["user_id"], name: "index_call_data_records_on_user_id", using: :btree
   add_index "call_data_records", ["uuid"], name: "index_call_data_records_on_uuid", unique: true, using: :btree
 
-  create_table "charge_requests", force: true do |t|
-    t.string   "result"
-    t.string   "reason"
-    t.string   "state"
-    t.string   "operator"
-    t.boolean  "notify_requester", default: false, null: false
+  create_table "charge_requests", force: :cascade do |t|
+    t.string   "result",           limit: 255
+    t.string   "reason",           limit: 255
+    t.string   "state",            limit: 255
+    t.string   "operator",         limit: 255
+    t.boolean  "notify_requester",             default: false, null: false
     t.integer  "requester_id"
-    t.string   "requester_type"
+    t.string   "requester_type",   limit: 255
     t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -58,13 +58,13 @@ ActiveRecord::Schema.define(version: 20131114144110) do
   add_index "charge_requests", ["updated_at", "state"], name: "index_charge_requests_on_updated_at_and_state", using: :btree
   add_index "charge_requests", ["user_id"], name: "index_charge_requests_on_user_id", using: :btree
 
-  create_table "chats", force: true do |t|
+  create_table "chats", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "friend_id"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
     t.integer  "starter_id"
-    t.string   "starter_type"
+    t.string   "starter_type", limit: 255
   end
 
   add_index "chats", ["friend_id"], name: "index_chats_on_friend_id", using: :btree
@@ -73,28 +73,28 @@ ActiveRecord::Schema.define(version: 20131114144110) do
   add_index "chats", ["user_id", "friend_id"], name: "index_chats_on_user_id_and_friend_id", unique: true, using: :btree
   add_index "chats", ["user_id"], name: "index_chats_on_user_id", using: :btree
 
-  create_table "locations", force: true do |t|
-    t.string   "city"
+  create_table "locations", force: :cascade do |t|
+    t.string   "city",         limit: 255
     t.string   "country_code", limit: 2
     t.float    "latitude"
     t.float    "longitude"
     t.integer  "user_id"
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
   end
 
   add_index "locations", ["country_code"], name: "index_locations_on_country_code", using: :btree
   add_index "locations", ["user_id"], name: "index_locations_on_user_id", using: :btree
 
-  create_table "messages", force: true do |t|
-    t.string   "from"
+  create_table "messages", force: :cascade do |t|
+    t.string   "from",       limit: 255
     t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at",                      null: false
-    t.datetime "updated_at",                      null: false
-    t.string   "guid"
-    t.string   "state",      default: "received", null: false
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
+    t.string   "guid",       limit: 255
+    t.string   "state",      limit: 255, default: "received", null: false
   end
 
   add_index "messages", ["chat_id"], name: "index_messages_on_chat_id", using: :btree
@@ -102,24 +102,24 @@ ActiveRecord::Schema.define(version: 20131114144110) do
   add_index "messages", ["state"], name: "index_messages_on_state", using: :btree
   add_index "messages", ["user_id"], name: "index_messages_on_user_id", using: :btree
 
-  create_table "missed_calls", force: true do |t|
-    t.string   "from"
+  create_table "missed_calls", force: :cascade do |t|
+    t.string   "from",       limit: 255
     t.integer  "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
   add_index "missed_calls", ["user_id"], name: "index_missed_calls_on_user_id", using: :btree
 
-  create_table "phone_calls", force: true do |t|
-    t.string   "sid"
-    t.string   "from"
-    t.string   "state"
+  create_table "phone_calls", force: :cascade do |t|
+    t.string   "sid",           limit: 255
+    t.string   "from",          limit: 255
+    t.string   "state",         limit: 255
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-    t.string   "dial_call_sid"
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+    t.string   "dial_call_sid", limit: 255
   end
 
   add_index "phone_calls", ["chat_id"], name: "index_phone_calls_on_chat_id", using: :btree
@@ -128,16 +128,16 @@ ActiveRecord::Schema.define(version: 20131114144110) do
   add_index "phone_calls", ["state"], name: "index_phone_calls_on_state", using: :btree
   add_index "phone_calls", ["user_id"], name: "index_phone_calls_on_user_id", using: :btree
 
-  create_table "replies", force: true do |t|
-    t.string   "to"
+  create_table "replies", force: :cascade do |t|
+    t.string   "to",           limit: 255
     t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at",                                null: false
-    t.datetime "updated_at",                                null: false
+    t.datetime "created_at",                                            null: false
+    t.datetime "updated_at",                                            null: false
     t.datetime "delivered_at"
-    t.string   "token"
-    t.string   "state",        default: "pending_delivery", null: false
+    t.string   "token",        limit: 255
+    t.string   "state",        limit: 255, default: "pending_delivery", null: false
   end
 
   add_index "replies", ["chat_id"], name: "index_replies_on_chat_id", using: :btree
@@ -145,21 +145,20 @@ ActiveRecord::Schema.define(version: 20131114144110) do
   add_index "replies", ["token"], name: "index_replies_on_token", unique: true, using: :btree
   add_index "replies", ["user_id"], name: "index_replies_on_user_id", using: :btree
 
-  create_table "users", force: true do |t|
-    t.string   "mobile_number"
-    t.string   "name"
-    t.string   "screen_name"
+  create_table "users", force: :cascade do |t|
+    t.string   "mobile_number",            limit: 255
+    t.string   "name",                     limit: 255
+    t.string   "screen_name",              limit: 255
     t.date     "date_of_birth"
     t.string   "gender",                   limit: 1
     t.string   "looking_for",              limit: 1
     t.integer  "active_chat_id"
-    t.datetime "created_at",                                            null: false
-    t.datetime "updated_at",                                            null: false
-    t.string   "state",                              default: "online", null: false
+    t.datetime "created_at",                                              null: false
+    t.datetime "updated_at",                                              null: false
+    t.string   "state",                    limit: 255, default: "online", null: false
     t.datetime "last_interacted_at"
     t.datetime "last_contacted_at"
-    t.datetime "activated_at"
-    t.string   "operator_name"
+    t.string   "operator_name",            limit: 255
     t.integer  "latest_charge_request_id"
   end
 
