@@ -51,8 +51,8 @@ describe User do
   end
 
   shared_examples_for "within hours" do |background_job|
-    context "passing 'between' => 9..22" do
-      let(:hour_range_options) { {"between" => 9..22} }
+    context "passing 'between' => [9, 22]" do
+      let(:hour_range_options) { {"between" => [9, 22]} }
 
       context "given the current time is not between 09:00 ICT and 22:00 ICT" do
         it "should not perform the task" do
@@ -463,7 +463,7 @@ describe User do
 
     def do_remind(options = {})
       create_actors unless options.delete(:skip_create_actors)
-      expect_message { trigger_job(options) { described_class.remind!(options) } }
+      expect_message { trigger_job(options) { described_class.remind!({"inactivity_cutoff" => 5.days.ago.to_s}.merge(options)) } }
     end
 
     def perform_background_job(options = {})
@@ -489,14 +489,9 @@ describe User do
       reply_to(user_not_contacted_recently).should be_nil
     end
 
-    it "should only remind users that have not been contacted in the last 5 days" do
-      do_remind
-      assert_reminded
-    end
-
-    context "passing 'inactivity_period' => 3.days.ago" do
+    context "passing 'inactivity_cutoff' => 3.days.ago.to_s" do
       it "should remind users that have not been contacted in the last 3 days" do
-        do_remind("inactivity_period" => 3.days.ago)
+        do_remind("inactivity_cutoff" => 3.days.ago.to_s)
         assert_reminded
         assert_user_reminded(registered_sp_user_not_contacted_for_a_short_time)
       end
@@ -664,7 +659,7 @@ describe User do
     let(:user) { create(:user, :not_contacted_recently) }
 
     def do_remind(options = {})
-      expect_message { user.remind!(options) }
+      expect_message { user.remind!({:inactivity_cutoff => 5.days.ago.to_s}.merge(options)) }
     end
 
     def assert_reminded
@@ -681,9 +676,9 @@ describe User do
         assert_reminded
       end
 
-      context "passing :inactivity_period => 8.days" do
+      context "passing :inactivity_cutoff => 8.days" do
         it "not send a reminder to the user" do
-          do_remind(:inactivity_period => 8.days.ago.to_s)
+          do_remind(:inactivity_cutoff => 8.days.ago.to_s)
           assert_not_reminded
         end
       end

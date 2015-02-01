@@ -275,26 +275,24 @@ describe Chat do
       active_chat.should_not be_active
     end
 
-    context "passing 'with_inactivity' => true" do
+    context "passing 'inactivity_cutoff'" do
       context "for a chat with inactivity" do
         it "should deactivate the chat" do
-          active_chat_with_inactivity.deactivate!("with_inactivity" => true)
+          active_chat_with_inactivity.deactivate!("inactivity_cutoff" => 9.minutes.ago.to_s)
           active_chat_with_inactivity.should_not be_active
         end
       end
 
-      context "passing 'inactivity_period' => 11.minutes.ago" do
+      context "passing 'inactivity_cutoff' => 11.minutes.ago.to_s" do
         it "should not deactivate the chat" do
-          active_chat_with_inactivity.deactivate!(
-            "with_inactivity" => true, "inactivity_period" => 11.minutes.ago
-          )
+          active_chat_with_inactivity.deactivate!("inactivity_cutoff" => 11.minutes.ago.to_s)
           active_chat_with_inactivity.should be_active
         end
       end
 
       context "for a chat that has activity" do
         it "should not deactivate the chat" do
-          active_chat.deactivate!("with_inactivity" => true)
+          active_chat.deactivate!("inactivity_cutoff" => 10.minutes.ago.to_s)
           active_chat.should be_active
         end
       end
@@ -914,9 +912,13 @@ describe Chat do
       unique_active_chat.should be_active
     end
 
+    def do_end_inactive(options = {})
+      described_class.end_inactive({"inactivity_cutoff" => 9.minutes.ago.to_s}.merge(options))
+    end
+
     context "for chats with inactivity in the last 10 minutes" do
       before do
-        trigger_job { described_class.end_inactive }
+        trigger_job { do_end_inactive }
       end
 
       it "should deactivate chats with more than 10 minutes of inactivity" do
@@ -925,9 +927,9 @@ describe Chat do
       end
     end
 
-    context "passing :inactivity_period => 11.minutes.ago" do
+    context "passing 'inactivity_cutoff' => 11.minutes.ago" do
       before do
-        trigger_job { described_class.end_inactive(:inactivity_period => 11.minutes.ago) }
+        trigger_job { do_end_inactive("inactivity_cutoff" => 11.minutes.ago.to_s) }
       end
 
       it "should deactivate chats with more than 11 minutes of inactivity" do
@@ -937,7 +939,7 @@ describe Chat do
 
     context "passing :all => true" do
       before do
-        trigger_job { described_class.end_inactive(:all => true) }
+        trigger_job { do_end_inactive(:all => true) }
       end
 
       it "should deactivate all chats with inactivity" do

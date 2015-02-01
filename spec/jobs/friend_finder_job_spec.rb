@@ -1,13 +1,18 @@
 require 'spec_helper'
 
 describe FriendFinderJob do
+  let(:options) { {"notify" => true, "between" => [6, 24], "notify_no_match" => false } }
+  subject { described_class.new(options) }
+
+  it "should be serializeable" do
+    expect(subject.serialize["arguments"].first).to eq(options)
+  end
+
   describe "#queue_name" do
     it { expect(subject.queue_name).to eq("default") }
   end
 
   describe "#perform(options = {})" do
-    let(:options) { {"some" => :options} }
-
     before do
       allow(User).to receive(:find_friends)
     end
