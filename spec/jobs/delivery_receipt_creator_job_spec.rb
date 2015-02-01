@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe DeliveryReceiptCreatorJob do
   let(:options) { ActionController::Parameters.new("token" => "token", "state" => "state") }

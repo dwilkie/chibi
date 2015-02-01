@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe CallDataRecordCreatorJob do
   describe "#queue_name" do

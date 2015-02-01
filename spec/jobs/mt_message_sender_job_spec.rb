@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe MtMessageSenderJob do
   it "should be a type of ActiveJob::Base" do

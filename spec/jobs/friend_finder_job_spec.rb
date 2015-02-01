@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe FriendFinderJob do
   let(:options) { {"notify" => true, "between" => [6, 24], "notify_no_match" => false } }

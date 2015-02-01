@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ChatExpirerJob do
   let(:options) { {"active_user" => true, "activate_new_chats" => true, "all" => true, "inactivity_period" => 24.hours.ago.to_s} }

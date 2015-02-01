@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe PhoneCall do
   include PhoneCallHelpers::States

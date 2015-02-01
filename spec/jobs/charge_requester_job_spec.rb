@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ChargeRequesterJob do
   describe "#queue_name" do

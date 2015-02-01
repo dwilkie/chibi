@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe "PhoneCalls" do
   describe "POST /phone_calls.xml" do

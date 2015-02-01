@@ -54,7 +54,6 @@ group :test do
   gem 'mock_redis'
   gem 'fakeweb'
   gem 'vcr'
-  gem 'database_cleaner'
   gem 'timecop'
   gem 'capybara'
   gem 'launchy'

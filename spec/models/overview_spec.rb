@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe Overview do
   let(:options) { { :operator => "operator", :country_code => "country_code" } }

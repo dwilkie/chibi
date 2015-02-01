@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ReportGeneratorJob do
   let(:options) { ActionController::Parameters.new(:year => 2014, :month => 1) }

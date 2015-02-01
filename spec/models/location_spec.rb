@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 # see the individual specs for each location under spec/models/location
 describe Location do

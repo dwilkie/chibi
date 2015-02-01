@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe UserDemographicPresenter do
   include ActionView::TestCase::Behavior

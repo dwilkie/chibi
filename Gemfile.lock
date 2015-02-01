@@ -84,7 +84,6 @@ GEM
     countries (0.10.0)
       currencies (~> 0.4.2)
     currencies (0.4.2)
-    database_cleaner (1.4.0)
     debug_inspector (0.0.2)
     deep_merge (1.0.1)
     diff-lcs (1.2.5)
@@ -365,7 +364,6 @@ DEPENDENCIES
   carrierwave
   coffee-rails (~> 4.0.0)
   countries
-  database_cleaner
   factory_girl
   faker
   fakeweb

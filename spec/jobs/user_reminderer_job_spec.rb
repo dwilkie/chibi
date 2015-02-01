@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe UserRemindererJob do
   let(:options) { {"inactivity_period" => 24.hours.ago.to_s, "between" => [6, 24] } }
