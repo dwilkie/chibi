@@ -24,6 +24,7 @@ gem 'carrierwave'
 gem 'fog'
 gem 'sidekiq'
 gem 'sinatra'
+gem 'airbrake'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
