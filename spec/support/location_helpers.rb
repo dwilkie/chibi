@@ -20,11 +20,11 @@ module LocationHelpers
           expected = expectation["expected_#{attribute}".to_sym]
           actual = subject.send(attribute)
           if expected
-            actual.should == expected
-            result.should == sub_example.downcase
+            expect(actual).to eq(expected)
+            expect(result).to eq(sub_example.downcase)
           else
-            actual.should be_nil
-            result.should be_nil
+            expect(actual).to be_nil
+            expect(result).to be_nil
           end
         end
       end

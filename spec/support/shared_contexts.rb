@@ -45,20 +45,20 @@ shared_context "twiml" do
 
     # asserts that each asserted attribute is present in the TwiML
     options.each do |attribute, value|
-      xpath[index].attributes[attribute.to_s].value.should == value.to_s
+      expect(xpath[index].attributes[attribute.to_s].value).to eq(value.to_s)
     end
 
     # asserts that no extra attributes are present in the TwiML
     xpath[index].attributes.each do |attribute_name, attribute_value|
-      attribute_value.value.should == options[attribute_name.to_sym]
+      expect(attribute_value.value).to eq(options[attribute_name.to_sym])
     end
 
-    block_given? ? yield(xpath) : xpath[index].content.strip.should.should == content
+    block_given? ? yield(xpath) : (expect(xpath[index].content.strip).to eq(content))
   end
 
   def assert_no_twiml(twiml_response, command)
     xpath = command_xpath(twiml_response, command)
-    xpath.should be_empty
+    expect(xpath).to be_empty
   end
 
   def command_xpath(twiml_response, command)

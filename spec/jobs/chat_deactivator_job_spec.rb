@@ -14,7 +14,7 @@ describe ChatDeactivatorJob do
 
   describe "#perform(chat_id, options = {})" do
     let(:chat) { double(Chat) }
-    let(:find_stub) { Chat.stub(:find) }
+    let(:find_stub) { allow(Chat).to receive(:find) }
 
     before do
       allow(chat).to receive(:deactivate!)

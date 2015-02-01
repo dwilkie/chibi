@@ -51,11 +51,11 @@ module MessagingHelpers
       # assert twilio delivery
     elsif options[:via] == :nuntium
       last_request = FakeWeb.last_request
-      last_request.path.should == nuntium_send_ao_path
+      expect(last_request.path).to eq(nuntium_send_ao_path)
       last_request_data = JSON.parse(last_request.body).first
-      last_request_data["body"].should == options[:body] if options[:body].present?
-      last_request_data["to"].should == "sms://#{options[:to]}" if options[:to].present?
-      last_request_data["suggested_channel"].should == options[:suggested_channel] if options[:suggested_channel].present?
+      expect(last_request_data["body"]).to eq(options[:body]) if options[:body].present?
+      expect(last_request_data["to"]).to eq("sms://#{options[:to]}") if options[:to].present?
+      expect(last_request_data["suggested_channel"]).to eq(options[:suggested_channel]) if options[:suggested_channel].present?
     else
       job = enqueued_jobs.last
       expect(job[:args]).to eq([options[:id], options[:short_code], options[:to], options[:body]])
@@ -88,7 +88,7 @@ module MessagingHelpers
 
           authentication_params(:message)
 
-          response.status.should be(options[:response] || 201)
+          expect(response.status).to be(options[:response] || 201)
         end
       end
     end

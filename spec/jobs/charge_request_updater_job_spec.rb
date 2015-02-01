@@ -49,9 +49,9 @@ describe ChargeRequestUpdaterJob do
 
     it "should update the charge request" do
       trigger_job { enqueue_job }
-      reply_to(user).body.should == spec_translate(
+      expect(reply_to(user).body).to eq(spec_translate(
         :not_enough_credit, user.locale
-      )
+      ))
     end
   end
 end

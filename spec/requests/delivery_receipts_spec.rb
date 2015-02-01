@@ -20,7 +20,7 @@ describe "Delivery Receipts" do
       authentication_params(:delivery_receipt)
     )
 
-    response.status.should be(options[:response] || 201)
+    expect(response.status).to be(options[:response] || 201)
   end
 
   describe "POST /delivery_receipts" do
@@ -35,7 +35,7 @@ describe "Delivery Receipts" do
         end
 
         it "should mark the reply as delivered by smsc" do
-          reply.reload.should be_delivered_by_smsc
+          expect(reply.reload).to be_delivered_by_smsc
         end
       end
 
@@ -45,7 +45,7 @@ describe "Delivery Receipts" do
         end
 
         it "should ignore the delivery receipt" do
-          Reply.count.should == 0
+          expect(Reply.count).to eq(0)
         end
       end
     end

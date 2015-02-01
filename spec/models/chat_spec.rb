@@ -31,59 +31,59 @@ describe Chat do
 
   describe "factory" do
     it "should be valid" do
-      new_chat.should be_valid
+      expect(new_chat).to be_valid
     end
   end
 
   describe "validations" do
     it "should not be valid without a user" do
       new_chat.user = nil
-      new_chat.should_not be_valid
+      expect(new_chat).not_to be_valid
     end
 
     it "should not be valid without a friend" do
       new_chat.friend = nil
-      new_chat.should_not be_valid
+      expect(new_chat).not_to be_valid
     end
 
     it "should not be valid with a duplicate user and friend" do
       chat
       new_chat.user = chat.user
       new_chat.friend = chat.friend
-      new_chat.should_not be_valid
+      expect(new_chat).not_to be_valid
     end
   end
 
   describe "#active?" do
     it "should only return true for chats which have active users" do
-      active_chat.should be_active
+      expect(active_chat).to be_active
       active_chat.active_users.clear
-      active_chat.should_not be_active
+      expect(active_chat).not_to be_active
 
       active_chat.active_users << user
-      active_chat.should_not be_active
+      expect(active_chat).not_to be_active
 
       active_chat.active_users << friend
-      active_chat.should be_active
+      expect(active_chat).to be_active
     end
   end
 
   describe "#activate" do
     before do
-      subject.stub(:activate!)
+      allow(subject).to receive(:activate!)
     end
 
     it "should pass the options to #activate!" do
-      subject.should_receive(:activate!).with({:some_option => "some option"})
+      expect(subject).to receive(:activate!).with({:some_option => "some option"})
       subject.activate({:some_option => "some option"})
     end
 
     it "should return whether on not the chat is active" do
-      subject.stub(:active?).and_return(true)
-      subject.activate.should == true
+      allow(subject).to receive(:active?).and_return(true)
+      expect(subject.activate).to eq(true)
 
-      subject.stub(:active?).and_return(false)
-      subject.activate.should == false
+      allow(subject).to receive(:active?).and_return(false)
+      expect(subject.activate).to eq(false)
     end
   end
 
@@ -91,10 +91,10 @@ describe Chat do
     shared_examples_for "activating a chat" do
       it "should set the active users and save the chat" do
         reference_chat.activate!
-        reference_chat.should be_active
-        reference_chat.should be_persisted
-        user.active_chat.should == reference_chat
-        friend.active_chat.should == reference_chat
+        expect(reference_chat).to be_active
+        expect(reference_chat).to be_persisted
+        expect(user.active_chat).to eq(reference_chat)
+        expect(friend.active_chat).to eq(reference_chat)
       end
 
       context "passing :activate_user => false" do
@@ -103,16 +103,16 @@ describe Chat do
         end
 
         it "should only activate the chat for the friend" do
-          reference_chat.should_not be_active
-          reference_chat.should be_persisted
-          user.active_chat.should be_nil
-          friend.active_chat.should == reference_chat
+          expect(reference_chat).not_to be_active
+          expect(reference_chat).to be_persisted
+          expect(user.active_chat).to be_nil
+          expect(friend.active_chat).to eq(reference_chat)
         end
 
         context "the initiator" do
           it "should be searching for friend" do
-            user.reload.should be_searching_for_friend
-            friend.reload.should_not be_searching_for_friend
+            expect(user.reload).to be_searching_for_friend
+            expect(friend.reload).not_to be_searching_for_friend
           end
         end
       end
@@ -121,8 +121,8 @@ describe Chat do
         it "should introduce only the chat partner" do
           expect_message { reference_chat.activate!(:notify => true) }
 
-          reply_to(user, reference_chat).should be_nil
-          reply_to(friend, reference_chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
+          expect(reply_to(user, reference_chat)).to be_nil
+          expect(reply_to(friend, reference_chat).body).to match(/#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/)
         end
       end
 
@@ -133,14 +133,14 @@ describe Chat do
 
         context "the initiator" do
           it "should not be searching for a friend" do
-            reference_chat.user.reload.should_not be_searching_for_friend
-            reference_chat.friend.reload.should_not be_searching_for_friend
+            expect(reference_chat.user.reload).not_to be_searching_for_friend
+            expect(reference_chat.friend.reload).not_to be_searching_for_friend
           end
         end
 
         it "should not introduce the new chat participants" do
-          reply_to(user, reference_chat).should be_nil
-          reply_to(friend, reference_chat).should be_nil
+          expect(reply_to(user, reference_chat)).to be_nil
+          expect(reply_to(friend, reference_chat)).to be_nil
         end
       end
     end
@@ -151,7 +151,7 @@ describe Chat do
           it "should set the starter as the #{starter}" do
             chat_starter = create(starter)
             chat.activate!(:starter => chat_starter)
-            chat.starter.should == chat_starter
+            expect(chat.starter).to eq(chat_starter)
           end
         end
       end
@@ -167,15 +167,15 @@ describe Chat do
 
       it "should deactivate the other chat for the new user but leave the partner active" do
         new_chat.activate!
-        current_active_chat.should_not be_active
-        current_active_chat.reload.active_users.should == [current_chat_partner]
+        expect(current_active_chat).not_to be_active
+        expect(current_active_chat.reload.active_users).to eq([current_chat_partner])
       end
 
       context "passing :notify => true" do
         it "should not inform the previous chat partner how to find a new friend" do
           expect_message { new_chat.activate!(:notify => true) }
-          reply_to(current_chat_partner, current_active_chat).should be_nil
-          reply_to(user, current_active_chat).should be_nil
+          expect(reply_to(current_chat_partner, current_active_chat)).to be_nil
+          expect(reply_to(user, current_active_chat)).to be_nil
         end
       end
     end
@@ -192,13 +192,13 @@ describe Chat do
       end
 
       it "should try to find a friend for the user" do
-        user.should_receive(:match)
+        expect(user).to receive(:match)
         subject.activate!
       end
 
       context "and a friend is found for this user" do
         before do
-          user.stub(:match).and_return(friend)
+          allow(user).to receive(:match).and_return(friend)
         end
 
         it_should_behave_like "activating a chat" do
@@ -211,12 +211,12 @@ describe Chat do
         shared_examples_for "not notifying the user of no match" do
           it "should not notify the user that there are no matches at this time" do
             subject.activate!
-            reply_to(user).should be_nil
+            expect(reply_to(user)).to be_nil
           end
         end
 
         before do
-          user.stub(:match).and_return(nil)
+          allow(user).to receive(:match).and_return(nil)
         end
 
         context "passing :notify => true" do
@@ -240,8 +240,8 @@ describe Chat do
         active_chat
         time_updated = active_chat.updated_at
         active_chat.reactivate!
-        active_chat.updated_at.should == time_updated
-        active_chat.should be_active
+        expect(active_chat.updated_at).to eq(time_updated)
+        expect(active_chat).to be_active
       end
     end
 
@@ -252,18 +252,18 @@ describe Chat do
       end
 
       it "should force reactivate the chat" do
-        active_chat_with_single_user.should_not be_active
+        expect(active_chat_with_single_user).not_to be_active
         active_chat_with_single_user.reactivate!
-        active_chat_with_single_user.should be_active
+        expect(active_chat_with_single_user).to be_active
       end
 
       context "and there are undelivered messages" do
         let(:reply) { create(:reply, :chat => active_chat_with_single_user) }
 
         it "should deliver the replies" do
-          reply.should_not be_delivered
+          expect(reply).not_to be_delivered
           expect_message { active_chat_with_single_user.reactivate! }
-          reply.reload.should be_delivered
+          expect(reply.reload).to be_delivered
         end
       end
     end
@@ -271,29 +271,29 @@ describe Chat do
 
   describe "#deactivate!" do
     def assert_active_users_cleared
-      active_chat.active_users.should be_empty
-      active_chat.should_not be_active
+      expect(active_chat.active_users).to be_empty
+      expect(active_chat).not_to be_active
     end
 
     context "passing 'inactivity_cutoff'" do
       context "for a chat with inactivity" do
         it "should deactivate the chat" do
           active_chat_with_inactivity.deactivate!("inactivity_cutoff" => 9.minutes.ago.to_s)
-          active_chat_with_inactivity.should_not be_active
+          expect(active_chat_with_inactivity).not_to be_active
         end
       end
 
       context "passing 'inactivity_cutoff' => 11.minutes.ago.to_s" do
         it "should not deactivate the chat" do
           active_chat_with_inactivity.deactivate!("inactivity_cutoff" => 11.minutes.ago.to_s)
-          active_chat_with_inactivity.should be_active
+          expect(active_chat_with_inactivity).to be_active
         end
       end
 
       context "for a chat that has activity" do
         it "should not deactivate the chat" do
           active_chat.deactivate!("inactivity_cutoff" => 10.minutes.ago.to_s)
-          active_chat.should be_active
+          expect(active_chat).to be_active
         end
       end
     end
@@ -303,11 +303,11 @@ describe Chat do
         reference_user.reload
 
         new_chat = subject.class.where(:friend_id => new_friend).first
-        new_chat.user.should == reference_user
-        new_chat.friend.should == new_friend
-        new_chat.active_users.should == [new_friend]
+        expect(new_chat.user).to eq(reference_user)
+        expect(new_chat.friend).to eq(new_friend)
+        expect(new_chat.active_users).to eq([new_friend])
 
-        reference_user.should_not be_currently_chatting
+        expect(reference_user).not_to be_currently_chatting
       end
 
       before do
@@ -329,7 +329,7 @@ describe Chat do
         it "should only deactivate the chat for #<User...A> and leave #<User...B> active" do
           # so that they are available to chat with someone else
           active_chat.deactivate!("active_user" => user)
-          active_chat.active_users.should == [friend]
+          expect(active_chat.active_users).to eq([friend])
         end
       end
 
@@ -342,7 +342,7 @@ describe Chat do
         it "should deactivate the chat for both #<User...A> and #<User...B>" do
           # so that they are available to chat with someone else
           active_chat_with_single_user.deactivate!("active_user" => user)
-          active_chat_with_single_user.active_users.should == []
+          expect(active_chat_with_single_user.active_users).to eq([])
         end
       end
     end
@@ -355,8 +355,8 @@ describe Chat do
           end
 
           it "should deactivate the chat for both users" do
-            active_chat.active_users.should be_empty
-            active_chat.should_not be_active
+            expect(active_chat.active_users).to be_empty
+            expect(active_chat).not_to be_active
           end
         end
 
@@ -366,8 +366,8 @@ describe Chat do
           end
 
           it "should only deactivate the chat for the active user" do
-            active_chat_with_single_user.active_users.should == [user]
-            active_chat_with_single_user.should_not be_active
+            expect(active_chat_with_single_user.active_users).to eq([user])
+            expect(active_chat_with_single_user).not_to be_active
           end
 
         end
@@ -384,7 +384,7 @@ describe Chat do
           end
 
           it "should deactivate the chat for the friend" do
-            active_chat.active_users.should == [user]
+            expect(active_chat.active_users).to eq([user])
           end
         end
 
@@ -395,7 +395,7 @@ describe Chat do
           end
 
           it "should deactivate the chat for the user" do
-            active_chat.active_users.should == [friend]
+            expect(active_chat.active_users).to eq([friend])
           end
         end
       end
@@ -414,19 +414,19 @@ describe Chat do
         end
 
         def assert_chat_reactivated
-          user.reload.active_chat.should == expired_chats[0]
-          pending_replies[0].reload.should be_delivered
-          pending_replies[1].reload.should_not be_delivered
+          expect(user.reload.active_chat).to eq(expired_chats[0])
+          expect(pending_replies[0].reload).to be_delivered
+          expect(pending_replies[1].reload).not_to be_delivered
         end
 
         def assert_chat_not_reactivated
           user.reload
           expired_chats.each do |expired_chat|
-            user.active_chat.should_not == expired_chat
+            expect(user.active_chat).not_to eq(expired_chat)
           end
 
           pending_replies.each do |pending_reply|
-            pending_reply.reload.should_not be_delivered
+            expect(pending_reply.reload).not_to be_delivered
           end
         end
 
@@ -489,9 +489,9 @@ describe Chat do
         end
 
         it "should deliver the replies to the participants and mark this as their active chat" do
-          chat.active_users.should == [user] # just make the chat active for the recipient of the reply
+          expect(chat.active_users).to eq([user]) # just make the chat active for the recipient of the reply
           undelivered_replies.each do |undelivered_reply|
-            undelivered_reply.reload.should be_delivered
+            expect(undelivered_reply.reload).to be_delivered
           end
         end
       end
@@ -503,9 +503,9 @@ describe Chat do
         end
 
         it "should not delivery the replies or mark this as their active chat" do
-          chat.active_users.should be_empty
+          expect(chat.active_users).to be_empty
           undelivered_replies.each do |undelivered_reply|
-            undelivered_reply.reload.should_not be_delivered
+            expect(undelivered_reply.reload).not_to be_delivered
           end
         end
       end
@@ -517,17 +517,17 @@ describe Chat do
       end
 
       it "should not reinvigorate the chat" do
-        chat.active_users.should be_empty
+        expect(chat.active_users).to be_empty
       end
     end
   end
 
   describe "#inactive_user" do
     it "should return the active user if he is the only active user in the chat" do
-      create(:chat, :initiator_active, :user => user).inactive_user.should == user
-      create(:chat, :friend_active, :friend => friend).inactive_user.should == friend
-      create(:chat, :active).inactive_user.should be_nil
-      create(:chat).inactive_user.should be_nil # expired
+      expect(create(:chat, :initiator_active, :user => user).inactive_user).to eq(user)
+      expect(create(:chat, :friend_active, :friend => friend).inactive_user).to eq(friend)
+      expect(create(:chat, :active).inactive_user).to be_nil
+      expect(create(:chat).inactive_user).to be_nil # expired
     end
   end
 
@@ -540,20 +540,20 @@ describe Chat do
     let(:message) { create_message(user) }
 
     def assert_forward_message_to(recipient, originator, chat_session, message, options = {})
-      chat_session.reload.messages.should include(message)
+      expect(chat_session.reload.messages).to include(message)
       reply = reply_to(recipient, chat_session)
-      reply.body.should == spec_translate(
+      expect(reply.body).to eq(spec_translate(
         :forward_message, recipient.locale, originator.screen_id, message_body
-      )
+      ))
 
       options[:delivered] = true unless options[:delivered] == false
 
       if options[:delivered]
-        recipient.active_chat.should == chat_session
-        originator.active_chat.should == chat_session
-        reply.should be_delivered
+        expect(recipient.active_chat).to eq(chat_session)
+        expect(originator.active_chat).to eq(chat_session)
+        expect(reply).to be_delivered
       else
-        reply.should_not be_delivered
+        expect(reply).not_to be_delivered
       end
     end
 
@@ -562,7 +562,7 @@ describe Chat do
         time_updated = active_chat_with_single_user.updated_at
         expect_message { active_chat_with_single_user.forward_message(message) }
         assert_forward_message_to(friend, user, active_chat_with_single_user, message)
-        active_chat_with_single_user.updated_at.should > time_updated
+        expect(active_chat_with_single_user.updated_at).to be > time_updated
       end
 
       context "and the originator has already sent one message" do
@@ -574,8 +574,8 @@ describe Chat do
         it "should just forward the message" do
           expect_message { active_chat_with_single_user.forward_message(message) }
           assert_forward_message_to(friend, user, active_chat_with_single_user, message)
-          user.reload.should be_currently_chatting
-          new_partner_for_user.reload.should_not be_currently_chatting
+          expect(user.reload).to be_currently_chatting
+          expect(new_partner_for_user.reload).not_to be_currently_chatting
         end
 
         context "and the originator has already sent another message" do
@@ -588,11 +588,11 @@ describe Chat do
               active_chat_with_single_user.forward_message(message)
             end
 
-            user.reload.should_not be_currently_chatting
-            new_partner_for_user.reload.should be_currently_chatting
-            new_partner_for_user.active_chat.starter.should == message
+            expect(user.reload).not_to be_currently_chatting
+            expect(new_partner_for_user.reload).to be_currently_chatting
+            expect(new_partner_for_user.active_chat.starter).to eq(message)
 
-            reply_to(new_partner_for_user).body.should =~ /#{spec_translate(:forward_message_approx, new_partner_for_user.locale, user.screen_id)}/
+            expect(reply_to(new_partner_for_user).body).to match(/#{spec_translate(:forward_message_approx, new_partner_for_user.locale, user.screen_id)}/)
           end
         end
       end
@@ -627,18 +627,18 @@ describe Chat do
 
         it "should save the message for sending later and find new friends for the sender" do
           # assert that the sender is now not in the chat session
-          sender.active_chat.should be_nil
+          expect(sender.active_chat).to be_nil
 
           new_chat_session = message.triggered_chats.first
 
           # assert that the sender's message triggered another chat
-          new_chat_session.should be_present
+          expect(new_chat_session).to be_present
 
           # assert that the new chat session is not the current chat session
-          new_chat_session.should_not == current_chat_session
+          expect(new_chat_session).not_to eq(current_chat_session)
 
           # assert that an introduction was sent to the new friend
-          reply_to(new_partner_for_sender).body.should =~ /#{spec_translate(:forward_message_approx, new_partner_for_sender.locale, sender.screen_id)}/
+          expect(reply_to(new_partner_for_sender).body).to match(/#{spec_translate(:forward_message_approx, new_partner_for_sender.locale, sender.screen_id)}/)
 
           # assert that the original message was queued for forwarding to the
           # unavailable user
@@ -659,10 +659,10 @@ describe Chat do
         end
 
         it "should reinvigorate the chat with pending replies" do
-          sender.active_chat.should == expired_chat_with_sender
+          expect(sender.active_chat).to eq(expired_chat_with_sender)
           reply = reply_to(sender)
-          reply.should == pending_reply_from_expired_chat
-          reply.should be_delivered
+          expect(reply).to eq(pending_reply_from_expired_chat)
+          expect(reply).to be_delivered
           assert_forward_message_to
         end
       end
@@ -671,8 +671,8 @@ describe Chat do
 
   describe "#partner" do
     it "should return the partner of the given user" do
-      new_chat.partner(new_chat.user).should == new_chat.friend
-      new_chat.partner(new_chat.friend).should == new_chat.user
+      expect(new_chat.partner(new_chat.user)).to eq(new_chat.friend)
+      expect(new_chat.partner(new_chat.friend)).to eq(new_chat.user)
     end
   end
 
@@ -681,12 +681,12 @@ describe Chat do
       user = User.new
 
       subject.initiator = new_chat.user
-      subject.user.should == new_chat.user
+      expect(subject.user).to eq(new_chat.user)
 
       user = User.new
 
       subject.user = user
-      subject.initiator.should == user
+      expect(subject.initiator).to eq(user)
     end
   end
 
@@ -704,12 +704,12 @@ describe Chat do
     context "passing no options" do
       it "should create 5 new chats for the user" do
         subject.class.activate_multiple!(friend)
-        subject.class.count.should == 5
-        friend.reload.active_chat.should be_nil
+        expect(subject.class.count).to eq(5)
+        expect(friend.reload.active_chat).to be_nil
 
         with_new_chats do |chat|
-          chat.user.should == friend
-          chat.active_users.should == [chat.friend]
+          expect(chat.user).to eq(friend)
+          expect(chat.active_users).to eq([chat.friend])
         end
       end
     end
@@ -717,18 +717,18 @@ describe Chat do
     context "passing :count => 7" do
       it "should create 7 new chats for the user" do
         subject.class.activate_multiple!(friend, :count => 7)
-        subject.class.count.should == 7
+        expect(subject.class.count).to eq(7)
       end
     end
 
     context "passing :notify => true" do
       it "should notify the all the new friends" do
         expect_message { subject.class.activate_multiple!(friend, :notify => true) }
-        reply_to(friend).should be_nil
+        expect(reply_to(friend)).to be_nil
 
         with_new_chats do |chat|
           new_friend = chat.friend
-          reply_to(new_friend).body.should =~ /#{spec_translate(:forward_message_approx, new_friend.locale, friend.screen_id)}/
+          expect(reply_to(new_friend).body).to match(/#{spec_translate(:forward_message_approx, new_friend.locale, friend.screen_id)}/)
         end
       end
     end
@@ -767,12 +767,12 @@ describe Chat do
     it "should try to determine the chat in which the message is intended for" do
       messages_to_bob.each do |bob_message|
         message.body = bob_message
-        subject.class.intended_for(message).should == chat_with_bob
+        expect(subject.class.intended_for(message)).to eq(chat_with_bob)
       end
 
       messages_to_dave.each do |dave_message|
         message.body = dave_message
-        subject.class.intended_for(message).should == chat_with_dave
+        expect(subject.class.intended_for(message)).to eq(chat_with_dave)
       end
 
       # Note:
@@ -781,19 +781,19 @@ describe Chat do
       # e.g. if a chat was originated from Dave to Chris but Chris never replied
       messages_to_current_partner.each do |current_partner_message|
         message.body = current_partner_message
-        subject.class.intended_for(message).should be_nil
+        expect(subject.class.intended_for(message)).to be_nil
       end
     end
 
     context "passing :num_recent_chats => 3" do
       it "should only look at the previous 3 chats for intended recipients" do
         messages_to_bob.each do |bob|
-          subject.class.intended_for(message, :num_recent_chats => 3).should be_nil
+          expect(subject.class.intended_for(message, :num_recent_chats => 3)).to be_nil
         end
 
         messages_to_dave.each do |dave_message|
           message.body = dave_message
-          subject.class.intended_for(message, :num_recent_chats => 3).should == chat_with_dave
+          expect(subject.class.intended_for(message, :num_recent_chats => 3)).to eq(chat_with_dave)
         end
       end
     end
@@ -801,7 +801,7 @@ describe Chat do
 
   describe ".filter_by" do
     it "should include users, friends & active users to avoid loading them for each user" do
-      subject.class.filter_by.includes_values.should include(:user, :friend, :active_users)
+      expect(subject.class.filter_by.includes_values).to include(:user, :friend, :active_users)
     end
 
     context ":user_id => 2" do
@@ -811,7 +811,7 @@ describe Chat do
       end
 
       it "should return all chats with the given user id" do
-        subject.class.filter_by(:user_id => chat.user_id).should == [chat]
+        expect(subject.class.filter_by(:user_id => chat.user_id)).to eq([chat])
       end
     end
   end
@@ -824,7 +824,7 @@ describe Chat do
       end
 
       it "should return the count of the chats with the given user id" do
-        subject.class.filter_by_count(:user_id => chat.user_id).should == 1
+        expect(subject.class.filter_by_count(:user_id => chat.user_id)).to eq(1)
       end
     end
   end
@@ -891,25 +891,25 @@ describe Chat do
 
     it "should cleanup any chats without interaction that are older than 30 days" do
       subject.class.cleanup!
-      Chat.all.should =~ [
+      expect(Chat.all).to match_array([
         chat, unique_active_chat, old_active_chat, old_chat_with_initiator_active,
         old_chat_with_friend_active, old_chat_with_message, old_chat_with_phone_call
-      ]
+      ])
     end
   end
 
   describe ".end_inactive" do
     before do
-      chat.should_not be_active
-      unique_active_chat.should be_active
+      expect(chat).not_to be_active
+      expect(unique_active_chat).to be_active
 
-      active_chat_with_inactivity.should be_active
-      active_chat_with_single_user_with_inactivity.active_users.count.should == 1
+      expect(active_chat_with_inactivity).to be_active
+      expect(active_chat_with_single_user_with_inactivity.active_users.count).to eq(1)
     end
 
     after do
-      chat.should_not be_active
-      unique_active_chat.should be_active
+      expect(chat).not_to be_active
+      expect(unique_active_chat).to be_active
     end
 
     def do_end_inactive(options = {})
@@ -922,8 +922,8 @@ describe Chat do
       end
 
       it "should deactivate chats with more than 10 minutes of inactivity" do
-        active_chat_with_inactivity.should_not be_active
-        active_chat_with_single_user_with_inactivity.active_users.count.should == 1
+        expect(active_chat_with_inactivity).not_to be_active
+        expect(active_chat_with_single_user_with_inactivity.active_users.count).to eq(1)
       end
     end
 
@@ -933,7 +933,7 @@ describe Chat do
       end
 
       it "should deactivate chats with more than 11 minutes of inactivity" do
-        active_chat_with_inactivity.should be_active
+        expect(active_chat_with_inactivity).to be_active
       end
     end
 
@@ -943,8 +943,8 @@ describe Chat do
       end
 
       it "should deactivate all chats with inactivity" do
-        active_chat_with_inactivity.should_not be_active
-        active_chat_with_single_user_with_inactivity.active_users.count.should be_zero
+        expect(active_chat_with_inactivity).not_to be_active
+        expect(active_chat_with_single_user_with_inactivity.active_users.count).to be_zero
       end
     end
   end

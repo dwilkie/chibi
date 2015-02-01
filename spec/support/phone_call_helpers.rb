@@ -31,7 +31,7 @@ module PhoneCallHelpers
 
     post phone_calls_path(:format => :xml), call_params(options), authentication_params(:phone_call)
 
-    response.status.should be(options[:response] || 200)
+    expect(response.status).to be(options[:response] || 200)
     options[:call_sid]
   end
 
@@ -44,14 +44,14 @@ module PhoneCallHelpers
         it "should fetch the body from the Twilio API" do
           expect_twilio_cdr_fetch(:call_sid => uuid, :direction => direction) { subject.body }
           parsed_body = MultiXml.parse(subject.body)["cdr"]
-          parsed_body["variables"]["duration"].should be_present
-          parsed_body["variables"]["billsec"].should be_present
+          expect(parsed_body["variables"]["duration"]).to be_present
+          expect(parsed_body["variables"]["billsec"]).to be_present
           assertions.each do |assertion_key, assertion_value|
             actual_value = parsed_body["variables"][assertion_key]
             if assertion_value == true
-              actual_value.should be_present
+              expect(actual_value).to be_present
             else
-              actual_value.should == assertion_value
+              expect(actual_value).to eq(assertion_value)
             end
           end
         end

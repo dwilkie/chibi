@@ -18,29 +18,29 @@ describe InboundCdr do
 
   describe "factory" do
     it "should be valid" do
-      subject.should be_valid
+      expect(subject).to be_valid
     end
   end
 
   describe "associations" do
     describe "#outbound_cdrs" do
       it "should have_many" do
-        subject.outbound_cdrs.should be_empty
+        expect(subject.outbound_cdrs).to be_empty
       end
     end
   end
 
   it "should not be valid without a rfc2822 date" do
     cdr.rfc2822_date = nil
-    cdr.should_not be_valid
+    expect(cdr).not_to be_valid
   end
 
   it "should not be valid without a related user" do
-    build_cdr(
+    expect(build_cdr(
       :cdr_variables => {
         "variables" => {"sip_from_user" => "invalid"}
       }
-    ).should_not be_valid
+    )).not_to be_valid
   end
 
   it_should_behave_like "communicable from user" do
@@ -52,8 +52,8 @@ describe InboundCdr do
       it "should populate the required attributes" do
         Timecop.freeze(Time.current) do
           subject.valid?
-          subject.rfc2822_date.to_i.should == Time.current.to_i
-          subject.phone_call.should be_nil
+          expect(subject.rfc2822_date.to_i).to eq(Time.current.to_i)
+          expect(subject.phone_call).to be_nil
         end
       end
 
@@ -63,7 +63,7 @@ describe InboundCdr do
 
         it "should set the related phone call" do
           subject.valid?
-          subject.phone_call.should == phone_call
+          expect(subject.phone_call).to eq(phone_call)
         end
       end
     end
@@ -97,13 +97,13 @@ describe InboundCdr do
     describe ".overview_of_duration(options = {})" do
       it "should return the sum of bill_sec in mins" do
         overview = InboundCdr.overview_of_duration
-        overview.should include([miliseconds_since_epoch(eight_days_ago), 2])
+        expect(overview).to include([miliseconds_since_epoch(eight_days_ago), 2])
       end
     end
 
     describe ".cdr_report_columns(:header => true)" do
       it "should return the column headers for the cdr report" do
-        InboundCdr.cdr_report_columns(:header => true).should == asserted_cdr_report_headers
+        expect(InboundCdr.cdr_report_columns(:header => true)).to eq(asserted_cdr_report_headers)
       end
     end
 
@@ -114,10 +114,10 @@ describe InboundCdr do
 
       it "should return only the relevant cdr columns" do
         results = run_filter
-        results[0].should == asserted_cdr_data_row(cdr_2)
-        results[1].should == asserted_cdr_data_row(cdr_3)
-        results[2].should == asserted_cdr_data_row(cdr_1)
-        results.should_not include(asserted_cdr_data_row(cdr_4))
+        expect(results[0]).to eq(asserted_cdr_data_row(cdr_2))
+        expect(results[1]).to eq(asserted_cdr_data_row(cdr_3))
+        expect(results[2]).to eq(asserted_cdr_data_row(cdr_1))
+        expect(results).not_to include(asserted_cdr_data_row(cdr_4))
       end
 
       it_should_behave_like "filtering by operator"

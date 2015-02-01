@@ -14,7 +14,7 @@ describe UserDemographicPresenter do
   end
 
   def assert_title(result, title)
-    result.should have_selector("h2", :text => title)
+    expect(result).to have_selector("h2", :text => title)
   end
 
   describe "#by_gender" do

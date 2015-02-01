@@ -19,7 +19,7 @@ module AnalyzableExamples
   shared_examples_for "filtering by operator" do
     context "passing :operator => '<operator>', :country_code => '<country_code>'" do
       it "should filter by the operator" do
-        run_filter(:operator => :foo, :country_code => :kh).should be_empty
+        expect(run_filter(:operator => :foo, :country_code => :kh)).to be_empty
       end
     end
   end
@@ -27,7 +27,7 @@ module AnalyzableExamples
   shared_examples_for "filtering by time" do
     context "passing :between => start_time..end_time" do
       it "should filter by the given timeline" do
-        run_filter(:between => time_period).to_json.should == filtered_by_time_results.to_json
+        expect(run_filter(:between => time_period).to_json).to eq(filtered_by_time_results.to_json)
       end
     end
   end
@@ -57,7 +57,7 @@ module AnalyzableExamples
 
       context "passing no args" do
         it "should return an overview of all the created resources (in HighStocks format)" do
-          resource.class.overview_of_created.should(
+          expect(resource.class.overview_of_created).to(
             include([miliseconds_since_epoch(two_months_and_one_day_ago), 1])
           )
         end
@@ -65,17 +65,17 @@ module AnalyzableExamples
 
       context "passing :timeframe_format => :report" do
         it "should return an overview of all the created resources (using the DOW format)" do
-          resource.class.overview_of_created(
+          expect(resource.class.overview_of_created(
             :timeframe_format => :report
-          ).should include([two_months_and_one_day_ago.day, 1])
+          )).to include([two_months_and_one_day_ago.day, 1])
         end
       end
 
       context "passing :least_recent => 2.months" do
         it "should return an overview of the resources created in the last 2 months" do
-          resource.class.overview_of_created(
+          expect(resource.class.overview_of_created(
             :least_recent => 2.months
-          ).should_not(
+          )).not_to(
             include(
               [miliseconds_since_epoch(two_months_and_one_day_ago), 1]
             )
@@ -85,9 +85,9 @@ module AnalyzableExamples
 
       context "passing :between => 3.months.ago..2.month.ago" do
         it "should return an overview of the resources created in the timeline given" do
-          resource.class.overview_of_created(
+          expect(resource.class.overview_of_created(
             :between => 3.months.ago..2.months.ago
-          ).should == [[miliseconds_since_epoch(two_months_and_one_day_ago), 1]]
+          )).to eq([[miliseconds_since_epoch(two_months_and_one_day_ago), 1]])
         end
       end
 
@@ -96,25 +96,25 @@ module AnalyzableExamples
           beginning_of_month = miliseconds_since_epoch(eight_days_ago.beginning_of_month)
           assertion = [beginning_of_month]
           eight_days_ago_was_in_this_month ? assertion << 5 : assertion << 2
-          resource.class.overview_of_created(
+          expect(resource.class.overview_of_created(
             :timeframe => :month
-          ).should(include(assertion))
+          )).to(include(assertion))
         end
       end
 
       context "passing :operator => '<operator>', :country_code => '<country_code>'" do
         it "should filter by the given operator" do
-          resource.class.overview_of_created(
+          expect(resource.class.overview_of_created(
             :operator => "foo", :country_code => country_code
-          ).should be_empty
+          )).to be_empty
 
-          resource.class.overview_of_created(
+          expect(resource.class.overview_of_created(
             :operator => operator_name, :country_code => "different"
-          ).should be_empty
+          )).to be_empty
 
-          resource.class.overview_of_created(
+          expect(resource.class.overview_of_created(
             :operator => operator_name, :country_code => country_code
-          ).should_not be_empty
+          )).not_to be_empty
         end
       end
 
@@ -126,12 +126,12 @@ module AnalyzableExamples
           end
 
           it "should return an overview of the resources created in the last 2 months by user" do
-            resource.class.overview_of_created(:by_user => true).should == [
+            expect(resource.class.overview_of_created(:by_user => true)).to eq([
               [miliseconds_since_epoch(two_months_and_one_day_ago), 1],
               [miliseconds_since_epoch(eight_days_ago), 2],
               [miliseconds_since_epoch(7.days.ago), 1],
               [miliseconds_since_epoch(Time.current), 3]
-            ]
+            ])
           end
         end
       end

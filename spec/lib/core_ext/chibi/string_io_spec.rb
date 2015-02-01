@@ -8,7 +8,7 @@ module Chibi
 
     describe "#original_filename" do
       it "should return the filename that it was initialized with" do
-        subject.original_filename.should == filename
+        expect(subject.original_filename).to eq(filename)
       end
     end
   end

@@ -19,7 +19,7 @@ describe Interaction do
     end
 
     it "should return the paginated interactions" do
-      subject.paginated_interactions.should == [message, phone_call]
+      expect(subject.paginated_interactions).to eq([message, phone_call])
     end
   end
 end

@@ -14,7 +14,7 @@ describe "Call Data Records" do
       },
       authentication_params(:call_data_record)
     )
-    response.status.should be(options[:response] || 201)
+    expect(response.status).to be(options[:response] || 201)
   end
 
   describe "POST /call_data_records.xml" do
@@ -44,9 +44,9 @@ describe "Call Data Records" do
         end
 
         it "should create the CDR with the correct fields" do
-          new_cdr.should be_present
-          new_cdr.should be_valid
-          asserted_cdr_type.last.should == new_cdr
+          expect(new_cdr).to be_present
+          expect(new_cdr).to be_valid
+          expect(asserted_cdr_type.last).to eq(new_cdr)
         end
       end
     end

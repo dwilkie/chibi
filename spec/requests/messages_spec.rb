@@ -28,7 +28,7 @@ describe "Messages" do
           end
 
           it "should put me online" do
-            offline_user.reload.should be_online
+            expect(offline_user.reload).to be_online
           end
         end
 
@@ -40,7 +40,7 @@ describe "Messages" do
 
             it "should not reply to me just now as my request for a friend has been already registered" do
               # sending a message that nobody is available is annoying
-              reply_to(new_user).should be_nil
+              expect(reply_to(new_user)).to be_nil
             end
           end
         end
@@ -49,9 +49,9 @@ describe "Messages" do
 
     context "as new user" do
       def assert_new_user
-        new_user.mobile_number.should == my_number
-        new_location.user.should == new_user
-        new_location.country_code.should == "kh"
+        expect(new_user.mobile_number).to eq(my_number)
+        expect(new_location.user).to eq(new_user)
+        expect(new_location.country_code).to eq("kh")
       end
 
       before do
@@ -65,9 +65,9 @@ describe "Messages" do
             # I just want to chat!
             assert_new_user
 
-            reply_to(new_user).should be_nil
+            expect(reply_to(new_user)).to be_nil
 
-            reply_to(alex).body.should =~ /#{spec_translate(:forward_message_approx, alex.locale, new_user.screen_id)}/
+            expect(reply_to(alex).body).to match(/#{spec_translate(:forward_message_approx, alex.locale, new_user.screen_id)}/)
           end
         end
 
@@ -93,7 +93,7 @@ describe "Messages" do
           end
 
           it "should log me out" do
-            reply_to(new_user).should be_nil
+            expect(reply_to(new_user)).to be_nil
           end
         end
 
@@ -107,13 +107,13 @@ describe "Messages" do
           it "should save me as 'map' a 27 yo male from Phnom Penh and start a chat with a matching female" do
             assert_new_user
 
-            new_user.name.should == "map"
-            new_user.age.should == 27
-            new_user.location.city.should == "Phnom Penh"
-            new_user.gender.should == "m"
+            expect(new_user.name).to eq("map")
+            expect(new_user.age).to eq(27)
+            expect(new_user.location.city).to eq("Phnom Penh")
+            expect(new_user.gender).to eq("m")
 
-            reply_to(new_user).should be_nil
-            reply_to(joy).body.should =~ /#{spec_translate(:forward_message_approx, joy.locale, new_user.screen_id)}/
+            expect(reply_to(new_user)).to be_nil
+            expect(reply_to(joy).body).to match(/#{spec_translate(:forward_message_approx, joy.locale, new_user.screen_id)}/)
           end
         end
       end
@@ -132,12 +132,12 @@ describe "Messages" do
           end
 
           it "should update my profile and find me new friends" do
-            alex.name.should == "alex"
-            alex.age.should == 23
-            alex.gender.should == "f"
+            expect(alex.name).to eq("alex")
+            expect(alex.age).to eq(23)
+            expect(alex.gender).to eq("f")
 
-            reply_to(alex).should be_nil
-            reply_to(dave).body.should =~ /#{spec_translate(:forward_message_approx, dave.locale, alex.screen_id)}/
+            expect(reply_to(alex)).to be_nil
+            expect(reply_to(dave).body).to match(/#{spec_translate(:forward_message_approx, dave.locale, alex.screen_id)}/)
           end
         end
       end
@@ -161,10 +161,10 @@ describe "Messages" do
 
             it "should forward Mara's message to me" do
               reply = reply_to(dave)
-              reply.body.should == spec_translate(
+              expect(reply.body).to eq(spec_translate(
                 :forward_message, dave.locale, mara.screen_id, "Hi Dave"
-              )
-              reply.should be_delivered
+              ))
+              expect(reply).to be_delivered
             end
 
             context "then I text 'Hi how are you?'" do
@@ -174,10 +174,10 @@ describe "Messages" do
 
               it "should forward the message to Mara" do
                 reply = reply_to(mara)
-                reply.body.should == spec_translate(
+                expect(reply.body).to eq(spec_translate(
                   :forward_message, mara.locale, dave.screen_id, "Hi how are you?"
-                )
-                reply.should be_delivered
+                ))
+                expect(reply).to be_delivered
               end
             end
 
@@ -188,10 +188,10 @@ describe "Messages" do
 
               it "should forward the message to Pauline" do
                 reply = reply_to(pauline)
-                reply.body.should == spec_translate(
+                expect(reply.body).to eq(spec_translate(
                   :forward_message, pauline.locale, dave.screen_id, "Hi Pauline how are you?"
-                )
-                reply.should be_delivered
+                ))
+                expect(reply).to be_delivered
               end
 
               context "and Pauline texts 'Good thanks and you?'" do
@@ -201,10 +201,10 @@ describe "Messages" do
 
                 it "should forward the message to me" do
                   reply = reply_to(dave)
-                  reply.body.should == spec_translate(
+                  expect(reply.body).to eq(spec_translate(
                     :forward_message, dave.locale, pauline.screen_id, "Good thanks and you?"
-                  )
-                  reply.should be_delivered
+                  ))
+                  expect(reply).to be_delivered
                 end
               end
 
@@ -215,10 +215,10 @@ describe "Messages" do
 
                 it "should forward the message to me but not deliver it because I chose to chat with Pauline" do
                   reply = reply_to(dave)
-                  reply.body.should == spec_translate(
+                  expect(reply.body).to eq(spec_translate(
                     :forward_message, dave.locale, mara.screen_id, "Good thanks and you?"
-                  )
-                  reply.should_not be_delivered
+                  ))
+                  expect(reply).not_to be_delivered
                 end
               end
             end
@@ -235,9 +235,9 @@ describe "Messages" do
               end
 
               it "should send the message to me" do
-                reply_to(dave).body.should == spec_translate(
+                expect(reply_to(dave).body).to eq(spec_translate(
                   :forward_message, dave.locale, mara.screen_id, "Hi Dave"
-                )
+                ))
               end
 
               context "if I then reply with 'Hi Mara'" do
@@ -246,9 +246,9 @@ describe "Messages" do
                 end
 
                 it "should send the message to mara" do
-                  reply_to(mara).body.should == spec_translate(
+                  expect(reply_to(mara).body).to eq(spec_translate(
                     :forward_message, mara.locale, dave.screen_id, "Hi Mara"
-                  )
+                  ))
                 end
               end
             end
@@ -287,12 +287,12 @@ describe "Messages" do
           let(:reply_to_dave) { reply_to(dave) }
 
           it "should find new friends for her" do
-            reply_to(luke).body.should =~ /#{spec_translate(:forward_message_approx, luke.locale, mara.screen_id)}/
+            expect(reply_to(luke).body).to match(/#{spec_translate(:forward_message_approx, luke.locale, mara.screen_id)}/)
 
-            reply_to_dave.body.should == spec_translate(
+            expect(reply_to_dave.body).to eq(spec_translate(
               :forward_message, dave.locale, mara.screen_id, "Hi Dave"
-            )
-            reply_to_dave.should_not be_delivered
+            ))
+            expect(reply_to_dave).not_to be_delivered
           end
 
           context "and I send another message" do
@@ -307,19 +307,19 @@ describe "Messages" do
               options ||= {}
 
               it "should send the message to my current friend" do
-                reply_to(joy).body.should == spec_translate(
+                expect(reply_to(joy).body).to eq(spec_translate(
                   :forward_message, joy.locale, dave.screen_id, "Hi Joy"
-                )
-                reply_to(pauline).should be_nil
+                ))
+                expect(reply_to(pauline)).to be_nil
               end
 
               if options[:deliver_message_from_mara]
                 it "should now deliver Mara's message to me" do
-                  reply_to_dave.should be_delivered
+                  expect(reply_to_dave).to be_delivered
                 end
               else
                 it "should not deliver Mara's message to me" do
-                  reply_to_dave.should_not be_delivered
+                  expect(reply_to_dave).not_to be_delivered
                 end
               end
             end
@@ -359,7 +359,7 @@ describe "Messages" do
             end
 
             it "should log me out" do
-              dave.reload.should_not be_online
+              expect(dave.reload).not_to be_online
             end
           end
 
@@ -373,13 +373,13 @@ describe "Messages" do
             end
 
             it "should forward my message to my chat partner and update my profile" do
-              dave.name.should == "mara"
-              dave.age.should == 27
-              dave.location.city.should == "Kampong Thom"
-              dave.mobile_number.should_not == "012232234"
-              reply_to(joy).body.should == spec_translate(
+              expect(dave.name).to eq("mara")
+              expect(dave.age).to eq(27)
+              expect(dave.location.city).to eq("Kampong Thom")
+              expect(dave.mobile_number).not_to eq("012232234")
+              expect(reply_to(joy).body).to eq(spec_translate(
                 :forward_message, joy.locale, dave.screen_id, "Hi nyom chhmous mara 27 nov kt want 2 chat with me? 012 232 234"
-              )
+              ))
             end
           end
         end
@@ -396,8 +396,8 @@ describe "Messages" do
             end
 
             it "should keep me in the chat with joy" do
-              dave.reload.should be_currently_chatting
-              joy.reload.should_not be_currently_chatting
+              expect(dave.reload).to be_currently_chatting
+              expect(joy.reload).not_to be_currently_chatting
             end
           end
 
@@ -407,8 +407,8 @@ describe "Messages" do
             end
 
             it "should keep joy in the chat with me" do
-              dave.reload.should_not be_currently_chatting
-              joy.reload.should be_currently_chatting
+              expect(dave.reload).not_to be_currently_chatting
+              expect(joy.reload).to be_currently_chatting
             end
           end
 
@@ -419,10 +419,10 @@ describe "Messages" do
             end
 
             it "should forward her message to me" do
-              joy.name.should == "sara"
-              reply_to(dave).body.should == spec_translate(
+              expect(joy.name).to eq("sara")
+              expect(reply_to(dave).body).to eq(spec_translate(
                 :forward_message, dave.locale, joy.screen_id, "Hi Dave, knyom sara bong nov na?"
-              )
+              ))
             end
           end
         end
@@ -443,8 +443,8 @@ describe "Messages" do
         end
 
         it "should not save or process the message" do
-          new_message.should be_nil
-          new_user.should be_nil
+          expect(new_message).to be_nil
+          expect(new_user).to be_nil
         end
       end
     end
@@ -462,7 +462,7 @@ describe "Messages" do
         end
 
         it "should not save or process the message" do
-          new_message.should == message_with_guid
+          expect(new_message).to eq(message_with_guid)
         end
       end
     end

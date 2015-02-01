@@ -23,8 +23,8 @@ describe DeliveryReceiptCreatorJob do
     it "should update the delivery state of the reply" do
       expect(Reply).to receive(:find_by_token).with("token")
       expect(reply).to receive(:update_delivery_state) do |options|
-        options[:state].should == "state"
-        options[:force].should == true
+        expect(options[:state]).to eq("state")
+        expect(options[:force]).to eq(true)
       end
       subject.perform(options)
     end

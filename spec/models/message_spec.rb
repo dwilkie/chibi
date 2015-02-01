@@ -18,13 +18,13 @@ describe Message do
 
   describe "factory" do
     it "should be valid" do
-      new_message.should be_valid
+      expect(new_message).to be_valid
     end
   end
 
   it "should not be valid with a duplicate a guid" do
     new_message.guid = message_with_guid.guid
-    new_message.should_not be_valid
+    expect(new_message).not_to be_valid
   end
 
   it_should_behave_like "a chat starter" do
@@ -97,13 +97,13 @@ describe Message do
         end
 
         it "should process the messages" do
-          message_awaiting_charge_result_for_too_long.reload.should be_processed
-          message_awaiting_charge_result.reload.should_not be_processed
-          unprocessed_message.reload.should be_processed
-          processed_message.reload.should be_processed
-          recently_received_message.reload.should be_processed
-          unprocessed_message_with_chat.reload.should be_processed
-          message.reload.should_not be_processed
+          expect(message_awaiting_charge_result_for_too_long.reload).to be_processed
+          expect(message_awaiting_charge_result.reload).not_to be_processed
+          expect(unprocessed_message.reload).to be_processed
+          expect(processed_message.reload).to be_processed
+          expect(recently_received_message.reload).to be_processed
+          expect(unprocessed_message_with_chat.reload).to be_processed
+          expect(message.reload).not_to be_processed
         end
       end
     end
@@ -127,11 +127,11 @@ describe Message do
     it "should be an alias for the attribute '#from'" do
       sample_number = generate(:mobile_number)
       subject.from = sample_number
-      subject.origin.should == sample_number
+      expect(subject.origin).to eq(sample_number)
 
       sample_number = generate(:mobile_number)
       subject.origin = sample_number
-      subject.from.should == sample_number
+      expect(subject.from).to eq(sample_number)
     end
   end
 
@@ -141,14 +141,14 @@ describe Message do
     it "should queue the message for processing" do
       trigger_job(:queue_only => true) { subject.charge_request_updated! }
       job = enqueued_jobs.first
-      job[:args].first.should == subject.id
+      expect(job[:args].first).to eq(subject.id)
     end
   end
 
   describe "#body" do
     it "should return an empty string if it is nil" do
       subject.body = nil
-      subject.body.should == ""
+      expect(subject.body).to eq("")
     end
   end
 
@@ -168,18 +168,18 @@ describe Message do
 
     shared_examples_for "starting a new chat" do
       before do
-        Chat.stub(:activate_multiple!)
+        allow(Chat).to receive(:activate_multiple!)
       end
 
       it "should try to activate multiple new chats" do
-        Chat.should_receive(:activate_multiple!).with(user, :starter => subject, :notify => true)
+        expect(Chat).to receive(:activate_multiple!).with(user, :starter => subject, :notify => true)
         subject.process!
       end
     end
 
     shared_examples_for "not starting a new chat" do
       it "should not start a new chat" do
-        Chat.should_not_receive(:activate_multiple!)
+        expect(Chat).not_to receive(:activate_multiple!)
         subject.process!
       end
     end
@@ -190,7 +190,7 @@ describe Message do
 
     shared_examples_for "not routing the message" do
       it "should not try to route the message" do
-        Chat.should_not_receive(:intended_for)
+        expect(Chat).not_to receive(:intended_for)
         subject.process!
       end
     end
@@ -199,11 +199,11 @@ describe Message do
       subject { create_message }
 
       def stub_user_charge!(result = nil)
-        user.stub(:charge!).and_return(result)
+        allow(user).to receive(:charge!).and_return(result)
       end
 
       def stub_user_update_profile
-        user.stub(:update_profile)
+        allow(user).to receive(:update_profile)
       end
 
       context "pre-processing" do
@@ -211,7 +211,7 @@ describe Message do
           subject { create_message(:chat => chat, :pre_process => true) }
 
           after do
-            subject.should be_processed
+            expect(subject).to be_processed
           end
 
           it_should_behave_like "not routing the message"
@@ -223,30 +223,30 @@ describe Message do
               subject { create_message(:body => stop_variation) }
 
               before do
-                user.stub(:logout!)
+                allow(user).to receive(:logout!)
               end
 
               it "should logout the user" do
-                user.should_receive(:logout!)
+                expect(user).to receive(:logout!)
                 subject.process!
-                subject.should be_processed
+                expect(subject).to be_processed
               end
             end # context "'#{stop_variation}'"
           end # ["stop", "off", "stop all"]
 
           context "indicates the sender wants to use the service" do
             before do
-              user.stub(:login!)
+              allow(user).to receive(:login!)
               stub_user_charge!
             end
 
             it "should try to charge the user" do
-              user.should_receive(:charge!).with(subject)
+              expect(user).to receive(:charge!).with(subject)
               subject.process!
             end
 
             it "should login the user" do
-              user.should_receive(:login!)
+              expect(user).to receive(:login!)
               subject.process!
             end
 
@@ -257,7 +257,7 @@ describe Message do
 
               it "should update the state to 'processed'" do
                 subject.process!
-                subject.should be_processed
+                expect(subject).to be_processed
               end
             end # context "the charge request returns true"
 
@@ -268,7 +268,7 @@ describe Message do
 
               it "should update the state to 'awaiting_charge_result'" do
                 subject.process!
-                subject.should be_awaiting_charge_result
+                expect(subject).to be_awaiting_charge_result
               end
             end # context "the charge request returns false"
           end # context "indicates the sender wants to use the service"
@@ -282,18 +282,18 @@ describe Message do
 
         context "if an exception is raised" do
           before do
-            Chat.stub(:activate_multiple!).and_raise(ArgumentError)
+            allow(Chat).to receive(:activate_multiple!).and_raise(ArgumentError)
           end
 
           it "should leave the message as 'received'" do
             expect { subject.process! }.to raise_error
-            subject.should_not be_processed
+            expect(subject).not_to be_processed
           end
         end
 
         context "unless an exception is raised" do
           after do
-            subject.should be_processed
+            expect(subject).to be_processed
           end
 
           context "if the message body is" do
@@ -306,15 +306,15 @@ describe Message do
 
             context "indicates that the sender is not trying to explicitly start a new chat" do
               def stub_chat_intended_for(return_value = nil)
-                Chat.stub(:intended_for).and_return(return_value  )
+                allow(Chat).to receive(:intended_for).and_return(return_value  )
               end
 
               def stub_user_active_chat(return_value = nil)
-                user.stub(:active_chat).and_return(return_value)
+                allow(user).to receive(:active_chat).and_return(return_value)
               end
 
               def stub_chat_forward_message
-                chat.stub(:forward_message)
+                allow(chat).to receive(:forward_message)
               end
 
               before do
@@ -327,18 +327,18 @@ describe Message do
                 end
 
                 it "should forward the message to a particular chat" do
-                  chat.should_receive(:forward_message).with(subject)
+                  expect(chat).to receive(:forward_message).with(subject)
                   subject.process!
                 end
               end
 
               it "should try to update the users profile from the message text" do
-                user.should_receive(:update_profile).with(subject.body)
+                expect(user).to receive(:update_profile).with(subject.body)
                 subject.process!
               end
 
               it "should try to determine who the message is intended for" do
-                Chat.should_receive(:intended_for).with(subject, :num_recent_chats => 10)
+                expect(Chat).to receive(:intended_for).with(subject, :num_recent_chats => 10)
                 subject.process!
               end
 
@@ -348,7 +348,7 @@ describe Message do
                 end
 
                 it "try to get the sender's active chat" do
-                  user.should_receive(:active_chat)
+                  expect(user).to receive(:active_chat)
                   subject.process!
                 end
 
@@ -393,17 +393,17 @@ describe Message do
       end
 
       after do
-        subject.should be_processed
+        expect(subject).to be_processed
       end
 
       context "if the charge request failed" do
         before do
           create_charge_request(:failed)
-          user.stub(:reply_not_enough_credit!)
+          allow(user).to receive(:reply_not_enough_credit!)
         end
 
         it "should tell the sender they don't have enough credit" do
-          user.should_receive(:reply_not_enough_credit!)
+          expect(user).to receive(:reply_not_enough_credit!)
           subject.process!
         end
 
@@ -436,7 +436,7 @@ describe Message do
 
       it "should leave the state as 'processed'" do
         expect { subject.process! }.not_to change { subject.updated_at }
-        subject.should be_processed
+        expect(subject).to be_processed
       end
     end
   end

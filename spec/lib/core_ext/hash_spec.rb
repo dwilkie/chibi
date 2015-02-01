@@ -6,7 +6,7 @@ describe Hash do
 
     it "should underscore the keys" do
       hash.underscorify_keys!
-      hash.should have_key(:hello_world)
+      expect(hash).to have_key(:hello_world)
     end
   end
 
@@ -15,7 +15,7 @@ describe Hash do
 
     it "should make the keys and values integers" do
       hash.integerify!
-      hash[1].should == 1
+      expect(hash[1]).to eq(1)
     end
   end
 end

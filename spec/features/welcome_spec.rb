@@ -6,7 +6,7 @@ describe "Home Page" do
   end
 
   it "should show me the home page" do
-    current_path.should == root_path
-    page.should have_content "Chibi"
+    expect(current_path).to eq(root_path)
+    expect(page).to have_content "Chibi"
   end
 end
