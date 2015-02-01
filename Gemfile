@@ -52,7 +52,7 @@ end
 group :test do
   gem 'factory_girl'
   gem 'mock_redis'
-  gem 'fakeweb'
+  gem 'webmock'
   gem 'vcr'
   gem 'timecop'
   gem 'capybara'

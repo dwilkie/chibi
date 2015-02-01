@@ -375,7 +375,7 @@ describe "Messages" do
             it "should forward my message to my chat partner and update my profile" do
               expect(dave.name).to eq("mara")
               expect(dave.age).to eq(27)
-              expect(dave.location.city).to eq("Kampong Thom")
+              expect(dave.location.city).to eq("Prasat Sambour")
               expect(dave.mobile_number).not_to eq("012232234")
               expect(reply_to(joy).body).to eq(spec_translate(
                 :forward_message, joy.locale, dave.screen_id, "Hi nyom chhmous mara 27 nov kt want 2 chat with me? 012 232 234"

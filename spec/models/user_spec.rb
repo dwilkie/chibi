@@ -1079,7 +1079,7 @@ describe User do
       # someone from siem reap wants to meet a girl
       registration_examples(
         keywords(:sr_wants_girl),
-        :expected_city => "Siem Reap",
+        :expected_city => "Banteay Srei",
         :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
       )
 
@@ -1088,7 +1088,7 @@ describe User do
         keywords(:kunthia_23_sr_girl_wants_boy),
         :expected_age => 23,
         :expected_gender => :female,
-        :expected_city => "Siem Reap",
+        :expected_city => "Banteay Srei",
         :expected_name => "kunthia",
         :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
       )
@@ -1114,7 +1114,7 @@ describe User do
         :expected_name => "vanna",
         :expected_gender => :male,
         :expected_age => 26,
-        :expected_city => "Kampong Thom",
+        :expected_city => "Prasat Sambour",
         :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
       )
 
@@ -1123,7 +1123,7 @@ describe User do
         keywords(:veasna),
         :expected_name => "veasna",
         :expected_age => 30,
-        :expected_city => "S'ang",
+        :expected_city => "Kandal",
         :vcr => {:expect_results => true, :cassette => "kh/kandaal"}
       )
 
@@ -1169,7 +1169,7 @@ describe User do
         keywords(:vanny),
         :expected_name => "vanny",
         :expected_age => 17,
-        :expected_city => "Pailin",
+        :expected_city => "Krong Pailin",
         :expected_gender => :male,
         :vcr => {:expect_results => true, :cassette => "kh/krong_pailin"}
       )
@@ -1177,7 +1177,7 @@ describe User do
       # live in siem reap n u . m 093208006
       registration_examples(
         keywords(:not_a_man_from_siem_reap),
-        :expected_city => "Siem Reap",
+        :expected_city => "Banteay Srei",
         :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
       )
 
@@ -1213,7 +1213,7 @@ describe User do
         keywords(:hai),
         :expected_name => "hai",
         :expected_age => 20,
-        :expected_city => "Krouch Chhmar",
+        :expected_city => "Tbuong Kmoum",
         :expected_gender => :male,
         :vcr => {:expect_results => true, :cassette => "kh/kampong_chaam"}
       )

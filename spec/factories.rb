@@ -361,8 +361,8 @@ FactoryGirl.define do
     trait :new_york do
       united_states
       city "New York"
-      latitude 40.7143528
-      longitude -74.00597309999999
+      latitude 40.7127837
+      longitude -74.0059413
     end
   end
 

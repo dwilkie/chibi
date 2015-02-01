@@ -42,7 +42,7 @@ describe Location do
       # locating a city in the wrong country
       assert_locate!(
         :kh,
-        "new york" => {
+        "amsterdam" => {
           :expected_city => nil,
           :expected_latitude => nil,
           :expected_longitude => nil

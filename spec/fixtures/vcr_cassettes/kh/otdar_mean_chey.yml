@@ -3,12 +3,14 @@ http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?address=otdar+mean+chey%2C+Cambodia&language=en&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -34,35 +36,70 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Oddar Meancheay\",\n               \"short_name\"
-      : \"Oddar Meancheay\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Oddar Meancheay, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 14.4395070,\n
-      \                 \"lng\" : 104.4748510\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 13.9096780,\n                  \"lng\" : 103.0405580\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 14.17171950,\n               \"lng\" : 103.63627150\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.51764260,\n                  \"lng\" : 104.14850910\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 13.82526820,\n                  \"lng\" : 103.12403390\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Oddar Meancheay",
+                       "short_name" : "Oddar Meancheay",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Oddar Meancheay, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.4395070,
+                          "lng" : 104.4748510
+                       },
+                       "southwest" : {
+                          "lat" : 13.9096780,
+                          "lng" : 103.0405580
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.17171950,
+                       "lng" : 103.63627150
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.51764260,
+                          "lng" : 104.14850910
+                       },
+                       "southwest" : {
+                          "lat" : 13.82526820,
+                          "lng" : 103.12403390
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 17:19:37 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=14.1717195%2C103.6362715&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -88,79 +125,550 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"56\",\n               \"short_name\"
-      : \"56\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Samraong\",\n               \"short_name\"
-      : \"Samraong\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Oddar Meancheay\",\n               \"short_name\" : \"Oddar Meancheay\",\n
-      \              \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n            },\n            {\n               \"long_name\" : \"Cambodia\",\n
-      \              \"short_name\" : \"KH\",\n               \"types\" : [ \"country\",
-      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"56, Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n
-      \              \"northeast\" : {\n                  \"lat\" : 14.23876080,\n
-      \                 \"lng\" : 103.56751440\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 14.23754610,\n                  \"lng\" : 103.56634480\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 14.23815350,\n               \"lng\" : 103.56692960\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.23950243029150,\n                  \"lng\"
-      : 103.5682785802915\n               },\n               \"southwest\" : {\n                  \"lat\"
-      : 14.23680446970850,\n                  \"lng\" : 103.5655806197085\n               }\n
-      \           }\n         },\n         \"types\" : [ \"route\" ]\n      },\n      {\n
-      \        \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Samraong\",\n               \"short_name\" : \"Samraong\",\n               \"types\"
-      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Oddar Meancheay\",\n               \"short_name\"
-      : \"Oddar Meancheay\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Samraong, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 14.438670,\n
-      \                 \"lng\" : 103.83110050\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 14.11393560,\n                  \"lng\" : 103.40057370\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 14.21985550,\n               \"lng\" : 103.58997330\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.438670,\n                  \"lng\" : 103.83110050\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 14.11393560,\n                  \"lng\" : 103.40057370\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
-      \              \"long_name\" : \"Oddar Meancheay\",\n               \"short_name\"
-      : \"Oddar Meancheay\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Oddar Meancheay, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 14.4395070,\n
-      \                 \"lng\" : 104.4748510\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 13.9096780,\n                  \"lng\" : 103.0405580\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 14.17171950,\n               \"lng\" : 103.63627150\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.4395070,\n                  \"lng\" : 104.4748510\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 13.9096780,\n                  \"lng\" : 103.0405580\n               }\n            }\n
-      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
-      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
-      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "56",
+                       "short_name" : "56",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Samraong",
+                       "short_name" : "Samraong",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Oddar Meancheay",
+                       "short_name" : "Oddar Meancheay",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "56, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.23876080,
+                          "lng" : 103.56751440
+                       },
+                       "southwest" : {
+                          "lat" : 14.23754610,
+                          "lng" : 103.56634480
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.23815350,
+                       "lng" : 103.56692960
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.23950243029150,
+                          "lng" : 103.5682785802915
+                       },
+                       "southwest" : {
+                          "lat" : 14.23680446970850,
+                          "lng" : 103.5655806197085
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Samraong",
+                       "short_name" : "Samraong",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Oddar Meancheay",
+                       "short_name" : "Oddar Meancheay",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Samraong, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.438670,
+                          "lng" : 103.83110050
+                       },
+                       "southwest" : {
+                          "lat" : 14.11393560,
+                          "lng" : 103.40057370
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.21985550,
+                       "lng" : 103.58997330
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.438670,
+                          "lng" : 103.83110050
+                       },
+                       "southwest" : {
+                          "lat" : 14.11393560,
+                          "lng" : 103.40057370
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Oddar Meancheay",
+                       "short_name" : "Oddar Meancheay",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Oddar Meancheay, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.4395070,
+                          "lng" : 104.4748510
+                       },
+                       "southwest" : {
+                          "lat" : 13.9096780,
+                          "lng" : 103.0405580
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.17171950,
+                       "lng" : 103.63627150
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.4395070,
+                          "lng" : 104.4748510
+                       },
+                       "southwest" : {
+                          "lat" : 13.9096780,
+                          "lng" : 103.0405580
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.5656790,
+                       "lng" : 104.9909630
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 17:19:37 GMT
-recorded_with: VCR 2.0.0.rc1
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=otdar%20mean%20chey,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:46 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:46 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Oddar Meancheay",
+                       "short_name" : "Oddar Meancheay",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Oddar Meancheay, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.4395071,
+                          "lng" : 104.4748511
+                       },
+                       "southwest" : {
+                          "lat" : 13.909678,
+                          "lng" : 103.0405579
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.1717195,
+                       "lng" : 103.6362715
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.4395071,
+                          "lng" : 104.4748511
+                       },
+                       "southwest" : {
+                          "lat" : 13.909678,
+                          "lng" : 103.0405579
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:46 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=14.1717195,103.6362715&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:46 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:46 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        ewogICAicmVzdWx0cyIgOiBbCiAgICAgIHsKICAgICAgICAgImFkZHJlc3Nf
+        Y29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAg
+        ImxvbmdfbmFtZSIgOiAi4Z6V4Z+S4Z6b4Z684Z6c4oCL4oCL4Z6H4Z624Z6P
+        4Z634oCL4oCL4Z6b4Z+B4Z6B4oCL4oCL4Z+m4Z+oIiwKICAgICAgICAgICAg
+        ICAgInNob3J0X25hbWUiIDogIuGeleGfkuGem+GevOGenOKAi+KAi+Geh+Ge
+        tuGej+Get+KAi+KAi+Gem+GfgeGegeKAi+KAi+GfpuGfqCIsCiAgICAgICAg
+        ICAgICAgICJ0eXBlcyIgOiBbICJyb3V0ZSIgXQogICAgICAgICAgICB9LAog
+        ICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJsb25nX25hbWUiIDogIuGe
+        n+GehOGfkuGegOGetuGej+Gfi+GegOGevOGek+GegOGfkuGemuGfgOGemyIs
+        CiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICLhnp/hnoThn5LhnoDh
+        nrbhno/hn4vhnoDhnrzhnpPhnoDhn5Lhnprhn4DhnpsiLAogICAgICAgICAg
+        ICAgICAidHlwZXMiIDogWyAic3VibG9jYWxpdHlfbGV2ZWxfMSIsICJzdWJs
+        b2NhbGl0eSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfSwKICAgICAg
+        ICAgICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6ICJLcm9uZyBT
+        YW1yYW9uZyIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJLcm9u
+        ZyBTYW1yYW9uZyIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJsb2Nh
+        bGl0eSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfSwKICAgICAgICAg
+        ICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6ICJTYW1yYW9uZyIs
+        CiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJTYW1yYW9uZyIsCiAg
+        ICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2ZV9hcmVh
+        X2xldmVsXzIiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0sCiAgICAg
+        ICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiT2RkYXIg
+        TWVhbmNoZWF5IiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDogIk9k
+        ZGFyIE1lYW5jaGVheSIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJh
+        ZG1pbmlzdHJhdGl2ZV9hcmVhX2xldmVsXzEiLCAicG9saXRpY2FsIiBdCiAg
+        ICAgICAgICAgIH0sCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxv
+        bmdfbmFtZSIgOiAiQ2FtYm9kaWEiLAogICAgICAgICAgICAgICAic2hvcnRf
+        bmFtZSIgOiAiS0giLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiY291
+        bnRyeSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfQogICAgICAgICBd
+        LAogICAgICAgICAiZm9ybWF0dGVkX2FkZHJlc3MiIDogIuGeleGfkuGem+Ge
+        vOGenOKAi+KAi+Geh+GetuGej+Get+KAi+KAi+Gem+GfgeGegeKAi+KAi+Gf
+        puGfqCwgS3JvbmcgU2FtcmFvbmcsIENhbWJvZGlhIiwKICAgICAgICAgImdl
+        b21ldHJ5IiA6IHsKICAgICAgICAgICAgImJvdW5kcyIgOiB7CiAgICAgICAg
+        ICAgICAgICJub3J0aGVhc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0
+        IiA6IDE0LjIzMjQ0ODQsCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTAz
+        LjU2MjI0NjYKICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgInNv
+        dXRod2VzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTQuMjI4
+        OTQzNywKICAgICAgICAgICAgICAgICAgImxuZyIgOiAxMDMuNTU1MzI2NQog
+        ICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJs
+        b2NhdGlvbiIgOiB7CiAgICAgICAgICAgICAgICJsYXQiIDogMTQuMjI5OTM5
+        NSwKICAgICAgICAgICAgICAgImxuZyIgOiAxMDMuNTU5MjQzNgogICAgICAg
+        ICAgICB9LAogICAgICAgICAgICAibG9jYXRpb25fdHlwZSIgOiAiQVBQUk9Y
+        SU1BVEUiLAogICAgICAgICAgICAidmlld3BvcnQiIDogewogICAgICAgICAg
+        ICAgICAibm9ydGhlYXN0IiA6IHsKICAgICAgICAgICAgICAgICAgImxhdCIg
+        OiAxNC4yMzI0NDg0LAogICAgICAgICAgICAgICAgICAibG5nIiA6IDEwMy41
+        NjIyNDY2CiAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICJzb3V0
+        aHdlc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0IiA6IDE0LjIyODk0
+        MzcsCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTAzLjU1NTMyNjUKICAg
+        ICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgIH0sCiAgICAg
+        ICAgICJ0eXBlcyIgOiBbICJyb3V0ZSIgXQogICAgICB9LAogICAgICB7CiAg
+        ICAgICAgICJhZGRyZXNzX2NvbXBvbmVudHMiIDogWwogICAgICAgICAgICB7
+        CiAgICAgICAgICAgICAgICJsb25nX25hbWUiIDogIuGen+GehOGfkuGegOGe
+        tuGej+Gfi+GegOGevOGek+GegOGfkuGemuGfgOGemyIsCiAgICAgICAgICAg
+        ICAgICJzaG9ydF9uYW1lIiA6ICLhnp/hnoThn5LhnoDhnrbhno/hn4vhnoDh
+        nrzhnpPhnoDhn5Lhnprhn4DhnpsiLAogICAgICAgICAgICAgICAidHlwZXMi
+        IDogWyAic3VibG9jYWxpdHlfbGV2ZWxfMSIsICJzdWJsb2NhbGl0eSIsICJw
+        b2xpdGljYWwiIF0KICAgICAgICAgICAgfSwKICAgICAgICAgICAgewogICAg
+        ICAgICAgICAgICAibG9uZ19uYW1lIiA6ICLhnoDhn5LhnprhnrvhnoThnp/h
+        n4bhnprhn4ThnoQiLAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIgOiAi
+        4Z6A4Z+S4Z6a4Z674Z6E4Z6f4Z+G4Z6a4Z+E4Z6EIiwKICAgICAgICAgICAg
+        ICAgInR5cGVzIiA6IFsgImxvY2FsaXR5IiwgInBvbGl0aWNhbCIgXQogICAg
+        ICAgICAgICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJsb25n
+        X25hbWUiIDogIuGep+Gej+GfkuGeiuGemuGemOGetuGek+Geh+GfkOGemSIs
+        CiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICLhnqfhno/hn5Lhnorh
+        nprhnpjhnrbhnpPhnofhn5DhnpkiLAogICAgICAgICAgICAgICAidHlwZXMi
+        IDogWyAiYWRtaW5pc3RyYXRpdmVfYXJlYV9sZXZlbF8xIiwgInBvbGl0aWNh
+        bCIgXQogICAgICAgICAgICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAg
+        ICAgICJsb25nX25hbWUiIDogIkNhbWJvZGlhIiwKICAgICAgICAgICAgICAg
+        InNob3J0X25hbWUiIDogIktIIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6
+        IFsgImNvdW50cnkiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0KICAg
+        ICAgICAgXSwKICAgICAgICAgImZvcm1hdHRlZF9hZGRyZXNzIiA6ICLhnp/h
+        noThn5LhnoDhnrbhno/hn4vhnoDhnrzhnpPhnoDhn5Lhnprhn4DhnpssIOGe
+        gOGfkuGemuGeu+GehOGen+GfhuGemuGfhOGehCwgQ2FtYm9kaWEiLAogICAg
+        ICAgICAiZ2VvbWV0cnkiIDogewogICAgICAgICAgICAiYm91bmRzIiA6IHsK
+        ICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAgICAgICAg
+        ICAgICJsYXQiIDogMTQuNDMzNDc0OSwKICAgICAgICAgICAgICAgICAgImxu
+        ZyIgOiAxMDMuODI5Njg0MwogICAgICAgICAgICAgICB9LAogICAgICAgICAg
+        ICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAgImxhdCIg
+        OiAxNC4wOTk5MDkzLAogICAgICAgICAgICAgICAgICAibG5nIiA6IDEwMy40
+        MTk4ODU2CiAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfSwKICAgICAg
+        ICAgICAgImxvY2F0aW9uIiA6IHsKICAgICAgICAgICAgICAgImxhdCIgOiAx
+        NC4zMDU0Njg2LAogICAgICAgICAgICAgICAibG5nIiA6IDEwMy42ODI1ODYK
+        ICAgICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uX3R5cGUiIDog
+        IkFQUFJPWElNQVRFIiwKICAgICAgICAgICAgInZpZXdwb3J0IiA6IHsKICAg
+        ICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAgICAgICAgICAg
+        ICJsYXQiIDogMTQuNDMzNDc0OSwKICAgICAgICAgICAgICAgICAgImxuZyIg
+        OiAxMDMuODI5Njg0MwogICAgICAgICAgICAgICB9LAogICAgICAgICAgICAg
+        ICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAgImxhdCIgOiAx
+        NC4wOTk5MDkzLAogICAgICAgICAgICAgICAgICAibG5nIiA6IDEwMy40MTk4
+        ODU2CiAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgICB9
+        LAogICAgICAgICAidHlwZXMiIDogWyAic3VibG9jYWxpdHlfbGV2ZWxfMSIs
+        ICJzdWJsb2NhbGl0eSIsICJwb2xpdGljYWwiIF0KICAgICAgfSwKICAgICAg
+        ewogICAgICAgICAiYWRkcmVzc19jb21wb25lbnRzIiA6IFsKICAgICAgICAg
+        ICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6ICJTYW1yYW9uZyIs
+        CiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJTYW1yYW9uZyIsCiAg
+        ICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2ZV9hcmVh
+        X2xldmVsXzIiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0sCiAgICAg
+        ICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiT2RkYXIg
+        TWVhbmNoZWF5IiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDogIk9k
+        ZGFyIE1lYW5jaGVheSIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJh
+        ZG1pbmlzdHJhdGl2ZV9hcmVhX2xldmVsXzEiLCAicG9saXRpY2FsIiBdCiAg
+        ICAgICAgICAgIH0sCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxv
+        bmdfbmFtZSIgOiAiQ2FtYm9kaWEiLAogICAgICAgICAgICAgICAic2hvcnRf
+        bmFtZSIgOiAiS0giLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiY291
+        bnRyeSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfQogICAgICAgICBd
+        LAogICAgICAgICAiZm9ybWF0dGVkX2FkZHJlc3MiIDogIlNhbXJhb25nLCBD
+        YW1ib2RpYSIsCiAgICAgICAgICJnZW9tZXRyeSIgOiB7CiAgICAgICAgICAg
+        ICJib3VuZHMiIDogewogICAgICAgICAgICAgICAibm9ydGhlYXN0IiA6IHsK
+        ICAgICAgICAgICAgICAgICAgImxhdCIgOiAxNC40Mzg2NywKICAgICAgICAg
+        ICAgICAgICAgImxuZyIgOiAxMDMuODMxMTAwNgogICAgICAgICAgICAgICB9
+        LAogICAgICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAg
+        ICAgICAgImxhdCIgOiAxNC4xMTM5MzU2LAogICAgICAgICAgICAgICAgICAi
+        bG5nIiA6IDEwMy40MDA1NzM3CiAgICAgICAgICAgICAgIH0KICAgICAgICAg
+        ICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uIiA6IHsKICAgICAgICAgICAg
+        ICAgImxhdCIgOiAxNC4yMTk4NTU1LAogICAgICAgICAgICAgICAibG5nIiA6
+        IDEwMy41ODk5NzMzCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJsb2Nh
+        dGlvbl90eXBlIiA6ICJBUFBST1hJTUFURSIsCiAgICAgICAgICAgICJ2aWV3
+        cG9ydCIgOiB7CiAgICAgICAgICAgICAgICJub3J0aGVhc3QiIDogewogICAg
+        ICAgICAgICAgICAgICAibGF0IiA6IDE0LjQzODY3LAogICAgICAgICAgICAg
+        ICAgICAibG5nIiA6IDEwMy44MzExMDA2CiAgICAgICAgICAgICAgIH0sCiAg
+        ICAgICAgICAgICAgICJzb3V0aHdlc3QiIDogewogICAgICAgICAgICAgICAg
+        ICAibGF0IiA6IDE0LjExMzkzNTYsCiAgICAgICAgICAgICAgICAgICJsbmci
+        IDogMTAzLjQwMDU3MzcKICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9
+        CiAgICAgICAgIH0sCiAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJh
+        dGl2ZV9hcmVhX2xldmVsXzIiLCAicG9saXRpY2FsIiBdCiAgICAgIH0sCiAg
+        ICAgIHsKICAgICAgICAgImFkZHJlc3NfY29tcG9uZW50cyIgOiBbCiAgICAg
+        ICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiS3Jvbmcg
+        U2FtcmFvbmciLAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIgOiAiS3Jv
+        bmcgU2FtcmFvbmciLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAibG9j
+        YWxpdHkiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0sCiAgICAgICAg
+        ICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiT2RkYXIgTWVh
+        bmNoZWF5IiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDogIk9kZGFy
+        IE1lYW5jaGVheSIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1p
+        bmlzdHJhdGl2ZV9hcmVhX2xldmVsXzEiLCAicG9saXRpY2FsIiBdCiAgICAg
+        ICAgICAgIH0sCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdf
+        bmFtZSIgOiAiQ2FtYm9kaWEiLAogICAgICAgICAgICAgICAic2hvcnRfbmFt
+        ZSIgOiAiS0giLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiY291bnRy
+        eSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfQogICAgICAgICBdLAog
+        ICAgICAgICAiZm9ybWF0dGVkX2FkZHJlc3MiIDogIktyb25nIFNhbXJhb25n
+        LCBDYW1ib2RpYSIsCiAgICAgICAgICJnZW9tZXRyeSIgOiB7CiAgICAgICAg
+        ICAgICJib3VuZHMiIDogewogICAgICAgICAgICAgICAibm9ydGhlYXN0IiA6
+        IHsKICAgICAgICAgICAgICAgICAgImxhdCIgOiAxNC40NDAyNDk0LAogICAg
+        ICAgICAgICAgICAgICAibG5nIiA6IDEwMy44Mjk3NzAxCiAgICAgICAgICAg
+        ICAgIH0sCiAgICAgICAgICAgICAgICJzb3V0aHdlc3QiIDogewogICAgICAg
+        ICAgICAgICAgICAibGF0IiA6IDE0LjA5NjkxMjQsCiAgICAgICAgICAgICAg
+        ICAgICJsbmciIDogMTAzLjM4MzY2NTEKICAgICAgICAgICAgICAgfQogICAg
+        ICAgICAgICB9LAogICAgICAgICAgICAibG9jYXRpb24iIDogewogICAgICAg
+        ICAgICAgICAibGF0IiA6IDE0LjIxOTg1NTUsCiAgICAgICAgICAgICAgICJs
+        bmciIDogMTAzLjU4OTk3MzMKICAgICAgICAgICAgfSwKICAgICAgICAgICAg
+        ImxvY2F0aW9uX3R5cGUiIDogIkFQUFJPWElNQVRFIiwKICAgICAgICAgICAg
+        InZpZXdwb3J0IiA6IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7
+        CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTQuNDQwMjQ5NCwKICAgICAg
+        ICAgICAgICAgICAgImxuZyIgOiAxMDMuODI5NzcwMQogICAgICAgICAgICAg
+        ICB9LAogICAgICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAg
+        ICAgICAgICAgImxhdCIgOiAxNC4wOTY5MTI0LAogICAgICAgICAgICAgICAg
+        ICAibG5nIiA6IDEwMy4zODM2NjUxCiAgICAgICAgICAgICAgIH0KICAgICAg
+        ICAgICAgfQogICAgICAgICB9LAogICAgICAgICAidHlwZXMiIDogWyAibG9j
+        YWxpdHkiLCAicG9saXRpY2FsIiBdCiAgICAgIH0sCiAgICAgIHsKICAgICAg
+        ICAgImFkZHJlc3NfY29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAg
+        ICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiT2RkYXIgTWVhbmNoZWF5IiwK
+        ICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDogIk9kZGFyIE1lYW5jaGVh
+        eSIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2
+        ZV9hcmVhX2xldmVsXzEiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0s
+        CiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAi
+        Q2FtYm9kaWEiLAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIgOiAiS0gi
+        LAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiY291bnRyeSIsICJwb2xp
+        dGljYWwiIF0KICAgICAgICAgICAgfQogICAgICAgICBdLAogICAgICAgICAi
+        Zm9ybWF0dGVkX2FkZHJlc3MiIDogIk9kZGFyIE1lYW5jaGVheSwgQ2FtYm9k
+        aWEiLAogICAgICAgICAiZ2VvbWV0cnkiIDogewogICAgICAgICAgICAiYm91
+        bmRzIiA6IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAg
+        ICAgICAgICAgICAgICJsYXQiIDogMTQuNDM5NTA3MSwKICAgICAgICAgICAg
+        ICAgICAgImxuZyIgOiAxMDQuNDc0ODUxMQogICAgICAgICAgICAgICB9LAog
+        ICAgICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAg
+        ICAgImxhdCIgOiAxMy45MDk2NzgsCiAgICAgICAgICAgICAgICAgICJsbmci
+        IDogMTAzLjA0MDU1NzkKICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9
+        LAogICAgICAgICAgICAibG9jYXRpb24iIDogewogICAgICAgICAgICAgICAi
+        bGF0IiA6IDE0LjE3MTcxOTUsCiAgICAgICAgICAgICAgICJsbmciIDogMTAz
+        LjYzNjI3MTUKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9u
+        X3R5cGUiIDogIkFQUFJPWElNQVRFIiwKICAgICAgICAgICAgInZpZXdwb3J0
+        IiA6IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAg
+        ICAgICAgICAgICJsYXQiIDogMTQuNDM5NTA3MSwKICAgICAgICAgICAgICAg
+        ICAgImxuZyIgOiAxMDQuNDc0ODUxMQogICAgICAgICAgICAgICB9LAogICAg
+        ICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAg
+        ImxhdCIgOiAxMy45MDk2NzgsCiAgICAgICAgICAgICAgICAgICJsbmciIDog
+        MTAzLjA0MDU1NzkKICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAg
+        ICAgICAgIH0sCiAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2
+        ZV9hcmVhX2xldmVsXzEiLCAicG9saXRpY2FsIiBdCiAgICAgIH0sCiAgICAg
+        IHsKICAgICAgICAgImFkZHJlc3NfY29tcG9uZW50cyIgOiBbCiAgICAgICAg
+        ICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiQ2FtYm9kaWEi
+        LAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIgOiAiS0giLAogICAgICAg
+        ICAgICAgICAidHlwZXMiIDogWyAiY291bnRyeSIsICJwb2xpdGljYWwiIF0K
+        ICAgICAgICAgICAgfQogICAgICAgICBdLAogICAgICAgICAiZm9ybWF0dGVk
+        X2FkZHJlc3MiIDogIkNhbWJvZGlhIiwKICAgICAgICAgImdlb21ldHJ5IiA6
+        IHsKICAgICAgICAgICAgImJvdW5kcyIgOiB7CiAgICAgICAgICAgICAgICJu
+        b3J0aGVhc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0IiA6IDE0LjY5
+        MDE3OSwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAxMDcuNjI3Njg3CiAg
+        ICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICJzb3V0aHdlc3QiIDog
+        ewogICAgICAgICAgICAgICAgICAibGF0IiA6IDkuMjg1NzU0MSwKICAgICAg
+        ICAgICAgICAgICAgImxuZyIgOiAxMDIuMzMzNTQyCiAgICAgICAgICAgICAg
+        IH0KICAgICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uIiA6IHsK
+        ICAgICAgICAgICAgICAgImxhdCIgOiAxMi41NjU2NzksCiAgICAgICAgICAg
+        ICAgICJsbmciIDogMTA0Ljk5MDk2MwogICAgICAgICAgICB9LAogICAgICAg
+        ICAgICAibG9jYXRpb25fdHlwZSIgOiAiQVBQUk9YSU1BVEUiLAogICAgICAg
+        ICAgICAidmlld3BvcnQiIDogewogICAgICAgICAgICAgICAibm9ydGhlYXN0
+        IiA6IHsKICAgICAgICAgICAgICAgICAgImxhdCIgOiAxNC42OTAxNzksCiAg
+        ICAgICAgICAgICAgICAgICJsbmciIDogMTA3LjYyNzY4NwogICAgICAgICAg
+        ICAgICB9LAogICAgICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAg
+        ICAgICAgICAgICAgImxhdCIgOiA5LjI4NTc1NDEsCiAgICAgICAgICAgICAg
+        ICAgICJsbmciIDogMTAyLjMzMzU0MgogICAgICAgICAgICAgICB9CiAgICAg
+        ICAgICAgIH0KICAgICAgICAgfSwKICAgICAgICAgInR5cGVzIiA6IFsgImNv
+        dW50cnkiLCAicG9saXRpY2FsIiBdCiAgICAgIH0KICAgXSwKICAgInN0YXR1
+        cyIgOiAiT0siCn0K
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:46 GMT
+recorded_with: VCR 2.9.3

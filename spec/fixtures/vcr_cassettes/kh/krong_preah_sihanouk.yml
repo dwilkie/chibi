@@ -3,12 +3,14 @@ http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?address=krong+preah+sihanouk%2C+Cambodia&language=en&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -34,35 +36,70 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Krong Preah Sihanouk\",\n               \"short_name\"
-      : \"Krong Preah Sihanouk\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Krong Preah Sihanouk, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 10.9888650,\n
-      \                 \"lng\" : 103.9621540\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 10.40374130,\n                  \"lng\" : 103.4098830\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 10.71623960,\n               \"lng\" : 103.77526340\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.06686290,\n                  \"lng\" : 104.2875010\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 10.36520980,\n                  \"lng\" : 103.26302580\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Krong Preah Sihanouk",
+                       "short_name" : "Krong Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Krong Preah Sihanouk, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 10.9888650,
+                          "lng" : 103.9621540
+                       },
+                       "southwest" : {
+                          "lat" : 10.40374130,
+                          "lng" : 103.4098830
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.71623960,
+                       "lng" : 103.77526340
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.06686290,
+                          "lng" : 104.2875010
+                       },
+                       "southwest" : {
+                          "lat" : 10.36520980,
+                          "lng" : 103.26302580
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 16:58:05 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=10.7162396%2C103.7752634&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -88,80 +125,631 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Mittapheap Kampuchea\",\n               \"short_name\"
-      : \"NH 4\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Prey Nob\",\n               \"short_name\"
-      : \"Prey Nob\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Krong Preah Sihanouk\",\n               \"short_name\" : \"Krong Preah Sihanouk\",\n
-      \              \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n            },\n            {\n               \"long_name\" : \"Cambodia\",\n
-      \              \"short_name\" : \"KH\",\n               \"types\" : [ \"country\",
-      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Mittapheap Kampuchea, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 10.73472240,\n
-      \                 \"lng\" : 103.80958270\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 10.7289430,\n                  \"lng\" : 103.80544730\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 10.73156010,\n               \"lng\" : 103.80713350\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 10.73472240,\n                  \"lng\" : 103.80958270\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 10.7289430,\n                  \"lng\" : 103.80544730\n               }\n
-      \           }\n         },\n         \"types\" : [ \"route\" ]\n      },\n      {\n
-      \        \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Prey Nob\",\n               \"short_name\" : \"Prey Nob\",\n               \"types\"
-      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Krong Preah Sihanouk\",\n               \"short_name\"
-      : \"Krong Preah Sihanouk\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Prey Nob, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 10.98896930,\n
-      \                 \"lng\" : 103.96216390\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 10.40379470,\n                  \"lng\" : 103.54056360\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 10.62822660,\n               \"lng\" : 103.77526340\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 10.98896930,\n                  \"lng\" : 103.96216390\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 10.40379470,\n                  \"lng\" : 103.54056360\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
-      \              \"long_name\" : \"Krong Preah Sihanouk\",\n               \"short_name\"
-      : \"Krong Preah Sihanouk\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Krong Preah Sihanouk, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 10.9888650,\n
-      \                 \"lng\" : 103.9621540\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 10.40374130,\n                  \"lng\" : 103.4098830\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 10.71623960,\n               \"lng\" : 103.77526340\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 10.9888650,\n                  \"lng\" : 103.9621540\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 10.40374130,\n                  \"lng\" : 103.4098830\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 14.6901790,\n                  \"lng\" : 107.6276870\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 9.283249899999999,\n
-      \                 \"lng\" : 102.3335420\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.5656790,\n               \"lng\"
-      : 104.9909630\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 14.6901790,\n                  \"lng\" : 107.6276870\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 9.283249899999999,\n
-      \                 \"lng\" : 102.3335420\n               }\n            }\n         },\n
-      \        \"types\" : [ \"country\", \"political\" ]\n      }\n   ],\n   \"status\"
-      : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Mittapheap Kampuchea",
+                       "short_name" : "NH 4",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Prey Nob",
+                       "short_name" : "Prey Nob",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Krong Preah Sihanouk",
+                       "short_name" : "Krong Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Mittapheap Kampuchea, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 10.73472240,
+                          "lng" : 103.80958270
+                       },
+                       "southwest" : {
+                          "lat" : 10.7289430,
+                          "lng" : 103.80544730
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.73156010,
+                       "lng" : 103.80713350
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 10.73472240,
+                          "lng" : 103.80958270
+                       },
+                       "southwest" : {
+                          "lat" : 10.7289430,
+                          "lng" : 103.80544730
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Prey Nob",
+                       "short_name" : "Prey Nob",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Krong Preah Sihanouk",
+                       "short_name" : "Krong Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Prey Nob, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 10.98896930,
+                          "lng" : 103.96216390
+                       },
+                       "southwest" : {
+                          "lat" : 10.40379470,
+                          "lng" : 103.54056360
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.62822660,
+                       "lng" : 103.77526340
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 10.98896930,
+                          "lng" : 103.96216390
+                       },
+                       "southwest" : {
+                          "lat" : 10.40379470,
+                          "lng" : 103.54056360
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Krong Preah Sihanouk",
+                       "short_name" : "Krong Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Krong Preah Sihanouk, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 10.9888650,
+                          "lng" : 103.9621540
+                       },
+                       "southwest" : {
+                          "lat" : 10.40374130,
+                          "lng" : 103.4098830
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.71623960,
+                       "lng" : 103.77526340
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 10.9888650,
+                          "lng" : 103.9621540
+                       },
+                       "southwest" : {
+                          "lat" : 10.40374130,
+                          "lng" : 103.4098830
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.5656790,
+                       "lng" : 104.9909630
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 16:58:06 GMT
-recorded_with: VCR 2.0.0.rc1
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=krong%20preah%20sihanouk,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:35 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:35 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Preah Sihanouk",
+                       "short_name" : "Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Preah Sihanouk, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.4356091,
+                          "lng" : 104.0803528
+                       },
+                       "southwest" : {
+                          "lat" : 9.9100275,
+                          "lng" : 102.8794956
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.7581899,
+                       "lng" : 103.8216261
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.4356091,
+                          "lng" : 104.0803528
+                       },
+                       "southwest" : {
+                          "lat" : 10.2505245,
+                          "lng" : 103.1227398
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Krong Preah Sihanouk",
+                       "short_name" : "Krong Preah Sihanouk",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Preah Sihanouk",
+                       "short_name" : "Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Krong Preah Sihanouk, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 10.7803603,
+                          "lng" : 103.5925877
+                       },
+                       "southwest" : {
+                          "lat" : 10.5427243,
+                          "lng" : 103.1816841
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.6253016,
+                       "lng" : 103.5233963
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 10.6949878,
+                          "lng" : 103.5925877
+                       },
+                       "southwest" : {
+                          "lat" : 10.5549844,
+                          "lng" : 103.4561545
+                       }
+                    }
+                 },
+                 "types" : [ "locality", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:35 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=10.7581899,103.8216261&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:36 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:36 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "National Highway 3",
+                       "short_name" : "NH 3",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Tuek Thla",
+                       "short_name" : "Tuek Thla",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "Prey Nob",
+                       "short_name" : "Prey Nob",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Preah Sihanouk",
+                       "short_name" : "Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "National Highway 3, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 10.6779164,
+                          "lng" : 103.908214
+                       },
+                       "southwest" : {
+                          "lat" : 10.6760953,
+                          "lng" : 103.9075262
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.6769757,
+                       "lng" : 103.9077932
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 10.6783548302915,
+                          "lng" : 103.9092190802915
+                       },
+                       "southwest" : {
+                          "lat" : 10.6756568697085,
+                          "lng" : 103.9065211197085
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cheung Kou",
+                       "short_name" : "Cheung Kou",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "Prey Nob",
+                       "short_name" : "Prey Nob",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Preah Sihanouk",
+                       "short_name" : "Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cheung Kou, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 10.9389482,
+                          "lng" : 103.8908172
+                       },
+                       "southwest" : {
+                          "lat" : 10.7201738,
+                          "lng" : 103.6743951
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.8148324,
+                       "lng" : 103.7868526
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 10.9389482,
+                          "lng" : 103.8908172
+                       },
+                       "southwest" : {
+                          "lat" : 10.7201738,
+                          "lng" : 103.6743951
+                       }
+                    }
+                 },
+                 "types" : [ "sublocality_level_1", "sublocality", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Prey Nob",
+                       "short_name" : "Prey Nob",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Preah Sihanouk",
+                       "short_name" : "Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Prey Nob, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 10.9889692,
+                          "lng" : 103.962164
+                       },
+                       "southwest" : {
+                          "lat" : 10.4036338,
+                          "lng" : 103.5405635
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.6282266,
+                       "lng" : 103.7752634
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 10.9889692,
+                          "lng" : 103.962164
+                       },
+                       "southwest" : {
+                          "lat" : 10.4036338,
+                          "lng" : 103.5405635
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Preah Sihanouk",
+                       "short_name" : "Preah Sihanouk",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Preah Sihanouk, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.4356091,
+                          "lng" : 104.0803528
+                       },
+                       "southwest" : {
+                          "lat" : 9.9100275,
+                          "lng" : 102.8794956
+                       }
+                    },
+                    "location" : {
+                       "lat" : 10.7581899,
+                       "lng" : 103.8216261
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.4356091,
+                          "lng" : 104.0803528
+                       },
+                       "southwest" : {
+                          "lat" : 10.2505245,
+                          "lng" : 103.1227398
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.690179,
+                          "lng" : 107.627687
+                       },
+                       "southwest" : {
+                          "lat" : 9.2857541,
+                          "lng" : 102.333542
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.565679,
+                       "lng" : 104.990963
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.690179,
+                          "lng" : 107.627687
+                       },
+                       "southwest" : {
+                          "lat" : 9.2857541,
+                          "lng" : 102.333542
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:36 GMT
+recorded_with: VCR 2.9.3

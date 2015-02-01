@@ -12,41 +12,27 @@ describe Location do
         "phnom penh" => {
           :abbreviations => ["pp", "p.p"],
           :expected_city => "Phnom Penh",
-          :expected_latitude => 11.558831,
-          :expected_longitude => 104.917445
+          :expected_latitude => 11.5448729,
+          :expected_longitude => 104.8921668
         },
 
         "siem reab" => {
           :abbreviations => ["sr", "s.r", "siem reap"],
-          :expected_city => "Siem Reap",
-          :expected_latitude => 13.3622222,
-          :expected_longitude => 103.8597222
-        },
-
-        "baat dambang" => {
-          :abbreviations => ["bb", "b.b", "battambang"],
-          :expected_city => "Battambang",
-          :expected_latitude => 13.1,
-          :expected_longitude => 103.2
-        },
-
-        "banteay mean chey" => {
-          :abbreviations => ["b.chey", "bm", "b.m", "banteay meanchey"],
-          :expected_city => "Svay Chek",
-          :expected_latitude => 13.66725960,
-          :expected_longitude => 102.89750980
+          :expected_city => "Banteay Srei",
+          :expected_latitude => 13.6915377,
+          :expected_longitude => 104.1001326
         },
 
         "kracheh" => {
           :abbreviations => ["kr.ch", "kr", "k.r", "kratie"],
-          :expected_city => "Kratie",
-          :expected_latitude => 12.480,
-          :expected_longitude => 106.030
+          :expected_city => "Kracheh",
+          :expected_latitude => 12.8606299,
+          :expected_longitude => 105.9699878
         },
 
         "mondol kiri" => {
           :abbreviations => ["m.ri", "mk", "m.k", "mondolkiri", "mondulkiri"],
-          :expected_city => "Pechr Chenda",
+          :expected_city => "Dei-Ey",
           :expected_latitude => 12.78794270,
           :expected_longitude => 107.10119310
         },
@@ -60,128 +46,121 @@ describe Location do
 
         "prey veaeng" => {
           :abbreviations => ["pr.v", "pv", "p.v", "prey veng"],
-          :expected_city => "Prey Veaeng",
-          :expected_latitude => 11.4851140,
-          :expected_longitude => 105.3280980
-        },
-
-        "pousaat" => {
-          :abbreviations => ["p.s", "ps", "pursat"],
-          :expected_city => "Pursat",
-          :expected_latitude => 12.53333330,
-          :expected_longitude => 103.91666670
+          :expected_city => "Smaong Khang Tboung Commune",
+          :expected_latitude => 11.3802442,
+          :expected_longitude => 105.5005483
         },
 
         "rotanak kiri" => {
           :abbreviations => ["r.r", "rr", "rk", "r.k", "ratanakiri"],
-          :expected_city => "Ta Veaeng",
+          :expected_city => "Andoung Meas",
           :expected_latitude => 13.85766070,
           :expected_longitude => 107.10119310
         },
 
         "krong preah sihanouk" => {
           :abbreviations => ["k.som", "k.saom", "s.v", "sihanoukville", "kampong som", "kampong saom", "kompong som", "kompong saom"],
-          :expected_city => "Prey Nob",
-          :expected_latitude => 10.71623960,
-          :expected_longitude => 103.77526340
+          :expected_city => "Tuek Thla",
+          :expected_latitude => 10.7581899,
+          :expected_longitude => 103.8216261
         },
 
         "stueng traeng" => {
           :abbreviations => ["s.t", "st", "stung treng"],
-          :expected_city => "Stung Treng",
-          :expected_latitude => 13.79164340,
-          :expected_longitude => 106.11105010
+          :expected_city => "Krong Stung Treng",
+          :expected_latitude => 13.576473,
+          :expected_longitude => 105.9699878
         },
 
         "svaay rieng" => {
           :abbreviations => ["sv.r", "svay rieng"],
           :expected_city => "Svay Rieng",
-          :expected_latitude => 11.08333330,
-          :expected_longitude => 105.80
+          :expected_latitude => 11.0877866,
+          :expected_longitude => 105.800951
         },
 
         "taakaev" => {
           :abbreviations => ["tk", "t.k", "takeo"],
-          :expected_city => "Takeo",
-          :expected_latitude => 10.98333330,
-          :expected_longitude => 104.78333330
+          :expected_city => "Doun Kaev",
+          :expected_latitude => 10.9321519,
+          :expected_longitude => 104.798771
         },
 
         "otdar mean chey" => {
           :abbreviations => ["o.chey", "om", "o.m", "oddar meanchey"],
-          :expected_city => "Samraong",
+          :expected_city => "Krong Samraong",
           :expected_latitude => 14.17171950,
           :expected_longitude => 103.63627150
         },
 
         "krong kep" => {
           :abbreviations => ["kep"],
-          :expected_city => "Kep",
-          :expected_latitude => 10.51523510,
-          :expected_longitude => 104.3326440
+          :expected_city => "ឃុំពងទឹក",
+          :expected_latitude => 10.536089,
+          :expected_longitude => 104.3559158
         },
 
         "krong pailin" => {
           :abbreviations => ["pl", "p.l", "pailin"],
-          :expected_city => "Pailin",
-          :expected_latitude => 12.90929620,
-          :expected_longitude => 102.66755750
+          :expected_city => "Krong Pailin",
+          :expected_latitude => 12.8539496,
+          :expected_longitude => 102.6083506
         },
 
         "kampong chaam" => {
           :abbreviations => ["k.cham", "kc", "k.c"],
-          :expected_city => "Krouch Chhmar",
+          :expected_city => "Tbuong Kmoum",
           :expected_latitude => 12.07699250,
           :expected_longitude => 105.68817880
         },
 
         "kampong chhnang" => {
           :abbreviations => ["k.chhnang", "kn", "k.n"],
-          :expected_city => "Kampong Chhnang",
+          :expected_city => "Krong Kampong Chhnang",
           :expected_latitude => 12.250,
-          :expected_longitude => 104.66666670
+          :expected_longitude => 104.666667
         },
 
         "kampong spueu" => {
           :abbreviations => ["k.speu", "ks", "k.s", "kampong speu"],
-          :expected_city => "Kampong Spoe",
-          :expected_latitude => 11.47349210,
-          :expected_longitude => 104.504360
+          :expected_city => "Thpong",
+          :expected_latitude => 11.6155109,
+          :expected_longitude => 104.3791912
         },
 
         "kampong thum" => {
           :abbreviations => ["k.thom", "kt", "k.t", "kampong thom"],
-          :expected_city => "Kampong Thom",
-          :expected_latitude => 12.711970,
-          :expected_longitude => 104.8886030
+          :expected_city => "Prasat Sambour",
+          :expected_latitude => 12.90616,
+          :expected_longitude => 105.2194808
         },
 
         "kampot" => {
           :abbreviations => ["k.pot", "kp", "k.p"],
-          :expected_city => "Kampot",
-          :expected_latitude => 10.60630,
-          :expected_longitude => 104.1819
+          :expected_city => "Tuek Chhou",
+          :expected_latitude => 10.7412089,
+          :expected_longitude => 104.1930918
         },
 
         "kandaal" => {
           :abbreviations => ["kd", "k.d", "kandal", "kondal"],
-          :expected_city => "S'ang",
-          :expected_latitude => 11.40010490,
-          :expected_longitude => 105.12589550
+          :expected_city => "Kandal",
+          :expected_latitude => 11.4573319,
+          :expected_longitude => 104.693403
         },
 
         "kaoh kong" => {
           :abbreviations => ["kk", "k.k", "koh kong"],
-          :expected_city => "Koh Kong",
-          :expected_latitude => 11.61666670,
-          :expected_longitude => 102.98333330
+          :expected_city => "Koh Kong District",
+          :expected_latitude => 11.5762804,
+          :expected_longitude => 103.3587288
         },
 
         "ខ្ងុំចង់ដីង អ្នកជានរណា" => {
           :expected_city => nil,
           :expected_latitude => nil,
           :expected_longitude => nil
-        }
+        },
       }
     end
 

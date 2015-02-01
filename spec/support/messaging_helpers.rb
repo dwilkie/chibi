@@ -1,11 +1,13 @@
 require_relative "authentication_helpers"
 require_relative "location_helpers"
 require_relative "active_job_helpers"
+require_relative "web_mock"
 
 module MessagingHelpers
   include AuthenticationHelpers
   include LocationHelpers
   include ActiveJobHelpers
+  include WebMockHelpers
 
   EXAMPLES = YAML.load_file(File.join(File.dirname(__FILE__), 'message_examples.yaml'))
 
@@ -50,8 +52,9 @@ module MessagingHelpers
     if options[:via] == :twilio
       # assert twilio delivery
     elsif options[:via] == :nuntium
-      last_request = FakeWeb.last_request
-      expect(last_request.path).to eq(nuntium_send_ao_path)
+      last_request = webmock_requests.last
+      uri = last_request.uri
+      expect(uri.path).to eq(nuntium_send_ao_path)
       last_request_data = JSON.parse(last_request.body).first
       expect(last_request_data["body"]).to eq(options[:body]) if options[:body].present?
       expect(last_request_data["to"]).to eq("sms://#{options[:to]}") if options[:to].present?

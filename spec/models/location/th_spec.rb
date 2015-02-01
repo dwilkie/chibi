@@ -10,14 +10,14 @@ describe Location do
         "bangkok" => {
           :abbreviations => ["BKK"],
           :expected_city => "Bangkok",
-          :expected_latitude => 13.7278956,
-          :expected_longitude => 100.5241235
+          :expected_latitude => 13.7563309,
+          :expected_longitude => 100.5017651
         },
 
         "chiang mai" => {
-          :expected_city => "Samoeng",
-          :expected_latitude => 18.7964642,
-          :expected_longitude => 98.6600586
+          :expected_city => "Chiang Mai",
+          :expected_latitude => 18.787747,
+          :expected_longitude => 98.99312839999999
         }
       }
     end
