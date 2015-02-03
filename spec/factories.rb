@@ -36,13 +36,13 @@ FactoryGirl.define do
     n.to_s
   end
 
-  sequence :chargeable_operator_number, 85513234567 do |n|
+  sequence :chargeable_operator_number, 85560234567 do |n|
     n.to_s
   end
 
   factory :charge_request do
     association :user, :factory => [:user, :from_chargeable_operator]
-    qb
+    beeline
 
     after(:build) do |charge_request|
       user = charge_request.user
@@ -68,6 +68,10 @@ FactoryGirl.define do
 
     trait :qb do
       operator "qb"
+    end
+
+    trait :beeline do
+      operator "beeline"
     end
 
     trait :from_message do
