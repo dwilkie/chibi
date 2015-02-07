@@ -1,3 +1,6 @@
 Airbrake.configure do |config|
-  config.api_key = 'ed8e9cba92c390af0c53d409ae6c4cc2'
+  config.api_key = ENV["AIRBRAKE_API_KEY"]
+  config.host    = ENV["AIRBRAKE_HOST"]
+  config.port    = 443
+  config.secure  = config.port == 443
 end
