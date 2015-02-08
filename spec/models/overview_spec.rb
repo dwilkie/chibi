@@ -4,7 +4,7 @@ describe Overview do
   let(:options) { { :operator => "operator", :country_code => "country_code" } }
 
   def asserted_options(overridden = {})
-    options.merge(:least_recent => 6.months).merge(overridden)
+    options.merge(:least_recent => 3.months).merge(overridden)
   end
 
   subject { Overview.new(options) }

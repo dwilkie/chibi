@@ -3,7 +3,7 @@ class Overview
 
   def initialize(params = {})
     self.options = params.slice(:operator, :country_code)
-    options.merge!(:least_recent => 6.months) unless params[:all]
+    options.merge!(:least_recent => 3.months) unless params[:all]
     @new_users = {}
     @messages_received = {}
     @users_texting = {}
