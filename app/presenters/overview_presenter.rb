@@ -43,9 +43,6 @@ class OverviewPresenter < BasePresenter
     chart_div_id = "#{identifier}_chart"
     result = content_tag(:div, :class => "overview_section", :id => identifier) do
       content_tag(:h2, title, :class => "chart_title") +
-      link_to("All", overview_path(:all => true)) +
-      " | " +
-      link_to("6 Months", overview_path) +
       generate_chart(chart_div_id, title, data_sets)
     end
     result + tag(:hr, :class => "separator")

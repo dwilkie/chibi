@@ -51,8 +51,6 @@ describe OverviewPresenter do
     section = result.find("##{identifier}")
     expect(section).to have_selector(".chart_title", :text => title)
     assert_highchart(identifier, section, :title => title)
-    expect(result).to have_link("All", :href => overview_path(:all => true))
-    expect(result).to have_link("6 Months", :href => overview_path)
     expect(result).to have_selector(".separator")
   end
 
