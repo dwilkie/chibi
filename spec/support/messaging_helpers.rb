@@ -18,7 +18,7 @@ module MessagingHelpers
   end
 
   def send_message(options = {})
-    post_message options
+    post_message(options)
   end
 
   def expect_message(options = {}, &block)
@@ -74,27 +74,59 @@ module MessagingHelpers
 
   def post_message(options = {})
     options[:from] = options[:from].mobile_number if options[:from].is_a?(User)
+    aggregator_params = options[:via_nuntium] ? nuntium_message_params(options) : twilio_message_params(options)
 
     expect_locate(options) do
       expect_message do
         trigger_job do
-          post messages_path,
-          {:message => {
-            :from => options[:from],
-            :body => options[:body],
-            :guid => options[:guid] || generate(:guid),
-            :application => options[:application] || "chatbox",
-            :channel => options[:channel] || "test",
-            :to => options[:to] || "012456789",
-            :subject => options[:subject] || ""
-          }},
-
-          authentication_params(:message)
+          post(
+            messages_path,
+            aggregator_params,
+            authentication_params(:message)
+          )
 
           expect(response.status).to be(options[:response] || 201)
         end
       end
     end
+  end
+
+  def nuntium_message_params(options = {})
+    {
+      :message => {
+        :from => options[:from],
+        :body => options[:body],
+        :guid => options[:guid] || generate(:guid),
+        :application => options[:application] || "chatbox",
+        :channel => options[:channel] || "test",
+        :to => options[:to] || "012456789",
+        :subject => options[:subject] || ""
+      }
+    }
+  end
+
+  def twilio_message_params(options = {})
+    guid = options[:guid] || generate(:guid)
+    {
+      "ToCountry"=>"US",
+      "ToState"=>"CA",
+      "SmsMessageSid"=> guid,
+      "NumMedia"=>"0",
+      "ToCity"=>"SAN FRANCISCO",
+      "FromZip"=>"",
+      "SmsSid"=>guid,
+      "FromState"=>"",
+      "SmsStatus"=>"received",
+      "FromCity"=>"",
+      "Body"=>options[:body],
+      "FromCountry"=>"KH",
+      "To"=> options[:to] || "012456789",
+      "ToZip"=>"94105",
+      "MessageSid"=>guid,
+      "AccountSid"=>Rails.application.secrets[:twilio_account_sid],
+      "From"=> options[:from],
+      "ApiVersion"=>"2010-04-01"
+    }
   end
 
   def nuntium_erb(options = {})

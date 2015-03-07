@@ -3,6 +3,7 @@ require 'rails_helper'
 describe Message do
   include AnalyzableExamples
   include ActiveJobHelpers
+  include MessagingHelpers
 
   include_context "replies"
 
@@ -49,6 +50,42 @@ describe Message do
 
   it_should_behave_like "chatable" do
     let(:chatable_resource) { message }
+  end
+
+  describe ".from_aggregator" do
+    include MessagingHelpers
+
+    let(:mobile_number) { generate(:mobile_number) }
+    let(:guid) { generate(:guid) }
+    let(:body) { "foo" }
+
+    let(:new_message) do
+      described_class.from_aggregator(
+        message_params(:from => mobile_number, :body => body, :guid => guid)
+      )
+    end
+
+    def assert_new_message!
+      expect(new_message.from).to eq(mobile_number)
+      expect(new_message.body).to eq(body)
+      expect(new_message.guid).to eq(guid)
+    end
+
+    describe "from twilio" do
+      def message_params(params = {})
+        twilio_message_params(params)
+      end
+
+      it { assert_new_message! }
+    end
+
+    describe "from nuntium" do
+      def message_params(params = {})
+        nuntium_message_params(params)
+      end
+
+      it { assert_new_message! }
+    end
   end
 
   describe ".queue_unprocessed" do

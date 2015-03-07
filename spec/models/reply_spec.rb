@@ -393,7 +393,7 @@ describe Reply do
       end
 
       before do
-        stub_env(:deliver_via_nuntium, "1")
+        stub_env(:deliver_via_nuntium => "1")
       end
 
       it "should deliver the message and save the token" do

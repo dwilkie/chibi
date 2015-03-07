@@ -41,6 +41,30 @@ class Message < ActiveRecord::Base
     end
   end
 
+  def self.from_nuntium?(params)
+    nuntium_params(params).present?
+  end
+
+  def self.from_aggregator(params = {})
+    from_nuntium?(params) ? from_nuntium(params) : from_twilio(params)
+  end
+
+  def self.nuntium_params(params)
+    params[:message]
+  end
+  private_class_method :nuntium_params
+
+  def self.from_nuntium(params)
+    new((nuntium_params(params) || {}).slice(:body, :guid, :from))
+  end
+  private_class_method :from_nuntium
+
+  def self.from_twilio(params)
+    params.underscorify_keys!
+    new(params.slice(:body, :from).merge(:guid => params[:message_sid]))
+  end
+  private_class_method :from_twilio
+
   def body
     read_attribute(:body).to_s
   end

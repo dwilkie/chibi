@@ -7,6 +7,7 @@ describe "Messages" do
   describe "POST /messages" do
     include MessagingHelpers
     include TranslationHelpers
+    include EnvHelpers
 
     include_context "existing users"
     include_context "replies"
@@ -449,7 +450,7 @@ describe "Messages" do
       end
     end
 
-    context "as nuntium" do
+    context "as Nuntium" do
       context "when I post a duplicate to the server" do
         let(:message_with_guid) { create(:message, :with_guid) }
 
@@ -463,6 +464,41 @@ describe "Messages" do
 
         it "should not save or process the message" do
           expect(new_message).to eq(message_with_guid)
+        end
+      end
+
+      context "when I post a message to the server" do
+        let(:nuntium_enabled) { "1" }
+
+        before do
+          stub_env(
+            :nuntium_enabled => nuntium_enabled,
+            :nuntium_messages_enabled => nuntium_messages_enabled
+          )
+
+          send_message(
+            :from => my_number,
+            :body => "foo",
+            :via_nuntium => true
+          )
+        end
+
+        context "given nuntium message processing is enabled" do
+          let(:nuntium_messages_enabled) { "1" }
+
+          it "should save and process the message" do
+            expect(new_message).to be_present
+            expect(new_message.from).to eq(my_number)
+            expect(new_message.body).to eq("foo")
+          end
+        end
+
+        context "given nuntium message processing is disabled" do
+          let(:nuntium_messages_enabled) { "0" }
+
+          it "should not save or process the message" do
+            expect(new_message).to be_nil
+          end
         end
       end
     end
