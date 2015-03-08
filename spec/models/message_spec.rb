@@ -4,6 +4,7 @@ describe Message do
   include AnalyzableExamples
   include ActiveJobHelpers
   include MessagingHelpers
+  include EnvHelpers
 
   include_context "replies"
 
@@ -52,9 +53,40 @@ describe Message do
     let(:chatable_resource) { message }
   end
 
-  describe ".from_aggregator" do
-    include MessagingHelpers
+  describe ".from_nuntium?" do
+    describe "from nuntium" do
+      let(:params) { nuntium_message_params }
+      it { expect(described_class.from_nuntium?(params)).to eq(true) }
+    end
 
+    describe "from twilio" do
+      let(:params) { twilio_message_params }
+      it { expect(described_class.from_nuntium?(params)).to eq(false) }
+    end
+  end
+
+  # nuntium
+  describe ".accept_messages_from_channel?" do
+    let(:params) { nuntium_message_params(:channel => nuntium_channel) }
+
+    before do
+      stub_env(:nuntium_messages_enabled_channels => nuntium_channel)
+    end
+
+    context "given the channel is nuntium enabled" do
+      let(:nuntium_channel) { "smart" }
+
+      it { expect(described_class.accept_messages_from_channel?(params)).to eq(true) }
+    end
+
+    context "given the channel is not nuntium enabled" do
+      let(:nuntium_channel) { nil }
+
+      it { expect(described_class.accept_messages_from_channel?(params)).to eq(false) }
+    end
+  end
+
+  describe ".from_aggregator" do
     let(:mobile_number) { generate(:mobile_number) }
     let(:guid) { generate(:guid) }
     let(:body) { "foo" }

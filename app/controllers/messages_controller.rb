@@ -4,7 +4,7 @@ class MessagesController < ApplicationController
   before_action :authenticate_message
 
   def create
-    status = (!accept_messages_from_nuntium? && Message.from_nuntium?(message_params)) ? :created : create_message
+    status = (from_nuntium? && !accept_messages_from_channel?) ? :created : create_message
     render(:nothing => true, :status => status)
   end
 
@@ -27,6 +27,14 @@ class MessagesController < ApplicationController
 
   def message_params
     params.permit!
+  end
+
+  def from_nuntium?
+    Message.from_nuntium?(message_params)
+  end
+
+  def accept_messages_from_channel?
+    accept_messages_from_nuntium? && Message.accept_messages_from_channel?(message_params)
   end
 
   def accept_messages_from_nuntium?

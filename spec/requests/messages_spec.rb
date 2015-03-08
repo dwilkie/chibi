@@ -469,22 +469,26 @@ describe "Messages" do
 
       context "when I post a message to the server" do
         let(:nuntium_enabled) { "1" }
+        let(:nuntium_messages_enabled) { "1" }
+        let(:channel_name) { "smart" }
 
         before do
           stub_env(
             :nuntium_enabled => nuntium_enabled,
-            :nuntium_messages_enabled => nuntium_messages_enabled
+            :nuntium_messages_enabled => nuntium_messages_enabled,
+            :nuntium_messages_enabled_channels => nuntium_channel
           )
 
           send_message(
             :from => my_number,
             :body => "foo",
-            :via_nuntium => true
+            :channel => channel_name,
+            :via_nuntium => true,
           )
         end
 
-        context "given nuntium message processing is enabled" do
-          let(:nuntium_messages_enabled) { "1" }
+        context "given nuntium message processing is enabled for the channel" do
+          let(:nuntium_channel) { channel_name.upcase }
 
           it "should save and process the message" do
             expect(new_message).to be_present
@@ -494,7 +498,7 @@ describe "Messages" do
         end
 
         context "given nuntium message processing is disabled" do
-          let(:nuntium_messages_enabled) { "0" }
+          let(:nuntium_channel) { nil }
 
           it "should not save or process the message" do
             expect(new_message).to be_nil
