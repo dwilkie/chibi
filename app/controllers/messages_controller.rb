@@ -42,10 +42,10 @@ class MessagesController < ApplicationController
   end
 
   def nuntium_messages_enabled?
-    Rails.application.secrets[:nuntium_messages_enabled] == "1"
+    Rails.application.secrets[:nuntium_messages_enabled].to_i == 1
   end
 
   def nuntium_enabled?
-    Rails.application.secrets[:nuntium_enabled] == "1"
+    Rails.application.secrets[:nuntium_enabled].to_i == 1
   end
 end
