@@ -24,6 +24,31 @@ describe Message do
     end
   end
 
+  describe "callbacks" do
+    describe "before_validation" do
+      it "should normalize the channel" do
+        subject.channel = "SMART"
+        subject.valid?
+        expect(subject.channel).to eq("smart")
+        subject.channel = nil
+        subject.valid?
+        expect(subject.channel).to eq(nil)
+      end
+
+      it "should normalize the 'to' number" do
+        subject.to = "+2442"
+        subject.valid?
+        expect(subject.to).to eq("2442")
+        subject.to = "+14156926280"
+        subject.valid?
+        expect(subject.to).to eq("14156926280")
+        subject.to = nil
+        subject.valid?
+        expect(subject.to).to eq(nil)
+      end
+    end
+  end
+
   it "should not be valid with a duplicate a guid" do
     new_message.guid = message_with_guid.guid
     expect(new_message).not_to be_valid
@@ -53,7 +78,7 @@ describe Message do
     let(:chatable_resource) { message }
   end
 
-  describe ".from_nuntium?" do
+  describe ".from_nuntium?(params = {})" do
     describe "from nuntium" do
       let(:params) { nuntium_message_params }
       it { expect(described_class.from_nuntium?(params)).to eq(true) }
@@ -66,7 +91,7 @@ describe Message do
   end
 
   # nuntium
-  describe ".accept_messages_from_channel?" do
+  describe ".accept_messages_from_channel?(params = {})" do
     let(:params) { nuntium_message_params(:channel => nuntium_channel) }
 
     before do
@@ -86,37 +111,58 @@ describe Message do
     end
   end
 
-  describe ".from_aggregator" do
-    let(:mobile_number) { generate(:mobile_number) }
+  describe "'.from' methods" do
+    let(:from) { generate(:mobile_number) }
+    let(:to) { "2442" }
     let(:guid) { generate(:guid) }
     let(:body) { "foo" }
-
-    let(:new_message) do
-      described_class.from_aggregator(
-        message_params(:from => mobile_number, :body => body, :guid => guid)
-      )
-    end
+    let(:channel) { "smart" }
 
     def assert_new_message!
-      expect(new_message.from).to eq(mobile_number)
+      expect(new_message.from).to eq(from)
       expect(new_message.body).to eq(body)
       expect(new_message.guid).to eq(guid)
+      expect(new_message.to).to eq(to)
+      expect(new_message.channel).to eq(channel)
     end
 
-    describe "from twilio" do
-      def message_params(params = {})
-        twilio_message_params(params)
+    describe ".from_smsc(params = {})" do
+      let(:guid) { nil }
+
+      let(:new_message) do
+        described_class.from_smsc(
+          :from => from, :body => body, :channel => channel, :to => to
+        )
       end
 
       it { assert_new_message! }
     end
 
-    describe "from nuntium" do
-      def message_params(params = {})
-        nuntium_message_params(params)
+    describe ".from_aggregator(params = {})" do
+      let(:new_message) do
+        described_class.from_aggregator(
+          message_params(:from => from, :body => body, :guid => guid, :channel => channel, :to => to)
+        )
       end
 
-      it { assert_new_message! }
+      describe "from twilio" do
+        let(:channel) { "twilio" }
+        let(:to) { "+14156926280" }
+
+        def message_params(params = {})
+          twilio_message_params(params)
+        end
+
+        it { assert_new_message! }
+      end
+
+      describe "from nuntium" do
+        def message_params(params = {})
+          nuntium_message_params(params)
+        end
+
+        it { assert_new_message! }
+      end
     end
   end
 
