@@ -124,6 +124,7 @@ describe Message do
       expect(new_message.guid).to eq(guid)
       expect(new_message.to).to eq(to)
       expect(new_message.channel).to eq(channel)
+      expect(new_message).to be_valid
     end
 
     describe ".from_smsc(params = {})" do
