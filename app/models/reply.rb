@@ -248,8 +248,7 @@ class Reply < ActiveRecord::Base
   end
 
   def deliver_via_nuntium?
-    deliver_via_nuntium = Rails.application.secrets[:deliver_via_nuntium]
-    deliver_via_nuntium.nil? || deliver_via_nuntium != "0"
+    Rails.application.secrets[:deliver_via_nuntium].to_i == 1
   end
 
   def nuntium
