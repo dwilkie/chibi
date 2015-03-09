@@ -20,18 +20,10 @@ module Chibi
       end
 
       def twilio_outgoing_numbers(options = {})
-        twilio_numbers = Rails.application.secrets[:twilio_outgoing_numbers].split(":")
-        return twilio_numbers if options[:formatted] == false
-
-        formatted_numbers = []
-
-        twilio_numbers.each do |number|
-          formatted_numbers << Phony.formatted(
-            number, :format => :international, :spaces => ""
-          )
-        end
-
-        formatted_numbers
+        config_key = "twilio_outgoing_numbers"
+        config_key += "_sms_capable" if options[:sms_capable]
+        twilio_numbers = Rails.application.secrets[config_key].split(":")
+        options[:formatted] == false ? twilio_numbers : twilio_numbers.map { |number| twilio_formatted(number) }
       end
 
       def twilio_number?(number, options = {})

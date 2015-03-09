@@ -1,4 +1,5 @@
-require File.join(File.dirname(__FILE__), 'authentication_helpers')
+require_relative 'authentication_helpers'
+require_relative 'twilio_helpers'
 
 module PhoneCallHelpers
   include AuthenticationHelpers
@@ -36,6 +37,8 @@ module PhoneCallHelpers
   end
 
   module TwilioHelpers
+    include ::TwilioHelpers
+
     shared_examples_for "a Chibi Twilio CDR" do
       describe "#body" do
         let(:uuid) { generate(:guid) }
@@ -60,14 +63,6 @@ module PhoneCallHelpers
 
     private
 
-    def twilio_cassette_erb(options = {})
-      {
-        :account_sid => Rails.application.secrets[:twilio_account_sid],
-        :auth_token =>  Rails.application.secrets[:twilio_auth_token],
-        :application_sid =>  Rails.application.secrets[:twilio_application_sid],
-      }.merge(options)
-    end
-
     def expect_twilio_cdr_fetch(options = {}, &block)
       cassette = options.delete(:cassette) || "get_call"
       options[:direction] ||= "inbound"
@@ -78,30 +73,6 @@ module PhoneCallHelpers
       options[:call_sid] ||= generate(:guid)
       options[:parent_call_sid] ||= generate(:guid)
       VCR.use_cassette("twilio/#{cassette}", :erb => twilio_cassette_erb(options)) { yield }
-    end
-
-    def asserted_number_formatted_for_twilio(number)
-      "+#{number}"
-    end
-
-    def twilio_number(options = {})
-      twilio_numbers = twilio_numbers(options)
-      options[:default] == false ? twilio_numbers.last : twilio_numbers.first
-    end
-
-    def twilio_numbers(options = {})
-      twilio_numbers = Rails.application.secrets[:twilio_outgoing_numbers].split(":")
-      return twilio_numbers if options[:formatted] == false
-
-      formatted_numbers = []
-
-      twilio_numbers.each do |number|
-        formatted_numbers << Phony.formatted(
-          number, :format => :international, :spaces => ""
-        )
-      end
-
-      formatted_numbers
     end
 
     def sample_adhearsion_twilio_api_version

@@ -131,14 +131,17 @@ describe OutboundCdr do
         }
 
         context "which is not active" do
-          let!(:chat) {
+          let(:chat) {
             create(:chat, :friend_active, :user => user, :friend => friend)
           }
 
+          before do
+            chat
+          end
 
           it "should reactivate the chat" do
             expect(chat).not_to be_active
-            subject.save!
+            expect_message { subject.save! }
             expect(chat.reload).to be_active
           end
 

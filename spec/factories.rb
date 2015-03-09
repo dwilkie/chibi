@@ -261,6 +261,10 @@ FactoryGirl.define do
       token
     end
 
+    trait :delivered_by_twilio do
+      with_token
+    end
+
     trait :with_unset_destination do
       to nil
     end

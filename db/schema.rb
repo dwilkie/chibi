@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150308092220) do
+ActiveRecord::Schema.define(version: 20150309130310) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -131,15 +131,16 @@ ActiveRecord::Schema.define(version: 20150308092220) do
   add_index "phone_calls", ["user_id"], name: "index_phone_calls_on_user_id", using: :btree
 
   create_table "replies", force: :cascade do |t|
-    t.string   "to",           limit: 255
+    t.string   "to",                  limit: 255
     t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at",                                            null: false
-    t.datetime "updated_at",                                            null: false
+    t.datetime "created_at",                                                   null: false
+    t.datetime "updated_at",                                                   null: false
     t.datetime "delivered_at"
-    t.string   "token",        limit: 255
-    t.string   "state",        limit: 255, default: "pending_delivery", null: false
+    t.string   "token",               limit: 255
+    t.string   "state",               limit: 255, default: "pending_delivery", null: false
+    t.string   "smsc_message_status"
   end
 
   add_index "replies", ["chat_id"], name: "index_replies_on_chat_id", using: :btree

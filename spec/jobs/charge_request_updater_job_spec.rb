@@ -30,6 +30,7 @@ describe ChargeRequestUpdaterJob do
     # this is an integration test
     include TranslationHelpers
     include ActiveJobHelpers
+    include MessagingHelpers
 
     include_context "replies"
 
@@ -48,7 +49,7 @@ describe ChargeRequestUpdaterJob do
     end
 
     it "should update the charge request" do
-      trigger_job { enqueue_job }
+      expect_message { trigger_job { enqueue_job } }
       expect(reply_to(user).body).to eq(spec_translate(
         :not_enough_credit, user.locale
       ))

@@ -5,6 +5,7 @@ describe Reply do
   include MessagingHelpers
   include PhoneCallHelpers::TwilioHelpers
   include AnalyzableExamples
+  include EnvHelpers
 
   let(:user) { build(:user) }
 
@@ -59,7 +60,7 @@ describe Reply do
     expect(reply.token).to eq(options[:token]) if options[:token]
     if options[:deliver]
       assertions = {:body => reply.body, :to => reply.destination}
-      assertions.merge!(options.slice(:id, :suggested_channel, :via, :short_code, :mt_message_queue))
+      assertions.merge!(options.slice(:id, :suggested_channel, :via, :short_code, :smpp_server_id, :to, :body))
       assert_deliver(assertions)
       expect(reply).to be_delivered
       expect(reply).to be_queued_for_smsc_delivery
@@ -280,6 +281,10 @@ describe Reply do
       reply.update_delivery_state(:state => "failed")
       expect(reply).to be_rejected
 
+      reply = create(:reply, :queued_for_smsc_delivery)
+      reply.update_delivery_state(:state => "error")
+      expect(reply).to be_errored
+
       reply = create(:reply, :delivered_by_smsc)
       reply.update_delivery_state(:state => "confirmed")
       expect(reply).to be_confirmed
@@ -363,31 +368,81 @@ describe Reply do
     end
   end
 
+  describe "#fetch_twilio_message_status!" do
+    it "should do something" do
+      twilio_message_states.each do |twilio_message_state, assertions|
+        clear_enqueued_jobs
+        subject = create(:reply, :delivered_by_twilio, :queued_for_smsc_delivery)
+        expect_twilio_message_status_fetch(
+          :message_sid => subject.token,
+          :status => twilio_message_state
+        ) { subject.fetch_twilio_message_status! }
+        assert_twilio_message_status_fetched!(:message_sid => subject.token)
+        subject.reload
+        expect(subject.smsc_message_status).to eq(twilio_message_state)
+        expect(subject.state).to eq(assertions[:reply_state])
+        job = enqueued_jobs.last
+        if assertions[:reschedule_job]
+          assert_fetch_twilio_message_status_job_enqueued!(job, :id => subject.id)
+        else
+          expect(enqueued_jobs).to be_empty
+        end
+      end
+    end
+  end
+
   describe "#deliver!" do
     include MobilePhoneHelpers
 
-    context "without Nuntium" do
+    context "by default" do
+      before do
+        stub_env(:deliver_via_nuntium => "0")
+      end
+
       it "should enqueue a MT message to be sent via SMPP" do
         with_operators do |number_parts, assertions|
           number = number_parts.join
           reply = create(:reply, :to => number)
-          reply.deliver!
+          message_sid = generate(:token)
+          expect_delivery_via_twilio(:message_sid => message_sid) { reply.deliver! }
           assert_persisted_and_delivered(
-            reply, number,
-            :id => reply.token, :short_code => assertions["short_code"],
-            :mt_message_queue => assertions["mt_message_queue"]
+            reply,
+            number,
+            :id => reply.id,
+            :short_code => assertions["short_code"],
+            :smpp_server_id => assertions["smpp_server_id"],
+            :via => assertions["smpp_server_id"] || :twilio
           )
         end
-        reply = create(:reply)
-        reply.deliver!
-        assert_persisted_and_delivered(reply, reply.destination)
-        expect(reply.token).to be_present
+      end
+    end
+
+    context "via Twilio" do
+      include TwilioHelpers
+
+      before do
+        stub_env(:deliver_via_nuntium => "0")
+      end
+
+      let(:dest_address) { "85589481811" }
+      let(:body) { "test from twilio" }
+      let(:message_sid) { generate(:guid) }
+
+      subject { create(:reply, :to => dest_address, :body => body) }
+
+      it "should send the reply via Twilio" do
+        expect_delivery_via_twilio(:message_sid => message_sid) { subject.deliver! }
+        assert_persisted_and_delivered(
+          subject,
+          dest_address,
+          :id => subject.id,
+          :via => :twilio,
+        )
+        expect(subject.token).to eq(message_sid)
       end
     end
 
     context "via Nuntium" do
-      include EnvHelpers
-
       def assert_persisted_and_delivered(reply, mobile_number, options = {})
         super(reply, mobile_number, options.merge(:via => :nuntium))
       end
@@ -397,7 +452,7 @@ describe Reply do
       end
 
       it "should deliver the message and save the token" do
-        expect_message(:token => "token") { reply.deliver! }
+        expect_delivery_via_nuntium(:token => "token") { reply.deliver! }
         assert_persisted_and_delivered(reply, user.mobile_number, :token => "token")
       end
 

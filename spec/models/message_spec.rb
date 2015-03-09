@@ -209,7 +209,7 @@ describe Message do
 
       context "after the job has run" do
         before do
-          trigger_job { described_class.queue_unprocessed }
+          expect_message { trigger_job { described_class.queue_unprocessed } }
         end
 
         it "should process the messages" do
@@ -296,7 +296,7 @@ describe Message do
     shared_examples_for "not starting a new chat" do
       it "should not start a new chat" do
         expect(Chat).not_to receive(:activate_multiple!)
-        subject.process!
+        expect_message { subject.process! }
       end
     end
 

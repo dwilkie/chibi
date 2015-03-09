@@ -4,13 +4,20 @@ class Reply < ActiveRecord::Base
   include Chibi::Communicable
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
+  include Chibi::Twilio::ApiHelpers
 
   include AASM
 
   DELIVERED = "delivered"
   FAILED = "failed"
   CONFIRMED = "confirmed"
+  ERROR = "error"
   NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER = 5
+
+  TWILIO_DELIVERED = DELIVERED
+  TWILIO_FAILED = "failed"
+  TWILIO_UNDELIVERED = "undelivered"
+  TWILIO_SENT = "sent"
 
   TWILIO_CHANNEL = "twilio"
 
@@ -25,6 +32,7 @@ class Reply < ActiveRecord::Base
     state :delivered_by_smsc
     state :rejected
     state :failed
+    state :errored
     state :confirmed
 
     event :update_delivery_status do
@@ -36,6 +44,7 @@ class Reply < ActiveRecord::Base
 
       transitions(:from => :pending_delivery, :to => :queued_for_smsc_delivery)
       transitions(:from => :queued_for_smsc_delivery, :to => :rejected, :if => :delivery_failed?)
+      transitions(:from => :queued_for_smsc_delivery, :to => :errored, :if => :delivery_error?)
       transitions(:from => :delivered_by_smsc, :to => :failed, :if => :delivery_failed?)
 
       # the following handles the case where the delivery receipts were received out of order
@@ -126,7 +135,31 @@ class Reply < ActiveRecord::Base
     save_with_state_check
   end
 
+  def fetch_twilio_message_status!
+    twilio_message = twilio_client.account.messages.get(token)
+    self.smsc_message_status = twilio_message.status.downcase
+    parse_twilio_message_status
+    save!
+  end
+
   private
+
+  def parse_twilio_message_status
+    case smsc_message_status
+    when TWILIO_SENT
+      update_delivery_state(:state => DELIVERED)
+      enqueue_twilio_message_status_fetch
+    when TWILIO_DELIVERED
+      update_delivery_state(:state => CONFIRMED)
+    when TWILIO_UNDELIVERED
+      update_delivery_state(:state => DELIVERED)
+      update_delivery_state(:state => FAILED)
+    when TWILIO_FAILED
+      update_delivery_state(:state => ERROR)
+    else
+      enqueue_twilio_message_status_fetch
+    end
+  end
 
   def random_canned_greeting(options = {})
     reply = canned_reply(options)
@@ -179,6 +212,10 @@ class Reply < ActiveRecord::Base
     self.destination ||= user.try(:mobile_number)
   end
 
+  def delivery_error?
+    @delivery_state == ERROR
+  end
+
   def delivery_succeeded?
     @delivery_state == DELIVERED
   end
@@ -216,21 +253,44 @@ class Reply < ActiveRecord::Base
 
     if deliver_via_nuntium?
       perform_delivery_via_nuntium!(message)
-      return save!
-    end
-
-    self.token = uuid.generate
-    if queue = operator.mt_message_queue
-      MtMessageSenderJob.set(:queue => queue).perform_later(
-        token,
-        operator.short_code,
-        destination,
-        message
-      )
     else
-      # queue message on Twilio...
+      can_perform_delivery_via_smsc? ?
+        perform_delivery_via_smsc!(message) :
+        perform_delivery_via_twilio!(message)
     end
+  end
+
+  def can_perform_delivery_via_smsc?
+    operator.smpp_server_id.present?
+  end
+
+  def perform_delivery_via_smsc!(message)
+    MtMessageSenderJob.perform_later(
+      id,
+      operator.smpp_server_id,
+      operator.short_code,
+      destination,
+      message
+    )
+  end
+
+  def perform_delivery_via_twilio!(message)
+    response = twilio_client.messages.create(
+      :from => twilio_outgoing_number(:sms_capable => true),
+      :to => twilio_formatted(destination),
+      :body => message
+    )
+    self.token = response.sid
+    enqueue_twilio_message_status_fetch
     save!
+  end
+
+  def enqueue_twilio_message_status_fetch
+    TwilioMessageStatusFetcherJob.set(:wait => twilio_message_status_fetcher_delay.seconds).perform_later(id)
+  end
+
+  def twilio_message_status_fetcher_delay
+    (Rails.application.secrets[:twilio_message_status_fetcher_delay] || 600).to_i
   end
 
   def perform_delivery_via_nuntium!(message)
@@ -241,6 +301,7 @@ class Reply < ActiveRecord::Base
       :suggested_channel => operator.nuntium_channel || TWILIO_CHANNEL
     }])
     self.token = response["token"]
+    save!
   end
 
   def uuid

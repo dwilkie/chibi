@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 describe Rails.application.secrets[:smpp_mo_message_received_worker].constantize do
+  it { expect(subject).not_to be_a(ActiveJob::Base) }
+
   describe ".sidekiq_options" do
     it { expect(described_class.sidekiq_options["queue"]).to eq(Rails.application.secrets[:smpp_mo_message_received_queue]) }
   end

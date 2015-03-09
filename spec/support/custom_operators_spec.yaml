@@ -6,6 +6,7 @@ kh:
     smart:
       assertions:
         nuntium_channel: "smart"
+        smpp_server_id: "smart"
         short_code: "2442"
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
@@ -26,6 +27,7 @@ kh:
     beeline:
       assertions:
         nuntium_channel: "beeline"
+        smpp_server_id: "beeline"
         short_code: "2442"
         chargeable: true
         services:
@@ -54,6 +56,7 @@ kh:
     cootel:
       assertions:
         short_code: "2442"
+        smpp_server_id: "cootel"
         nuntium_channel: "cootel"
         caller_id: "2442"
         voip_gateway_host: "103.5.126.165"
