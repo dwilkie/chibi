@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   end
 
   resources :test_messages, :only => [:new, :create]
+  resources :test_replies, :only => [:new, :create]
 
   resource :report, :only => [:create, :show, :destroy]
 

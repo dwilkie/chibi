@@ -1,0 +1,18 @@
+%h2
+  Test Messages
+
+= form_for @reply, :url => test_replies_path do |f|
+  - if @reply.errors.any?
+    %h3
+      = pluralize(@reply.errors.count, "error")
+      prohibited this article from being saved
+    %ul
+      - @reply.errors.full_messages.each do |msg|
+        %li
+          = msg
+
+  = f.label :to
+  = f.text_field :to
+  = f.label :body
+  = f.text_area :body
+  = f.submit
