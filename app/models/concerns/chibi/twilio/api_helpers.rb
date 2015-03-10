@@ -22,7 +22,7 @@ module Chibi
       def twilio_outgoing_numbers(options = {})
         config_key = "twilio_outgoing_numbers"
         config_key += "_sms_capable" if options[:sms_capable]
-        twilio_numbers = Rails.application.secrets[config_key].split(":")
+        twilio_numbers = Rails.application.secrets[config_key].to_s.split(":")
         options[:formatted] == false ? twilio_numbers : twilio_numbers.map { |number| twilio_formatted(number) }
       end
 
