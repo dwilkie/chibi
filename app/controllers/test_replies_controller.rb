@@ -2,11 +2,12 @@ class TestRepliesController < ApplicationController
   before_filter :authenticate_admin
 
   def new
-    @reply = Message.new
+    @reply = Reply.new
   end
 
   def create
     @reply = Reply.new(permitted_params)
+    @reply.user = User.find_by_mobile_number(@reply.to)
     if @reply.save
       @reply.deliver!
       redirect_to new_test_reply_path
@@ -18,6 +19,6 @@ class TestRepliesController < ApplicationController
   private
 
   def permitted_params
-    params.require(:message).permit(:to, :body)
+    params.require(:reply).permit(:to, :body)
   end
 end
