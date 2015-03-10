@@ -394,6 +394,10 @@ describe Reply do
   describe "#deliver!" do
     include MobilePhoneHelpers
 
+    def default_smpp_server_id
+      :twilio
+    end
+
     context "by default" do
       before do
         stub_env(:deliver_via_nuntium => "0")
@@ -405,13 +409,16 @@ describe Reply do
           reply = create(:reply, :to => number)
           message_sid = generate(:token)
           expect_delivery_via_twilio(:message_sid => message_sid) { reply.deliver! }
+          reply.reload
+          expect(reply.operator_name).to eq(assertions["id"])
+          expect(reply.delivery_channel).to eq(assertions["smpp_server_id"] ? "smsc" : "twilio")
           assert_persisted_and_delivered(
             reply,
             number,
             :id => reply.id,
             :short_code => assertions["short_code"],
             :smpp_server_id => assertions["smpp_server_id"],
-            :via => assertions["smpp_server_id"] || :twilio
+            :via => assertions["smpp_server_id"] || default_smpp_server_id
           )
         end
       end
@@ -439,11 +446,15 @@ describe Reply do
           :via => :twilio,
         )
         expect(subject.token).to eq(message_sid)
+        expect(subject.delivery_channel).to eq("twilio")
       end
     end
 
     context "via Nuntium" do
       def assert_persisted_and_delivered(reply, mobile_number, options = {})
+        reply.reload
+        expect(reply.operator_name).to eq(options[:operator_id]) if options[:operator_id]
+        expect(reply.delivery_channel).to eq("nuntium")
         super(reply, mobile_number, options.merge(:via => :nuntium))
       end
 
@@ -461,12 +472,21 @@ describe Reply do
           number = number_parts.join
           reply = create(:reply, :to => number)
           expect_message { reply.deliver! }
-          assert_persisted_and_delivered(reply, number, :suggested_channel => assertions["nuntium_channel"])
+          assert_persisted_and_delivered(
+            reply,
+            number,
+            :suggested_channel => assertions["nuntium_channel"],
+            :operator_id => assertions["id"]
+          )
         end
         user = create(:user, :from_unknown_operator)
         reply = create(:reply, :user => user)
         expect_message { reply.deliver! }
-        assert_persisted_and_delivered(reply, reply.destination, :suggested_channel => "twilio")
+        assert_persisted_and_delivered(
+          reply,
+          reply.destination,
+          :suggested_channel => "twilio"
+        )
       end
 
       context "given the delivery fails" do

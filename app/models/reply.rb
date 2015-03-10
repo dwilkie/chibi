@@ -21,6 +21,10 @@ class Reply < ActiveRecord::Base
 
   TWILIO_CHANNEL = "twilio"
 
+  DELIVERY_CHANNEL_NUNTIUM = "nuntium"
+  DELIVERY_CHANNEL_TWILIO = TWILIO_CHANNEL
+  DELIVERY_CHANNEL_SMSC = "smsc"
+
   validates :to, :body, :presence => true
   validates :token, :uniqueness => true, :allow_nil => true
 
@@ -251,6 +255,8 @@ class Reply < ActiveRecord::Base
   def perform_delivery!(message)
     save! if new_record? # ensure message is saved so we don't get a blank destination
 
+    self.operator_name = operator.id
+
     if deliver_via_nuntium?
       perform_delivery_via_nuntium!(message)
     else
@@ -258,6 +264,8 @@ class Reply < ActiveRecord::Base
         perform_delivery_via_smsc!(message) :
         perform_delivery_via_twilio!(message)
     end
+
+    save!
   end
 
   def can_perform_delivery_via_smsc?
@@ -272,6 +280,7 @@ class Reply < ActiveRecord::Base
       destination,
       message
     )
+    self.delivery_channel = DELIVERY_CHANNEL_SMSC
   end
 
   def perform_delivery_via_twilio!(message)
@@ -281,8 +290,8 @@ class Reply < ActiveRecord::Base
       :body => message
     )
     self.token = response.sid
+    self.delivery_channel = DELIVERY_CHANNEL_TWILIO
     enqueue_twilio_message_status_fetch
-    save!
   end
 
   def enqueue_twilio_message_status_fetch
@@ -300,8 +309,8 @@ class Reply < ActiveRecord::Base
       :body => message,
       :suggested_channel => operator.nuntium_channel || TWILIO_CHANNEL
     }])
+    self.delivery_channel = DELIVERY_CHANNEL_NUNTIUM
     self.token = response["token"]
-    save!
   end
 
   def uuid
