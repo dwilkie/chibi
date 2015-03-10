@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ChargeRequest do
   include AnalyzableExamples
@@ -31,25 +31,25 @@ describe ChargeRequest do
 
   describe "factory" do
     it "should be valid" do
-      subject.should be_valid
+      expect(subject).to be_valid
     end
   end
 
   describe "validations" do
     it "should not be valid without an associated user" do
       subject.user = nil
-      subject.should_not be_valid
+      expect(subject).not_to be_valid
     end
 
     it "should not be valid without an operator" do
       subject.operator = nil
-      subject.should_not be_valid
+      expect(subject).not_to be_valid
     end
   end
 
   describe ".charge_report_columns(:header => true)" do
     it "should return the column headers for the charge report" do
-      ChargeRequest.charge_report_columns(:header => true).should == asserted_charge_report_headers
+      expect(ChargeRequest.charge_report_columns(:header => true)).to eq(asserted_charge_report_headers)
     end
   end
 
@@ -72,9 +72,9 @@ describe ChargeRequest do
 
     it "should only return only the relevant charge request columns" do
       results = run_filter
-      results.size.should == 2
-      results[0].to_json.should == asserted_charge_request_data_row(cr_1).to_json
-      results[1].to_json.should == asserted_charge_request_data_row(cr_2).to_json
+      expect(results.size).to eq(2)
+      expect(results[0].to_json).to eq(asserted_charge_request_data_row(cr_1).to_json)
+      expect(results[1].to_json).to eq(asserted_charge_request_data_row(cr_2).to_json)
     end
 
     it_should_behave_like "filtering by operator"
@@ -112,14 +112,14 @@ describe ChargeRequest do
 
     it "should only mark old charge requests that are 'awaiting_result' or 'created' as 'errored'" do
       described_class.timeout!
-      charge_request_awaiting_result.reload.should be_awaiting_result
-      old_charge_request_awaiting_result.reload.should be_errored
-      old_charge_request_awaiting_result.reason.should == "timeout"
-      old_charge_request_errored.reload.should be_errored
-      old_charge_request_failed.reload.should be_failed
-      old_charge_request_successful.reload.should be_successful
-      old_charge_request_created.reload.should be_errored
-      old_charge_request_created.reason.should == "timeout"
+      expect(charge_request_awaiting_result.reload).to be_awaiting_result
+      expect(old_charge_request_awaiting_result.reload).to be_errored
+      expect(old_charge_request_awaiting_result.reason).to eq("timeout")
+      expect(old_charge_request_errored.reload).to be_errored
+      expect(old_charge_request_failed.reload).to be_failed
+      expect(old_charge_request_successful.reload).to be_successful
+      expect(old_charge_request_created.reload).to be_errored
+      expect(old_charge_request_created.reason).to eq("timeout")
     end
   end
 
@@ -133,7 +133,7 @@ describe ChargeRequest do
       context "no timeout is specified" do
         context "charge request was last updated less than 5 seconds ago" do
           it "should return false" do
-            subject.should_not be_slow
+            expect(subject).not_to be_slow
           end
         end
 
@@ -141,7 +141,7 @@ describe ChargeRequest do
           subject { create_charge_request(:updated_at => default_timeout.ago) }
 
           it "should return true" do
-            subject.should be_slow
+            expect(subject).to be_slow
           end
         end
       end
@@ -149,7 +149,7 @@ describe ChargeRequest do
 
     context "the charge request is not 'created' or 'awaiting_confirmation'" do
       it "should return true" do
-        create_charge_request(:successful).should be_slow
+        expect(create_charge_request(:successful)).to be_slow
       end
     end
 
@@ -185,9 +185,9 @@ describe ChargeRequest do
           it "should update the charge request's result, reason and state" do
             do_set_result!(result, assertions)
             subject.reload
-            subject.state.should == (assertions[:asserted_state] || result)
-            subject.result.should == result
-            subject.reason.should == assertions[:reason]
+            expect(subject.state).to eq(assertions[:asserted_state] || result)
+            expect(subject.result).to eq(result)
+            expect(subject.reason).to eq(assertions[:reason])
           end
 
           context "requester is set" do
@@ -197,7 +197,7 @@ describe ChargeRequest do
               subject { create(:charge_request, :notify_requester, :requester => requester) }
 
               it "should notify the requester" do
-                requester.should_receive(:charge_request_updated!)
+                expect(requester).to receive(:charge_request_updated!)
                 do_set_result!(result, assertions)
               end
             end
@@ -206,7 +206,7 @@ describe ChargeRequest do
               subject { create(:charge_request, :requester => requester) }
 
               it "should not notify the requester" do
-                requester.should_not_receive(:charge_request_updated!)
+                expect(requester).not_to receive(:charge_request_updated!)
                 do_set_result!(result, assertions)
               end
             end
@@ -221,9 +221,9 @@ describe ChargeRequest do
             previous_reason = subject.reason
             do_set_result!(result, assertions)
             subject.reload
-            subject.should be_successful
-            subject.result.should == previous_result
-            subject.reason.should == previous_reason
+            expect(subject).to be_successful
+            expect(subject.result).to eq(previous_result)
+            expect(subject.reason).to eq(previous_reason)
           end
         end
       end
@@ -247,7 +247,7 @@ describe ChargeRequest do
       end
 
       it "should mark the charge_request as 'awaiting_result'" do
-        subject.reload.should be_awaiting_result
+        expect(subject.reload).to be_awaiting_result
       end
     end
   end

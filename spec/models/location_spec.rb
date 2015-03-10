@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 # see the individual specs for each location under spec/models/location
 describe Location do
@@ -8,7 +8,7 @@ describe Location do
 
   describe "factory" do
     it "should be valid" do
-      location.should be_valid
+      expect(location).to be_valid
     end
   end
 
@@ -17,7 +17,7 @@ describe Location do
       it "should normalize the country code" do
         location.country_code = "KH"
         location.save
-        location.reload.country_code.should == "kh"
+        expect(location.reload.country_code).to eq("kh")
       end
     end
 
@@ -33,7 +33,7 @@ describe Location do
 
   it "should not be valid without a country code" do
     location.country_code = nil
-    location.should_not be_valid
+    expect(location).not_to be_valid
   end
 
   describe "#locate!(address)" do
@@ -42,7 +42,7 @@ describe Location do
       # locating a city in the wrong country
       assert_locate!(
         :kh,
-        "new york" => {
+        "amsterdam" => {
           :expected_city => nil,
           :expected_latitude => nil,
           :expected_longitude => nil
@@ -50,11 +50,11 @@ describe Location do
       )
 
       # try to locate without an address
-      build(:location).locate!("").should be_nil
+      expect(build(:location).locate!("")).to be_nil
 
       # try to locate without a country code
       subject.country_code = ""
-      subject.locate!("new york").should be_nil
+      expect(subject.locate!("new york")).to be_nil
 
       # do not try to reverse geocode unless the latitude or longitude changes
       new_york = create(:location, :new_york)
@@ -69,11 +69,11 @@ describe Location do
   describe "#country_code" do
     it "should return a lowercase string of the country code" do
       subject.country_code = :AB
-      subject.country_code.should == "ab"
+      expect(subject.country_code).to eq("ab")
     end
 
     it "should return nil if the country code is nil" do
-      subject.country_code.should be_nil
+      expect(subject.country_code).to be_nil
     end
   end
 end

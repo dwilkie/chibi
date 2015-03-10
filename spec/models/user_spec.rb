@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe User do
   include MobilePhoneHelpers
@@ -27,10 +27,10 @@ describe User do
 
     options[:searcher].reload
     options[:new_friend].reload
-    options[:new_friend].should be_currently_chatting
-    options[:new_friend].active_chat.user.should == options[:searcher]
-    options[:searcher].should_not be_currently_chatting
-    options[:searcher].should be_searching_for_friend
+    expect(options[:new_friend]).to be_currently_chatting
+    expect(options[:new_friend].active_chat.user).to eq(options[:searcher])
+    expect(options[:searcher]).not_to be_currently_chatting
+    expect(options[:searcher]).to be_searching_for_friend
   end
 
   def assert_friend_not_found(options = {})
@@ -40,9 +40,9 @@ describe User do
 
     options[:searcher].reload
     options[:new_friend].reload
-    options[:new_friend].should_not be_currently_chatting
-    options[:searcher].should_not be_currently_chatting
-    options[:searcher].searching_for_friend?.should == options[:still_searching]
+    expect(options[:new_friend]).not_to be_currently_chatting
+    expect(options[:searcher]).not_to be_currently_chatting
+    expect(options[:searcher].searching_for_friend?).to eq(options[:still_searching])
   end
 
   def create_user(*args)
@@ -51,8 +51,8 @@ describe User do
   end
 
   shared_examples_for "within hours" do |background_job|
-    context "passing 'between' => 9..22" do
-      let(:hour_range_options) { {"between" => 9..22} }
+    context "passing 'between' => [9, 22]" do
+      let(:hour_range_options) { {"between" => [9, 22]} }
 
       context "given the current time is not between 09:00 ICT and 22:00 ICT" do
         it "should not perform the task" do
@@ -97,65 +97,65 @@ describe User do
 
   it "should not be valid without a mobile number" do
     new_user.mobile_number = nil
-    new_user.should_not be_valid
+    expect(new_user).not_to be_valid
   end
 
   it "should not be valid with an invalid gender" do
-    build(:user, :with_invalid_gender).should_not be_valid
+    expect(build(:user, :with_invalid_gender)).not_to be_valid
   end
 
   it "should not be valid with an invalid looking for preference" do
-    build(:user, :with_invalid_looking_for_preference).should_not be_valid
+    expect(build(:user, :with_invalid_looking_for_preference)).not_to be_valid
   end
 
   it "should not be valid with an invalid age" do
-    build(:user, :too_old).should_not be_valid
-    build(:user, :too_young).should_not be_valid
+    expect(build(:user, :too_old)).not_to be_valid
+    expect(build(:user, :too_young)).not_to be_valid
   end
 
   it "should not be valid with an invalid mobile number e.g. a short code" do
-    build(:user, :with_invalid_mobile_number).should_not be_valid
+    expect(build(:user, :with_invalid_mobile_number)).not_to be_valid
 
     ["8559878917", "8559620617899"].each do |invalid_number|
       user = build(:user, :mobile_number => invalid_number)
-      user.should_not be_valid
+      expect(user).not_to be_valid
     end
   end
 
   it "should not be valid without a screen name" do
     user.screen_name = nil
-    user.should_not be_valid
+    expect(user).not_to be_valid
   end
 
   it "should not be valid without a location" do
     user.location = nil
-    user.should_not be_valid
+    expect(user).not_to be_valid
   end
 
   it "should default to being online" do
-    subject.should be_online
+    expect(subject).to be_online
   end
 
   describe "factory" do
     it "should be valid" do
-      new_user.should be_valid
+      expect(new_user).to be_valid
     end
 
     describe "english" do
       it "should be valid" do
-        build(:user, :english).should be_valid
+        expect(build(:user, :english)).to be_valid
       end
     end
 
     describe "american" do
       it "should be valid" do
-        build(:user, :american).should be_valid
+        expect(build(:user, :american)).to be_valid
       end
     end
 
     describe "thai" do
       it "should be valid" do
-        build(:user, :thai).should be_valid
+        expect(build(:user, :thai)).to be_valid
       end
     end
   end
@@ -169,7 +169,7 @@ describe User do
       it "should be autosaved" do
         user.location.city = "Melbourne"
         user.save
-        user.location.reload.city.should == "Melbourne"
+        expect(user.location.reload.city).to eq("Melbourne")
       end
     end
   end
@@ -187,43 +187,43 @@ describe User do
 
         it "should no longer be searching for a friend" do
           chat_with_user_searching_for_friend
-          user_searching_for_friend.reload.should be_searching_for_friend
+          expect(user_searching_for_friend.reload).to be_searching_for_friend
           active_chat_with_user_searching_for_friend
-          user_searching_for_friend.reload.should_not be_searching_for_friend
+          expect(user_searching_for_friend.reload).not_to be_searching_for_friend
         end
       end
     end
 
     context "before_validation(:on => :create)" do
       it "should generate a screen name" do
-        new_user.screen_name.should be_nil
+        expect(new_user.screen_name).to be_nil
         new_user.valid?
-        new_user.screen_name.should be_present
+        expect(new_user.screen_name).to be_present
       end
 
       context "given a mobile number is present" do
         subject { build(:user, :location => nil) }
 
         it "should assign a location" do
-          subject.should_receive(:assign_location).with(no_args)
+          expect(subject).to receive(:assign_location).with(no_args)
           subject.valid?
         end
 
         it "should try to assign an operator" do
           subject.valid?
-          subject.operator_name.should be_present
+          expect(subject.operator_name).to be_present
         end
       end
 
       context "given a mobile number is not present" do
         it "should not try to build a location" do
           subject.valid?
-          subject.location.should be_nil
+          expect(subject.location).to be_nil
         end
 
         it "should not try to assign an operator" do
           subject.valid?
-          subject.operator_name.should be_nil
+          expect(subject.operator_name).to be_nil
         end
       end
     end
@@ -258,7 +258,7 @@ describe User do
 
     it "should return the users whos age is in the given range" do
       Timecop.freeze(Time.current) do
-        User.between_the_ages(13..17).should =~ [thirteen_year_old, seventeen_year_old]
+        expect(User.between_the_ages(13..17)).to match_array([thirteen_year_old, seventeen_year_old])
       end
     end
   end
@@ -270,7 +270,7 @@ describe User do
     end
 
     it "should return only the males" do
-      User.male.should == [male]
+      expect(User.male).to eq([male])
     end
   end
 
@@ -281,7 +281,7 @@ describe User do
     end
 
     it "should return only the females" do
-      User.female.should == [female]
+      expect(User.female).to eq([female])
     end
   end
 
@@ -293,7 +293,7 @@ describe User do
     end
 
     it "should only return the users with a date of birth" do
-      User.with_date_of_birth.should == [user_with_date_of_birth]
+      expect(User.with_date_of_birth).to eq([user_with_date_of_birth])
     end
   end
 
@@ -304,7 +304,7 @@ describe User do
     end
 
     it "should only return the users without a gender" do
-      User.without_gender.should == [user]
+      expect(User.without_gender).to eq([user])
     end
   end
 
@@ -317,7 +317,7 @@ describe User do
     end
 
     it "should only return users who are online and not currently chatting" do
-      User.available.should == [male]
+      expect(User.available).to eq([male])
     end
   end
 
@@ -328,7 +328,7 @@ describe User do
     end
 
     it "should not return users who are offline" do
-      subject.class.online.should == [user]
+      expect(subject.class.online).to eq([user])
     end
   end
 
@@ -340,19 +340,19 @@ describe User do
         number = number_parts.join
         user = create(:user, :mobile_number => number)
         user.update_attribute(:operator_name, nil)
-        user.operator_name.should be_nil
+        expect(user.operator_name).to be_nil
         asserted_operator_names[user] == assertions["id"]
       end
 
       user_with_operator_name = create(:user, :mobile_number => "85512345678")
       user_with_operator_name.update_attribute(:operator_name, "foo")
-      user_with_operator_name.operator_name.should == "foo"
+      expect(user_with_operator_name.operator_name).to eq("foo")
 
       subject.class.set_operator_name
 
-      user_with_operator_name.reload.operator_name.should == "foo"
+      expect(user_with_operator_name.reload.operator_name).to eq("foo")
       asserted_operator_names.each do |user, asserted_operator_name|
-        user.reload.operator_name.should == asserted_operator_name
+        expect(user.reload.operator_name).to eq(asserted_operator_name)
       end
     end
   end
@@ -365,16 +365,16 @@ describe User do
     end
 
     it "should return a list users who's recent MT messages failed to deliver" do
-      subject.class.logout_users_with_inactive_numbers!.should == 0
-      user.reload.should be_online
+      expect(subject.class.logout_users_with_inactive_numbers!).to eq(0)
+      expect(user.reload).to be_online
 
       create(:reply, :failed, :user => user)
-      subject.class.logout_users_with_inactive_numbers!(:num_last_failed_replies => 6).should == 0
-      user.reload.should be_online
+      expect(subject.class.logout_users_with_inactive_numbers!(:num_last_failed_replies => 6)).to eq(0)
+      expect(user.reload).to be_online
 
       create(:reply, :rejected, :user => user)
-      subject.class.logout_users_with_inactive_numbers!.should == 1
-      user.reload.should_not be_online
+      expect(subject.class.logout_users_with_inactive_numbers!).to eq(1)
+      expect(user.reload).not_to be_online
     end
   end
 
@@ -406,7 +406,7 @@ describe User do
 
   describe ".filter_by" do
     it "should include the user's location to avoid loading it for each user" do
-      subject.class.filter_by.includes_values.should include(:location)
+      expect(subject.class.filter_by.includes_values).to include(:location)
     end
   end
 
@@ -421,11 +421,11 @@ describe User do
         offline_user
         active_chat
 
-        subject.class.filter_params(:gender => "m").should == [male]
-        subject.class.filter_params(:gender => "f").should == [female]
+        expect(subject.class.filter_params(:gender => "m")).to eq([male])
+        expect(subject.class.filter_params(:gender => "f")).to eq([female])
 
-        subject.class.filter_params(:available => true).should =~ [male, female, thai]
-        subject.class.filter_params(:country_code => "th").should == [thai]
+        expect(subject.class.filter_params(:available => true)).to match_array([male, female, thai])
+        expect(subject.class.filter_params(:country_code => "th")).to eq([thai])
       end
     end
   end
@@ -463,7 +463,7 @@ describe User do
 
     def do_remind(options = {})
       create_actors unless options.delete(:skip_create_actors)
-      expect_message { trigger_job(options) { described_class.remind!(options) } }
+      expect_message { trigger_job(options) { described_class.remind!({"inactivity_cutoff" => 5.days.ago.to_s}.merge(options)) } }
     end
 
     def perform_background_job(options = {})
@@ -471,32 +471,27 @@ describe User do
     end
 
     def assert_user_reminded(reference_user)
-      replies_to(reference_user).count.should == 1
-      reply_to(reference_user).body.should be_present
+      expect(replies_to(reference_user).count).to eq(1)
+      expect(reply_to(reference_user).body).to be_present
     end
 
     def assert_reminded
       assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
       assert_user_reminded(registered_sp_user_not_contacted_recently)
-      reply_to(registered_sp_user_with_recent_interaction).should be_nil
-      reply_to(user_not_contacted_recently).should be_nil
+      expect(reply_to(registered_sp_user_with_recent_interaction)).to be_nil
+      expect(reply_to(user_not_contacted_recently)).to be_nil
     end
 
     def assert_not_reminded
-      reply_to(registered_sp_user_not_contacted_for_a_long_time).should be_nil
-      reply_to(registered_sp_user_not_contacted_recently).should be_nil
-      reply_to(registered_sp_user_with_recent_interaction).should be_nil
-      reply_to(user_not_contacted_recently).should be_nil
+      expect(reply_to(registered_sp_user_not_contacted_for_a_long_time)).to be_nil
+      expect(reply_to(registered_sp_user_not_contacted_recently)).to be_nil
+      expect(reply_to(registered_sp_user_with_recent_interaction)).to be_nil
+      expect(reply_to(user_not_contacted_recently)).to be_nil
     end
 
-    it "should only remind users that have not been contacted in the last 5 days" do
-      do_remind
-      assert_reminded
-    end
-
-    context "passing 'inactivity_period' => 3.days.ago" do
+    context "passing 'inactivity_cutoff' => 3.days.ago.to_s" do
       it "should remind users that have not been contacted in the last 3 days" do
-        do_remind("inactivity_period" => 3.days.ago)
+        do_remind("inactivity_cutoff" => 3.days.ago.to_s)
         assert_reminded
         assert_user_reminded(registered_sp_user_not_contacted_for_a_short_time)
       end
@@ -522,7 +517,7 @@ describe User do
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
-        new_user.operator.id.should == assertions["id"]
+        expect(new_user.operator.id).to eq(assertions["id"])
       end
     end
   end
@@ -532,12 +527,12 @@ describe User do
     let(:reply) { double(Reply) }
 
     before do
-      reply.stub(:not_enough_credit!)
-      subject.stub_chain(:replies, :build).and_return(reply)
+      allow(reply).to receive(:not_enough_credit!)
+      allow(subject).to receive_message_chain(:replies, :build).and_return(reply)
     end
 
     it "should delegate to a new reply" do
-      reply.should_receive(:not_enough_credit!)
+      expect(reply).to receive(:not_enough_credit!)
       subject.reply_not_enough_credit!
     end
   end
@@ -557,11 +552,11 @@ describe User do
       options ||= {}
       options[:expected_return_value]
       it "should create a charge request with notify_requester => #{options[:notify_requester]} and return #{options[:expected_return_value]}" do
-        subject.charge!(requester).should == options[:expected_return_value]
-        subject.charge_requests.should include(latest_charge_request)
-        latest_charge_request.requester.should == requester
-        latest_charge_request.notify_requester.should == options[:notify_requester]
-        latest_charge_request.operator.should == subject.operator.id
+        expect(subject.charge!(requester)).to eq(options[:expected_return_value])
+        expect(subject.charge_requests).to include(latest_charge_request)
+        expect(latest_charge_request.requester).to eq(requester)
+        expect(latest_charge_request.notify_requester).to eq(options[:notify_requester])
+        expect(latest_charge_request.operator).to eq(subject.operator.id)
       end
     end
 
@@ -573,16 +568,16 @@ describe User do
       end
 
       it "should not create a new charge request and it should return #{options[:expected_return_value]}" do
-        subject.charge!(requester).should == options[:expected_return_value]
-        subject.charge_requests.should == [latest_charge_request]
-        subject.latest_charge_request.should == latest_charge_request
+        expect(subject.charge!(requester)).to eq(options[:expected_return_value])
+        expect(subject.charge_requests).to eq([latest_charge_request])
+        expect(subject.latest_charge_request).to eq(latest_charge_request)
       end
     end
 
     shared_examples_for "a timed charge request" do
       context "latest charge request is slow" do
         before do
-          latest_charge_request.stub(:slow?).and_return(true)
+          allow(latest_charge_request).to receive(:slow?).and_return(true)
         end
 
         it_should_behave_like "not charging the user", :expected_return_value => true
@@ -590,7 +585,7 @@ describe User do
 
       context "latest charge request is not slow" do
         before do
-          latest_charge_request.stub(:slow?).and_return(false)
+          allow(latest_charge_request).to receive(:slow?).and_return(false)
         end
 
         it_should_behave_like "not charging the user", :expected_return_value => false
@@ -601,9 +596,9 @@ describe User do
       subject { user }
 
       it "should not charge the user" do
-        subject.charge!(requester).should == true
-        subject.charge_requests.should be_empty
-        subject.latest_charge_request.should be_nil
+        expect(subject.charge!(requester)).to eq(true)
+        expect(subject.charge_requests).to be_empty
+        expect(subject.latest_charge_request).to be_nil
       end
     end
 
@@ -664,15 +659,15 @@ describe User do
     let(:user) { create(:user, :not_contacted_recently) }
 
     def do_remind(options = {})
-      expect_message { user.remind!(options) }
+      expect_message { user.remind!({:inactivity_cutoff => 5.days.ago.to_s}.merge(options)) }
     end
 
     def assert_reminded
-      reply_to(user).body.should be_present
+      expect(reply_to(user).body).to be_present
     end
 
     def assert_not_reminded
-      reply_to(user).should be_nil
+      expect(reply_to(user)).to be_nil
     end
 
     context "given the user needs reminding" do
@@ -681,9 +676,9 @@ describe User do
         assert_reminded
       end
 
-      context "passing :inactivity_period => 8.days" do
+      context "passing :inactivity_cutoff => 8.days" do
         it "not send a reminder to the user" do
-          do_remind(:inactivity_period => 8.days.ago.to_s)
+          do_remind(:inactivity_cutoff => 8.days.ago.to_s)
           assert_not_reminded
         end
       end
@@ -917,16 +912,16 @@ describe User do
           result_index = 0
           matches.each do |expected_match|
             if expected_match.is_a?(Array)
-              result_names[result_index..result_index + expected_match.size - 1].should =~ expected_match
+              expect(result_names[result_index..result_index + expected_match.size - 1]).to match_array(expected_match)
               result_index += expected_match.size
             else
-              result_names[result_index].should == expected_match
+              expect(result_names[result_index]).to eq(expected_match)
               result_index += 1
             end
           end
 
           results.each do |result|
-            result.should_not be_readonly
+            expect(result).not_to be_readonly
           end
         end
       end
@@ -994,12 +989,12 @@ describe User do
       [:gender, :looking_for].each do |attribute|
         expected_attribute = options["expected_#{attribute}".to_sym]
         expected_attribute = expected_attribute.to_s[0] if expected_attribute
-        user.send(attribute).should eq(expected_attribute)
+        expect(user.send(attribute)).to eq(expected_attribute)
       end
 
       [:name, :age, :city].each do |attribute|
         expected_attribute = options["expected_#{attribute}".to_sym]
-        user.send(attribute).should eq(expected_attribute)
+        expect(user.send(attribute)).to eq(expected_attribute)
       end
     end
 
@@ -1084,7 +1079,7 @@ describe User do
       # someone from siem reap wants to meet a girl
       registration_examples(
         keywords(:sr_wants_girl),
-        :expected_city => "Siem Reap",
+        :expected_city => "Banteay Srei",
         :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
       )
 
@@ -1093,7 +1088,7 @@ describe User do
         keywords(:kunthia_23_sr_girl_wants_boy),
         :expected_age => 23,
         :expected_gender => :female,
-        :expected_city => "Siem Reap",
+        :expected_city => "Banteay Srei",
         :expected_name => "kunthia",
         :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
       )
@@ -1119,7 +1114,7 @@ describe User do
         :expected_name => "vanna",
         :expected_gender => :male,
         :expected_age => 26,
-        :expected_city => "Kampong Thom",
+        :expected_city => "Prasat Sambour",
         :vcr => {:expect_results => true, :cassette => "kh/kampong_thum"}
       )
 
@@ -1128,7 +1123,7 @@ describe User do
         keywords(:veasna),
         :expected_name => "veasna",
         :expected_age => 30,
-        :expected_city => "S'ang",
+        :expected_city => "Kandal",
         :vcr => {:expect_results => true, :cassette => "kh/kandaal"}
       )
 
@@ -1174,7 +1169,7 @@ describe User do
         keywords(:vanny),
         :expected_name => "vanny",
         :expected_age => 17,
-        :expected_city => "Pailin",
+        :expected_city => "Krong Pailin",
         :expected_gender => :male,
         :vcr => {:expect_results => true, :cassette => "kh/krong_pailin"}
       )
@@ -1182,7 +1177,7 @@ describe User do
       # live in siem reap n u . m 093208006
       registration_examples(
         keywords(:not_a_man_from_siem_reap),
-        :expected_city => "Siem Reap",
+        :expected_city => "Banteay Srei",
         :vcr => {:expect_results => true, :cassette => "kh/siem_reab"}
       )
 
@@ -1218,7 +1213,7 @@ describe User do
         keywords(:hai),
         :expected_name => "hai",
         :expected_age => 20,
-        :expected_city => "Krouch Chhmar",
+        :expected_city => "Tbuong Kmoum",
         :expected_gender => :male,
         :vcr => {:expect_results => true, :cassette => "kh/kampong_chaam"}
       )
@@ -1241,24 +1236,24 @@ describe User do
 
   describe "#matches" do
     it "should return all the matches for a user" do
-      subject.class.stub(:matches).with(subject).and_return([new_user])
-      subject.class.should_receive(:matches).with(subject)
-      subject.matches.should == [new_user]
+      allow(subject.class).to receive(:matches).with(subject).and_return([new_user])
+      expect(subject.class).to receive(:matches).with(subject)
+      expect(subject.matches).to eq([new_user])
     end
   end
 
   describe "#match" do
     it "should return the first match from .matches" do
-      subject.class.stub(:matches).with(subject).and_return([new_user])
-      subject.class.should_receive(:matches).with(subject)
-      subject.match.should == new_user
+      allow(subject.class).to receive(:matches).with(subject).and_return([new_user])
+      expect(subject.class).to receive(:matches).with(subject)
+      expect(subject.match).to eq(new_user)
     end
   end
 
   describe "#assign_location(address = nil)" do
     def assert_location_assigned(user, asserted_country_code, asserted_address)
-      user.location.country_code.should == asserted_country_code.to_s
-      user.location.address.should == asserted_address
+      expect(user.location.country_code).to eq(asserted_country_code.to_s)
+      expect(user.location.address).to eq(asserted_address)
     end
 
     it "should assign a location derived the mobile number" do
@@ -1286,22 +1281,22 @@ describe User do
 
   describe "#online?" do
     it "should only return false for offline users" do
-      offline_user.should_not be_online
-      user.should be_online
-      user_searching_for_friend.should be_online
+      expect(offline_user).not_to be_online
+      expect(user).to be_online
+      expect(user_searching_for_friend).to be_online
     end
   end
 
   describe "#available?(options = {})" do
     context "he is offline" do
       it "should be false" do
-        offline_user.should_not be_available
+        expect(offline_user).not_to be_available
       end
     end
 
     context "he is online and not currently chatting" do
       it "should be true" do
-        user.should be_available
+        expect(user).to be_available
       end
     end
 
@@ -1312,7 +1307,7 @@ describe User do
         end
 
         it "should be false" do
-          user.should_not be_available
+          expect(user).not_to be_available
         end
       end
 
@@ -1326,12 +1321,12 @@ describe User do
         end
 
         it "should be true" do
-          user.should be_available
+          expect(user).to be_available
         end
 
         context "passing :not_currently_chatting => true" do
           it "should be false" do
-            user.should_not be_available(:not_currently_chatting => true)
+            expect(user).not_to be_available(:not_currently_chatting => true)
           end
         end
       end
@@ -1340,22 +1335,22 @@ describe User do
 
   describe "#locale" do
     it "should delegate to #country_code and convert it to a symbol" do
-      user.country_code.should be_present
-      user.locale.should == user.country_code.to_sym
+      expect(user.country_code).to be_present
+      expect(user.locale).to eq(user.country_code.to_sym)
     end
   end
 
   describe "#city" do
     it "should delegate to location" do
-      subject.city.should be_nil
-      user_with_complete_profile.city.should be_present
+      expect(subject.city).to be_nil
+      expect(user_with_complete_profile.city).to be_present
     end
   end
 
   describe "#country_code" do
     it "should delegate to location" do
-      subject.country_code.should be_nil
-      user.country_code.should be_present
+      expect(subject.country_code).to be_nil
+      expect(user.country_code).to be_present
     end
   end
 
@@ -1363,8 +1358,8 @@ describe User do
     context "given he is not currently chatting" do
       it "should mark the user as searching for a friend" do
         new_user.search_for_friend!
-        new_user.reload.should be_searching_for_friend
-        new_user.should be_persisted
+        expect(new_user.reload).to be_searching_for_friend
+        expect(new_user).to be_persisted
       end
     end
 
@@ -1375,7 +1370,7 @@ describe User do
 
       it "should not mark the user as searching for a friend" do
         user.search_for_friend!
-        user.reload.should_not be_searching_for_friend
+        expect(user.reload).not_to be_searching_for_friend
       end
     end
   end
@@ -1386,24 +1381,24 @@ describe User do
     context "1" do
       it "should be male" do
         subject.send(attribute_writer, "1")
-        subject.send(attribute_reader).should == "m"
+        expect(subject.send(attribute_reader)).to eq("m")
       end
     end
 
     context "2" do
       it "should be female" do
         subject.send(attribute_writer, "2")
-        subject.send(attribute_reader).should == "f"
+        expect(subject.send(attribute_reader)).to eq("f")
       end
     end
 
     context "any other value" do
       it "should respect the value" do
         subject.send(attribute_writer, "3")
-        subject.send(attribute_reader).should == "3"
+        expect(subject.send(attribute_reader)).to eq("3")
 
         subject.send(attribute_writer, :m)
-        subject.send(attribute_reader).should == "m"
+        expect(subject.send(attribute_reader)).to eq("m")
       end
     end
   end
@@ -1423,7 +1418,7 @@ describe User do
       end
 
       it "should be true" do
-        subject.should be_female
+        expect(subject).to be_female
       end
     end
 
@@ -1433,13 +1428,13 @@ describe User do
       end
 
       it "should be false" do
-        subject.should_not be_female
+        expect(subject).not_to be_female
       end
     end
 
     context "gender is not set" do
       it "should be false" do
-        subject.should_not be_female
+        expect(subject).not_to be_female
       end
     end
   end
@@ -1451,7 +1446,7 @@ describe User do
       end
 
       it "should == 'm'" do
-        subject.opposite_gender.should == "m"
+        expect(subject.opposite_gender).to eq("m")
       end
     end
 
@@ -1461,28 +1456,28 @@ describe User do
       end
 
       it "should == 'f'" do
-        subject.opposite_gender.should == "f"
+        expect(subject.opposite_gender).to eq("f")
       end
     end
 
     context "gender is not set" do
       it "should be nil" do
-        subject.opposite_gender.should be_nil
+        expect(subject.opposite_gender).to be_nil
       end
     end
   end
 
   describe "#gay?" do
     it "should only return try for gay males and females" do
-      subject.should_not be_gay
+      expect(subject).not_to be_gay
       subject.gender = "m"
-      subject.should_not be_gay
+      expect(subject).not_to be_gay
       subject.looking_for = "m"
-      subject.should be_gay
+      expect(subject).to be_gay
       subject.looking_for = "f"
-      subject.should_not be_gay
+      expect(subject).not_to be_gay
       subject.gender = "f"
-      subject.should be_gay
+      expect(subject).to be_gay
     end
   end
 
@@ -1493,7 +1488,7 @@ describe User do
       end
 
       it "should be true" do
-        subject.should be_male
+        expect(subject).to be_male
       end
     end
 
@@ -1503,13 +1498,13 @@ describe User do
       end
 
       it "should be false" do
-        subject.should_not be_male
+        expect(subject).not_to be_male
       end
     end
 
     context "gender is not set" do
       it "should be false" do
-        subject.should_not be_male
+        expect(subject).not_to be_male
       end
     end
   end
@@ -1519,7 +1514,7 @@ describe User do
       it "should set the user's date of birth to 15 years ago" do
         Timecop.freeze(Time.current) do
           subject.age = 15
-          subject.date_of_birth.should == 15.years.ago.to_date
+          expect(subject.date_of_birth).to eq(15.years.ago.to_date)
         end
       end
     end
@@ -1530,7 +1525,7 @@ describe User do
       end
 
       it "should set the user's date of birth to nil" do
-        subject.date_of_birth.should be_nil
+        expect(subject.date_of_birth).to be_nil
       end
     end
   end
@@ -1542,28 +1537,28 @@ describe User do
       end
 
       it "should be true" do
-        user.should be_currently_chatting
+        expect(user).to be_currently_chatting
       end
     end
 
     context "given the user is not in an active chat session" do
       it "should be false" do
-        user.should_not be_currently_chatting
+        expect(user).not_to be_currently_chatting
       end
     end
   end
 
   describe "#can_call_short_code?" do
     it "should return true only if the user belongs to a operator supporting voice" do
-      user.should_not be_can_call_short_code
+      expect(user).not_to be_can_call_short_code
 
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
         if assertions["caller_id"]
-          new_user.should be_can_call_short_code
+          expect(new_user).to be_can_call_short_code
         else
-          new_user.should_not be_can_call_short_code
+          expect(new_user).not_to be_can_call_short_code
         end
       end
     end
@@ -1571,9 +1566,9 @@ describe User do
 
   describe "#contact_me_number" do
     it "should retun the user's operator's SMS short code or the twilio number" do
-      create_user(:from_unknown_operator).contact_me_number.should == twilio_number
+      expect(create_user(:from_unknown_operator).contact_me_number).to eq(twilio_number)
       with_operators do |number_parts, assertions|
-        build(:user, :mobile_number => number_parts.join).contact_me_number.should == (assertions["short_code"] || twilio_number)
+        expect(build(:user, :mobile_number => number_parts.join).contact_me_number).to eq(assertions["short_code"] || twilio_number)
       end
     end
   end
@@ -1582,13 +1577,13 @@ describe User do
     def assert_caller_id(requesting_api_version, assert_twilio_number)
       # regardless of the requesting api it should always return the twilio number
       # if the operator does not have it's own caller_id
-      build(:user).caller_id(requesting_api_version).should == twilio_number
+      expect(build(:user).caller_id(requesting_api_version)).to eq(twilio_number)
 
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
         asserted_caller_id = assert_twilio_number ? twilio_number : (assertions["caller_id"] || twilio_number)
-        new_user.caller_id(requesting_api_version).should == asserted_caller_id
+        expect(new_user.caller_id(requesting_api_version)).to eq(asserted_caller_id)
       end
     end
 
@@ -1609,7 +1604,7 @@ describe User do
     def assert_dial_string(requesting_api_version, assert_only_number)
       factory_user = build(:user)
       factory_asserted_dial_string = assert_only_number ? asserted_number_formatted_for_twilio(factory_user.mobile_number) : asserted_default_pbx_dial_string(:number_to_dial => factory_user.mobile_number)
-      factory_user.dial_string(requesting_api_version).should == factory_asserted_dial_string
+      expect(factory_user.dial_string(requesting_api_version)).to eq(factory_asserted_dial_string)
 
       with_operators do |number_parts, assertions|
         number = number_parts.join
@@ -1626,7 +1621,7 @@ describe User do
             ) || asserted_default_pbx_dial_string(:number_to_dial => number)
           )
         end
-        new_user.dial_string(requesting_api_version).should == asserted_dial_string
+        expect(new_user.dial_string(requesting_api_version)).to eq(asserted_dial_string)
       end
     end
 
@@ -1658,20 +1653,20 @@ describe User do
       end
 
       it "should return 23" do
-        subject.age.should == 23
+        expect(subject.age).to eq(23)
       end
     end
 
     context "when the user's date of birth is 23 years ago" do
       subject { create(:user, :date_of_birth => 23.years.ago) }
       it "should return 23" do
-        subject.age.should == 23
+        expect(subject.age).to eq(23)
       end
     end
 
     context "when the user's date of birth is unknown" do
       it "should return nil" do
-        subject.age.should be_nil
+        expect(subject.age).to be_nil
       end
     end
   end
@@ -1681,7 +1676,7 @@ describe User do
       let(:user_with_name) { create(:user, :with_name, :name => "sok", :id => 69) }
 
       it "should return the user's name" do
-        user_with_name.screen_id.should == "Sok"
+        expect(user_with_name.screen_id).to eq("Sok")
       end
     end
 
@@ -1689,28 +1684,28 @@ describe User do
       let(:user_without_name) { create(:user, :id => 88) }
 
       it "should return the user's screen name" do
-        user_without_name.screen_id.should == "#{user_without_name.screen_name.capitalize}"
+        expect(user_without_name.screen_id).to eq("#{user_without_name.screen_name.capitalize}")
       end
     end
 
     context "the user has not yet been validated" do
       it "should return nil" do
-        subject.screen_id.should be_nil
+        expect(subject.screen_id).to be_nil
       end
     end
   end
 
   describe "#login!" do
     it "should put the user online" do
-      offline_user.should_not be_online
+      expect(offline_user).not_to be_online
       offline_user.login!
-      offline_user.should be_online
+      expect(offline_user).to be_online
 
       # test that we simply return for user's who are already online
       duplicate_user = build(:user, :mobile_number => offline_user.mobile_number)
-      duplicate_user.should be_online
+      expect(duplicate_user).to be_online
       duplicate_user.login!
-      duplicate_user.should be_online
+      expect(duplicate_user).to be_online
     end
   end
 
@@ -1720,7 +1715,7 @@ describe User do
 
     it "should put the user offline" do
       user.logout!
-      user.should_not be_online
+      expect(user).not_to be_online
     end
 
     context "given the user is not currently chatting" do
@@ -1729,8 +1724,8 @@ describe User do
       end
 
       it "should not create any notifications" do
-        reply.should be_nil
-        reply_to_partner.should be_nil
+        expect(reply).to be_nil
+        expect(reply_to_partner).to be_nil
       end
     end
 
@@ -1740,15 +1735,15 @@ describe User do
       end
 
       it "should deactivate the chat" do
-        user.should be_currently_chatting
-        friend.should be_currently_chatting
+        expect(user).to be_currently_chatting
+        expect(friend).to be_currently_chatting
 
         user.logout!
 
-        user.reload.should be_currently_chatting
+        expect(user.reload).to be_currently_chatting
         friend.reload
-        friend.should_not be_currently_chatting
-        friend.should be_online
+        expect(friend).not_to be_currently_chatting
+        expect(friend).to be_online
       end
     end
   end

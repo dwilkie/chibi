@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe "Admin" do
   include MessagingHelpers
@@ -64,9 +64,9 @@ describe "Admin" do
       resources = send(resources_name) if resources.empty?
       resources.reverse! if options[:reverse]
 
-      page.find(
+      expect(page.find(
         total_resources_id(resources_name)
-      ).text.gsub(/\s/, "").should == "#{resources_name.titleize.gsub(/\s/, "")}(#{resources.count})"
+      ).text.gsub(/\s/, "")).to eq("#{resources_name.titleize.gsub(/\s/, "")}(#{resources.count})")
 
       resources.each_with_index do |resource, index|
         within("##{resource_name}_#{index + 1}") do
@@ -76,33 +76,33 @@ describe "Admin" do
     end
 
     def assert_show_user(reference_user)
-      page.current_path.should == user_path(reference_user)
+      expect(page.current_path).to eq(user_path(reference_user))
       assert_user_show(reference_user)
     end
 
     def assert_user_show(reference_user)
-      page.should have_css "#id", :text => reference_user.id.to_s
-      page.should have_css "#created_at", :text => time_ago_in_words
-      page.should have_css "#name", :text => reference_user.name
-      page.should have_css "#screen_name", :text => reference_user.screen_name
-      page.should have_css "#date_of_birth", :text => reference_user.date_of_birth
-      page.should have_css "#gender", :text => reference_user.gender
-      page.should have_css "#city", :text => reference_user.city
-      page.should have_css "#looking_for", :text => reference_user.looking_for
-      page.should have_css "#state", :text => reference_user.state
-      page.should have_css "#locale", :text => reference_user.locale
+      expect(page).to have_css "#id", :text => reference_user.id.to_s
+      expect(page).to have_css "#created_at", :text => time_ago_in_words
+      expect(page).to have_css "#name", :text => reference_user.name
+      expect(page).to have_css "#screen_name", :text => reference_user.screen_name
+      expect(page).to have_css "#date_of_birth", :text => reference_user.date_of_birth
+      expect(page).to have_css "#gender", :text => reference_user.gender
+      expect(page).to have_css "#city", :text => reference_user.city
+      expect(page).to have_css "#looking_for", :text => reference_user.looking_for
+      expect(page).to have_css "#state", :text => reference_user.state
+      expect(page).to have_css "#locale", :text => reference_user.locale
       within "#mobile_number" do
-        page.should have_link reference_user.mobile_number, :href => user_path(reference_user)
+        expect(page).to have_link reference_user.mobile_number, :href => user_path(reference_user)
       end
 
       assert_communicable_resources_counts(reference_user)
     end
 
     def assert_chat_show(reference_chat)
-      page.should have_css "#id", :text => reference_chat.id.to_s
-      page.should have_css "#active", :text => reference_chat.active?
-      page.should have_css "#created_at", :text => time_ago_in_words(10)
-      page.should have_css "#updated_at", :text => time_ago_in_words
+      expect(page).to have_css "#id", :text => reference_chat.id.to_s
+      expect(page).to have_css "#active", :text => reference_chat.active?
+      expect(page).to have_css "#created_at", :text => time_ago_in_words(10)
+      expect(page).to have_css "#updated_at", :text => time_ago_in_words
 
       assert_communicable_resources_counts(reference_chat)
 
@@ -110,9 +110,9 @@ describe "Admin" do
         within("##{user_type}") do
           reference_user = reference_chat.send(user_type)
           if screen_id = reference_user.try(:screen_id)
-            page.should have_link screen_id, :href => user_path(reference_user)
+            expect(page).to have_link screen_id, :href => user_path(reference_user)
           else
-            page.should have_content screen_id
+            expect(page).to have_content screen_id
           end
         end
       end
@@ -130,10 +130,10 @@ describe "Admin" do
           communicable_resources_link = communicable_resources_count.to_s
 
           if communicable_resources_count.zero?
-            page.should have_no_link(communicable_resources_link)
-            page.should have_content(communicable_resources_link)
+            expect(page).to have_no_link(communicable_resources_link)
+            expect(page).to have_content(communicable_resources_link)
           else
-            page.should have_link(
+            expect(page).to have_link(
               communicable_resources_link,
               :href => send("#{resource.class.to_s.underscore}_interaction_path", resource)
             )
@@ -143,28 +143,28 @@ describe "Admin" do
     end
 
     def assert_message_show(reference_message)
-      page.should have_content reference_message.body
-      page.should have_content reference_message.from
-      page.should have_content time_ago_in_words
+      expect(page).to have_content reference_message.body
+      expect(page).to have_content reference_message.from
+      expect(page).to have_content time_ago_in_words
     end
 
     def assert_reply_show(reference_reply)
-      page.should have_content reference_reply.body
-      page.should have_content reference_reply.to
+      expect(page).to have_content reference_reply.body
+      expect(page).to have_content reference_reply.to
       if reference_reply.delivered?
-        page.should have_content time_ago_in_words
+        expect(page).to have_content time_ago_in_words
       else
-        page.should have_content "pending"
+        expect(page).to have_content "pending"
       end
     end
 
     def assert_phone_call_show(reference_phone_call)
-      page.should have_content time_ago_in_words
-      page.should have_link(
+      expect(page).to have_content time_ago_in_words
+      expect(page).to have_link(
         reference_phone_call.from,
         :href => user_path(reference_phone_call.user_id)
       )
-      page.should have_content reference_phone_call.state.humanize
+      expect(page).to have_content reference_phone_call.state.humanize
     end
 
     def assert_show_interaction
@@ -195,7 +195,7 @@ describe "Admin" do
       end
 
       it "should show me the user demographic" do
-        page.should have_content "User Demographic"
+        expect(page).to have_content "User Demographic"
       end
     end
 
@@ -218,8 +218,8 @@ describe "Admin" do
       it "should show me an overview of Chibi" do
         [:day, :month].each do |timeframe|
           within "#timeline_by_#{timeframe}" do
-            page.should have_content "Timeline By #{timeframe.to_s.titleize}"
-            page.should have_selector "#timeline_by_#{timeframe}_chart"
+            expect(page).to have_content "Timeline By #{timeframe.to_s.titleize}"
+            expect(page).to have_selector "#timeline_by_#{timeframe}_chart"
           end
         end
       end
@@ -250,8 +250,8 @@ describe "Admin" do
             end
 
             it "should download my report" do
-              response_headers["Content-Type"].should == asserted_report_type
-              response_headers["Content-Disposition"].should == "attachment; filename=\"#{asserted_report_filename(:february, 2014)}\""
+              expect(response_headers["Content-Type"]).to eq(asserted_report_type)
+              expect(response_headers["Content-Disposition"]).to eq("attachment; filename=\"#{asserted_report_filename(:february, 2014)}\"")
             end
           end
         end

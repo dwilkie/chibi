@@ -3,12 +3,14 @@ http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?address=kandaal%2C+Cambodia&language=en&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -34,35 +36,70 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Kandal\",\n               \"short_name\"
-      : \"Kandal\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Kandal, Cambodia\",\n         \"geometry\" : {\n            \"bounds\" :
-      {\n               \"northeast\" : {\n                  \"lat\" : 11.8948830,\n
-      \                 \"lng\" : 105.2987980\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 10.8921980,\n                  \"lng\" : 104.6585250\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.40010490,\n               \"lng\" : 105.12589550\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.74989850,\n                  \"lng\" : 105.63813310\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.04988020,\n                  \"lng\" : 104.61365790\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kandal, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.8948830,
+                          "lng" : 105.2987980
+                       },
+                       "southwest" : {
+                          "lat" : 10.8921980,
+                          "lng" : 104.6585250
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.40010490,
+                       "lng" : 105.12589550
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.74989850,
+                          "lng" : 105.63813310
+                       },
+                       "southwest" : {
+                          "lat" : 11.04988020,
+                          "lng" : 104.61365790
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 17:42:44 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=11.4001049%2C105.1258955&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -88,78 +125,772 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"21\",\n               \"short_name\"
-      : \"21\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
-      \              \"long_name\" : \"S'ang\",\n               \"short_name\" : \"S'ang\",\n
-      \              \"types\" : [ \"administrative_area_level_2\", \"political\"
-      ]\n            },\n            {\n               \"long_name\" : \"Kandal\",\n
-      \              \"short_name\" : \"Kandal\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"21, Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n
-      \              \"northeast\" : {\n                  \"lat\" : 11.37913670,\n
-      \                 \"lng\" : 105.001080\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 11.37851670,\n                  \"lng\" : 105.00098490\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.37883090,\n               \"lng\" : 105.00101260\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.38017568029150,\n                  \"lng\"
-      : 105.0023814302915\n               },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.37747771970850,\n                  \"lng\" : 104.9996834697085\n               }\n
-      \           }\n         },\n         \"types\" : [ \"route\" ]\n      },\n      {\n
-      \        \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Kien Svay\",\n               \"short_name\" : \"Kien Svay\",\n               \"types\"
-      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Kandal\",\n               \"short_name\" :
-      \"Kandal\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n            },\n            {\n               \"long_name\" : \"Cambodia\",\n
-      \              \"short_name\" : \"KH\",\n               \"types\" : [ \"country\",
-      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Kien Svay, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 11.55246890,\n
-      \                 \"lng\" : 105.26206970\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 11.34137160,\n                  \"lng\" : 104.94936430\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.42339970,\n               \"lng\" : 105.10250750\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.55246890,\n                  \"lng\" : 105.26206970\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.34137160,\n                  \"lng\" : 104.94936430\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
-      \              \"long_name\" : \"Kandal\",\n               \"short_name\" :
-      \"Kandal\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n            },\n            {\n               \"long_name\" : \"Cambodia\",\n
-      \              \"short_name\" : \"KH\",\n               \"types\" : [ \"country\",
-      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Kandal, Cambodia\",\n         \"geometry\" : {\n            \"bounds\" :
-      {\n               \"northeast\" : {\n                  \"lat\" : 11.8948830,\n
-      \                 \"lng\" : 105.2987980\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 10.8921980,\n                  \"lng\" : 104.6585250\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.40010490,\n               \"lng\" : 105.12589550\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.8948830,\n                  \"lng\" : 105.2987980\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 10.8921980,\n                  \"lng\" : 104.6585250\n               }\n            }\n
-      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
-      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
-      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "21",
+                       "short_name" : "21",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "S'ang",
+                       "short_name" : "S'ang",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "21, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.37913670,
+                          "lng" : 105.001080
+                       },
+                       "southwest" : {
+                          "lat" : 11.37851670,
+                          "lng" : 105.00098490
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.37883090,
+                       "lng" : 105.00101260
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.38017568029150,
+                          "lng" : 105.0023814302915
+                       },
+                       "southwest" : {
+                          "lat" : 11.37747771970850,
+                          "lng" : 104.9996834697085
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kien Svay",
+                       "short_name" : "Kien Svay",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kien Svay, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.55246890,
+                          "lng" : 105.26206970
+                       },
+                       "southwest" : {
+                          "lat" : 11.34137160,
+                          "lng" : 104.94936430
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.42339970,
+                       "lng" : 105.10250750
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.55246890,
+                          "lng" : 105.26206970
+                       },
+                       "southwest" : {
+                          "lat" : 11.34137160,
+                          "lng" : 104.94936430
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kandal, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.8948830,
+                          "lng" : 105.2987980
+                       },
+                       "southwest" : {
+                          "lat" : 10.8921980,
+                          "lng" : 104.6585250
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.40010490,
+                       "lng" : 105.12589550
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.8948830,
+                          "lng" : 105.2987980
+                       },
+                       "southwest" : {
+                          "lat" : 10.8921980,
+                          "lng" : 104.6585250
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.5656790,
+                       "lng" : 104.9909630
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 17:42:45 GMT
-recorded_with: VCR 2.0.0.rc1
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=kandaal,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:04:06 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:04:06 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        ewogICAicmVzdWx0cyIgOiBbCiAgICAgIHsKICAgICAgICAgImFkZHJlc3Nf
+        Y29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAg
+        ImxvbmdfbmFtZSIgOiAiS2FuZGFsIiwKICAgICAgICAgICAgICAgInNob3J0
+        X25hbWUiIDogIkthbmRhbCIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBb
+        ICJsb2NhbGl0eSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfSwKICAg
+        ICAgICAgICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6ICJBbmdr
+        IFNudW9sIiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDogIkFuZ2sg
+        U251b2wiLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiYWRtaW5pc3Ry
+        YXRpdmVfYXJlYV9sZXZlbF8yIiwgInBvbGl0aWNhbCIgXQogICAgICAgICAg
+        ICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJsb25nX25hbWUi
+        IDogIkthbmRhbCIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJL
+        YW5kYWwiLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiYWRtaW5pc3Ry
+        YXRpdmVfYXJlYV9sZXZlbF8xIiwgInBvbGl0aWNhbCIgXQogICAgICAgICAg
+        ICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJsb25nX25hbWUi
+        IDogIkNhbWJvZGlhIiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDog
+        IktIIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6IFsgImNvdW50cnkiLCAi
+        cG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0KICAgICAgICAgXSwKICAgICAg
+        ICAgImZvcm1hdHRlZF9hZGRyZXNzIiA6ICJLYW5kYWwsIENhbWJvZGlhIiwK
+        ICAgICAgICAgImdlb21ldHJ5IiA6IHsKICAgICAgICAgICAgImJvdW5kcyIg
+        OiB7CiAgICAgICAgICAgICAgICJub3J0aGVhc3QiIDogewogICAgICAgICAg
+        ICAgICAgICAibGF0IiA6IDExLjQ1ODk5MDIsCiAgICAgICAgICAgICAgICAg
+        ICJsbmciIDogMTA0LjY5NDk0ODkKICAgICAgICAgICAgICAgfSwKICAgICAg
+        ICAgICAgICAgInNvdXRod2VzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJs
+        YXQiIDogMTEuNDU2ODE4OSwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAx
+        MDQuNjkwOTA5NAogICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0sCiAg
+        ICAgICAgICAgICJsb2NhdGlvbiIgOiB7CiAgICAgICAgICAgICAgICJsYXQi
+        IDogMTEuNDU3MzMxOSwKICAgICAgICAgICAgICAgImxuZyIgOiAxMDQuNjkz
+        NDAzCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJsb2NhdGlvbl90eXBl
+        IiA6ICJBUFBST1hJTUFURSIsCiAgICAgICAgICAgICJ2aWV3cG9ydCIgOiB7
+        CiAgICAgICAgICAgICAgICJub3J0aGVhc3QiIDogewogICAgICAgICAgICAg
+        ICAgICAibGF0IiA6IDExLjQ1OTI1MzUzMDI5MTUsCiAgICAgICAgICAgICAg
+        ICAgICJsbmciIDogMTA0LjY5NDk0ODkKICAgICAgICAgICAgICAgfSwKICAg
+        ICAgICAgICAgICAgInNvdXRod2VzdCIgOiB7CiAgICAgICAgICAgICAgICAg
+        ICJsYXQiIDogMTEuNDU2NTU1NTY5NzA4NSwKICAgICAgICAgICAgICAgICAg
+        ImxuZyIgOiAxMDQuNjkwOTA5NAogICAgICAgICAgICAgICB9CiAgICAgICAg
+        ICAgIH0KICAgICAgICAgfSwKICAgICAgICAgInBhcnRpYWxfbWF0Y2giIDog
+        dHJ1ZSwKICAgICAgICAgInR5cGVzIiA6IFsgImxvY2FsaXR5IiwgInBvbGl0
+        aWNhbCIgXQogICAgICB9LAogICAgICB7CiAgICAgICAgICJhZGRyZXNzX2Nv
+        bXBvbmVudHMiIDogWwogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJs
+        b25nX25hbWUiIDogIkthbmRhbCIsCiAgICAgICAgICAgICAgICJzaG9ydF9u
+        YW1lIiA6ICJLYW5kYWwiLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAi
+        bG9jYWxpdHkiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0sCiAgICAg
+        ICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiS2FuZGFs
+        IFN0dWVuZyIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJLYW5k
+        YWwgU3R1ZW5nIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6IFsgImFkbWlu
+        aXN0cmF0aXZlX2FyZWFfbGV2ZWxfMiIsICJwb2xpdGljYWwiIF0KICAgICAg
+        ICAgICAgfSwKICAgICAgICAgICAgewogICAgICAgICAgICAgICAibG9uZ19u
+        YW1lIiA6ICJLYW5kYWwiLAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIg
+        OiAiS2FuZGFsIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6IFsgImFkbWlu
+        aXN0cmF0aXZlX2FyZWFfbGV2ZWxfMSIsICJwb2xpdGljYWwiIF0KICAgICAg
+        ICAgICAgfSwKICAgICAgICAgICAgewogICAgICAgICAgICAgICAibG9uZ19u
+        YW1lIiA6ICJDYW1ib2RpYSIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1l
+        IiA6ICJLSCIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJjb3VudHJ5
+        IiwgInBvbGl0aWNhbCIgXQogICAgICAgICAgICB9CiAgICAgICAgIF0sCiAg
+        ICAgICAgICJmb3JtYXR0ZWRfYWRkcmVzcyIgOiAiS2FuZGFsLCBDYW1ib2Rp
+        YSIsCiAgICAgICAgICJnZW9tZXRyeSIgOiB7CiAgICAgICAgICAgICJib3Vu
+        ZHMiIDogewogICAgICAgICAgICAgICAibm9ydGhlYXN0IiA6IHsKICAgICAg
+        ICAgICAgICAgICAgImxhdCIgOiAxMS40MzkwNDc4LAogICAgICAgICAgICAg
+        ICAgICAibG5nIiA6IDEwNC44ODIxMTg4CiAgICAgICAgICAgICAgIH0sCiAg
+        ICAgICAgICAgICAgICJzb3V0aHdlc3QiIDogewogICAgICAgICAgICAgICAg
+        ICAibGF0IiA6IDExLjQyNzg1ODksCiAgICAgICAgICAgICAgICAgICJsbmci
+        IDogMTA0Ljg3MjQ5NDkKICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9
+        LAogICAgICAgICAgICAibG9jYXRpb24iIDogewogICAgICAgICAgICAgICAi
+        bGF0IiA6IDExLjQzMzA2NDMsCiAgICAgICAgICAgICAgICJsbmciIDogMTA0
+        Ljg3Njg0MDIKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9u
+        X3R5cGUiIDogIkFQUFJPWElNQVRFIiwKICAgICAgICAgICAgInZpZXdwb3J0
+        IiA6IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAg
+        ICAgICAgICAgICJsYXQiIDogMTEuNDM5MDQ3OCwKICAgICAgICAgICAgICAg
+        ICAgImxuZyIgOiAxMDQuODgyMTE4OAogICAgICAgICAgICAgICB9LAogICAg
+        ICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAg
+        ImxhdCIgOiAxMS40Mjc4NTg5LAogICAgICAgICAgICAgICAgICAibG5nIiA6
+        IDEwNC44NzI0OTQ5CiAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQog
+        ICAgICAgICB9LAogICAgICAgICAicGFydGlhbF9tYXRjaCIgOiB0cnVlLAog
+        ICAgICAgICAidHlwZXMiIDogWyAibG9jYWxpdHkiLCAicG9saXRpY2FsIiBd
+        CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAgImFkZHJlc3NfY29tcG9uZW50
+        cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFt
+        ZSIgOiAiS2FuZGFsIiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDog
+        IkthbmRhbCIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlz
+        dHJhdGl2ZV9hcmVhX2xldmVsXzEiLCAicG9saXRpY2FsIiBdCiAgICAgICAg
+        ICAgIH0sCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFt
+        ZSIgOiAiQ2FtYm9kaWEiLAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIg
+        OiAiS0giLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiY291bnRyeSIs
+        ICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfQogICAgICAgICBdLAogICAg
+        ICAgICAiZm9ybWF0dGVkX2FkZHJlc3MiIDogIkthbmRhbCwgQ2FtYm9kaWEi
+        LAogICAgICAgICAiZ2VvbWV0cnkiIDogewogICAgICAgICAgICAiYm91bmRz
+        IiA6IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAg
+        ICAgICAgICAgICJsYXQiIDogMTEuODkyODg0NiwKICAgICAgICAgICAgICAg
+        ICAgImxuZyIgOiAxMDUuMjk2NzA3MQogICAgICAgICAgICAgICB9LAogICAg
+        ICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAg
+        ImxhdCIgOiAxMC44OTIxOTgsCiAgICAgICAgICAgICAgICAgICJsbmciIDog
+        MTA0LjY1MzAxNTEKICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9LAog
+        ICAgICAgICAgICAibG9jYXRpb24iIDogewogICAgICAgICAgICAgICAibGF0
+        IiA6IDExLjIyMzczODMsCiAgICAgICAgICAgICAgICJsbmciIDogMTA1LjEy
+        NTg5NTUKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uX3R5
+        cGUiIDogIkFQUFJPWElNQVRFIiwKICAgICAgICAgICAgInZpZXdwb3J0IiA6
+        IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAgICAg
+        ICAgICAgICJsYXQiIDogMTEuODkyODg0NiwKICAgICAgICAgICAgICAgICAg
+        ImxuZyIgOiAxMDUuMjk2NzA3MQogICAgICAgICAgICAgICB9LAogICAgICAg
+        ICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAgImxh
+        dCIgOiAxMC44OTIxOTgsCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTA0
+        LjY1MzAxNTEKICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAg
+        ICAgIH0sCiAgICAgICAgICJwYXJ0aWFsX21hdGNoIiA6IHRydWUsCiAgICAg
+        ICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2ZV9hcmVhX2xldmVsXzEi
+        LCAicG9saXRpY2FsIiBdCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAgImFk
+        ZHJlc3NfY29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAg
+        ICAgICAgImxvbmdfbmFtZSIgOiAiS2FuZGFsIiwKICAgICAgICAgICAgICAg
+        InNob3J0X25hbWUiIDogIkthbmRhbCIsCiAgICAgICAgICAgICAgICJ0eXBl
+        cyIgOiBbICJsb2NhbGl0eSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAg
+        fSwKICAgICAgICAgICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6
+        ICJCYXRpIiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDogIkJhdGki
+        LAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiYWRtaW5pc3RyYXRpdmVf
+        YXJlYV9sZXZlbF8yIiwgInBvbGl0aWNhbCIgXQogICAgICAgICAgICB9LAog
+        ICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJsb25nX25hbWUiIDogIlRh
+        a8OpbyBQcm92aW5jZSIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6
+        ICJUYWvDqW8gUHJvdmluY2UiLAogICAgICAgICAgICAgICAidHlwZXMiIDog
+        WyAiYWRtaW5pc3RyYXRpdmVfYXJlYV9sZXZlbF8xIiwgInBvbGl0aWNhbCIg
+        XQogICAgICAgICAgICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAgICAg
+        ICJsb25nX25hbWUiIDogIkNhbWJvZGlhIiwKICAgICAgICAgICAgICAgInNo
+        b3J0X25hbWUiIDogIktIIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6IFsg
+        ImNvdW50cnkiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0KICAgICAg
+        ICAgXSwKICAgICAgICAgImZvcm1hdHRlZF9hZGRyZXNzIiA6ICJLYW5kYWws
+        IENhbWJvZGlhIiwKICAgICAgICAgImdlb21ldHJ5IiA6IHsKICAgICAgICAg
+        ICAgImJvdW5kcyIgOiB7CiAgICAgICAgICAgICAgICJub3J0aGVhc3QiIDog
+        ewogICAgICAgICAgICAgICAgICAibGF0IiA6IDExLjMxMDgyMTksCiAgICAg
+        ICAgICAgICAgICAgICJsbmciIDogMTA0Ljc2NDk1OTkKICAgICAgICAgICAg
+        ICAgfSwKICAgICAgICAgICAgICAgInNvdXRod2VzdCIgOiB7CiAgICAgICAg
+        ICAgICAgICAgICJsYXQiIDogMTEuMjk2MDkyNywKICAgICAgICAgICAgICAg
+        ICAgImxuZyIgOiAxMDQuNzU3NDcxCiAgICAgICAgICAgICAgIH0KICAgICAg
+        ICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uIiA6IHsKICAgICAgICAg
+        ICAgICAgImxhdCIgOiAxMS4zMDQzNDQ0LAogICAgICAgICAgICAgICAibG5n
+        IiA6IDEwNC43NjIzMDMzCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJs
+        b2NhdGlvbl90eXBlIiA6ICJBUFBST1hJTUFURSIsCiAgICAgICAgICAgICJ2
+        aWV3cG9ydCIgOiB7CiAgICAgICAgICAgICAgICJub3J0aGVhc3QiIDogewog
+        ICAgICAgICAgICAgICAgICAibGF0IiA6IDExLjMxMDgyMTksCiAgICAgICAg
+        ICAgICAgICAgICJsbmciIDogMTA0Ljc2NDk1OTkKICAgICAgICAgICAgICAg
+        fSwKICAgICAgICAgICAgICAgInNvdXRod2VzdCIgOiB7CiAgICAgICAgICAg
+        ICAgICAgICJsYXQiIDogMTEuMjk2MDkyNywKICAgICAgICAgICAgICAgICAg
+        ImxuZyIgOiAxMDQuNzU3NDcxCiAgICAgICAgICAgICAgIH0KICAgICAgICAg
+        ICAgfQogICAgICAgICB9LAogICAgICAgICAicGFydGlhbF9tYXRjaCIgOiB0
+        cnVlLAogICAgICAgICAidHlwZXMiIDogWyAibG9jYWxpdHkiLCAicG9saXRp
+        Y2FsIiBdCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAgImFkZHJlc3NfY29t
+        cG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxv
+        bmdfbmFtZSIgOiAiS2FuZGFsIiwKICAgICAgICAgICAgICAgInNob3J0X25h
+        bWUiIDogIkthbmRhbCIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJs
+        b2NhbGl0eSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfSwKICAgICAg
+        ICAgICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6ICJLYW1wb25n
+        IENoaG5hbmciLAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIgOiAiS2Ft
+        cG9uZyBDaGhuYW5nIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6IFsgImFk
+        bWluaXN0cmF0aXZlX2FyZWFfbGV2ZWxfMiIsICJwb2xpdGljYWwiIF0KICAg
+        ICAgICAgICAgfSwKICAgICAgICAgICAgewogICAgICAgICAgICAgICAibG9u
+        Z19uYW1lIiA6ICJLYW1wb25nIENoaG5hbmciLAogICAgICAgICAgICAgICAi
+        c2hvcnRfbmFtZSIgOiAiS2FtcG9uZyBDaGhuYW5nIiwKICAgICAgICAgICAg
+        ICAgInR5cGVzIiA6IFsgImFkbWluaXN0cmF0aXZlX2FyZWFfbGV2ZWxfMSIs
+        ICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfSwKICAgICAgICAgICAgewog
+        ICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6ICJDYW1ib2RpYSIsCiAgICAg
+        ICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJLSCIsCiAgICAgICAgICAgICAg
+        ICJ0eXBlcyIgOiBbICJjb3VudHJ5IiwgInBvbGl0aWNhbCIgXQogICAgICAg
+        ICAgICB9CiAgICAgICAgIF0sCiAgICAgICAgICJmb3JtYXR0ZWRfYWRkcmVz
+        cyIgOiAiS2FuZGFsLCBDYW1ib2RpYSIsCiAgICAgICAgICJnZW9tZXRyeSIg
+        OiB7CiAgICAgICAgICAgICJib3VuZHMiIDogewogICAgICAgICAgICAgICAi
+        bm9ydGhlYXN0IiA6IHsKICAgICAgICAgICAgICAgICAgImxhdCIgOiAxMi4y
+        Njg1MTE5LAogICAgICAgICAgICAgICAgICAibG5nIiA6IDEwNC42OTI0NTQz
+        CiAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICJzb3V0aHdlc3Qi
+        IDogewogICAgICAgICAgICAgICAgICAibGF0IiA6IDEyLjI2MjMzNjgsCiAg
+        ICAgICAgICAgICAgICAgICJsbmciIDogMTA0LjY4MDgxMzcKICAgICAgICAg
+        ICAgICAgfQogICAgICAgICAgICB9LAogICAgICAgICAgICAibG9jYXRpb24i
+        IDogewogICAgICAgICAgICAgICAibGF0IiA6IDEyLjI2NTc1MzUsCiAgICAg
+        ICAgICAgICAgICJsbmciIDogMTA0LjY4NTc0OTMKICAgICAgICAgICAgfSwK
+        ICAgICAgICAgICAgImxvY2F0aW9uX3R5cGUiIDogIkFQUFJPWElNQVRFIiwK
+        ICAgICAgICAgICAgInZpZXdwb3J0IiA6IHsKICAgICAgICAgICAgICAgIm5v
+        cnRoZWFzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTIuMjY4
+        NTExOSwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAxMDQuNjkyNDU0Mwog
+        ICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAic291dGh3ZXN0IiA6
+        IHsKICAgICAgICAgICAgICAgICAgImxhdCIgOiAxMi4yNjIzMzY4LAogICAg
+        ICAgICAgICAgICAgICAibG5nIiA6IDEwNC42ODA4MTM3CiAgICAgICAgICAg
+        ICAgIH0KICAgICAgICAgICAgfQogICAgICAgICB9LAogICAgICAgICAicGFy
+        dGlhbF9tYXRjaCIgOiB0cnVlLAogICAgICAgICAidHlwZXMiIDogWyAibG9j
+        YWxpdHkiLCAicG9saXRpY2FsIiBdCiAgICAgIH0KICAgXSwKICAgInN0YXR1
+        cyIgOiAiT0siCn0K
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:04:06 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=11.4573319,104.693403&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:04:06 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:04:06 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Unnamed Road",
+                       "short_name" : "Unnamed Road",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Lumhach Commune",
+                       "short_name" : "Lumhach Commune",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Angk Snuol",
+                       "short_name" : "Angk Snuol",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Unnamed Road, Kandal, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.4616163,
+                          "lng" : 104.6942421
+                       },
+                       "southwest" : {
+                          "lat" : 11.4576422,
+                          "lng" : 104.6923092
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.4588434,
+                       "lng" : 104.6942039
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.4616163,
+                          "lng" : 104.6946246302915
+                       },
+                       "southwest" : {
+                          "lat" : 11.4576422,
+                          "lng" : 104.6919266697085
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Angk Snuol",
+                       "short_name" : "Angk Snuol",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kandal, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.4589902,
+                          "lng" : 104.6949489
+                       },
+                       "southwest" : {
+                          "lat" : 11.4568189,
+                          "lng" : 104.6909094
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.4573319,
+                       "lng" : 104.693403
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.4592535302915,
+                          "lng" : 104.6949489
+                       },
+                       "southwest" : {
+                          "lat" : 11.4565555697085,
+                          "lng" : 104.6909094
+                       }
+                    }
+                 },
+                 "types" : [ "locality", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Lumhach Commune",
+                       "short_name" : "Lumhach Commune",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "Angk Snuol",
+                       "short_name" : "Angk Snuol",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Lumhach Commune, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.4998339,
+                          "lng" : 104.6983351
+                       },
+                       "southwest" : {
+                          "lat" : 11.4478849,
+                          "lng" : 104.6574113
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.4730664,
+                       "lng" : 104.6762738
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.4998339,
+                          "lng" : 104.6983351
+                       },
+                       "southwest" : {
+                          "lat" : 11.4478849,
+                          "lng" : 104.6574113
+                       }
+                    }
+                 },
+                 "types" : [ "sublocality_level_1", "sublocality", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Angk Snuol",
+                       "short_name" : "Angk Snuol",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Angk Snuol, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.6749425,
+                          "lng" : 104.8033541
+                       },
+                       "southwest" : {
+                          "lat" : 11.4455598,
+                          "lng" : 104.6566431
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.5754839,
+                       "lng" : 104.7287607
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.6749425,
+                          "lng" : 104.8033541
+                       },
+                       "southwest" : {
+                          "lat" : 11.4455598,
+                          "lng" : 104.6566431
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kandal",
+                       "short_name" : "Kandal",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kandal, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.8928846,
+                          "lng" : 105.2967071
+                       },
+                       "southwest" : {
+                          "lat" : 10.892198,
+                          "lng" : 104.6530151
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.2237383,
+                       "lng" : 105.1258955
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.8928846,
+                          "lng" : 105.2967071
+                       },
+                       "southwest" : {
+                          "lat" : 10.892198,
+                          "lng" : 104.6530151
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.690179,
+                          "lng" : 107.627687
+                       },
+                       "southwest" : {
+                          "lat" : 9.2857541,
+                          "lng" : 102.333542
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.565679,
+                       "lng" : 104.990963
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.690179,
+                          "lng" : 107.627687
+                       },
+                       "southwest" : {
+                          "lat" : 9.2857541,
+                          "lng" : 102.333542
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:04:06 GMT
+recorded_with: VCR 2.9.3

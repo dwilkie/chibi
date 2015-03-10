@@ -1,13 +1,18 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ChatExpirerJob do
+  let(:options) { {"active_user" => true, "activate_new_chats" => true, "all" => true, "inactivity_period" => 24.hours.ago.to_s} }
+  subject { described_class.new(options) }
+
+  it "should be serializeable" do
+    expect(subject.serialize["arguments"].first).to eq(options)
+  end
+
   describe "#queue_name" do
     it { expect(subject.queue_name).to eq("default") }
   end
 
   describe "#perform(options = {})" do
-    let(:options) { {"some" => :options} }
-
     before do
       allow(Chat).to receive(:end_inactive)
     end

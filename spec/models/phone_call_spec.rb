@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe PhoneCall do
   include PhoneCallHelpers::States
@@ -16,7 +16,7 @@ describe PhoneCall do
 
   describe "factory" do
     it "should be valid" do
-      new_phone_call.should be_valid
+      expect(new_phone_call).to be_valid
     end
   end
 
@@ -30,18 +30,18 @@ describe PhoneCall do
 
   it "should not be valid without an sid" do
     new_phone_call.sid = nil
-    new_phone_call.should_not be_valid
+    expect(new_phone_call).not_to be_valid
   end
 
   it "should not be valid with a duplicate sid" do
     new_phone_call.sid = phone_call.sid
-    new_phone_call.should_not be_valid
+    expect(new_phone_call).not_to be_valid
   end
 
   it "should not be valid with a duplicate dial_call_sid" do
     phone_call = create(:phone_call, :with_dial_call_sid)
     new_phone_call.dial_call_sid = phone_call.dial_call_sid
-    new_phone_call.should_not be_valid
+    expect(new_phone_call).not_to be_valid
   end
 
   it_should_behave_like "a chat starter" do
@@ -63,31 +63,31 @@ describe PhoneCall do
   describe "#call_sid" do
     it "should be an alias for the attribute '#sid'" do
       subject.sid = "123"
-      subject.call_sid.should == "123"
+      expect(subject.call_sid).to eq("123")
 
       subject.call_sid = "456"
-      subject.sid.should == "456"
+      expect(subject.sid).to eq("456")
     end
   end
 
   describe "#redirect_url" do
     it "should be an accessor" do
       subject.redirect_url = "some_url"
-      subject.redirect_url.should == "some_url"
+      expect(subject.redirect_url).to eq("some_url")
     end
   end
 
   describe "#dial_status" do
     it "should be an accessor" do
       subject.dial_status = "some_status"
-      subject.dial_status.should == "some_status"
+      expect(subject.dial_status).to eq("some_status")
     end
   end
 
   describe "#call_status" do
     it "should be an accessor" do
       subject.call_status = "some_call_status"
-      subject.call_status.should == "some_call_status"
+      expect(subject.call_status).to eq("some_call_status")
     end
   end
 
@@ -97,30 +97,30 @@ describe PhoneCall do
       # test override
       subject.from = "+1-234-567-8910"
       subject.to = "+1-229-876-5432"
-      subject.from.should == "12298765432"
+      expect(subject.from).to eq("12298765432")
 
       # test no override for blank 'to'
       subject.to = ""
-      subject.from.should == "12298765432"
+      expect(subject.from).to eq("12298765432")
     end
 
     it "should be mass assignable" do
       new_phone_call = subject.class.new(:from => "+1-234-567-8910", :to => "+1-229-876-5432")
-      new_phone_call.from.should == "12298765432"
+      expect(new_phone_call.from).to eq("12298765432")
     end
   end
 
   describe "#digits" do
     it "should be an accessor but return the set value as an integer" do
       subject.digits = "1234"
-      subject.digits.should == 1234
+      expect(subject.digits).to eq(1234)
     end
   end
 
   describe "#fetch_inbound_twilio_cdr!" do
     it "should create a Chibi Twilio Inbound CDR" do
       expect_twilio_cdr_fetch(:call_sid => phone_call.sid) { phone_call.fetch_inbound_twilio_cdr! }
-      Chibi::Twilio::InboundCdr.last.phone_call.should == phone_call
+      expect(Chibi::Twilio::InboundCdr.last.phone_call).to eq(phone_call)
     end
   end
 
@@ -134,14 +134,14 @@ describe PhoneCall do
           :parent_call_sid => phone_call.sid
         ) { phone_call.fetch_outbound_twilio_cdr! }
 
-        Chibi::Twilio::OutboundCdr.last.phone_call.should == phone_call
+        expect(Chibi::Twilio::OutboundCdr.last.phone_call).to eq(phone_call)
       end
     end
 
     context "given the phone call does not have a dial_call_sid" do
       it "should not create a Chibi Twilio Outbound CDR" do
         phone_call.fetch_outbound_twilio_cdr!
-        Chibi::Twilio::OutboundCdr.last.should be_nil
+        expect(Chibi::Twilio::OutboundCdr.last).to be_nil
       end
     end
   end
@@ -171,22 +171,22 @@ describe PhoneCall do
         subject.class.find_or_create_and_process_by(params.dup, redirect_url)
       end
       before do
-        subject.class.stub(:find_or_initialize_by).and_return(phone_call)
+        allow(subject.class).to receive(:find_or_initialize_by).and_return(phone_call)
       end
 
       it "should update the phone call" do
         do_find_or_create_and_process
 
-        phone_call.redirect_url.should == redirect_url
-        phone_call.digits.should == params[:Digits].to_i
-        phone_call.call_status.should == params[:CallStatus]
-        phone_call.dial_status.should == params[:DialCallStatus]
-        phone_call.dial_call_sid.should == params[:DialCallSid]
-        phone_call.api_version.should == params[:ApiVersion]
+        expect(phone_call.redirect_url).to eq(redirect_url)
+        expect(phone_call.digits).to eq(params[:Digits].to_i)
+        expect(phone_call.call_status).to eq(params[:CallStatus])
+        expect(phone_call.dial_status).to eq(params[:DialCallStatus])
+        expect(phone_call.dial_call_sid).to eq(params[:DialCallSid])
+        expect(phone_call.api_version).to eq(params[:ApiVersion])
       end
 
       it "should log in the user" do
-        user.should_receive(:login!)
+        expect(user).to receive(:login!)
         do_find_or_create_and_process
       end
 
@@ -194,33 +194,33 @@ describe PhoneCall do
         let(:charge_request) { create(:charge_request, :requester => phone_call) }
 
         before do
-          phone_call.stub(:charge_request).and_return(charge_request)
-          charge_request.stub(:slow?)
+          allow(phone_call).to receive(:charge_request).and_return(charge_request)
+          allow(charge_request).to receive(:slow?)
         end
 
         it "should ask if the charge request is slow" do
-          charge_request.should_receive(:slow?)
+          expect(charge_request).to receive(:slow?)
           do_find_or_create_and_process
         end
 
         context "and it's slow (see charge_request#slow?)" do
           before do
-            charge_request.stub(:slow?).and_return(true)
+            allow(charge_request).to receive(:slow?).and_return(true)
           end
 
           it "should process the phone call" do
-            phone_call.should_receive(:process!)
+            expect(phone_call).to receive(:process!)
             do_find_or_create_and_process
           end
         end
 
         context "but it's not slow" do
           before do
-            charge_request.stub(:slow?).and_return(false)
+            allow(charge_request).to receive(:slow?).and_return(false)
           end
 
           it "should not process the phone call" do
-            phone_call.should_not_receive(:process!)
+            expect(phone_call).not_to receive(:process!)
             do_find_or_create_and_process
           end
         end
@@ -228,28 +228,28 @@ describe PhoneCall do
 
       context "there's no charge request for this call" do
         it "should try to charge the caller" do
-          user.should_receive(:charge!).with(phone_call)
+          expect(user).to receive(:charge!).with(phone_call)
           do_find_or_create_and_process
         end
 
         context "given the charge request returns true" do
           before do
-            user.stub(:charge!).and_return(true)
+            allow(user).to receive(:charge!).and_return(true)
           end
 
           it "should process the phone call" do
-            phone_call.should_receive(:process!)
+            expect(phone_call).to receive(:process!)
             do_find_or_create_and_process
           end
         end
 
         context "given the charge request returns nil" do
           before do
-            user.stub(:charge!).and_return(nil)
+            allow(user).to receive(:charge!).and_return(nil)
           end
 
           it "should not process the phone call" do
-            phone_call.should_not_receive(:process!)
+            expect(phone_call).not_to receive(:process!)
             do_find_or_create_and_process
           end
         end
@@ -260,16 +260,16 @@ describe PhoneCall do
       let(:params) { sample_params(:from => "+2441", :to => "+2441") }
 
       it "should not process the phone call" do
-        subject.class.find_or_create_and_process_by(params.dup, redirect_url).should be_nil
+        expect(subject.class.find_or_create_and_process_by(params.dup, redirect_url)).to be_nil
       end
     end
 
     context "phone call is new" do
       it "should save the phone call" do
         phone_call = subject.class.find_or_create_and_process_by(params, redirect_url)
-        phone_call.should be_persisted
-        phone_call.sid.should == call_sid
-        phone_call.from.should == from
+        expect(phone_call).to be_persisted
+        expect(phone_call.sid).to eq(call_sid)
+        expect(phone_call.from).to eq(from)
       end
     end
 
@@ -280,9 +280,9 @@ describe PhoneCall do
 
       it "should not update the from field" do
         phone_call = subject.class.find_or_create_and_process_by(params, redirect_url)
-        phone_call.should be_persisted
-        phone_call.sid.should == call_sid
-        phone_call.from.should_not == from
+        expect(phone_call).to be_persisted
+        expect(phone_call.sid).to eq(call_sid)
+        expect(phone_call.from).not_to eq(from)
       end
     end
   end
@@ -297,7 +297,7 @@ describe PhoneCall do
       already_complete = reference_phone_call.completed?
       clear_enqueued_jobs
       trigger_job(:queue_only => true) { reference_phone_call.process! }
-      reference_phone_call.should be_completed
+      expect(reference_phone_call).to be_completed
       job = enqueued_jobs.first
       if already_complete
         expect(job).to eq(nil)
@@ -311,15 +311,15 @@ describe PhoneCall do
       old_chat = phone_call.chat
       old_partner = old_chat.partner(caller)
       reply = reply_to(old_partner, old_chat)
-      reply.body.should =~ Regexp.new(
+      expect(reply.body).to match(Regexp.new(
         spec_translate(
           :contact_me, old_partner.locale, caller.screen_id,
           Regexp.escape(old_partner.caller_id(phone_call.api_version))
         )
-      )
-      reply.should_not be_delivered
-      caller.should_not be_currently_chatting
-      phone_call.triggered_chats.should_not be_empty
+      ))
+      expect(reply).not_to be_delivered
+      expect(caller).not_to be_currently_chatting
+      expect(phone_call.triggered_chats).not_to be_empty
     end
 
     def assert_phone_call_attributes(resource, expectations)
@@ -332,7 +332,7 @@ describe PhoneCall do
               send("assert_#{assertion}", resource)
             end
           else
-            resource.send(attribute).should == value
+            expect(resource.send(attribute)).to eq(value)
           end
         end
       end
@@ -344,7 +344,7 @@ describe PhoneCall do
 
         phone_call = create_phone_call(state, *traits)
         phone_call.process!
-        phone_call.should send("be_#{next_state}")
+        expect(phone_call).to send("be_#{next_state}")
 
         substates.each do |substate_trait, substate_attributes|
           if substate_attributes.is_a?(Hash)
@@ -357,7 +357,7 @@ describe PhoneCall do
 
           phone_call = create_phone_call(state, substate_trait.to_sym, *traits)
           phone_call.process!
-          phone_call.should send("be_#{next_state_from_substate}")
+          expect(phone_call).to send("be_#{next_state_from_substate}")
 
           assert_phone_call_attributes(phone_call, expectations)
         end
@@ -432,7 +432,7 @@ describe PhoneCall do
     end
 
     def assert_no_response(phone_call)
-      phone_call.to_twiml.should be_empty
+      expect(phone_call.to_twiml).to be_empty
     end
 
     def assert_redirect_to_current_url(phone_call)

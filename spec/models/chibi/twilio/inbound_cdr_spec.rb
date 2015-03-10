@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 module Chibi
   module Twilio
@@ -16,7 +16,7 @@ module Chibi
       end
 
       it "should be valid" do
-        expect_twilio_cdr_fetch { subject.should be_valid }
+        expect_twilio_cdr_fetch { expect(subject).to be_valid }
       end
 
       describe "associations" do
@@ -24,8 +24,8 @@ module Chibi
           it "should have_many" do
             expect_twilio_cdr_fetch do
               relation = subject.outbound_cdrs
-              relation.should be_empty
-              relation.to_sql.should =~ /Chibi::Twilio::OutboundCdr/
+              expect(relation).to be_empty
+              expect(relation.to_sql).to match(/Chibi::Twilio::OutboundCdr/)
             end
           end
         end

@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe "PhoneCalls" do
   describe "POST /phone_calls.xml" do
@@ -103,13 +103,13 @@ describe "PhoneCalls" do
 
             it "should queue a message to my partner to call me back" do
               reply = reply_to(chat.friend, chat)
-              reply.body.should =~ Regexp.new(
+              expect(reply.body).to match(Regexp.new(
                 spec_translate(
                   :contact_me, chat.friend.locale, chat.user.screen_id,
                   Regexp.escape(twilio_number)
                 )
-              )
-              reply.should_not be_delivered
+              ))
+              expect(reply).not_to be_delivered
             end
           end
         end
@@ -128,11 +128,11 @@ describe "PhoneCalls" do
           let(:new_outbound_twilio_cdr) { Chibi::Twilio::OutboundCdr.last }
 
           it "should create a Twilio Inbound CDR" do
-            new_inbound_twilio_cdr.should be_present
+            expect(new_inbound_twilio_cdr).to be_present
           end
 
           it "should create a Twilio Outbound CDR" do
-            new_outbound_twilio_cdr.should be_present
+            expect(new_outbound_twilio_cdr).to be_present
           end
         else
           before do
@@ -142,7 +142,7 @@ describe "PhoneCalls" do
           end
 
           it "should create a Twilio Inbound CDR" do
-            new_inbound_twilio_cdr.should be_present
+            expect(new_inbound_twilio_cdr).to be_present
           end
         end
       end
@@ -480,7 +480,7 @@ describe "PhoneCalls" do
     shared_examples_for "saving the phone call" do
       it "should save the phone call" do
         new_phone_call = PhoneCall.last
-        new_phone_call.from.should == from
+        expect(new_phone_call.from).to eq(from)
       end
     end
 
@@ -493,7 +493,7 @@ describe "PhoneCalls" do
         end
 
         it "should put me online" do
-          offline_user.reload.should be_online
+          expect(offline_user.reload).to be_online
         end
       end
     end

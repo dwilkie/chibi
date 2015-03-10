@@ -163,7 +163,7 @@ class User < ActiveRecord::Base
       limit = options.delete(:limit) || 100
 
       users_to_remind = not_contacted_recently(
-        inactive_timestamp(options)
+        options[:inactivity_cutoff]
       ).from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(limit)
 
       users_to_remind.each do |user_to_remind|
@@ -309,7 +309,7 @@ class User < ActiveRecord::Base
 
   def remind!(options = {})
     self.class.within_hours(options) do
-      replies.build.send_reminder! unless contacted_recently?(self.class.inactive_timestamp(options))
+      replies.build.send_reminder! unless contacted_recently?(options[:inactivity_cutoff])
     end
   end
 
@@ -552,12 +552,8 @@ class User < ActiveRecord::Base
     joins(:location).where(condition_statements.join(' OR '), *values)
   end
 
-  def self.inactive_timestamp(options = {})
-    options[:inactivity_period] || 5.days.ago
-  end
-
-  def self.not_contacted_recently(inactivity_timestamp)
-    where("#{coalesce_last_contacted_at} < ?", inactivity_timestamp)
+  def self.not_contacted_recently(inactivity_cutoff)
+    where("#{coalesce_last_contacted_at} < ?", DateTime.parse(inactivity_cutoff))
   end
 
   def self.coalesce_last_contacted_at
@@ -573,9 +569,8 @@ class User < ActiveRecord::Base
     do_find = true
 
     if between = options[:between]
-      between = Range.new(*(between.split("..")).map(&:to_i)) if between.is_a?(String)
       current_time = Time.current
-      do_find = (current_time >= time_at(between.min) && current_time <= time_at(between.max))
+      do_find = (current_time >= time_at(between.first) && current_time <= time_at(between.last))
     end
 
     yield if do_find
@@ -635,9 +630,9 @@ class User < ActiveRecord::Base
     nil
   end
 
-  def contacted_recently?(inactivity_timestamp)
+  def contacted_recently?(inactivity_cutoff)
     last_contacted_timestamp = last_contacted_at || updated_at
-    last_contacted_timestamp >= inactivity_timestamp
+    last_contacted_timestamp >= DateTime.parse(inactivity_cutoff)
   end
 
   def set_gender_related_attribute(attribute, value)

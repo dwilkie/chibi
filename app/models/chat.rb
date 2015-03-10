@@ -15,7 +15,7 @@ class Chat < ActiveRecord::Base
 
   def self.end_inactive(options = {})
     with_inactivity(options).find_each do |chat|
-      ChatDeactivatorJob.perform_later(chat.id, options.merge(:with_inactivity => true))
+      ChatDeactivatorJob.perform_later(chat.id, options)
     end
   end
 
@@ -119,7 +119,7 @@ class Chat < ActiveRecord::Base
 
   def deactivate!(options = {})
     options = options.with_indifferent_access
-    return if options[:with_inactivity] && !has_inactivity?(options)
+    return if options[:inactivity_cutoff] && !has_inactivity?(options)
 
     # reactivate previous chats by default
     options[:reactivate_previous_chat] = true unless options[:reactivate_previous_chat] == false
@@ -233,15 +233,11 @@ class Chat < ActiveRecord::Base
 
     joins(:user).joins(:friend).where(
       "users.active_chat_id = #{table_name}.id #{condition} friends_chats.active_chat_id = #{table_name}.id"
-    ).where("#{table_name}.updated_at < ?", inactive_timestamp(options))
+    ).where("#{table_name}.updated_at < ?", DateTime.parse(options[:inactivity_cutoff]))
   end
 
   def self.filter_params(params = {})
     super.where(params.slice(:user_id))
-  end
-
-  def self.inactive_timestamp(options = {})
-    options[:inactivity_period] || 10.minutes.ago
   end
 
   def one_sided?(num_messages = 3)
@@ -250,7 +246,7 @@ class Chat < ActiveRecord::Base
   end
 
   def has_inactivity?(options = {})
-    updated_at < self.class.inactive_timestamp(options)
+    updated_at < DateTime.parse(options[:inactivity_cutoff])
   end
 
   def reinvigorate_expired_chats(users)

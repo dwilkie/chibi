@@ -1,6 +1,13 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe UserRemindererJob do
+  let(:options) { {"inactivity_period" => 24.hours.ago.to_s, "between" => [6, 24] } }
+  subject { described_class.new(options) }
+
+  it "should be serializeable" do
+    expect(subject.serialize["arguments"].first).to eq(options)
+  end
+
   describe "#queue_name" do
     it { expect(subject.queue_name).to eq("low") }
   end

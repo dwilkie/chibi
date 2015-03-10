@@ -1,10 +1,11 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe Reply do
   include TranslationHelpers
   include MessagingHelpers
   include PhoneCallHelpers::TwilioHelpers
   include AnalyzableExamples
+  include EnvHelpers
 
   let(:user) { build(:user) }
 
@@ -54,18 +55,18 @@ describe Reply do
 
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
     options[:deliver] = true unless options[:deliver] == false
-    reply.should be_persisted
-    reply.destination.should == mobile_number
-    reply.token.should == options[:token] if options[:token]
+    expect(reply).to be_persisted
+    expect(reply.destination).to eq(mobile_number)
+    expect(reply.token).to eq(options[:token]) if options[:token]
     if options[:deliver]
       assertions = {:body => reply.body, :to => reply.destination}
-      assertions.merge!(options.slice(:id, :suggested_channel, :via, :short_code, :mt_message_queue))
+      assertions.merge!(options.slice(:id, :suggested_channel, :via, :short_code, :smpp_server_id, :to, :body))
       assert_deliver(assertions)
-      reply.should be_delivered
-      reply.should be_queued_for_smsc_delivery
+      expect(reply).to be_delivered
+      expect(reply).to be_queued_for_smsc_delivery
     else
-      reply.should_not be_delivered
-      reply.should be_pending_delivery
+      expect(reply).not_to be_delivered
+      expect(reply).to be_pending_delivery
     end
   end
 
@@ -77,9 +78,9 @@ describe Reply do
       expect_message { reply.send(method, *options[:args]) }
       asserted_reply = spec_translate(key, local_user.locale, *options[:interpolations])
       if options[:approx]
-        reply.body.should =~ /#{asserted_reply}/
+        expect(reply.body).to match(/#{asserted_reply}/)
       else
-        reply.body.should == asserted_reply
+        expect(reply.body).to eq(asserted_reply)
       end
 
       assert_persisted_and_delivered(reply, local_user.mobile_number, options)
@@ -88,13 +89,13 @@ describe Reply do
 
   describe "factory" do
     it "should be valid" do
-      new_reply.should be_valid
+      expect(new_reply).to be_valid
     end
   end
 
   describe "default state" do
     it "should be pending_delivery" do
-      reply.should be_pending_delivery
+      expect(reply).to be_pending_delivery
     end
   end
 
@@ -116,24 +117,24 @@ describe Reply do
 
   it "should not be valid without a destination" do
     user.mobile_number = nil
-    new_reply.should_not be_valid
+    expect(new_reply).not_to be_valid
   end
 
   it "should not be valid with a duplicate a token" do
     new_reply.token = reply_with_token.token
-    new_reply.should_not be_valid
+    expect(new_reply).not_to be_valid
   end
 
   it "should not be valid without a body" do
-    build(:reply, :with_no_body).should_not be_valid
+    expect(build(:reply, :with_no_body)).not_to be_valid
   end
 
   describe "callbacks" do
     describe "before_validation(:on => :create)" do
       context "if the destination is nil" do
         it "should be set as the user's mobile number" do
-          new_reply.should be_valid
-          new_reply.destination.should == user.mobile_number
+          expect(new_reply).to be_valid
+          expect(new_reply.destination).to eq(user.mobile_number)
         end
       end
 
@@ -143,8 +144,8 @@ describe Reply do
         end
 
         it "should not be set as the user's mobile number" do
-          new_reply.should be_valid
-          new_reply.destination.should == "1234"
+          expect(new_reply).to be_valid
+          expect(new_reply.destination).to eq("1234")
         end
       end
     end
@@ -160,7 +161,7 @@ describe Reply do
     end
 
     it "should return only the undelivered replies" do
-      subject.class.undelivered.should == [reply, another_reply]
+      expect(subject.class.undelivered).to eq([reply, another_reply])
     end
   end
 
@@ -171,7 +172,7 @@ describe Reply do
     end
 
     it "should return only the delivered replies" do
-      subject.class.delivered.should == [delivered_reply]
+      expect(subject.class.delivered).to eq([delivered_reply])
     end
   end
 
@@ -185,7 +186,7 @@ describe Reply do
     end
 
     it "should return the last delivered reply" do
-      subject.class.last_delivered.should == another_delivered_reply
+      expect(subject.class.last_delivered).to eq(another_delivered_reply)
     end
   end
 
@@ -211,34 +212,34 @@ describe Reply do
 
     it "should remove any delivered replies that are older than 1 month" do
       subject.class.cleanup!
-      Reply.all.should =~ [
+      expect(Reply.all).to match_array([
         old_undelivered_reply, new_undelivered_reply, new_delivered_reply
-      ]
+      ])
     end
   end
 
   describe "#body" do
     it "should return an empty string if it is nil" do
       subject.body = nil
-      subject.body.should == ""
+      expect(subject.body).to eq("")
     end
   end
 
   describe "#destination" do
     it "should be an alias for the attribute '#to'" do
       subject.destination = "123"
-      subject.to.should == "123"
+      expect(subject.to).to eq("123")
 
       subject.to = "456"
-      subject.destination.should == "456"
+      expect(subject.destination).to eq("456")
     end
   end
 
   describe "#delivered?" do
     it "should return true if the message has been delivered" do
-      reply.should_not be_delivered
+      expect(reply).not_to be_delivered
       expect_message { reply.deliver! }
-      reply.should be_delivered
+      expect(reply).to be_delivered
     end
   end
 
@@ -246,17 +247,17 @@ describe Reply do
     it "should correctly update the delivery state" do
       reply = create(:reply)
       reply.update_delivery_state
-      reply.should be_queued_for_smsc_delivery
+      expect(reply).to be_queued_for_smsc_delivery
 
       # tests the case where the delivery receipt
       # is received before the reply has been updated to 'queued_for_smsc_delivery'
       reply = create(:reply)
       reply.update_delivery_state(:state => "delivered")
-      reply.should be_delivered_by_smsc
+      expect(reply).to be_delivered_by_smsc
 
       # tests that not passing :force => true will not update incase of a race condition
       reply = create(:reply)
-      reply.stub(:update_delivery_state) do |options|
+      allow(reply).to receive(:update_delivery_state) do |options|
         options ||= {}
         create_race_condition(reply, :delivered_by_smsc)
         reply.instance_variable_set(:@delivery_state, options[:state])
@@ -266,38 +267,42 @@ describe Reply do
       end
 
       reply.update_delivery_state
-      reply.reload.should be_delivered_by_smsc
+      expect(reply.reload).to be_delivered_by_smsc
 
       reply = create(:reply, :queued_for_smsc_delivery)
       reply.update_delivery_state(:state => "delivered")
-      reply.should be_delivered_by_smsc
+      expect(reply).to be_delivered_by_smsc
 
       reply = create(:reply, :queued_for_smsc_delivery)
       reply.update_delivery_state(:state => "confirmed")
-      reply.should be_confirmed
+      expect(reply).to be_confirmed
 
       reply = create(:reply, :queued_for_smsc_delivery)
       reply.update_delivery_state(:state => "failed")
-      reply.should be_rejected
+      expect(reply).to be_rejected
+
+      reply = create(:reply, :queued_for_smsc_delivery)
+      reply.update_delivery_state(:state => "error")
+      expect(reply).to be_errored
 
       reply = create(:reply, :delivered_by_smsc)
       reply.update_delivery_state(:state => "confirmed")
-      reply.should be_confirmed
+      expect(reply).to be_confirmed
 
       reply = create(:reply, :delivered_by_smsc)
       reply.update_delivery_state(:state => "failed")
-      reply.should be_failed
+      expect(reply).to be_failed
 
       # tests the case where the delivery receipt
       # is received before the reply has been updated to 'queued_for_smsc_delivery'
       reply = create(:reply, :delivered_by_smsc)
       reply.update_delivery_state
-      reply.should be_delivered_by_smsc
+      expect(reply).to be_delivered_by_smsc
 
       # tests that passing :force => true
       # updates regardless of a race condition
       reply = create(:reply)
-      reply.stub(:update_delivery_state) do |options|
+      allow(reply).to receive(:update_delivery_state) do |options|
         options ||= {}
         create_race_condition(reply, :queued_for_smsc_delivery)
         reply.instance_variable_set(:@delivery_state, options[:state])
@@ -307,32 +312,32 @@ describe Reply do
       end
 
       reply.update_delivery_state(:state => "delivered", :force => true)
-      reply.reload.should be_delivered_by_smsc
+      expect(reply.reload).to be_delivered_by_smsc
 
       reply = create(:reply, :failed)
       reply.update_delivery_state(:state => "delivered")
 
-      reply.should be_failed
+      expect(reply).to be_failed
 
       reply = create(:reply, :rejected)
       reply.update_delivery_state(:state => "confirmed")
-      reply.should be_confirmed
+      expect(reply).to be_confirmed
 
       reply = create(:reply, :rejected)
       reply.update_delivery_state(:state => "delivered")
-      reply.should be_failed
+      expect(reply).to be_failed
 
       reply = create(:reply, :failed)
       reply.update_delivery_state(:state => "confirmed")
-      reply.should be_confirmed
+      expect(reply).to be_confirmed
 
       reply = create(:reply, :confirmed)
       reply.update_delivery_state(:state => "delivered")
-      reply.should be_confirmed
+      expect(reply).to be_confirmed
 
       reply = create(:reply, :confirmed)
       reply.update_delivery_state(:state => "failed")
-      reply.should be_confirmed
+      expect(reply).to be_confirmed
     end
 
     context "the reply failed to deliver" do
@@ -347,17 +352,40 @@ describe Reply do
       context "and this also happened the last 4 times for this number" do
       let(:previous_consecutive_failed_replies) { 4 }
         it "should logout the intended recipient" do
-          user.should_not be_online
+          expect(user).not_to be_online
         end
       end
 
       context "and this also happened the last 3 times for this number" do
         let(:previous_consecutive_failed_replies) { 3 }
         it "should not yet logout the recipient" do
-          user.should be_online
+          expect(user).to be_online
           another_reply = create(:reply, :delivered_by_smsc, :user => user)
           another_reply.update_delivery_state(:state => "failed")
-          user.should_not be_online
+          expect(user).not_to be_online
+        end
+      end
+    end
+  end
+
+  describe "#fetch_twilio_message_status!" do
+    it "should do something" do
+      twilio_message_states.each do |twilio_message_state, assertions|
+        clear_enqueued_jobs
+        subject = create(:reply, :delivered_by_twilio, :queued_for_smsc_delivery)
+        expect_twilio_message_status_fetch(
+          :message_sid => subject.token,
+          :status => twilio_message_state
+        ) { subject.fetch_twilio_message_status! }
+        assert_twilio_message_status_fetched!(:message_sid => subject.token)
+        subject.reload
+        expect(subject.smsc_message_status).to eq(twilio_message_state)
+        expect(subject.state).to eq(assertions[:reply_state])
+        job = enqueued_jobs.last
+        if assertions[:reschedule_job]
+          assert_fetch_twilio_message_status_job_enqueued!(job, :id => subject.id)
+        else
+          expect(enqueued_jobs).to be_empty
         end
       end
     end
@@ -366,38 +394,76 @@ describe Reply do
   describe "#deliver!" do
     include MobilePhoneHelpers
 
-    context "without Nuntium" do
+    def default_smpp_server_id
+      :twilio
+    end
+
+    context "by default" do
+      before do
+        stub_env(:deliver_via_nuntium => "0")
+      end
+
       it "should enqueue a MT message to be sent via SMPP" do
         with_operators do |number_parts, assertions|
           number = number_parts.join
           reply = create(:reply, :to => number)
-          reply.deliver!
+          message_sid = generate(:token)
+          expect_delivery_via_twilio(:message_sid => message_sid) { reply.deliver! }
+          reply.reload
+          expect(reply.operator_name).to eq(assertions["id"])
+          expect(reply.delivery_channel).to eq(assertions["smpp_server_id"] ? "smsc" : "twilio")
           assert_persisted_and_delivered(
-            reply, number,
-            :id => reply.token, :short_code => assertions["short_code"],
-            :mt_message_queue => assertions["mt_message_queue"]
+            reply,
+            number,
+            :id => reply.id,
+            :short_code => assertions["short_code"],
+            :smpp_server_id => assertions["smpp_server_id"],
+            :via => assertions["smpp_server_id"] || default_smpp_server_id
           )
         end
-        reply = create(:reply)
-        reply.deliver!
-        assert_persisted_and_delivered(reply, reply.destination)
-        reply.token.should be_present
+      end
+    end
+
+    context "via Twilio" do
+      include TwilioHelpers
+
+      before do
+        stub_env(:deliver_via_nuntium => "0")
+      end
+
+      let(:dest_address) { "85589481811" }
+      let(:body) { "test from twilio" }
+      let(:message_sid) { generate(:guid) }
+
+      subject { create(:reply, :to => dest_address, :body => body) }
+
+      it "should send the reply via Twilio" do
+        expect_delivery_via_twilio(:message_sid => message_sid) { subject.deliver! }
+        assert_persisted_and_delivered(
+          subject,
+          dest_address,
+          :id => subject.id,
+          :via => :twilio,
+        )
+        expect(subject.token).to eq(message_sid)
+        expect(subject.delivery_channel).to eq("twilio")
       end
     end
 
     context "via Nuntium" do
-      include EnvHelpers
-
       def assert_persisted_and_delivered(reply, mobile_number, options = {})
+        reply.reload
+        expect(reply.operator_name).to eq(options[:operator_id]) if options[:operator_id]
+        expect(reply.delivery_channel).to eq("nuntium")
         super(reply, mobile_number, options.merge(:via => :nuntium))
       end
 
       before do
-        stub_env(:deliver_via_nuntium, "1")
+        stub_env(:deliver_via_nuntium => "1")
       end
 
       it "should deliver the message and save the token" do
-        expect_message(:token => "token") { reply.deliver! }
+        expect_delivery_via_nuntium(:token => "token") { reply.deliver! }
         assert_persisted_and_delivered(reply, user.mobile_number, :token => "token")
       end
 
@@ -406,29 +472,38 @@ describe Reply do
           number = number_parts.join
           reply = create(:reply, :to => number)
           expect_message { reply.deliver! }
-          assert_persisted_and_delivered(reply, number, :suggested_channel => assertions["nuntium_channel"])
+          assert_persisted_and_delivered(
+            reply,
+            number,
+            :suggested_channel => assertions["nuntium_channel"],
+            :operator_id => assertions["id"]
+          )
         end
         user = create(:user, :from_unknown_operator)
         reply = create(:reply, :user => user)
         expect_message { reply.deliver! }
-        assert_persisted_and_delivered(reply, reply.destination, :suggested_channel => "twilio")
+        assert_persisted_and_delivered(
+          reply,
+          reply.destination,
+          :suggested_channel => "twilio"
+        )
       end
 
       context "given the delivery fails" do
         before do
-          Nuntium.stub(:new).and_raise("BOOM! Cannot connect to Nuntium Server")
+          allow(Nuntium).to receive(:new).and_raise("BOOM! Cannot connect to Nuntium Server")
         end
 
         it "should not mark the reply as delivered" do
           expect { reply.deliver! }.to raise_error
-          reply.should_not be_delivered
-          reply.should be_pending_delivery
+          expect(reply).not_to be_delivered
+          expect(reply).to be_pending_delivery
         end
       end
 
       context "given there is a race condition for when the state is updated" do
         before do
-          reply.stub(:touch).with(:delivered_at) do
+          allow(reply).to receive(:touch).with(:delivered_at) do
             reply.update_attribute(:delivered_at, Time.current)
             create_race_condition(reply, :delivered_by_smsc)
           end
@@ -436,8 +511,8 @@ describe Reply do
 
         it "should correctly update the state of the reply" do
           expect_message { reply.deliver! }
-          reply.reload.should be_delivered
-          reply.should be_delivered_by_smsc
+          expect(reply.reload).to be_delivered
+          expect(reply).to be_delivered_by_smsc
         end
       end
     end

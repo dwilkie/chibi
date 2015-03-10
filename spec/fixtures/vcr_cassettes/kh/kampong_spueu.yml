@@ -3,12 +3,14 @@ http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?address=kampong+spueu%2C+Cambodia&language=en&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -34,40 +36,80 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Kampong Spoe\",\n               \"short_name\"
-      : \"Kampong Spoe\",\n               \"types\" : [ \"locality\", \"political\"
-      ]\n            },\n            {\n               \"long_name\" : \"Chbar Mon\",\n
-      \              \"short_name\" : \"Chbar Mon\",\n               \"types\" : [
-      \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Kampong Speu\",\n               \"short_name\"
-      : \"Kampong Speu\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Kampong Spoe, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 11.48414620,\n
-      \                 \"lng\" : 104.52255250\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 11.45672420,\n                  \"lng\" : 104.48667530\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.47349210,\n               \"lng\" : 104.504360\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.48442690,\n                  \"lng\" : 104.52036740\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.46255690,\n                  \"lng\" : 104.48835260\n               }\n
-      \           }\n         },\n         \"types\" : [ \"locality\", \"political\"
-      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kampong Spoe",
+                       "short_name" : "Kampong Spoe",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Chbar Mon",
+                       "short_name" : "Chbar Mon",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kampong Speu",
+                       "short_name" : "Kampong Speu",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kampong Spoe, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.48414620,
+                          "lng" : 104.52255250
+                       },
+                       "southwest" : {
+                          "lat" : 11.45672420,
+                          "lng" : 104.48667530
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.47349210,
+                       "lng" : 104.504360
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.48442690,
+                          "lng" : 104.52036740
+                       },
+                       "southwest" : {
+                          "lat" : 11.46255690,
+                          "lng" : 104.48835260
+                       }
+                    }
+                 },
+                 "types" : [ "locality", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 17:38:32 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=11.4734921%2C104.50436&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -93,122 +135,550 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"44\",\n               \"short_name\"
-      : \"44\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Kampong Spoe\",\n               \"short_name\"
-      : \"Kampong Spoe\",\n               \"types\" : [ \"locality\", \"political\"
-      ]\n            },\n            {\n               \"long_name\" : \"Chbar Mon\",\n
-      \              \"short_name\" : \"Chbar Mon\",\n               \"types\" : [
-      \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Kampong Speu\",\n               \"short_name\"
-      : \"Kampong Speu\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"44, Kampong Spoe, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 11.47278520,\n
-      \                 \"lng\" : 104.50807810\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 11.47184540,\n                  \"lng\" : 104.50786830\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.47231530,\n               \"lng\" : 104.50797320\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.47366428029150,\n                  \"lng\"
-      : 104.5093221802915\n               },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.47096631970850,\n                  \"lng\" : 104.5066242197085\n               }\n
-      \           }\n         },\n         \"types\" : [ \"route\" ]\n      },\n      {\n
-      \        \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Kampong Spoe\",\n               \"short_name\" : \"Kampong Spoe\",\n               \"types\"
-      : [ \"locality\", \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Chbar Mon\",\n               \"short_name\" : \"Chbar Mon\",\n               \"types\"
-      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Kampong Speu\",\n               \"short_name\"
-      : \"Kampong Speu\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Kampong Spoe, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 11.48414620,\n
-      \                 \"lng\" : 104.52255250\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 11.45672420,\n                  \"lng\" : 104.48667530\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.47349210,\n               \"lng\" : 104.504360\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.48414620,\n                  \"lng\" : 104.52255250\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.45672420,\n                  \"lng\" : 104.48667530\n               }\n
-      \           }\n         },\n         \"types\" : [ \"locality\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Chbar Mon\",\n               \"short_name\" : \"Chbar Mon\",\n               \"types\"
-      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Kampong Speu\",\n               \"short_name\"
-      : \"Kampong Speu\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Chbar Mon, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 11.51408860,\n
-      \                 \"lng\" : 104.5821190\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 11.43056150,\n                  \"lng\" : 104.45860860\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.46504550,\n               \"lng\" : 104.50727220\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.51408860,\n                  \"lng\" : 104.5821190\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.43056150,\n                  \"lng\" : 104.45860860\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
-      \              \"long_name\" : \"Samraong Tong\",\n               \"short_name\"
-      : \"Samraong Tong\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Kampong Speu\",\n               \"short_name\" : \"Kampong Speu\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Samraong Tong, Cambodia\",\n
-      \        \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.6121360,\n                  \"lng\" : 104.67199630\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.2917160,\n                  \"lng\" : 104.27759170\n               }\n
-      \           },\n            \"location\" : {\n               \"lat\" : 11.4755240,\n
-      \              \"lng\" : 104.51892140\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 11.6121360,\n                  \"lng\" : 104.67199630\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.2917160,\n                  \"lng\" : 104.27759170\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
-      \              \"long_name\" : \"Kampong Speu\",\n               \"short_name\"
-      : \"Kampong Speu\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Kampong Speu, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 12.1020880,\n
-      \                 \"lng\" : 104.7903810\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 11.0749690,\n                  \"lng\" : 103.7777180\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 11.61551090,\n               \"lng\" : 104.37919120\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 12.1020880,\n                  \"lng\" : 104.7903810\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 11.0749690,\n                  \"lng\" : 103.7777180\n               }\n            }\n
-      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
-      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
-      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "44",
+                       "short_name" : "44",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Kampong Spoe",
+                       "short_name" : "Kampong Spoe",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Chbar Mon",
+                       "short_name" : "Chbar Mon",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kampong Speu",
+                       "short_name" : "Kampong Speu",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "44, Kampong Spoe, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.47278520,
+                          "lng" : 104.50807810
+                       },
+                       "southwest" : {
+                          "lat" : 11.47184540,
+                          "lng" : 104.50786830
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.47231530,
+                       "lng" : 104.50797320
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.47366428029150,
+                          "lng" : 104.5093221802915
+                       },
+                       "southwest" : {
+                          "lat" : 11.47096631970850,
+                          "lng" : 104.5066242197085
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kampong Spoe",
+                       "short_name" : "Kampong Spoe",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Chbar Mon",
+                       "short_name" : "Chbar Mon",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kampong Speu",
+                       "short_name" : "Kampong Speu",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kampong Spoe, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.48414620,
+                          "lng" : 104.52255250
+                       },
+                       "southwest" : {
+                          "lat" : 11.45672420,
+                          "lng" : 104.48667530
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.47349210,
+                       "lng" : 104.504360
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.48414620,
+                          "lng" : 104.52255250
+                       },
+                       "southwest" : {
+                          "lat" : 11.45672420,
+                          "lng" : 104.48667530
+                       }
+                    }
+                 },
+                 "types" : [ "locality", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Chbar Mon",
+                       "short_name" : "Chbar Mon",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kampong Speu",
+                       "short_name" : "Kampong Speu",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Chbar Mon, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.51408860,
+                          "lng" : 104.5821190
+                       },
+                       "southwest" : {
+                          "lat" : 11.43056150,
+                          "lng" : 104.45860860
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.46504550,
+                       "lng" : 104.50727220
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.51408860,
+                          "lng" : 104.5821190
+                       },
+                       "southwest" : {
+                          "lat" : 11.43056150,
+                          "lng" : 104.45860860
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Samraong Tong",
+                       "short_name" : "Samraong Tong",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kampong Speu",
+                       "short_name" : "Kampong Speu",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Samraong Tong, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 11.6121360,
+                          "lng" : 104.67199630
+                       },
+                       "southwest" : {
+                          "lat" : 11.2917160,
+                          "lng" : 104.27759170
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.4755240,
+                       "lng" : 104.51892140
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 11.6121360,
+                          "lng" : 104.67199630
+                       },
+                       "southwest" : {
+                          "lat" : 11.2917160,
+                          "lng" : 104.27759170
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kampong Speu",
+                       "short_name" : "Kampong Speu",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kampong Speu, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 12.1020880,
+                          "lng" : 104.7903810
+                       },
+                       "southwest" : {
+                          "lat" : 11.0749690,
+                          "lng" : 103.7777180
+                       }
+                    },
+                    "location" : {
+                       "lat" : 11.61551090,
+                       "lng" : 104.37919120
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 12.1020880,
+                          "lng" : 104.7903810
+                       },
+                       "southwest" : {
+                          "lat" : 11.0749690,
+                          "lng" : 103.7777180
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.5656790,
+                       "lng" : 104.9909630
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 17:38:32 GMT
-recorded_with: VCR 2.0.0.rc1
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=kampong%20spueu,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:59 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:59 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        ewogICAicmVzdWx0cyIgOiBbCiAgICAgIHsKICAgICAgICAgImFkZHJlc3Nf
+        Y29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAg
+        ImxvbmdfbmFtZSIgOiAiS2FtcG9uZyBTcGV14oCLIiwKICAgICAgICAgICAg
+        ICAgInNob3J0X25hbWUiIDogIkthbXBvbmcgU3BldeKAiyIsCiAgICAgICAg
+        ICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2ZV9hcmVhX2xldmVs
+        XzEiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0sCiAgICAgICAgICAg
+        IHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiQ2FtYm9kaWEiLAog
+        ICAgICAgICAgICAgICAic2hvcnRfbmFtZSIgOiAiS0giLAogICAgICAgICAg
+        ICAgICAidHlwZXMiIDogWyAiY291bnRyeSIsICJwb2xpdGljYWwiIF0KICAg
+        ICAgICAgICAgfQogICAgICAgICBdLAogICAgICAgICAiZm9ybWF0dGVkX2Fk
+        ZHJlc3MiIDogIkthbXBvbmcgU3BldeKAiywgQ2FtYm9kaWEiLAogICAgICAg
+        ICAiZ2VvbWV0cnkiIDogewogICAgICAgICAgICAiYm91bmRzIiA6IHsKICAg
+        ICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAgICAgICAgICAg
+        ICJsYXQiIDogMTIuMTAyMDg4LAogICAgICAgICAgICAgICAgICAibG5nIiA6
+        IDEwNC43OTAzODEKICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAg
+        InNvdXRod2VzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTEu
+        MDc0OTY5LAogICAgICAgICAgICAgICAgICAibG5nIiA6IDEwMy43Nzc3MTc5
+        CiAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfSwKICAgICAgICAgICAg
+        ImxvY2F0aW9uIiA6IHsKICAgICAgICAgICAgICAgImxhdCIgOiAxMS42MTU1
+        MTA5LAogICAgICAgICAgICAgICAibG5nIiA6IDEwNC4zNzkxOTEyCiAgICAg
+        ICAgICAgIH0sCiAgICAgICAgICAgICJsb2NhdGlvbl90eXBlIiA6ICJBUFBS
+        T1hJTUFURSIsCiAgICAgICAgICAgICJ2aWV3cG9ydCIgOiB7CiAgICAgICAg
+        ICAgICAgICJub3J0aGVhc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0
+        IiA6IDEyLjEwMjA4OCwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAxMDQu
+        NzkwMzgxCiAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICJzb3V0
+        aHdlc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0IiA6IDExLjA3NDk2
+        OSwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAxMDMuNzc3NzE3OQogICAg
+        ICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICAgfSwKICAgICAg
+        ICAgInBhcnRpYWxfbWF0Y2giIDogdHJ1ZSwKICAgICAgICAgInR5cGVzIiA6
+        IFsgImFkbWluaXN0cmF0aXZlX2FyZWFfbGV2ZWxfMSIsICJwb2xpdGljYWwi
+        IF0KICAgICAgfQogICBdLAogICAic3RhdHVzIiA6ICJPSyIKfQo=
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:59 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=11.6155109,104.3791912&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:04:00 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:04:00 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        ewogICAicmVzdWx0cyIgOiBbCiAgICAgIHsKICAgICAgICAgImFkZHJlc3Nf
+        Y29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAg
+        ImxvbmdfbmFtZSIgOiAiMTMyIiwKICAgICAgICAgICAgICAgInNob3J0X25h
+        bWUiIDogIjEzMiIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJyb3V0
+        ZSIgXQogICAgICAgICAgICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAg
+        ICAgICJsb25nX25hbWUiIDogIlRocG9uZyIsCiAgICAgICAgICAgICAgICJz
+        aG9ydF9uYW1lIiA6ICJUaHBvbmciLAogICAgICAgICAgICAgICAidHlwZXMi
+        IDogWyAiYWRtaW5pc3RyYXRpdmVfYXJlYV9sZXZlbF8yIiwgInBvbGl0aWNh
+        bCIgXQogICAgICAgICAgICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAg
+        ICAgICJsb25nX25hbWUiIDogIkthbXBvbmcgU3BldeKAiyIsCiAgICAgICAg
+        ICAgICAgICJzaG9ydF9uYW1lIiA6ICJLYW1wb25nIFNwZXXigIsiLAogICAg
+        ICAgICAgICAgICAidHlwZXMiIDogWyAiYWRtaW5pc3RyYXRpdmVfYXJlYV9s
+        ZXZlbF8xIiwgInBvbGl0aWNhbCIgXQogICAgICAgICAgICB9LAogICAgICAg
+        ICAgICB7CiAgICAgICAgICAgICAgICJsb25nX25hbWUiIDogIkNhbWJvZGlh
+        IiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDogIktIIiwKICAgICAg
+        ICAgICAgICAgInR5cGVzIiA6IFsgImNvdW50cnkiLCAicG9saXRpY2FsIiBd
+        CiAgICAgICAgICAgIH0KICAgICAgICAgXSwKICAgICAgICAgImZvcm1hdHRl
+        ZF9hZGRyZXNzIiA6ICIxMzIsIENhbWJvZGlhIiwKICAgICAgICAgImdlb21l
+        dHJ5IiA6IHsKICAgICAgICAgICAgImJvdW5kcyIgOiB7CiAgICAgICAgICAg
+        ICAgICJub3J0aGVhc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0IiA6
+        IDExLjY0NTQyMDUsCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTA0LjQy
+        NDYxOTcKICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgInNvdXRo
+        d2VzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTEuNjQ0Mzc2
+        NSwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAxMDQuNDIzNjE5OQogICAg
+        ICAgICAgICAgICB9CiAgICAgICAgICAgIH0sCiAgICAgICAgICAgICJsb2Nh
+        dGlvbiIgOiB7CiAgICAgICAgICAgICAgICJsYXQiIDogMTEuNjQ0OTU3MiwK
+        ICAgICAgICAgICAgICAgImxuZyIgOiAxMDQuNDI0MTgxCiAgICAgICAgICAg
+        IH0sCiAgICAgICAgICAgICJsb2NhdGlvbl90eXBlIiA6ICJBUFBST1hJTUFU
+        RSIsCiAgICAgICAgICAgICJ2aWV3cG9ydCIgOiB7CiAgICAgICAgICAgICAg
+        ICJub3J0aGVhc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0IiA6IDEx
+        LjY0NjI0NzQ4MDI5MTUsCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTA0
+        LjQyNTQ2ODc4MDI5MTUKICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAg
+        ICAgInNvdXRod2VzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDog
+        MTEuNjQzNTQ5NTE5NzA4NSwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAx
+        MDQuNDIyNzcwODE5NzA4NQogICAgICAgICAgICAgICB9CiAgICAgICAgICAg
+        IH0KICAgICAgICAgfSwKICAgICAgICAgInR5cGVzIiA6IFsgInJvdXRlIiBd
+        CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAgImFkZHJlc3NfY29tcG9uZW50
+        cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFt
+        ZSIgOiAiVGhwb25nIiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDog
+        IlRocG9uZyIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlz
+        dHJhdGl2ZV9hcmVhX2xldmVsXzIiLCAicG9saXRpY2FsIiBdCiAgICAgICAg
+        ICAgIH0sCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFt
+        ZSIgOiAiS2FtcG9uZyBTcGV14oCLIiwKICAgICAgICAgICAgICAgInNob3J0
+        X25hbWUiIDogIkthbXBvbmcgU3BldeKAiyIsCiAgICAgICAgICAgICAgICJ0
+        eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2ZV9hcmVhX2xldmVsXzEiLCAicG9s
+        aXRpY2FsIiBdCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgIHsKICAgICAg
+        ICAgICAgICAgImxvbmdfbmFtZSIgOiAiQ2FtYm9kaWEiLAogICAgICAgICAg
+        ICAgICAic2hvcnRfbmFtZSIgOiAiS0giLAogICAgICAgICAgICAgICAidHlw
+        ZXMiIDogWyAiY291bnRyeSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAg
+        fQogICAgICAgICBdLAogICAgICAgICAiZm9ybWF0dGVkX2FkZHJlc3MiIDog
+        IlRocG9uZywgQ2FtYm9kaWEiLAogICAgICAgICAiZ2VvbWV0cnkiIDogewog
+        ICAgICAgICAgICAiYm91bmRzIiA6IHsKICAgICAgICAgICAgICAgIm5vcnRo
+        ZWFzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTEuOTg2MjYz
+        NSwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAxMDQuNjQ3MjY0NgogICAg
+        ICAgICAgICAgICB9LAogICAgICAgICAgICAgICAic291dGh3ZXN0IiA6IHsK
+        ICAgICAgICAgICAgICAgICAgImxhdCIgOiAxMS41NTg0MDc2LAogICAgICAg
+        ICAgICAgICAgICAibG5nIiA6IDEwNC4yMzQyNDcyCiAgICAgICAgICAgICAg
+        IH0KICAgICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uIiA6IHsK
+        ICAgICAgICAgICAgICAgImxhdCIgOiAxMS42NTc1MDU3LAogICAgICAgICAg
+        ICAgICAibG5nIiA6IDEwNC40MjU3NTMzCiAgICAgICAgICAgIH0sCiAgICAg
+        ICAgICAgICJsb2NhdGlvbl90eXBlIiA6ICJBUFBST1hJTUFURSIsCiAgICAg
+        ICAgICAgICJ2aWV3cG9ydCIgOiB7CiAgICAgICAgICAgICAgICJub3J0aGVh
+        c3QiIDogewogICAgICAgICAgICAgICAgICAibGF0IiA6IDExLjk4NjI2MzUs
+        CiAgICAgICAgICAgICAgICAgICJsbmciIDogMTA0LjY0NzI2NDYKICAgICAg
+        ICAgICAgICAgfSwKICAgICAgICAgICAgICAgInNvdXRod2VzdCIgOiB7CiAg
+        ICAgICAgICAgICAgICAgICJsYXQiIDogMTEuNTU4NDA3NiwKICAgICAgICAg
+        ICAgICAgICAgImxuZyIgOiAxMDQuMjM0MjQ3MgogICAgICAgICAgICAgICB9
+        CiAgICAgICAgICAgIH0KICAgICAgICAgfSwKICAgICAgICAgInR5cGVzIiA6
+        IFsgImFkbWluaXN0cmF0aXZlX2FyZWFfbGV2ZWxfMiIsICJwb2xpdGljYWwi
+        IF0KICAgICAgfSwKICAgICAgewogICAgICAgICAiYWRkcmVzc19jb21wb25l
+        bnRzIiA6IFsKICAgICAgICAgICAgewogICAgICAgICAgICAgICAibG9uZ19u
+        YW1lIiA6ICJLYW1wb25nIFNwZXXigIsiLAogICAgICAgICAgICAgICAic2hv
+        cnRfbmFtZSIgOiAiS2FtcG9uZyBTcGV14oCLIiwKICAgICAgICAgICAgICAg
+        InR5cGVzIiA6IFsgImFkbWluaXN0cmF0aXZlX2FyZWFfbGV2ZWxfMSIsICJw
+        b2xpdGljYWwiIF0KICAgICAgICAgICAgfSwKICAgICAgICAgICAgewogICAg
+        ICAgICAgICAgICAibG9uZ19uYW1lIiA6ICJDYW1ib2RpYSIsCiAgICAgICAg
+        ICAgICAgICJzaG9ydF9uYW1lIiA6ICJLSCIsCiAgICAgICAgICAgICAgICJ0
+        eXBlcyIgOiBbICJjb3VudHJ5IiwgInBvbGl0aWNhbCIgXQogICAgICAgICAg
+        ICB9CiAgICAgICAgIF0sCiAgICAgICAgICJmb3JtYXR0ZWRfYWRkcmVzcyIg
+        OiAiS2FtcG9uZyBTcGV14oCLLCBDYW1ib2RpYSIsCiAgICAgICAgICJnZW9t
+        ZXRyeSIgOiB7CiAgICAgICAgICAgICJib3VuZHMiIDogewogICAgICAgICAg
+        ICAgICAibm9ydGhlYXN0IiA6IHsKICAgICAgICAgICAgICAgICAgImxhdCIg
+        OiAxMi4xMDIwODgsCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTA0Ljc5
+        MDM4MQogICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAic291dGh3
+        ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAgImxhdCIgOiAxMS4wNzQ5Njks
+        CiAgICAgICAgICAgICAgICAgICJsbmciIDogMTAzLjc3NzcxNzkKICAgICAg
+        ICAgICAgICAgfQogICAgICAgICAgICB9LAogICAgICAgICAgICAibG9jYXRp
+        b24iIDogewogICAgICAgICAgICAgICAibGF0IiA6IDExLjYxNTUxMDksCiAg
+        ICAgICAgICAgICAgICJsbmciIDogMTA0LjM3OTE5MTIKICAgICAgICAgICAg
+        fSwKICAgICAgICAgICAgImxvY2F0aW9uX3R5cGUiIDogIkFQUFJPWElNQVRF
+        IiwKICAgICAgICAgICAgInZpZXdwb3J0IiA6IHsKICAgICAgICAgICAgICAg
+        Im5vcnRoZWFzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTIu
+        MTAyMDg4LAogICAgICAgICAgICAgICAgICAibG5nIiA6IDEwNC43OTAzODEK
+        ICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgInNvdXRod2VzdCIg
+        OiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTEuMDc0OTY5LAogICAg
+        ICAgICAgICAgICAgICAibG5nIiA6IDEwMy43Nzc3MTc5CiAgICAgICAgICAg
+        ICAgIH0KICAgICAgICAgICAgfQogICAgICAgICB9LAogICAgICAgICAidHlw
+        ZXMiIDogWyAiYWRtaW5pc3RyYXRpdmVfYXJlYV9sZXZlbF8xIiwgInBvbGl0
+        aWNhbCIgXQogICAgICB9LAogICAgICB7CiAgICAgICAgICJhZGRyZXNzX2Nv
+        bXBvbmVudHMiIDogWwogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJs
+        b25nX25hbWUiIDogIkNhbWJvZGlhIiwKICAgICAgICAgICAgICAgInNob3J0
+        X25hbWUiIDogIktIIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6IFsgImNv
+        dW50cnkiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0KICAgICAgICAg
+        XSwKICAgICAgICAgImZvcm1hdHRlZF9hZGRyZXNzIiA6ICJDYW1ib2RpYSIs
+        CiAgICAgICAgICJnZW9tZXRyeSIgOiB7CiAgICAgICAgICAgICJib3VuZHMi
+        IDogewogICAgICAgICAgICAgICAibm9ydGhlYXN0IiA6IHsKICAgICAgICAg
+        ICAgICAgICAgImxhdCIgOiAxNC42OTAxNzksCiAgICAgICAgICAgICAgICAg
+        ICJsbmciIDogMTA3LjYyNzY4NwogICAgICAgICAgICAgICB9LAogICAgICAg
+        ICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAgImxh
+        dCIgOiA5LjI4NTc1NDEsCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTAy
+        LjMzMzU0MgogICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0sCiAgICAg
+        ICAgICAgICJsb2NhdGlvbiIgOiB7CiAgICAgICAgICAgICAgICJsYXQiIDog
+        MTIuNTY1Njc5LAogICAgICAgICAgICAgICAibG5nIiA6IDEwNC45OTA5NjMK
+        ICAgICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uX3R5cGUiIDog
+        IkFQUFJPWElNQVRFIiwKICAgICAgICAgICAgInZpZXdwb3J0IiA6IHsKICAg
+        ICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAgICAgICAgICAg
+        ICJsYXQiIDogMTQuNjkwMTc5LAogICAgICAgICAgICAgICAgICAibG5nIiA6
+        IDEwNy42Mjc2ODcKICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAg
+        InNvdXRod2VzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogOS4y
+        ODU3NTQxLAogICAgICAgICAgICAgICAgICAibG5nIiA6IDEwMi4zMzM1NDIK
+        ICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgIH0sCiAg
+        ICAgICAgICJ0eXBlcyIgOiBbICJjb3VudHJ5IiwgInBvbGl0aWNhbCIgXQog
+        ICAgICB9CiAgIF0sCiAgICJzdGF0dXMiIDogIk9LIgp9Cg==
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:59 GMT
+recorded_with: VCR 2.9.3

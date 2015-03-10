@@ -1,16 +1,16 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe Overview do
   let(:options) { { :operator => "operator", :country_code => "country_code" } }
 
   def asserted_options(overridden = {})
-    options.merge(:least_recent => 6.months).merge(overridden)
+    options.merge(:least_recent => 3.months).merge(overridden)
   end
 
   subject { Overview.new(options) }
 
   def stub_overview(resource, value = [])
-    resource.stub(asserted_message_expectation).and_return(value)
+    allow(resource).to receive(asserted_message_expectation).and_return(value)
   end
 
   def asserted_message_expectation
@@ -24,8 +24,8 @@ describe Overview do
   describe "#timeframe=(value)" do
     it "should update the options" do
       subject.timeframe = :day
-      subject.options[:timeframe].should == :day
-      subject.timeframe.should == :day
+      expect(subject.options[:timeframe]).to eq(:day)
+      expect(subject.timeframe).to eq(:day)
     end
   end
 
@@ -35,10 +35,10 @@ describe Overview do
     end
 
     it "should return an overview" do
-      klass_to_overview.should_receive(asserted_message_expectation).with(*asserted_message_args).once
+      expect(klass_to_overview).to receive(asserted_message_expectation).with(*asserted_message_args).once
       2.times { run_overview }
       subject.timeframe = :month
-      klass_to_overview.should_receive(asserted_message_expectation).with(*asserted_message_args(:timeframe => :month)).once
+      expect(klass_to_overview).to receive(asserted_message_expectation).with(*asserted_message_args(:timeframe => :month)).once
       2.times { run_overview }
     end
   end
@@ -118,7 +118,7 @@ describe Overview do
     end
 
     it "should return an overview of the active users who are not new" do
-      subject.return_users.should == [[1360886400000, 3], [1361232000000, 2]]
+      expect(subject.return_users).to eq([[1360886400000, 3], [1361232000000, 2]])
     end
   end
 end

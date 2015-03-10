@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe CannedReply do
   include PhoneCallHelpers::TwilioHelpers
@@ -11,13 +11,13 @@ describe CannedReply do
   def assert_random(method, *args, &block)
     100.times do
       result = subject.send(method, *args)
-      result.should_not =~ /[\%\{]+/
+      expect(result).not_to match(/[\%\{]+/)
       yield(result) if block_given?
     end
   end
 
   def assert_contact_number_included(result)
-    result.should =~ /#{Regexp.escape(recipient.contact_me_number)}/
+    expect(result).to match(/#{Regexp.escape(recipient.contact_me_number)}/)
   end
 
   describe "#gay_reminder" do
@@ -25,7 +25,7 @@ describe CannedReply do
       let(:recipient) { create(:user, :male, :name => "hanh") }
       it "should generate a gay reminder message for males" do
         assert_random(:gay_reminder) do |result|
-          result.should =~ /boys/
+          expect(result).to match(/boys/)
         end
       end
     end
@@ -34,7 +34,7 @@ describe CannedReply do
       let(:recipient) { create(:user, :female, :name => "hanh") }
       it "should generate a gay reminder message for females" do
         assert_random(:gay_reminder) do |result|
-          result.should =~ /girls/
+          expect(result).to match(/girls/)
         end
       end
     end
@@ -48,7 +48,7 @@ describe CannedReply do
     context "passing :gay => true" do
       it "should generate a greeting aimed at gay users" do
         assert_random(:greeting, :gay => true) do |result|
-          result.should =~ /(?:love|gay)/i
+          expect(result).to match(/(?:love|gay)/i)
         end
       end
     end
@@ -82,13 +82,13 @@ describe CannedReply do
 
   describe "#contact_me" do
     def assert_sms_me(result)
-      result.should =~ /sms/i
+      expect(result).to match(/sms/i)
       assert_contact_number_included(result)
     end
 
     def assert_call_me(result, positive_assertion = true)
       call_regex = /call/i
-      positive_assertion ? result.should =~ call_regex : result.should_not =~ call_regex
+      positive_assertion ? (expect(result).to match(call_regex)) : (expect(result).not_to match(call_regex))
     end
 
     context "the recipient's operator does not have voice enabled" do

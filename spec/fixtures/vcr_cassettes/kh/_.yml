@@ -10,7 +10,7 @@ http_interactions:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -38,7 +38,62 @@ http_interactions:
       - close
     body:
       encoding: US-ASCII
-      string: ! "{\n   \"results\" : [],\n   \"status\" : \"ZERO_RESULTS\"\n}\n"
+      string: |
+        {
+           "results" : [],
+           "status" : "ZERO_RESULTS"
+        }
     http_version: '1.1'
   recorded_at: Wed, 18 Apr 2012 17:54:08 GMT
-recorded_with: VCR 2.0.0
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=%E1%9E%81%E1%9F%92%E1%9E%84%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%84%E1%9F%8B%E1%9E%8A%E1%9E%B8%E1%9E%84%20%E1%9E%A2%E1%9F%92%E1%9E%93%E1%9E%80%E1%9E%87%E1%9E%B6%E1%9E%93%E1%9E%9A%E1%9E%8E%E1%9E%B6,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:08 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:08 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [],
+           "status" : "ZERO_RESULTS"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:07 GMT
+recorded_with: VCR 2.9.3

@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe "Report" do
   include AuthenticationHelpers
@@ -55,11 +55,11 @@ describe "Report" do
       it "should queue a job to generate a report" do
         expect(enqueued_jobs.size).to eq(1)
         job = enqueued_jobs.first
-        job[:args].first.should == {"year" => "2014", "month" => "1"}
+        expect(job[:args].first).to eq({"year" => "2014", "month" => "1"})
       end
 
       it "should return a 201" do
-        response.status.should be(201)
+        expect(response.status).to be(201)
       end
     end
 
@@ -73,7 +73,7 @@ describe "Report" do
       end
 
       it "should return a 400" do
-        response.status.should be(400)
+        expect(response.status).to be(400)
       end
     end
   end
@@ -85,7 +85,7 @@ describe "Report" do
       end
 
       it "should return a 404" do
-        response.status.should be(404)
+        expect(response.status).to be(404)
       end
     end
 
@@ -95,13 +95,13 @@ describe "Report" do
       end
 
       it "should return a 200" do
-        response.status.should be(200)
+        expect(response.status).to be(200)
       end
 
       it "should return the generated report" do
         parsed_response = JSON.parse(response.body)["report"]
-        parsed_response["month"].should == "1"
-        parsed_response["year"].should == "2014"
+        expect(parsed_response["month"]).to eq("1")
+        expect(parsed_response["year"]).to eq("2014")
       end
     end
   end
@@ -120,15 +120,15 @@ describe "Report" do
     end
 
     it "should return a 200" do
-      response.status.should be(200)
+      expect(response.status).to be(200)
     end
 
     it "should delete the report" do
       post_wait_and_retrieve_report(:month => 1, :year => 2014)
-      response.status.should be(200)
+      expect(response.status).to be(200)
       delete_report
       get_report
-      response.status.should be(404)
+      expect(response.status).to be(404)
     end
   end
 end

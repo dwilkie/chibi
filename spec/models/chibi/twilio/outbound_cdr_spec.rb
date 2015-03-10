@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 module Chibi
   module Twilio
@@ -15,7 +15,7 @@ module Chibi
         expect_twilio_cdr_fetch(
           :call_sid => uuid, :to => related_user.mobile_number,
           :direction => :outbound, :parent_call_sid => related_phone_call.sid
-        ) { subject.should be_valid }
+        ) { expect(subject).to be_valid }
       end
 
       it_should_behave_like "a Chibi Twilio CDR" do

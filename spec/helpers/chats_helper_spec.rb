@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ChatsHelper do
   let(:chat) { create(:chat) }
@@ -9,10 +9,10 @@ describe ChatsHelper do
     def assert_chat_user_link(reference_chat, user_type, options = {})
       result = helper.chat_user_link(reference_chat, user_type)
       if options[:link] == false
-        result.should == "-"
+        expect(result).to eq("-")
       else
         reference_user = reference_chat.send(user_type)
-        result.should have_link(
+        expect(result).to have_link(
           reference_user.screen_id,
           :href => "/users/#{reference_user.id}"
         )

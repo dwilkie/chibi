@@ -16,6 +16,8 @@ class Message < ActiveRecord::Base
 
   validates :guid, :uniqueness => true, :allow_nil => true
 
+  before_validation :normalize_channel, :normalize_to, :on => :create
+
   aasm :column => :state, :whiny_transitions => false do
     state :received, :initial => true
     state :processed
@@ -39,6 +41,24 @@ class Message < ActiveRecord::Base
     unprocessed.where.not(:chat_id => nil).find_each do |message|
       message.process!
     end
+  end
+
+  def self.from_nuntium?(params)
+    nuntium_params(params).any?
+  end
+
+  # nuntium
+  def self.accept_messages_from_channel?(params)
+    enabled_channels = (Rails.application.secrets[:nuntium_messages_enabled_channels]).to_s.downcase.split(";")
+    enabled_channels.include?(nuntium_params(params)[:channel].to_s.downcase)
+  end
+
+  def self.from_aggregator(params = {})
+    from_nuntium?(params) ? from_nuntium(params) : from_twilio(params)
+  end
+
+  def self.from_smsc(params = {})
+    new(params.slice(:body, :from, :to, :channel))
   end
 
   def body
@@ -109,7 +129,31 @@ class Message < ActiveRecord::Base
     @normalized_body ||= body.strip.downcase
   end
 
+  def normalize_channel
+    self.channel = channel.downcase if channel?
+  end
+
+  def normalize_to
+    self.to = Phony.normalize(to) if to?
+  end
+
   def activate_chats!
     Chat.activate_multiple!(user, :starter => self, :notify => true)
   end
+
+  def self.nuntium_params(params)
+    params[:message] || {}
+  end
+  private_class_method :nuntium_params
+
+  def self.from_nuntium(params)
+    new(nuntium_params(params).slice(:body, :guid, :from, :to, :channel))
+  end
+  private_class_method :from_nuntium
+
+  def self.from_twilio(params)
+    params.underscorify_keys!
+    new(params.slice(:body, :from, :to).merge(:guid => params[:message_sid], :channel => "twilio"))
+  end
+  private_class_method :from_twilio
 end

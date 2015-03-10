@@ -3,12 +3,14 @@ http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?address=kracheh%2C+Cambodia&language=en&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -34,40 +36,80 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Kratie\",\n               \"short_name\"
-      : \"Kratie\",\n               \"types\" : [ \"locality\", \"political\" ]\n
-      \           },\n            {\n               \"long_name\" : \"Kracheh\",\n
-      \              \"short_name\" : \"Kracheh\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Kratie\",\n               \"short_name\" : \"Kratie\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Kratie, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.51468190,\n                  \"lng\" : 106.062870\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.4583680,\n
-      \                 \"lng\" : 106.01446150\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.480,\n               \"lng\"
-      : 106.030\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.50178780,\n                  \"lng\" : 106.06201480\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.45821040,\n
-      \                 \"lng\" : 105.99798520\n               }\n            }\n
-      \        },\n         \"types\" : [ \"locality\", \"political\" ]\n      }\n
-      \  ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kratie",
+                       "short_name" : "Kratie",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Kracheh",
+                       "short_name" : "Kracheh",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kratie",
+                       "short_name" : "Kratie",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kratie, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 12.51468190,
+                          "lng" : 106.062870
+                       },
+                       "southwest" : {
+                          "lat" : 12.4583680,
+                          "lng" : 106.01446150
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.480,
+                       "lng" : 106.030
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 12.50178780,
+                          "lng" : 106.06201480
+                       },
+                       "southwest" : {
+                          "lat" : 12.45821040,
+                          "lng" : 105.99798520
+                       }
+                    }
+                 },
+                 "types" : [ "locality", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 16:41:19 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=12.48%2C106.03&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -93,102 +135,500 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"308\",\n               \"short_name\"
-      : \"308\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Kratie\",\n               \"short_name\" :
-      \"Kratie\",\n               \"types\" : [ \"locality\", \"political\" ]\n            },\n
-      \           {\n               \"long_name\" : \"Kracheh\",\n               \"short_name\"
-      : \"Kracheh\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Kratie\",\n               \"short_name\" : \"Kratie\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"308, Kratie, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.48225280,\n                  \"lng\" : 106.02192880\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.4757160,\n
-      \                 \"lng\" : 106.01896260\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.47898440,\n               \"lng\"
-      : 106.02044570\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.48225280,\n                  \"lng\" : 106.02192880\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.4757160,\n
-      \                 \"lng\" : 106.01896260\n               }\n            }\n
-      \        },\n         \"types\" : [ \"route\" ]\n      },\n      {\n         \"address_components\"
-      : [\n            {\n               \"long_name\" : \"Kratie\",\n               \"short_name\"
-      : \"Kratie\",\n               \"types\" : [ \"locality\", \"political\" ]\n
-      \           },\n            {\n               \"long_name\" : \"Kracheh\",\n
-      \              \"short_name\" : \"Kracheh\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Kratie\",\n               \"short_name\" : \"Kratie\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Kratie, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.51468190,\n                  \"lng\" : 106.062870\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.4583680,\n
-      \                 \"lng\" : 106.01446150\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.480,\n               \"lng\"
-      : 106.030\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 12.51468190,\n                  \"lng\" : 106.062870\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 12.4583680,\n
-      \                 \"lng\" : 106.01446150\n               }\n            }\n
-      \        },\n         \"types\" : [ \"locality\", \"political\" ]\n      },\n
-      \     {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Kracheh\",\n               \"short_name\" : \"Kracheh\",\n               \"types\"
-      : [ \"administrative_area_level_2\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Kratie\",\n               \"short_name\" :
-      \"Kratie\",\n               \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n            },\n            {\n               \"long_name\" : \"Cambodia\",\n
-      \              \"short_name\" : \"KH\",\n               \"types\" : [ \"country\",
-      \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Kracheh, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 12.7869430,\n
-      \                 \"lng\" : 106.40919690\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 12.3327070,\n                  \"lng\" : 105.9990120\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 12.57598620,\n               \"lng\" : 106.25221430\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 12.7869430,\n                  \"lng\" : 106.40919690\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 12.3327070,\n                  \"lng\" : 105.9990120\n               }\n            }\n
-      \        },\n         \"types\" : [ \"administrative_area_level_2\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Kratie\",\n               \"short_name\" : \"Kratie\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Kratie, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 13.4162510,\n                  \"lng\" : 106.8154020\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 11.9471130,\n
-      \                 \"lng\" : 105.5888580\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 12.86062990,\n               \"lng\"
-      : 105.96998780\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 13.4162510,\n                  \"lng\" : 106.8154020\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 11.9471130,\n
-      \                 \"lng\" : 105.5888580\n               }\n            }\n         },\n
-      \        \"types\" : [ \"administrative_area_level_1\", \"political\" ]\n      },\n
-      \     {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
-      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
-      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "308",
+                       "short_name" : "308",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Kratie",
+                       "short_name" : "Kratie",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Kracheh",
+                       "short_name" : "Kracheh",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kratie",
+                       "short_name" : "Kratie",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "308, Kratie, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 12.48225280,
+                          "lng" : 106.02192880
+                       },
+                       "southwest" : {
+                          "lat" : 12.4757160,
+                          "lng" : 106.01896260
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.47898440,
+                       "lng" : 106.02044570
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 12.48225280,
+                          "lng" : 106.02192880
+                       },
+                       "southwest" : {
+                          "lat" : 12.4757160,
+                          "lng" : 106.01896260
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kratie",
+                       "short_name" : "Kratie",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Kracheh",
+                       "short_name" : "Kracheh",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kratie",
+                       "short_name" : "Kratie",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kratie, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 12.51468190,
+                          "lng" : 106.062870
+                       },
+                       "southwest" : {
+                          "lat" : 12.4583680,
+                          "lng" : 106.01446150
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.480,
+                       "lng" : 106.030
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 12.51468190,
+                          "lng" : 106.062870
+                       },
+                       "southwest" : {
+                          "lat" : 12.4583680,
+                          "lng" : 106.01446150
+                       }
+                    }
+                 },
+                 "types" : [ "locality", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kracheh",
+                       "short_name" : "Kracheh",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Kratie",
+                       "short_name" : "Kratie",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kracheh, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 12.7869430,
+                          "lng" : 106.40919690
+                       },
+                       "southwest" : {
+                          "lat" : 12.3327070,
+                          "lng" : 105.9990120
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.57598620,
+                       "lng" : 106.25221430
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 12.7869430,
+                          "lng" : 106.40919690
+                       },
+                       "southwest" : {
+                          "lat" : 12.3327070,
+                          "lng" : 105.9990120
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Kratie",
+                       "short_name" : "Kratie",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Kratie, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 13.4162510,
+                          "lng" : 106.8154020
+                       },
+                       "southwest" : {
+                          "lat" : 11.9471130,
+                          "lng" : 105.5888580
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.86062990,
+                       "lng" : 105.96998780
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 13.4162510,
+                          "lng" : 106.8154020
+                       },
+                       "southwest" : {
+                          "lat" : 11.9471130,
+                          "lng" : 105.5888580
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.5656790,
+                       "lng" : 104.9909630
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 16:41:19 GMT
-recorded_with: VCR 2.0.0.rc1
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=kracheh,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:15 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:15 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        ewogICAicmVzdWx0cyIgOiBbCiAgICAgIHsKICAgICAgICAgImFkZHJlc3Nf
+        Y29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAg
+        ImxvbmdfbmFtZSIgOiAiS3JhdGnDqSIsCiAgICAgICAgICAgICAgICJzaG9y
+        dF9uYW1lIiA6ICJLcmF0acOpIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6
+        IFsgImFkbWluaXN0cmF0aXZlX2FyZWFfbGV2ZWxfMSIsICJwb2xpdGljYWwi
+        IF0KICAgICAgICAgICAgfSwKICAgICAgICAgICAgewogICAgICAgICAgICAg
+        ICAibG9uZ19uYW1lIiA6ICJDYW1ib2RpYSIsCiAgICAgICAgICAgICAgICJz
+        aG9ydF9uYW1lIiA6ICJLSCIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBb
+        ICJjb3VudHJ5IiwgInBvbGl0aWNhbCIgXQogICAgICAgICAgICB9CiAgICAg
+        ICAgIF0sCiAgICAgICAgICJmb3JtYXR0ZWRfYWRkcmVzcyIgOiAiS3JhdGnD
+        qSwgQ2FtYm9kaWEiLAogICAgICAgICAiZ2VvbWV0cnkiIDogewogICAgICAg
+        ICAgICAiYm91bmRzIiA6IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIg
+        OiB7CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTMuNDE2MjUxMSwKICAg
+        ICAgICAgICAgICAgICAgImxuZyIgOiAxMDYuODE1NDAyCiAgICAgICAgICAg
+        ICAgIH0sCiAgICAgICAgICAgICAgICJzb3V0aHdlc3QiIDogewogICAgICAg
+        ICAgICAgICAgICAibGF0IiA6IDExLjk0NzExMjksCiAgICAgICAgICAgICAg
+        ICAgICJsbmciIDogMTA1LjU4ODg1NzkKICAgICAgICAgICAgICAgfQogICAg
+        ICAgICAgICB9LAogICAgICAgICAgICAibG9jYXRpb24iIDogewogICAgICAg
+        ICAgICAgICAibGF0IiA6IDEyLjg2MDYyOTksCiAgICAgICAgICAgICAgICJs
+        bmciIDogMTA1Ljk2OTk4NzgKICAgICAgICAgICAgfSwKICAgICAgICAgICAg
+        ImxvY2F0aW9uX3R5cGUiIDogIkFQUFJPWElNQVRFIiwKICAgICAgICAgICAg
+        InZpZXdwb3J0IiA6IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7
+        CiAgICAgICAgICAgICAgICAgICJsYXQiIDogMTMuNDE2MjUxMSwKICAgICAg
+        ICAgICAgICAgICAgImxuZyIgOiAxMDYuODE1NDAyCiAgICAgICAgICAgICAg
+        IH0sCiAgICAgICAgICAgICAgICJzb3V0aHdlc3QiIDogewogICAgICAgICAg
+        ICAgICAgICAibGF0IiA6IDExLjk0NzExMjksCiAgICAgICAgICAgICAgICAg
+        ICJsbmciIDogMTA1LjU4ODg1NzkKICAgICAgICAgICAgICAgfQogICAgICAg
+        ICAgICB9CiAgICAgICAgIH0sCiAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1p
+        bmlzdHJhdGl2ZV9hcmVhX2xldmVsXzEiLCAicG9saXRpY2FsIiBdCiAgICAg
+        IH0KICAgXSwKICAgInN0YXR1cyIgOiAiT0siCn0K
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:15 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=12.8606299,105.9699878&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:16 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:16 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        ewogICAicmVzdWx0cyIgOiBbCiAgICAgIHsKICAgICAgICAgImFkZHJlc3Nf
+        Y29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAg
+        ImxvbmdfbmFtZSIgOiAiUm9hZCBOYXRpb25hbCA3IiwKICAgICAgICAgICAg
+        ICAgInNob3J0X25hbWUiIDogIlJvYWQgTmF0aW9uYWwgNyIsCiAgICAgICAg
+        ICAgICAgICJ0eXBlcyIgOiBbICJyb3V0ZSIgXQogICAgICAgICAgICB9LAog
+        ICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJsb25nX25hbWUiIDogIkty
+        YWNoZWgiLAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIgOiAiS3JhY2hl
+        aCIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2
+        ZV9hcmVhX2xldmVsXzIiLCAicG9saXRpY2FsIiBdCiAgICAgICAgICAgIH0s
+        CiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAi
+        S3JhdGnDqSIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJLcmF0
+        acOpIiwKICAgICAgICAgICAgICAgInR5cGVzIiA6IFsgImFkbWluaXN0cmF0
+        aXZlX2FyZWFfbGV2ZWxfMSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAg
+        fSwKICAgICAgICAgICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6
+        ICJDYW1ib2RpYSIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJL
+        SCIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJjb3VudHJ5IiwgInBv
+        bGl0aWNhbCIgXQogICAgICAgICAgICB9CiAgICAgICAgIF0sCiAgICAgICAg
+        ICJmb3JtYXR0ZWRfYWRkcmVzcyIgOiAiUm9hZCBOYXRpb25hbCA3LCBDYW1i
+        b2RpYSIsCiAgICAgICAgICJnZW9tZXRyeSIgOiB7CiAgICAgICAgICAgICJi
+        b3VuZHMiIDogewogICAgICAgICAgICAgICAibm9ydGhlYXN0IiA6IHsKICAg
+        ICAgICAgICAgICAgICAgImxhdCIgOiAxMi42ODI5MjU3LAogICAgICAgICAg
+        ICAgICAgICAibG5nIiA6IDEwNi4xMTE3Nzk0CiAgICAgICAgICAgICAgIH0s
+        CiAgICAgICAgICAgICAgICJzb3V0aHdlc3QiIDogewogICAgICAgICAgICAg
+        ICAgICAibGF0IiA6IDEyLjY1OTM2OTksCiAgICAgICAgICAgICAgICAgICJs
+        bmciIDogMTA2LjEwNzY1MjIKICAgICAgICAgICAgICAgfQogICAgICAgICAg
+        ICB9LAogICAgICAgICAgICAibG9jYXRpb24iIDogewogICAgICAgICAgICAg
+        ICAibGF0IiA6IDEyLjY3MTQyNzksCiAgICAgICAgICAgICAgICJsbmciIDog
+        MTA2LjEwODY4MTEKICAgICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0
+        aW9uX3R5cGUiIDogIkFQUFJPWElNQVRFIiwKICAgICAgICAgICAgInZpZXdw
+        b3J0IiA6IHsKICAgICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAg
+        ICAgICAgICAgICAgICJsYXQiIDogMTIuNjgyOTI1NywKICAgICAgICAgICAg
+        ICAgICAgImxuZyIgOiAxMDYuMTExNzc5NAogICAgICAgICAgICAgICB9LAog
+        ICAgICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAg
+        ICAgImxhdCIgOiAxMi42NTkzNjk5LAogICAgICAgICAgICAgICAgICAibG5n
+        IiA6IDEwNi4xMDc2NTIyCiAgICAgICAgICAgICAgIH0KICAgICAgICAgICAg
+        fQogICAgICAgICB9LAogICAgICAgICAidHlwZXMiIDogWyAicm91dGUiIF0K
+        ICAgICAgfSwKICAgICAgewogICAgICAgICAiYWRkcmVzc19jb21wb25lbnRz
+        IiA6IFsKICAgICAgICAgICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1l
+        IiA6ICJTYW1ib3VyIiwKICAgICAgICAgICAgICAgInNob3J0X25hbWUiIDog
+        IlNhbWJvdXIiLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiYWRtaW5p
+        c3RyYXRpdmVfYXJlYV9sZXZlbF8yIiwgInBvbGl0aWNhbCIgXQogICAgICAg
+        ICAgICB9LAogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICJsb25nX25h
+        bWUiIDogIktyYXRpw6kiLAogICAgICAgICAgICAgICAic2hvcnRfbmFtZSIg
+        OiAiS3JhdGnDqSIsCiAgICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1p
+        bmlzdHJhdGl2ZV9hcmVhX2xldmVsXzEiLCAicG9saXRpY2FsIiBdCiAgICAg
+        ICAgICAgIH0sCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdf
+        bmFtZSIgOiAiQ2FtYm9kaWEiLAogICAgICAgICAgICAgICAic2hvcnRfbmFt
+        ZSIgOiAiS0giLAogICAgICAgICAgICAgICAidHlwZXMiIDogWyAiY291bnRy
+        eSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfQogICAgICAgICBdLAog
+        ICAgICAgICAiZm9ybWF0dGVkX2FkZHJlc3MiIDogIlNhbWJvdXIsIENhbWJv
+        ZGlhIiwKICAgICAgICAgImdlb21ldHJ5IiA6IHsKICAgICAgICAgICAgImJv
+        dW5kcyIgOiB7CiAgICAgICAgICAgICAgICJub3J0aGVhc3QiIDogewogICAg
+        ICAgICAgICAgICAgICAibGF0IiA6IDEzLjQxNjI1MzgsCiAgICAgICAgICAg
+        ICAgICAgICJsbmciIDogMTA2LjYxNzMzNjIKICAgICAgICAgICAgICAgfSwK
+        ICAgICAgICAgICAgICAgInNvdXRod2VzdCIgOiB7CiAgICAgICAgICAgICAg
+        ICAgICJsYXQiIDogMTIuNjAzNTY5MiwKICAgICAgICAgICAgICAgICAgImxu
+        ZyIgOiAxMDUuNTg4ODI3MQogICAgICAgICAgICAgICB9CiAgICAgICAgICAg
+        IH0sCiAgICAgICAgICAgICJsb2NhdGlvbiIgOiB7CiAgICAgICAgICAgICAg
+        ICJsYXQiIDogMTIuOTQzOTc5MSwKICAgICAgICAgICAgICAgImxuZyIgOiAx
+        MDYuMDY0MDE3OQogICAgICAgICAgICB9LAogICAgICAgICAgICAibG9jYXRp
+        b25fdHlwZSIgOiAiQVBQUk9YSU1BVEUiLAogICAgICAgICAgICAidmlld3Bv
+        cnQiIDogewogICAgICAgICAgICAgICAibm9ydGhlYXN0IiA6IHsKICAgICAg
+        ICAgICAgICAgICAgImxhdCIgOiAxMy40MTYyNTM4LAogICAgICAgICAgICAg
+        ICAgICAibG5nIiA6IDEwNi42MTczMzYyCiAgICAgICAgICAgICAgIH0sCiAg
+        ICAgICAgICAgICAgICJzb3V0aHdlc3QiIDogewogICAgICAgICAgICAgICAg
+        ICAibGF0IiA6IDEyLjYwMzU2OTIsCiAgICAgICAgICAgICAgICAgICJsbmci
+        IDogMTA1LjU4ODgyNzEKICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9
+        CiAgICAgICAgIH0sCiAgICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJh
+        dGl2ZV9hcmVhX2xldmVsXzIiLCAicG9saXRpY2FsIiBdCiAgICAgIH0sCiAg
+        ICAgIHsKICAgICAgICAgImFkZHJlc3NfY29tcG9uZW50cyIgOiBbCiAgICAg
+        ICAgICAgIHsKICAgICAgICAgICAgICAgImxvbmdfbmFtZSIgOiAiS3JhdGnD
+        qSIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJLcmF0acOpIiwK
+        ICAgICAgICAgICAgICAgInR5cGVzIiA6IFsgImFkbWluaXN0cmF0aXZlX2Fy
+        ZWFfbGV2ZWxfMSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAgfSwKICAg
+        ICAgICAgICAgewogICAgICAgICAgICAgICAibG9uZ19uYW1lIiA6ICJDYW1i
+        b2RpYSIsCiAgICAgICAgICAgICAgICJzaG9ydF9uYW1lIiA6ICJLSCIsCiAg
+        ICAgICAgICAgICAgICJ0eXBlcyIgOiBbICJjb3VudHJ5IiwgInBvbGl0aWNh
+        bCIgXQogICAgICAgICAgICB9CiAgICAgICAgIF0sCiAgICAgICAgICJmb3Jt
+        YXR0ZWRfYWRkcmVzcyIgOiAiS3JhdGnDqSwgQ2FtYm9kaWEiLAogICAgICAg
+        ICAiZ2VvbWV0cnkiIDogewogICAgICAgICAgICAiYm91bmRzIiA6IHsKICAg
+        ICAgICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAgICAgICAgICAg
+        ICJsYXQiIDogMTMuNDE2MjUxMSwKICAgICAgICAgICAgICAgICAgImxuZyIg
+        OiAxMDYuODE1NDAyCiAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAg
+        ICJzb3V0aHdlc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0IiA6IDEx
+        Ljk0NzExMjksCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTA1LjU4ODg1
+        NzkKICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9LAogICAgICAgICAg
+        ICAibG9jYXRpb24iIDogewogICAgICAgICAgICAgICAibGF0IiA6IDEyLjg2
+        MDYyOTksCiAgICAgICAgICAgICAgICJsbmciIDogMTA1Ljk2OTk4NzgKICAg
+        ICAgICAgICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uX3R5cGUiIDogIkFQ
+        UFJPWElNQVRFIiwKICAgICAgICAgICAgInZpZXdwb3J0IiA6IHsKICAgICAg
+        ICAgICAgICAgIm5vcnRoZWFzdCIgOiB7CiAgICAgICAgICAgICAgICAgICJs
+        YXQiIDogMTMuNDE2MjUxMSwKICAgICAgICAgICAgICAgICAgImxuZyIgOiAx
+        MDYuODE1NDAyCiAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICJz
+        b3V0aHdlc3QiIDogewogICAgICAgICAgICAgICAgICAibGF0IiA6IDExLjk0
+        NzExMjksCiAgICAgICAgICAgICAgICAgICJsbmciIDogMTA1LjU4ODg1NzkK
+        ICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgIH0sCiAg
+        ICAgICAgICJ0eXBlcyIgOiBbICJhZG1pbmlzdHJhdGl2ZV9hcmVhX2xldmVs
+        XzEiLCAicG9saXRpY2FsIiBdCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAg
+        ImFkZHJlc3NfY29tcG9uZW50cyIgOiBbCiAgICAgICAgICAgIHsKICAgICAg
+        ICAgICAgICAgImxvbmdfbmFtZSIgOiAiQ2FtYm9kaWEiLAogICAgICAgICAg
+        ICAgICAic2hvcnRfbmFtZSIgOiAiS0giLAogICAgICAgICAgICAgICAidHlw
+        ZXMiIDogWyAiY291bnRyeSIsICJwb2xpdGljYWwiIF0KICAgICAgICAgICAg
+        fQogICAgICAgICBdLAogICAgICAgICAiZm9ybWF0dGVkX2FkZHJlc3MiIDog
+        IkNhbWJvZGlhIiwKICAgICAgICAgImdlb21ldHJ5IiA6IHsKICAgICAgICAg
+        ICAgImJvdW5kcyIgOiB7CiAgICAgICAgICAgICAgICJub3J0aGVhc3QiIDog
+        ewogICAgICAgICAgICAgICAgICAibGF0IiA6IDE0LjY5MDE3OSwKICAgICAg
+        ICAgICAgICAgICAgImxuZyIgOiAxMDcuNjI3Njg3CiAgICAgICAgICAgICAg
+        IH0sCiAgICAgICAgICAgICAgICJzb3V0aHdlc3QiIDogewogICAgICAgICAg
+        ICAgICAgICAibGF0IiA6IDkuMjg1NzU0MSwKICAgICAgICAgICAgICAgICAg
+        ImxuZyIgOiAxMDIuMzMzNTQyCiAgICAgICAgICAgICAgIH0KICAgICAgICAg
+        ICAgfSwKICAgICAgICAgICAgImxvY2F0aW9uIiA6IHsKICAgICAgICAgICAg
+        ICAgImxhdCIgOiAxMi41NjU2NzksCiAgICAgICAgICAgICAgICJsbmciIDog
+        MTA0Ljk5MDk2MwogICAgICAgICAgICB9LAogICAgICAgICAgICAibG9jYXRp
+        b25fdHlwZSIgOiAiQVBQUk9YSU1BVEUiLAogICAgICAgICAgICAidmlld3Bv
+        cnQiIDogewogICAgICAgICAgICAgICAibm9ydGhlYXN0IiA6IHsKICAgICAg
+        ICAgICAgICAgICAgImxhdCIgOiAxNC42OTAxNzksCiAgICAgICAgICAgICAg
+        ICAgICJsbmciIDogMTA3LjYyNzY4NwogICAgICAgICAgICAgICB9LAogICAg
+        ICAgICAgICAgICAic291dGh3ZXN0IiA6IHsKICAgICAgICAgICAgICAgICAg
+        ImxhdCIgOiA5LjI4NTc1NDEsCiAgICAgICAgICAgICAgICAgICJsbmciIDog
+        MTAyLjMzMzU0MgogICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAg
+        ICAgICAgfSwKICAgICAgICAgInR5cGVzIiA6IFsgImNvdW50cnkiLCAicG9s
+        aXRpY2FsIiBdCiAgICAgIH0KICAgXSwKICAgInN0YXR1cyIgOiAiT0siCn0K
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:16 GMT
+recorded_with: VCR 2.9.3

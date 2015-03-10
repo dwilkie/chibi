@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe OverviewPresenter do
   include ActionView::TestCase::Behavior
@@ -25,19 +25,19 @@ describe OverviewPresenter do
       result.text.match(/options\s*=\s*(.+)\;/)[1]
     )
 
-    highchart_options["title"]["text"].should == assertions[:title]
+    expect(highchart_options["title"]["text"]).to eq(assertions[:title])
 
     chart_options = highchart_options["chart"]
     series_options = highchart_options["series"]
 
-    chart_options["renderTo"].should == "#{identifier}_chart"
+    expect(chart_options["renderTo"]).to eq("#{identifier}_chart")
 
-    chart_options["borderWidth"].should == 5
-    chart_options["zoomType"].should == "y"
+    expect(chart_options["borderWidth"]).to eq(5)
+    expect(chart_options["zoomType"]).to eq("y")
 
     sample_data.each_with_index do |(identifier, data_set), index|
-      series_options[index]["name"].should == identifier.to_s.titleize
-      series_options[index]["data"].should == data_set
+      expect(series_options[index]["name"]).to eq(identifier.to_s.titleize)
+      expect(series_options[index]["data"]).to eq(data_set)
     end
   end
 
@@ -49,31 +49,29 @@ describe OverviewPresenter do
     title ||= identifier.to_s.titleize
     result = capybara_string(result)
     section = result.find("##{identifier}")
-    section.should have_selector(".chart_title", :text => title)
+    expect(section).to have_selector(".chart_title", :text => title)
     assert_highchart(identifier, section, :title => title)
-    result.should have_link("All", :href => overview_path(:all => true))
-    result.should have_link("6 Months", :href => overview_path)
-    result.should have_selector(".separator")
+    expect(result).to have_selector(".separator")
   end
 
   def assert_overview_methods
     sample_data.keys.each do |method|
-      overview.should_receive(method)
+      expect(overview).to receive(method)
     end
   end
 
   describe "#timeline" do
     before do
-      overview.stub(:timeframe=)
+      allow(overview).to receive(:timeframe=)
     end
 
     context "passing no options" do
       before do
-        overview.stub(:timeframe).and_return(:day)
+        allow(overview).to receive(:timeframe).and_return(:day)
       end
 
       it "should render a StockChart showing an overview by day" do
-        overview.should_receive(:timeframe=).with(:day)
+        expect(overview).to receive(:timeframe=).with(:day)
         assert_overview_methods
         assert_overview_section(:timeline_by_day, presenter.timeline)
       end
@@ -81,11 +79,11 @@ describe OverviewPresenter do
 
     context "passing :timeframe => :month" do
       before do
-        overview.stub(:timeframe).and_return(:month)
+        allow(overview).to receive(:timeframe).and_return(:month)
       end
 
       it "should render a StockChart showing an overview by month" do
-        overview.should_receive(:timeframe=).with(:month)
+        expect(overview).to receive(:timeframe=).with(:month)
         assert_overview_methods
         assert_overview_section(:timeline_by_month, presenter.timeline(:timeframe => :month))
       end
@@ -106,7 +104,7 @@ describe OverviewPresenter do
 
       it "should return a link to create a report for December 2013" do
         result = capybara_string(presenter.menu)
-        result.should have_link(
+        expect(result).to have_link(
           "create report for December 2013", :href => report_path(
             :report => {:month => 12, :year => 2013}
           )
@@ -125,7 +123,7 @@ describe OverviewPresenter do
 
       it "should return a link to create a report for March 2014" do
         result = capybara_string(presenter.menu)
-        result.should have_link(
+        expect(result).to have_link(
           "create report for March 2014", :href => report_path(
             :report => {:year => 2014, :month => 3}
           )

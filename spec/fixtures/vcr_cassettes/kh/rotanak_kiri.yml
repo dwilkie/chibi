@@ -3,12 +3,14 @@ http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?address=rotanak+kiri%2C+Cambodia&language=en&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -34,35 +36,70 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Ratanakiri\",\n               \"short_name\"
-      : \"Ratanakiri\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Ratanakiri, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 14.6864040,\n
-      \                 \"lng\" : 107.6277160\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 13.1666070,\n                  \"lng\" : 106.5465850\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 13.85766070,\n               \"lng\" : 107.10119310\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.54993620,\n                  \"lng\" : 108.12566820\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 13.16331560,\n                  \"lng\" : 106.0767180\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Ratanakiri",
+                       "short_name" : "Ratanakiri",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Ratanakiri, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6864040,
+                          "lng" : 107.6277160
+                       },
+                       "southwest" : {
+                          "lat" : 13.1666070,
+                          "lng" : 106.5465850
+                       }
+                    },
+                    "location" : {
+                       "lat" : 13.85766070,
+                       "lng" : 107.10119310
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.54993620,
+                          "lng" : 108.12566820
+                       },
+                       "southwest" : {
+                          "lat" : 13.16331560,
+                          "lng" : 106.0767180
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 16:53:59 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=13.8576607%2C107.1011931&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -88,79 +125,526 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"1944\",\n               \"short_name\"
-      : \"1944\",\n               \"types\" : [ \"route\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Ta Veaeng\",\n               \"short_name\"
-      : \"Ta Veaeng\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Ratanakiri\",\n               \"short_name\" : \"Ratanakiri\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"1944, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 14.03999960,\n                  \"lng\" : 107.10798740\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 14.03863290,\n
-      \                 \"lng\" : 107.10749390\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 14.03924410,\n               \"lng\"
-      : 107.10794580\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 14.04066523029150,\n                  \"lng\" : 107.1090896302915\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 14.03796726970850,\n
-      \                 \"lng\" : 107.1063916697085\n               }\n            }\n
-      \        },\n         \"types\" : [ \"route\" ]\n      },\n      {\n         \"address_components\"
-      : [\n            {\n               \"long_name\" : \"Ou Chum\",\n               \"short_name\"
-      : \"Ou Chum\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Ratanakiri\",\n               \"short_name\" : \"Ratanakiri\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Ou Chum, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 13.93165130,\n                  \"lng\" : 107.17437740\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 13.7320480,\n
-      \                 \"lng\" : 106.87156680\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 13.84033210,\n               \"lng\"
-      : 107.03032210\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 13.93165130,\n                  \"lng\" : 107.17437740\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 13.7320480,\n
-      \                 \"lng\" : 106.87156680\n               }\n            }\n
-      \        },\n         \"types\" : [ \"administrative_area_level_2\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Ratanakiri\",\n               \"short_name\" : \"Ratanakiri\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Ratanakiri, Cambodia\",\n         \"geometry\"
-      : {\n            \"bounds\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 14.6864040,\n                  \"lng\" : 107.6277160\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 13.1666070,\n
-      \                 \"lng\" : 106.5465850\n               }\n            },\n
-      \           \"location\" : {\n               \"lat\" : 13.85766070,\n               \"lng\"
-      : 107.10119310\n            },\n            \"location_type\" : \"APPROXIMATE\",\n
-      \           \"viewport\" : {\n               \"northeast\" : {\n                  \"lat\"
-      : 14.6864040,\n                  \"lng\" : 107.6277160\n               },\n
-      \              \"southwest\" : {\n                  \"lat\" : 13.1666070,\n
-      \                 \"lng\" : 106.5465850\n               }\n            }\n         },\n
-      \        \"types\" : [ \"administrative_area_level_1\", \"political\" ]\n      },\n
-      \     {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
-      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
-      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "1944",
+                       "short_name" : "1944",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Ta Veaeng",
+                       "short_name" : "Ta Veaeng",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Ratanakiri",
+                       "short_name" : "Ratanakiri",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "1944, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.03999960,
+                          "lng" : 107.10798740
+                       },
+                       "southwest" : {
+                          "lat" : 14.03863290,
+                          "lng" : 107.10749390
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.03924410,
+                       "lng" : 107.10794580
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.04066523029150,
+                          "lng" : 107.1090896302915
+                       },
+                       "southwest" : {
+                          "lat" : 14.03796726970850,
+                          "lng" : 107.1063916697085
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Ou Chum",
+                       "short_name" : "Ou Chum",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Ratanakiri",
+                       "short_name" : "Ratanakiri",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Ou Chum, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 13.93165130,
+                          "lng" : 107.17437740
+                       },
+                       "southwest" : {
+                          "lat" : 13.7320480,
+                          "lng" : 106.87156680
+                       }
+                    },
+                    "location" : {
+                       "lat" : 13.84033210,
+                       "lng" : 107.03032210
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 13.93165130,
+                          "lng" : 107.17437740
+                       },
+                       "southwest" : {
+                          "lat" : 13.7320480,
+                          "lng" : 106.87156680
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Ratanakiri",
+                       "short_name" : "Ratanakiri",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Ratanakiri, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6864040,
+                          "lng" : 107.6277160
+                       },
+                       "southwest" : {
+                          "lat" : 13.1666070,
+                          "lng" : 106.5465850
+                       }
+                    },
+                    "location" : {
+                       "lat" : 13.85766070,
+                       "lng" : 107.10119310
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6864040,
+                          "lng" : 107.6277160
+                       },
+                       "southwest" : {
+                          "lat" : 13.1666070,
+                          "lng" : 106.5465850
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.5656790,
+                       "lng" : 104.9909630
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 16:53:59 GMT
-recorded_with: VCR 2.0.0.rc1
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=rotanak%20kiri,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:29 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:29 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Ratanakiri",
+                       "short_name" : "Ratanakiri",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Ratanakiri, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6864041,
+                          "lng" : 107.6277161
+                       },
+                       "southwest" : {
+                          "lat" : 13.1666069,
+                          "lng" : 106.5465848
+                       }
+                    },
+                    "location" : {
+                       "lat" : 13.8576607,
+                       "lng" : 107.1011931
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6864041,
+                          "lng" : 107.6277161
+                       },
+                       "southwest" : {
+                          "lat" : 13.1666069,
+                          "lng" : 106.5465848
+                       }
+                    }
+                 },
+                 "partial_match" : true,
+                 "types" : [ "administrative_area_level_1", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:29 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=13.8576607,107.1011931&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:30 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:30 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "3789",
+                       "short_name" : "3789",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Andoung Meas",
+                       "short_name" : "Andoung Meas",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Ratanakiri",
+                       "short_name" : "Ratanakiri",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "3789, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 13.8499288,
+                          "lng" : 107.2925672
+                       },
+                       "southwest" : {
+                          "lat" : 13.8377674,
+                          "lng" : 107.2888541
+                       }
+                    },
+                    "location" : {
+                       "lat" : 13.843572,
+                       "lng" : 107.291575
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 13.8499288,
+                          "lng" : 107.2925672
+                       },
+                       "southwest" : {
+                          "lat" : 13.8377674,
+                          "lng" : 107.2888541
+                       }
+                    }
+                 },
+                 "types" : [ "route" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Ou Chum",
+                       "short_name" : "Ou Chum",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Ratanakiri",
+                       "short_name" : "Ratanakiri",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Ou Chum, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 13.9316514,
+                          "lng" : 107.1743775
+                       },
+                       "southwest" : {
+                          "lat" : 13.7320481,
+                          "lng" : 106.8715668
+                       }
+                    },
+                    "location" : {
+                       "lat" : 13.8403321,
+                       "lng" : 107.0303221
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 13.9316514,
+                          "lng" : 107.1743775
+                       },
+                       "southwest" : {
+                          "lat" : 13.7320481,
+                          "lng" : 106.8715668
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Ratanakiri",
+                       "short_name" : "Ratanakiri",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Ratanakiri, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6864041,
+                          "lng" : 107.6277161
+                       },
+                       "southwest" : {
+                          "lat" : 13.1666069,
+                          "lng" : 106.5465848
+                       }
+                    },
+                    "location" : {
+                       "lat" : 13.8576607,
+                       "lng" : 107.1011931
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6864041,
+                          "lng" : 107.6277161
+                       },
+                       "southwest" : {
+                          "lat" : 13.1666069,
+                          "lng" : 106.5465848
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.690179,
+                          "lng" : 107.627687
+                       },
+                       "southwest" : {
+                          "lat" : 9.2857541,
+                          "lng" : 102.333542
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.565679,
+                       "lng" : 104.990963
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.690179,
+                          "lng" : 107.627687
+                       },
+                       "southwest" : {
+                          "lat" : 9.2857541,
+                          "lng" : 102.333542
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:30 GMT
+recorded_with: VCR 2.9.3

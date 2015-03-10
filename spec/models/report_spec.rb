@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe Report do
   include ReportHelpers
@@ -37,44 +37,44 @@ describe Report do
     describe ".clear" do
       it "should clear the report" do
         report.clear
-        report.data.should == asserted_report(:empty => true)
+        expect(report.data).to eq(asserted_report(:empty => true))
       end
     end
 
     describe ".year" do
       it "should return the report year" do
-        report.year.should == base_report_data["report"]["year"]
+        expect(report.year).to eq(base_report_data["report"]["year"])
       end
     end
 
     describe ".month" do
       it "should return the report month" do
-        report.month.should == base_report_data["report"]["month"]
+        expect(report.month).to eq(base_report_data["report"]["month"])
       end
     end
 
     describe ".filename" do
       it "should return a filename from the month and the date" do
-        report.filename.should == asserted_report_filename(:january, 2014)
+        expect(report.filename).to eq(asserted_report_filename(:january, 2014))
       end
     end
 
     describe ".type" do
       it "should return 'application/json'" do
-        report.type.should == asserted_report_type
+        expect(report.type).to eq(asserted_report_type)
       end
     end
 
     describe ".data" do
       it "should return the report data" do
-        report.data.should == asserted_report
+        expect(report.data).to eq(asserted_report)
       end
     end
 
     describe ".generated?" do
       context "given the report has been generated" do
         it "should return true" do
-          report.should be_generated
+          expect(report).to be_generated
         end
       end
 
@@ -84,7 +84,7 @@ describe Report do
         end
 
         it "should return false" do
-          report.should_not be_generated
+          expect(report).not_to be_generated
         end
       end
     end
@@ -97,20 +97,20 @@ describe Report do
 
     it "should clear the report" do
       subject
-      report.data.should == asserted_report(:empty => true)
+      expect(report.data).to eq(asserted_report(:empty => true))
     end
   end
 
   describe "#valid?" do
     context "given it has a month and a year" do
       it "should return true" do
-        subject.should be_valid
+        expect(subject).to be_valid
       end
     end
 
     context "given is does not have a month or a year" do
       it "should return false" do
-        Report.new(:year => 2014).should_not be_valid
+        expect(Report.new(:year => 2014)).not_to be_valid
       end
     end
   end
@@ -204,10 +204,10 @@ describe Report do
 
     it "should generate a report" do
       asserted_report
-      report.should_not be_generated
+      expect(report).not_to be_generated
       generated_report = JSON.parse(subject.generate!)
-      generated_report.should == asserted_report
-      report.should be_generated
+      expect(generated_report).to eq(asserted_report)
+      expect(report).to be_generated
     end
   end
 end

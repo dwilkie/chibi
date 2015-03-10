@@ -23,7 +23,9 @@ gem 'multi_xml'
 gem 'carrierwave'
 gem 'fog'
 gem 'sidekiq'
+gem 'sidekiq-failures'
 gem 'sinatra'
+gem 'airbrake'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -51,9 +53,8 @@ end
 group :test do
   gem 'factory_girl'
   gem 'mock_redis'
-  gem 'fakeweb'
+  gem 'webmock'
   gem 'vcr'
-  gem 'database_cleaner'
   gem 'timecop'
   gem 'capybara'
   gem 'launchy'

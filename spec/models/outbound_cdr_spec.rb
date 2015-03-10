@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe OutboundCdr do
   include CdrHelpers
@@ -13,19 +13,19 @@ describe OutboundCdr do
 
   describe "factory" do
     it "should be valid" do
-      subject.should be_valid
+      expect(subject).to be_valid
     end
   end
 
   it "should not be valid without a related user" do
-    build_cdr(
+    expect(build_cdr(
       :cdr_variables => {
         "variables" => {"sip_to_user" => "invalid"},
         "callflow" => {
           "caller_profile" => {"destination_number" => "invalid"}
         }
       }
-    ).should_not be_valid
+    )).not_to be_valid
   end
 
   it_should_behave_like "communicable from user", :passive => true do
@@ -54,14 +54,14 @@ describe OutboundCdr do
 
           it "should set the related inbound cdr" do
             subject.valid?
-            subject.inbound_cdr.should == inbound_cdr
+            expect(subject.inbound_cdr).to eq(inbound_cdr)
           end
         end
 
         context "given no existing related inbound cdr" do
           it "should still set the bridge uuid" do
             subject.valid?
-            subject.bridge_uuid.should be_present
+            expect(subject.bridge_uuid).to be_present
           end
         end
 
@@ -71,7 +71,7 @@ describe OutboundCdr do
 
           it "should set the related phone call" do
             subject.valid?
-            subject.phone_call.should == phone_call
+            expect(subject.phone_call).to eq(phone_call)
           end
         end
 
@@ -99,11 +99,11 @@ describe OutboundCdr do
 
               cdr = build_cdr(default_cdr_options.merge(:sip_to_host => assertions["voip_gateway_host"]))
               cdr.valid?
-              cdr.from.should == number
+              expect(cdr.from).to eq(number)
 
               cdr = build_cdr(default_cdr_options.merge(:sip_to_host => "invalid", :network_addr => assertions["voip_gateway_host"]))
               cdr.valid?
-              cdr.from.should == number
+              expect(cdr.from).to eq(number)
             end
           end
         end
@@ -131,32 +131,35 @@ describe OutboundCdr do
         }
 
         context "which is not active" do
-          let!(:chat) {
+          let(:chat) {
             create(:chat, :friend_active, :user => user, :friend => friend)
           }
 
+          before do
+            chat
+          end
 
           it "should reactivate the chat" do
-            chat.should_not be_active
-            subject.save!
-            chat.reload.should be_active
+            expect(chat).not_to be_active
+            expect_message { subject.save! }
+            expect(chat.reload).to be_active
           end
 
           it "should send a canned message to the caller from the receiver and to the receiver from the caller" do
             expect_message { subject.save! }
-            reply_to(user, chat).body.should =~ /#{spec_translate(:forward_message_approx, user.locale, friend.screen_id)}/
-            reply_to(friend, chat).body.should =~ /#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/
+            expect(reply_to(user, chat).body).to match(/#{spec_translate(:forward_message_approx, user.locale, friend.screen_id)}/)
+            expect(reply_to(friend, chat).body).to match(/#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/)
           end
         end
 
         context "which is currently active" do
           let!(:chat) { create(:chat, :active, :user => user, :friend => friend) }
           it "should not send any canned messages" do
-            chat.should be_active
+            expect(chat).to be_active
             subject.save!
-            chat.reload.should be_active
-            reply_to(user, chat).should be_nil
-            reply_to(friend, chat).should be_nil
+            expect(chat.reload).to be_active
+            expect(reply_to(user, chat)).to be_nil
+            expect(reply_to(friend, chat)).to be_nil
           end
         end
       end

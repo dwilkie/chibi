@@ -3,12 +3,14 @@ http_interactions:
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?address=preah+vihear%2C+Cambodia&language=en&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -34,35 +36,70 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Preah Vihear\",\n               \"short_name\"
-      : \"Preah Vihear\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Preah Vihear, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 14.4343270,\n
-      \                 \"lng\" : 105.8868710\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 13.0990640,\n                  \"lng\" : 104.3539240\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 14.00857970,\n               \"lng\" : 104.84546190\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.7003920,\n                  \"lng\" : 105.8699370\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 13.31467710,\n                  \"lng\" : 103.82098680\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Preah Vihear",
+                       "short_name" : "Preah Vihear",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Preah Vihear, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.4343270,
+                          "lng" : 105.8868710
+                       },
+                       "southwest" : {
+                          "lat" : 13.0990640,
+                          "lng" : 104.3539240
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.00857970,
+                       "lng" : 104.84546190
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.7003920,
+                          "lng" : 105.8699370
+                       },
+                       "southwest" : {
+                          "lat" : 13.31467710,
+                          "lng" : 103.82098680
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 16:46:28 GMT
 - request:
     method: get
     uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=14.0085797%2C104.8454619&sensor=false
-    body: ''
+    body:
+      encoding: UTF-8
+      string: ''
     headers:
       accept-encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       accept:
-      - ! '*/*'
+      - "*/*"
       user-agent:
       - Ruby
       connection:
@@ -88,58 +125,419 @@ http_interactions:
       - SAMEORIGIN
       connection:
       - close
-    body: ! "{\n   \"results\" : [\n      {\n         \"address_components\" : [\n
-      \           {\n               \"long_name\" : \"Choam Khsant\",\n               \"short_name\"
-      : \"Choam Khsant\",\n               \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Preah Vihear\",\n               \"short_name\" : \"Preah Vihear\",\n               \"types\"
-      : [ \"administrative_area_level_1\", \"political\" ]\n            },\n            {\n
-      \              \"long_name\" : \"Cambodia\",\n               \"short_name\"
-      : \"KH\",\n               \"types\" : [ \"country\", \"political\" ]\n            }\n
-      \        ],\n         \"formatted_address\" : \"Choam Khsant, Cambodia\",\n
-      \        \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.4338490,\n                  \"lng\" : 105.35699840\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 13.95805780,\n                  \"lng\" : 104.43903920\n               }\n
-      \           },\n            \"location\" : {\n               \"lat\" : 14.09317060,\n
-      \              \"lng\" : 104.93888530\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.43921450,\n                  \"lng\" : 105.45112290\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 13.74660120,\n                  \"lng\" : 104.42664770\n               }\n
-      \           }\n         },\n         \"types\" : [ \"administrative_area_level_2\",
-      \"political\" ]\n      },\n      {\n         \"address_components\" : [\n            {\n
-      \              \"long_name\" : \"Preah Vihear\",\n               \"short_name\"
-      : \"Preah Vihear\",\n               \"types\" : [ \"administrative_area_level_1\",
-      \"political\" ]\n            },\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Preah Vihear, Cambodia\",\n         \"geometry\" : {\n            \"bounds\"
-      : {\n               \"northeast\" : {\n                  \"lat\" : 14.4343270,\n
-      \                 \"lng\" : 105.8868710\n               },\n               \"southwest\"
-      : {\n                  \"lat\" : 13.0990640,\n                  \"lng\" : 104.3539240\n
-      \              }\n            },\n            \"location\" : {\n               \"lat\"
-      : 14.00857970,\n               \"lng\" : 104.84546190\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.4343270,\n                  \"lng\" : 105.8868710\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 13.0990640,\n                  \"lng\" : 104.3539240\n               }\n            }\n
-      \        },\n         \"types\" : [ \"administrative_area_level_1\", \"political\"
-      ]\n      },\n      {\n         \"address_components\" : [\n            {\n               \"long_name\"
-      : \"Cambodia\",\n               \"short_name\" : \"KH\",\n               \"types\"
-      : [ \"country\", \"political\" ]\n            }\n         ],\n         \"formatted_address\"
-      : \"Cambodia\",\n         \"geometry\" : {\n            \"bounds\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           },\n            \"location\" : {\n               \"lat\" : 12.5656790,\n
-      \              \"lng\" : 104.9909630\n            },\n            \"location_type\"
-      : \"APPROXIMATE\",\n            \"viewport\" : {\n               \"northeast\"
-      : {\n                  \"lat\" : 14.6901790,\n                  \"lng\" : 107.6276870\n
-      \              },\n               \"southwest\" : {\n                  \"lat\"
-      : 9.283249899999999,\n                  \"lng\" : 102.3335420\n               }\n
-      \           }\n         },\n         \"types\" : [ \"country\", \"political\"
-      ]\n      }\n   ],\n   \"status\" : \"OK\"\n}\n"
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Choam Khsant",
+                       "short_name" : "Choam Khsant",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Preah Vihear",
+                       "short_name" : "Preah Vihear",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Choam Khsant, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.4338490,
+                          "lng" : 105.35699840
+                       },
+                       "southwest" : {
+                          "lat" : 13.95805780,
+                          "lng" : 104.43903920
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.09317060,
+                       "lng" : 104.93888530
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.43921450,
+                          "lng" : 105.45112290
+                       },
+                       "southwest" : {
+                          "lat" : 13.74660120,
+                          "lng" : 104.42664770
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Preah Vihear",
+                       "short_name" : "Preah Vihear",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Preah Vihear, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.4343270,
+                          "lng" : 105.8868710
+                       },
+                       "southwest" : {
+                          "lat" : 13.0990640,
+                          "lng" : 104.3539240
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.00857970,
+                       "lng" : 104.84546190
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.4343270,
+                          "lng" : 105.8868710
+                       },
+                       "southwest" : {
+                          "lat" : 13.0990640,
+                          "lng" : 104.3539240
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.5656790,
+                       "lng" : 104.9909630
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.6901790,
+                          "lng" : 107.6276870
+                       },
+                       "southwest" : {
+                          "lat" : 9.283249899999999,
+                          "lng" : 102.3335420
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
     http_version: '1.1'
   recorded_at: Mon, 12 Dec 2011 16:46:28 GMT
-recorded_with: VCR 2.0.0.rc1
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=preah%20vihear,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:22 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:22 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Preah Vihear",
+                       "short_name" : "Preah Vihear",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Preah Vihear, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.434327,
+                          "lng" : 105.8868709
+                       },
+                       "southwest" : {
+                          "lat" : 13.099064,
+                          "lng" : 104.3539239
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.0085797,
+                       "lng" : 104.8454619
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.434327,
+                          "lng" : 105.8868709
+                       },
+                       "southwest" : {
+                          "lat" : 13.099064,
+                          "lng" : 104.3539239
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:22 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=14.0085797,104.8454619&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 09:03:22 GMT
+      Expires:
+      - Mon, 02 Feb 2015 09:03:22 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Choam Khsant",
+                       "short_name" : "Choam Khsant",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "Preah Vihear",
+                       "short_name" : "Preah Vihear",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Choam Khsant, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.4338491,
+                          "lng" : 105.3569984
+                       },
+                       "southwest" : {
+                          "lat" : 13.9580578,
+                          "lng" : 104.4390392
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.0931706,
+                       "lng" : 104.9388853
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.4338491,
+                          "lng" : 105.3569984
+                       },
+                       "southwest" : {
+                          "lat" : 13.9580578,
+                          "lng" : 104.4390392
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Preah Vihear",
+                       "short_name" : "Preah Vihear",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Preah Vihear, Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.434327,
+                          "lng" : 105.8868709
+                       },
+                       "southwest" : {
+                          "lat" : 13.099064,
+                          "lng" : 104.3539239
+                       }
+                    },
+                    "location" : {
+                       "lat" : 14.0085797,
+                       "lng" : 104.8454619
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.434327,
+                          "lng" : 105.8868709
+                       },
+                       "southwest" : {
+                          "lat" : 13.099064,
+                          "lng" : 104.3539239
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Cambodia",
+                       "short_name" : "KH",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Cambodia",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 14.690179,
+                          "lng" : 107.627687
+                       },
+                       "southwest" : {
+                          "lat" : 9.2857541,
+                          "lng" : 102.333542
+                       }
+                    },
+                    "location" : {
+                       "lat" : 12.565679,
+                       "lng" : 104.990963
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 14.690179,
+                          "lng" : 107.627687
+                       },
+                       "southwest" : {
+                          "lat" : 9.2857541,
+                          "lng" : 102.333542
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 09:03:22 GMT
+recorded_with: VCR 2.9.3

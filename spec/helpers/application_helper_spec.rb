@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ApplicationHelper do
   include CommunicableExampleHelpers
@@ -17,9 +17,9 @@ describe ApplicationHelper do
         xpath = "//td[@id='#{communicable_resources}']"
         expected_text = communicable_resources_count.to_s
         if communicable_resources_count.zero?
-          output.should have_xpath(xpath, :text => expected_text)
+          expect(output).to have_xpath(xpath, :text => expected_text)
         else
-          output.should have_xpath(
+          expect(output).to have_xpath(
             "#{xpath}/a[@href='/#{resource_name.to_s.pluralize}/#{resource.id}/interaction']",
             :text => expected_text
           )
@@ -49,7 +49,7 @@ describe ApplicationHelper do
 
   describe "#heading_with_count" do
     it "should return a h2 heading with the resource and the count" do
-      helper.heading_with_count(:phone_calls, 5).should have_css(
+      expect(helper.heading_with_count(:phone_calls, 5)).to have_css(
         "h2#total_phone_calls", :text => "Phone Calls (5)"
       )
     end

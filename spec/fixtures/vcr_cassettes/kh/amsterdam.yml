@@ -1,0 +1,814 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?address=amsterdam,%20Cambodia&language=en&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 07:53:32 GMT
+      Expires:
+      - Mon, 02 Feb 2015 07:53:32 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Permanent Mission of Cambodia",
+                       "short_name" : "Permanent Mission of Cambodia",
+                       "types" : [ "point_of_interest", "establishment" ]
+                    },
+                    {
+                       "long_name" : "327",
+                       "short_name" : "327",
+                       "types" : [ "street_number" ]
+                    },
+                    {
+                       "long_name" : "East 58th Street",
+                       "short_name" : "E 58th St",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Midtown East",
+                       "short_name" : "Midtown East",
+                       "types" : [ "neighborhood", "political" ]
+                    },
+                    {
+                       "long_name" : "Manhattan",
+                       "short_name" : "Manhattan",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    },
+                    {
+                       "long_name" : "10022",
+                       "short_name" : "10022",
+                       "types" : [ "postal_code" ]
+                    },
+                    {
+                       "long_name" : "2257",
+                       "short_name" : "2257",
+                       "types" : [ "postal_code_suffix" ]
+                    }
+                 ],
+                 "formatted_address" : "Permanent Mission of Cambodia, 327 East 58th Street, New York, NY 10022, USA",
+                 "geometry" : {
+                    "location" : {
+                       "lat" : 40.75968210000001,
+                       "lng" : -73.96361159999999
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.76103108029151,
+                          "lng" : -73.9622626197085
+                       },
+                       "southwest" : {
+                          "lat" : 40.75833311970851,
+                          "lng" : -73.9649605802915
+                       }
+                    }
+                 },
+                 "partial_match" : true,
+                 "types" : [ "embassy", "point_of_interest", "establishment" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 07:53:32 GMT
+- request:
+    method: get
+    uri: http://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=40.75968210000001,-73.9636116&sensor=false
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 01 Feb 2015 07:53:32 GMT
+      Expires:
+      - Mon, 02 Feb 2015 07:53:32 GMT
+      Cache-Control:
+      - public, max-age=86400
+      Access-Control-Allow-Origin:
+      - "*"
+      Server:
+      - mafe
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Frame-Options:
+      - SAMEORIGIN
+      Alternate-Protocol:
+      - 80:quic,p=0.02
+      Accept-Ranges:
+      - none
+      Vary:
+      - Accept-Encoding
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+           "results" : [
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "327",
+                       "short_name" : "327",
+                       "types" : [ "street_number" ]
+                    },
+                    {
+                       "long_name" : "East 58th Street",
+                       "short_name" : "E 58th St",
+                       "types" : [ "route" ]
+                    },
+                    {
+                       "long_name" : "Midtown East",
+                       "short_name" : "Midtown East",
+                       "types" : [ "neighborhood", "political" ]
+                    },
+                    {
+                       "long_name" : "Manhattan",
+                       "short_name" : "Manhattan",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    },
+                    {
+                       "long_name" : "10022",
+                       "short_name" : "10022",
+                       "types" : [ "postal_code" ]
+                    },
+                    {
+                       "long_name" : "2257",
+                       "short_name" : "2257",
+                       "types" : [ "postal_code_suffix" ]
+                    }
+                 ],
+                 "formatted_address" : "327 East 58th Street, New York, NY 10022, USA",
+                 "geometry" : {
+                    "location" : {
+                       "lat" : 40.759715,
+                       "lng" : -73.963571
+                    },
+                    "location_type" : "ROOFTOP",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.7610639802915,
+                          "lng" : -73.96222201970849
+                       },
+                       "southwest" : {
+                          "lat" : 40.7583660197085,
+                          "lng" : -73.96491998029151
+                       }
+                    }
+                 },
+                 "types" : [ "street_address" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "E 57 St/1 Av",
+                       "short_name" : "E 57 St/1 Av",
+                       "types" : [ "bus_station", "transit_station", "establishment" ]
+                    },
+                    {
+                       "long_name" : "Midtown East",
+                       "short_name" : "Midtown East",
+                       "types" : [ "neighborhood", "political" ]
+                    },
+                    {
+                       "long_name" : "Manhattan",
+                       "short_name" : "Manhattan",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    },
+                    {
+                       "long_name" : "10022",
+                       "short_name" : "10022",
+                       "types" : [ "postal_code" ]
+                    }
+                 ],
+                 "formatted_address" : "E 57 St/1 Av, New York, NY 10022, USA",
+                 "geometry" : {
+                    "location" : {
+                       "lat" : 40.758564,
+                       "lng" : -73.963303
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.7599129802915,
+                          "lng" : -73.9619540197085
+                       },
+                       "southwest" : {
+                          "lat" : 40.7572150197085,
+                          "lng" : -73.96465198029151
+                       }
+                    }
+                 },
+                 "types" : [ "bus_station", "transit_station", "establishment" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "1 Av/E 57 St",
+                       "short_name" : "1 Av/E 57 St",
+                       "types" : [ "bus_station", "transit_station", "establishment" ]
+                    },
+                    {
+                       "long_name" : "Midtown East",
+                       "short_name" : "Midtown East",
+                       "types" : [ "neighborhood", "political" ]
+                    },
+                    {
+                       "long_name" : "Manhattan",
+                       "short_name" : "Manhattan",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    },
+                    {
+                       "long_name" : "10022",
+                       "short_name" : "10022",
+                       "types" : [ "postal_code" ]
+                    }
+                 ],
+                 "formatted_address" : "1 Av/E 57 St, New York, NY 10022, USA",
+                 "geometry" : {
+                    "location" : {
+                       "lat" : 40.758564,
+                       "lng" : -73.962585
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.7599129802915,
+                          "lng" : -73.96123601970851
+                       },
+                       "southwest" : {
+                          "lat" : 40.7572150197085,
+                          "lng" : -73.96393398029151
+                       }
+                    }
+                 },
+                 "types" : [ "bus_station", "transit_station", "establishment" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "10022",
+                       "short_name" : "10022",
+                       "types" : [ "postal_code" ]
+                    },
+                    {
+                       "long_name" : "Manhattan",
+                       "short_name" : "Manhattan",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "New York, NY 10022, USA",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 40.7651359,
+                          "lng" : -73.95612600000001
+                       },
+                       "southwest" : {
+                          "lat" : 40.7514449,
+                          "lng" : -73.97765500000001
+                       }
+                    },
+                    "location" : {
+                       "lat" : 40.7593941,
+                       "lng" : -73.9697795
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.7651359,
+                          "lng" : -73.95612600000001
+                       },
+                       "southwest" : {
+                          "lat" : 40.7514449,
+                          "lng" : -73.97765500000001
+                       }
+                    }
+                 },
+                 "types" : [ "postal_code" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Midtown East",
+                       "short_name" : "Midtown East",
+                       "types" : [ "neighborhood", "political" ]
+                    },
+                    {
+                       "long_name" : "Manhattan",
+                       "short_name" : "Manhattan",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Midtown East, New York, NY, USA",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 40.7641613,
+                          "lng" : -73.95908899999999
+                       },
+                       "southwest" : {
+                          "lat" : 40.7481753,
+                          "lng" : -73.9808908
+                       }
+                    },
+                    "location" : {
+                       "lat" : 40.7540369,
+                       "lng" : -73.9668408
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.7641613,
+                          "lng" : -73.95908899999999
+                       },
+                       "southwest" : {
+                          "lat" : 40.7481753,
+                          "lng" : -73.9808908
+                       }
+                    }
+                 },
+                 "types" : [ "neighborhood", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Midtown",
+                       "short_name" : "Midtown",
+                       "types" : [ "neighborhood", "political" ]
+                    },
+                    {
+                       "long_name" : "Manhattan",
+                       "short_name" : "Manhattan",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Midtown, New York, NY, USA",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 40.77410690000001,
+                          "lng" : -73.95889869999999
+                       },
+                       "southwest" : {
+                          "lat" : 40.72686849999999,
+                          "lng" : -74.0089488
+                       }
+                    },
+                    "location" : {
+                       "lat" : 40.7549309,
+                       "lng" : -73.9840195
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.77410690000001,
+                          "lng" : -73.95889869999999
+                       },
+                       "southwest" : {
+                          "lat" : 40.72686849999999,
+                          "lng" : -74.0089488
+                       }
+                    }
+                 },
+                 "types" : [ "neighborhood", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "Manhattan",
+                       "short_name" : "Manhattan",
+                       "types" : [ "sublocality_level_1", "sublocality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "Manhattan, New York, NY, USA",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 40.882214,
+                          "lng" : -73.907
+                       },
+                       "southwest" : {
+                          "lat" : 40.6795479,
+                          "lng" : -74.047285
+                       }
+                    },
+                    "location" : {
+                       "lat" : 40.790278,
+                       "lng" : -73.959722
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.820045,
+                          "lng" : -73.90331300000001
+                       },
+                       "southwest" : {
+                          "lat" : 40.698078,
+                          "lng" : -74.03514899999999
+                       }
+                    }
+                 },
+                 "types" : [ "sublocality_level_1", "sublocality", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "New York County",
+                       "short_name" : "New York County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "New York County, NY, USA",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 40.8792779,
+                          "lng" : -73.907
+                       },
+                       "southwest" : {
+                          "lat" : 40.6795929,
+                          "lng" : -74.04726289999999
+                       }
+                    },
+                    "location" : {
+                       "lat" : 40.7830603,
+                       "lng" : -73.9712488
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.8792779,
+                          "lng" : -73.907
+                       },
+                       "southwest" : {
+                          "lat" : 40.6795929,
+                          "lng" : -74.04726289999999
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_2", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "locality", "political" ]
+                    },
+                    {
+                       "long_name" : "Kings County",
+                       "short_name" : "Kings County",
+                       "types" : [ "administrative_area_level_2", "political" ]
+                    },
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "New York, NY, USA",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 40.91525559999999,
+                          "lng" : -73.70027209999999
+                       },
+                       "southwest" : {
+                          "lat" : 40.4913686,
+                          "lng" : -74.25908989999999
+                       }
+                    },
+                    "location" : {
+                       "lat" : 40.7127837,
+                       "lng" : -74.0059413
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 40.91525559999999,
+                          "lng" : -73.70027209999999
+                       },
+                       "southwest" : {
+                          "lat" : 40.4913686,
+                          "lng" : -74.25908989999999
+                       }
+                    }
+                 },
+                 "types" : [ "locality", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "New York",
+                       "short_name" : "NY",
+                       "types" : [ "administrative_area_level_1", "political" ]
+                    },
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "New York, USA",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 45.015865,
+                          "lng" : -71.85626429999999
+                       },
+                       "southwest" : {
+                          "lat" : 40.4913686,
+                          "lng" : -79.76214379999999
+                       }
+                    },
+                    "location" : {
+                       "lat" : 43.2994285,
+                       "lng" : -74.21793260000001
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 45.015865,
+                          "lng" : -71.85626429999999
+                       },
+                       "southwest" : {
+                          "lat" : 40.4913686,
+                          "lng" : -79.76214379999999
+                       }
+                    }
+                 },
+                 "types" : [ "administrative_area_level_1", "political" ]
+              },
+              {
+                 "address_components" : [
+                    {
+                       "long_name" : "United States",
+                       "short_name" : "US",
+                       "types" : [ "country", "political" ]
+                    }
+                 ],
+                 "formatted_address" : "United States",
+                 "geometry" : {
+                    "bounds" : {
+                       "northeast" : {
+                          "lat" : 71.389888,
+                          "lng" : -66.94539469999999
+                       },
+                       "southwest" : {
+                          "lat" : 18.9110642,
+                          "lng" : 172.4458955
+                       }
+                    },
+                    "location" : {
+                       "lat" : 37.09024,
+                       "lng" : -95.712891
+                    },
+                    "location_type" : "APPROXIMATE",
+                    "viewport" : {
+                       "northeast" : {
+                          "lat" : 49.38,
+                          "lng" : -66.94
+                       },
+                       "southwest" : {
+                          "lat" : 25.82,
+                          "lng" : -124.39
+                       }
+                    }
+                 },
+                 "types" : [ "country", "political" ]
+              }
+           ],
+           "status" : "OK"
+        }
+    http_version: 
+  recorded_at: Sun, 01 Feb 2015 07:53:32 GMT
+recorded_with: VCR 2.9.3

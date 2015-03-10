@@ -1,13 +1,8 @@
 HireFire::Resource.configure do |config|
-  config.dyno(:critical_task_worker) do
+  config.dyno(:worker) do
     HireFire::Macro::Sidekiq.queue(
       :critical,
-      :urgent
-    )
-  end
-
-  config.dyno(:non_critical_task_worker) do
-    HireFire::Macro::Sidekiq.queue(
+      :urgent,
       :very_high,
       :high,
       :default,

@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ChatReactivatorJob do
   describe "#queue_name" do
