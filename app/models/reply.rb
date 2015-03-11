@@ -12,21 +12,65 @@ class Reply < ActiveRecord::Base
   FAILED = "failed"
   CONFIRMED = "confirmed"
   ERROR = "error"
+  EXPIRED = "expired"
+
   NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER = 5
 
+  NUNTIUM_DELIVERED = DELIVERED
+  NUNTIUM_FAILED = FAILED
+  NUNTIUM_CONFIRMED = CONFIRMED
+
   TWILIO_DELIVERED = DELIVERED
-  TWILIO_FAILED = "failed"
+  TWILIO_FAILED = FAILED
   TWILIO_UNDELIVERED = "undelivered"
   TWILIO_SENT = "sent"
-
   TWILIO_CHANNEL = "twilio"
+
+  SMSC_ENROUTE       = "ENROUTE"
+  SMSC_DELIVERED     = "DELIVERED"
+  SMSC_EXPIRED       = "EXPIRED"
+  SMSC_DELETED       = "DELETED"
+  SMSC_UNDELIVERABLE = "UNDELIVERABLE"
+  SMSC_ACCEPTED      = "ACCEPTED"
+  SMSC_UNKNOWN       = "UNKNOWN"
+  SMSC_REJECTED      = "REJECTED"
+  SMSC_INVALID       = "INVALID"
 
   DELIVERY_CHANNEL_NUNTIUM = "nuntium"
   DELIVERY_CHANNEL_TWILIO = TWILIO_CHANNEL
   DELIVERY_CHANNEL_SMSC = "smsc"
 
+  DELIVERY_CHANNELS = [DELIVERY_CHANNEL_NUNTIUM, DELIVERY_CHANNEL_TWILIO, DELIVERY_CHANNEL_SMSC]
+
+  DELIVERY_STATES = {
+    DELIVERY_CHANNEL_NUNTIUM => {
+      NUNTIUM_DELIVERED => DELIVERED,
+      NUNTIUM_CONFIRMED => CONFIRMED,
+      NUNTIUM_FAILED    => FAILED
+    },
+    DELIVERY_CHANNEL_TWILIO => {
+      TWILIO_SENT        => DELIVERED,
+      TWILIO_DELIVERED   => CONFIRMED,
+      TWILIO_UNDELIVERED => FAILED,
+      TWILIO_FAILED      => ERROR,
+    },
+    DELIVERY_CHANNEL_SMSC => {
+      SMSC_ENROUTE       => DELIVERED,
+      SMSC_ACCEPTED      => DELIVERED,
+      SMSC_DELIVERED     => CONFIRMED,
+      SMSC_REJECTED      => FAILED,
+      SMSC_UNDELIVERABLE => FAILED,
+      SMSC_EXPIRED       => EXPIRED,
+      SMSC_DELETED       => ERROR,
+      SMSC_UNKNOWN       => ERROR,
+      SMSC_INVALID       => ERROR
+    }
+  }
+
   validates :to, :body, :presence => true
   validates :token, :uniqueness => true, :allow_nil => true
+  validates :delivery_channel, :presence => true,
+                               :inclusion => { :in => DELIVERY_CHANNELS }
 
   alias_attribute :destination, :to
 
@@ -34,29 +78,45 @@ class Reply < ActiveRecord::Base
     state :pending_delivery, :initial => true
     state :queued_for_smsc_delivery
     state :delivered_by_smsc
-    state :rejected
-    state :failed
-    state :errored
     state :confirmed
+    state :failed
+    state :expired
+    state :errored
 
     event :update_delivery_status do
       transitions(
-        :from => [:pending_delivery, :queued_for_smsc_delivery],
-        :to => :delivered_by_smsc,
-        :if => :delivery_succeeded?
+        :from => :pending_delivery,
+        :to => :queued_for_smsc_delivery
       )
 
-      transitions(:from => :pending_delivery, :to => :queued_for_smsc_delivery)
-      transitions(:from => :queued_for_smsc_delivery, :to => :rejected, :if => :delivery_failed?)
-      transitions(:from => :queued_for_smsc_delivery, :to => :errored, :if => :delivery_error?)
-      transitions(:from => :delivered_by_smsc, :to => :failed, :if => :delivery_failed?)
-
-      # the following handles the case where the delivery receipts were received out of order
-      transitions(:from => :rejected, :to => :failed, :if => :delivery_succeeded?)
       transitions(
-        :from => [:queued_for_smsc_delivery, :delivered_by_smsc, :rejected, :failed],
-        :to => :confirmed,
-        :if => :delivery_confirmed?
+        :from => :queued_for_smsc_delivery,
+        :to   => :delivered_by_smsc,
+        :if   => :accepted_by_smsc?
+      )
+
+      transitions(
+        :from => [:queued_for_smsc_delivery, :delivered_by_smsc],
+        :to   => :confirmed,
+        :if   => :delivery_confirmed?
+      )
+
+      transitions(
+        :from => [:queued_for_smsc_delivery, :delivered_by_smsc],
+        :to   => :failed,
+        :if   => :delivery_failed?
+      )
+
+      transitions(
+        :from => [:queued_for_smsc_delivery, :delivered_by_smsc],
+        :to   => :expired,
+        :if   => :delivery_expired?
+      )
+
+      transitions(
+        :from => [:queued_for_smsc_delivery, :delivered_by_smsc],
+        :to   => :errored,
+        :if   => :delivery_error?
       )
     end
   end
@@ -128,8 +188,8 @@ class Reply < ActiveRecord::Base
 
   def deliver!
     perform_delivery!(body)
+    update_delivery_state(:force => true)
     touch(:delivered_at)
-    update_delivery_state
   end
 
   def update_delivery_state(options = {})
@@ -137,6 +197,17 @@ class Reply < ActiveRecord::Base
     @force_state_update = options[:force]
     update_delivery_status
     save_with_state_check
+  end
+
+  def delivered_by_smsc!(smsc_name, smsc_message_id, status)
+    raise(
+      ArgumentError,
+      "Reply ##{id} failed to deliver on SMSC: '#{smsc_name}' (SMSC MESSAGE ID: '#{smsc_message_id}')"
+    ) unless status
+
+    self.token = smsc_message_id
+    self.update_delivery_state(:state => DELIVERED)
+    save!
   end
 
   def fetch_twilio_message_status!
@@ -149,20 +220,11 @@ class Reply < ActiveRecord::Base
   private
 
   def parse_twilio_message_status
-    case smsc_message_status
-    when TWILIO_SENT
-      update_delivery_state(:state => DELIVERED)
-      enqueue_twilio_message_status_fetch
-    when TWILIO_DELIVERED
-      update_delivery_state(:state => CONFIRMED)
-    when TWILIO_UNDELIVERED
-      update_delivery_state(:state => DELIVERED)
-      update_delivery_state(:state => FAILED)
-    when TWILIO_FAILED
-      update_delivery_state(:state => ERROR)
-    else
-      enqueue_twilio_message_status_fetch
+    if reply_state = DELIVERY_STATES[delivery_channel][smsc_message_status]
+      update_delivery_state(:state => reply_state)
     end
+
+    enqueue_twilio_message_status_fetch if !reply_state || reply_state == DELIVERED
   end
 
   def random_canned_greeting(options = {})
@@ -216,12 +278,12 @@ class Reply < ActiveRecord::Base
     self.destination ||= user.try(:mobile_number)
   end
 
-  def delivery_error?
-    @delivery_state == ERROR
+  def delivery_expired?
+    @delivery_state == EXPIRED
   end
 
-  def delivery_succeeded?
-    @delivery_state == DELIVERED
+  def delivery_error?
+    @delivery_state == ERROR
   end
 
   def delivery_failed?
@@ -232,8 +294,12 @@ class Reply < ActiveRecord::Base
     @delivery_state == CONFIRMED
   end
 
+  def accepted_by_smsc?
+    @delivery_state == DELIVERED
+  end
+
   def logout_user_if_failed_consecutively
-    return unless failed? || rejected?
+    return unless failed?
     number_inactive = true
     recent_replies = user.replies.reverse_order.limit(NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER).pluck(:state)
     return unless recent_replies.count == NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER
@@ -264,8 +330,6 @@ class Reply < ActiveRecord::Base
         perform_delivery_via_smsc!(message) :
         perform_delivery_via_twilio!(message)
     end
-
-    save!
   end
 
   def can_perform_delivery_via_smsc?
@@ -273,6 +337,7 @@ class Reply < ActiveRecord::Base
   end
 
   def perform_delivery_via_smsc!(message)
+    self.delivery_channel = DELIVERY_CHANNEL_SMSC
     MtMessageSenderJob.perform_later(
       id,
       operator.smpp_server_id,
@@ -280,17 +345,16 @@ class Reply < ActiveRecord::Base
       destination,
       message
     )
-    self.delivery_channel = DELIVERY_CHANNEL_SMSC
   end
 
   def perform_delivery_via_twilio!(message)
+    self.delivery_channel = DELIVERY_CHANNEL_TWILIO
     response = twilio_client.messages.create(
       :from => twilio_outgoing_number(:sms_capable => true),
       :to => twilio_formatted(destination),
       :body => message
     )
     self.token = response.sid
-    self.delivery_channel = DELIVERY_CHANNEL_TWILIO
     enqueue_twilio_message_status_fetch
   end
 
