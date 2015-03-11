@@ -115,18 +115,12 @@ describe Reply do
     end
   end
 
-  it "should not be valid without a destination" do
-    user.mobile_number = nil
-    expect(new_reply).not_to be_valid
-  end
-
-  it "should not be valid with a duplicate a token" do
-    new_reply.token = reply_with_token.token
-    expect(new_reply).not_to be_valid
-  end
-
-  it "should not be valid without a body" do
-    expect(build(:reply, :with_no_body)).not_to be_valid
+  describe "validations" do
+    it { is_expected.to validate_presence_of(:to) }
+    it { is_expected.to validate_presence_of(:body) }
+    it { is_expected.to validate_presence_of(:delivery_channel) }
+    it { is_expected.to validate_inclusion_of(:delivery_channel).in_array(["nuntium", "twilio", "smsc"]) }
+    it { is_expected.to validate_uniqueness_of(:token) }
   end
 
   describe "callbacks" do
@@ -240,6 +234,44 @@ describe Reply do
       expect(reply).not_to be_delivered
       expect_message { reply.deliver! }
       expect(reply).to be_delivered
+    end
+  end
+
+  describe "#delivered_by_smsc!(smsc_name, smsc_message_id, status)" do
+    let(:subject) { create(:reply, :queued_for_smsc_delivery) }
+    let(:smsc_name) { "SMART" }
+    let(:smsc_message_id) { "7869576120333847249" }
+
+    def do_delivered_by_smsc!
+      subject.delivered_by_smsc!(smsc_name, smsc_message_id, status)
+      subject.reload
+    end
+
+    context "where the delivery was successful" do
+      let(:status) { true }
+
+      before do
+        do_delivered_by_smsc!
+      end
+
+      it "should update the message token and status" do
+        expect(subject.token).to eq(smsc_message_id)
+        expect(subject).to be_delivered_by_smsc
+      end
+    end
+
+    context "where the status was not successful" do
+      # know about it first
+      let(:status) { false }
+
+      it "should raise an error" do
+        expect { do_delivered_by_smsc!}.to raise_error do |error|
+          expect(error).to be_a(ArgumentError)
+          expect(error.message).to include(subject.id.to_s)
+          expect(error.message).to include(smsc_name)
+          expect(error.message).to include(smsc_message_id)
+        end
+      end
     end
   end
 
@@ -369,10 +401,10 @@ describe Reply do
   end
 
   describe "#fetch_twilio_message_status!" do
-    it "should do something" do
+    it "should update the message state from Twilio" do
       twilio_message_states.each do |twilio_message_state, assertions|
         clear_enqueued_jobs
-        subject = create(:reply, :delivered_by_twilio, :queued_for_smsc_delivery)
+        subject = create(:reply, :twilio_channel, :queued_for_smsc_delivery, :with_token)
         expect_twilio_message_status_fetch(
           :message_sid => subject.token,
           :status => twilio_message_state

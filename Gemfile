@@ -58,4 +58,5 @@ group :test do
   gem 'timecop'
   gem 'capybara'
   gem 'launchy'
+  gem 'shoulda-matchers', :require => false
 end

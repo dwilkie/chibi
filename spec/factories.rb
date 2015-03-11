@@ -231,6 +231,8 @@ FactoryGirl.define do
   factory :reply do
     user
     body "body"
+    nuntium_channel
+
     to { user.mobile_number }
 
     trait :delivered do
@@ -261,8 +263,16 @@ FactoryGirl.define do
       token
     end
 
-    trait :delivered_by_twilio do
-      with_token
+    trait :twilio_channel do
+      delivery_channel "twilio"
+    end
+
+    trait :nuntium_channel do
+      delivery_channel "nuntium"
+    end
+
+    trait :smsc_channel do
+      delivery_channel "smsc"
     end
 
     trait :with_unset_destination do

@@ -40,7 +40,7 @@ describe "Test Messages" do
         click_button "Create Message"
       end
 
-      it "should not create a message", :focus do
+      it "should not create a message" do
         new_message.should_not be_present
         page.should have_content "can't be blank"
       end
