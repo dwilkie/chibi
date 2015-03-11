@@ -281,26 +281,6 @@ describe Reply do
       reply.update_delivery_state
       expect(reply).to be_queued_for_smsc_delivery
 
-      # tests the case where the delivery receipt
-      # is received before the reply has been updated to 'queued_for_smsc_delivery'
-      reply = create(:reply)
-      reply.update_delivery_state(:state => "delivered")
-      expect(reply).to be_delivered_by_smsc
-
-      # tests that not passing :force => true will not update incase of a race condition
-      reply = create(:reply)
-      allow(reply).to receive(:update_delivery_state) do |options|
-        options ||= {}
-        create_race_condition(reply, :delivered_by_smsc)
-        reply.instance_variable_set(:@delivery_state, options[:state])
-        reply.instance_variable_set(:@force_state_update, options[:force])
-        reply.update_delivery_status
-        reply.send(:save_with_state_check)
-      end
-
-      reply.update_delivery_state
-      expect(reply.reload).to be_delivered_by_smsc
-
       reply = create(:reply, :queued_for_smsc_delivery)
       reply.update_delivery_state(:state => "delivered")
       expect(reply).to be_delivered_by_smsc
@@ -311,7 +291,7 @@ describe Reply do
 
       reply = create(:reply, :queued_for_smsc_delivery)
       reply.update_delivery_state(:state => "failed")
-      expect(reply).to be_rejected
+      expect(reply).to be_failed
 
       reply = create(:reply, :queued_for_smsc_delivery)
       reply.update_delivery_state(:state => "error")
@@ -325,51 +305,9 @@ describe Reply do
       reply.update_delivery_state(:state => "failed")
       expect(reply).to be_failed
 
-      # tests the case where the delivery receipt
-      # is received before the reply has been updated to 'queued_for_smsc_delivery'
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state
-      expect(reply).to be_delivered_by_smsc
-
-      # tests that passing :force => true
-      # updates regardless of a race condition
-      reply = create(:reply)
-      allow(reply).to receive(:update_delivery_state) do |options|
-        options ||= {}
-        create_race_condition(reply, :queued_for_smsc_delivery)
-        reply.instance_variable_set(:@delivery_state, options[:state])
-        reply.instance_variable_set(:@force_state_update, options[:force])
-        reply.update_delivery_status
-        reply.send(:save_with_state_check)
-      end
-
-      reply.update_delivery_state(:state => "delivered", :force => true)
-      expect(reply.reload).to be_delivered_by_smsc
-
-      reply = create(:reply, :failed)
-      reply.update_delivery_state(:state => "delivered")
-
-      expect(reply).to be_failed
-
-      reply = create(:reply, :rejected)
-      reply.update_delivery_state(:state => "confirmed")
-      expect(reply).to be_confirmed
-
-      reply = create(:reply, :rejected)
-      reply.update_delivery_state(:state => "delivered")
-      expect(reply).to be_failed
-
-      reply = create(:reply, :failed)
-      reply.update_delivery_state(:state => "confirmed")
-      expect(reply).to be_confirmed
-
-      reply = create(:reply, :confirmed)
-      reply.update_delivery_state(:state => "delivered")
-      expect(reply).to be_confirmed
-
-      reply = create(:reply, :confirmed)
-      reply.update_delivery_state(:state => "failed")
-      expect(reply).to be_confirmed
+      reply.update_delivery_state(:state => "error")
+      expect(reply).to be_errored
     end
 
     context "the reply failed to deliver" do
