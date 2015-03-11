@@ -357,27 +357,6 @@ describe User do
     end
   end
 
-  describe ".logout_users_with_inactive_numbers!" do
-    before do
-      offline_user = create(:user, :offline)
-      create_list(:reply, 4, :failed, :user => user)
-      create_list(:reply, 5, :failed, :user => offline_user)
-    end
-
-    it "should return a list users who's recent MT messages failed to deliver" do
-      expect(subject.class.logout_users_with_inactive_numbers!).to eq(0)
-      expect(user.reload).to be_online
-
-      create(:reply, :failed, :user => user)
-      expect(subject.class.logout_users_with_inactive_numbers!(:num_last_failed_replies => 6)).to eq(0)
-      expect(user.reload).to be_online
-
-      create(:reply, :rejected, :user => user)
-      expect(subject.class.logout_users_with_inactive_numbers!).to eq(1)
-      expect(user.reload).not_to be_online
-    end
-  end
-
   describe ".find_friends" do
     def do_find_friends(options = {})
       trigger_job(options) { described_class.find_friends(options) }
