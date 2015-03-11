@@ -14,7 +14,6 @@ describe Reply do
     [create(:user, :cambodian, :from_unknown_operator), create(:user, :english), create(:user, :filipino)]
   end
 
-  let(:new_reply) { build(:reply, :with_unset_destination, :user => user) }
   let(:partner) { build(:user, :with_name) }
   let(:reply) { create(:reply, :user => user) }
   let(:delivered_reply) { create(:reply, :delivered) }
@@ -47,10 +46,6 @@ describe Reply do
       reply.save(:validate => false)
       reply
     end
-  end
-
-  def create_race_condition(reference_reply, state)
-    Reply.where(:id => reference_reply.id).update_all(:state => state)
   end
 
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
@@ -87,12 +82,6 @@ describe Reply do
     end
   end
 
-  describe "factory" do
-    it "should be valid" do
-      expect(new_reply).to be_valid
-    end
-  end
-
   describe "default state" do
     it "should be pending_delivery" do
       expect(reply).to be_pending_delivery
@@ -118,31 +107,8 @@ describe Reply do
   describe "validations" do
     it { is_expected.to validate_presence_of(:to) }
     it { is_expected.to validate_presence_of(:body) }
-    it { is_expected.to validate_presence_of(:delivery_channel) }
     it { is_expected.to validate_inclusion_of(:delivery_channel).in_array(["nuntium", "twilio", "smsc"]) }
     it { is_expected.to validate_uniqueness_of(:token) }
-  end
-
-  describe "callbacks" do
-    describe "before_validation(:on => :create)" do
-      context "if the destination is nil" do
-        it "should be set as the user's mobile number" do
-          expect(new_reply).to be_valid
-          expect(new_reply.destination).to eq(user.mobile_number)
-        end
-      end
-
-      context "if the destination is set" do
-        before do
-          new_reply.destination = "1234"
-        end
-
-        it "should not be set as the user's mobile number" do
-          expect(new_reply).to be_valid
-          expect(new_reply.destination).to eq("1234")
-        end
-      end
-    end
   end
 
   describe ".undelivered" do
@@ -209,6 +175,19 @@ describe Reply do
       expect(Reply.all).to match_array([
         old_undelivered_reply, new_undelivered_reply, new_delivered_reply
       ])
+    end
+  end
+
+  describe "#user=(value)" do
+    context "if the destination is nil" do
+      subject { build(:reply, :user => user) }
+
+      it { expect(subject.destination).to eq(user.mobile_number) }
+    end
+
+    context "if the destination is set" do
+      subject { build(:reply, :destination => "1234", :user => user) }
+      it { expect(subject.destination).to eq("1234") }
     end
   end
 
@@ -468,21 +447,6 @@ describe Reply do
           expect { reply.deliver! }.to raise_error
           expect(reply).not_to be_delivered
           expect(reply).to be_pending_delivery
-        end
-      end
-
-      context "given there is a race condition for when the state is updated" do
-        before do
-          allow(reply).to receive(:touch).with(:delivered_at) do
-            reply.update_attribute(:delivered_at, Time.current)
-            create_race_condition(reply, :delivered_by_smsc)
-          end
-        end
-
-        it "should correctly update the state of the reply" do
-          expect_message { reply.deliver! }
-          expect(reply.reload).to be_delivered
-          expect(reply).to be_delivered_by_smsc
         end
       end
     end

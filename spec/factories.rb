@@ -231,9 +231,6 @@ FactoryGirl.define do
   factory :reply do
     user
     body "body"
-    nuntium_channel
-
-    to { user.mobile_number }
 
     trait :delivered do
       delivered_at { Time.current }
@@ -241,6 +238,7 @@ FactoryGirl.define do
 
     trait :queued_for_smsc_delivery do
       state "queued_for_smsc_delivery"
+      nuntium_channel
     end
 
     trait :delivered_by_smsc do
@@ -273,10 +271,6 @@ FactoryGirl.define do
 
     trait :smsc_channel do
       delivery_channel "smsc"
-    end
-
-    trait :with_unset_destination do
-      to nil
     end
 
     trait :with_no_body do

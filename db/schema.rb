@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150310071352) do
+ActiveRecord::Schema.define(version: 20150311124924) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -141,7 +141,7 @@ ActiveRecord::Schema.define(version: 20150310071352) do
     t.string   "token",               limit: 255
     t.string   "state",               limit: 255, default: "pending_delivery", null: false
     t.string   "smsc_message_status"
-    t.string   "delivery_channel",                default: "nuntium",          null: false
+    t.string   "delivery_channel"
     t.string   "operator_name"
   end
 
