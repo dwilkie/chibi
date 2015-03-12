@@ -16,13 +16,13 @@ describe DeliveryReceiptCreatorJob do
     let(:reply) { double(Reply) }
 
     before do
-      allow(reply).to receive(:update_delivery_state!)
+      allow(reply).to receive(:delivery_status_updated_by_nuntium!)
       allow(Reply).to receive(:find_by_token).and_return(reply)
     end
 
     it "should update the delivery state of the reply" do
       expect(Reply).to receive(:find_by_token).with("token")
-      expect(reply).to receive(:update_delivery_state!).with(options[:state])
+      expect(reply).to receive(:delivery_status_updated_by_nuntium!).with(options[:state])
       subject.perform(options)
     end
   end

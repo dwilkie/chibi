@@ -238,6 +238,28 @@ describe Reply do
     it { expect(subject).to be_delivered_by_smsc }
   end
 
+  describe "#delivery_status_updated_by_nuntium!(status)" do
+    it "should correctly update the state" do
+      nuntium_message_states.each do |nuntium_message_state, assertions|
+        subject = create(:reply, :nuntium_channel, assertions[:initial_state], :with_token)
+        subject.delivery_status_updated_by_nuntium!(nuntium_message_state)
+        expect(subject.smsc_message_status).to eq(nuntium_message_state.downcase)
+        expect(subject.state).to eq(assertions[:reply_state])
+      end
+    end
+  end
+
+  describe "#delivery_status_updated_by_smsc!(smsc_name, status)" do
+    it "should correctly update the state" do
+      smsc_message_states.each do |smsc_message_state, assertions|
+        subject = create(:reply, :smsc_channel, :delivered_by_smsc, :with_token)
+        subject.delivery_status_updated_by_smsc!("SMART", smsc_message_state)
+        expect(subject.smsc_message_status).to eq(smsc_message_state.downcase)
+        expect(subject.state).to eq(assertions[:reply_state])
+      end
+    end
+  end
+
   describe "#delivered_by_smsc!(smsc_name, smsc_message_id, status)" do
     let(:subject) { create(:reply, :queued_for_smsc_delivery) }
     let(:smsc_name) { "SMART" }
@@ -273,30 +295,6 @@ describe Reply do
           expect(error.message).to include(smsc_message_id)
         end
       end
-    end
-  end
-
-  describe "#update_delivery_state!(status)" do
-    it "should correctly update the state" do
-      reply = create(:reply, :queued_for_smsc_delivery, :with_token)
-      reply.update_delivery_state!("delivered")
-      expect(reply).to be_delivered_by_smsc
-
-      reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state!("confirmed")
-      expect(reply).to be_confirmed
-
-      reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state!("failed")
-      expect(reply).to be_failed
-
-      reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state!("error")
-      expect(reply).to be_errored
-
-      reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state!("expired")
-      expect(reply).to be_expired
     end
   end
 

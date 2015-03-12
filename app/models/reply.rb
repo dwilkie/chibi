@@ -17,6 +17,7 @@ class Reply < ActiveRecord::Base
   NUNTIUM_DELIVERED = DELIVERED
   NUNTIUM_FAILED = FAILED
   NUNTIUM_CONFIRMED = CONFIRMED
+  NUNTIUM_REJECTED = "rejected"
 
   TWILIO_DELIVERED = DELIVERED
   TWILIO_FAILED = FAILED
@@ -24,15 +25,15 @@ class Reply < ActiveRecord::Base
   TWILIO_SENT = "sent"
   TWILIO_CHANNEL = "twilio"
 
-  SMSC_ENROUTE       = "ENROUTE"
-  SMSC_DELIVERED     = "DELIVERED"
-  SMSC_EXPIRED       = "EXPIRED"
-  SMSC_DELETED       = "DELETED"
-  SMSC_UNDELIVERABLE = "UNDELIVERABLE"
-  SMSC_ACCEPTED      = "ACCEPTED"
-  SMSC_UNKNOWN       = "UNKNOWN"
-  SMSC_REJECTED      = "REJECTED"
-  SMSC_INVALID       = "INVALID"
+  SMSC_ENROUTE       = "enroute"
+  SMSC_DELIVERED     = "delivered"
+  SMSC_EXPIRED       = "expired"
+  SMSC_DELETED       = "deleted"
+  SMSC_UNDELIVERABLE = "undeliverable"
+  SMSC_ACCEPTED      = "accepted"
+  SMSC_UNKNOWN       = "unknown"
+  SMSC_REJECTED      = "rejected"
+  SMSC_INVALID       = "invalid"
 
   DELIVERY_CHANNEL_NUNTIUM = "nuntium"
   DELIVERY_CHANNEL_TWILIO = TWILIO_CHANNEL
@@ -44,7 +45,8 @@ class Reply < ActiveRecord::Base
     DELIVERY_CHANNEL_NUNTIUM => {
       NUNTIUM_DELIVERED => DELIVERED,
       NUNTIUM_CONFIRMED => CONFIRMED,
-      NUNTIUM_FAILED    => FAILED
+      NUNTIUM_FAILED    => FAILED,
+      NUNTIUM_REJECTED  => FAILED,
     },
     DELIVERY_CHANNEL_TWILIO => {
       TWILIO_DELIVERED   => CONFIRMED,
@@ -52,8 +54,6 @@ class Reply < ActiveRecord::Base
       TWILIO_FAILED      => ERROR,
     },
     DELIVERY_CHANNEL_SMSC => {
-      SMSC_ENROUTE       => DELIVERED,
-      SMSC_ACCEPTED      => DELIVERED,
       SMSC_DELIVERED     => CONFIRMED,
       SMSC_REJECTED      => FAILED,
       SMSC_UNDELIVERABLE => FAILED,
@@ -208,19 +208,31 @@ class Reply < ActiveRecord::Base
     ) unless status
 
     self.token = smsc_message_id
-    self.update_delivery_state!(DELIVERED)
+    update_delivery_state!(DELIVERED)
   end
 
   def delivered_by_twilio!
     update_delivery_state!(DELIVERED)
   end
 
+  def delivery_status_updated_by_nuntium!(status)
+    self.smsc_message_status = status.downcase
+    parse_smsc_delivery_status!
+  end
+
+  def delivery_status_updated_by_smsc!(smsc_name, status)
+    self.smsc_message_status = status.downcase
+    parse_smsc_delivery_status!
+  end
+
   def fetch_twilio_message_status!
     twilio_message = twilio_client.account.messages.get(token)
     self.smsc_message_status = twilio_message.status.downcase
-    parse_twilio_message_status
     save!
+    parse_twilio_delivery_status!
   end
+
+  private
 
   def update_delivery_state!(status)
     @delivery_state = status
@@ -239,8 +251,6 @@ class Reply < ActiveRecord::Base
       delivery_expired!
     end
   end
-
-  private
 
   def set_destination
     (self.to ||= user_mobile_number) && (self.operator_name ||= operator.id)
@@ -273,12 +283,15 @@ class Reply < ActiveRecord::Base
     valid? && delivery_channel?
   end
 
-  def parse_twilio_message_status
+  def parse_twilio_delivery_status!
+    enqueue_twilio_message_status_fetch if !parse_smsc_delivery_status! || delivered_by_smsc?
+  end
+
+  def parse_smsc_delivery_status!
     if reply_state = DELIVERY_STATES[delivery_channel][smsc_message_status]
       update_delivery_state!(reply_state)
+      reply_state
     end
-
-    enqueue_twilio_message_status_fetch if !reply_state || delivered_by_smsc?
   end
 
   def random_canned_greeting(options = {})
@@ -305,23 +318,27 @@ class Reply < ActiveRecord::Base
   end
 
   def delivery_expired?
-    @delivery_state == EXPIRED
+    delivery_status_can_be_updated? && @delivery_state == EXPIRED
   end
 
   def delivery_error?
-    @delivery_state == ERROR
+    delivery_status_can_be_updated? && @delivery_state == ERROR
   end
 
   def delivery_failed?
-    @delivery_state == FAILED
+    delivery_status_can_be_updated? && @delivery_state == FAILED
   end
 
   def delivery_confirmed?
-    @delivery_state == CONFIRMED
+    delivery_status_can_be_updated? && @delivery_state == CONFIRMED
   end
 
   def delivery_accepted?
-    @delivery_state == DELIVERED && token.present?
+    token.present? && @delivery_state == DELIVERED
+  end
+
+  def delivery_status_can_be_updated?
+    smsc_message_status?
   end
 
   def torasup_number

@@ -3,7 +3,7 @@ class DeliveryReceiptCreatorJob < ActiveJob::Base
 
   def perform(params)
     if reply = Reply.find_by_token(params[:token])
-      reply.update_delivery_state!(params[:state])
+      reply.delivery_status_updated_by_nuntium!(params[:state])
     end
   end
 end

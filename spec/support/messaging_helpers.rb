@@ -241,6 +241,29 @@ module MessagingHelpers
     }
   end
 
+  def smsc_message_states
+    {
+      "ENROUTE"        => {:reply_state => "delivered_by_smsc"},
+      "DELIVERED"      => {:reply_state => "confirmed"},
+      "EXPIRED"        => {:reply_state => "expired"},
+      "DELETED"        => {:reply_state => "errored"},
+      "UNDELIVERABLE"  => {:reply_state => "failed"},
+      "ACCEPTED"       => {:reply_state => "delivered_by_smsc"},
+      "UNKNOWN"        => {:reply_state => "errored"},
+      "REJECTED"       => {:reply_state => "failed"},
+      "INVALID"        => {:reply_state => "errored"}
+    }
+  end
+
+  def nuntium_message_states
+    {
+      "DELIVERED"      => {:initial_state => :queued_for_smsc_delivery, :reply_state => "delivered_by_smsc"},
+      "CONFIRMED"      => {:initial_state => :delivered_by_smsc, :reply_state => "confirmed"},
+      "FAILED"         => {:initial_state => :delivered_by_smsc, :reply_state => "failed"},
+      "REJECTED"       => {:initial_state => :delivered_by_smsc, :reply_state => "failed"},
+    }
+  end
+
   def deliver_via_nuntium?
     Rails.application.secrets[:deliver_via_nuntium].to_i == 1
   end

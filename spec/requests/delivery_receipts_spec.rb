@@ -4,7 +4,7 @@ describe "Delivery Receipts" do
   include AuthenticationHelpers
   include ActiveJobHelpers
 
-  let(:reply) { create(:reply, :with_token, :delivered, :queued_for_smsc_delivery) }
+  let(:reply) { create(:reply, :nuntium_channel, :with_token, :delivered, :queued_for_smsc_delivery) }
   let(:new_delivery_receipt) { DeliveryReceipt.last }
 
   def post_delivery_receipt(options = {})
