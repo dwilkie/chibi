@@ -7,7 +7,7 @@ gem 'pg'
 gem 'kaminari'
 gem 'lazy_high_charts'
 gem 'geocoder'
-gem 'phony'
+gem 'phony_rails'
 gem 'countries', :require => 'iso3166'
 gem 'faker'
 gem 'hirefire-resource'
@@ -18,7 +18,6 @@ gem 'torasup'
 gem 'nuntium_api', :github => 'dwilkie/nuntium-api-ruby'
 gem 'aasm', :github => 'aasm/aasm'
 gem 'twilio-ruby'
-gem 'uuid'
 gem 'multi_xml'
 gem 'carrierwave'
 gem 'fog'
@@ -41,6 +40,7 @@ gem 'rails_12factor', :group => :production
 
 group :development do
   gem 'web-console', '~> 2.0'
+  gem 'rails_best_practices'
 end
 
 group :test, :development do

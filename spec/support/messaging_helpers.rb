@@ -64,11 +64,23 @@ module MessagingHelpers
     expect(uri.path).to eq(twilio_get_message_path(options))
   end
 
-  def assert_fetch_twilio_message_status_job_enqueued!(job, options = {})
+  def assert_twilio_job!(job, options = {})
     expect(job).to be_present
     expect(job[:args]).to eq([options[:id]])
-    expect(job[:job]).to eq(TwilioMessageStatusFetcherJob)
-    expect(job[:at]).to be_present
+    expect(job[:job]).to eq(options[:job_class])
+    if options[:scheduled]
+      expect(job[:at]).to be_present
+    else
+      expect(job[:at]).not_to be_present
+    end
+  end
+
+  def assert_fetch_twilio_message_status_job_enqueued!(job, options = {})
+    assert_twilio_job!(job, {:job_class => TwilioMessageStatusFetcherJob, :scheduled => true}.merge(options))
+  end
+
+  def assert_twilio_mt_message_received_job_enqueued!(job, options = {})
+    assert_twilio_job!(job, {:job_class => TwilioMtMessageReceivedJob, :scheduled => false}.merge(options))
   end
 
   def assert_deliver(options = {})
@@ -102,8 +114,8 @@ module MessagingHelpers
     asserted_from = twilio_number(:sms_capable => true)
     expect(last_request_data["From"]).to eq(asserted_from)
     expect(last_request_data["Body"]).to eq(options[:body])
-    job = enqueued_jobs.last
-    assert_fetch_twilio_message_status_job_enqueued!(job, options)
+    assert_twilio_mt_message_received_job_enqueued!(enqueued_jobs[0], options)
+    assert_fetch_twilio_message_status_job_enqueued!(enqueued_jobs[1], options)
   end
 
   def assert_deliver_via_smsc!(options = {})
@@ -219,10 +231,10 @@ module MessagingHelpers
 
   def twilio_message_states
     {
-      "queued" => {:reply_state => "queued_for_smsc_delivery", :reschedule_job => true},
-      "sending" => {:reply_state => "queued_for_smsc_delivery", :reschedule_job => true},
+      "queued" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
+      "sending" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
       "sent" => { :reply_state => "delivered_by_smsc", :reschedule_job => true },
-      "receiving" => {:reply_state => "queued_for_smsc_delivery", :reschedule_job => true},
+      "receiving" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
       "delivered" => {:reply_state => "confirmed", :reschedule_job => false},
       "undelivered" => {:reply_state => "failed", :reschedule_job => false},
       "failed" => {:reply_state => "errored", :reschedule_job => false}

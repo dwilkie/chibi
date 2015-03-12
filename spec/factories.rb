@@ -231,9 +231,6 @@ FactoryGirl.define do
   factory :reply do
     user
     body "body"
-    nuntium_channel
-
-    to { user.mobile_number }
 
     trait :delivered do
       delivered_at { Time.current }
@@ -243,20 +240,23 @@ FactoryGirl.define do
       state "queued_for_smsc_delivery"
     end
 
-    trait :delivered_by_smsc do
-      state "delivered_by_smsc"
+    trait :accepted_by_smsc do
+      with_token
     end
 
-    trait :rejected do
-      state "rejected"
+    trait :delivered_by_smsc do
+      state "delivered_by_smsc"
+      accepted_by_smsc
     end
 
     trait :failed do
       state "failed"
+      accepted_by_smsc
     end
 
     trait :confirmed do
       state "confirmed"
+      accepted_by_smsc
     end
 
     trait :with_token do
@@ -273,10 +273,6 @@ FactoryGirl.define do
 
     trait :smsc_channel do
       delivery_channel "smsc"
-    end
-
-    trait :with_unset_destination do
-      to nil
     end
 
     trait :with_no_body do

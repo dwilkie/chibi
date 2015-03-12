@@ -14,7 +14,6 @@ describe Reply do
     [create(:user, :cambodian, :from_unknown_operator), create(:user, :english), create(:user, :filipino)]
   end
 
-  let(:new_reply) { build(:reply, :with_unset_destination, :user => user) }
   let(:partner) { build(:user, :with_name) }
   let(:reply) { create(:reply, :user => user) }
   let(:delivered_reply) { create(:reply, :delivered) }
@@ -47,10 +46,6 @@ describe Reply do
       reply.save(:validate => false)
       reply
     end
-  end
-
-  def create_race_condition(reference_reply, state)
-    Reply.where(:id => reference_reply.id).update_all(:state => state)
   end
 
   def assert_persisted_and_delivered(reply, mobile_number, options = {})
@@ -87,12 +82,6 @@ describe Reply do
     end
   end
 
-  describe "factory" do
-    it "should be valid" do
-      expect(new_reply).to be_valid
-    end
-  end
-
   describe "default state" do
     it "should be pending_delivery" do
       expect(reply).to be_pending_delivery
@@ -118,29 +107,31 @@ describe Reply do
   describe "validations" do
     it { is_expected.to validate_presence_of(:to) }
     it { is_expected.to validate_presence_of(:body) }
-    it { is_expected.to validate_presence_of(:delivery_channel) }
     it { is_expected.to validate_inclusion_of(:delivery_channel).in_array(["nuntium", "twilio", "smsc"]) }
     it { is_expected.to validate_uniqueness_of(:token) }
   end
 
   describe "callbacks" do
     describe "before_validation(:on => :create)" do
+      let(:user) { create(:user, :from_registered_service_provider) }
+
+      before do
+        subject.valid?
+      end
+
       context "if the destination is nil" do
-        it "should be set as the user's mobile number" do
-          expect(new_reply).to be_valid
-          expect(new_reply.destination).to eq(user.mobile_number)
-        end
+        subject { build(:reply, :user => user) }
+
+        it { expect(subject.destination).to eq(user.mobile_number) }
+        it { expect(subject.operator_name).to be_present }
       end
 
       context "if the destination is set" do
-        before do
-          new_reply.destination = "1234"
-        end
+        let(:destination) { generate(:unknown_operator_number) }
 
-        it "should not be set as the user's mobile number" do
-          expect(new_reply).to be_valid
-          expect(new_reply.destination).to eq("1234")
-        end
+        subject { build(:reply, :destination => destination, :user => user) }
+        it { expect(subject.destination).to eq(destination) }
+        it { expect(subject.operator_name).not_to be_present }
       end
     end
   end
@@ -237,6 +228,16 @@ describe Reply do
     end
   end
 
+  describe "#delivered_by_twilio!" do
+    let(:subject) { create(:reply, :queued_for_smsc_delivery, :twilio_channel, :with_token) }
+
+    before do
+      subject.delivered_by_twilio!
+    end
+
+    it { expect(subject).to be_delivered_by_smsc }
+  end
+
   describe "#delivered_by_smsc!(smsc_name, smsc_message_id, status)" do
     let(:subject) { create(:reply, :queued_for_smsc_delivery) }
     let(:smsc_name) { "SMART" }
@@ -275,66 +276,27 @@ describe Reply do
     end
   end
 
-  describe "#update_delivery_state(options = {})" do
-    it "should correctly update the delivery state" do
-      reply = create(:reply)
-      reply.update_delivery_state
-      expect(reply).to be_queued_for_smsc_delivery
-
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state(:state => "delivered")
+  describe "#update_delivery_state!(status)" do
+    it "should correctly update the state" do
+      reply = create(:reply, :queued_for_smsc_delivery, :with_token)
+      reply.update_delivery_state!("delivered")
       expect(reply).to be_delivered_by_smsc
 
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state(:state => "confirmed")
-      expect(reply).to be_confirmed
-
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state(:state => "failed")
-      expect(reply).to be_failed
-
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state(:state => "error")
-      expect(reply).to be_errored
-
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state(:state => "confirmed")
+      reply.update_delivery_state!("confirmed")
       expect(reply).to be_confirmed
 
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state(:state => "failed")
+      reply.update_delivery_state!("failed")
       expect(reply).to be_failed
 
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state(:state => "error")
+      reply.update_delivery_state!("error")
       expect(reply).to be_errored
-    end
 
-    context "the reply failed to deliver" do
-      let(:user) { create(:user) }
-      let(:reply) { create(:reply, :queued_for_smsc_delivery, :user => user) }
-
-      before do
-        create_list(:reply, previous_consecutive_failed_replies, :failed, :user => user)
-        reply.update_delivery_state(:state => "failed")
-      end
-
-      context "and this also happened the last 4 times for this number" do
-      let(:previous_consecutive_failed_replies) { 4 }
-        it "should logout the intended recipient" do
-          expect(user).not_to be_online
-        end
-      end
-
-      context "and this also happened the last 3 times for this number" do
-        let(:previous_consecutive_failed_replies) { 3 }
-        it "should not yet logout the recipient" do
-          expect(user).to be_online
-          another_reply = create(:reply, :delivered_by_smsc, :user => user)
-          another_reply.update_delivery_state(:state => "failed")
-          expect(user).not_to be_online
-        end
-      end
+      reply = create(:reply, :delivered_by_smsc)
+      reply.update_delivery_state!("expired")
+      expect(reply).to be_expired
     end
   end
 
@@ -342,7 +304,7 @@ describe Reply do
     it "should update the message state from Twilio" do
       twilio_message_states.each do |twilio_message_state, assertions|
         clear_enqueued_jobs
-        subject = create(:reply, :twilio_channel, :queued_for_smsc_delivery, :with_token)
+        subject = create(:reply, :twilio_channel, :delivered_by_smsc, :with_token)
         expect_twilio_message_status_fetch(
           :message_sid => subject.token,
           :status => twilio_message_state
@@ -375,6 +337,7 @@ describe Reply do
 
       it "should enqueue a MT message to be sent via SMPP" do
         with_operators do |number_parts, assertions|
+          clear_enqueued_jobs
           number = number_parts.join
           reply = create(:reply, :to => number)
           message_sid = generate(:token)
@@ -468,21 +431,6 @@ describe Reply do
           expect { reply.deliver! }.to raise_error
           expect(reply).not_to be_delivered
           expect(reply).to be_pending_delivery
-        end
-      end
-
-      context "given there is a race condition for when the state is updated" do
-        before do
-          allow(reply).to receive(:touch).with(:delivered_at) do
-            reply.update_attribute(:delivered_at, Time.current)
-            create_race_condition(reply, :delivered_by_smsc)
-          end
-        end
-
-        it "should correctly update the state of the reply" do
-          expect_message { reply.deliver! }
-          expect(reply.reload).to be_delivered
-          expect(reply).to be_delivered_by_smsc
         end
       end
     end

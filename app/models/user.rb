@@ -1,15 +1,4 @@
-# encoding: utf-8
-
 class User < ActiveRecord::Base
-
-  class MobileNumberValidator < ActiveModel::EachValidator
-    def validate_each(record, attribute, value)
-      unless Phony.plausible?(value)
-        record.errors[attribute] << (options[:message] || "is not valid")
-      end
-    end
-  end
-
   include Chibi::Analyzable
   include Chibi::Twilio::ApiHelpers
   include Chibi::Communicable::HasCommunicableResources
@@ -41,7 +30,7 @@ class User < ActiveRecord::Base
             :presence => true,
             :uniqueness => true,
             :length => { :minimum => MINIMUM_MOBILE_NUMBER_LENGTH },
-            :mobile_number => true
+            :phony_plausible => true
 
   validates :location, :screen_name, :presence => true
 
