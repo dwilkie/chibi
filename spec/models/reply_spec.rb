@@ -216,6 +216,16 @@ describe Reply do
     end
   end
 
+  describe "#delivered_by_twilio!" do
+    let(:subject) { create(:reply, :queued_for_smsc_delivery, :twilio_channel, :with_token) }
+
+    before do
+      subject.delivered_by_twilio!
+    end
+
+    it { expect(subject).to be_delivered_by_smsc }
+  end
+
   describe "#delivered_by_smsc!(smsc_name, smsc_message_id, status)" do
     let(:subject) { create(:reply, :queued_for_smsc_delivery) }
     let(:smsc_name) { "SMART" }
@@ -254,66 +264,27 @@ describe Reply do
     end
   end
 
-  describe "#update_delivery_state(options = {})" do
-    it "should correctly update the delivery state" do
-      reply = create(:reply)
-      reply.update_delivery_state
-      expect(reply).to be_queued_for_smsc_delivery
-
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state(:state => "delivered")
+  describe "#update_delivery_state!(status)" do
+    it "should correctly update the state" do
+      reply = create(:reply, :queued_for_smsc_delivery, :with_token)
+      reply.update_delivery_state!("delivered")
       expect(reply).to be_delivered_by_smsc
 
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state(:state => "confirmed")
-      expect(reply).to be_confirmed
-
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state(:state => "failed")
-      expect(reply).to be_failed
-
-      reply = create(:reply, :queued_for_smsc_delivery)
-      reply.update_delivery_state(:state => "error")
-      expect(reply).to be_errored
-
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state(:state => "confirmed")
+      reply.update_delivery_state!("confirmed")
       expect(reply).to be_confirmed
 
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state(:state => "failed")
+      reply.update_delivery_state!("failed")
       expect(reply).to be_failed
 
       reply = create(:reply, :delivered_by_smsc)
-      reply.update_delivery_state(:state => "error")
+      reply.update_delivery_state!("error")
       expect(reply).to be_errored
-    end
 
-    context "the reply failed to deliver" do
-      let(:user) { create(:user) }
-      let(:reply) { create(:reply, :queued_for_smsc_delivery, :user => user) }
-
-      before do
-        create_list(:reply, previous_consecutive_failed_replies, :failed, :user => user)
-        reply.update_delivery_state(:state => "failed")
-      end
-
-      context "and this also happened the last 4 times for this number" do
-      let(:previous_consecutive_failed_replies) { 4 }
-        it "should logout the intended recipient" do
-          expect(user).not_to be_online
-        end
-      end
-
-      context "and this also happened the last 3 times for this number" do
-        let(:previous_consecutive_failed_replies) { 3 }
-        it "should not yet logout the recipient" do
-          expect(user).to be_online
-          another_reply = create(:reply, :delivered_by_smsc, :user => user)
-          another_reply.update_delivery_state(:state => "failed")
-          expect(user).not_to be_online
-        end
-      end
+      reply = create(:reply, :delivered_by_smsc)
+      reply.update_delivery_state!("expired")
+      expect(reply).to be_expired
     end
   end
 
@@ -321,7 +292,7 @@ describe Reply do
     it "should update the message state from Twilio" do
       twilio_message_states.each do |twilio_message_state, assertions|
         clear_enqueued_jobs
-        subject = create(:reply, :twilio_channel, :queued_for_smsc_delivery, :with_token)
+        subject = create(:reply, :twilio_channel, :delivered_by_smsc, :with_token)
         expect_twilio_message_status_fetch(
           :message_sid => subject.token,
           :status => twilio_message_state
@@ -354,6 +325,7 @@ describe Reply do
 
       it "should enqueue a MT message to be sent via SMPP" do
         with_operators do |number_parts, assertions|
+          clear_enqueued_jobs
           number = number_parts.join
           reply = create(:reply, :to => number)
           message_sid = generate(:token)

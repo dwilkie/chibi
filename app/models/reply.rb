@@ -47,7 +47,6 @@ class Reply < ActiveRecord::Base
       NUNTIUM_FAILED    => FAILED
     },
     DELIVERY_CHANNEL_TWILIO => {
-      TWILIO_SENT        => DELIVERED,
       TWILIO_DELIVERED   => CONFIRMED,
       TWILIO_UNDELIVERED => FAILED,
       TWILIO_FAILED      => ERROR,
@@ -101,7 +100,7 @@ class Reply < ActiveRecord::Base
 
     event :delivery_confirmed do
       transitions(
-        :from => [:queued_for_smsc_delivery, :delivered_by_smsc],
+        :from => :delivered_by_smsc,
         :to   => :confirmed,
         :if   => :delivery_confirmed?
       )
@@ -109,7 +108,7 @@ class Reply < ActiveRecord::Base
 
     event :delivery_failed do
       transitions(
-        :from => [:queued_for_smsc_delivery, :delivered_by_smsc],
+        :from => :delivered_by_smsc,
         :to   => :failed,
         :if   => :delivery_failed?
       )
@@ -117,7 +116,7 @@ class Reply < ActiveRecord::Base
 
     event :delivery_expired do
       transitions(
-        :from => [:queued_for_smsc_delivery, :delivered_by_smsc],
+        :from => :delivered_by_smsc,
         :to   => :expired,
         :if   => :delivery_expired?
       )
@@ -125,7 +124,7 @@ class Reply < ActiveRecord::Base
 
     event :delivery_errored do
       transitions(
-        :from => [:queued_for_smsc_delivery, :delivered_by_smsc],
+        :from => :delivered_by_smsc,
         :to   => :errored,
         :if   => :delivery_error?
       )
@@ -210,8 +209,11 @@ class Reply < ActiveRecord::Base
     ) unless status
 
     self.token = smsc_message_id
-    self.update_delivery_state!(:state => DELIVERED)
-    save!
+    self.update_delivery_state!(DELIVERED)
+  end
+
+  def delivered_by_twilio!
+    update_delivery_state!(DELIVERED)
   end
 
   def fetch_twilio_message_status!
@@ -221,8 +223,9 @@ class Reply < ActiveRecord::Base
     save!
   end
 
-  def update_delivery_state!(options = {})
-    @delivery_state = options[:state]
+  def update_delivery_state!(status)
+    @delivery_state = status
+
     case @delivery_state
 
     when DELIVERED
@@ -270,10 +273,10 @@ class Reply < ActiveRecord::Base
 
   def parse_twilio_message_status
     if reply_state = DELIVERY_STATES[delivery_channel][smsc_message_status]
-      update_delivery_state!(:state => reply_state)
+      update_delivery_state!(reply_state)
     end
 
-    enqueue_twilio_message_status_fetch if !reply_state || reply_state == DELIVERED
+    enqueue_twilio_message_status_fetch if !reply_state || delivered_by_smsc?
   end
 
   def random_canned_greeting(options = {})
@@ -325,7 +328,7 @@ class Reply < ActiveRecord::Base
   end
 
   def delivery_accepted?
-    @delivery_state == DELIVERED
+    @delivery_state == DELIVERED && token.present?
   end
 
   def logout_user_if_failed_consecutively
@@ -370,6 +373,7 @@ class Reply < ActiveRecord::Base
     )
     self.token = response.sid
     save!
+    enqueue_twilio_mt_message_received
     enqueue_twilio_message_status_fetch
   end
 
@@ -386,6 +390,10 @@ class Reply < ActiveRecord::Base
 
   def enqueue_twilio_message_status_fetch
     TwilioMessageStatusFetcherJob.set(:wait => twilio_message_status_fetcher_delay.seconds).perform_later(id)
+  end
+
+  def enqueue_twilio_mt_message_received
+    TwilioMtMessageReceivedJob.perform_later(id)
   end
 
   def twilio_message_status_fetcher_delay

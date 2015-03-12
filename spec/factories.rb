@@ -238,23 +238,25 @@ FactoryGirl.define do
 
     trait :queued_for_smsc_delivery do
       state "queued_for_smsc_delivery"
-      nuntium_channel
+    end
+
+    trait :accepted_by_smsc do
+      with_token
     end
 
     trait :delivered_by_smsc do
       state "delivered_by_smsc"
-    end
-
-    trait :rejected do
-      state "rejected"
+      accepted_by_smsc
     end
 
     trait :failed do
       state "failed"
+      accepted_by_smsc
     end
 
     trait :confirmed do
       state "confirmed"
+      accepted_by_smsc
     end
 
     trait :with_token do
