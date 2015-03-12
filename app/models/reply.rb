@@ -1,4 +1,6 @@
 class Reply < ActiveRecord::Base
+  before_validation :set_destination, :on => :create
+
   include Chibi::Communicable
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
@@ -62,7 +64,12 @@ class Reply < ActiveRecord::Base
     }
   }
 
-  validates :to, :body, :presence => true
+  validates :to,
+            :presence => true,
+            :phony_plausible => true
+
+  validates :body, :presence => true
+
   validates :token, :uniqueness => true, :allow_nil => true
   validates :delivery_channel, :inclusion => { :in => DELIVERY_CHANNELS }, :allow_nil => true
 
@@ -143,12 +150,6 @@ class Reply < ActiveRecord::Base
 
   def self.cleanup!
     where.not(:delivered_at => nil).where("updated_at < ?", 1.month.ago).delete_all
-  end
-
-  def user=(value)
-    user = super
-    self.destination ||= user_mobile_number
-    user
   end
 
   def body
@@ -241,8 +242,11 @@ class Reply < ActiveRecord::Base
 
   private
 
+  def set_destination
+    (self.to ||= user_mobile_number) && (self.operator_name ||= operator.id)
+  end
+
   def set_channel_attributes
-    self.operator_name = operator.id
     self.delivery_channel = set_to_deliver_via_nuntium? ?
       DELIVERY_CHANNEL_NUNTIUM :
       (can_perform_delivery_via_smsc? ? DELIVERY_CHANNEL_SMSC : DELIVERY_CHANNEL_TWILIO)
@@ -266,7 +270,7 @@ class Reply < ActiveRecord::Base
   end
 
   def can_be_queued_for_smsc_delivery?
-    delivery_channel?
+    valid? && delivery_channel?
   end
 
   def parse_twilio_message_status

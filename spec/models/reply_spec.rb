@@ -111,6 +111,31 @@ describe Reply do
     it { is_expected.to validate_uniqueness_of(:token) }
   end
 
+  describe "callbacks" do
+    describe "before_validation(:on => :create)" do
+      let(:user) { create(:user, :from_registered_service_provider) }
+
+      before do
+        subject.valid?
+      end
+
+      context "if the destination is nil" do
+        subject { build(:reply, :user => user) }
+
+        it { expect(subject.destination).to eq(user.mobile_number) }
+        it { expect(subject.operator_name).to be_present }
+      end
+
+      context "if the destination is set" do
+        let(:destination) { generate(:unknown_operator_number) }
+
+        subject { build(:reply, :destination => destination, :user => user) }
+        it { expect(subject.destination).to eq(destination) }
+        it { expect(subject.operator_name).not_to be_present }
+      end
+    end
+  end
+
   describe ".undelivered" do
     let(:another_reply) { create(:reply) }
 
@@ -175,19 +200,6 @@ describe Reply do
       expect(Reply.all).to match_array([
         old_undelivered_reply, new_undelivered_reply, new_delivered_reply
       ])
-    end
-  end
-
-  describe "#user=(value)" do
-    context "if the destination is nil" do
-      subject { build(:reply, :user => user) }
-
-      it { expect(subject.destination).to eq(user.mobile_number) }
-    end
-
-    context "if the destination is set" do
-      subject { build(:reply, :destination => "1234", :user => user) }
-      it { expect(subject.destination).to eq("1234") }
     end
   end
 

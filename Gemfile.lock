@@ -237,6 +237,10 @@ GEM
       parallel
     pg (0.18.1)
     phony (2.12.2)
+    phony_rails (0.11.0)
+      activesupport (>= 3.0)
+      countries (~> 0.8, >= 0.8.2)
+      phony (~> 2.11, >= 2.11.1)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -407,7 +411,7 @@ DEPENDENCIES
   nuntium_api!
   parallel_tests
   pg
-  phony
+  phony_rails
   pry
   rack-timeout
   rails (= 4.2.0)

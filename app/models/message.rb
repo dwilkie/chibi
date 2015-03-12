@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class Message < ActiveRecord::Base
   include Chibi::Communicable
   include Chibi::Communicable::FromUser
