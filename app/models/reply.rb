@@ -12,8 +12,6 @@ class Reply < ActiveRecord::Base
   ERROR     = "error"
   EXPIRED   = "expired"
 
-  NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER = 5
-
   NUNTIUM_DELIVERED = DELIVERED
   NUNTIUM_FAILED = FAILED
   NUNTIUM_CONFIRMED = CONFIRMED
@@ -288,15 +286,6 @@ class Reply < ActiveRecord::Base
     CannedReply.new(user.locale, options)
   end
 
-  def self.queued_for_smsc_delivery
-    where(:state => "queued_for_smsc_delivery").where("token IS NOT NULL")
-  end
-
-  def undeliver!
-    self.delivered_at = nil
-    save!
-  end
-
   def set_forward_message(from, message)
     message.gsub!(/\A#{from.screen_id}\s*\:?\s*/i, "")
     prepend_screen_id(from.screen_id, message)
@@ -329,18 +318,6 @@ class Reply < ActiveRecord::Base
 
   def delivery_accepted?
     @delivery_state == DELIVERED && token.present?
-  end
-
-  def logout_user_if_failed_consecutively
-    return unless failed?
-    number_inactive = true
-    recent_replies = user.replies.reverse_order.limit(NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER).pluck(:state)
-    return unless recent_replies.count == NUM_CONSECUTIVE_FAILED_REPLIES_TO_BE_CONSIDERED_AN_INACTIVE_NUMBER
-    recent_replies.each do |reply_state|
-      number_inactive &&= (reply_state == "failed" || reply_state == "rejected")
-      break unless number_inactive
-    end
-    user.logout! if number_inactive
   end
 
   def torasup_number
@@ -398,10 +375,6 @@ class Reply < ActiveRecord::Base
 
   def twilio_message_status_fetcher_delay
     (Rails.application.secrets[:twilio_message_status_fetcher_delay] || 600).to_i
-  end
-
-  def uuid
-    @uuid ||= UUID.new
   end
 
   def set_to_deliver_via_nuntium?
