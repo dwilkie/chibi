@@ -86,7 +86,7 @@ class Reply < ActiveRecord::Base
     state :expired
     state :errored
 
-    event :deliver, :before => :set_channel_attributes do
+    event :deliver, :before => :prepare_for_delivery do
       transitions(
         :from   => :pending_delivery,
         :to     => :queued_for_smsc_delivery,
@@ -256,7 +256,8 @@ class Reply < ActiveRecord::Base
     (self.to ||= user_mobile_number) && (self.operator_name ||= operator.id)
   end
 
-  def set_channel_attributes
+  def prepare_for_delivery
+    return unless save
     self.delivery_channel = set_to_deliver_via_nuntium? ?
       DELIVERY_CHANNEL_NUNTIUM :
       (can_perform_delivery_via_smsc? ? DELIVERY_CHANNEL_SMSC : DELIVERY_CHANNEL_TWILIO)
@@ -280,7 +281,7 @@ class Reply < ActiveRecord::Base
   end
 
   def can_be_queued_for_smsc_delivery?
-    valid? && delivery_channel?
+    persisted? && valid? && delivery_channel?
   end
 
   def parse_twilio_delivery_status!
