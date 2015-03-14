@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150314072928) do
+ActiveRecord::Schema.define(version: 20150314074044) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -134,6 +134,7 @@ ActiveRecord::Schema.define(version: 20150314072928) do
     t.string   "smsc_message_status"
     t.string   "delivery_channel"
     t.string   "operator_name"
+    t.string   "smpp_server_id"
   end
 
   add_index "replies", ["chat_id"], name: "index_replies_on_chat_id", using: :btree

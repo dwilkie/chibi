@@ -253,7 +253,10 @@ class Reply < ActiveRecord::Base
   end
 
   def set_destination
-    (self.to ||= user_mobile_number) && (self.operator_name ||= operator.id)
+    if self.to ||= user_mobile_number
+      self.operator_name ||= operator.id
+      self.smpp_server_id ||= operator.smpp_server_id
+    end
   end
 
   def prepare_for_delivery
@@ -351,13 +354,13 @@ class Reply < ActiveRecord::Base
   end
 
   def can_perform_delivery_via_smsc?
-    operator.smpp_server_id.present?
+    smpp_server_id?
   end
 
   def request_delivery_via_smsc!
     MtMessageSenderJob.perform_later(
       id,
-      operator.smpp_server_id,
+      smpp_server_id,
       operator.short_code,
       destination,
       body

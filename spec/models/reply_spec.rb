@@ -349,6 +349,7 @@ describe Reply do
           reply.reload
           expect(reply.operator_name).to eq(assertions["id"])
           expect(reply.delivery_channel).to eq(assertions["smpp_server_id"] ? "smsc" : "twilio")
+          expect(reply.smpp_server_id).to eq(assertions["smpp_server_id"])
           assert_persisted_and_delivered(
             reply,
             number,
