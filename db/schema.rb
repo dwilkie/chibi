@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150311124924) do
+ActiveRecord::Schema.define(version: 20150314072928) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -103,15 +103,6 @@ ActiveRecord::Schema.define(version: 20150311124924) do
   add_index "messages", ["guid"], name: "index_messages_on_guid", unique: true, using: :btree
   add_index "messages", ["state"], name: "index_messages_on_state", using: :btree
   add_index "messages", ["user_id"], name: "index_messages_on_user_id", using: :btree
-
-  create_table "missed_calls", force: :cascade do |t|
-    t.string   "from",       limit: 255
-    t.integer  "user_id"
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
-  end
-
-  add_index "missed_calls", ["user_id"], name: "index_missed_calls_on_user_id", using: :btree
 
   create_table "phone_calls", force: :cascade do |t|
     t.string   "sid",           limit: 255
