@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150314074044) do
+ActiveRecord::Schema.define(version: 20150314092124) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -86,17 +86,30 @@ ActiveRecord::Schema.define(version: 20150314074044) do
   add_index "locations", ["country_code"], name: "index_locations_on_country_code", using: :btree
   add_index "locations", ["user_id"], name: "index_locations_on_user_id", using: :btree
 
+  create_table "message_parts", force: :cascade do |t|
+    t.string   "body",            null: false
+    t.integer  "sequence_number", null: false
+    t.integer  "message_id",      null: false
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "message_parts", ["message_id"], name: "index_message_parts_on_message_id", using: :btree
+
   create_table "messages", force: :cascade do |t|
-    t.string   "from",       limit: 255
+    t.string   "from",                  limit: 255
     t.text     "body"
     t.integer  "user_id"
     t.integer  "chat_id"
-    t.datetime "created_at",                                  null: false
-    t.datetime "updated_at",                                  null: false
-    t.string   "guid",       limit: 255
-    t.string   "state",      limit: 255, default: "received", null: false
+    t.datetime "created_at",                                             null: false
+    t.datetime "updated_at",                                             null: false
+    t.string   "guid",                  limit: 255
+    t.string   "state",                 limit: 255, default: "received", null: false
     t.string   "to"
     t.string   "channel"
+    t.integer  "csms_reference_number",             default: 0,          null: false
+    t.integer  "number_of_parts",                   default: 1,          null: false
+    t.boolean  "awaiting_parts",                    default: false,      null: false
   end
 
   add_index "messages", ["chat_id"], name: "index_messages_on_chat_id", using: :btree
