@@ -333,16 +333,23 @@ describe Reply do
         stub_env(:deliver_via_nuntium => "0")
       end
 
+      context "where there is no destination" do
+        it "should raise an invalid state transition error" do
+          expect { subject.deliver! }.to raise_error(AASM::InvalidTransition)
+        end
+      end
+
       it "should enqueue a MT message to be sent via SMPP" do
         with_operators do |number_parts, assertions|
           clear_enqueued_jobs
           number = number_parts.join
-          reply = create(:reply, :to => number)
+          reply = build(:reply, :to => number)
           message_sid = generate(:token)
           expect_delivery_via_twilio(:message_sid => message_sid) { reply.deliver! }
           reply.reload
           expect(reply.operator_name).to eq(assertions["id"])
           expect(reply.delivery_channel).to eq(assertions["smpp_server_id"] ? "smsc" : "twilio")
+          expect(reply.smpp_server_id).to eq(assertions["smpp_server_id"])
           assert_persisted_and_delivered(
             reply,
             number,
@@ -366,7 +373,7 @@ describe Reply do
       let(:body) { "test from twilio" }
       let(:message_sid) { generate(:guid) }
 
-      subject { create(:reply, :to => dest_address, :body => body) }
+      subject { build(:reply, :to => dest_address, :body => body) }
 
       it "should send the reply via Twilio" do
         expect_delivery_via_twilio(:message_sid => message_sid) { subject.deliver! }
@@ -401,7 +408,7 @@ describe Reply do
       it "should suggest the correct channel" do
         with_operators do |number_parts, assertions|
           number = number_parts.join
-          reply = create(:reply, :to => number)
+          reply = build(:reply, :to => number)
           expect_message { reply.deliver! }
           assert_persisted_and_delivered(
             reply,

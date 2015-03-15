@@ -46,12 +46,80 @@ describe Message do
         subject.valid?
         expect(subject.to).to eq(nil)
       end
+
+      context "setting the body" do
+        before do
+          subject.valid?
+        end
+
+        context "for a multipart message" do
+          context "that already has a body" do
+            subject { create(:message, :multipart, :body => "bar") }
+
+            it "should not override the body" do
+              expect(subject.body).to eq("bar")
+              expect(subject).not_to be_awaiting_parts
+              expect(subject.message_parts).not_to be_empty
+            end
+          end
+
+          context "when the message is complete" do
+            subject { create(:message, :multipart, :message_part_body => "bar") }
+
+            it "should set the body from the message parts" do
+              expect(subject.body).to eq("bar1bar2")
+              expect(subject).not_to be_awaiting_parts
+              expect(subject.message_parts).not_to be_empty
+            end
+          end
+
+          context "when the message is awaiting parts" do
+            subject { create(:message, :awaiting_parts) }
+
+            it "should not set the body from the message parts" do
+              expect(subject.body).not_to be_present
+              expect(subject).to be_awaiting_parts
+              expect(subject.message_parts).not_to be_empty
+            end
+          end
+        end
+
+        context "for single part messages" do
+          subject { create(:message, :multipart, :number_of_parts => 1) }
+
+          it "should clear the message parts" do
+            expect(subject.body).to be_present
+            expect(subject).not_to be_awaiting_parts
+            expect(subject.message_parts).to be_empty
+          end
+        end
+
+        context "for normal messages" do
+          subject { create(:message) }
+
+          it "should not set the body from the message parts" do
+            expect(subject.body).not_to be_present
+            expect(subject).not_to be_awaiting_parts
+            expect(subject.message_parts).to be_empty
+          end
+        end
+      end
     end
   end
 
-  it "should not be valid with a duplicate a guid" do
-    new_message.guid = message_with_guid.guid
-    expect(new_message).not_to be_valid
+  describe "associations" do
+    it { is_expected.to have_many(:message_parts) }
+  end
+
+  describe "validations" do
+    subject { create(:message) }
+
+    it { is_expected.to validate_uniqueness_of(:guid).allow_nil }
+    it { is_expected.to validate_presence_of(:channel) }
+    it { is_expected.to validate_presence_of(:csms_reference_number) }
+    it { is_expected.to validate_numericality_of(:csms_reference_number).only_integer.is_greater_than_or_equal_to(0).is_less_than_or_equal_to(255) }
+    it { is_expected.to validate_presence_of(:number_of_parts) }
+it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_greater_than_or_equal_to(1).is_less_than_or_equal_to(255) }
   end
 
   it_should_behave_like "a chat starter" do
@@ -117,14 +185,20 @@ describe Message do
     let(:guid) { generate(:guid) }
     let(:body) { "foo" }
     let(:channel) { "smart" }
+    let(:asserted_to) { to }
+    let(:asserted_body) { body }
+    let(:asserted_message_parts) { 0 }
+    let(:asserted_awaiting_parts) { false }
 
     def assert_new_message!
-      expect(new_message.from).to eq(from)
-      expect(new_message.body).to eq(body)
-      expect(new_message.guid).to eq(guid)
-      expect(new_message.to).to eq(to)
-      expect(new_message.channel).to eq(channel)
       expect(new_message).to be_valid
+      expect(new_message.message_parts.size).to eq(asserted_message_parts)
+      expect(new_message.from).to eq(from)
+      expect(new_message.body).to eq(asserted_body)
+      expect(new_message.guid).to eq(guid)
+      expect(new_message.to).to eq(asserted_to)
+      expect(new_message.channel).to eq(channel)
+      expect(new_message.awaiting_parts?).to eq(asserted_awaiting_parts)
     end
 
     describe ".from_smsc(params = {})" do
@@ -132,11 +206,62 @@ describe Message do
 
       let(:new_message) do
         described_class.from_smsc(
-          :from => from, :body => body, :channel => channel, :to => to
+          :from => from,
+          :body => body,
+          :channel => channel,
+          :to => to,
+          :csms_reference_number => csms_reference_number,
+          :number_of_parts => number_of_parts,
+          :sequence_number => sequence_number
         )
       end
 
-      it { assert_new_message! }
+      context "normal" do
+        let(:csms_reference_number) { 0 }
+        let(:number_of_parts) { 1 }
+        let(:sequence_number) { 1 }
+        let(:asserted_message_parts) { 0 }
+        let(:asserted_body) { body }
+        let(:asserted_awaiting_parts) { false }
+
+        it { assert_new_message! }
+      end
+
+      context "multipart" do
+        let(:csms_reference_number) { 1 }
+        let(:number_of_parts) { 2 }
+
+        context "1 of 2" do
+          let(:sequence_number) { 1 }
+          let(:asserted_message_parts) { 1 }
+          let(:asserted_body) { "" }
+          let(:asserted_awaiting_parts) { true }
+
+          it { assert_new_message! }
+        end
+
+        context "2 of 2" do
+          let(:sequence_number) { 2 }
+          let(:asserted_message_parts) { 2 }
+          let(:asserted_body) { "baz1" + body }
+          let(:asserted_awaiting_parts) { false }
+
+          before do
+            create(
+              :message,
+              :awaiting_parts,
+              :message_part_body => "baz",
+              :from => from,
+              :to => to,
+              :number_of_parts => number_of_parts - 1,
+              :csms_reference_number => csms_reference_number,
+              :channel => channel
+            )
+          end
+
+          it { assert_new_message! }
+        end
+      end
     end
 
     describe ".from_aggregator(params = {})" do
@@ -149,6 +274,7 @@ describe Message do
       describe "from twilio" do
         let(:channel) { "twilio" }
         let(:to) { "+14156926280" }
+        let(:asserted_to) { "14156926280" }
 
         def message_params(params = {})
           twilio_message_params(params)
@@ -163,6 +289,88 @@ describe Message do
         end
 
         it { assert_new_message! }
+      end
+    end
+  end
+
+  describe ".by_channel(channel_name)" do
+    let(:message) { create(:message, :channel => "smart") }
+
+    it "should return messages with the given channel" do
+      expect(described_class.by_channel("SMART")).to eq([message])
+    end
+  end
+
+  describe ".awaiting_parts" do
+    let(:message_awaiting_parts) { create(:message, :awaiting_parts) }
+
+    before do
+      message_awaiting_parts
+      create(:message)
+    end
+
+    it "should return messages that are awaiting parts" do
+      expect(described_class.awaiting_parts).to eq([message_awaiting_parts])
+    end
+  end
+
+  describe ".find_csms_message(channel, csms_reference_number, num_parts, from, to)" do
+    let(:message) { create(:message, :awaiting_parts) }
+
+    let(:channel) { message.channel }
+    let(:csms_reference_number) { message.csms_reference_number }
+    let(:num_parts) { message.number_of_parts }
+    let(:from) { message.from }
+    let(:to) { message.to }
+
+    let(:result) { described_class.find_csms_message(channel, csms_reference_number, num_parts, from, to) }
+
+    context "given a message exists that's awaiting parts" do
+      def assert_found!
+        expect(result).to eq(message)
+      end
+
+      def assert_not_found!
+        expect(result).to eq(nil)
+      end
+
+      before do
+        message
+      end
+
+      context "passing matching parameters" do
+        it { assert_found! }
+      end
+
+      context "passing 'csms_reference_number' => 0" do
+        let(:csms_reference_number) { 0 }
+        it { assert_not_found! }
+      end
+
+      context "passing 'num_parts' => 1" do
+        let(:num_parts) { 1 }
+
+        it { assert_not_found! }
+      end
+
+      context "'from' doesn't match" do
+        let(:from) { generate(:mobile_number) }
+        it { assert_not_found! }
+      end
+
+      context "'to' doesn't match" do
+        let(:to) { generate(:mobile_number) }
+        it { assert_not_found! }
+      end
+
+      context "'channel' doesn't match" do
+        let(:channel) { "different channel" }
+        it { assert_not_found! }
+      end
+
+      context "no longer awaiting parts" do
+        let(:message) { create(:message, :multipart) }
+        it { assert_not_found! }
       end
     end
   end
@@ -236,6 +444,42 @@ describe Message do
           message_awaiting_charge_result_for_too_long.id
         )
       end
+    end
+  end
+
+  describe "#find_csms_message" do
+    let(:to) { "+855 38 383 8380" }
+    let(:from) { "+855 12 239 134" }
+    let(:channel) { "MOBITEL" }
+
+    let(:message) {
+      create(
+        :message,
+        :awaiting_parts,
+        :to => "855383838380",
+        :from => "85512239134",
+        :channel => "mobitel"
+      )
+    }
+
+    subject {
+      build(
+        :message,
+        :csms_reference_number => message.csms_reference_number,
+        :number_of_parts => message.number_of_parts,
+        :to => to,
+        :from => from,
+        :channel => channel
+      )
+    }
+
+    context "a message exists that's awaiting parts with the same message params" do
+      it { expect(subject.find_csms_message).to eq(message) }
+    end
+
+    context "'from' doesn't match" do
+      let(:from) { "+855 12 239 135" }
+      it { expect(subject.find_csms_message).to eq(subject) }
     end
   end
 
@@ -320,6 +564,15 @@ describe Message do
 
       def stub_user_update_profile
         allow(user).to receive(:update_profile)
+      end
+
+      context "mulipart message is awaiting parts" do
+        subject { create(:message, :awaiting_parts) }
+
+        it "should not process the message" do
+          subject.process!
+          expect(subject).not_to be_processed
+        end
       end
 
       context "pre-processing" do

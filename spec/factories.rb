@@ -89,6 +89,39 @@ FactoryGirl.define do
 
   factory :message do
     from { generate(:mobile_number) }
+    twilio_channel
+
+    transient do
+      message_part_body "foo"
+    end
+
+    trait :awaiting_parts do
+      multipart
+      after(:build) do |message|
+        message.number_of_parts += 1
+      end
+    end
+
+    trait :multipart do
+      csms_reference_number 1
+      number_of_parts 2
+
+      after(:build) do |message, evaluator|
+        message.number_of_parts.times do |index|
+          sequence_number = message.number_of_parts - index # create parts out of order
+          message.message_parts << build(
+            :message_part,
+            :message => message,
+            :sequence_number => sequence_number,
+            :body => evaluator.message_part_body + sequence_number.to_s
+          )
+        end
+      end
+    end
+
+    trait :twilio_channel do
+      channel "twilio"
+    end
 
     trait :with_guid do
       guid
@@ -106,6 +139,12 @@ FactoryGirl.define do
       user nil
       from { generate(:mobile_number) }
     end
+  end
+
+  factory :message_part do
+    sequence_number 1
+    body "foo"
+    message
   end
 
   factory :phone_call do

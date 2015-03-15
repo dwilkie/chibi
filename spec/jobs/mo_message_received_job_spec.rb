@@ -15,6 +15,9 @@ describe Rails.application.secrets[:smpp_mo_message_received_worker].constantize
     let(:source_address) { "85512344592" }
     let(:dest_address) { "2442" }
     let(:message_text) { "Hi" }
+    let(:csms_reference_num) { 0 }
+    let(:csms_num_parts) { 1 }
+    let(:csms_seq_num) { 1 }
 
     before do
       stub_env(:smpp_mo_message_received_worker_enabled => worker_enabled)
@@ -24,7 +27,15 @@ describe Rails.application.secrets[:smpp_mo_message_received_worker].constantize
     end
 
     def do_perform
-      subject.perform(channel, source_address, dest_address, message_text)
+      subject.perform(
+        channel,
+        source_address,
+        dest_address,
+        message_text,
+        csms_reference_num,
+        csms_num_parts,
+        csms_seq_num
+      )
     end
 
     context "given the worker is enabled" do
@@ -34,7 +45,10 @@ describe Rails.application.secrets[:smpp_mo_message_received_worker].constantize
           :channel => channel,
           :from => source_address,
           :to => dest_address,
-          :body => message_text
+          :body => message_text,
+          :csms_reference_number => csms_reference_num,
+          :number_of_parts => csms_num_parts,
+          :sequence_number => csms_seq_num
         )
         expect(message).to receive(:save!)
         expect(message).to receive(:process!)
