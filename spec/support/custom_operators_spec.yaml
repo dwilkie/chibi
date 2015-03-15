@@ -5,7 +5,6 @@ kh:
   operators:
     smart:
       assertions:
-        nuntium_channel: "smart"
         smpp_server_id: "smart"
         short_code: "2442"
         caller_id: "2442"
@@ -26,7 +25,6 @@ kh:
             revenue_share: "0.35"
     beeline:
       assertions:
-        nuntium_channel: "beeline"
         smpp_server_id: "beeline"
         short_code: "2442"
         chargeable: true
@@ -40,7 +38,6 @@ kh:
     qb:
       assertions:
         short_code: "2442"
-        nuntium_channel: "qb"
         caller_id: "2442"
         dial_string_number_prefix: "2442"
         voip_gateway_host: "117.55.252.146"
@@ -57,7 +54,6 @@ kh:
       assertions:
         short_code: "2442"
         smpp_server_id: "cootel"
-        nuntium_channel: "cootel"
         caller_id: "2442"
         voip_gateway_host: "103.5.126.165"
         dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}:5061"

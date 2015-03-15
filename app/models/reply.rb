@@ -14,16 +14,10 @@ class Reply < ActiveRecord::Base
   ERROR     = "error"
   EXPIRED   = "expired"
 
-  NUNTIUM_DELIVERED = DELIVERED
-  NUNTIUM_FAILED = FAILED
-  NUNTIUM_CONFIRMED = CONFIRMED
-  NUNTIUM_REJECTED = "rejected"
-
   TWILIO_DELIVERED = DELIVERED
   TWILIO_FAILED = FAILED
   TWILIO_UNDELIVERED = "undelivered"
   TWILIO_SENT = "sent"
-  TWILIO_CHANNEL = "twilio"
 
   SMSC_ENROUTE       = "enroute"
   SMSC_DELIVERED     = "delivered"
@@ -35,19 +29,12 @@ class Reply < ActiveRecord::Base
   SMSC_REJECTED      = "rejected"
   SMSC_INVALID       = "invalid"
 
-  DELIVERY_CHANNEL_NUNTIUM = "nuntium"
-  DELIVERY_CHANNEL_TWILIO = TWILIO_CHANNEL
+  DELIVERY_CHANNEL_TWILIO = "twilio"
   DELIVERY_CHANNEL_SMSC = "smsc"
 
-  DELIVERY_CHANNELS = [DELIVERY_CHANNEL_NUNTIUM, DELIVERY_CHANNEL_TWILIO, DELIVERY_CHANNEL_SMSC]
+  DELIVERY_CHANNELS = [DELIVERY_CHANNEL_TWILIO, DELIVERY_CHANNEL_SMSC]
 
   DELIVERY_STATES = {
-    DELIVERY_CHANNEL_NUNTIUM => {
-      NUNTIUM_DELIVERED => DELIVERED,
-      NUNTIUM_CONFIRMED => CONFIRMED,
-      NUNTIUM_FAILED    => FAILED,
-      NUNTIUM_REJECTED  => FAILED,
-    },
     DELIVERY_CHANNEL_TWILIO => {
       TWILIO_DELIVERED   => CONFIRMED,
       TWILIO_UNDELIVERED => FAILED,
@@ -215,11 +202,6 @@ class Reply < ActiveRecord::Base
     update_delivery_state!(DELIVERED)
   end
 
-  def delivery_status_updated_by_nuntium!(status)
-    self.smsc_message_status = status.downcase
-    parse_smsc_delivery_status!
-  end
-
   def delivery_status_updated_by_smsc!(smsc_name, status)
     self.smsc_message_status = status.downcase
     parse_smsc_delivery_status!
@@ -261,9 +243,7 @@ class Reply < ActiveRecord::Base
 
   def prepare_for_delivery
     return unless save
-    self.delivery_channel = set_to_deliver_via_nuntium? ?
-      DELIVERY_CHANNEL_NUNTIUM :
-      (can_perform_delivery_via_smsc? ? DELIVERY_CHANNEL_SMSC : DELIVERY_CHANNEL_TWILIO)
+    self.delivery_channel = can_perform_delivery_via_smsc? ? DELIVERY_CHANNEL_SMSC : DELIVERY_CHANNEL_TWILIO
   end
 
   def request_delivery!
@@ -274,8 +254,6 @@ class Reply < ActiveRecord::Base
   def perform_delivery!
     case delivery_channel
 
-    when DELIVERY_CHANNEL_NUNTIUM
-      request_delivery_via_nuntium!
     when DELIVERY_CHANNEL_SMSC
       request_delivery_via_smsc!
     when DELIVERY_CHANNEL_TWILIO
@@ -379,17 +357,6 @@ class Reply < ActiveRecord::Base
     enqueue_twilio_message_status_fetch
   end
 
-  def request_delivery_via_nuntium!
-    # use an array so Nuntium sends a POST
-    response = nuntium.send_ao([{
-      :to => "sms://#{destination}",
-      :body => body,
-      :suggested_channel => operator.nuntium_channel || TWILIO_CHANNEL
-    }])
-    self.token = response["token"]
-    save!
-  end
-
   def enqueue_twilio_message_status_fetch
     TwilioMessageStatusFetcherJob.set(:wait => twilio_message_status_fetcher_delay.seconds).perform_later(id)
   end
@@ -400,18 +367,5 @@ class Reply < ActiveRecord::Base
 
   def twilio_message_status_fetcher_delay
     (Rails.application.secrets[:twilio_message_status_fetcher_delay] || 600).to_i
-  end
-
-  def set_to_deliver_via_nuntium?
-    Rails.application.secrets[:deliver_via_nuntium].to_i == 1
-  end
-
-  def nuntium
-    @nuntium ||= Nuntium.new(
-      Rails.application.secrets[:nuntium_url],
-      Rails.application.secrets[:nuntium_account],
-      Rails.application.secrets[:nuntium_application],
-      Rails.application.secrets[:nuntium_password]
-    )
   end
 end

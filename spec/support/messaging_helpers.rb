@@ -25,13 +25,13 @@ module MessagingHelpers
   end
 
   def expect_message(options = {}, &block)
-    # eject the current cassette, and insert a new nuntium cassette with a unique token
+    # eject the current cassette, and insert a new twilio cassette with a unique token
     # then after the request, eject the cassette
     VCR.configure do |c|
-      cassette_filter = lambda { |req| URI.parse(req.uri).path == nuntium_send_ao_path }
+      cassette_filter = lambda { |req| URI.parse(req.uri).path == twilio_post_messages_path(options) }
       c.before_http_request(cassette_filter) do |request|
         VCR.eject_cassette
-        VCR.insert_cassette(:nuntium, :erb => nuntium_erb(options))
+        VCR.insert_cassette(twilio_post_messages_cassette, :erb => twilio_post_messages_erb(options))
       end
 
       c.after_http_request(cassette_filter) do
@@ -42,13 +42,10 @@ module MessagingHelpers
     yield
   end
 
-  alias_method :expect_delivery_via_nuntium, :expect_message
+  alias_method :expect_delivery_via_twilio, :expect_message
 
-  def expect_delivery_via_twilio(options = {}, &block)
-    VCR.use_cassette(
-      :"twilio/post_messages",
-      :erb => twilio_post_messages_erb(options)
-    ) { yield }
+  def twilio_post_messages_cassette
+    :"twilio/post_messages"
   end
 
   def expect_twilio_message_status_fetch(options = {}, &block)
@@ -66,7 +63,7 @@ module MessagingHelpers
 
   def assert_twilio_job!(job, options = {})
     expect(job).to be_present
-    expect(job[:args]).to eq([options[:id]])
+    expect(job[:args]).to eq([options[:id]]) if options[:id]
     expect(job[:job]).to eq(options[:job_class])
     if options[:scheduled]
       expect(job[:at]).to be_present
@@ -84,25 +81,8 @@ module MessagingHelpers
   end
 
   def assert_deliver(options = {})
-    via = options.delete(:via)
-    via ||= :nuntium if deliver_via_nuntium?
-    if via == :twilio
-      assert_deliver_via_twilio!(options)
-    elsif via == :nuntium
-      assert_deliver_via_nuntium!(options)
-    else
-      assert_deliver_via_smsc!(options)
-    end
-  end
-
-  def assert_deliver_via_nuntium!(options = {})
-    last_request = webmock_requests.last
-    uri = last_request.uri
-    expect(uri.path).to eq(nuntium_send_ao_path)
-    last_request_data = JSON.parse(last_request.body).first
-    expect(last_request_data["body"]).to eq(options[:body]) if options[:body].present?
-    expect(last_request_data["to"]).to eq("sms://#{options[:to]}") if options[:to].present?
-    expect(last_request_data["suggested_channel"]).to eq(options[:suggested_channel]) if options[:suggested_channel].present?
+    via = options.delete(:via) || :twilio
+    via == :twilio ? assert_deliver_via_twilio!(options) : assert_deliver_via_smsc!(options)
   end
 
   def assert_deliver_via_twilio!(options = {})
@@ -114,8 +94,8 @@ module MessagingHelpers
     asserted_from = twilio_number(:sms_capable => true)
     expect(last_request_data["From"]).to eq(asserted_from)
     expect(last_request_data["Body"]).to eq(options[:body])
-    assert_twilio_mt_message_received_job_enqueued!(enqueued_jobs[0], options)
-    assert_fetch_twilio_message_status_job_enqueued!(enqueued_jobs[1], options)
+    assert_twilio_mt_message_received_job_enqueued!(enqueued_jobs[-2], options)
+    assert_fetch_twilio_message_status_job_enqueued!(enqueued_jobs[-1], options)
   end
 
   def assert_deliver_via_smsc!(options = {})
@@ -135,11 +115,11 @@ module MessagingHelpers
 
   def post_message(options = {})
     options[:from] = options[:from].mobile_number if options[:from].is_a?(User)
-    aggregator_params = options[:via_nuntium] ? nuntium_message_params(options) : twilio_message_params(options)
+    aggregator_params = twilio_message_params(options)
 
     expect_locate(options) do
       expect_message do
-        trigger_job do
+        trigger_job(:only => [MessageProcessorJob]) do
           post(
             messages_path,
             aggregator_params,
@@ -150,20 +130,6 @@ module MessagingHelpers
         end
       end
     end
-  end
-
-  def nuntium_message_params(options = {})
-    {
-      :message => {
-        :from => options[:from],
-        :body => options[:body],
-        :guid => options[:guid] || generate(:guid),
-        :application => options[:application] || "chatbox",
-        :channel => options[:channel] || "test",
-        :to => options[:to] || "012456789",
-        :subject => options[:subject] || ""
-      }
-    }
   end
 
   def twilio_message_params(options = {})
@@ -205,20 +171,8 @@ module MessagingHelpers
 
   def twilio_message_erb(options = {})
     twilio_cassette_erb(options).merge(
-      :message_sid => "SM908e28e9909641369494f1767ba5c0dd"
+      :message_sid => generate(:twilio_sid)
     ).merge(options)
-  end
-
-  def nuntium_erb(options = {})
-    {
-      :url => Rails.application.secrets[:nuntium_url],
-      :account => Rails.application.secrets[:nuntium_account],
-      :application => Rails.application.secrets[:nuntium_application],
-      :password => Rails.application.secrets[:nuntium_password],
-      :token => options.delete(:token) || generate(:token),
-      :to => options.delete(:to) || generate(:mobile_number),
-      :body => options.delete(:body) || "hello"
-    }.merge(options)
   end
 
   def twilio_post_messages_path(options = {})
@@ -253,22 +207,5 @@ module MessagingHelpers
       "REJECTED"       => {:reply_state => "failed"},
       "INVALID"        => {:reply_state => "errored"}
     }
-  end
-
-  def nuntium_message_states
-    {
-      "DELIVERED"      => {:initial_state => :queued_for_smsc_delivery, :reply_state => "delivered_by_smsc"},
-      "CONFIRMED"      => {:initial_state => :delivered_by_smsc, :reply_state => "confirmed"},
-      "FAILED"         => {:initial_state => :delivered_by_smsc, :reply_state => "failed"},
-      "REJECTED"       => {:initial_state => :delivered_by_smsc, :reply_state => "failed"},
-    }
-  end
-
-  def deliver_via_nuntium?
-    Rails.application.secrets[:deliver_via_nuntium].to_i == 1
-  end
-
-  def nuntium_send_ao_path
-    "/#{Rails.application.secrets[:nuntium_account]}/#{Rails.application.secrets[:nuntium_application]}/send_ao.json"
   end
 end

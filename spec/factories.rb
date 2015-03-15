@@ -20,6 +20,10 @@ FactoryGirl.define do
     "123abc84-a82e-23a1-b691-b2c19834bce#{n}"
   end
 
+  sequence :twilio_sid do |n|
+    "SM908e28e9909641369494f1767ba5c0d#{n}"
+  end
+
   sequence :mobile_number, 855972345678 do |n|
     n.to_s
   end
@@ -304,10 +308,6 @@ FactoryGirl.define do
 
     trait :twilio_channel do
       delivery_channel "twilio"
-    end
-
-    trait :nuntium_channel do
-      delivery_channel "nuntium"
     end
 
     trait :smsc_channel do

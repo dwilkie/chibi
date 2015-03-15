@@ -5,8 +5,6 @@ Rails.application.routes.draw do
 
   resources :messages, :only => :create
   resources :phone_calls, :only => :create, :defaults => { :format => 'xml' }
-  resources :missed_calls, :only => :create
-  resources :delivery_receipts, :only => :create
   resources :call_data_records, :only => :create, :defaults => { :format => 'xml' }
 
   resource :overview,         :only => :show
