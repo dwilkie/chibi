@@ -58,18 +58,8 @@ class Message < ActiveRecord::Base
     end
   end
 
-  def self.from_nuntium?(params)
-    nuntium_params(params).any?
-  end
-
-  # nuntium
-  def self.accept_messages_from_channel?(params)
-    enabled_channels = (Rails.application.secrets[:nuntium_messages_enabled_channels]).to_s.downcase.split(";")
-    enabled_channels.include?(nuntium_params(params)[:channel].to_s.downcase)
-  end
-
   def self.from_aggregator(params = {})
-    from_nuntium?(params) ? from_nuntium(params) : from_twilio(params)
+    from_twilio(params)
   end
 
   def self.by_channel(channel_name)
@@ -208,16 +198,6 @@ class Message < ActiveRecord::Base
   def activate_chats!
     Chat.activate_multiple!(user, :starter => self, :notify => true)
   end
-
-  def self.nuntium_params(params)
-    params[:message] || {}
-  end
-  private_class_method :nuntium_params
-
-  def self.from_nuntium(params)
-    new(nuntium_params(params).slice(:body, :guid, :from, :to, :channel))
-  end
-  private_class_method :from_nuntium
 
   def self.from_twilio(params)
     params.underscorify_keys!

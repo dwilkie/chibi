@@ -146,39 +146,6 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     let(:chatable_resource) { message }
   end
 
-  describe ".from_nuntium?(params = {})" do
-    describe "from nuntium" do
-      let(:params) { nuntium_message_params }
-      it { expect(described_class.from_nuntium?(params)).to eq(true) }
-    end
-
-    describe "from twilio" do
-      let(:params) { twilio_message_params }
-      it { expect(described_class.from_nuntium?(params)).to eq(false) }
-    end
-  end
-
-  # nuntium
-  describe ".accept_messages_from_channel?(params = {})" do
-    let(:params) { nuntium_message_params(:channel => nuntium_channel) }
-
-    before do
-      stub_env(:nuntium_messages_enabled_channels => nuntium_channel)
-    end
-
-    context "given the channel is nuntium enabled" do
-      let(:nuntium_channel) { "smart" }
-
-      it { expect(described_class.accept_messages_from_channel?(params)).to eq(true) }
-    end
-
-    context "given the channel is not nuntium enabled" do
-      let(:nuntium_channel) { nil }
-
-      it { expect(described_class.accept_messages_from_channel?(params)).to eq(false) }
-    end
-  end
-
   describe "'.from' methods" do
     let(:from) { generate(:mobile_number) }
     let(:to) { "2442" }
@@ -278,14 +245,6 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
         def message_params(params = {})
           twilio_message_params(params)
-        end
-
-        it { assert_new_message! }
-      end
-
-      describe "from nuntium" do
-        def message_params(params = {})
-          nuntium_message_params(params)
         end
 
         it { assert_new_message! }
@@ -417,7 +376,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
       context "after the job has run" do
         before do
-          expect_message { trigger_job { described_class.queue_unprocessed } }
+          expect_message { trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed } }
         end
 
         it "should process the messages" do

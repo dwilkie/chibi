@@ -4,22 +4,19 @@ class MessagesController < ApplicationController
   before_action :authenticate_message
 
   def create
-    status = (from_nuntium? && !accept_messages_from_channel?) ? :created : create_message
-    render(:nothing => true, :status => status)
-  end
-
-  private
-
-  def create_message
     message = Message.from_aggregator(message_params)
 
     if message.save
       message.queue_for_processing!
-      :created
+      status = :created
     else
-      :bad_request
+      status = :bad_request
     end
+
+    render(:nothing => true, :status => status)
   end
+
+  private
 
   def authenticate_message
     authenticate(:message)
@@ -27,25 +24,5 @@ class MessagesController < ApplicationController
 
   def message_params
     params.permit!
-  end
-
-  def from_nuntium?
-    Message.from_nuntium?(message_params)
-  end
-
-  def accept_messages_from_channel?
-    accept_messages_from_nuntium? && Message.accept_messages_from_channel?(message_params)
-  end
-
-  def accept_messages_from_nuntium?
-    nuntium_enabled? && nuntium_messages_enabled?
-  end
-
-  def nuntium_messages_enabled?
-    Rails.application.secrets[:nuntium_messages_enabled].to_i == 1
-  end
-
-  def nuntium_enabled?
-    Rails.application.secrets[:nuntium_enabled].to_i == 1
   end
 end

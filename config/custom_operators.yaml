@@ -6,7 +6,6 @@ kh:
       metadata:
         short_code: "2442"
         smpp_server_id: "smart"
-        nuntium_channel: "smart"
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
         dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
@@ -27,7 +26,6 @@ kh:
       metadata:
         short_code: "2442"
         smpp_server_id: "beeline"
-        nuntium_channel: "beeline"
         chargeable: true
         services:
           bee_friends:
@@ -39,7 +37,6 @@ kh:
     qb:
       metadata:
         short_code: "2442"
-        nuntium_channel: "qb"
         caller_id: "2442"
         voip_gateway_host: "117.55.252.146"
         dial_string: "sofia/internal/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
@@ -56,7 +53,6 @@ kh:
       metadata:
         short_code: "2442"
         smpp_server_id: "cootel"
-        nuntium_channel: "cootel"
         caller_id: "2442"
         voip_gateway_host: "103.5.126.165"
         dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}:5061"

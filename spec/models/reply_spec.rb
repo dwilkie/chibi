@@ -107,7 +107,7 @@ describe Reply do
   describe "validations" do
     it { is_expected.to validate_presence_of(:to) }
     it { is_expected.to validate_presence_of(:body) }
-    it { is_expected.to validate_inclusion_of(:delivery_channel).in_array(["nuntium", "twilio", "smsc"]) }
+    it { is_expected.to validate_inclusion_of(:delivery_channel).in_array(["twilio", "smsc"]) }
     it { is_expected.to validate_uniqueness_of(:token) }
   end
 
@@ -238,17 +238,6 @@ describe Reply do
     it { expect(subject).to be_delivered_by_smsc }
   end
 
-  describe "#delivery_status_updated_by_nuntium!(status)" do
-    it "should correctly update the state" do
-      nuntium_message_states.each do |nuntium_message_state, assertions|
-        subject = create(:reply, :nuntium_channel, assertions[:initial_state], :with_token)
-        subject.delivery_status_updated_by_nuntium!(nuntium_message_state)
-        expect(subject.smsc_message_status).to eq(nuntium_message_state.downcase)
-        expect(subject.state).to eq(assertions[:reply_state])
-      end
-    end
-  end
-
   describe "#delivery_status_updated_by_smsc!(smsc_name, status)" do
     it "should correctly update the state" do
       smsc_message_states.each do |smsc_message_state, assertions|
@@ -329,10 +318,6 @@ describe Reply do
     end
 
     context "by default" do
-      before do
-        stub_env(:deliver_via_nuntium => "0")
-      end
-
       context "where there is no destination" do
         it "should raise an invalid state transition error" do
           expect { subject.deliver! }.to raise_error(AASM::InvalidTransition)
@@ -365,10 +350,6 @@ describe Reply do
     context "via Twilio" do
       include TwilioHelpers
 
-      before do
-        stub_env(:deliver_via_nuntium => "0")
-      end
-
       let(:dest_address) { "85589481811" }
       let(:body) { "test from twilio" }
       let(:message_sid) { generate(:guid) }
@@ -385,58 +366,6 @@ describe Reply do
         )
         expect(subject.token).to eq(message_sid)
         expect(subject.delivery_channel).to eq("twilio")
-      end
-    end
-
-    context "via Nuntium" do
-      def assert_persisted_and_delivered(reply, mobile_number, options = {})
-        reply.reload
-        expect(reply.operator_name).to eq(options[:operator_id]) if options[:operator_id]
-        expect(reply.delivery_channel).to eq("nuntium")
-        super(reply, mobile_number, options.merge(:via => :nuntium))
-      end
-
-      before do
-        stub_env(:deliver_via_nuntium => "1")
-      end
-
-      it "should deliver the message and save the token" do
-        expect_delivery_via_nuntium(:token => "token") { reply.deliver! }
-        assert_persisted_and_delivered(reply, user.mobile_number, :token => "token")
-      end
-
-      it "should suggest the correct channel" do
-        with_operators do |number_parts, assertions|
-          number = number_parts.join
-          reply = build(:reply, :to => number)
-          expect_message { reply.deliver! }
-          assert_persisted_and_delivered(
-            reply,
-            number,
-            :suggested_channel => assertions["nuntium_channel"],
-            :operator_id => assertions["id"]
-          )
-        end
-        user = create(:user, :from_unknown_operator)
-        reply = create(:reply, :user => user)
-        expect_message { reply.deliver! }
-        assert_persisted_and_delivered(
-          reply,
-          reply.destination,
-          :suggested_channel => "twilio"
-        )
-      end
-
-      context "given the delivery fails" do
-        before do
-          allow(Nuntium).to receive(:new).and_raise("BOOM! Cannot connect to Nuntium Server")
-        end
-
-        it "should not mark the reply as delivered" do
-          expect { reply.deliver! }.to raise_error
-          expect(reply).not_to be_delivered
-          expect(reply).to be_pending_delivery
-        end
       end
     end
   end
