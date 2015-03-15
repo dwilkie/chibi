@@ -7,6 +7,7 @@ class TestMessagesController < ApplicationController
 
   def create
     @message = Message.new(permitted_params)
+    @message.channel = "test_messages"
     if @message.save
       @message.process!
       redirect_to users_path
