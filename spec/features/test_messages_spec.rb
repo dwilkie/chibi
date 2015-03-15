@@ -6,7 +6,7 @@ describe "Test Messages" do
   context "without the username and password" do
     it "should deny me access" do
       visit new_test_message_path
-      page.body.should have_content "Access denied"
+      expect(page.body).to have_content "Access denied"
     end
   end
 
@@ -28,7 +28,7 @@ describe "Test Messages" do
       end
 
       it "should create a message and process it" do
-        new_message.should be_processed
+        expect(new_message).to be_processed
       end
     end
 
@@ -41,8 +41,8 @@ describe "Test Messages" do
       end
 
       it "should not create a message" do
-        new_message.should_not be_present
-        page.should have_content "can't be blank"
+        expect(new_message).not_to be_present
+        expect(page).to have_content "can't be blank"
       end
     end
   end
