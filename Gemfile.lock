@@ -241,7 +241,6 @@ GEM
       rack
     rack-test (0.6.3)
       rack (>= 1.0)
-    rack-timeout (0.2.0)
     rails (4.2.0)
       actionmailer (= 4.2.0)
       actionpack (= 4.2.0)
@@ -400,7 +399,6 @@ DEPENDENCIES
   pg
   phony_rails
   pry
-  rack-timeout
   rails (= 4.2.0)
   rails_12factor
   rails_best_practices
