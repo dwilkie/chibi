@@ -68,7 +68,7 @@ class Message < ActiveRecord::Base
 
   def self.find_csms_message(id, channel, csms_reference_number, num_parts, from, to)
     return nil if csms_reference_number == 0 || num_parts == 1
-    awaiting_parts.by_channel(channel).where.not(
+    awaiting_parts.where.not(
       :id => id
     ).where(
       :csms_reference_number => csms_reference_number,

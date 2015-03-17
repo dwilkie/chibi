@@ -329,8 +329,10 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
       end
 
       context "'channel' doesn't match" do
+        # sometimes we get smart and smart2
+        # to and from should be ok for now
         let(:channel) { "different channel" }
-        it { assert_not_found! }
+        it { assert_found! }
       end
 
       context "no longer awaiting parts" do
