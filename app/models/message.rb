@@ -38,7 +38,7 @@ class Message < ActiveRecord::Base
     state :processed
     state :awaiting_charge_result
 
-    event :process, :if => :can_be_processed? do
+    event :process, :if => :can_be_processed?, :before => :queue_for_cleanup do
       transitions(:from => :received, :to => :awaiting_charge_result, :unless => :user_charge!)
       transitions(:from => :received, :to => :processed, :after => :route_to_destination)
       transitions(:from => :awaiting_charge_result, :to => :processed, :after => :examine_charge_result)
@@ -66,9 +66,11 @@ class Message < ActiveRecord::Base
     where(:channel => channel_name.downcase)
   end
 
-  def self.find_csms_message(channel, csms_reference_number, num_parts, from, to)
+  def self.find_csms_message(id, channel, csms_reference_number, num_parts, from, to)
     return nil if csms_reference_number == 0 || num_parts == 1
-    awaiting_parts.by_channel(channel).where(
+    awaiting_parts.by_channel(channel).where.not(
+      :id => id
+    ).where(
       :csms_reference_number => csms_reference_number,
       :number_of_parts => num_parts,
       :from => from,
@@ -81,20 +83,18 @@ class Message < ActiveRecord::Base
   end
 
   def self.from_smsc(params = {})
-    tmp_message = new(
+    message = new(
       params.slice(
         :from, :to, :channel, :number_of_parts, :csms_reference_number
       )
     )
 
-    message = tmp_message.find_csms_message
-    message.message_parts.build(params.slice(:body, :sequence_number))
+    message_part = message.message_parts.build(params.slice(:body, :sequence_number))
     message
   end
 
   def find_csms_message
-    valid?
-    self.class.find_csms_message(channel, csms_reference_number, number_of_parts, from, to) || self
+    self.class.find_csms_message(id, channel, csms_reference_number, number_of_parts, from, to)
   end
 
   def body
@@ -109,10 +109,22 @@ class Message < ActiveRecord::Base
     MessageProcessorJob.perform_later(id)
   end
 
+  def destroy_invalid_multipart!
+    destroy if invalid_multipart?
+  end
+
   private
 
+  def queue_for_cleanup
+    MessageCleanupJob.perform_later(id) if invalid_multipart?
+  end
+
+  def invalid_multipart?
+    multipart? && message_parts.empty?
+  end
+
   def can_be_processed?
-    !awaiting_parts?
+    !awaiting_parts? && !invalid_multipart?
   end
 
   def set_body_from_message_parts
@@ -130,7 +142,7 @@ class Message < ActiveRecord::Base
   end
 
   def multipart?
-    number_of_parts.to_i > 1
+    csms_reference_number.to_i > 0 && number_of_parts.to_i > 1
   end
 
   def examine_charge_result

@@ -107,8 +107,7 @@ FactoryGirl.define do
     end
 
     trait :multipart do
-      csms_reference_number 1
-      number_of_parts 2
+      invalid_multipart
 
       after(:build) do |message, evaluator|
         message.number_of_parts.times do |index|
@@ -121,6 +120,11 @@ FactoryGirl.define do
           )
         end
       end
+    end
+
+    trait :invalid_multipart do
+      csms_reference_number 1
+      number_of_parts 2
     end
 
     trait :twilio_channel do
