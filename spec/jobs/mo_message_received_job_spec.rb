@@ -8,8 +8,6 @@ describe Rails.application.secrets[:smpp_mo_message_received_worker].constantize
   end
 
   describe "#perform(smsc_name, source_address, dest_address, message_text)" do
-    include EnvHelpers
-
     let(:message) { double(Message) }
     let(:channel) { "SMART" }
     let(:source_address) { "85512344592" }
@@ -20,7 +18,6 @@ describe Rails.application.secrets[:smpp_mo_message_received_worker].constantize
     let(:csms_seq_num) { 1 }
 
     before do
-      stub_env(:smpp_mo_message_received_worker_enabled => worker_enabled)
       allow(Message).to receive(:from_smsc).and_return(message)
       allow(message).to receive(:save!)
       allow(message).to receive(:process)
@@ -38,31 +35,19 @@ describe Rails.application.secrets[:smpp_mo_message_received_worker].constantize
       )
     end
 
-    context "given the worker is enabled" do
-      let(:worker_enabled) { "1" }
-      it "should save and process the message" do
-        expect(Message).to receive(:from_smsc).with(
-          :channel => channel,
-          :from => source_address,
-          :to => dest_address,
-          :body => message_text,
-          :csms_reference_number => csms_reference_num,
-          :number_of_parts => csms_num_parts,
-          :sequence_number => csms_seq_num
-        )
-        expect(message).to receive(:save!)
-        expect(message).to receive(:process!)
-        do_perform
-      end
-    end
-
-    context "given the worker is disabled" do
-      let(:worker_enabled) { nil }
-
-      it "should do nothing" do
-        expect(message).not_to receive(:process!)
-        do_perform
-      end
+    it "should save and process the message" do
+      expect(Message).to receive(:from_smsc).with(
+        :channel => channel,
+        :from => source_address,
+        :to => dest_address,
+        :body => message_text,
+        :csms_reference_number => csms_reference_num,
+        :number_of_parts => csms_num_parts,
+        :sequence_number => csms_seq_num
+      )
+      expect(message).to receive(:save!)
+      expect(message).to receive(:process!)
+      do_perform
     end
   end
 end
