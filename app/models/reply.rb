@@ -13,6 +13,7 @@ class Reply < ActiveRecord::Base
   CONFIRMED = "confirmed"
   ERROR     = "error"
   EXPIRED   = "expired"
+  UNKNOWN   = "unknown"
 
   TWILIO_DELIVERED = DELIVERED
   TWILIO_FAILED = FAILED
@@ -36,6 +37,7 @@ class Reply < ActiveRecord::Base
 
   DELIVERY_STATES = {
     DELIVERY_CHANNEL_TWILIO => {
+      TWILIO_SENT        => UNKNOWN,
       TWILIO_DELIVERED   => CONFIRMED,
       TWILIO_UNDELIVERED => FAILED,
       TWILIO_FAILED      => ERROR,
@@ -46,7 +48,7 @@ class Reply < ActiveRecord::Base
       SMSC_UNDELIVERABLE => FAILED,
       SMSC_EXPIRED       => EXPIRED,
       SMSC_DELETED       => ERROR,
-      SMSC_UNKNOWN       => ERROR,
+      SMSC_UNKNOWN       => UNKNOWN,
       SMSC_INVALID       => ERROR
     }
   }
@@ -72,6 +74,7 @@ class Reply < ActiveRecord::Base
     state :failed
     state :expired
     state :errored
+    state :unknown
 
     event :deliver, :before => :prepare_for_delivery do
       transitions(
@@ -119,6 +122,14 @@ class Reply < ActiveRecord::Base
         :from => :delivered_by_smsc,
         :to   => :errored,
         :if   => :delivery_error?
+      )
+    end
+
+    event :delivery_unknown do
+      transitions(
+        :from => :delivered_by_smsc,
+        :to   => :unknown,
+        :if   => :delivery_unknown?
       )
     end
   end
@@ -231,6 +242,8 @@ class Reply < ActiveRecord::Base
       delivery_errored!
     when EXPIRED
       delivery_expired!
+    when UNKNOWN
+      delivery_unknown!
     end
   end
 
@@ -313,6 +326,10 @@ class Reply < ActiveRecord::Base
 
   def delivery_confirmed?
     delivery_status_can_be_updated? && @delivery_state == CONFIRMED
+  end
+
+  def delivery_unknown?
+    delivery_status_can_be_updated? && @delivery_state == UNKNOWN
   end
 
   def delivery_accepted?
