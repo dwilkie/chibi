@@ -21,7 +21,7 @@ module TwilioHelpers
   def twilio_numbers(options = {})
     config_key = "twilio_outgoing_numbers"
     config_key += "_sms_capable" if options[:sms_capable]
-    numbers = Rails.application.secrets[config_key].split(":")
+    numbers = Rails.application.secrets[config_key].to_s.split(":")
     options[:formatted] == false ? numbers : numbers.map { |number| asserted_number_formatted_for_twilio(number) }
   end
 

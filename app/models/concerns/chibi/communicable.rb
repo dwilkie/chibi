@@ -44,7 +44,7 @@ module Chibi
         # assume it's a local number with the incorrect US country code added
         # Twilio does this sometimes
         local_number = sanitized_value.gsub(/\A1{1}/, "")
-        default_country_code = Rails.application.secrets[:default_country_code]
+        default_country_code = Rails.application.secrets[:default_country_code].to_s
 
         number_with_country_code = Phony.normalize(default_country_code + local_number)
         return write_from(number_with_country_code) if Phony.plausible?(number_with_country_code)
