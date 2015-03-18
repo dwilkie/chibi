@@ -3,6 +3,6 @@ class CallDataRecordCreatorJob < ActiveJob::Base
 
   def perform(body)
     cdr = CallDataRecord.new(:body => body)
-    cdr.typed.save!
+    cdr.typed.save
   end
 end

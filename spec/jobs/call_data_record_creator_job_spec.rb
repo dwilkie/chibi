@@ -13,12 +13,12 @@ describe CallDataRecordCreatorJob do
     before do
       allow(CallDataRecord).to receive(:new).and_return(call_data_record)
       allow(call_data_record).to receive(:typed).and_return(inbound_cdr)
-      allow(inbound_cdr).to receive(:save!)
+      allow(inbound_cdr).to receive(:save)
     end
 
     it "should create the CDR" do
       expect(CallDataRecord).to receive(:new).with(:body => body)
-      expect(inbound_cdr).to receive(:save!)
+      expect(inbound_cdr).to receive(:save)
       subject.perform(body)
     end
   end
