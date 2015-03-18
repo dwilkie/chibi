@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe MessageProcessorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("urgent") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:message_processor_queue]) }
   end
 
   describe "#perform(message_id)" do

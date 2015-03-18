@@ -9,7 +9,7 @@ describe ChatExpirerJob do
   end
 
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("default") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:chat_expirer_queue]) }
   end
 
   describe "#perform(options = {})" do

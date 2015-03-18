@@ -9,7 +9,7 @@ describe FriendFinderJob do
   end
 
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("default") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:friend_finder_queue]) }
   end
 
   describe "#perform(options = {})" do

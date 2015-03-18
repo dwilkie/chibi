@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe LocatorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("high") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:locator_queue]) }
   end
 
   describe "#perform(id, address)" do

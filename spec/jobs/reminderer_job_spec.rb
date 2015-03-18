@@ -9,7 +9,7 @@ describe RemindererJob do
   end
 
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("very_low") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:reminderer_queue]) }
   end
 
   describe "#perform(options = {})" do

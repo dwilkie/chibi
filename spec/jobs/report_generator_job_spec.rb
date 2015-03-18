@@ -9,7 +9,7 @@ describe ReportGeneratorJob do
   end
 
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("high") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:report_generator_queue]) }
   end
 
   describe "#perform(options)" do

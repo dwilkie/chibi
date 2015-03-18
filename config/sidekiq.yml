@@ -1,0 +1,3 @@
+---
+:queues:
+  <%= ENV["INTERNAL_QUEUES"].to_s.split(":").map.with_index { |name, index| [name, 2 ** index] } %>

@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe CallDataRecordCreatorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("very_high") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:call_data_record_creator_queue]) }
   end
 
   describe "#perform(body)" do

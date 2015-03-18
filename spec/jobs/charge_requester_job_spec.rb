@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe ChargeRequesterJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("charge_requester_queue") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:charge_requester_external_queue]) }
   end
 
   it "should be a type of ActiveJob::Base" do

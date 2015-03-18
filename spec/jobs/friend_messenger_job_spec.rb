@@ -9,7 +9,7 @@ describe FriendMessengerJob do
   end
 
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("high") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:friend_messenger_queue]) }
   end
 
   describe "#perform(user_id, options = {})" do
