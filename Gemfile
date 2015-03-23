@@ -20,7 +20,6 @@ gem 'multi_xml'
 gem 'carrierwave'
 gem 'fog'
 gem 'sidekiq'
-gem 'sidekiq-failures'
 gem 'sinatra'
 gem 'airbrake'
 
