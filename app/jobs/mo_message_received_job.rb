@@ -1,4 +1,4 @@
-job_class = Class.new(Object) do
+class MoMessageReceivedJob
   include Sidekiq::Worker
   sidekiq_options :queue => Rails.application.secrets[:smpp_mo_message_received_queue]
 
@@ -16,5 +16,3 @@ job_class = Class.new(Object) do
     message.process!
   end
 end
-
-Object.const_set(Rails.application.secrets[:smpp_mo_message_received_worker], job_class)

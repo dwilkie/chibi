@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Rails.application.secrets[:smpp_mt_message_update_status_worker].constantize do
+describe MtMessageUpdateStatusJob do
   it { expect(subject).not_to be_a(ActiveJob::Base) }
 
   describe ".sidekiq_options" do

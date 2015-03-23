@@ -1,4 +1,4 @@
-job_class = Class.new(Object) do
+class MtMessageUpdateStatusJob
   include Sidekiq::Worker
   sidekiq_options :queue => Rails.application.secrets[:smpp_mt_message_update_status_queue]
 
@@ -6,5 +6,3 @@ job_class = Class.new(Object) do
     Reply.find(mt_message_id).delivered_by_smsc!(smsc_name, smsc_message_id, status)
   end
 end
-
-Object.const_set(Rails.application.secrets[:smpp_mt_message_update_status_worker], job_class)
