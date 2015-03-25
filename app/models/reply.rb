@@ -200,11 +200,7 @@ class Reply < ActiveRecord::Base
   end
 
   def delivered_by_smsc!(smsc_name, smsc_message_id, status)
-    raise(
-      ArgumentError,
-      "Reply ##{id} failed to deliver on SMSC: '#{smsc_name}' (SMSC MESSAGE ID: '#{smsc_message_id}')"
-    ) unless status
-
+    return request_delivery! unless status
     self.token = smsc_message_id
     update_delivery_state!(DELIVERED)
   end
@@ -265,13 +261,7 @@ class Reply < ActiveRecord::Base
   end
 
   def perform_delivery!
-    case delivery_channel
-
-    when DELIVERY_CHANNEL_SMSC
-      request_delivery_via_smsc!
-    when DELIVERY_CHANNEL_TWILIO
-      request_delivery_via_twilio!
-    end
+    delivery_channel == DELIVERY_CHANNEL_SMSC ? request_delivery_via_smsc! : request_delivery_via_twilio!
   end
 
   def can_be_queued_for_smsc_delivery?

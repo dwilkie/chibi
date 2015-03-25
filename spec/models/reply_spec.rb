@@ -250,7 +250,7 @@ describe Reply do
   end
 
   describe "#delivered_by_smsc!(smsc_name, smsc_message_id, status)" do
-    let(:subject) { create(:reply, :queued_for_smsc_delivery) }
+    let(:subject) { create(:reply, :queued_for_smsc_delivery, :smsc_channel) }
     let(:smsc_name) { "SMART" }
     let(:smsc_message_id) { "7869576120333847249" }
 
@@ -259,12 +259,12 @@ describe Reply do
       subject.reload
     end
 
+    before do
+      do_delivered_by_smsc!
+    end
+
     context "where the delivery was successful" do
       let(:status) { true }
-
-      before do
-        do_delivered_by_smsc!
-      end
 
       it "should update the message token and status" do
         expect(subject.token).to eq(smsc_message_id)
@@ -273,16 +273,12 @@ describe Reply do
     end
 
     context "where the status was not successful" do
-      # know about it first
       let(:status) { false }
+      let(:job) { enqueued_jobs.last }
 
-      it "should raise an error" do
-        expect { do_delivered_by_smsc!}.to raise_error do |error|
-          expect(error).to be_a(ArgumentError)
-          expect(error.message).to include(subject.id.to_s)
-          expect(error.message).to include(smsc_name)
-          expect(error.message).to include(smsc_message_id)
-        end
+      it "should enqueue a job to redeliver the message" do
+        expect(job[:job]).to eq(MtMessageSenderJob)
+        expect(job[:args][0]).to eq(subject.id)
       end
     end
   end
@@ -319,7 +315,7 @@ describe Reply do
 
     context "by default" do
       context "where there is no destination" do
-        it "should raise an invalid state transition error" do
+        it "should not deliver message" do
           subject.deliver!
           expect(subject).to be_pending_delivery
         end
