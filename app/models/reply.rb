@@ -66,7 +66,7 @@ class Reply < ActiveRecord::Base
 
   alias_attribute :destination, :to
 
-  aasm :column => :state do
+  aasm :column => :state, :whiny_transitions => false do
     state :pending_delivery, :initial => true
     state :queued_for_smsc_delivery
     state :delivered_by_smsc

@@ -320,7 +320,8 @@ describe Reply do
     context "by default" do
       context "where there is no destination" do
         it "should raise an invalid state transition error" do
-          expect { subject.deliver! }.to raise_error(AASM::InvalidTransition)
+          subject.deliver!
+          expect(subject).to be_pending_delivery
         end
       end
 
