@@ -1,6 +1,3 @@
-# ensure the environment vars are loaded
-require_relative "dotenv"
-
 Fog.mock!
 
 connection = Fog::Storage.new(
