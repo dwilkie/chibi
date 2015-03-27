@@ -134,6 +134,10 @@ class Reply < ActiveRecord::Base
     end
   end
 
+  def self.token_find(token)
+    find_by_token(token.to_s.downcase)
+  end
+
   def self.delivered
     where.not(:delivered_at => nil)
   end
@@ -377,6 +381,14 @@ class Reply < ActiveRecord::Base
   end
 
   def normalize_token
-    self.token = token.downcase if token?
+    self.token = token.downcase if token? && normalize_token?
+  end
+
+  def delivery_channel_twilio?
+    delivery_channel == DELIVERY_CHANNEL_TWILIO
+  end
+
+  def normalize_token?
+    !delivery_channel_twilio?
   end
 end

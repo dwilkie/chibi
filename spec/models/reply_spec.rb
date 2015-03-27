@@ -117,10 +117,14 @@ describe Reply do
       end
 
       describe "#normalize_token" do
-        subject { create(:reply, :token => token) }
+        def create_reply(*args)
+          options = args.extract_options!
+          create(:reply, *args, {:token => token}.merge(options))
+        end
 
         context "the token is nil" do
           let(:token) { nil }
+          subject { create_reply }
 
           it { expect(subject.token).to eq(nil) }
         end
@@ -128,7 +132,15 @@ describe Reply do
         context "token is present" do
           let(:token) { "ABC" }
 
-          it { expect(subject.token).to eq("abc") }
+          context "delivery channel is twilio" do
+            subject { create_reply(:twilio_channel) }
+            it { expect(subject.token).to eq(token) }
+          end
+
+          context "delivery channel is smsc" do
+            subject { create_reply(:smsc_channel) }
+            it { expect(subject.token).to eq("abc") }
+          end
         end
       end
 
@@ -220,6 +232,16 @@ describe Reply do
         old_undelivered_reply, new_undelivered_reply, new_delivered_reply
       ])
     end
+  end
+
+  describe ".token_find(token)" do
+    let(:reply) { create(:reply, :token => "abc") }
+
+    before do
+      reply
+    end
+
+    it { expect(described_class.token_find("ABC")).to eq(reply) }
   end
 
   describe "#body" do
