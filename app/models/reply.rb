@@ -1,5 +1,6 @@
 class Reply < ActiveRecord::Base
   before_validation :set_destination, :on => :create
+  before_validation :normalize_token
 
   include Chibi::Communicable
   include Chibi::Communicable::Chatable
@@ -59,7 +60,6 @@ class Reply < ActiveRecord::Base
 
   validates :body, :presence => true
 
-  validates :token, :uniqueness => true, :allow_nil => true
   validates :delivery_channel, :inclusion => { :in => DELIVERY_CHANNELS }, :allow_nil => true
 
   delegate :mobile_number, :to => :user, :prefix => true, :allow_nil => true
@@ -374,5 +374,9 @@ class Reply < ActiveRecord::Base
 
   def twilio_message_status_fetcher_delay
     (Rails.application.secrets[:twilio_message_status_fetcher_delay] || 600).to_i
+  end
+
+  def normalize_token
+    self.token = token.downcase if token?
   end
 end

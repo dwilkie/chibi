@@ -108,30 +108,49 @@ describe Reply do
     it { is_expected.to validate_presence_of(:to) }
     it { is_expected.to validate_presence_of(:body) }
     it { is_expected.to validate_inclusion_of(:delivery_channel).in_array(["twilio", "smsc"]) }
-    it { is_expected.to validate_uniqueness_of(:token) }
   end
 
   describe "callbacks" do
-    describe "before_validation(:on => :create)" do
-      let(:user) { create(:user, :from_registered_service_provider) }
-
+    describe "before_validation" do
       before do
         subject.valid?
       end
 
-      context "if the destination is nil" do
-        subject { build(:reply, :user => user) }
+      describe "#normalize_token" do
+        subject { create(:reply, :token => token) }
 
-        it { expect(subject.destination).to eq(user.mobile_number) }
-        it { expect(subject.operator_name).to be_present }
+        context "the token is nil" do
+          let(:token) { nil }
+
+          it { expect(subject.token).to eq(nil) }
+        end
+
+        context "token is present" do
+          let(:token) { "ABC" }
+
+          it { expect(subject.token).to eq("abc") }
+        end
       end
 
-      context "if the destination is set" do
-        let(:destination) { generate(:unknown_operator_number) }
+      describe ":on => :create" do
+        let(:user) { create(:user, :from_registered_service_provider) }
 
-        subject { build(:reply, :destination => destination, :user => user) }
-        it { expect(subject.destination).to eq(destination) }
-        it { expect(subject.operator_name).not_to be_present }
+        describe "#set_destination" do
+          context "the destination is nil" do
+            subject { build(:reply, :user => user) }
+
+            it { expect(subject.destination).to eq(user.mobile_number) }
+            it { expect(subject.operator_name).to be_present }
+          end
+
+          context "the destination is present" do
+            let(:destination) { generate(:unknown_operator_number) }
+
+            subject { build(:reply, :destination => destination, :user => user) }
+            it { expect(subject.destination).to eq(destination) }
+            it { expect(subject.operator_name).not_to be_present }
+          end
+        end
       end
     end
   end
