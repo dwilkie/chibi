@@ -9,7 +9,6 @@ class Chat < ActiveRecord::Base
   has_many :active_users, :class_name => 'User', :foreign_key => "active_chat_id"
 
   validates :user, :friend, :presence => true
-  validates :friend_id, :uniqueness => {:scope => :user_id}
 
   alias_attribute :initiator, :user
 

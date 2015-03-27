@@ -36,22 +36,10 @@ describe Chat do
   end
 
   describe "validations" do
-    it "should not be valid without a user" do
-      new_chat.user = nil
-      expect(new_chat).not_to be_valid
-    end
-
-    it "should not be valid without a friend" do
-      new_chat.friend = nil
-      expect(new_chat).not_to be_valid
-    end
-
-    it "should not be valid with a duplicate user and friend" do
-      chat
-      new_chat.user = chat.user
-      new_chat.friend = chat.friend
-      expect(new_chat).not_to be_valid
-    end
+    subject { build(:chat) }
+    it { is_expected.to be_valid }
+    it { is_expected.to validate_presence_of(:user) }
+    it { is_expected.to validate_presence_of(:friend) }
   end
 
   describe "#active?" do

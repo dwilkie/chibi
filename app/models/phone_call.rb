@@ -22,8 +22,7 @@ class PhoneCall < ActiveRecord::Base
   attr_accessor :redirect_url, :digits, :to, :dial_status, :call_status, :api_version
   alias_attribute :call_sid, :sid
 
-  validates :sid, :presence => true, :uniqueness => true
-  validates :dial_call_sid, :uniqueness => true, :allow_nil => true
+  validates :sid, :presence => true
 
   delegate :charge!, :login!, :to => :user, :prefix => true
 

@@ -14,10 +14,11 @@ describe PhoneCall do
     options[:build] ? build(:phone_call, *traits) : create(:phone_call, *traits)
   end
 
-  describe "factory" do
-    it "should be valid" do
-      expect(new_phone_call).to be_valid
-    end
+  describe "validations" do
+    subject { build(:phone_call) }
+
+    it { is_expected.to be_valid }
+    it { is_expected.to validate_presence_of(:sid) }
   end
 
   it_should_behave_like "analyzable" do
@@ -26,22 +27,6 @@ describe PhoneCall do
     def create_resource(*args)
       create(:phone_call, *args)
     end
-  end
-
-  it "should not be valid without an sid" do
-    new_phone_call.sid = nil
-    expect(new_phone_call).not_to be_valid
-  end
-
-  it "should not be valid with a duplicate sid" do
-    new_phone_call.sid = phone_call.sid
-    expect(new_phone_call).not_to be_valid
-  end
-
-  it "should not be valid with a duplicate dial_call_sid" do
-    phone_call = create(:phone_call, :with_dial_call_sid)
-    new_phone_call.dial_call_sid = phone_call.dial_call_sid
-    expect(new_phone_call).not_to be_valid
   end
 
   it_should_behave_like "a chat starter" do

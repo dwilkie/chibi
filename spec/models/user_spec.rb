@@ -95,70 +95,50 @@ describe User do
     end
   end
 
-  it "should not be valid without a mobile number" do
-    new_user.mobile_number = nil
-    expect(new_user).not_to be_valid
-  end
+  describe "validations" do
+    subject { build(:user) }
 
-  it "should not be valid with an invalid gender" do
-    expect(build(:user, :with_invalid_gender)).not_to be_valid
-  end
+    it { is_expected.to be_valid }
+    it { is_expected.to validate_presence_of(:mobile_number) }
+    it { is_expected.to validate_inclusion_of(:gender).in_array(["m", "f"]) }
+    it { is_expected.to validate_inclusion_of(:looking_for).in_array(["m", "f"]) }
+    it { is_expected.not_to allow_value(attributes_for(:user, :with_invalid_mobile_number)[:mobile_number]).for(:mobile_number) }
+    it { is_expected.not_to allow_value("8559878917").for(:mobile_number) }
+    it { is_expected.not_to allow_value("8559620617899").for(:mobile_number) }
 
-  it "should not be valid with an invalid looking for preference" do
-    expect(build(:user, :with_invalid_looking_for_preference)).not_to be_valid
-  end
-
-  it "should not be valid with an invalid age" do
-    expect(build(:user, :too_old)).not_to be_valid
-    expect(build(:user, :too_young)).not_to be_valid
-  end
-
-  it "should not be valid with an invalid mobile number e.g. a short code" do
-    expect(build(:user, :with_invalid_mobile_number)).not_to be_valid
-
-    ["8559878917", "8559620617899"].each do |invalid_number|
-      user = build(:user, :mobile_number => invalid_number)
-      expect(user).not_to be_valid
+    context "for persisted users" do
+      subject { create(:user) }
+      it { is_expected.to validate_presence_of(:screen_name) }
+      it { is_expected.to validate_presence_of(:location) }
     end
-  end
 
-  it "should not be valid without a screen name" do
-    user.screen_name = nil
-    expect(user).not_to be_valid
-  end
+    context "too old" do
+      subject { build(:user, :too_old) }
+      it { is_expected.not_to be_valid }
+    end
 
-  it "should not be valid without a location" do
-    user.location = nil
-    expect(user).not_to be_valid
-  end
-
-  it "should default to being online" do
-    expect(subject).to be_online
-  end
-
-  describe "factory" do
-    it "should be valid" do
-      expect(new_user).to be_valid
+    context "too young" do
+      subject { build(:user, :too_young) }
+      it { is_expected.not_to be_valid }
     end
 
     describe "english" do
-      it "should be valid" do
-        expect(build(:user, :english)).to be_valid
-      end
+      subject { build(:user, :english) }
+      it { is_expected.to be_valid }
     end
 
     describe "american" do
-      it "should be valid" do
-        expect(build(:user, :american)).to be_valid
-      end
+      subject { build(:user, :american) }
+      it { is_expected.to be_valid }
     end
 
     describe "thai" do
-      it "should be valid" do
-        expect(build(:user, :thai)).to be_valid
-      end
+      subject { build(:user, :thai) }
+      it { is_expected.to be_valid }
     end
   end
+
+  it { is_expected.to be_online }
 
   describe "associations" do
     describe "location" do

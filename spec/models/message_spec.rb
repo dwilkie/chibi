@@ -18,12 +18,6 @@ describe Message do
   let(:processed_message) { create(:message, :processed, :created_at => 10.minutes.ago, :user => user) }
   let(:subject) { build(:message, :without_user) }
 
-  describe "factory" do
-    it "should be valid" do
-      expect(new_message).to be_valid
-    end
-  end
-
   describe "callbacks" do
     describe "before_validation" do
       it "should normalize the channel" do
@@ -114,12 +108,13 @@ describe Message do
   describe "validations" do
     subject { create(:message) }
 
-    it { is_expected.to validate_uniqueness_of(:guid).allow_nil }
+    it { is_expected.to be_valid }
     it { is_expected.to validate_presence_of(:channel) }
     it { is_expected.to validate_presence_of(:csms_reference_number) }
     it { is_expected.to validate_numericality_of(:csms_reference_number).only_integer.is_greater_than_or_equal_to(0).is_less_than_or_equal_to(255) }
     it { is_expected.to validate_presence_of(:number_of_parts) }
 it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_greater_than_or_equal_to(1).is_less_than_or_equal_to(255) }
+
   end
 
   it_should_behave_like "a chat starter" do

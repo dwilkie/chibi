@@ -14,7 +14,6 @@ class Message < ActiveRecord::Base
 
   alias_attribute :origin, :from
 
-  validates :guid, :uniqueness => true, :allow_nil => true
   validates :channel, :presence => true
   validates :csms_reference_number, :presence => true,
                                     :numericality => {

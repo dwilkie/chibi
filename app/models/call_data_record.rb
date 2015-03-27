@@ -13,9 +13,7 @@ class CallDataRecord < ActiveRecord::Base
   belongs_to :inbound_cdr
 
   validates :duration, :bill_sec, :uuid, :type, :direction, :presence => true
-  validates :uuid, :uniqueness => true
-  validates :phone_call_id, :uniqueness => {:scope => :type}, :allow_nil => true
-  validates :type,  :inclusion => { :in => VALID_TYPES }
+  validates :type, :inclusion => { :in => VALID_TYPES }
 
   attr_accessor :body
 

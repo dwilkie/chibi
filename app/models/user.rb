@@ -28,7 +28,6 @@ class User < ActiveRecord::Base
 
   validates :mobile_number,
             :presence => true,
-            :uniqueness => true,
             :length => { :minimum => MINIMUM_MOBILE_NUMBER_LENGTH },
             :phony_plausible => true
 
