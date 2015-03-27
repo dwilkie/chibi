@@ -40,7 +40,7 @@ FactoryGirl.define do
     n.to_s
   end
 
-  sequence :chargeable_operator_number, 85560234567 do |n|
+  sequence :chargeable_operator_number, 85513234567 do |n|
     n.to_s
   end
 

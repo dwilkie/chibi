@@ -22,18 +22,6 @@ kh:
             short_code: "2442"
             unit_cost: "0.1"
             revenue_share: "0.35"
-    beeline:
-      metadata:
-        short_code: "2442"
-        smpp_server_id: "beeline"
-        chargeable: true
-        services:
-          bee_friends:
-            type: "sms"
-            name: "Chibi SMS Chat"
-            short_code: "2442"
-            unit_cost: "0.05"
-            revenue_share: "0.3"
     qb:
       metadata:
         short_code: "2442"
@@ -42,7 +30,7 @@ kh:
         voip_gateway_host: "117.55.252.146"
         dial_string: "sofia/internal/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
         dial_string_number_prefix: "2442"
-        chargeable: false
+        chargeable: true
         services:
           qb_friends:
             type: "charge"

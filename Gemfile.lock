@@ -4,6 +4,15 @@ GIT
   specs:
     aasm (4.1.0)
 
+GIT
+  remote: git://github.com/dwilkie/torasup.git
+  revision: fefa251e71975e2cde4b199092b9d2c6f2777b8e
+  specs:
+    torasup (0.0.9)
+      countries
+      deep_merge
+      phony (>= 2.10.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -337,10 +346,6 @@ GEM
     timecop (0.7.3)
     timers (4.0.1)
       hitimes
-    torasup (0.0.8)
-      countries
-      deep_merge
-      phony (>= 2.10.2)
     turbolinks (2.5.3)
       coffee-rails
     twilio-ruby (3.15.2)
@@ -405,7 +410,7 @@ DEPENDENCIES
   sidekiq
   sinatra
   timecop
-  torasup
+  torasup!
   turbolinks
   twilio-ruby
   uglifier (>= 1.3.0)
