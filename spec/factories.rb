@@ -46,7 +46,7 @@ FactoryGirl.define do
 
   factory :charge_request do
     association :user, :factory => [:user, :from_chargeable_operator]
-    beeline
+    qb
 
     after(:build) do |charge_request|
       user = charge_request.user
@@ -72,10 +72,6 @@ FactoryGirl.define do
 
     trait :qb do
       operator "qb"
-    end
-
-    trait :beeline do
-      operator "beeline"
     end
 
     trait :from_message do
