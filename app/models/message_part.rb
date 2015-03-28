@@ -5,7 +5,10 @@ class MessagePart < ActiveRecord::Base
 
   after_commit :queue_for_processing, :on => :create
 
-  delegate :awaiting_parts?, :find_csms_message, :to => :message
+  delegate :awaiting_parts?,
+           :stop_awaiting_parts,
+           :find_csms_message,
+           :to => :message
 
   def process!
     if belongs_to_another_message?
@@ -14,7 +17,7 @@ class MessagePart < ActiveRecord::Base
         other_message.save!
         other_message.queue_for_processing!
       else
-        queue_for_processing
+        stop_awaiting_parts || queue_for_processing
       end
     end
   end

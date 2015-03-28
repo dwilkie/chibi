@@ -14,6 +14,7 @@ describe MessagePart do
 
   describe "#process!" do
     let(:original_message) { create(:message, :awaiting_parts) }
+    let(:created_at) { Time.now }
     let(:csms_reference_number) { original_message.csms_reference_number }
     let(:job) { enqueued_jobs.first }
 
@@ -24,7 +25,8 @@ describe MessagePart do
         :csms_reference_number => csms_reference_number,
         :from => original_message.from,
         :to => original_message.to,
-        :channel => original_message.channel
+        :channel => original_message.channel,
+        :created_at => created_at
       )
     }
 
@@ -56,10 +58,24 @@ describe MessagePart do
       context "but the message cannot yet be found" do
         let(:csms_reference_number) { 123 }
 
-        it "should schedule the job to be reprocessed" do
-          expect(job[:job]).to eq(MessagePartProcessorJob)
-          expect(job[:args]).to eq([subject.id])
-          expect(job[:at]).to be_present
+        context "and the message has not been awaiting parts too long" do
+          it "should schedule the job to be reprocessed" do
+            expect(job[:job]).to eq(MessagePartProcessorJob)
+            expect(job[:args]).to eq([subject.id])
+            expect(job[:at]).to be_present
+          end
+        end
+
+        context "but the message has been awaiting parts too long" do
+          let(:configured_timeout) { (Rails.application.secrets[:message_awaiting_parts_timeout] || 300).to_i }
+          let(:created_at) { configured_timeout.seconds.ago }
+
+          it "should should give up awaiting parts and process the message" do
+            expect(subject.message).to eq(new_message)
+            expect(new_message).not_to be_awaiting_parts
+            expect(job[:job]).to eq(MessageProcessorJob)
+            expect(job[:args]).to eq([new_message.id])
+          end
         end
       end
     end

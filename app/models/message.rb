@@ -8,6 +8,8 @@ class Message < ActiveRecord::Base
 
   include AASM
 
+  DEFAULT_AWAITING_PARTS_TIMEOUT = 300
+
   has_many :message_parts
 
   attr_accessor :pre_process
@@ -112,7 +114,23 @@ class Message < ActiveRecord::Base
     destroy if invalid_multipart?
   end
 
+  def stop_awaiting_parts
+    return false unless awaiting_parts_timeout?
+    self.number_of_parts = 1
+    save!
+    queue_for_processing!
+    true
+  end
+
   private
+
+  def awaiting_parts_timeout?
+    awaiting_parts? &&
+    created_at < (
+      Rails.application.secrets[:message_awaiting_parts_timeout] ||
+      DEFAULT_AWAITING_PARTS_TIMEOUT
+    ).to_i.seconds.ago
+  end
 
   def queue_for_cleanup
     MessageCleanupJob.perform_later(id) if invalid_multipart?
@@ -129,7 +147,7 @@ class Message < ActiveRecord::Base
   def set_body_from_message_parts
     self.body = (body.presence || body_from_message_parts) unless more_message_parts?
     self.awaiting_parts = more_message_parts?
-    message_parts.clear unless multipart?
+    message_parts.clear if !multipart? && message_parts.select(&:persisted?).empty?
   end
 
   def body_from_message_parts
