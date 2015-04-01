@@ -9,7 +9,7 @@ describe UserRemindererJob do
   end
 
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq(Rails.application.secrets[:user_reminderer_job_queue]) }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:user_reminderer_queue]) }
   end
 
   describe "#perform(user_id, options = {})" do
