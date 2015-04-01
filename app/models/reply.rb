@@ -134,8 +134,8 @@ class Reply < ActiveRecord::Base
     end
   end
 
-  def self.token_find(token)
-    find_by_token(token.to_s.downcase)
+  def self.token_find!(token)
+    where(:token => token.to_s.downcase).first!
   end
 
   def self.delivered

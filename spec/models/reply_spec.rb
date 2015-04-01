@@ -234,14 +234,20 @@ describe Reply do
     end
   end
 
-  describe ".token_find(token)" do
+  describe ".token_find!(token)" do
     let(:reply) { create(:reply, :token => "abc") }
 
-    before do
-      reply
+    context "given the reply exists" do
+      before do
+        reply
+      end
+
+      it { expect(described_class.token_find!("ABC")).to eq(reply) }
     end
 
-    it { expect(described_class.token_find("ABC")).to eq(reply) }
+    context "given the reply does not exist" do
+      it { expect { described_class.token_find!("ABC") }.to raise_error(ActiveRecord::RecordNotFound) }
+    end
   end
 
   describe "#body" do

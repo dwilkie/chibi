@@ -14,7 +14,7 @@ describe DeliveryReceiptUpdateStatusJob do
     let(:status) { "FAILED" }
 
     before do
-      allow(Reply).to receive(:token_find).with(smsc_message_id).and_return(reply)
+      allow(Reply).to receive(:token_find!).with(smsc_message_id).and_return(reply)
       allow(reply).to receive(:delivery_status_updated_by_smsc!)
     end
 
