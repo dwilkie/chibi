@@ -140,7 +140,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def fetch_inbound_twilio_cdr!
-    Chibi::Twilio::InboundCdr.create(:uuid => sid)
+    Chibi::Twilio::InboundCdr.create(:uuid => sid) unless Chibi::Twilio::InboundCdr.where(:uuid => sid).any?
   end
 
   def fetch_outbound_twilio_cdr!

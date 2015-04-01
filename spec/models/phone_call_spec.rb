@@ -103,9 +103,26 @@ describe PhoneCall do
   end
 
   describe "#fetch_inbound_twilio_cdr!" do
-    it "should create a Chibi Twilio Inbound CDR" do
-      expect_twilio_cdr_fetch(:call_sid => phone_call.sid) { phone_call.fetch_inbound_twilio_cdr! }
-      expect(Chibi::Twilio::InboundCdr.last.phone_call).to eq(phone_call)
+    include WebMockHelpers
+    subject { create(:phone_call) }
+
+    context "given the CDR has not already been saved" do
+      it "should create a Chibi Twilio Inbound CDR" do
+        expect_twilio_cdr_fetch(:call_sid => subject.sid) { subject.fetch_inbound_twilio_cdr! }
+        expect(Chibi::Twilio::InboundCdr.last.phone_call).to eq(subject)
+      end
+    end
+
+    context "given the CDR has already been saved" do
+      before do
+        expect_twilio_cdr_fetch(:call_sid => subject.sid) { subject.fetch_inbound_twilio_cdr! }
+      end
+
+      it "should not fetch the CDR" do
+        WebMock.clear_requests!
+        subject.fetch_inbound_twilio_cdr!
+        expect(webmock_requests).to be_empty
+      end
     end
   end
 
