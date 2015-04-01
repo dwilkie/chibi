@@ -250,6 +250,68 @@ describe Reply do
     end
   end
 
+  describe "handling failed messages" do
+    def create_user(*args)
+      options = args.extract_options!
+      create(:user, :without_recent_interaction, *args, options)
+    end
+
+    def create_reply(*args)
+      options = args.extract_options!
+      create(:reply, :failed, *args, {:user => user}.merge(options))
+    end
+
+    let(:num_failed_replies) { 4 }
+    let(:results) { described_class.to_users_that_cannot_be_contacted }
+
+    before do
+      num_failed_replies.times do
+        create_reply
+      end
+    end
+
+    context "for users that cannot be contacted" do
+      describe ".to_users_that_cannot_be_contacted" do
+        it { expect(results[0].user).to eq(user) }
+      end
+
+      describe ".handle_failed" do
+        let(:job) { enqueued_jobs.last }
+
+        before do
+          described_class.handle_failed!
+        end
+
+        it "should enqueue a job to cleanup the user" do
+          expect(job[:job]).to eq(UserCleanupJob)
+          expect(job[:args][0]).to eq(user.id)
+        end
+      end
+    end
+
+    describe ".to_users_that_cannot_be_contacted" do
+      context "for offline users" do
+        let(:user) { create_user(:offline) }
+
+        it { expect(results).to be_empty }
+      end
+
+      context "for online users" do
+        context "with recent interaction" do
+          let(:user) { create_user(:with_recent_interaction) }
+          it { expect(results).to be_empty }
+        end
+
+        context "without recent interaction" do
+          context "with not enough failed replies" do
+            let(:num_failed_replies) { 3 }
+            it { expect(results).to be_empty }
+          end
+        end
+      end
+    end
+  end
+
   describe "#body" do
     it "should return an empty string if it is nil" do
       subject.body = nil

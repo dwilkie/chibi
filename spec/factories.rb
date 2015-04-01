@@ -434,6 +434,10 @@ FactoryGirl.define do
       updated_at { 10.days.ago }
     end
 
+    trait :without_recent_interaction do
+      last_interacted_at { 1.month.ago }
+    end
+
     trait :not_contacted_recently do
       last_contacted_at { 6.days.ago }
     end

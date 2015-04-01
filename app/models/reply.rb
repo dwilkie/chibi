@@ -138,6 +138,37 @@ class Reply < ActiveRecord::Base
     where(:token => token.to_s.downcase).first!
   end
 
+  def self.handle_failed!
+    to_users_that_cannot_be_contacted.count.each do |user_id, num_failed|
+      UserCleanupJob.perform_later(user_id)
+    end
+  end
+
+  def self.to_users_that_cannot_be_contacted
+    failed_to_deliver.joins(
+      :user
+    ).merge(
+      User.online
+    ).merge(
+      User.without_recent_interaction
+    ).select(
+      :user_id
+    ).group(
+      :user_id
+    ).having(
+      "count(\"#{table_name}\".\"user_id\") > ?",
+      failed_replies_cutoff
+    )
+  end
+
+  def self.failed_replies_cutoff
+    (Rails.application.secrets[:failed_replies_cutoff] || 3).to_i
+  end
+
+  def self.failed_to_deliver
+    where(:state => "failed")
+  end
+
   def self.delivered
     where.not(:delivered_at => nil)
   end

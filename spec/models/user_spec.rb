@@ -308,7 +308,7 @@ describe User do
     end
 
     it "should not return users who are offline" do
-      expect(subject.class.online).to eq([user])
+      expect(described_class.online).to eq([user])
     end
   end
 
@@ -328,7 +328,7 @@ describe User do
       user_with_operator_name.update_attribute(:operator_name, "foo")
       expect(user_with_operator_name.operator_name).to eq("foo")
 
-      subject.class.set_operator_name
+      described_class.set_operator_name
 
       expect(user_with_operator_name.reload.operator_name).to eq("foo")
       asserted_operator_names.each do |user, asserted_operator_name|
@@ -365,7 +365,36 @@ describe User do
 
   describe ".filter_by" do
     it "should include the user's location to avoid loading it for each user" do
-      expect(subject.class.filter_by.includes_values).to include(:location)
+      expect(described_class.filter_by.includes_values).to include(:location)
+    end
+  end
+
+  describe ".without_recent_interaction" do
+    def create_user(*args)
+      options = args.extract_options!
+      create(:user, *args, options)
+    end
+
+    before do
+      user
+    end
+
+    context "a user has never had recent interaction" do
+      let(:user) { create_user }
+
+      it { expect(described_class.without_recent_interaction).to eq([user]) }
+    end
+
+    context "a user has no recent interaction" do
+      let(:user) { create_user(:without_recent_interaction) }
+
+      it { expect(described_class.without_recent_interaction).to eq([user]) }
+    end
+
+    context "a user has recent interaction" do
+      let(:user) { create_user(:with_recent_interaction) }
+
+      it { expect(described_class.without_recent_interaction).to be_empty }
     end
   end
 
@@ -380,11 +409,11 @@ describe User do
         offline_user
         active_chat
 
-        expect(subject.class.filter_params(:gender => "m")).to eq([male])
-        expect(subject.class.filter_params(:gender => "f")).to eq([female])
+        expect(described_class.filter_params(:gender => "m")).to eq([male])
+        expect(described_class.filter_params(:gender => "f")).to eq([female])
 
-        expect(subject.class.filter_params(:available => true)).to match_array([male, female, thai])
-        expect(subject.class.filter_params(:country_code => "th")).to eq([thai])
+        expect(described_class.filter_params(:available => true)).to match_array([male, female, thai])
+        expect(described_class.filter_params(:country_code => "th")).to eq([thai])
       end
     end
   end
@@ -866,7 +895,7 @@ describe User do
 
       it "should match the user with the best compatible match" do
         USER_MATCHES.each do |user, matches|
-          results = subject.class.matches(send(user))
+          results = described_class.matches(send(user))
           result_names = results.map { |result| result.name.to_sym }
           result_index = 0
           matches.each do |expected_match|
@@ -1195,16 +1224,16 @@ describe User do
 
   describe "#matches" do
     it "should return all the matches for a user" do
-      allow(subject.class).to receive(:matches).with(subject).and_return([new_user])
-      expect(subject.class).to receive(:matches).with(subject)
+      allow(described_class).to receive(:matches).with(subject).and_return([new_user])
+      expect(described_class).to receive(:matches).with(subject)
       expect(subject.matches).to eq([new_user])
     end
   end
 
   describe "#match" do
     it "should return the first match from .matches" do
-      allow(subject.class).to receive(:matches).with(subject).and_return([new_user])
-      expect(subject.class).to receive(:matches).with(subject)
+      allow(described_class).to receive(:matches).with(subject).and_return([new_user])
+      expect(described_class).to receive(:matches).with(subject)
       expect(subject.match).to eq(new_user)
     end
   end
