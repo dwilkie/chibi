@@ -367,7 +367,7 @@ describe PhoneCall do
     end
 
     it "should transition to the correct state" do
-      assert_correct_transition(:voice_prompts => false)
+      assert_correct_transition
     end
   end
 
@@ -556,7 +556,7 @@ describe PhoneCall do
 
     context "given the redirect url has been set" do
       it "should return the correct TwiML" do
-        assert_correct_twiml(:voice_prompts => false)
+        assert_correct_twiml
       end
     end
   end

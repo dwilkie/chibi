@@ -82,10 +82,8 @@ module PhoneCallHelpers
 
   module States
     def with_phone_call_states(options = {}, &block)
-      options[:voice_prompts] = true unless options[:voice_prompts] == false
       state_file = "phone_call_states.yaml"
-      call_type = options[:voice_prompts] ? "with_voice_prompts" : "without_voice_prompts"
-      phone_call_states = YAML.load_file(File.join(File.dirname(__FILE__), state_file))[call_type]
+      phone_call_states = YAML.load_file(File.join(File.dirname(__FILE__), state_file))
       phone_call_states.each do |phone_call_state|
         if phone_call_state.is_a?(Hash)
           state = phone_call_state.keys.first
