@@ -12,6 +12,25 @@ describe MessagePart do
     it { is_expected.to validate_presence_of(:body) }
   end
 
+  describe "callbacks" do
+    describe "before validation" do
+      context "normalizing the body" do
+        context "body contains null bytes" do
+          subject { build(:message_part, :body => "0\\\u0011\u0000\u0000\u0000\u0000s") }
+
+          before do
+            subject.valid?
+          end
+
+          it "should remove them" do
+            expect(subject.body).to be_present
+            expect(subject.save!).to eq(true)
+          end
+        end
+      end
+    end
+  end
+
   describe "#process!" do
     let(:original_message) { create(:message, :awaiting_parts) }
     let(:created_at) { Time.now }

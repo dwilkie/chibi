@@ -41,21 +41,6 @@ describe Message do
         expect(subject.to).to eq(nil)
       end
 
-      context "normalizing the body" do
-        context "body contains null bytes" do
-          subject { build(:message, :body => "0\\\u0011\u0000\u0000\u0000\u0000s") }
-
-          before do
-            subject.valid?
-          end
-
-          it "should remove them" do
-            expect(subject.body).to be_present
-            expect(subject.save!).to eq(true)
-          end
-        end
-      end
-
       context "setting the body" do
         before do
           subject.valid?

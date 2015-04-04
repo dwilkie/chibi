@@ -1,6 +1,8 @@
 class MessagePart < ActiveRecord::Base
   belongs_to :message
 
+  before_validation :normalize_body, :on => :create
+
   validates :body, :sequence_number, :presence => true
 
   after_commit :queue_for_processing, :on => :create
@@ -36,5 +38,9 @@ class MessagePart < ActiveRecord::Base
 
   def message_part_processor_delay
     (Rails.application.secrets[:message_part_processor_delay] || 5).to_i
+  end
+
+  def normalize_body
+    self.body = body.gsub("\u0000", "") if body?
   end
 end
