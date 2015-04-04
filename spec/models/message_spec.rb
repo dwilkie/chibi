@@ -41,6 +41,21 @@ describe Message do
         expect(subject.to).to eq(nil)
       end
 
+      context "normalizing the body" do
+        context "body contains null bytes" do
+          subject { build(:message, :body => "0\\\u0011\u0000\u0000\u0000\u0000s") }
+
+          before do
+            subject.valid?
+          end
+
+          it "should remove them" do
+            expect(subject.body).to be_present
+            expect(subject.save!).to eq(true)
+          end
+        end
+      end
+
       context "setting the body" do
         before do
           subject.valid?
@@ -114,7 +129,6 @@ describe Message do
     it { is_expected.to validate_numericality_of(:csms_reference_number).only_integer.is_greater_than_or_equal_to(0).is_less_than_or_equal_to(255) }
     it { is_expected.to validate_presence_of(:number_of_parts) }
 it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_greater_than_or_equal_to(1).is_less_than_or_equal_to(255) }
-
   end
 
   it_should_behave_like "a chat starter" do

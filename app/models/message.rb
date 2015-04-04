@@ -31,7 +31,7 @@ class Message < ActiveRecord::Base
                                       :less_than_or_equal_to => 255
                                     }
 
-  before_validation :normalize_channel, :normalize_to, :on => :create
+  before_validation :normalize_channel, :normalize_to, :normalize_body, :on => :create
   before_validation :set_body_from_message_parts
 
   aasm :column => :state, :whiny_transitions => false do
@@ -222,6 +222,10 @@ class Message < ActiveRecord::Base
 
   def normalize_to
     self.to = Phony.normalize(to) if to?
+  end
+
+  def normalize_body
+    self.body = body.gsub("\u0000", "") if body?
   end
 
   def activate_chats!
