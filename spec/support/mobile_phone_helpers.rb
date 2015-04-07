@@ -2,7 +2,7 @@ module MobilePhoneHelpers
   include Torasup::Test::Helpers
 
   ASSERTED_REGISTERED_OPERATORS = {
-    "kh" => %w{smart qb cootel}
+    "kh" => %w{smart cootel}
   }
 
   TESTED_NATIONALITIES = {
