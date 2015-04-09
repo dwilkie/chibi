@@ -222,6 +222,18 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
           it { assert_new_message! }
         end
+
+        context "with an empty body" do
+          let(:csms_reference_number) { 35 }
+          let(:number_of_parts) { 3 }
+          let(:asserted_message_parts) { 1 }
+          let(:asserted_awaiting_parts) { true }
+
+          let(:sequence_number) { 3 }
+          let(:body) { "" }
+
+          it { assert_new_message! }
+        end
       end
     end
 

@@ -9,21 +9,20 @@ describe MessagePart do
 
   describe "validations" do
     it { is_expected.to validate_presence_of(:sequence_number) }
-    it { is_expected.to validate_presence_of(:body) }
   end
 
   describe "callbacks" do
     describe "before validation" do
       context "normalizing the body" do
         context "body contains null bytes" do
-          subject { build(:message_part, :body => "0\\\u0011\u0000\u0000\u0000\u0000s") }
+          subject { build(:message_part, :body => "\u0000\u0000\u0000\u0000") }
 
           before do
             subject.valid?
           end
 
           it "should remove them" do
-            expect(subject.body).to be_present
+            expect(subject.body).to be_empty
             expect(subject.save!).to eq(true)
           end
         end

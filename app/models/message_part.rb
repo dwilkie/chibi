@@ -3,7 +3,7 @@ class MessagePart < ActiveRecord::Base
 
   before_validation :normalize_body, :on => :create
 
-  validates :body, :sequence_number, :presence => true
+  validates :sequence_number, :presence => true
 
   after_commit :queue_for_processing, :on => :create
 
