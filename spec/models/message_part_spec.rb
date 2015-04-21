@@ -58,6 +58,7 @@ describe MessagePart do
 
     before do
       expect(subject.message).to eq(new_message)
+      clear_enqueued_jobs
       subject.process!
       subject.reload
       original_message.reload

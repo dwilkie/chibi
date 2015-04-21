@@ -6,19 +6,10 @@ describe ChargeRequest do
   include ActiveJobHelpers
 
   subject { create(:charge_request) }
-  let(:skip_callback_request_charge) { false }
 
   def create_charge_request(*args)
     options = args.extract_options!
     create(:charge_request, *args, options)
-  end
-
-  before do
-    ChargeRequest.skip_callback(:create, :after, :request_charge!) if skip_callback_request_charge
-  end
-
-  after do
-    ChargeRequest.set_callback(:create, :after, :request_charge!)
   end
 
   it_should_behave_like "analyzable", true do
@@ -29,22 +20,9 @@ describe ChargeRequest do
     end
   end
 
-  describe "factory" do
-    it "should be valid" do
-      expect(subject).to be_valid
-    end
-  end
-
   describe "validations" do
-    it "should not be valid without an associated user" do
-      subject.user = nil
-      expect(subject).not_to be_valid
-    end
-
-    it "should not be valid without an operator" do
-      subject.operator = nil
-      expect(subject).not_to be_valid
-    end
+    it { is_expected.to validate_presence_of(:user) }
+    it { is_expected.to validate_presence_of(:operator) }
   end
 
   describe ".charge_report_columns(:header => true)" do
@@ -87,14 +65,12 @@ describe ChargeRequest do
 
   describe ".timeout!" do
     let(:time_considered_old) { 24.hours }
-    let(:skip_callback_request_charge) { true }
 
     let(:old_charge_request_awaiting_result) { create_charge_request(:awaiting_result) }
     let(:charge_request_awaiting_result) { create_charge_request(:awaiting_result, :updated_at => 23.hours.ago) }
     let(:old_charge_request_errored) { create_charge_request(:errored) }
     let(:old_charge_request_failed) { create_charge_request(:failed) }
     let(:old_charge_request_successful) { create_charge_request(:successful) }
-    let(:old_charge_request_created) { create_charge_request }
 
     def create_charge_request(*args)
       options = args.extract_options!
@@ -107,7 +83,6 @@ describe ChargeRequest do
       old_charge_request_errored
       old_charge_request_failed
       old_charge_request_successful
-      old_charge_request_created
     end
 
     it "should only mark old charge requests that are 'awaiting_result' or 'created' as 'errored'" do
@@ -118,13 +93,10 @@ describe ChargeRequest do
       expect(old_charge_request_errored.reload).to be_errored
       expect(old_charge_request_failed.reload).to be_failed
       expect(old_charge_request_successful.reload).to be_successful
-      expect(old_charge_request_created.reload).to be_errored
-      expect(old_charge_request_created.reason).to eq("timeout")
     end
   end
 
   describe "#slow?" do
-
     let(:default_timeout) { 20.seconds }
 
     shared_examples_for "determining if a charge request is slow" do
@@ -147,16 +119,10 @@ describe ChargeRequest do
       end
     end
 
-    context "the charge request is not 'created' or 'awaiting_confirmation'" do
+    context "the charge request is not 'awaiting_confirmation'" do
       it "should return true" do
         expect(create_charge_request(:successful)).to be_slow
       end
-    end
-
-    context "the charge request is 'created'" do
-      let(:skip_callback_request_charge) { true }
-
-      it_should_behave_like "determining if a charge request is slow"
     end
 
     context "the charge request is 'awaiting_confirmation'" do
@@ -231,7 +197,7 @@ describe ChargeRequest do
   end
 
   describe "callbacks" do
-    describe "after_create" do
+    describe "after_commit(:on => :create)" do
       subject { build(:charge_request) }
 
       let(:job) { enqueued_jobs.first }

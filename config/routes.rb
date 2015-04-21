@@ -4,7 +4,11 @@ Rails.application.routes.draw do
   root "welcome#index"
 
   resources :messages, :only => :create
-  resources :phone_calls, :only => :create, :defaults => { :format => 'xml' }
+
+  resources :phone_calls, :only => [:create, :show], :defaults => { :format => 'xml' }
+  post "phone_calls/:id", :to => "phone_calls#update", :defaults => { :format => 'xml' }
+
+  resources :phone_call_completions, :only => :create, :defaults => { :format => 'xml' }
   resources :call_data_records, :only => :create, :defaults => { :format => 'xml' }
 
   resource :overview,         :only => :show

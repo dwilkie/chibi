@@ -159,77 +159,48 @@ FactoryGirl.define do
       state "answered"
     end
 
-    trait :welcoming_user do
-      state "welcoming_user"
-    end
-
-    trait :offering_menu do
-      state "offering_menu"
-    end
-
-    trait :asking_for_age_in_menu do
-      state "asking_for_age_in_menu"
-    end
-
-    trait :asking_for_gender_in_menu do
-      state "asking_for_gender_in_menu"
-    end
-
-    trait :asking_for_looking_for_in_menu do
-      state "asking_for_looking_for_in_menu"
-    end
-
-    trait :finding_new_friends do
-      state "finding_new_friends"
-    end
-
-    trait :dialing_friends do
-      state "dialing_friends"
-    end
-
-    trait :connecting_user_with_friend do
-      state "connecting_user_with_friend"
+    trait :transitioning_from_answered do
+      state "transitioning_from_answered"
     end
 
     trait :telling_user_they_dont_have_enough_credit do
       state "telling_user_they_dont_have_enough_credit"
     end
 
-    trait :telling_user_their_chat_has_ended do
-      state "telling_user_their_chat_has_ended"
+    trait :transitioning_from_telling_user_they_dont_have_enough_credit do
+      state "transitioning_from_telling_user_they_dont_have_enough_credit"
     end
 
-    trait :telling_user_to_try_again_later do
-      state "telling_user_to_try_again_later"
+    trait :awaiting_completion do
+      state "awaiting_completion"
     end
 
     trait :completed do
       state "completed"
     end
 
-    trait :caller_wants_menu do
-      digits "8"
+    trait :connecting_user_with_friend do
+      state "connecting_user_with_friend"
     end
 
-    trait :already_in_chat do
-      after(:create) do |phone_call|
-        create(:chat, :active, :user => phone_call.user)
-      end
+    trait  :transitioning_from_connecting_user_with_friend do
+      state "transitioning_from_connecting_user_with_friend"
     end
 
-    trait :with_active_chat do
-      after(:create) do |phone_call|
-        chat = create(:chat, :active, :user => phone_call.user)
-        phone_call.chat = chat
-      end
+    trait :finding_friends do
+      state "finding_friends"
     end
 
-    trait :to_unavailable_user do
-      after(:create) do |phone_call|
-        friend = create(:user, :from_unknown_operator)
-        chat = create(:chat, :initiator_active, :user => phone_call.user, :friend => friend)
-        create(:chat, :active, :user => chat.friend)
-      end
+    trait :transitioning_from_finding_friends do
+      state "transitioning_from_finding_friends"
+    end
+
+    trait :dialing_friends do
+      state "dialing_friends"
+    end
+
+    trait :transitioning_from_dialing_friends do
+      state "transitioning_from_dialing_friends"
     end
 
     trait :found_friends do
@@ -238,24 +209,6 @@ FactoryGirl.define do
           :chat, 5, :friend_active, :user => phone_call.user, :starter => phone_call
         )
       end
-    end
-
-    trait :with_failed_charge_request do
-      after(:build) do |phone_call|
-        create(:charge_request, :failed, :requester => phone_call)
-      end
-    end
-
-    trait :caller_is_24_years_old do
-      digits "24"
-    end
-
-    trait :caller_answers_male do
-      digits "1"
-    end
-
-    trait :caller_answers_female do
-      digits "2"
     end
 
     trait :dial_status_completed do

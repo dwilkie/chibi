@@ -7,7 +7,7 @@ class ChargeRequest < ActiveRecord::Base
 
   validates :user, :operator, :presence => true
 
-  after_create :request_charge!
+  after_commit :request_charge!, :on => :create
 
   aasm :column => :state, :whiny_transitions => false do
     state :created, :initial => true

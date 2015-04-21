@@ -229,7 +229,7 @@ class Message < ActiveRecord::Base
   end
 
   def self.from_twilio(params)
-    params.underscorify_keys!
+    params = params.underscorify_keys
     new(params.slice(:body, :from, :to).merge(:guid => params[:message_sid], :channel => "twilio"))
   end
   private_class_method :from_twilio

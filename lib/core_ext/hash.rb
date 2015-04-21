@@ -1,15 +1,13 @@
 class Hash
-  def underscorify_keys!
-    keys.each do |key|
-      self[key.to_s.underscore.to_sym] = delete(key)
-    end
-    self
+  def underscorify_keys
+    (transform_keys { |key| key.to_s.underscore }).with_indifferent_access
   end
 
-  def integerify!
-    dup.each do |key, value|
-      self[key.to_i] = delete(key).to_i
+  def integerify
+    result = self.class.new
+    each_key do |key|
+      result[key.to_i] = self[key].to_i
     end
-    self
+    result
   end
 end

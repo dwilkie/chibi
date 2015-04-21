@@ -6,7 +6,7 @@ module Chibi
       # this returns the data in the format required by HighStocks
       def overview_of_created(options = {})
         count_args = "DISTINCT(#{table_name}.user_id)" if options[:by_user]
-        group_by_timeframe(options).count(count_args).integerify!.to_a
+        group_by_timeframe(options).count(count_args).integerify.to_a
       end
 
       def group_by_timeframe(options = {}, &block)

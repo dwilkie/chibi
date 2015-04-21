@@ -56,4 +56,5 @@ group :test do
   gem 'capybara'
   gem 'launchy'
   gem 'shoulda-matchers', :require => false
+  gem 'test_after_commit'
 end

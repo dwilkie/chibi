@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe User do
   include MobilePhoneHelpers
-  include PhoneCallHelpers::TwilioHelpers
+  include PhoneCallHelpers
   include TranslationHelpers
   include MessagingHelpers
   include ActiveJobHelpers
@@ -1361,42 +1361,6 @@ describe User do
         expect(user.reload).not_to be_searching_for_friend
       end
     end
-  end
-
-  shared_examples_for "setting a gender related attribute" do |attribute_reader|
-    attribute_writer = "#{attribute_reader}="
-
-    context "1" do
-      it "should be male" do
-        subject.send(attribute_writer, "1")
-        expect(subject.send(attribute_reader)).to eq("m")
-      end
-    end
-
-    context "2" do
-      it "should be female" do
-        subject.send(attribute_writer, "2")
-        expect(subject.send(attribute_reader)).to eq("f")
-      end
-    end
-
-    context "any other value" do
-      it "should respect the value" do
-        subject.send(attribute_writer, "3")
-        expect(subject.send(attribute_reader)).to eq("3")
-
-        subject.send(attribute_writer, :m)
-        expect(subject.send(attribute_reader)).to eq("m")
-      end
-    end
-  end
-
-  describe "#gender=" do
-    it_should_behave_like "setting a gender related attribute", :gender
-  end
-
-  describe "#looking_for=" do
-    it_should_behave_like "setting a gender related attribute", :looking_for
   end
 
   describe "#female?" do
