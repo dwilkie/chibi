@@ -1,289 +1,221 @@
 require 'rails_helper'
 
 describe "PhoneCalls" do
-  describe "POST /phone_calls.xml" do
-    include PhoneCallHelpers
-    include PhoneCallHelpers::TwilioHelpers
-    include MobilePhoneHelpers
-    include TranslationHelpers
-    include ActiveJobHelpers
+  include PhoneCallHelpers
+  include PhoneCallHelpers::TwilioHelpers
+  include TwilioHelpers::TwimlAssertions::RSpec
+  include MobilePhoneHelpers
+  include ActiveJobHelpers
 
-    include_context "replies"
-    include_context "existing users"
-    include_context "twiml"
+  let(:twiml) { response.body }
+  let(:caller) { create(:user, :mobile_number => my_number) }
+  let(:phone_call) { PhoneCall.last! }
+  let(:my_number) { generate(:mobile_number) }
 
-    let(:twiml_response) { parse_twiml(response.body) }
-    let(:my_number) { "855977123876" }
-    let(:new_user) { User.where(:mobile_number => my_number).first }
-    let(:caller) { create(:user) }
+  context "when I call" do
+    let(:asserted_locale) { "kh" }
+    let(:asserted_filename) { "#{asserted_locale}/ringback_tone.mp3" }
+    let(:asserted_redirect_url) { phone_call_url(phone_call, :format => :xml) }
+    let(:phone_call_params) { {:api_version => sample_adhearsion_twilio_api_version} }
 
-    def current_call(options = {})
-      options.is_a?(PhoneCall) ? @call_sid = options.sid : @call_sid ||= make_call(options)
+    def make_call(options = {})
+      super(phone_call_params.merge(options))
     end
 
-    alias :call :current_call
-
-    def phone_call_callback_url
-      phone_calls_url(:format => :xml)
+    def update_phone_call(phone_call, options = {})
+      super(phone_call, phone_call_params.merge(options))
     end
 
-    def assert_redirect_to_current_url
-      assert_redirect(twiml_response, phone_call_callback_url)
+    def get_phone_call(phone_call, options = {})
+      super(phone_call, phone_call_params.merge(options))
     end
 
-    def assert_play_then_redirect_to_current_url(file)
-      assert_play(twiml_response, "kh/#{filename_with_extension(file)}")
-      assert_redirect_to_current_url
+    before do
+      make_call(:from => my_number)
     end
 
-    def assert_dial_to_current_url(number, dial_options = {}, number_options = {})
-      numbers = [number].flatten
-      assert_dial(twiml_response, phone_call_callback_url, dial_options) do |dial_response|
-        numbers.each_with_index do |number, index|
-          assert_number(dial_response, number, number_options.merge(:index => index))
-        end
+    it "should play the ringback tone" do
+      assert_play!
+      assert_redirect!
+    end
+
+    context "after the ringback tone has been played" do
+      def setup_scenario
       end
-    end
-
-    def assert_ask_for_input(prompt, twiml_options = {})
-      twiml_options[:numDigits] ||= 1
-      twiml_options[:numDigits] = twiml_options[:numDigits].to_s
-      assert_gather(twiml_response, twiml_options) do |gather|
-        assert_play(gather, "kh/#{filename_with_extension(prompt)}")
-      end
-      assert_redirect_to_current_url
-    end
-
-    def update_current_call_status(options = {})
-      options[:call_sid] ||= current_call
-      update_call_status(options)
-    end
-
-    def friends_numbers(friends, calling_to)
-      friends.map { |friend|
-        number = friend.mobile_number
-        calling_to == :twilio ? asserted_number_formatted_for_twilio(number) : asserted_default_pbx_dial_string(:number_to_dial => number)
-      }.reverse
-    end
-
-    shared_examples_for "saving the phone call" do
-      it "should save the phone call" do
-        new_phone_call = PhoneCall.last
-        expect(new_phone_call.from).to eq(from)
-      end
-    end
-
-    context "given that I'm already in a chat session" do
-      context "and my partner is available" do
-        let!(:chat) { create(:chat, :active, :user => caller) }
-
-        context "when I call" do
-          before do
-            call(:from => caller)
-          end
-
-          it "should connect me with my friend" do
-            assert_dial_to_current_url(
-              asserted_number_formatted_for_twilio(chat.friend.mobile_number),
-              :callerId => twilio_number
-            )
-          end
-        end
-      end
-
-      context "but my partner is not available" do
-        let(:friend) { create(:user, :from_unknown_operator) }
-        let!(:chat) { create(:chat, :initiator_active, :user => caller, :friend => friend) }
-
-        before do
-          create(:chat, :active, :friend => chat.friend)
-        end
-
-        context "when I call" do
-          before do
-            call(:from => caller)
-          end
-
-          it "should find me some new friends" do
-            assert_redirect_to_current_url
-          end
-
-          it "should queue a message to my partner to call me back" do
-            reply = reply_to(chat.friend, chat)
-            expect(reply.body).to match(Regexp.new(
-              spec_translate(
-                :contact_me, chat.friend.locale, chat.user.screen_id,
-                Regexp.escape(twilio_number)
-              )
-            ))
-            expect(reply).not_to be_delivered
-          end
-        end
-      end
-    end
-
-    context "given there are new friends online" do
-      let(:friends) { caller.matches }
-      let(:caller) { User.first }
 
       before do
-        load_users
-        caller
-        friends
+        setup_scenario
+        trigger_job { update_phone_call(phone_call) }
       end
 
-      context "when I call" do
-        before do
-          call(:from => caller.mobile_number)
-        end
+      it "should redirect to the phone call" do
+        assert_redirect!(:method => "GET")
+      end
 
-        it "should try to find me some new friends" do
-          assert_redirect_to_current_url
-        end
+      context "in the meantime" do
+        context "if the charge failed" do
+          def setup_scenario
+            create(:charge_request, :failed, :requester => phone_call)
+          end
 
-        context "after some new friends are found for me" do
-          context "given I'm calling to Twilio" do
+          context "when the twiml is requested" do
+            let(:asserted_filename) { "#{asserted_locale}/not_enough_credit.mp3" }
+
             before do
-              update_current_call_status
+              get_phone_call(phone_call)
             end
 
-            it "should try to connect me with them through Twilio" do
-              numbers = friends_numbers(friends, :twilio)
-              assert_dial_to_current_url(numbers, :callerId => twilio_number)
+            it "should play a file telling the user they don't have enough credit" do
+              assert_play!
+              assert_redirect!
+            end
+          end
+
+          context "after the file has been played" do
+            before do
+              trigger_job { update_phone_call(phone_call) }
             end
 
-            context "if someone answers" do
-              context "and hangs up first" do
-                let(:dial_call_sid) { "dial_call_sid" }
+            it "should redirect to the phone call" do
+              assert_redirect!(:method => "GET")
+            end
 
+            context "when the twiml is requested" do
+              before do
+                get_phone_call(phone_call)
+              end
+
+              it "should hangup" do
+                assert_hangup!
+              end
+            end
+          end
+        end
+
+        context "if there are friends available" do
+          let(:friend) { create(:user, :mobile_number => friends_number) }
+          let(:friends_number) { registered_operator(:number) }
+
+          def setup_scenario
+            friend
+          end
+
+          context "when the twiml is requested" do
+            before do
+              get_phone_call(phone_call)
+            end
+
+            it "should redirect to update the phone call" do
+              assert_redirect!
+            end
+
+            context "when the phone call is updated again" do
+              before do
+                trigger_job { update_phone_call(phone_call) }
+              end
+
+              it "should redirect to the phone call" do
+                assert_redirect!(:method => "GET")
+              end
+
+              context "when the twiml is requested again" do
                 before do
-                  expect_twilio_cdr_fetch(:call_sid => current_call) do
-                    expect_twilio_cdr_fetch(
-                      :cassette => "get_outbound_call",
-                      :call_sid => dial_call_sid,
-                      :parent_call_sid => current_call,
-                      :direction => :outbound
-                    ) do
-                       trigger_job do
-                        update_current_call_status(
-                          :dial_call_status => :completed, :dial_call_sid => dial_call_sid
-                        )
-                      end
+                  get_phone_call(phone_call)
+                end
+
+                it "should dial friends" do
+                  assert_dial! do |dial_twiml|
+                    assert_numbers_dialed!(dial_twiml, 1)
+
+                    assert_number!(
+                      dial_twiml,
+                      interpolated_assertion(
+                        registered_operator(:dial_string),
+                        :number_to_dial => friends_number,
+                        :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
+                        :voip_gateway_host => registered_operator(:voip_gateway_host)
+                      ),
+                      :callerId => registered_operator(:caller_id),
+                      :index => 0
+                    )
+                  end
+                end
+
+                context "after the dial has completed (and the call was connected)" do
+                  before do
+                    trigger_job { update_phone_call(phone_call, :dial_call_status => "completed") }
+                  end
+
+                  it "should redirect to the phone call" do
+                    assert_redirect!(:method => "GET")
+                  end
+
+                  context "when the twiml is requested again" do
+                    before do
+                      get_phone_call(phone_call)
+                    end
+
+                    it "should hang up" do
+                      assert_hangup!
                     end
                   end
                 end
-
-                context "when I hold the line" do
-                  let(:new_inbound_twilio_cdr) { Chibi::Twilio::InboundCdr.last }
-                  let(:new_outbound_twilio_cdr) { Chibi::Twilio::OutboundCdr.last }
-
-                  before do
-                    update_current_call_status
-                  end
-
-                  it "should hangup on me" do
-                    assert_hangup(twiml_response)
-                  end
-
-                  it "should create a Twilio Inbound CDR" do
-                    expect(new_inbound_twilio_cdr).to be_present
-                  end
-
-                  it "should create a Twilio Outbound CDR" do
-                    expect(new_outbound_twilio_cdr).to be_present
-                  end
-                end
-              end
-            end
-
-            context "if nobody answers" do
-              before do
-                update_current_call_status(:dial_call_status => :no_answer)
-              end
-
-              it "should find me some new friends" do
-                assert_redirect_to_current_url
-              end
-
-              context "and I hold the line" do
-                before do
-                  update_current_call_status
-                end
-
-                it "should connnect me with my new friends" do
-                  numbers = friends_numbers(friends, :twilio)
-                  assert_dial_to_current_url(numbers, :callerId => twilio_number)
-                end
               end
             end
           end
+        end
 
-          context "given I'm calling to 2442" do
+        context "if the caller is already in a chat" do
+          let(:partner) { create(:user, :mobile_number => partners_number) }
+
+          let(:partners_number) { registered_operator(:number) }
+
+          let(:asserted_number_to_dial) do
+            interpolated_assertion(
+              registered_operator(:dial_string),
+              :number_to_dial => partners_number,
+              :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
+              :voip_gateway_host => registered_operator(:voip_gateway_host)
+            )
+          end
+
+          let(:asserted_caller_id) { registered_operator(:caller_id) }
+
+          def setup_scenario
+            create(:chat, :active, :user => phone_call.user, :friend => partner)
+          end
+
+          context "when the twiml is requested" do
             before do
-              update_current_call_status(:api_version => sample_adhearsion_twilio_api_version)
+              get_phone_call(phone_call)
             end
 
-            it "should try to connect me with her through the default PBX dial string" do
-              dial_strings = friends_numbers(friends, :pbx)
-              assert_dial_to_current_url(dial_strings, {}, :callerId => twilio_number)
+            it "should connect the caller with his friend" do
+              assert_dial! do |dial_twiml|
+                assert_number!(dial_twiml, asserted_number_to_dial, :callerId => asserted_caller_id)
+              end
             end
           end
-        end
-      end
-    end
 
-    context "when I call" do
-      context "given I am offline" do
-        let(:offline_user) { create(:user, :offline) }
+          context "after the friend has been connected" do
+            before do
+              trigger_job { update_phone_call(phone_call, :dial_call_status => "completed") }
+            end
 
-        before do
-          call(:from => offline_user)
-        end
+            it "should redirect to the phone call" do
+              assert_redirect!(:method => "GET")
+            end
 
-        it "should put me online" do
-          expect(offline_user.reload).to be_online
-        end
-      end
+            context "when the twiml is requested" do
+              before do
+                get_phone_call(phone_call)
+              end
 
-      context "to Twilio" do
-        before do
-          call(:from => my_number)
-        end
-
-        it_should_behave_like "saving the phone call" do
-          let(:from) { my_number }
-        end
-      end
-    end
-
-    context "when I call to the short code '2442'" do
-      before do
-        call(:from => "+85510236139", :to => "+2442", :api_version => "adhearsion-twilio-0.0.1")
-      end
-
-      it_should_behave_like "saving the phone call" do
-        let(:from) { "85510236139" }
-      end
-    end
-
-    context "when I call to a number from the Twilio number" do
-      before do
-        call(:from => twilio_number, :to => "+85510236139")
-      end
-
-      it_should_behave_like "saving the phone call" do
-        let(:from) { "85510236139" }
-      end
-    end
-
-    context "when I am called" do
-      context "and I answer" do
-        before do
-          call(:to => my_number)
-        end
-
-        it_should_behave_like "saving the phone call" do
-          let(:from) { my_number }
+              it "should hangup" do
+                assert_hangup!
+              end
+            end
+          end
         end
       end
     end

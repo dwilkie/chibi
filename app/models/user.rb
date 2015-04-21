@@ -130,11 +130,11 @@ class User < ActiveRecord::Base
   end
 
   def self.with_date_of_birth
-    where("date_of_birth IS NOT NULL")
+    where.not(:date_of_birth => nil)
   end
 
   def self.without_gender
-    where("gender IS NULL")
+    where(:gender => nil)
   end
 
   def self.available
@@ -195,14 +195,8 @@ class User < ActiveRecord::Base
     save
   end
 
-  [:gender, :looking_for].each do |attribute|
-    define_method("#{attribute}=") do |value|
-      set_gender_related_attribute(attribute, value)
-    end
-  end
-
   def charge!(requester)
-    return true unless operator.chargeable
+    return true unless chargeable?
     if latest_charge_request
       if latest_charge_request.successful?
         if latest_charge_request.updated_at < 24.hours.ago
@@ -219,6 +213,10 @@ class User < ActiveRecord::Base
     else
       create_charge_request!(requester)
     end
+  end
+
+  def chargeable?
+    operator.chargeable
   end
 
   def contact_me_number
@@ -631,18 +629,6 @@ class User < ActiveRecord::Base
   def contacted_recently?(inactivity_cutoff)
     last_contacted_timestamp = last_contacted_at || updated_at
     last_contacted_timestamp >= DateTime.parse(inactivity_cutoff)
-  end
-
-  def set_gender_related_attribute(attribute, value)
-    value_as_integer = value.to_s.to_i
-
-    if value_as_integer == 1
-      value = MALE
-    elsif value_as_integer == 2
-      value = FEMALE
-    end
-
-    write_attribute(attribute, value)
   end
 
   def extract(info)

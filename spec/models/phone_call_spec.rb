@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe PhoneCall do
-  include PhoneCallHelpers::States
+  include PhoneCallHelpers
   include PhoneCallHelpers::TwilioHelpers
   include ActiveJobHelpers
   include AnalyzableExamples
@@ -9,9 +9,12 @@ describe PhoneCall do
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
 
-  def create_phone_call(*traits)
-    options = traits.extract_options!
-    options[:build] ? build(:phone_call, *traits) : create(:phone_call, *traits)
+  def sample_call_params(options = {})
+    params = {}
+    super(options).each do |key, value|
+      params[key] = value || key.to_s.underscore.dasherize
+    end
+    params
   end
 
   describe "validations" do
@@ -45,6 +48,25 @@ describe PhoneCall do
     let(:chatable_resource) { phone_call }
   end
 
+  describe "#pre_process!" do
+    subject { create(:phone_call, :user => user) }
+    let(:user) { create(:user) }
+
+    def set_expectations
+      expect(user).to receive(:charge!).with(subject)
+    end
+
+    before do
+      set_expectations
+      subject.pre_process!
+    end
+
+    context "user is offline" do
+      let(:user) { create(:user, :offline) }
+      it { expect(user).to be_online }
+    end
+  end
+
   describe "#call_sid" do
     it "should be an alias for the attribute '#sid'" do
       subject.sid = "123"
@@ -52,27 +74,6 @@ describe PhoneCall do
 
       subject.call_sid = "456"
       expect(subject.sid).to eq("456")
-    end
-  end
-
-  describe "#redirect_url" do
-    it "should be an accessor" do
-      subject.redirect_url = "some_url"
-      expect(subject.redirect_url).to eq("some_url")
-    end
-  end
-
-  describe "#dial_status" do
-    it "should be an accessor" do
-      subject.dial_status = "some_status"
-      expect(subject.dial_status).to eq("some_status")
-    end
-  end
-
-  describe "#call_status" do
-    it "should be an accessor" do
-      subject.call_status = "some_call_status"
-      expect(subject.call_status).to eq("some_call_status")
     end
   end
 
@@ -92,13 +93,6 @@ describe PhoneCall do
     it "should be mass assignable" do
       new_phone_call = subject.class.new(:from => "+1-234-567-8910", :to => "+1-229-876-5432")
       expect(new_phone_call.from).to eq("12298765432")
-    end
-  end
-
-  describe "#digits" do
-    it "should be an accessor but return the set value as an integer" do
-      subject.digits = "1234"
-      expect(subject.digits).to eq(1234)
     end
   end
 
@@ -148,415 +142,474 @@ describe PhoneCall do
     end
   end
 
-  describe ".find_or_create_and_process_by(params, redirect_url)" do
-    include PhoneCallHelpers
-
-    let(:redirect_url) { "http://example.com" }
+  describe ".answer!(params, request_url)" do
+    let(:request_url) { "http://example.com/phone_calls.xml" }
     let(:call_sid) { generate(:guid) }
     let(:from) { generate(:mobile_number) }
     let(:to) { "2441" }
-    let(:params) { sample_params(:from => from, :to => to, :call_sid => call_sid) }
-    let(:user) { create(:user) }
-    let(:phone_call) { create(:phone_call, :user => user) }
+    let(:call_params) { sample_call_params(:from => from, :to => to, :call_sid => call_sid) }
 
-    def sample_params(options = {})
-      options[:digits] ||= 1
-      params = {}
-      call_params(options).each do |key, value|
-        params[key] = value || key.to_s.underscore.dasherize
-      end
-      params
+    let(:phone_call) { described_class.answer!(call_params, request_url) }
+
+    it "should save the phone call" do
+      expect(phone_call).to be_persisted
+      expect(phone_call.sid).to eq(call_sid)
+      expect(phone_call.from).to eq(from)
+      expect(phone_call).to be_answered
+      expect(phone_call.request_url).to eq(request_url)
     end
+  end
 
-    context "phone call is valid" do
-      def do_find_or_create_and_process
-        subject.class.find_or_create_and_process_by(params.dup, redirect_url)
-      end
-      before do
-        allow(subject.class).to receive(:find_or_initialize_by).and_return(phone_call)
-      end
+  describe ".complete!(params)" do
+    let(:call_duration) { 30 }
 
-      it "should update the phone call" do
-        do_find_or_create_and_process
-
-        expect(phone_call.redirect_url).to eq(redirect_url)
-        expect(phone_call.digits).to eq(params[:Digits].to_i)
-        expect(phone_call.call_status).to eq(params[:CallStatus])
-        expect(phone_call.dial_status).to eq(params[:DialCallStatus])
-        expect(phone_call.dial_call_sid).to eq(params[:DialCallSid])
-        expect(phone_call.api_version).to eq(params[:ApiVersion])
-      end
-
-      it "should log in the user" do
-        expect(user).to receive(:login!)
-        do_find_or_create_and_process
-      end
-
-      context "there's a charge request for this call" do
-        let(:charge_request) { create(:charge_request, :requester => phone_call) }
-
-        before do
-          allow(phone_call).to receive(:charge_request).and_return(charge_request)
-          allow(charge_request).to receive(:slow?)
-        end
-
-        it "should ask if the charge request is slow" do
-          expect(charge_request).to receive(:slow?)
-          do_find_or_create_and_process
-        end
-
-        context "and it's slow (see charge_request#slow?)" do
-          before do
-            allow(charge_request).to receive(:slow?).and_return(true)
-          end
-
-          it "should process the phone call" do
-            expect(phone_call).to receive(:process!)
-            do_find_or_create_and_process
-          end
-        end
-
-        context "but it's not slow" do
-          before do
-            allow(charge_request).to receive(:slow?).and_return(false)
-          end
-
-          it "should not process the phone call" do
-            expect(phone_call).not_to receive(:process!)
-            do_find_or_create_and_process
-          end
-        end
-      end
-
-      context "there's no charge request for this call" do
-        it "should try to charge the caller" do
-          expect(user).to receive(:charge!).with(phone_call)
-          do_find_or_create_and_process
-        end
-
-        context "given the charge request returns true" do
-          before do
-            allow(user).to receive(:charge!).and_return(true)
-          end
-
-          it "should process the phone call" do
-            expect(phone_call).to receive(:process!)
-            do_find_or_create_and_process
-          end
-        end
-
-        context "given the charge request returns nil" do
-          before do
-            allow(user).to receive(:charge!).and_return(nil)
-          end
-
-          it "should not process the phone call" do
-            expect(phone_call).not_to receive(:process!)
-            do_find_or_create_and_process
-          end
-        end
-      end
-    end
-
-    context "phone call is invalid" do
-      let(:params) { sample_params(:from => "+2441", :to => "+2441") }
-
-      it "should not process the phone call" do
-        expect(subject.class.find_or_create_and_process_by(params.dup, redirect_url)).to be_nil
-      end
-    end
-
-    context "phone call is new" do
-      it "should save the phone call" do
-        phone_call = subject.class.find_or_create_and_process_by(params, redirect_url)
-        expect(phone_call).to be_persisted
-        expect(phone_call.sid).to eq(call_sid)
-        expect(phone_call.from).to eq(from)
-      end
-    end
-
-    context "phone call already exists" do
-      before do
-        create(:phone_call, :sid => call_sid)
-      end
-
-      it "should not update the from field" do
-        phone_call = subject.class.find_or_create_and_process_by(params, redirect_url)
-        expect(phone_call).to be_persisted
-        expect(phone_call.sid).to eq(call_sid)
-        expect(phone_call.from).not_to eq(from)
+    it "should transition from all states to completed" do
+      described_class.aasm.states.each do |state|
+        phone_call = create(:phone_call, state.name)
+        params = sample_call_params(:call_sid => phone_call.sid, :call_duration => call_duration)
+        described_class.complete!(params)
+        phone_call.reload
+        expect(phone_call).to be_completed
+        expect(phone_call.duration).to eq(call_duration)
       end
     end
   end
 
   describe "#process!" do
-    include TranslationHelpers
-
+    include Rails.application.routes.url_helpers
     include_context "replies"
 
-    def assert_phone_call_can_be_completed(reference_phone_call)
-      reference_phone_call.call_status = "completed"
-      already_complete = reference_phone_call.completed?
-      clear_enqueued_jobs
-      trigger_job(:queue_only => true) { reference_phone_call.process! }
-      expect(reference_phone_call).to be_completed
-      job = enqueued_jobs.first
-      if already_complete
-        expect(job).to eq(nil)
-      else
-        expect(job[:args].first).to eq(reference_phone_call.id)
-      end
+    def create_phone_call(*args)
+      options = args.extract_options!
+      create(:phone_call, current_state, *args, {:user => user}.merge(options))
     end
 
-    def assert_message_queued_for_partner(phone_call)
-      caller = phone_call.user.reload
-      old_chat = phone_call.chat
-      old_partner = old_chat.partner(caller)
-      reply = reply_to(old_partner, old_chat)
-      expect(reply.body).to match(Regexp.new(
-        spec_translate(
-          :contact_me, old_partner.locale, caller.screen_id,
-          Regexp.escape(old_partner.caller_id(phone_call.api_version))
-        )
-      ))
-      expect(reply).not_to be_delivered
-      expect(caller).not_to be_currently_chatting
-      expect(phone_call.triggered_chats).not_to be_empty
+    def setup_scenario
     end
 
-    def assert_phone_call_attributes(resource, expectations)
-      expectations.each do |attribute, value|
-        if value.is_a?(Hash)
-          assert_phone_call_attributes(resource.send(attribute), value)
-        else
-          if attribute == "assertions"
-            value.each do |assertion|
-              send("assert_#{assertion}", resource)
+    subject { create_phone_call }
+
+    let(:host) { "http://www.example.com" }
+    let(:request_url) { phone_call_path(subject, :host => host, :format => :xml) }
+    let(:call_params) { {} }
+    let(:user) { create(:user, :offline) }
+
+    before do
+      setup_scenario
+      subject.set_call_params(call_params, request_url)
+      subject.process!
+      subject.reload
+    end
+
+    context "current state is:" do
+      context "transitioning_from" do
+        context "answered" do
+          let(:current_state) { :transitioning_from_answered }
+
+          context "the charge request failed" do
+            def setup_scenario
+              create(:charge_request, :failed, :requester => subject)
             end
-          else
-            expect(resource.send(attribute)).to eq(value)
+
+            it { expect(subject.reload).to be_telling_user_they_dont_have_enough_credit }
+          end
+
+          context "the user is not currently chatting" do
+            it { expect(subject.reload).to be_finding_friends }
+
+            context "given there are users available to chat" do
+              def setup_scenario
+                create(:user)
+              end
+
+              it { expect(subject.triggered_chats).not_to be_empty }
+            end
+          end
+
+          context "the user is already in a chat" do
+            def setup_scenario
+              chat
+            end
+
+            def create_chat(*args)
+              options = args.extract_options!
+              create(:chat, *args, {:user => user}.merge(options))
+            end
+
+            context "that is active" do
+              let(:chat) { create_chat(:active) }
+
+              it { is_expected.to be_connecting_user_with_friend }
+              it { expect(subject.chat).to eq(chat) }
+            end
+
+            context "that is not active" do
+              let(:chat) { create_chat(:initiator_active, :friend => partner) }
+              let(:partner) { create(:user) }
+
+              context "but the partner is available" do
+                it { is_expected.to be_connecting_user_with_friend }
+                it { expect(subject.chat).to eq(chat) }
+              end
+
+              context "and the partner is no longer available" do
+                let(:reply_to_partner) { reply_to(partner) }
+
+                def setup_scenario
+                  super
+                  create(:chat, :active, :friend => partner) # partner is in active chat
+                end
+
+                it { is_expected.to be_finding_friends }
+                it { expect(subject.chat).to eq(chat) }
+
+                it "should queue a message for the partner to receive when his available" do
+                  expect(reply_to_partner).to be_present
+                  expect(reply_to_partner).not_to be_delivered
+                end
+              end
+            end
+          end
+        end
+
+        context "telling_user_they_dont_have_enough_credit" do
+          let(:current_state) { :transitioning_from_telling_user_they_dont_have_enough_credit }
+          it { is_expected.to be_awaiting_completion }
+        end
+
+        context "connecting_user_with_friend" do
+          let(:current_state) { :transitioning_from_connecting_user_with_friend }
+
+          context "friend answered call" do
+            let(:call_params) { sample_call_params(:dial_call_status => "completed") }
+            it { is_expected.to be_awaiting_completion }
+          end
+
+          context "friend did not answer call" do
+            let(:call_params) { sample_call_params(:dial_call_status => "no-answer") }
+            it { is_expected.to be_finding_friends }
+          end
+        end
+
+        context "finding_friends" do
+          let(:current_state) { :transitioning_from_finding_friends }
+
+          context "friends are found" do
+            def setup_scenario
+              create(:chat, :starter => subject)
+            end
+
+            it { is_expected.to be_dialing_friends }
+          end
+
+          context "friends are not found" do
+            it { is_expected.to be_awaiting_completion }
+          end
+        end
+
+        context "dialing_friends" do
+          let(:current_state) { :transitioning_from_dialing_friends }
+
+          context "call was answered" do
+            let(:call_params) { sample_call_params(:dial_call_status => "completed") }
+            it { is_expected.to be_awaiting_completion }
+          end
+
+          context "call was not answered" do
+            it { is_expected.to be_finding_friends }
           end
         end
       end
     end
+  end
 
-    def assert_correct_transition(options = {})
-      with_phone_call_states(options) do |state, traits, next_state, twiml_expectation, substates|
-        assert_phone_call_can_be_completed(create_phone_call(state, *traits))
+  describe "#flag_as_processing!"  do
+    let(:call_params) { { "Foo" => "Bar" } }
+    let(:request_url) { "https://example.com/phone_calls.xml" }
+    let(:job) { enqueued_jobs.last }
 
-        phone_call = create_phone_call(state, *traits)
-        phone_call.process!
-        expect(phone_call).to send("be_#{next_state}")
+    subject { create(:phone_call, current_state, :call_params => call_params) }
 
-        substates.each do |substate_trait, substate_attributes|
-          if substate_attributes.is_a?(Hash)
-            next_state_from_substate = substate_attributes["next_state"]
-            expectations = substate_attributes["expectations"]
-          else
-            next_state_from_substate = substate_attributes
-            expectations = {}
-          end
-
-          phone_call = create_phone_call(state, substate_trait.to_sym, *traits)
-          phone_call.process!
-          expect(phone_call).to send("be_#{next_state_from_substate}")
-
-          assert_phone_call_attributes(phone_call, expectations)
-        end
-      end
+    before do
+      subject.request_url = request_url
+      subject.flag_as_processing!
+      assert_job_queued!
+      subject.reload
     end
 
-    it "should transition to the correct state" do
-      assert_correct_transition
+    def assert_job_queued!
+      args = job[:args]
+      expect(job[:job]).to eq(PhoneCallProcessorJob)
+      expect(args[0]).to eq(subject.id)
+      expect(args[1]).to include(call_params)
+      expect(args[2]).to eq(request_url)
+    end
+
+    context "current state is:" do
+      context "answered" do
+        let(:current_state) { :answered }
+
+        it { is_expected.to be_transitioning_from_answered }
+      end
+
+      context "telling_user_they_dont_have_enough_credit" do
+        let(:current_state) { :telling_user_they_dont_have_enough_credit }
+
+        it { is_expected.to be_transitioning_from_telling_user_they_dont_have_enough_credit }
+      end
+
+      context "connecting_user_with_friend" do
+        let(:current_state) { :connecting_user_with_friend }
+
+        it { is_expected.to be_transitioning_from_connecting_user_with_friend }
+      end
+
+      context "finding_friends" do
+        let(:current_state) { :finding_friends }
+
+        it { is_expected.to be_transitioning_from_finding_friends }
+      end
+
+      context "dialing_friends" do
+        let(:current_state) { :dialing_friends }
+
+        it { is_expected.to be_transitioning_from_dialing_friends }
+      end
     end
   end
 
   describe "#to_twiml" do
     include MobilePhoneHelpers
+    include TwilioHelpers
+    include TwilioHelpers::TwimlAssertions::RSpec
+    include Rails.application.routes.url_helpers
 
-    include_context "twiml"
-    include_context "existing users"
+    let(:host) { "http://www.example.com" }
 
-    let(:redirect_url) { authenticated_url("http://example.com/twiml") }
+    context "current state is:" do
+      let(:user) { create(:user) }
+      let(:twiml) { subject.to_twiml }
+      let(:asserted_redirect_url) { phone_call_url(subject, :host => host, :format => :xml) }
+      let(:request_url) { authenticated_url(phone_call_url(subject, :host => host, :format => :xml)) }
+      let(:call_params) { sample_call_params }
 
-    def twiml_response(resource)
-      resource.redirect_url = redirect_url
-      parse_twiml(resource.to_twiml)
-    end
+      subject { create_phone_call }
 
-    def assert_dial_to_redirect_url(twiml, asserted_numbers, dial_options = {}, number_options = {})
-      assert_dial(twiml, redirect_url, dial_options) do |dial_twiml|
-        if asserted_numbers.is_a?(String)
-          assert_number(dial_twiml, asserted_numbers, number_options)
-        elsif asserted_numbers.is_a?(Array)
-          asserted_numbers.each_with_index do |asserted_number, index|
-            assert_number(dial_twiml, asserted_number, number_options.merge(:index => index))
+      before do
+        setup_scenario
+        subject.set_call_params(call_params, request_url)
+      end
+
+      def setup_scenario
+      end
+
+      def create_phone_call(*args)
+        options = args.extract_options!
+        create(:phone_call, current_state, {:user => user}.merge(options))
+      end
+
+      context "answered" do
+        let(:current_state) { :answered }
+        let(:request_url) { authenticated_url(phone_calls_url(:host => host, :format => :xml)) }
+        let(:asserted_filename) { "#{asserted_locale}/ringback_tone.mp3" }
+
+        it { assert_redirect! }
+
+        context "given the user is Khmer" do
+          let(:user) { create(:user, :cambodian) }
+          let(:asserted_locale) { "kh" }
+          it { assert_play! }
+        end
+
+        context "given the user is Filipino" do
+          let(:user) { create(:user, :filipino) }
+          let(:asserted_locale) { "ph" }
+          it { assert_play! }
+        end
+      end
+
+      context "telling_user_they_dont_have_enough_credit" do
+        let(:current_state) { :telling_user_they_dont_have_enough_credit }
+        let(:asserted_filename) { "#{asserted_locale}/not_enough_credit.mp3" }
+
+        it { assert_redirect! }
+
+        context "given the user is Khmer" do
+          let(:user) { create(:user, :cambodian) }
+          let(:asserted_locale) { "kh" }
+          it { assert_play! }
+        end
+
+        context "given the user is Filipino" do
+          let(:user) { create(:user, :filipino) }
+          let(:asserted_locale) { "ph" }
+          it { assert_play! }
+        end
+      end
+
+      context "awaiting_completion" do
+        let(:current_state) { :awaiting_completion }
+        it { assert_hangup! }
+      end
+
+      context "connecting_user_with_friend" do
+        let(:current_state) { :connecting_user_with_friend }
+        let(:partners_number) { generate(:mobile_number) }
+        let(:partner) { create(:user, :mobile_number => partners_number) }
+        let(:chat) { create(:chat, :active, :user => user, :friend => partner) }
+
+        subject { create_phone_call(:chat => chat) }
+
+        context "given the call was initiated from Twilio" do
+          let(:call_params) { sample_call_params(:api_version => sample_twilio_api_version) }
+          let(:asserted_caller_id) { twilio_number }
+
+          it "should dial to the partner in Twilio format" do
+            assert_dial!(:callerId => asserted_caller_id) do |dial_twiml|
+              assert_number!(dial_twiml, asserted_number_formatted_for_twilio(partner.mobile_number))
+            end
           end
-        elsif asserted_numbers.is_a?(Hash)
-          asserted_numbers.each_with_index do |(asserted_number, asserted_number_options), index|
-            assert_number(dial_twiml, asserted_number, asserted_number_options.merge(:index => index))
+        end
+
+        context "given the call was not initiated from Twilio" do
+          let(:call_params) { sample_call_params(:api_version => sample_adhearsion_twilio_api_version) }
+
+          context "and the partner is from a registered operator" do
+            let(:partners_number) { registered_operator(:number) }
+
+            it "should dial to the partner in adhearsion-twilio format" do
+              asserted_number_to_dial = interpolated_assertion(
+                registered_operator(:dial_string),
+                :number_to_dial => partners_number,
+                :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
+                :voip_gateway_host => registered_operator(:voip_gateway_host)
+              )
+
+              asserted_caller_id = registered_operator(:caller_id)
+
+              assert_dial! do |dial_twiml|
+                assert_number!(dial_twiml, asserted_number_to_dial, :callerId => asserted_caller_id)
+              end
+            end
+          end
+
+          context "and the partner is not from a registered operator" do
+            let(:partners_number) { generate(:unknown_operator_number) }
+
+            it "should dial to the partner in adhearsion-twilio format" do
+              asserted_number_to_dial = asserted_default_pbx_dial_string(:number_to_dial => partners_number)
+
+              assert_dial! do |dial_twiml|
+                assert_number!(dial_twiml, asserted_number_to_dial, :callerId => twilio_number)
+              end
+            end
           end
         end
       end
-    end
 
-    def assert_play_languages(phone_call, filename, options = {})
-      user = phone_call.user
-      filename_with_extension = filename_with_extension(filename)
-
-      twiml = twiml_response(phone_call)
-
-      assert_play(twiml, "#{user.locale}/#{filename_with_extension}", options)
-      assert_redirect(twiml, redirect_url, options)
-
-      phone_call.user = create(:user, :american)
-
-      flunk(
-        "choose a location with no translation to test the default locale"
-      ) if I18n.available_locales.include?(phone_call.user.locale)
-
-      assert_play(twiml_response(phone_call), "en/#{filename_with_extension}", options)
-      phone_call.user = user
-    end
-
-    def assert_ask_for_input(phone_call, prompt, twiml_options = {})
-      # automatically asserts redirect
-      assert_play_languages(phone_call, prompt)
-      filename_with_extension = filename_with_extension(prompt)
-
-      twiml_options.symbolize_keys!
-
-      twiml_options[:numDigits] ||= 1
-      twiml_options[:numDigits] = twiml_options[:numDigits].to_s
-      assert_gather(twiml_response(phone_call), twiml_options) do |gather|
-        assert_play(gather, "#{phone_call.user.locale}/#{filename_with_extension}")
+      context "finding_friends" do
+        let(:current_state) { :finding_friends }
+        it { assert_redirect! }
       end
-    end
 
-    def assert_no_response(phone_call)
-      expect(phone_call.to_twiml).to be_empty
-    end
+      context "dialing_friends" do
+        let(:current_state) { :dialing_friends }
+        let(:non_registered_operator_number) { generate(:mobile_number) }
+        let(:registered_operator_number) { registered_operator(:number) }
 
-    def assert_redirect_to_current_url(phone_call)
-      assert_redirect(twiml_response(phone_call), redirect_url)
-    end
+        let(:partner_from_registered_operator) { create(:user, :mobile_number => registered_operator_number) }
+        let(:partner_from_non_registered_operator) { create(:user, :mobile_number => non_registered_operator_number) }
 
-    def assert_hangup_current_call(phone_call)
-      assert_hangup(twiml_response(phone_call))
-    end
+        let(:asserted_max_simultaneous_dials) { Rails.application.secrets[:max_simultaneous_dials].to_i }
 
-    def find_friends(phone_call, with_mobile_numbers)
-      with_mobile_numbers.each do |mobile_number|
-        create(
-          :chat, :friend_active,
-          :user => phone_call.user, :starter => phone_call,
-          :friend => create(:user, :mobile_number => mobile_number)
-        )
+        def setup_scenario
+          create_list(:chat, 5, :starter => subject)
+          create(:chat, :starter => subject, :friend => partner_from_registered_operator)
+          create(:chat, :starter => subject, :friend => partner_from_non_registered_operator)
+        end
+
+        context "given the call was initiated from Twilio" do
+          let(:call_params) { sample_call_params(:api_version => sample_twilio_api_version) }
+
+          it "should dial to the partners in Twilio format" do
+            assert_dial!(:callerId => twilio_number) do |dial_twiml|
+              assert_numbers_dialed!(dial_twiml, asserted_max_simultaneous_dials)
+
+              assert_number!(
+                dial_twiml,
+                asserted_number_formatted_for_twilio(non_registered_operator_number),
+                :index => 0
+              )
+              assert_number!(
+                dial_twiml,
+                asserted_number_formatted_for_twilio(registered_operator_number),
+                :index => 1
+              )
+            end
+          end
+        end
+
+        context "given the call was not initiated from Twilio" do
+          let(:call_params) { sample_call_params(:api_version => sample_adhearsion_twilio_api_version) }
+
+          it "should dial to the partners in adhearsion-twilio format" do
+            assert_dial! do |dial_twiml|
+              assert_numbers_dialed!(dial_twiml, asserted_max_simultaneous_dials)
+
+              assert_number!(
+                dial_twiml,
+                asserted_default_pbx_dial_string(:number_to_dial => non_registered_operator_number),
+                :callerId => twilio_number,
+                :index => 0
+              )
+
+              assert_number!(
+                dial_twiml,
+                interpolated_assertion(
+                  registered_operator(:dial_string),
+                  :number_to_dial => registered_operator_number,
+                  :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
+                  :voip_gateway_host => registered_operator(:voip_gateway_host)
+                ),
+                :callerId => registered_operator(:caller_id),
+                :index => 1
+              )
+            end
+          end
+        end
       end
-    end
 
-    def assert_dial_friends(phone_call)
-      # assert correct TwiML for Twilio request
+      context "transitioning_from" do
+        def assert_redirect!
+          super(:method => "GET")
+        end
 
-      non_registered_operator_number = generate(:mobile_number)
-      registered_operator_number = registered_operator(:number)
+        let(:request_url) { authenticated_url(phone_call_url(subject, :host => host, :format => :xml)) }
 
-      sample_numbers = [non_registered_operator_number, registered_operator_number]
+        context "answered" do
+          let(:current_state) { :transitioning_from_answered }
+          it { assert_redirect! }
+        end
 
-      find_friends(phone_call, sample_numbers)
-      asserted_numbers = sample_numbers.map { |sample_number| asserted_number_formatted_for_twilio(sample_number) }.reverse
+        context "telling_user_they_dont_have_enough_credit" do
+          let(:current_state) { :transitioning_from_telling_user_they_dont_have_enough_credit }
+          it { assert_redirect! }
+        end
 
-      assert_dial_to_redirect_url(
-        twiml_response(phone_call), asserted_numbers, :callerId => twilio_number
-      )
+        context "connecting_user_with_friend" do
+          let(:current_state) { :transitioning_from_connecting_user_with_friend }
+          it { assert_redirect! }
+        end
 
-      # Simulate an adhearsion-twilio request
-      phone_call.api_version = sample_adhearsion_twilio_api_version
+        context "finding_friends" do
+          let(:current_state) { :transitioning_from_finding_friends }
+          it { assert_redirect! }
+        end
 
-      asserted_registered_operator_dial_string = interpolated_assertion(
-        registered_operator(:dial_string),
-        :number_to_dial => registered_operator_number,
-        :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
-        :voip_gateway_host => registered_operator(:voip_gateway_host)
-      )
-
-      asserted_non_registered_operator_dial_string = asserted_default_pbx_dial_string(
-        :number_to_dial => non_registered_operator_number
-      )
-
-      asserted_numbers = {
-        asserted_registered_operator_dial_string => {
-          :callerId => registered_operator(:caller_id)
-        },
-        asserted_non_registered_operator_dial_string => {
-          :callerId => twilio_number
-        }
-      }
-
-      assert_dial_to_redirect_url(
-        twiml_response(phone_call), asserted_numbers
-      )
-    end
-
-    def assert_dial_partner(phone_call)
-      # assert correct TwiML for Twilio request
-      user_to_dial = phone_call.chat.partner(phone_call.user)
-      asserted_number = asserted_number_formatted_for_twilio(user_to_dial.mobile_number)
-
-      assert_dial_to_redirect_url(
-        twiml_response(phone_call), asserted_number, :callerId => twilio_number
-      )
-
-      # Simulate an adhearsion-twilio request
-      phone_call.api_version = sample_adhearsion_twilio_api_version
-
-      # assert correct TwiML when dialing to a user from an unregistered service provider
-      asserted_number = asserted_default_pbx_dial_string(:number_to_dial => user_to_dial.mobile_number)
-      assert_dial_to_redirect_url(
-        twiml_response(phone_call), asserted_number, {}, :callerId => twilio_number
-      )
-
-      # assert correct TwiML when dialing to a user from registered service provider
-      partners_number = registered_operator(:number)
-      asserted_number = interpolated_assertion(
-        registered_operator(:dial_string),
-        :number_to_dial => partners_number,
-        :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
-        :voip_gateway_host => registered_operator(:voip_gateway_host)
-      )
-
-      phone_call.chat = create(
-        :chat, :active, :user => phone_call.user,
-        :friend => create(:user, :mobile_number => partners_number),
-        :starter => phone_call
-      )
-
-      assert_dial_to_redirect_url(
-        twiml_response(phone_call), asserted_number, {}, :callerId => registered_operator(:caller_id)
-      )
-    end
-
-    def assert_twiml_response(phone_call, expectation)
-      if expectation.is_a?(Hash)
-        assertion_method = expectation.keys.first
-        assertion_args = expectation.values
-        assertion_args = assertion_args.first.flatten if assertion_args.first.is_a?(Hash)
-      else
-        assertion_method = expectation
-      end
-      assertion_args ||= []
-      send("assert_#{assertion_method}", phone_call, *assertion_args)
-    end
-
-    def assert_correct_twiml(options = {})
-      with_phone_call_states(options) do |state, traits, next_state, expectation|
-        assert_twiml_response(create_phone_call(state, *traits), expectation)
-      end
-    end
-
-    context "given the redirect url has been set" do
-      it "should return the correct TwiML" do
-        assert_correct_twiml
+        context "dialing_friends" do
+          let(:current_state) { :transitioning_from_dialing_friends }
+          it { assert_redirect! }
+        end
       end
     end
   end

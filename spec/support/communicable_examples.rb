@@ -150,15 +150,13 @@ shared_examples_for "communicable from user" do |options|
   end
 
   describe "callbacks" do
-    context "after_create" do
+    context "after_commit(:on => :create)" do
+      let(:interactor) { communicable_resource.user }
+
       if options[:passive]
-        it "should not record the users's last_interacted_at" do
-          expect(communicable_resource.user.last_interacted_at).to be_nil
-        end
+        it { expect(interactor.last_interacted_at).to eq(nil) }
       else
-        it "should record the users's last_interacted_at" do
-          expect(communicable_resource.user.last_interacted_at).to be_present
-        end
+        it { expect(interactor.last_interacted_at).to be_present }
       end
     end
 

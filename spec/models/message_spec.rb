@@ -563,6 +563,8 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
       context "multipart message" do
         before do
+          subject
+          clear_enqueued_jobs
           subject.process!
           expect(subject).not_to be_processed
         end

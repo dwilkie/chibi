@@ -19,7 +19,7 @@ module Chibi
 
       included do
         before_validation :assign_to_user, :on => :create
-        after_create :record_user_interaction
+        after_commit :record_user_interaction, :on => :create
 
         validates :from, :presence => true
       end

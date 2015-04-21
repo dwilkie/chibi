@@ -8,98 +8,126 @@ class PhoneCall < ActiveRecord::Base
 
   include AASM
 
-  # The maximum number of concurrent outbound dials to trigger
-  MAX_SIMULTANEOUS_OUTBOUND_DIALS = 5
-
-  module Digits
-    MENU = 8
-  end
-
   module CallStatuses
     COMPLETED = "completed"
   end
 
-  attr_accessor :redirect_url, :digits, :to, :dial_status, :call_status, :api_version
+  attr_accessor :request_url, :to, :call_params
   alias_attribute :call_sid, :sid
 
   validates :sid, :presence => true
 
-  delegate :charge!, :login!, :to => :user, :prefix => true
-
   aasm :column => :state, :whiny_transitions => false do
     state :answered, :initial => true
+    state :transitioning_from_answered
     state :telling_user_they_dont_have_enough_credit
-    state :finding_new_friends
+    state :transitioning_from_telling_user_they_dont_have_enough_credit
     state :connecting_user_with_friend
+    state :transitioning_from_connecting_user_with_friend
+    state :finding_friends
+    state :transitioning_from_finding_friends
     state :dialing_friends
+    state :transitioning_from_dialing_friends
+    state :awaiting_completion
     state :completed
 
-    event :process, :after_commit => :fetch_twilio_cdr do
-      # complete the call if it has finished
+    event :flag_as_processing, :after_commit => :queue_for_processing! do
+      transitions(:from => :answered, :to => :transitioning_from_answered)
       transitions(
-        :from => [
-          :answered,
-          :telling_user_they_dont_have_enough_credit,
-          :finding_new_friends,
-          :connecting_user_with_friend,
-          :dialing_friends,
-        ],
-        :to => :completed,
-        :if => :complete?
+        :from => :telling_user_they_dont_have_enough_credit,
+        :to => :transitioning_from_telling_user_they_dont_have_enough_credit
       )
-
-      # tell him that he doesn't have enough credit if the charge failed
       transitions(
-        :from => :answered,
+        :from => :connecting_user_with_friend,
+        :to => :transitioning_from_connecting_user_with_friend
+      )
+      transitions(
+        :from => :finding_friends,
+        :to => :transitioning_from_finding_friends
+      )
+      transitions(
+        :from => :dialing_friends,
+        :to => :transitioning_from_dialing_friends
+      )
+    end
+
+    event :complete do
+      transitions(
+        :from => PhoneCall.aasm.states.map(&:name),
+        :to => :completed
+      )
+    end
+
+    event :process, :after_commit => :fetch_twilio_cdr do
+      # if the charge failed
+      # tell him that he doesn't have enough credit
+      transitions(
+        :from => :transitioning_from_answered,
         :to => :telling_user_they_dont_have_enough_credit,
         :if => :charge_failed?
       )
 
+      # then hang up
       transitions(
-        :from => :telling_user_they_dont_have_enough_credit,
-        :to => :completed
+        :from => :transitioning_from_telling_user_they_dont_have_enough_credit,
+        :to => :awaiting_completion,
       )
 
+      # if can dial to current chat parter
       # connect him with his existing friend
       transitions(
-        :from => :answered,
+        :from => :transitioning_from_answered,
         :to => :connecting_user_with_friend,
         :if => :can_dial_to_partner?,
         :after => :set_or_update_current_chat
       )
 
-      # find him new friends
+      # if the friend answered
+      # hang up
       transitions(
-        :from => :answered,
-        :to => :finding_new_friends,
+        :from => :transitioning_from_connecting_user_with_friend,
+        :to => :awaiting_completion,
+        :if => :connected?
+      )
+
+      # otherwise find him new friends
+      transitions(
+        :from => :transitioning_from_connecting_user_with_friend,
+        :to => :finding_friends,
         :after => :find_friends
       )
 
-      # connect him with his new friend
+      # find him new friends
       transitions(
-        :from => :finding_new_friends,
+        :from => :transitioning_from_answered,
+        :to => :finding_friends,
+        :after => :find_friends
+      )
+
+      # if available call his new friends
+      transitions(
+        :from => :transitioning_from_finding_friends,
         :to => :dialing_friends,
         :if => :friends_available?
       )
 
-      # hangup if the call has ended
+      # otherwise hangup
       transitions(
-        :from => [:connecting_user_with_friend, :dialing_friends],
-        :to => :completed,
+        :from => :transitioning_from_finding_friends,
+        :to => :awaiting_completion
+      )
+
+      # if he's connected with a friend hang up
+      transitions(
+        :from => :transitioning_from_dialing_friends,
+        :to => :awaiting_completion,
         :if => :connected?
       )
 
-      # find him a new friend
+      # otherwise find him new friends
       transitions(
-        :from => [:dialing_friends, :connecting_user_with_friend],
-        :to => :finding_new_friends,
-        :after => :find_friends
-      )
-
-      # complete call
-      transitions(
-        :from => :finding_new_friends,
-        :to => :completed,
+        :from => :transitioning_from_dialing_friends,
+        :to => :finding_friends
       )
     end
   end
@@ -108,31 +136,37 @@ class PhoneCall < ActiveRecord::Base
     send("twiml_for_#{state}")
   end
 
-  def self.find_or_create_and_process_by(params, redirect_url)
-    params.underscorify_keys!
+  def self.answer!(params, request_url)
+    phone_call = new
+    phone_call.set_call_params(params, request_url, true)
+    phone_call.save!
+    phone_call.pre_process!
+    phone_call
+  end
 
-    phone_call = find_or_initialize_by(:sid => params[:call_sid]) do |pc|
-      pc.from = params[:from]
-      pc.to = params[:to]
-    end
+  def self.complete!(params)
+    call_params = params.underscorify_keys
+    phone_call = where(:sid => call_params["call_sid"]).first!
+    phone_call.duration = call_params["call_duration"]
+    phone_call.complete!
+  end
 
-    if phone_call.valid?
-      phone_call.user_login!
-      phone_call.redirect_url = redirect_url
-      phone_call.digits = params[:digits]
-      phone_call.call_status = params[:call_status]
-      phone_call.dial_status = params[:dial_call_status]
-      phone_call.dial_call_sid ||= params[:dial_call_sid]
-      phone_call.api_version = params[:api_version]
-      phone_call.save!
-      charge_request = phone_call.charge_request
-      phone_call.process! if (charge_request.nil? && phone_call.user_charge!(phone_call)) || (charge_request && charge_request.slow?)
-      phone_call
+  def set_call_params(call_params, request_url = nil, initialize = false)
+    call_params = call_params.underscorify_keys
+
+    self.call_params = call_params
+    self.request_url = request_url
+
+    if initialize
+      self.from = call_params["from"]
+      self.to = call_params["to"]
+      self.sid = call_params["call_sid"]
     end
   end
 
-  def digits
-    @digits.to_i
+  def pre_process!
+    user.login!
+    user.charge!(self)
   end
 
   def to=(value)
@@ -149,28 +183,52 @@ class PhoneCall < ActiveRecord::Base
 
   private
 
+  def queue_for_processing!
+    PhoneCallProcessorJob.perform_later(id, call_params, request_url)
+  end
+
   def twiml_for_answered
-    redirect
+    play(:ringback_tone)
+  end
+
+  def twiml_for_transitioning_from_answered
+    redirect_to_self
   end
 
   def twiml_for_telling_user_they_dont_have_enough_credit
     play(:not_enough_credit)
   end
 
-  def twiml_for_finding_new_friends
-    redirect
+  def twiml_for_transitioning_from_telling_user_they_dont_have_enough_credit
+    redirect_to_self
+  end
+
+  def twiml_for_awaiting_completion
+    hangup
   end
 
   def twiml_for_connecting_user_with_friend
     dial(chat.partner(user))
   end
 
+  def twiml_for_transitioning_from_connecting_user_with_friend
+    redirect_to_self
+  end
+
+  def twiml_for_finding_friends
+    redirect_to_self("POST")
+  end
+
+  def twiml_for_transitioning_from_finding_friends
+    redirect_to_self
+  end
+
   def twiml_for_dialing_friends
     dial(*new_friends)
   end
 
-  def twiml_for_completed
-    hangup
+  def twiml_for_transitioning_from_dialing_friends
+    redirect_to_self
   end
 
   def charge_failed?
@@ -178,7 +236,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def from_adhearsion_twilio?
-    adhearsion_twilio_requested?(api_version)
+    adhearsion_twilio_requested?(call_params["api_version"])
   end
 
   def from_twilio?
@@ -197,6 +255,10 @@ class PhoneCall < ActiveRecord::Base
     @current_partner ||= current_chat.partner(user)
   end
 
+  def set_or_update_current_chat
+    self.chat ||= user.active_chat
+  end
+
   def current_chat
     @current_chat ||= user.active_chat
   end
@@ -204,11 +266,11 @@ class PhoneCall < ActiveRecord::Base
   def find_friends
     set_or_update_current_chat
     ask_partner_to_contact_me if user.currently_chatting? && !can_dial_to_partner?
-    Chat.activate_multiple!(user, :starter => self, :count => MAX_SIMULTANEOUS_OUTBOUND_DIALS)
+    Chat.activate_multiple!(user, :starter => self, :count => max_simultaneous_outbound_calls)
   end
 
   def new_friends
-    @new_friends ||= triggered_chats.order("created_at DESC").includes(:friend).limit(MAX_SIMULTANEOUS_OUTBOUND_DIALS).map(&:friend)
+    @new_friends ||= triggered_chats.order("created_at DESC").includes(:friend).limit(max_simultaneous_outbound_calls).map(&:friend)
   end
 
   def friends_available?
@@ -220,26 +282,12 @@ class PhoneCall < ActiveRecord::Base
     current_chat.replies.build(:user => to).contact_me(user)
   end
 
-  def wants_menu?
-    digits == Digits::MENU
-  end
-
   def connected?
-    dial_status == CallStatuses::COMPLETED
+    call_params["dial_call_status"] == CallStatuses::COMPLETED
   end
 
   def complete?
     call_status == CallStatuses::COMPLETED
-  end
-
-  def set_profile_from_digits(transition)
-    return if complete?
-    user.send(transition.from.gsub("asking_for_", "").gsub("_in_menu", "") << "=", transition.object.digits)
-    user.reload unless user.save
-  end
-
-  def set_or_update_current_chat
-    self.chat ||= user.active_chat
   end
 
   def play(file, options = {})
@@ -252,11 +300,12 @@ class PhoneCall < ActiveRecord::Base
 
   def dial(*users_to_dial)
     generate_twiml(:redirect => false) do |twiml|
-      dial_options = { :action => redirect_url }
+      dial_options = {:action => redirect_url, :method => "POST"}
       dial_options.merge!(:callerId => twilio_outgoing_number) if from_twilio?
       twiml.Dial(dial_options) do
         users_to_dial.each do |user_to_dial|
           number_options = {}
+          api_version = call_params["api_version"]
           number_options.merge!(:callerId => user_to_dial.caller_id(api_version)) if from_adhearsion_twilio?
           twiml.Number(user_to_dial.dial_string(api_version), number_options)
         end
@@ -264,23 +313,29 @@ class PhoneCall < ActiveRecord::Base
     end
   end
 
-  def ask_for_input(prompt, options = {})
-    options[:numDigits] ||= 1
-    generate_twiml do |twiml|
-      twiml.Gather(options) { |gather| gather.Play play_url(prompt) }
-    end
-  end
-
   def generate_twiml(options = {}, &block)
     response = Twilio::TwiML::Response.new do |twiml|
       yield twiml if block_given?
-      twiml.Redirect(redirect_url) unless options[:redirect] == false
+      twiml.Redirect(
+        redirect_url,
+        :method => (options[:redirect_method] || "POST").to_s.upcase
+      ) unless options[:redirect] == false
     end
 
     response.text
   end
 
-  alias redirect generate_twiml
+  def redirect_to_self(redirect_method = "GET")
+    generate_twiml(:redirect_method => redirect_method)
+  end
+
+  def redirect_url
+    return @redirect_url if @redirect_url
+    uri = URI.parse(request_url)
+    uri.path = Rails.application.routes.url_helpers.phone_call_path(self)
+    uri.query = nil
+    @redirect_url = uri.to_s
+  end
 
   def play_url(filename)
     "https://s3.amazonaws.com/chibimp3/#{play_path_prefix}/#{filename}.mp3"
@@ -288,5 +343,9 @@ class PhoneCall < ActiveRecord::Base
 
   def play_path_prefix
     I18n.t(:play_path_prefix, :locale => user.locale)
+  end
+
+  def max_simultaneous_outbound_calls
+    (Rails.application.secrets[:max_simultaneous_outbound_calls] || 5).to_i
   end
 end
