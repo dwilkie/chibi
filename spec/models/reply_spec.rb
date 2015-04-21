@@ -108,30 +108,61 @@ describe Reply do
     it { is_expected.to validate_presence_of(:to) }
     it { is_expected.to validate_presence_of(:body) }
     it { is_expected.to validate_inclusion_of(:delivery_channel).in_array(["twilio", "smsc"]) }
-    it { is_expected.to validate_uniqueness_of(:token) }
   end
 
   describe "callbacks" do
-    describe "before_validation(:on => :create)" do
-      let(:user) { create(:user, :from_registered_service_provider) }
-
+    describe "before_validation" do
       before do
         subject.valid?
       end
 
-      context "if the destination is nil" do
-        subject { build(:reply, :user => user) }
+      describe "#normalize_token" do
+        def create_reply(*args)
+          options = args.extract_options!
+          create(:reply, *args, {:token => token}.merge(options))
+        end
 
-        it { expect(subject.destination).to eq(user.mobile_number) }
-        it { expect(subject.operator_name).to be_present }
+        context "the token is nil" do
+          let(:token) { nil }
+          subject { create_reply }
+
+          it { expect(subject.token).to eq(nil) }
+        end
+
+        context "token is present" do
+          let(:token) { "ABC" }
+
+          context "delivery channel is twilio" do
+            subject { create_reply(:twilio_channel) }
+            it { expect(subject.token).to eq(token) }
+          end
+
+          context "delivery channel is smsc" do
+            subject { create_reply(:smsc_channel) }
+            it { expect(subject.token).to eq("abc") }
+          end
+        end
       end
 
-      context "if the destination is set" do
-        let(:destination) { generate(:unknown_operator_number) }
+      describe ":on => :create" do
+        let(:user) { create(:user, :from_registered_service_provider) }
 
-        subject { build(:reply, :destination => destination, :user => user) }
-        it { expect(subject.destination).to eq(destination) }
-        it { expect(subject.operator_name).not_to be_present }
+        describe "#set_destination" do
+          context "the destination is nil" do
+            subject { build(:reply, :user => user) }
+
+            it { expect(subject.destination).to eq(user.mobile_number) }
+            it { expect(subject.operator_name).to be_present }
+          end
+
+          context "the destination is present" do
+            let(:destination) { generate(:unknown_operator_number) }
+
+            subject { build(:reply, :destination => destination, :user => user) }
+            it { expect(subject.destination).to eq(destination) }
+            it { expect(subject.operator_name).not_to be_present }
+          end
+        end
       end
     end
   end
@@ -203,6 +234,84 @@ describe Reply do
     end
   end
 
+  describe ".token_find!(token)" do
+    let(:reply) { create(:reply, :token => "abc") }
+
+    context "given the reply exists" do
+      before do
+        reply
+      end
+
+      it { expect(described_class.token_find!("ABC")).to eq(reply) }
+    end
+
+    context "given the reply does not exist" do
+      it { expect { described_class.token_find!("ABC") }.to raise_error(ActiveRecord::RecordNotFound) }
+    end
+  end
+
+  describe "handling failed messages" do
+    def create_user(*args)
+      options = args.extract_options!
+      create(:user, :without_recent_interaction, *args, options)
+    end
+
+    def create_reply(*args)
+      options = args.extract_options!
+      create(:reply, :failed, *args, {:user => user}.merge(options))
+    end
+
+    let(:num_failed_replies) { 4 }
+    let(:results) { described_class.to_users_that_cannot_be_contacted }
+
+    before do
+      num_failed_replies.times do
+        create_reply
+      end
+    end
+
+    context "for users that cannot be contacted" do
+      describe ".to_users_that_cannot_be_contacted" do
+        it { expect(results[0].user).to eq(user) }
+      end
+
+      describe ".handle_failed" do
+        let(:job) { enqueued_jobs.last }
+
+        before do
+          described_class.handle_failed!
+        end
+
+        it "should enqueue a job to cleanup the user" do
+          expect(job[:job]).to eq(UserCleanupJob)
+          expect(job[:args][0]).to eq(user.id)
+        end
+      end
+    end
+
+    describe ".to_users_that_cannot_be_contacted" do
+      context "for offline users" do
+        let(:user) { create_user(:offline) }
+
+        it { expect(results).to be_empty }
+      end
+
+      context "for online users" do
+        context "with recent interaction" do
+          let(:user) { create_user(:with_recent_interaction) }
+          it { expect(results).to be_empty }
+        end
+
+        context "without recent interaction" do
+          context "with not enough failed replies" do
+            let(:num_failed_replies) { 3 }
+            it { expect(results).to be_empty }
+          end
+        end
+      end
+    end
+  end
+
   describe "#body" do
     it "should return an empty string if it is nil" do
       subject.body = nil
@@ -250,7 +359,7 @@ describe Reply do
   end
 
   describe "#delivered_by_smsc!(smsc_name, smsc_message_id, status)" do
-    let(:subject) { create(:reply, :queued_for_smsc_delivery) }
+    let(:subject) { create(:reply, :queued_for_smsc_delivery, :smsc_channel) }
     let(:smsc_name) { "SMART" }
     let(:smsc_message_id) { "7869576120333847249" }
 
@@ -259,12 +368,12 @@ describe Reply do
       subject.reload
     end
 
+    before do
+      do_delivered_by_smsc!
+    end
+
     context "where the delivery was successful" do
       let(:status) { true }
-
-      before do
-        do_delivered_by_smsc!
-      end
 
       it "should update the message token and status" do
         expect(subject.token).to eq(smsc_message_id)
@@ -273,16 +382,12 @@ describe Reply do
     end
 
     context "where the status was not successful" do
-      # know about it first
       let(:status) { false }
+      let(:job) { enqueued_jobs.last }
 
-      it "should raise an error" do
-        expect { do_delivered_by_smsc!}.to raise_error do |error|
-          expect(error).to be_a(ArgumentError)
-          expect(error.message).to include(subject.id.to_s)
-          expect(error.message).to include(smsc_name)
-          expect(error.message).to include(smsc_message_id)
-        end
+      it "should enqueue a job to redeliver the message" do
+        expect(job[:job]).to eq(MtMessageSenderJob)
+        expect(job[:args][0]).to eq(subject.id)
       end
     end
   end
@@ -319,8 +424,9 @@ describe Reply do
 
     context "by default" do
       context "where there is no destination" do
-        it "should raise an invalid state transition error" do
-          expect { subject.deliver! }.to raise_error(AASM::InvalidTransition)
+        it "should not deliver message" do
+          subject.deliver!
+          expect(subject).to be_pending_delivery
         end
       end
 

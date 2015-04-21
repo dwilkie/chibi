@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe ChatReinvigoratorJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("default") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:chat_reinvigorator_queue]) }
   end
 
   describe "#perform" do

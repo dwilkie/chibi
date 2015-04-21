@@ -5,11 +5,11 @@ describe ChatDeactivatorJob do
   subject { described_class.new(options) }
 
   it "should be serializeable" do
-    expect(subject.serialize["arguments"].first).to eq(options)
+    expect(subject.serialize["arguments"].first).to include(options)
   end
 
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("high") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:chat_deactivator_queue]) }
   end
 
   describe "#perform(chat_id, options = {})" do

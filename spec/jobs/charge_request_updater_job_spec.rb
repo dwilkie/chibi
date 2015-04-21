@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe ChargeRequestUpdaterJob do
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("critical") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:charge_request_updater_queue]) }
   end
 
   describe ".perform(charge_request_id, result, responder, reason = nil)" do

@@ -14,10 +14,11 @@ describe PhoneCall do
     options[:build] ? build(:phone_call, *traits) : create(:phone_call, *traits)
   end
 
-  describe "factory" do
-    it "should be valid" do
-      expect(new_phone_call).to be_valid
-    end
+  describe "validations" do
+    subject { build(:phone_call) }
+
+    it { is_expected.to be_valid }
+    it { is_expected.to validate_presence_of(:sid) }
   end
 
   it_should_behave_like "analyzable" do
@@ -26,22 +27,6 @@ describe PhoneCall do
     def create_resource(*args)
       create(:phone_call, *args)
     end
-  end
-
-  it "should not be valid without an sid" do
-    new_phone_call.sid = nil
-    expect(new_phone_call).not_to be_valid
-  end
-
-  it "should not be valid with a duplicate sid" do
-    new_phone_call.sid = phone_call.sid
-    expect(new_phone_call).not_to be_valid
-  end
-
-  it "should not be valid with a duplicate dial_call_sid" do
-    phone_call = create(:phone_call, :with_dial_call_sid)
-    new_phone_call.dial_call_sid = phone_call.dial_call_sid
-    expect(new_phone_call).not_to be_valid
   end
 
   it_should_behave_like "a chat starter" do
@@ -118,9 +103,26 @@ describe PhoneCall do
   end
 
   describe "#fetch_inbound_twilio_cdr!" do
-    it "should create a Chibi Twilio Inbound CDR" do
-      expect_twilio_cdr_fetch(:call_sid => phone_call.sid) { phone_call.fetch_inbound_twilio_cdr! }
-      expect(Chibi::Twilio::InboundCdr.last.phone_call).to eq(phone_call)
+    include WebMockHelpers
+    subject { create(:phone_call) }
+
+    context "given the CDR has not already been saved" do
+      it "should create a Chibi Twilio Inbound CDR" do
+        expect_twilio_cdr_fetch(:call_sid => subject.sid) { subject.fetch_inbound_twilio_cdr! }
+        expect(Chibi::Twilio::InboundCdr.last.phone_call).to eq(subject)
+      end
+    end
+
+    context "given the CDR has already been saved" do
+      before do
+        expect_twilio_cdr_fetch(:call_sid => subject.sid) { subject.fetch_inbound_twilio_cdr! }
+      end
+
+      it "should not fetch the CDR" do
+        WebMock.clear_requests!
+        subject.fetch_inbound_twilio_cdr!
+        expect(webmock_requests).to be_empty
+      end
     end
   end
 
@@ -365,7 +367,7 @@ describe PhoneCall do
     end
 
     it "should transition to the correct state" do
-      assert_correct_transition(:voice_prompts => false)
+      assert_correct_transition
     end
   end
 
@@ -554,7 +556,7 @@ describe PhoneCall do
 
     context "given the redirect url has been set" do
       it "should return the correct TwiML" do
-        assert_correct_twiml(:voice_prompts => false)
+        assert_correct_twiml
       end
     end
   end

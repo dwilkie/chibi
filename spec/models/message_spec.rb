@@ -18,12 +18,6 @@ describe Message do
   let(:processed_message) { create(:message, :processed, :created_at => 10.minutes.ago, :user => user) }
   let(:subject) { build(:message, :without_user) }
 
-  describe "factory" do
-    it "should be valid" do
-      expect(new_message).to be_valid
-    end
-  end
-
   describe "callbacks" do
     describe "before_validation" do
       it "should normalize the channel" do
@@ -114,7 +108,7 @@ describe Message do
   describe "validations" do
     subject { create(:message) }
 
-    it { is_expected.to validate_uniqueness_of(:guid).allow_nil }
+    it { is_expected.to be_valid }
     it { is_expected.to validate_presence_of(:channel) }
     it { is_expected.to validate_presence_of(:csms_reference_number) }
     it { is_expected.to validate_numericality_of(:csms_reference_number).only_integer.is_greater_than_or_equal_to(0).is_less_than_or_equal_to(255) }
@@ -209,9 +203,9 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
         context "2 of 2" do
           let(:sequence_number) { 2 }
-          let(:asserted_message_parts) { 2 }
-          let(:asserted_body) { "baz1" + body }
-          let(:asserted_awaiting_parts) { false }
+          let(:asserted_message_parts) { 1 }
+          let(:asserted_body) { "" }
+          let(:asserted_awaiting_parts) { true }
 
           before do
             create(
@@ -225,6 +219,18 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
               :channel => channel
             )
           end
+
+          it { assert_new_message! }
+        end
+
+        context "with an empty body" do
+          let(:csms_reference_number) { 35 }
+          let(:number_of_parts) { 3 }
+          let(:asserted_message_parts) { 1 }
+          let(:asserted_awaiting_parts) { true }
+
+          let(:sequence_number) { 3 }
+          let(:body) { "" }
 
           it { assert_new_message! }
         end
@@ -273,16 +279,17 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     end
   end
 
-  describe ".find_csms_message(channel, csms_reference_number, num_parts, from, to)" do
+  describe ".find_csms_message(id, channel, csms_reference_number, num_parts, from, to)" do
     let(:message) { create(:message, :awaiting_parts) }
 
+    let(:id) { 0 }
     let(:channel) { message.channel }
     let(:csms_reference_number) { message.csms_reference_number }
     let(:num_parts) { message.number_of_parts }
     let(:from) { message.from }
     let(:to) { message.to }
 
-    let(:result) { described_class.find_csms_message(channel, csms_reference_number, num_parts, from, to) }
+    let(:result) { described_class.find_csms_message(id, channel, csms_reference_number, num_parts, from, to) }
 
     context "given a message exists that's awaiting parts" do
       def assert_found!
@@ -299,6 +306,11 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
       context "passing matching parameters" do
         it { assert_found! }
+      end
+
+      context "passing an 'id' that matches" do
+        let(:id) { message.id }
+        it { assert_not_found! }
       end
 
       context "passing 'csms_reference_number' => 0" do
@@ -323,8 +335,10 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
       end
 
       context "'channel' doesn't match" do
+        # sometimes we get smart and smart2
+        # to and from should be ok for now
         let(:channel) { "different channel" }
-        it { assert_not_found! }
+        it { assert_found! }
       end
 
       context "no longer awaiting parts" do
@@ -422,7 +436,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     }
 
     subject {
-      build(
+      create(
         :message,
         :csms_reference_number => message.csms_reference_number,
         :number_of_parts => message.number_of_parts,
@@ -438,7 +452,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
     context "'from' doesn't match" do
       let(:from) { "+855 12 239 135" }
-      it { expect(subject.find_csms_message).to eq(subject) }
+      it { expect(subject.find_csms_message).to eq(nil) }
     end
   end
 
@@ -471,11 +485,31 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     end
   end
 
-  describe "queue_for_processing!" do
+  describe "#queue_for_processing!" do
     it "queue the message for processing" do
       trigger_job(:queue_only => true) { message.queue_for_processing! }
       job = enqueued_jobs.last
       expect(job[:args].first).to eq(message.id)
+    end
+  end
+
+  describe "#destroy_invalid_multipart!" do
+    before do
+      subject.destroy_invalid_multipart!
+    end
+
+    let(:message) { described_class.find_by_id(subject.id) }
+
+    context "for invalid multipart messages" do
+      subject { create(:message, :invalid_multipart) }
+
+      it { expect(message).to eq(nil) }
+    end
+
+    context "for valid multipart messages" do
+      subject { create(:message, :multipart) }
+
+      it { expect(message).to eq(subject) }
     end
   end
 
@@ -515,6 +549,8 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     end
 
     context "state is 'received'" do
+      let(:job) { enqueued_jobs.first }
+
       subject { create_message }
 
       def stub_user_charge!(result = nil)
@@ -525,12 +561,25 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
         allow(user).to receive(:update_profile)
       end
 
-      context "mulipart message is awaiting parts" do
-        subject { create(:message, :awaiting_parts) }
-
-        it "should not process the message" do
+      context "multipart message" do
+        before do
           subject.process!
           expect(subject).not_to be_processed
+        end
+
+        context "is awaiting parts" do
+          subject { create(:message, :awaiting_parts) }
+
+          it { expect(job).to eq(nil) }
+        end
+
+        context "is invalid" do
+          subject { create(:message, :invalid_multipart) }
+
+          it "should enqueue a job to cleanup the message" do
+            expect(job[:job]).to eq(MessageCleanupJob)
+            expect(job[:args]).to eq([subject.id])
+          end
         end
       end
 

@@ -28,7 +28,6 @@ class User < ActiveRecord::Base
 
   validates :mobile_number,
             :presence => true,
-            :uniqueness => true,
             :length => { :minimum => MINIMUM_MOBILE_NUMBER_LENGTH },
             :phony_plausible => true
 
@@ -89,7 +88,7 @@ class User < ActiveRecord::Base
   end
 
   def self.online
-    where("\"#{table_name}\".\"state\" != ?", "offline")
+    where.not(:state => "offline")
   end
 
   def self.filter_by(params = {})
@@ -105,6 +104,21 @@ class User < ActiveRecord::Base
 
   def self.between_the_ages(range)
     where("date_of_birth <= ? AND date_of_birth > ?", range.min.years.ago.to_date, range.max.years.ago.to_date)
+  end
+
+  def self.with_inactive_numbers(options = {})
+    options[:num_last_failed_replies] ||= 5
+
+    # find the most recent replies for a particular user
+    recent_replies_subquery = "(#{Reply.where("#{User.quoted_attribute(:user_id, :replies)} = #{User.quoted_attribute(:id)}").reverse_order.limit(options[:num_last_failed_replies]).to_sql}) recent_replies"
+
+    # count the most recent replies that are failed
+    num_recently_failed_replies_subquery = "(#{Reply.select('COUNT (*)').from(recent_replies_subquery).where("#{quoted_attribute(:state, :recent_replies)} = 'failed' OR #{quoted_attribute(:state, :recent_replies)} = 'rejected'").to_sql})"
+
+    # logout the users who's most recent replies all failed
+    joins(:replies).where(
+      "#{num_recently_failed_replies_subquery} = ?", options[:num_last_failed_replies]
+    ).uniq
   end
 
   def self.male
@@ -460,7 +474,9 @@ class User < ActiveRecord::Base
     # use the last_interacted_at timestamp to create case statements for recent interaction
     NUM_INACTIVITY_PERIODS.times do
       inactivity_scope = inactivity_scope.where(
-        "COALESCE(#{quoted_attribute(:last_interacted_at)}, ?) > ?", coalesce_timestamp, inactivity_period.hours.ago
+        "COALESCE(#{quoted_attribute(:last_interacted_at)}, ?) > ?",
+        coalesce_timestamp,
+        inactivity_period.hours.ago
       )
       inactivity_period *= 2
     end
@@ -584,6 +600,18 @@ class User < ActiveRecord::Base
 
   def self.enqueue_friend_messenger(user, options = {})
     FriendMessengerJob.perform_later(user.id, options)
+  end
+
+  def self.without_recent_interaction
+    where(
+      "COALESCE(\"#{table_name}\".\"last_interacted_at\", ?) < ?",
+      recent_interaction_cutoff,
+      recent_interaction_cutoff
+    )
+  end
+
+  def self.recent_interaction_cutoff
+    (Rails.application.secrets[:recent_interaction_cutoff_months] || 1).to_i.months.ago
   end
 
   def set_operator_name

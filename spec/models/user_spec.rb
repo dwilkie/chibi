@@ -95,70 +95,50 @@ describe User do
     end
   end
 
-  it "should not be valid without a mobile number" do
-    new_user.mobile_number = nil
-    expect(new_user).not_to be_valid
-  end
+  describe "validations" do
+    subject { build(:user) }
 
-  it "should not be valid with an invalid gender" do
-    expect(build(:user, :with_invalid_gender)).not_to be_valid
-  end
+    it { is_expected.to be_valid }
+    it { is_expected.to validate_presence_of(:mobile_number) }
+    it { is_expected.to validate_inclusion_of(:gender).in_array(["m", "f"]) }
+    it { is_expected.to validate_inclusion_of(:looking_for).in_array(["m", "f"]) }
+    it { is_expected.not_to allow_value(attributes_for(:user, :with_invalid_mobile_number)[:mobile_number]).for(:mobile_number) }
+    it { is_expected.not_to allow_value("8559878917").for(:mobile_number) }
+    it { is_expected.not_to allow_value("8559620617899").for(:mobile_number) }
 
-  it "should not be valid with an invalid looking for preference" do
-    expect(build(:user, :with_invalid_looking_for_preference)).not_to be_valid
-  end
-
-  it "should not be valid with an invalid age" do
-    expect(build(:user, :too_old)).not_to be_valid
-    expect(build(:user, :too_young)).not_to be_valid
-  end
-
-  it "should not be valid with an invalid mobile number e.g. a short code" do
-    expect(build(:user, :with_invalid_mobile_number)).not_to be_valid
-
-    ["8559878917", "8559620617899"].each do |invalid_number|
-      user = build(:user, :mobile_number => invalid_number)
-      expect(user).not_to be_valid
+    context "for persisted users" do
+      subject { create(:user) }
+      it { is_expected.to validate_presence_of(:screen_name) }
+      it { is_expected.to validate_presence_of(:location) }
     end
-  end
 
-  it "should not be valid without a screen name" do
-    user.screen_name = nil
-    expect(user).not_to be_valid
-  end
+    context "too old" do
+      subject { build(:user, :too_old) }
+      it { is_expected.not_to be_valid }
+    end
 
-  it "should not be valid without a location" do
-    user.location = nil
-    expect(user).not_to be_valid
-  end
-
-  it "should default to being online" do
-    expect(subject).to be_online
-  end
-
-  describe "factory" do
-    it "should be valid" do
-      expect(new_user).to be_valid
+    context "too young" do
+      subject { build(:user, :too_young) }
+      it { is_expected.not_to be_valid }
     end
 
     describe "english" do
-      it "should be valid" do
-        expect(build(:user, :english)).to be_valid
-      end
+      subject { build(:user, :english) }
+      it { is_expected.to be_valid }
     end
 
     describe "american" do
-      it "should be valid" do
-        expect(build(:user, :american)).to be_valid
-      end
+      subject { build(:user, :american) }
+      it { is_expected.to be_valid }
     end
 
     describe "thai" do
-      it "should be valid" do
-        expect(build(:user, :thai)).to be_valid
-      end
+      subject { build(:user, :thai) }
+      it { is_expected.to be_valid }
     end
   end
+
+  it { is_expected.to be_online }
 
   describe "associations" do
     describe "location" do
@@ -328,7 +308,7 @@ describe User do
     end
 
     it "should not return users who are offline" do
-      expect(subject.class.online).to eq([user])
+      expect(described_class.online).to eq([user])
     end
   end
 
@@ -348,7 +328,7 @@ describe User do
       user_with_operator_name.update_attribute(:operator_name, "foo")
       expect(user_with_operator_name.operator_name).to eq("foo")
 
-      subject.class.set_operator_name
+      described_class.set_operator_name
 
       expect(user_with_operator_name.reload.operator_name).to eq("foo")
       asserted_operator_names.each do |user, asserted_operator_name|
@@ -385,7 +365,36 @@ describe User do
 
   describe ".filter_by" do
     it "should include the user's location to avoid loading it for each user" do
-      expect(subject.class.filter_by.includes_values).to include(:location)
+      expect(described_class.filter_by.includes_values).to include(:location)
+    end
+  end
+
+  describe ".without_recent_interaction" do
+    def create_user(*args)
+      options = args.extract_options!
+      create(:user, *args, options)
+    end
+
+    before do
+      user
+    end
+
+    context "a user has never had recent interaction" do
+      let(:user) { create_user }
+
+      it { expect(described_class.without_recent_interaction).to eq([user]) }
+    end
+
+    context "a user has no recent interaction" do
+      let(:user) { create_user(:without_recent_interaction) }
+
+      it { expect(described_class.without_recent_interaction).to eq([user]) }
+    end
+
+    context "a user has recent interaction" do
+      let(:user) { create_user(:with_recent_interaction) }
+
+      it { expect(described_class.without_recent_interaction).to be_empty }
     end
   end
 
@@ -400,11 +409,11 @@ describe User do
         offline_user
         active_chat
 
-        expect(subject.class.filter_params(:gender => "m")).to eq([male])
-        expect(subject.class.filter_params(:gender => "f")).to eq([female])
+        expect(described_class.filter_params(:gender => "m")).to eq([male])
+        expect(described_class.filter_params(:gender => "f")).to eq([female])
 
-        expect(subject.class.filter_params(:available => true)).to match_array([male, female, thai])
-        expect(subject.class.filter_params(:country_code => "th")).to eq([thai])
+        expect(described_class.filter_params(:available => true)).to match_array([male, female, thai])
+        expect(described_class.filter_params(:country_code => "th")).to eq([thai])
       end
     end
   end
@@ -886,7 +895,7 @@ describe User do
 
       it "should match the user with the best compatible match" do
         USER_MATCHES.each do |user, matches|
-          results = subject.class.matches(send(user))
+          results = described_class.matches(send(user))
           result_names = results.map { |result| result.name.to_sym }
           result_index = 0
           matches.each do |expected_match|
@@ -1215,16 +1224,16 @@ describe User do
 
   describe "#matches" do
     it "should return all the matches for a user" do
-      allow(subject.class).to receive(:matches).with(subject).and_return([new_user])
-      expect(subject.class).to receive(:matches).with(subject)
+      allow(described_class).to receive(:matches).with(subject).and_return([new_user])
+      expect(described_class).to receive(:matches).with(subject)
       expect(subject.matches).to eq([new_user])
     end
   end
 
   describe "#match" do
     it "should return the first match from .matches" do
-      allow(subject.class).to receive(:matches).with(subject).and_return([new_user])
-      expect(subject.class).to receive(:matches).with(subject)
+      allow(described_class).to receive(:matches).with(subject).and_return([new_user])
+      expect(described_class).to receive(:matches).with(subject)
       expect(subject.match).to eq(new_user)
     end
   end

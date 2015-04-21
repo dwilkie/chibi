@@ -40,13 +40,13 @@ FactoryGirl.define do
     n.to_s
   end
 
-  sequence :chargeable_operator_number, 85560234567 do |n|
+  sequence :chargeable_operator_number, 85513234567 do |n|
     n.to_s
   end
 
   factory :charge_request do
     association :user, :factory => [:user, :from_chargeable_operator]
-    beeline
+    qb
 
     after(:build) do |charge_request|
       user = charge_request.user
@@ -72,10 +72,6 @@ FactoryGirl.define do
 
     trait :qb do
       operator "qb"
-    end
-
-    trait :beeline do
-      operator "beeline"
     end
 
     trait :from_message do
@@ -107,8 +103,7 @@ FactoryGirl.define do
     end
 
     trait :multipart do
-      csms_reference_number 1
-      number_of_parts 2
+      invalid_multipart
 
       after(:build) do |message, evaluator|
         message.number_of_parts.times do |index|
@@ -121,6 +116,11 @@ FactoryGirl.define do
           )
         end
       end
+    end
+
+    trait :invalid_multipart do
+      csms_reference_number 1
+      number_of_parts 2
     end
 
     trait :twilio_channel do
@@ -432,6 +432,10 @@ FactoryGirl.define do
 
     trait :never_contacted do
       updated_at { 10.days.ago }
+    end
+
+    trait :without_recent_interaction do
+      last_interacted_at { 1.month.ago }
     end
 
     trait :not_contacted_recently do

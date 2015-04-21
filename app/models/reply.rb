@@ -1,5 +1,6 @@
 class Reply < ActiveRecord::Base
   before_validation :set_destination, :on => :create
+  before_validation :normalize_token
 
   include Chibi::Communicable
   include Chibi::Communicable::Chatable
@@ -13,6 +14,7 @@ class Reply < ActiveRecord::Base
   CONFIRMED = "confirmed"
   ERROR     = "error"
   EXPIRED   = "expired"
+  UNKNOWN   = "unknown"
 
   TWILIO_DELIVERED = DELIVERED
   TWILIO_FAILED = FAILED
@@ -36,6 +38,7 @@ class Reply < ActiveRecord::Base
 
   DELIVERY_STATES = {
     DELIVERY_CHANNEL_TWILIO => {
+      TWILIO_SENT        => UNKNOWN,
       TWILIO_DELIVERED   => CONFIRMED,
       TWILIO_UNDELIVERED => FAILED,
       TWILIO_FAILED      => ERROR,
@@ -46,7 +49,7 @@ class Reply < ActiveRecord::Base
       SMSC_UNDELIVERABLE => FAILED,
       SMSC_EXPIRED       => EXPIRED,
       SMSC_DELETED       => ERROR,
-      SMSC_UNKNOWN       => ERROR,
+      SMSC_UNKNOWN       => UNKNOWN,
       SMSC_INVALID       => ERROR
     }
   }
@@ -57,14 +60,13 @@ class Reply < ActiveRecord::Base
 
   validates :body, :presence => true
 
-  validates :token, :uniqueness => true, :allow_nil => true
   validates :delivery_channel, :inclusion => { :in => DELIVERY_CHANNELS }, :allow_nil => true
 
   delegate :mobile_number, :to => :user, :prefix => true, :allow_nil => true
 
   alias_attribute :destination, :to
 
-  aasm :column => :state do
+  aasm :column => :state, :whiny_transitions => false do
     state :pending_delivery, :initial => true
     state :queued_for_smsc_delivery
     state :delivered_by_smsc
@@ -72,6 +74,7 @@ class Reply < ActiveRecord::Base
     state :failed
     state :expired
     state :errored
+    state :unknown
 
     event :deliver, :before => :prepare_for_delivery do
       transitions(
@@ -121,6 +124,49 @@ class Reply < ActiveRecord::Base
         :if   => :delivery_error?
       )
     end
+
+    event :delivery_unknown do
+      transitions(
+        :from => :delivered_by_smsc,
+        :to   => :unknown,
+        :if   => :delivery_unknown?
+      )
+    end
+  end
+
+  def self.token_find!(token)
+    where(:token => token.to_s.downcase).first!
+  end
+
+  def self.handle_failed!
+    to_users_that_cannot_be_contacted.count.each do |user_id, num_failed|
+      UserCleanupJob.perform_later(user_id)
+    end
+  end
+
+  def self.to_users_that_cannot_be_contacted
+    failed_to_deliver.joins(
+      :user
+    ).merge(
+      User.online
+    ).merge(
+      User.without_recent_interaction
+    ).select(
+      :user_id
+    ).group(
+      :user_id
+    ).having(
+      "count(\"#{table_name}\".\"user_id\") > ?",
+      failed_replies_cutoff
+    )
+  end
+
+  def self.failed_replies_cutoff
+    (Rails.application.secrets[:failed_replies_cutoff] || 3).to_i
+  end
+
+  def self.failed_to_deliver
+    where(:state => "failed")
   end
 
   def self.delivered
@@ -189,11 +235,7 @@ class Reply < ActiveRecord::Base
   end
 
   def delivered_by_smsc!(smsc_name, smsc_message_id, status)
-    raise(
-      ArgumentError,
-      "Reply ##{id} failed to deliver on SMSC: '#{smsc_name}' (SMSC MESSAGE ID: '#{smsc_message_id}')"
-    ) unless status
-
+    return request_delivery! unless status
     self.token = smsc_message_id
     update_delivery_state!(DELIVERED)
   end
@@ -231,6 +273,8 @@ class Reply < ActiveRecord::Base
       delivery_errored!
     when EXPIRED
       delivery_expired!
+    when UNKNOWN
+      delivery_unknown!
     end
   end
 
@@ -252,13 +296,7 @@ class Reply < ActiveRecord::Base
   end
 
   def perform_delivery!
-    case delivery_channel
-
-    when DELIVERY_CHANNEL_SMSC
-      request_delivery_via_smsc!
-    when DELIVERY_CHANNEL_TWILIO
-      request_delivery_via_twilio!
-    end
+    delivery_channel == DELIVERY_CHANNEL_SMSC ? request_delivery_via_smsc! : request_delivery_via_twilio!
   end
 
   def can_be_queued_for_smsc_delivery?
@@ -315,6 +353,10 @@ class Reply < ActiveRecord::Base
     delivery_status_can_be_updated? && @delivery_state == CONFIRMED
   end
 
+  def delivery_unknown?
+    delivery_status_can_be_updated? && @delivery_state == UNKNOWN
+  end
+
   def delivery_accepted?
     token.present? && @delivery_state == DELIVERED
   end
@@ -367,5 +409,17 @@ class Reply < ActiveRecord::Base
 
   def twilio_message_status_fetcher_delay
     (Rails.application.secrets[:twilio_message_status_fetcher_delay] || 600).to_i
+  end
+
+  def normalize_token
+    self.token = token.downcase if token? && normalize_token?
+  end
+
+  def delivery_channel_twilio?
+    delivery_channel == DELIVERY_CHANNEL_TWILIO
+  end
+
+  def normalize_token?
+    !delivery_channel_twilio?
   end
 end

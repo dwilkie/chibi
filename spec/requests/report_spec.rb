@@ -55,7 +55,7 @@ describe "Report" do
       it "should queue a job to generate a report" do
         expect(enqueued_jobs.size).to eq(1)
         job = enqueued_jobs.first
-        expect(job[:args].first).to eq({"year" => "2014", "month" => "1"})
+        expect(job[:args].first).to include({"year" => "2014", "month" => "1"})
       end
 
       it "should return a 201" do

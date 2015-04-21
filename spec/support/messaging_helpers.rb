@@ -187,7 +187,7 @@ module MessagingHelpers
     {
       "queued" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
       "sending" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
-      "sent" => { :reply_state => "delivered_by_smsc", :reschedule_job => true },
+      "sent" => { :reply_state => "unknown", :reschedule_job => false},
       "receiving" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
       "delivered" => {:reply_state => "confirmed", :reschedule_job => false},
       "undelivered" => {:reply_state => "failed", :reschedule_job => false},
@@ -203,7 +203,7 @@ module MessagingHelpers
       "DELETED"        => {:reply_state => "errored"},
       "UNDELIVERABLE"  => {:reply_state => "failed"},
       "ACCEPTED"       => {:reply_state => "delivered_by_smsc"},
-      "UNKNOWN"        => {:reply_state => "errored"},
+      "UNKNOWN"        => {:reply_state => "unknown"},
       "REJECTED"       => {:reply_state => "failed"},
       "INVALID"        => {:reply_state => "errored"}
     }

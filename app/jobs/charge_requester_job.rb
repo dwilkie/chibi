@@ -1,3 +1,3 @@
 class ChargeRequesterJob < ActiveJob::Base
-  queue_as :charge_requester_queue
+  queue_as Rails.application.secrets[:charge_requester_external_queue]
 end

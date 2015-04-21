@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Rails.application.secrets[:smpp_delivery_receipt_update_status_worker].constantize do
+describe DeliveryReceiptUpdateStatusJob do
   it { expect(subject).not_to be_a(ActiveJob::Base) }
 
   describe ".sidekiq_options" do
@@ -14,7 +14,7 @@ describe Rails.application.secrets[:smpp_delivery_receipt_update_status_worker].
     let(:status) { "FAILED" }
 
     before do
-      allow(Reply).to receive(:find_by_token).with(smsc_message_id).and_return(reply)
+      allow(Reply).to receive(:token_find!).with(smsc_message_id).and_return(reply)
       allow(reply).to receive(:delivery_status_updated_by_smsc!)
     end
 

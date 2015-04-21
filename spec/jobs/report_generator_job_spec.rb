@@ -5,11 +5,11 @@ describe ReportGeneratorJob do
   subject { described_class.new(options) }
 
   it "should be serializeable" do
-    expect(subject.serialize["arguments"].first).to eq(options)
+    expect(subject.serialize["arguments"].first).to include(options)
   end
 
   describe "#queue_name" do
-    it { expect(subject.queue_name).to eq("high") }
+    it { expect(subject.queue_name).to eq(Rails.application.secrets[:report_generator_queue]) }
   end
 
   describe "#perform(options)" do

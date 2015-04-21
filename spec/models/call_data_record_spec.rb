@@ -6,60 +6,24 @@ describe CallDataRecord do
   let(:cdr) { create_cdr }
   let(:new_cdr) { build_cdr }
 
-  describe "factory" do
-    it "should be valid" do
-      expect(cdr).to be_valid
+  describe "validations" do
+    describe "factory" do
+      it "should be valid" do
+        expect(cdr).to be_valid
+      end
     end
-  end
 
-  it "should not be valid without a direction" do
-    cdr.direction = nil
-    expect(cdr).not_to be_valid
-  end
+    it { is_expected.to validate_presence_of(:direction) }
+    it { is_expected.to validate_presence_of(:type) }
+    it { is_expected.to validate_presence_of(:uuid) }
+    it { is_expected.to validate_presence_of(:duration) }
+    it { is_expected.to validate_presence_of(:bill_sec) }
+    it { is_expected.to validate_inclusion_of(:type).in_array(["InboundCdr", "OutboundCdr",  "Chibi::Twilio::InboundCdr", "Chibi::Twilio::OutboundCdr"]) }
 
-  it "should not be valid without a type" do
-    cdr.type = nil
-    expect(cdr).not_to be_valid
-  end
-
-  it "should not be valid with the wrong type" do
-    cdr.type = "Foo"
-    expect(cdr).not_to be_valid
-  end
-
-  it "should not be valid without a uuid" do
-    cdr.uuid = nil
-    expect(cdr).not_to be_valid
-  end
-
-  it "should not be valid with a duplicate uuid" do
-    new_cdr.uuid = cdr.uuid
-    expect(new_cdr).not_to be_valid
-  end
-
-  it "should be valid without an associated phone call" do
-    new_cdr = build_cdr(:cdr_variables => {"variables" => {"uuid" => "invalid"}})
-    expect(new_cdr).to be_valid
-  end
-
-  it "should not be valid with a duplicate phone call id for the same type" do
-    phone_call = create(:phone_call)
-    inbound_cdr = create_cdr(:phone_call => phone_call)
-    new_cdr.phone_call = inbound_cdr.phone_call
-    expect(new_cdr).not_to be_valid # because the new cdr is inbound as well
-    new_cdr = build_cdr(:cdr_variables => {"variables" => {"direction" => "outbound"}})
-    new_cdr.phone_call = phone_call
-    expect(new_cdr).to be_valid # because the new cdr is outbound
-  end
-
-  it "should not be valid without a duration" do
-    cdr.duration = nil
-    expect(cdr).not_to be_valid
-  end
-
-  it "should not be valid without a bill_sec" do
-    cdr.bill_sec = nil
-    expect(cdr).not_to be_valid
+    it "should be valid without an associated phone call" do
+      new_cdr = build_cdr(:cdr_variables => {"variables" => {"uuid" => "invalid"}})
+      expect(new_cdr).to be_valid
+    end
   end
 
   it_should_behave_like "communicable" do
