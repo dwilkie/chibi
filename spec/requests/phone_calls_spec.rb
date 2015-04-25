@@ -34,8 +34,7 @@ describe "PhoneCalls" do
       make_call(:from => my_number)
     end
 
-    it "should play the ringback tone" do
-      assert_play!
+    it "should redirect back to the call" do
       assert_redirect!
     end
 

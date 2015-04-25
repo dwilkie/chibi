@@ -188,7 +188,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def twiml_for_answered
-    play(:ringback_tone)
+    redirect_to_self("POST")
   end
 
   def twiml_for_transitioning_from_answered

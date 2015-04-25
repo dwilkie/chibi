@@ -414,18 +414,6 @@ describe PhoneCall do
         let(:asserted_filename) { "#{asserted_locale}/ringback_tone.mp3" }
 
         it { assert_redirect! }
-
-        context "given the user is Khmer" do
-          let(:user) { create(:user, :cambodian) }
-          let(:asserted_locale) { "kh" }
-          it { assert_play! }
-        end
-
-        context "given the user is Filipino" do
-          let(:user) { create(:user, :filipino) }
-          let(:asserted_locale) { "ph" }
-          it { assert_play! }
-        end
       end
 
       context "telling_user_they_dont_have_enough_credit" do
