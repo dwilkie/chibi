@@ -184,7 +184,7 @@ class PhoneCall < ActiveRecord::Base
   private
 
   def queue_for_processing!
-    PhoneCallProcessorJob.perform_later(id, call_params, request_url)
+    process!
   end
 
   def twiml_for_answered

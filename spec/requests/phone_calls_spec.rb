@@ -47,7 +47,7 @@ describe "PhoneCalls" do
         trigger_job { update_phone_call(phone_call) }
       end
 
-      it "should redirect to the phone call" do
+      xit "should redirect to the phone call" do
         assert_redirect!(:method => "GET")
       end
 
@@ -75,7 +75,7 @@ describe "PhoneCalls" do
               trigger_job { update_phone_call(phone_call) }
             end
 
-            it "should redirect to the phone call" do
+            xit "should redirect to the phone call" do
               assert_redirect!(:method => "GET")
             end
 
@@ -113,7 +113,7 @@ describe "PhoneCalls" do
                 trigger_job { update_phone_call(phone_call) }
               end
 
-              it "should redirect to the phone call" do
+              xit "should redirect to the phone call" do
                 assert_redirect!(:method => "GET")
               end
 
@@ -145,7 +145,7 @@ describe "PhoneCalls" do
                     trigger_job { update_phone_call(phone_call, :dial_call_status => "completed") }
                   end
 
-                  it "should redirect to the phone call" do
+                  xit "should redirect to the phone call" do
                     assert_redirect!(:method => "GET")
                   end
 
@@ -201,7 +201,7 @@ describe "PhoneCalls" do
               trigger_job { update_phone_call(phone_call, :dial_call_status => "completed") }
             end
 
-            it "should redirect to the phone call" do
+            xit "should redirect to the phone call" do
               assert_redirect!(:method => "GET")
             end
 
