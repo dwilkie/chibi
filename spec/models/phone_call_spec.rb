@@ -439,6 +439,11 @@ describe PhoneCall do
         it { assert_hangup! }
       end
 
+      context "completed" do
+        let(:current_state) { :completed }
+        it { assert_hangup! }
+      end
+
       context "connecting_user_with_friend" do
         let(:current_state) { :connecting_user_with_friend }
         let(:partners_number) { generate(:mobile_number) }

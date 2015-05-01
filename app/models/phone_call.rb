@@ -207,6 +207,10 @@ class PhoneCall < ActiveRecord::Base
     hangup
   end
 
+  def twiml_for_completed
+    hangup
+  end
+
   def twiml_for_connecting_user_with_friend
     dial(chat.partner(user))
   end
