@@ -81,7 +81,7 @@ module TwilioHelpers
       assert_twiml!(
         raw_response,
         :play,
-        {:content => "https://s3.amazonaws.com/chibimp3/#{path}"}.merge(options)
+        {:content => asserted_play_url(path)}.merge(options)
       )
     end
 
@@ -128,6 +128,14 @@ module TwilioHelpers
       uri.to_s
     end
 
+    def asserted_ringback_tone(locale)
+      "#{locale}/ringback_tone.mp3"
+    end
+
+    def asserted_play_url(path)
+      "https://s3.amazonaws.com/chibimp3/#{path}"
+    end
+
     def filename_with_extension(filename)
       "#{filename}.mp3"
     end
@@ -151,7 +159,10 @@ module TwilioHelpers
         super(
           twiml,
           asserted_redirect_url,
-          {:method => "POST"}.merge(options),
+          {
+            :method => "POST",
+            :ringback => asserted_play_url(asserted_ringback_tone(:kh))
+          }.merge(options),
           &block
         )
       end

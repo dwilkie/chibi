@@ -411,7 +411,6 @@ describe PhoneCall do
       context "answered" do
         let(:current_state) { :answered }
         let(:request_url) { authenticated_url(phone_calls_url(:host => host, :format => :xml)) }
-        let(:asserted_filename) { "#{asserted_locale}/ringback_tone.mp3" }
 
         it { assert_redirect! }
       end
@@ -465,19 +464,38 @@ describe PhoneCall do
           context "and the partner is from a registered operator" do
             let(:partners_number) { registered_operator(:number) }
 
-            it "should dial to the partner in adhearsion-twilio format" do
-              asserted_number_to_dial = interpolated_assertion(
+            let(:asserted_number_to_dial) {
+              interpolated_assertion(
                 registered_operator(:dial_string),
                 :number_to_dial => partners_number,
                 :dial_string_number_prefix => registered_operator(:dial_string_number_prefix),
                 :voip_gateway_host => registered_operator(:voip_gateway_host)
               )
+            }
 
-              asserted_caller_id = registered_operator(:caller_id)
+            let(:asserted_caller_id) { registered_operator(:caller_id) }
+            let(:asserted_ringback_path) { asserted_ringback_tone(asserted_locale) }
 
-              assert_dial! do |dial_twiml|
-                assert_number!(dial_twiml, asserted_number_to_dial, :callerId => asserted_caller_id)
+            def assert_dial!
+              super(:ringback => asserted_play_url(asserted_ringback_path)) do |dial_twiml|
+                assert_number!(
+                  dial_twiml,
+                  asserted_number_to_dial,
+                  :callerId => asserted_caller_id,
+                )
               end
+            end
+
+            context "given the dialer is Khmer" do
+              let(:user) { create(:user, :cambodian) }
+              let(:asserted_locale) { "kh" }
+              it { assert_dial! }
+            end
+
+            context "given the dialer is Filipino" do
+              let(:user) { create(:user, :filipino) }
+              let(:asserted_locale) { "ph" }
+              it { assert_dial! }
             end
           end
 

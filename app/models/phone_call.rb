@@ -300,7 +300,7 @@ class PhoneCall < ActiveRecord::Base
 
   def dial(*users_to_dial)
     generate_twiml(:redirect => false) do |twiml|
-      dial_options = {:action => redirect_url, :method => "POST"}
+      dial_options = {:action => redirect_url, :method => "POST", :ringback => play_url(:ringback_tone)}
       dial_options.merge!(:callerId => twilio_outgoing_number) if from_twilio?
       twiml.Dial(dial_options) do
         users_to_dial.each do |user_to_dial|
