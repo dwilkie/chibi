@@ -25,29 +25,20 @@ describe "Call Data Records" do
     end
 
     shared_examples_for "creating a CDR" do
+      let(:new_cdr) { CallDataRecord.find_by_uuid(sample_cdr.uuid) }
+
       def do_request(options = {})
-        trigger_job(options) { post_call_data_record }
+        post_call_data_record
       end
 
-      it "should queue a job for saving the CDR and return immediately" do
-        do_request(:queue_only => true)
-        expect(enqueued_jobs.size).to eq(1)
-        job = enqueued_jobs.first
-        expect(job[:args].first).to eq(sample_cdr.body)
+      before do
+        do_request
       end
 
-      context "when the job is run" do
-        let(:new_cdr) { CallDataRecord.find_by_uuid(sample_cdr.uuid) }
-
-        before do
-          do_request
-        end
-
-        it "should create the CDR with the correct fields" do
-          expect(new_cdr).to be_present
-          expect(new_cdr).to be_valid
-          expect(asserted_cdr_type.last).to eq(new_cdr)
-        end
+      it "should create the CDR with the correct fields" do
+        expect(new_cdr).to be_present
+        expect(new_cdr).to be_valid
+        expect(asserted_cdr_type.last).to eq(new_cdr)
       end
     end
 
