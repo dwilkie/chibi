@@ -257,10 +257,12 @@ describe PhoneCall do
 
                 def setup_scenario
                   super
+                  create(:user)
                   create(:chat, :active, :friend => partner) # partner is in active chat
                 end
 
                 it { is_expected.to be_finding_friends }
+                it { expect(subject.triggered_chats).not_to be_empty }
                 it { expect(subject.chat).to eq(chat) }
 
                 it "should queue a message for the partner to receive when his available" do
@@ -316,7 +318,13 @@ describe PhoneCall do
           end
 
           context "call was not answered" do
+            def setup_scenario
+              super
+              create(:user)
+            end
+
             it { is_expected.to be_finding_friends }
+            it { expect(subject.triggered_chats).not_to be_empty }
           end
         end
       end

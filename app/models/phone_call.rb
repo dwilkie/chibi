@@ -52,10 +52,7 @@ class PhoneCall < ActiveRecord::Base
     end
 
     event :complete do
-      transitions(
-        :from => PhoneCall.aasm.states.map(&:name),
-        :to => :completed
-      )
+      transitions(:to => :completed)
     end
 
     event :process, :after_commit => :fetch_twilio_cdr do
@@ -127,7 +124,8 @@ class PhoneCall < ActiveRecord::Base
       # otherwise find him new friends
       transitions(
         :from => :transitioning_from_dialing_friends,
-        :to => :finding_friends
+        :to => :finding_friends,
+        :after => :find_friends
       )
     end
   end
