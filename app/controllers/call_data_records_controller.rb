@@ -4,7 +4,8 @@ class CallDataRecordsController < ApplicationController
   before_filter :authenticate_call_data_record
 
   def create
-    CallDataRecordCreatorJob.perform_later(params["cdr"])
+    cdr = CallDataRecord.new(:body => params["cdr"])
+    cdr.typed.save!
     render :nothing => true, :status => :created
   end
 
