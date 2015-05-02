@@ -44,7 +44,7 @@ class InboundCdr < CallDataRecord
 
   def set_inbound_cdr_attributes
     if body.present?
-      self.rfc2822_date ||= unescaped_variable("RFC2822_DATE")
+      self.rfc2822_date ||= Time.at(unescaped_variable("start_epoch").to_i)
     end
   end
 

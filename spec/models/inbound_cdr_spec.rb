@@ -16,35 +16,49 @@ describe InboundCdr do
     end
   end
 
-  describe "factory" do
-    it "should be valid" do
-      expect(subject).to be_valid
-    end
-  end
-
   describe "associations" do
-    describe "#outbound_cdrs" do
-      it "should have_many" do
-        expect(subject.outbound_cdrs).to be_empty
-      end
-    end
+    it { is_expected.to have_many(:outbound_cdrs) }
   end
 
-  it "should not be valid without a rfc2822 date" do
-    cdr.rfc2822_date = nil
-    expect(cdr).not_to be_valid
-  end
+  describe "validations" do
+    subject { create_cdr }
+    it { is_expected.to validate_presence_of(:rfc2822_date) }
 
-  it "should not be valid without a related user" do
-    expect(build_cdr(
-      :cdr_variables => {
-        "variables" => {"sip_from_user" => "invalid"}
+    describe "#user" do
+      subject {
+        build_cdr(
+          :cdr_variables => {
+            "variables" => {"sip_from_user" => "invalid"}
+          }
+        )
       }
-    )).not_to be_valid
+
+      it { is_expected.not_to be_valid }
+    end
   end
 
   it_should_behave_like "communicable from user" do
     let(:communicable_resource) { cdr }
+  end
+
+  describe "initialization" do
+    subject { CallDataRecord.new(:body => File.read("#{fixture_path}/inbound_cdr.xml")).typed }
+
+    before do
+      subject.save!
+    end
+
+    it "should extract the correct data" do
+      # assertions are from fixture
+      expect(subject).to be_a(InboundCdr)
+      expect(subject.uuid).to eq("3b6d7b7a-d2b1-4f87-9a2f-73be0c1f8b5e")
+      expect(subject.duration).to eq(52)
+      expect(subject.bill_sec).to eq(32)
+      expect(subject.bridge_uuid).to eq(nil)
+      expect(subject.from).to eq("85510239136")
+      expect(subject.phone_call).to eq(nil)
+      expect(subject.rfc2822_date.to_i).to eq(1430559444)
+    end
   end
 
   describe "callbacks" do

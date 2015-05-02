@@ -64,6 +64,10 @@ class CallDataRecord < ActiveRecord::Base
   end
 
   def parsed_body
-    @parsed_body ||= MultiXml.parse(body)["cdr"]
+    return @parsed_body if @parsed_body
+    MultiXml.parser = ::Chibi::MultiXml::Parsers::CdrParser
+    @parsed_body = ::MultiXml.parse(body)["cdr"]
+    MultiXml.parser = MultiXml.default_parser
+    @parsed_body
   end
 end

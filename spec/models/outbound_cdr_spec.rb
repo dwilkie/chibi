@@ -11,25 +11,44 @@ describe OutboundCdr do
   let(:cdr) { create_cdr }
   subject { build_cdr }
 
-  describe "factory" do
-    it "should be valid" do
-      expect(subject).to be_valid
-    end
-  end
-
-  it "should not be valid without a related user" do
-    expect(build_cdr(
-      :cdr_variables => {
-        "variables" => {"sip_to_user" => "invalid"},
-        "callflow" => {
-          "caller_profile" => {"destination_number" => "invalid"}
-        }
+  describe "validations" do
+    describe "#user" do
+      subject {
+        build_cdr(
+          :cdr_variables => {
+            "variables" => {"sip_to_user" => "invalid"},
+            "callflow" => {
+              "caller_profile" => {"destination_number" => "invalid"}
+            }
+          }
+        )
       }
-    )).not_to be_valid
+
+      it { is_expected.not_to be_valid }
+    end
   end
 
   it_should_behave_like "communicable from user", :passive => true do
     let(:communicable_resource) { cdr }
+  end
+
+  describe "initialization" do
+    subject { CallDataRecord.new(:body => File.read("#{fixture_path}/outbound_cdr.xml")).typed }
+
+    before do
+      subject.save!
+    end
+
+    it "should extract the correct data" do
+      # assertions are from fixture
+      expect(subject).to be_a(OutboundCdr)
+      expect(subject.uuid).to eq("3415f9c3-2e76-46c8-84d8-e15103b1d3d3")
+      expect(subject.duration).to eq(31)
+      expect(subject.bill_sec).to eq(0)
+      expect(subject.bridge_uuid).to eq("359b1cf0-f0dc-11e4-859e-f3ff45d0abdc")
+      expect(subject.from).to eq("85589481811")
+      expect(subject.phone_call).to eq(nil)
+    end
   end
 
   describe "callbacks" do
