@@ -1,0 +1,238 @@
+<?xml version="1.0"?>
+<cdr core-uuid="6869b88b-2423-4f33-827d-7af9d49431ce" switchname="ip-10-0-0-139">
+  <channel_data>
+    <state>CS_REPORTING</state>
+    <direction>outbound</direction>
+    <state_number>11</state_number>
+    <flags>0=1;2=1;3=1;37=1;38=1;40=1;43=1;53=1;60=1;111=1;112=1;116=1</flags>
+    <caps>1=1;2=1;3=1;4=1;5=1;6=1</caps>
+  </channel_data>
+  <variables>
+    <direction>outbound</direction>
+    <is_outbound>true</is_outbound>
+    <uuid>3415f9c3-2e76-46c8-84d8-e15103b1d3d3</uuid>
+    <session_id>2</session_id>
+    <sip_gateway_name>didlogic</sip_gateway_name>
+    <sip_profile_name>gateway</sip_profile_name>
+    <channel_name>sofia/external/85589481811</channel_name>
+    <sip_destination_url>sip:85589481811@sip.sg.didlogic.net</sip_destination_url>
+    <origination_uuid>3415f9c3-2e76-46c8-84d8-e15103b1d3d3</origination_uuid>
+    <rayo_dcp_jid>adhearsion@freeswitch-staging.chibitxt.me/a1cac65f-b87e-428c-9658-62d80860978d-3</rayo_dcp_jid>
+    <rayo_call_jid>3415f9c3-2e76-46c8-84d8-e15103b1d3d3@freeswitch-staging.chibitxt.me</rayo_call_jid>
+    <origination_caller_id_number>+855383838380</origination_caller_id_number>
+    <origination_caller_id_name>+855383838380</origination_caller_id_name>
+    <originate_early_media>true</originate_early_media>
+    <rtp_local_sdp_str>v=0
+o=FreeSWITCH 1430539264 1430539265 IN IP4 freeswitch-staging.chibitxt.me
+s=FreeSWITCH
+c=IN IP4 freeswitch-staging.chibitxt.me
+t=0 0
+m=audio 20200 RTP/AVP 0 8 18 101 13
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=rtpmap:18 G729/8000
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-16
+a=ptime:20
+a=sendrecv
+</rtp_local_sdp_str>
+    <sip_outgoing_contact_uri><sip:gw+didlogic@freeswitch-staging.chibitxt.me:5060;transport=udp;gw=didlogic></sip_outgoing_contact_uri>
+    <sip_req_uri>85589481811@sip.sg.didlogic.net</sip_req_uri>
+    <sofia_profile_name>external</sofia_profile_name>
+    <recovery_profile_name>external</recovery_profile_name>
+    <sip_local_network_addr>freeswitch-staging.chibitxt.me</sip_local_network_addr>
+    <sip_reply_host>192.170.159.194</sip_reply_host>
+    <sip_reply_port>5060</sip_reply_port>
+    <sip_network_ip>192.170.159.194</sip_network_ip>
+    <sip_network_port>5060</sip_network_port>
+    <ep_codec_string>PCMU@8000h@20i@64000b,PCMA@8000h@20i@64000b,G729@8000h@20i@8000b</ep_codec_string>
+    <sip_user_agent>DID Logic GW</sip_user_agent>
+    <sip_recover_contact><sip:85589481811@192.170.159.195:5080></sip_recover_contact>
+    <sip_invite_record_route><sip:192.170.159.194;lr=on;ftag=8paa086cH7aZB;nat=yes></sip_invite_record_route>
+    <sip_full_via>SIP/2.0/UDP freeswitch-staging.chibitxt.me;received=52.74.158.59;rport=5060;branch=z9hG4bK9cBv147BXeN5F</sip_full_via>
+    <sip_recover_via>SIP/2.0/UDP freeswitch-staging.chibitxt.me;received=52.74.158.59;rport=5060;branch=z9hG4bK9cBv147BXeN5F</sip_recover_via>
+    <sip_from_display>+855383838380</sip_from_display>
+    <sip_full_from>"+855383838380" <sip:+855383838380@freeswitch-staging.chibitxt.me>;tag=8paa086cH7aZB</sip_full_from>
+    <sip_full_to><sip:85589481811@sip.sg.didlogic.net>;tag=as38d53cf4</sip_full_to>
+    <sip_from_user>+855383838380</sip_from_user>
+    <sip_from_uri>+855383838380@freeswitch-staging.chibitxt.me</sip_from_uri>
+    <sip_from_host>freeswitch-staging.chibitxt.me</sip_from_host>
+    <sip_to_user>85589481811</sip_to_user>
+    <sip_to_uri>85589481811@sip.sg.didlogic.net</sip_to_uri>
+    <sip_to_host>sip.sg.didlogic.net</sip_to_host>
+    <sip_contact_user>85589481811</sip_contact_user>
+    <sip_contact_port>5080</sip_contact_port>
+    <sip_contact_uri>85589481811@192.170.159.195:5080</sip_contact_uri>
+    <sip_contact_host>192.170.159.195</sip_contact_host>
+    <sip_to_tag>as38d53cf4</sip_to_tag>
+    <sip_from_tag>8paa086cH7aZB</sip_from_tag>
+    <sip_cseq>74943669</sip_cseq>
+    <sip_call_id>ba22f873-6b51-1233-7997-06578364bf4e</sip_call_id>
+    <switch_r_sdp>v=0\\r
+o=didlogic 2011674062 2011674062 IN IP4 192.170.159.195\\r
+s=DID Logic GW\\r
+c=IN IP4 192.170.159.195\\r
+t=0 0\\r
+m=audio 14108 RTP/AVP 0 8 18 101\\r
+a=rtpmap:0 PCMU/8000\\r
+a=rtpmap:8 PCMA/8000\\r
+a=rtpmap:18 G729/8000\\r
+a=fmtp:18 annexb=no\\r
+a=rtpmap:101 telephone-event/8000\\r
+a=fmtp:101 0-16\\r
+a=ptime:20\\r
+</switch_r_sdp>
+    <rtp_use_codec_string>G722,PCMU,PCMA,GSM,G729</rtp_use_codec_string>
+    <rtp_audio_recv_pt>0</rtp_audio_recv_pt>
+    <rtp_use_codec_name>PCMU</rtp_use_codec_name>
+    <rtp_use_codec_rate>8000</rtp_use_codec_rate>
+    <rtp_use_codec_ptime>20</rtp_use_codec_ptime>
+    <rtp_use_codec_channels>1</rtp_use_codec_channels>
+    <rtp_last_audio_codec_string>PCMU@8000h@20i@1c</rtp_last_audio_codec_string>
+    <read_codec>PCMU</read_codec>
+    <original_read_codec>PCMU</original_read_codec>
+    <read_rate>8000</read_rate>
+    <original_read_rate>8000</original_read_rate>
+    <write_codec>PCMU</write_codec>
+    <write_rate>8000</write_rate>
+    <dtmf_type>rfc2833</dtmf_type>
+    <local_media_ip>10.0.0.139</local_media_ip>
+    <local_media_port>20200</local_media_port>
+    <advertised_media_ip>freeswitch-staging.chibitxt.me</advertised_media_ip>
+    <rtp_use_timer_name>soft</rtp_use_timer_name>
+    <rtp_use_pt>0</rtp_use_pt>
+    <rtp_use_ssrc>3311625320</rtp_use_ssrc>
+    <rtp_2833_send_payload>101</rtp_2833_send_payload>
+    <rtp_2833_recv_payload>101</rtp_2833_recv_payload>
+    <remote_media_ip>192.170.159.195</remote_media_ip>
+    <remote_media_port>14108</remote_media_port>
+    <endpoint_disposition>EARLY MEDIA</endpoint_disposition>
+    <pre_transfer_caller_id_name>+855383838380</pre_transfer_caller_id_name>
+    <pre_transfer_caller_id_number>+855383838380</pre_transfer_caller_id_number>
+    <call_uuid>3415f9c3-2e76-46c8-84d8-e15103b1d3d3</call_uuid>
+    <current_application>rayo</current_application>
+    <bridge_uuid>359b1cf0-f0dc-11e4-859e-f3ff45d0abdc</bridge_uuid>
+    <hangup_after_bridge>false</hangup_after_bridge>
+    <park_after_bridge>true</park_after_bridge>
+    <hold_hangup_xfer_exten>park:inline:</hold_hangup_xfer_exten>
+    <send_silence_when_idle>-1</send_silence_when_idle>
+    <rayo_local_hangup>true</rayo_local_hangup>
+    <hangup_cause>NORMAL_CLEARING</hangup_cause>
+    <hangup_cause_q850>16</hangup_cause_q850>
+    <digits_dialed>none</digits_dialed>
+    <start_stamp>2015-05-02 09:37:44</start_stamp>
+    <profile_start_stamp>2015-05-02 09:37:44</profile_start_stamp>
+    <progress_media_stamp>2015-05-02 09:37:52</progress_media_stamp>
+    <end_stamp>2015-05-02 09:38:15</end_stamp>
+    <start_epoch>1430559464</start_epoch>
+    <start_uepoch>1430559464738976</start_uepoch>
+    <profile_start_epoch>1430559464</profile_start_epoch>
+    <profile_start_uepoch>1430559464738976</profile_start_uepoch>
+    <answer_epoch>0</answer_epoch>
+    <answer_uepoch>0</answer_uepoch>
+    <bridge_epoch>0</bridge_epoch>
+    <bridge_uepoch>0</bridge_uepoch>
+    <last_hold_epoch>0</last_hold_epoch>
+    <last_hold_uepoch>0</last_hold_uepoch>
+    <hold_accum_seconds>0</hold_accum_seconds>
+    <hold_accum_usec>0</hold_accum_usec>
+    <hold_accum_ms>0</hold_accum_ms>
+    <resurrect_epoch>0</resurrect_epoch>
+    <resurrect_uepoch>0</resurrect_uepoch>
+    <progress_epoch>0</progress_epoch>
+    <progress_uepoch>0</progress_uepoch>
+    <progress_media_epoch>1430559472</progress_media_epoch>
+    <progress_media_uepoch>1430559472099036</progress_media_uepoch>
+    <end_epoch>1430559495</end_epoch>
+    <end_uepoch>1430559495018977</end_uepoch>
+    <last_app>rayo</last_app>
+    <caller_id>"Outbound Call" <85589481811></caller_id>
+    <duration>31</duration>
+    <billsec>0</billsec>
+    <progresssec>0</progresssec>
+    <answersec>0</answersec>
+    <waitsec>0</waitsec>
+    <progress_mediasec>8</progress_mediasec>
+    <flow_billsec>0</flow_billsec>
+    <mduration>30280</mduration>
+    <billmsec>0</billmsec>
+    <progressmsec>0</progressmsec>
+    <answermsec>0</answermsec>
+    <waitmsec>0</waitmsec>
+    <progress_mediamsec>7361</progress_mediamsec>
+    <flow_billmsec>0</flow_billmsec>
+    <uduration>30280001</uduration>
+    <billusec>0</billusec>
+    <progressusec>0</progressusec>
+    <answerusec>0</answerusec>
+    <waitusec>0</waitusec>
+    <progress_mediausec>7360060</progress_mediausec>
+    <flow_billusec>0</flow_billusec>
+    <sip_hangup_disposition>send_cancel</sip_hangup_disposition>
+    <rtp_audio_in_raw_bytes>196768</rtp_audio_in_raw_bytes>
+    <rtp_audio_in_media_bytes>196768</rtp_audio_in_media_bytes>
+    <rtp_audio_in_packet_count>1144</rtp_audio_in_packet_count>
+    <rtp_audio_in_media_packet_count>1144</rtp_audio_in_media_packet_count>
+    <rtp_audio_in_skip_packet_count>1</rtp_audio_in_skip_packet_count>
+    <rtp_audio_in_jitter_packet_count>0</rtp_audio_in_jitter_packet_count>
+    <rtp_audio_in_dtmf_packet_count>0</rtp_audio_in_dtmf_packet_count>
+    <rtp_audio_in_cng_packet_count>0</rtp_audio_in_cng_packet_count>
+    <rtp_audio_in_flush_packet_count>0</rtp_audio_in_flush_packet_count>
+    <rtp_audio_in_largest_jb_size>0</rtp_audio_in_largest_jb_size>
+    <rtp_audio_in_jitter_min_variance>95.74</rtp_audio_in_jitter_min_variance>
+    <rtp_audio_in_jitter_max_variance>1521.00</rtp_audio_in_jitter_max_variance>
+    <rtp_audio_in_jitter_loss_rate>0.00</rtp_audio_in_jitter_loss_rate>
+    <rtp_audio_in_jitter_burst_rate>0.00</rtp_audio_in_jitter_burst_rate>
+    <rtp_audio_in_mean_interval>20.02</rtp_audio_in_mean_interval>
+    <rtp_audio_in_flaw_total>0</rtp_audio_in_flaw_total>
+    <rtp_audio_in_quality_percentage>100.00</rtp_audio_in_quality_percentage>
+    <rtp_audio_in_mos>4.50</rtp_audio_in_mos>
+    <rtp_audio_out_raw_bytes>196940</rtp_audio_out_raw_bytes>
+    <rtp_audio_out_media_bytes>196940</rtp_audio_out_media_bytes>
+    <rtp_audio_out_packet_count>1145</rtp_audio_out_packet_count>
+    <rtp_audio_out_media_packet_count>1145</rtp_audio_out_media_packet_count>
+    <rtp_audio_out_skip_packet_count>0</rtp_audio_out_skip_packet_count>
+    <rtp_audio_out_dtmf_packet_count>0</rtp_audio_out_dtmf_packet_count>
+    <rtp_audio_out_cng_packet_count>0</rtp_audio_out_cng_packet_count>
+    <rtp_audio_rtcp_packet_count>0</rtp_audio_rtcp_packet_count>
+    <rtp_audio_rtcp_octet_count>0</rtp_audio_rtcp_octet_count>
+  </variables>
+  <app_log>
+    <application app_name="rayo" app_data="" app_stamp="1430559472121028"></application>
+  </app_log>
+  <callflow unique-id="74b09e5c-fafe-4676-98ab-18b0f9e02260" clone-of="7ce6fbb9-d0dd-4880-b552-a7e9025f8505" profile_index="1">
+    <extension name="rayo" number="">
+      <application app_name="rayo" app_data=""></application>
+    </extension>
+    <caller_profile>
+      <username></username>
+      <dialplan></dialplan>
+      <caller_id_name>Outbound Call</caller_id_name>
+      <caller_id_number>85589481811</caller_id_number>
+      <callee_id_name>+855383838380</callee_id_name>
+      <callee_id_number>+855383838380</callee_id_number>
+      <ani>+855383838380</ani>
+      <aniii></aniii>
+      <network_addr>192.170.159.194</network_addr>
+      <rdnis></rdnis>
+      <destination_number>85589481811</destination_number>
+      <uuid>3415f9c3-2e76-46c8-84d8-e15103b1d3d3</uuid>
+      <source>src/switch_ivr_originate.c</source>
+      <context>default</context>
+      <chan_name>sofia/external/85589481811</chan_name>
+    </caller_profile>
+    <times>
+      <created_time>1430559464738976</created_time>
+      <profile_created_time>1430559464738976</profile_created_time>
+      <progress_time>0</progress_time>
+      <progress_media_time>1430559472099036</progress_media_time>
+      <answered_time>0</answered_time>
+      <bridged_time>0</bridged_time>
+      <last_hold_time>0</last_hold_time>
+      <hold_accum_time>0</hold_accum_time>
+      <hangup_time>1430559495018977</hangup_time>
+      <resurrect_time>0</resurrect_time>
+      <transfer_time>0</transfer_time>
+    </times>
+  </callflow>
+</cdr>
