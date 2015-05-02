@@ -699,7 +699,7 @@ FactoryGirl.define do
         dynamic_cdr_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{dynamic_cdr_variables["sip_from_user"]}")
 
         dynamic_cdr_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
-        dynamic_cdr_variables["RFC2822_DATE"] ||= Rack::Utils.escape(Time.current.rfc2822)
+        dynamic_cdr_variables["start_epoch"] ||= Time.current.to_i.to_s
       else
         called_user = user_who_was_called || FactoryGirl.create(:user)
         default_host = "27.109.112.12"

@@ -91,7 +91,7 @@ describe InboundCdr do
           "variables" => {
             "duration" => "60",
             "billsec" => options[:billsec] || "59",
-            "RFC2822_DATE" => Rack::Utils.escape((options[:rfc2822_date] || (8.days.ago - 1.second)).rfc2822)
+            "start_epoch" => (options[:rfc2822_date] || (8.days.ago - 1.second)).to_i.to_s
           }
         }
       )
