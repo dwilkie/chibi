@@ -9,7 +9,7 @@ kh:
         short_code: "2442"
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
-        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
+        dial_string: "sofia/external/%{number_to_dial}@%{voip_gateway_host}"
         services:
           ifriendship_sms:
             type: "sms"
@@ -29,7 +29,7 @@ kh:
         caller_id: "2442"
         dial_string_number_prefix: "2442"
         voip_gateway_host: "117.55.252.146"
-        dial_string: "sofia/internal/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
+        dial_string: "sofia/external/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
         chargeable: true
         services:
           qb_friends:
@@ -44,7 +44,7 @@ kh:
         smpp_server_id: "cootel"
         caller_id: "2442"
         voip_gateway_host: "103.5.126.165"
-        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}:5061"
+        dial_string: "sofia/external/%{number_to_dial}@%{voip_gateway_host}:5061"
         services:
           cool_chat_sms:
             type: "sms"
