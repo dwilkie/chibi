@@ -43,7 +43,7 @@ kh:
         smpp_server_id: "cootel"
         caller_id: "2442"
         voip_gateway_host: "103.5.126.165"
-        dial_string: "sofia/external/%{number_to_dial}@%{voip_gateway_host}:5061"
+        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}:5061"
         services:
           cool_chat_sms:
             type: "sms"
