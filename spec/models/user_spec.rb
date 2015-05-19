@@ -312,31 +312,6 @@ describe User do
     end
   end
 
-  describe ".set_operator_name" do
-    it "should set the operator_name column for users without one set" do
-      asserted_operator_names = {}
-
-      with_operators(:only_registered => false) do |number_parts, assertions|
-        number = number_parts.join
-        user = create(:user, :mobile_number => number)
-        user.update_attribute(:operator_name, nil)
-        expect(user.operator_name).to be_nil
-        asserted_operator_names[user] == assertions["id"]
-      end
-
-      user_with_operator_name = create(:user, :mobile_number => "85512345678")
-      user_with_operator_name.update_attribute(:operator_name, "foo")
-      expect(user_with_operator_name.operator_name).to eq("foo")
-
-      described_class.set_operator_name
-
-      expect(user_with_operator_name.reload.operator_name).to eq("foo")
-      asserted_operator_names.each do |user, asserted_operator_name|
-        expect(user.reload.operator_name).to eq(asserted_operator_name)
-      end
-    end
-  end
-
   describe ".find_friends" do
     def do_find_friends(options = {})
       trigger_job(options) { described_class.find_friends(options) }

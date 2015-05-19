@@ -8,9 +8,4 @@ namespace :users do
   task :find_friends => :environment do
     FriendFinderJob.perform_later(:notify => true, :notify_no_match => false, :between => [6, 24])
   end
-
-  desc "Sets User#operator_name for users who's operator is unknown"
-  task :set_operator_name => :environment do
-    User.set_operator_name
-  end
 end
