@@ -9,7 +9,7 @@ kh:
         short_code: "2442"
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
-        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
+        dial_string: "sofia/external/%{number_to_dial}@%{voip_gateway_host}"
         services:
           ifriendship_sms:
             type: "sms"
