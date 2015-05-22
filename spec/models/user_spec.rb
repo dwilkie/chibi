@@ -525,7 +525,7 @@ describe User do
     end
   end
 
-  describe "#charge!(requester)" do
+  xdescribe "#charge!(requester)" do
     subject { create(:user, :from_chargeable_operator) }
     let(:requester) { Random.new.rand(0..1).zero? ? create(:message, :user => subject) : create(:phone_call, :user => subject) }
     let(:latest_charge_request) { subject.latest_charge_request }

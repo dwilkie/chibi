@@ -29,7 +29,7 @@ kh:
         voip_gateway_host: "117.55.252.146"
         dial_string: "sofia/external/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
         dial_string_number_prefix: "2442"
-        chargeable: true
+        chargeable: false
         services:
           qb_friends:
             type: "charge"
