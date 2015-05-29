@@ -28,6 +28,12 @@ module TranslationHelpers
       :en => "Hello! Want to meet new friends? Please top up your account to get 24hrs free SMS on 2442",
       :kh => "Sousdey! Want to meet new friends? Please top up your account to get 24hrs free SMS on 2442",
       :ph => "Gusto mo ba ng bagong kaibigan? Mag-load na at magtext sa 2442!",
+    },
+
+    :broadcast => {
+      :en => "Hello! Want to meet new friends? Call to 2442 or SMS your name, age, sex and location. Ex. nhom Mara 26 girl in pp",
+      :kh => "Sousdey! Want to meet new friends? Call to 2442 or SMS your name, age, sex and location. Ex. nhom Mara 26 girl in pp",
+      :ph => "Gusto mo ba ng bagong kaibigan? Call to 2442 or SMS your name, age, sex and location. Ex. nhom Mara 26 girl in pp"
     }
   }
 

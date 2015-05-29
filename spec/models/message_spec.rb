@@ -4,7 +4,6 @@ describe Message do
   include AnalyzableExamples
   include ActiveJobHelpers
   include MessagingHelpers
-  include EnvHelpers
 
   include_context "replies"
 

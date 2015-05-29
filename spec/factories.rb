@@ -51,9 +51,6 @@ FactoryGirl.define do
   factory :msisdn do
     mobile_number { generate(:registered_operator_number) }
 
-    operator { Torasup::PhoneNumber.new(mobile_number).operator.id }
-    country_code { Torasup::PhoneNumber.new(mobile_number).country_id }
-
     trait :from_unregistered_operator do
       mobile_number { generate(:unregistered_operator_number) }
     end

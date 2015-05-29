@@ -5,6 +5,7 @@ class CreateMsisdns < ActiveRecord::Migration
       t.string :operator, :null => false
       t.string :country_code, :null => false
       t.string :state, :null => false
+      t.integer :number_of_checks, :null => false, :default => 0
       t.datetime :last_checked_at
       t.timestamps :null => false
     end

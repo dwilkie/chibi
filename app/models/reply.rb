@@ -225,6 +225,11 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
+  def broadcast!(locale)
+    self.body = I18n.t(:broadcast, :locale => locale)
+    deliver!
+  end
+
   def not_enough_credit!
     self.body = I18n.t(:not_enough_credit, :locale => user.locale)
     deliver!

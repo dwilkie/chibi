@@ -5,7 +5,6 @@ describe Reply do
   include MessagingHelpers
   include PhoneCallHelpers::TwilioHelpers
   include AnalyzableExamples
-  include EnvHelpers
 
   let(:user) { build(:user) }
 
@@ -104,7 +103,7 @@ describe Reply do
     end
   end
 
-  describe "associations", :focus do
+  describe "associations" do
     it { is_expected.to belong_to(:msisdn) }
   end
 
@@ -529,6 +528,12 @@ describe Reply do
         :forward_message!, :forward_message,
         :args => [partner, "#{partner.screen_id.downcase}  :  hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"]
       )
+    end
+  end
+
+  describe "#broadcast!" do
+    it "should send a broadcast message" do
+      assert_reply(:broadcast!, :broadcast, :args => ["kh"], :test_users => [create(:user, :cambodian)])
     end
   end
 

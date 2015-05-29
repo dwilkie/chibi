@@ -118,13 +118,14 @@ ActiveRecord::Schema.define(version: 20150517015727) do
   add_index "messages", ["user_id"], name: "index_messages_on_user_id", using: :btree
 
   create_table "msisdns", force: :cascade do |t|
-    t.string   "mobile_number",   null: false
-    t.string   "operator",        null: false
-    t.string   "country_code",    null: false
-    t.string   "state",           null: false
+    t.string   "mobile_number",                null: false
+    t.string   "operator",                     null: false
+    t.string   "country_code",                 null: false
+    t.string   "state",                        null: false
+    t.integer  "number_of_checks", default: 0, null: false
     t.datetime "last_checked_at"
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at",                   null: false
   end
 
   add_index "msisdns", ["mobile_number"], name: "index_msisdns_on_mobile_number", unique: true, using: :btree

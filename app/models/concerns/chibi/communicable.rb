@@ -4,7 +4,6 @@ module Chibi
 
     included do
       belongs_to :user, :touch => :last_contacted_at
-      validates :user, :associated => true, :presence => true
     end
 
     module FromUser
