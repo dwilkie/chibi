@@ -32,6 +32,10 @@ FactoryGirl.define do
     n.to_s
   end
 
+  sequence :unregistered_operator_number, 85512239195 do |n|
+    n.to_s
+  end
+
   sequence :unknown_operator_number, 85523481234 do |n|
     n.to_s
   end
@@ -42,6 +46,36 @@ FactoryGirl.define do
 
   sequence :chargeable_operator_number, 85513234567 do |n|
     n.to_s
+  end
+
+  factory :msisdn do
+    mobile_number { generate(:registered_operator_number) }
+
+    operator { Torasup::PhoneNumber.new(mobile_number).operator.id }
+    country_code { Torasup::PhoneNumber.new(mobile_number).country_id }
+
+    trait :from_unregistered_operator do
+      mobile_number { generate(:unregistered_operator_number) }
+    end
+
+    trait :unchecked do
+    end
+
+    trait :queued_for_checking do
+      state "queued_for_checking"
+    end
+
+    trait :awaiting_result do
+      state "awaiting_result"
+    end
+
+    trait :active do
+      state "active"
+    end
+
+    trait :inactive do
+      state "inactive"
+    end
   end
 
   factory :charge_request do

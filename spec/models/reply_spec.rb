@@ -104,6 +104,10 @@ describe Reply do
     end
   end
 
+  describe "associations", :focus do
+    it { is_expected.to belong_to(:msisdn) }
+  end
+
   describe "validations" do
     it { is_expected.to validate_presence_of(:to) }
     it { is_expected.to validate_presence_of(:body) }

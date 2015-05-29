@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150410154721) do
+ActiveRecord::Schema.define(version: 20150517015727) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -117,6 +117,18 @@ ActiveRecord::Schema.define(version: 20150410154721) do
   add_index "messages", ["state"], name: "index_messages_on_state", using: :btree
   add_index "messages", ["user_id"], name: "index_messages_on_user_id", using: :btree
 
+  create_table "msisdns", force: :cascade do |t|
+    t.string   "mobile_number",   null: false
+    t.string   "operator",        null: false
+    t.string   "country_code",    null: false
+    t.string   "state",           null: false
+    t.datetime "last_checked_at"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "msisdns", ["mobile_number"], name: "index_msisdns_on_mobile_number", unique: true, using: :btree
+
   create_table "phone_calls", force: :cascade do |t|
     t.string   "sid",           limit: 255
     t.string   "from",          limit: 255
@@ -149,6 +161,7 @@ ActiveRecord::Schema.define(version: 20150410154721) do
     t.string   "delivery_channel"
     t.string   "operator_name"
     t.string   "smpp_server_id"
+    t.integer  "msisdn_id"
   end
 
   add_index "replies", ["chat_id"], name: "index_replies_on_chat_id", using: :btree
@@ -182,4 +195,5 @@ ActiveRecord::Schema.define(version: 20150410154721) do
   add_index "users", ["operator_name"], name: "index_users_on_operator_name", using: :btree
   add_index "users", ["state"], name: "index_users_on_state", using: :btree
 
+  add_foreign_key "replies", "msisdns"
 end

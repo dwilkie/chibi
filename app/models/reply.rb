@@ -54,6 +54,8 @@ class Reply < ActiveRecord::Base
     }
   }
 
+  belongs_to :msisdn
+
   validates :to,
             :presence => true,
             :phony_plausible => true

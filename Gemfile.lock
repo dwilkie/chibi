@@ -4,9 +4,8 @@ GIT
   specs:
     aasm (4.1.0)
 
-GIT
-  remote: git://github.com/dwilkie/torasup.git
-  revision: fefa251e71975e2cde4b199092b9d2c6f2777b8e
+PATH
+  remote: /home/dave/work/contrib/torasup
   specs:
     torasup (0.0.9)
       countries
