@@ -4,7 +4,6 @@ describe Message do
   include AnalyzableExamples
   include ActiveJobHelpers
   include MessagingHelpers
-  include EnvHelpers
 
   include_context "replies"
 
@@ -128,12 +127,8 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     end
   end
 
-  it_should_behave_like "communicable" do
-    let(:communicable_resource) { message }
-  end
-
   it_should_behave_like "communicable from user" do
-    let(:communicable_resource) { message }
+    subject { message }
   end
 
   it_should_behave_like "chatable" do

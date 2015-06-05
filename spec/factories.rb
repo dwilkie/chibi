@@ -32,7 +32,11 @@ FactoryGirl.define do
     n.to_s
   end
 
-  sequence :unknown_operator_number, 85523481234 do |n|
+  sequence :unregistered_operator_number, 85512239195 do |n|
+    n.to_s
+  end
+
+  sequence :unknown_operator_number, 61438381912 do |n|
     n.to_s
   end
 
@@ -42,6 +46,93 @@ FactoryGirl.define do
 
   sequence :chargeable_operator_number, 85513234567 do |n|
     n.to_s
+  end
+
+  factory :msisdn_discovery_run do
+    country_code "kh"
+    operator "smart"
+    prefix "85510"
+    subscriber_number_min 203000
+    subscriber_number_max 999999
+
+    trait :blacklisted do
+      prefix "85538"
+      subscriber_number_min 2000000
+      subscriber_number_max 9999999
+    end
+
+    trait :finished do
+      after(:build) do |msisdn_discovery_run|
+        msisdn_discovery_run.msisdn_discoveries << build(
+          :msisdn_discovery,
+          :subscriber_number => msisdn_discovery_run.subscriber_number_max,
+          :msisdn_discovery_run => msisdn_discovery_run
+        )
+      end
+    end
+
+    trait :nearly_finished do
+      after(:build) do |msisdn_discovery_run|
+        msisdn_discovery_run.msisdn_discoveries << build(
+          :msisdn_discovery,
+          :subscriber_number => msisdn_discovery_run.subscriber_number_max - 1,
+          :msisdn_discovery_run => msisdn_discovery_run
+        )
+      end
+    end
+  end
+
+  factory :msisdn_discovery do
+    msisdn_discovery_run
+    sequence(:subscriber_number, 203000) { |n| n }
+
+    trait :not_started do
+    end
+
+    trait :blacklisted do
+      association :msisdn_discovery_run, :factory => [:msisdn_discovery_run, :blacklisted]
+      subscriber_number 2038039
+    end
+
+    trait :skipped do
+      state "skipped"
+    end
+
+    trait :queued_for_discovery do
+      state "queued_for_discovery"
+    end
+
+    trait :awaiting_result do
+      state "awaiting_result"
+    end
+
+    trait :active do
+      state "active"
+    end
+
+    trait :inactive do
+      state "inactive"
+    end
+  end
+
+  factory :msisdn do
+    mobile_number { generate(:registered_operator_number) }
+
+    trait :from_unregistered_operator do
+      mobile_number { generate(:unregistered_operator_number) }
+    end
+
+    trait :blacklisted do
+      mobile_number "855382038039"
+    end
+
+    trait :active do
+      active true
+    end
+
+    trait :inactive do
+      active false
+    end
   end
 
   factory :charge_request do
@@ -225,14 +316,22 @@ FactoryGirl.define do
   end
 
   factory :reply do
-    user
+    for_user
     body "body"
+
+    trait :for_user do
+      user
+    end
 
     trait :delivered do
       delivered_at { Time.current }
     end
 
+    trait :pending_delivery do
+    end
+
     trait :queued_for_smsc_delivery do
+      delivered
       state "queued_for_smsc_delivery"
     end
 
@@ -255,7 +354,13 @@ FactoryGirl.define do
       accepted_by_smsc
     end
 
+    trait :expired do
+      state "expired"
+      accepted_by_smsc
+    end
+
     trait :with_token do
+      delivered
       token
     end
 

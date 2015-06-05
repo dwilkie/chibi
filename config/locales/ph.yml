@@ -2,6 +2,7 @@ ph:
   not_enough_credit: "Gusto mo ba ng bagong kaibigan? Mag-load na at magtext sa 2442!"
   play_path_prefix: "ph"
   language: Filipino
+  broadcast: "Gusto mo ba ng bagong kaibigan? Call to 2442 or SMS your name, age, sex and location. Ex. nhom Mara 26 girl in pp"
   activerecord:
     attributes:
       user:

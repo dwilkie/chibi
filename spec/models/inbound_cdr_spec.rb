@@ -38,7 +38,7 @@ describe InboundCdr do
   end
 
   it_should_behave_like "communicable from user" do
-    let(:communicable_resource) { cdr }
+    subject { cdr }
   end
 
   describe "initialization" do

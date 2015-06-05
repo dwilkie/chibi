@@ -71,22 +71,6 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.set_operator_name
-    Torasup::Operator.all["kh"].each do |operator_id, operator_metadata|
-      condition_statements = []
-      condition_values = []
-
-      operator_metadata["prefixes"].each do |prefix|
-        condition_statements << "\"#{table_name}\".\"mobile_number\" LIKE ?"
-        condition_values << "#{prefix}%"
-      end
-
-      where(:operator_name => nil).where(condition_statements.join(" OR "), *condition_values).update_all(
-        :operator_name => operator_id
-      )
-    end
-  end
-
   def self.online
     where.not(:state => "offline")
   end
