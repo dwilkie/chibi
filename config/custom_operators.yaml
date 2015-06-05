@@ -3,6 +3,7 @@
 kh:
   operators:
     smart:
+      default_mobile_subscriber_number_min: 203000
       metadata:
         short_code: "2442"
         smpp_server_id: "smart"
@@ -57,3 +58,5 @@ kh:
             short_code: "2442"
             unit_cost: "0.01"
             revenue_share: "0.4"
+        blacklist:
+        - "855382038039"

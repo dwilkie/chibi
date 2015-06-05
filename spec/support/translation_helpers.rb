@@ -44,7 +44,7 @@ module TranslationHelpers
     # if the users locale is :gb test the default locale
     sub_locales = []
     [locale].flatten.each do |sub_locale|
-      sub_locale.to_sym == :gb ? sub_locales << :en : sub_locales << sub_locale.to_sym
+      [:au, :gb].include?(sub_locale.to_sym) ? sub_locales << :en : sub_locales << sub_locale.to_sym
     end
 
     translation = translations[sub_locales.first]

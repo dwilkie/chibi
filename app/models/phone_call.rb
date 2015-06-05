@@ -1,5 +1,4 @@
 class PhoneCall < ActiveRecord::Base
-  include Chibi::Communicable
   include Chibi::Communicable::FromUser
   include Chibi::Communicable::Chatable
   include Chibi::ChatStarter

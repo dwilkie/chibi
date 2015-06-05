@@ -29,7 +29,7 @@ describe OutboundCdr do
   end
 
   it_should_behave_like "communicable from user", :passive => true do
-    let(:communicable_resource) { cdr }
+    subject { cdr }
   end
 
   describe "initialization" do

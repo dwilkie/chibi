@@ -5,20 +5,19 @@ describe MsisdnDiscoveryJob do
     it { expect(subject.queue_name).to eq(Rails.application.secrets[:msisdn_discovery_queue]) }
   end
 
-  describe "#perform(mobile_number)" do
-    let(:scope) { double(ActiveRecord::Relation) }
-    let(:msisdn) { double(Msisdn) }
-    let(:mobile_number) { generate(:mobile_number) }
+  describe "#perform(msisdn_discovery_run_id, subscriber_number)" do
+    let(:msisdn_discovery_run_id) { 1 }
+    let(:msisdn_discovery_run) { double(MsisdnDiscoveryRun) }
+    let(:subscriber_number) { 12345678 }
 
     before do
-      allow(Msisdn).to receive(:where).with(:mobile_number => mobile_number).and_return(scope)
-      allow(scope).to receive(:first_or_create!).and_return(msisdn)
-      allow(msisdn).to receive(:discover!)
+      allow(MsisdnDiscoveryRun).to receive(:find).with(msisdn_discovery_run_id).and_return(msisdn_discovery_run)
+      allow(msisdn_discovery_run).to receive(:discover!)
     end
 
-    it "should discover the msisdn" do
-      expect(msisdn).to receive(:discover!)
-      subject.perform(mobile_number)
+    it "should discover the MsisdnDiscoveryRun" do
+      expect(msisdn_discovery_run).to receive(:discover!).with(subscriber_number)
+      subject.perform(msisdn_discovery_run_id, subscriber_number)
     end
   end
 end

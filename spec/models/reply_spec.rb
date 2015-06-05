@@ -87,10 +87,6 @@ describe Reply do
     end
   end
 
-  it_should_behave_like "communicable" do
-    let(:communicable_resource) { reply }
-  end
-
   it_should_behave_like "chatable" do
     let(:chatable_resource) { reply }
   end
@@ -104,7 +100,19 @@ describe Reply do
   end
 
   describe "associations" do
-    it { is_expected.to belong_to(:msisdn) }
+    it { is_expected.to belong_to(:msisdn_discovery) }
+    it { is_expected.to belong_to(:user).touch(:last_contacted_at) }
+
+    describe "user" do
+      subject { create(:reply, :for_user) }
+
+      it "should record touch the user's last_contacted_at" do
+        user_timestamp = subject.user.updated_at
+        subject.touch
+        expect(subject.user.updated_at).to be > user_timestamp
+        expect(subject.user.last_contacted_at).to be > user_timestamp
+      end
+    end
   end
 
   describe "validations" do
@@ -114,6 +122,19 @@ describe Reply do
   end
 
   describe "callbacks" do
+    describe "after_commit" do
+      context "reply belongs to a msisdn_discovery" do
+        let(:msisdn_discovery) { create(:msisdn_discovery) }
+
+        subject { build(:reply, :msisdn_discovery => msisdn_discovery) }
+
+        it "should notify the msisdn_discovery" do
+          expect(msisdn_discovery).to receive(:notify)
+          subject.save!
+        end
+      end
+    end
+
     describe "before_validation" do
       before do
         subject.valid?
@@ -503,12 +524,19 @@ describe Reply do
     end
   end
 
-  describe "#send_reminder!" do
+  describe "#send_reminder!(options = {})" do
+    subject { build(:reply) }
+
     it "should send the user a reminder on how to use the service" do
       assert_reply(
         :send_reminder!, :anonymous_reminder, :approx => true,
         :args => [], :test_users => [local_users, create(:user, :gay), create(:user, :lesbian)].flatten
       )
+    end
+
+    it "should set #smsc_priority to -5" do
+      subject.send_reminder!
+      expect(subject.smsc_priority).to eq(-5)
     end
   end
 
@@ -522,18 +550,33 @@ describe Reply do
     end
   end
 
-  describe "#forward_message!" do
+  describe "#forward_message!(from, message, options = {})" do
+    subject { build(:reply) }
+
     it "should deliver the forwarded message" do
       assert_reply(
         :forward_message!, :forward_message,
         :args => [partner, "#{partner.screen_id.downcase}  :  hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"]
       )
     end
+
+    it "should set #smsc_priority to 10" do
+      subject.forward_message!(partner, "foo")
+      expect(subject.smsc_priority).to eq(10)
+    end
   end
 
-  describe "#broadcast!" do
+  describe "#broadcast!(options = {})" do
+    subject { build(:reply) }
+    let(:args) { [{ :locale => "kh" }] }
+
     it "should send a broadcast message" do
-      assert_reply(:broadcast!, :broadcast, :args => ["kh"], :test_users => [create(:user, :cambodian)])
+      assert_reply(:broadcast!, :broadcast, :args => args, :test_users => [create(:user, :cambodian)])
+    end
+
+    it "should set #smsc_priority to -10" do
+      subject.broadcast!(*args)
+      expect(subject.smsc_priority).to eq(-10)
     end
   end
 

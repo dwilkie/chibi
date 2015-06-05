@@ -1,8 +1,8 @@
 class Reply < ActiveRecord::Base
   before_validation :set_destination, :on => :create
   before_validation :normalize_token
+  after_commit :msisdn_discovery_notify
 
-  include Chibi::Communicable
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
   include Chibi::Twilio::ApiHelpers
@@ -54,7 +54,8 @@ class Reply < ActiveRecord::Base
     }
   }
 
-  belongs_to :msisdn
+  belongs_to :user, :touch => :last_contacted_at
+  belongs_to :msisdn_discovery
 
   validates :to,
             :presence => true,
@@ -65,8 +66,11 @@ class Reply < ActiveRecord::Base
   validates :delivery_channel, :inclusion => { :in => DELIVERY_CHANNELS }, :allow_nil => true
 
   delegate :mobile_number, :to => :user, :prefix => true, :allow_nil => true
+  delegate :notify, :to => :msisdn_discovery, :prefix => true, :allow_nil => true
 
   alias_attribute :destination, :to
+
+  attr_accessor :smsc_priority
 
   aasm :column => :state, :whiny_transitions => false do
     state :pending_delivery, :initial => true
@@ -192,7 +196,7 @@ class Reply < ActiveRecord::Base
   end
 
   def delivered?
-    delivered_at.present?
+    delivered_at?
   end
 
   def forward_message(from, message)
@@ -200,8 +204,9 @@ class Reply < ActiveRecord::Base
     save
   end
 
-  def forward_message!(from, message)
+  def forward_message!(from, message, options = {})
     forward_message(from, message)
+    self.smsc_priority = options[:smsc_priority] || 10
     deliver!
   end
 
@@ -225,8 +230,9 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
-  def broadcast!(locale)
-    self.body = I18n.t(:broadcast, :locale => locale)
+  def broadcast!(options = {})
+    self.body = I18n.t(:broadcast, options)
+    self.smsc_priority = options[:smsc_priority] || -10
     deliver!
   end
 
@@ -235,9 +241,10 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
-  def send_reminder!
+  def send_reminder!(options = {})
     self.body = user.gay? ? canned_reply(:recipient => user).gay_reminder : random_canned_greeting(:recipient => user)
     prepend_screen_id(Faker::Name.first_name)
+    self.smsc_priority = options[:smsc_priority] || -5
     deliver!
   end
 
@@ -390,7 +397,8 @@ class Reply < ActiveRecord::Base
       smpp_server_id,
       operator.short_code,
       destination,
-      body
+      body,
+      smsc_priority
     )
   end
 
