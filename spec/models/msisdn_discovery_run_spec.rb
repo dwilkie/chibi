@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe MsisdnDiscoveryRun do
   def at_time(hours, minutes = 0, &block)
-    Timecop.freeze(Time.local(2015, 10, 22, hours, minutes)) do
+    Timecop.freeze(Time.zone.local(2015, 10, 22, hours, minutes)) do
       yield
     end
   end
