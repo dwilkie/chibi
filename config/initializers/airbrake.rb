@@ -3,4 +3,9 @@ Airbrake.configure do |config|
   config.host    = ENV["AIRBRAKE_HOST"]
   config.port    = 443
   config.secure  = config.port == 443
+
+  config.ignore_by_filter do |exception_data|
+    exception_data["error_class"] == "AASM::InvalidTransition" &&
+    exception_data["class"] == "DeliveryReceiptUpdateStatusJob"
+  end
 end
