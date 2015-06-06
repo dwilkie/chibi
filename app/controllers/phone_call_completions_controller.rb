@@ -4,7 +4,7 @@ class PhoneCallCompletionsController < ApplicationController
   before_filter :authenticate_phone_call
 
   def create
-    PhoneCall.complete!(params)
+    PhoneCallCompletionJob.perform_later(params)
     render(:nothing => true)
   end
 
