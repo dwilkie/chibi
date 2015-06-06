@@ -59,7 +59,8 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   end
 
   def discover!(subscriber_number)
-    msisdn_discoveries.create!(:subscriber_number => subscriber_number).broadcast!
+    msisdn_discovery = msisdn_discoveries.build(:subscriber_number => subscriber_number)
+    msisdn_discovery.broadcast! if msisdn_discovery.save
   end
 
   private

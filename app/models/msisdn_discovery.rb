@@ -34,6 +34,8 @@ class MsisdnDiscovery < ActiveRecord::Base
               :less_than_or_equal_to => proc { |m| m.subscriber_number_max.to_i }
             }
 
+  validates :msisdn_id, :uniqueness => { :scope => [:msisdn_discovery_run_id] }
+
   include AASM
 
   aasm :column => :state do

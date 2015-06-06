@@ -33,6 +33,19 @@ describe MsisdnDiscovery do
 
     it { is_expected.to validate_presence_of(:msisdn_discovery_run) }
     it { is_expected.to validate_presence_of(:msisdn) }
+
+    describe "#msisdn_id" do
+      let(:existing_msisdn_discovery) { create(:msisdn_discovery) }
+      subject {
+        build(
+          :msisdn_discovery,
+          :subscriber_number => existing_msisdn_discovery.subscriber_number,
+          :msisdn_discovery_run => existing_msisdn_discovery.msisdn_discovery_run
+        )
+      }
+
+      it { is_expected.not_to be_valid; expect(subject.errors[:msisdn_id]).not_to be_empty }
+    end
   end
 
   describe "callbacks" do

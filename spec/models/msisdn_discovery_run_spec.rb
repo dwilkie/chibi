@@ -158,11 +158,25 @@ describe MsisdnDiscoveryRun do
 
     let(:subscriber_number) { subject.subscriber_number_min }
 
+    def setup_scenario
+    end
+
     before do
+      setup_scenario
       subject.discover!(subscriber_number)
     end
 
     it { expect(subject.reload.msisdn_discoveries.last!.subscriber_number).to eq(subscriber_number) }
+
+    context "given a discovery already exists for this subscriber number" do
+      let(:msisdn_discovery) { create(:msisdn_discovery, :msisdn_discovery_run => subject, :subscriber_number => subscriber_number) }
+
+      def setup_scenario
+        msisdn_discovery
+      end
+
+      it { expect(subject.reload.msisdn_discoveries.count).to eq(1) }
+    end
   end
 
   describe "#finished?" do
