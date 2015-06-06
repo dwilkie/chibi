@@ -3,42 +3,22 @@ class Report
 
   attr_accessor :month, :year
 
-  def initialize(options = {})
+  def initialize(options = nil)
+    options ||= {}
     self.month = options["month"]
     self.year = options["year"]
-    self.class.clear
-  end
-
-  def self.clear
-    REDIS.del(REDIS_KEY)
-  end
-
-  def self.data
-    REDIS.get(REDIS_KEY) || "{}"
-  end
-
-  def self.month
-    parsed_data["month"]
-  end
-
-  def self.year
-    parsed_data["year"]
-  end
-
-  def self.filename
-    "chibi_report_" + Time.zone.local(year, month).strftime("%B_%Y").downcase + ".json"
-  end
-
-  def self.type
-    "application/json"
-  end
-
-  def self.generated?
-    parsed_data.any?
   end
 
   def valid?
-    month && year
+    @month && @year
+  end
+
+  def month
+    @month || parsed_data["month"]
+  end
+
+  def year
+    @year || parsed_data["year"]
   end
 
   def generate!
@@ -59,17 +39,57 @@ class Report
       end
     end
     store_report("report" => report_data)
-    self.class.data
+    data
+  end
+
+  def clear
+    redis.del(REDIS_KEY)
+  end
+
+  def store_report(value)
+    redis.set(REDIS_KEY, value.to_json)
+  end
+
+  def data
+    redis.get(REDIS_KEY) || "{}"
+  end
+
+  def filename
+    "chibi_report_" + Time.zone.local(year, month).strftime("%B_%Y").downcase + ".json"
+  end
+
+  def type
+    "application/json"
+  end
+
+  def generated?
+    parsed_data.any?
   end
 
   private
 
-  def self.parsed_data
+  def parsed_data
     JSON.parse(data)["report"] || {}
   end
 
-  def store_report(value)
-    REDIS.set(REDIS_KEY, value.to_json)
+  def redis
+    @redis ||= Redis.new(redis_options)
+  end
+
+  def redis_options
+    {:host => redis_uri.host, :port => redis_uri.port, :password => redis_uri.password}
+  end
+
+  def redis_uri
+    @redis_uri ||= URI.parse(redis_url)
+  end
+
+  def redis_url
+    ENV[redis_provider].to_s
+  end
+
+  def redis_provider
+    ENV["REDIS_PROVIDER"].to_s
   end
 
   def generate_sms_report!(service_metadata, operator_options)

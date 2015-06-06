@@ -47,6 +47,13 @@ describe "Report" do
   end
 
   describe "POST '/report.json'" do
+    let(:report) { Report.new }
+
+    before do
+      # store an old report
+      store_report
+    end
+
     context "with valid params" do
       before do
         do_post_report({:month => 1, :year => 2014}, :queue_only => true)
@@ -58,9 +65,8 @@ describe "Report" do
         expect(job[:args].first).to include({"year" => "2014", "month" => "1"})
       end
 
-      it "should return a 201" do
-        expect(response.status).to be(201)
-      end
+      it { expect(report).not_to be_generated }
+      it { expect(response.status).to be(201) }
     end
 
     context "with invalid params" do
@@ -68,13 +74,9 @@ describe "Report" do
         do_post_report({:year => 2014}, :queue_only => true)
       end
 
-      it "should not queue a job to generate a report" do
-        expect(enqueued_jobs.size).to eq(0)
-      end
-
-      it "should return a 400" do
-        expect(response.status).to be(400)
-      end
+      it { expect(report).to be_generated }
+      it { expect(enqueued_jobs.size).to eq(0) }
+      it { expect(response.status).to be(400) }
     end
   end
 
