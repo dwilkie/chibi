@@ -99,9 +99,13 @@ describe MsisdnDiscovery do
   describe "#notify" do
     let(:msisdn) { subject.msisdn }
 
-    before do
+    def setup_scenario
       reply
       subject.reload
+    end
+
+    before do
+      setup_scenario
     end
 
     subject { create(:msisdn_discovery, state) }
@@ -132,6 +136,15 @@ describe MsisdnDiscovery do
         let(:state) { :awaiting_result }
         it { is_expected.to be_inactive }
         it { expect(msisdn).not_to be_active }
+
+        context "this state is queued_for_discovery" do
+          let(:state) { :queued_for_discovery }
+
+          def setup_scenario
+          end
+
+          it { expect { reply }.to raise_error(AASM::InvalidTransition) }
+        end
       end
 
       context "expired" do
