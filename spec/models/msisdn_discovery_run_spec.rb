@@ -1,11 +1,7 @@
 require 'rails_helper'
 
 describe MsisdnDiscoveryRun do
-  def at_time(hours, minutes = 0, &block)
-    Timecop.freeze(Time.zone.local(2015, 10, 22, hours, minutes)) do
-      yield
-    end
-  end
+  include TimecopHelpers
 
   describe "associations" do
     it { is_expected.to have_many(:msisdn_discoveries) }

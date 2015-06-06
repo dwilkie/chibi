@@ -3,6 +3,12 @@ class User < ActiveRecord::Base
   include Chibi::Twilio::ApiHelpers
   include Chibi::Communicable::HasCommunicableResources
 
+  DEFAULT_RECENT_INTERACTION_CUTOFF_MONTHS = 1
+  DEFAULT_REMIND_MAX = 100
+  DEFAULT_REMIND_INACTIVITY_CUTOFF_DAYS = 5
+  DEFAULT_USER_HOURS_MIN = 8
+  DEFAULT_USER_HOURS_MAX = 20
+
   include AASM
 
   has_communicable_resources :phone_calls, :messages, :replies
@@ -125,26 +131,19 @@ class User < ActiveRecord::Base
     where(:active_chat_id => nil).online
   end
 
-  def self.remind!(options = {})
-    options = options.with_indifferent_access
-    within_hours(options) do
-      limit = options.delete(:limit) || 100
+  def self.remind!
+    return if out_of_user_hours?
+    users_to_remind = not_contacted_recently.from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(remind_max)
 
-      users_to_remind = not_contacted_recently(
-        options[:inactivity_cutoff]
-      ).from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(limit)
-
-      users_to_remind.each do |user_to_remind|
-        UserRemindererJob.perform_later(user_to_remind.id, options)
-      end
+    users_to_remind.each do |user_to_remind|
+      UserRemindererJob.perform_later(user_to_remind.id)
     end
   end
 
-  def self.find_friends(options = {})
-    within_hours(options) do
-      where(:state => "searching_for_friend").find_each do |user|
-        enqueue_friend_messenger(user, options)
-      end
+  def self.find_friends!
+    return if out_of_user_hours?
+    searching_for_friend.find_each do |user|
+      FriendMessengerJob.perform_later(user.id)
     end
   end
 
@@ -219,10 +218,8 @@ class User < ActiveRecord::Base
     adhearsion_twilio_requested?(requesting_api_version) ? (operator.dial_string(:number_to_dial => mobile_number, :dial_string_number_prefix => operator.dial_string_number_prefix, :voip_gateway_host => operator.voip_gateway_host) || default_pbx_dial_string(:number_to_dial => mobile_number)) : twilio_formatted(mobile_number)
   end
 
-  def find_friends!(options = {})
-    self.class.within_hours(options) do
-      Chat.activate_multiple!(self, options) if searching_for_friend?
-    end
+  def find_friends!
+    Chat.activate_multiple!(self, :notify => true, :notify_no_match => false) if searching_for_friend?
   end
 
   def female?
@@ -273,10 +270,8 @@ class User < ActiveRecord::Base
     (name || screen_name).try(:capitalize)
   end
 
-  def remind!(options = {})
-    self.class.within_hours(options) do
-      replies.build.send_reminder! unless contacted_recently?(options[:inactivity_cutoff])
-    end
+  def remind!
+    replies.build.send_reminder! if !contacted_recently?
   end
 
   def reply_not_enough_credit!
@@ -520,8 +515,8 @@ class User < ActiveRecord::Base
     joins(:location).where(condition_statements.join(' OR '), *values)
   end
 
-  def self.not_contacted_recently(inactivity_cutoff)
-    where("#{coalesce_last_contacted_at} < ?", DateTime.parse(inactivity_cutoff))
+  def self.not_contacted_recently
+    where("#{coalesce_last_contacted_at} < ?", remind_inactivity_cutoff_days.days.ago)
   end
 
   def self.coalesce_last_contacted_at
@@ -532,20 +527,9 @@ class User < ActiveRecord::Base
     "\"#{table || table_name}\".\"#{attribute}\""
   end
 
-  def self.within_hours(options = {}, &block)
-    options = options.with_indifferent_access
-    do_find = true
-
-    if between = options[:between]
-      current_time = Time.current
-      do_find = (current_time >= time_at(between.first) && current_time <= time_at(between.last))
-    end
-
-    yield if do_find
-  end
-
-  def self.time_at(hour)
-    Time.zone.local(Time.current.year, Time.current.month, Time.current.day, hour)
+  def self.out_of_user_hours?
+    current_hour = Time.current.hour
+    current_hour < user_hours_min || current_hour >= user_hours_max
   end
 
   def self.order_by_case(scope, conditions_scope, else_value)
@@ -580,10 +564,6 @@ class User < ActiveRecord::Base
    "(?:#{all_keywords.join('|')})"
   end
 
-  def self.enqueue_friend_messenger(user, options = {})
-    FriendMessengerJob.perform_later(user.id, options)
-  end
-
   def self.without_recent_interaction
     where(
       "COALESCE(\"#{table_name}\".\"last_interacted_at\", ?) < ?",
@@ -593,7 +573,23 @@ class User < ActiveRecord::Base
   end
 
   def self.recent_interaction_cutoff
-    (Rails.application.secrets[:recent_interaction_cutoff_months] || 1).to_i.months.ago
+    (Rails.application.secrets[:recent_interaction_cutoff_months] || DEFAULT_RECENT_INTERACTION_CUTOFF_MONTHS).to_i.months.ago
+  end
+
+  def self.remind_max
+    (Rails.application.secrets[:remind_max] || DEFAULT_REMIND_MAX).to_i
+  end
+
+  def self.remind_inactivity_cutoff_days
+    (Rails.application.secrets[:remind_inactivity_cutoff_days] || DEFAULT_REMIND_INACTIVITY_CUTOFF_DAYS).to_i
+  end
+
+  def self.user_hours_min
+    (Rails.application.secrets[:user_hours_min] || DEFAULT_USER_HOURS_MIN).to_i
+  end
+
+  def self.user_hours_max
+    (Rails.application.secrets[:user_hours_max] || DEFAULT_USER_HOURS_MAX).to_i
   end
 
   def set_operator_name
@@ -610,9 +606,8 @@ class User < ActiveRecord::Base
     nil
   end
 
-  def contacted_recently?(inactivity_cutoff)
-    last_contacted_timestamp = last_contacted_at || updated_at
-    last_contacted_timestamp >= DateTime.parse(inactivity_cutoff)
+  def contacted_recently?
+    (last_contacted_at || updated_at) >= self.class.remind_inactivity_cutoff_days.days.ago
   end
 
   def extract(info)
