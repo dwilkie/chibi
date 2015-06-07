@@ -161,11 +161,8 @@ describe MsisdnDiscovery do
 
         context "this state is queued_for_discovery" do
           let(:state) { :queued_for_discovery }
-
-          def setup_scenario
-          end
-
-          it { expect { reply }.to raise_error(AASM::InvalidTransition) }
+          it { is_expected.to be_inactive }
+          it { expect(msisdn).not_to be_active }
         end
       end
 

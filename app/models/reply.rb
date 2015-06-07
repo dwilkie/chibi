@@ -15,6 +15,7 @@ class Reply < ActiveRecord::Base
   ERROR     = "error"
   EXPIRED   = "expired"
   UNKNOWN   = "unknown"
+  REJECTED  = "rejected"
 
   TWILIO_DELIVERED = DELIVERED
   TWILIO_FAILED = FAILED
@@ -94,6 +95,13 @@ class Reply < ActiveRecord::Base
         :from => :queued_for_smsc_delivery,
         :to   => :delivered_by_smsc,
         :if   => :delivery_accepted?
+      )
+    end
+
+    event :delivery_rejected do
+      transitions(
+        :from => :queued_for_smsc_delivery,
+        :to => :failed
       )
     end
 
@@ -246,10 +254,15 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
-  def delivered_by_smsc!(smsc_name, smsc_message_id, status)
-    return request_delivery! unless status
-    self.token = smsc_message_id
-    update_delivery_state!(DELIVERED)
+  def delivered_by_smsc!(smsc_name, smsc_message_id, successful, error = nil)
+    self.smsc_message_status = error.downcase if error
+
+    if successful
+      self.token = smsc_message_id
+      update_delivery_state!(DELIVERED)
+    else
+      update_delivery_state!(REJECTED)
+    end
   end
 
   def delivered_by_twilio!
@@ -287,6 +300,8 @@ class Reply < ActiveRecord::Base
       delivery_expired!
     when UNKNOWN
       delivery_unknown!
+    when REJECTED
+      delivery_rejected!
     end
   end
 

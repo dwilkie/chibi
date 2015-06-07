@@ -382,13 +382,13 @@ describe Reply do
     end
   end
 
-  describe "#delivered_by_smsc!(smsc_name, smsc_message_id, status)" do
+  describe "#delivered_by_smsc!(smsc_name, smsc_message_id, successful, error = nil)" do
     let(:subject) { create(:reply, :queued_for_smsc_delivery, :smsc_channel) }
     let(:smsc_name) { "SMART" }
     let(:smsc_message_id) { "7869576120333847249" }
 
     def do_delivered_by_smsc!
-      subject.delivered_by_smsc!(smsc_name, smsc_message_id, status)
+      subject.delivered_by_smsc!(smsc_name, smsc_message_id, successful, error)
       subject.reload
     end
 
@@ -397,21 +397,24 @@ describe Reply do
     end
 
     context "where the delivery was successful" do
-      let(:status) { true }
+      let(:successful) { true }
+      let(:error) { nil }
 
-      it "should update the message token and status" do
+      it "should update the message_token, smsc_message_status and state" do
         expect(subject.token).to eq(smsc_message_id)
+        expect(subject.smsc_message_status).to eq(error)
         expect(subject).to be_delivered_by_smsc
       end
     end
 
     context "where the status was not successful" do
-      let(:status) { false }
-      let(:job) { enqueued_jobs.last }
+      let(:successful) { false }
+      let(:error) { "INVALID_DESTINATION" }
 
-      it "should enqueue a job to redeliver the message" do
-        expect(job[:job]).to eq(MtMessageSenderJob)
-        expect(job[:args][0]).to eq(subject.id)
+      it "should update the smsc_message_status and state" do
+        expect(subject.token).to eq(nil)
+        expect(subject.smsc_message_status).to eq("invalid_destination")
+        expect(subject).to be_failed
       end
     end
   end

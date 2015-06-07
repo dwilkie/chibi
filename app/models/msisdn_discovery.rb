@@ -76,7 +76,7 @@ class MsisdnDiscovery < ActiveRecord::Base
 
     event :deactivate, :after_commit => :msisdn_deactivate! do
       transitions(
-        :from   => :awaiting_result,
+        :from   => [:queued_for_discovery, :awaiting_result],
         :to     => :inactive,
       )
     end
