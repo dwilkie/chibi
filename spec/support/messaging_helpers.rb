@@ -108,7 +108,7 @@ module MessagingHelpers
         options[:short_code],
         options[:to],
         options[:body],
-        options[:smsc_priority]
+        options[:smsc_priority].to_i
       ]
     )
     expect(job[:queue]).to eq(Rails.application.secrets[:smpp_internal_mt_message_queue])
