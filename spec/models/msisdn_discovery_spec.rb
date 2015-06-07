@@ -135,6 +135,15 @@ describe MsisdnDiscovery do
         let(:reply_state) { :queued_for_smsc_delivery }
         let(:state) { :not_started }
         it { is_expected.to be_queued_for_discovery }
+
+        context "this state is queued_for_discovery" do
+          let(:state) { :queued_for_discovery }
+
+          def setup_scenario
+          end
+
+          it { expect { reply }.not_to raise_error }
+        end
       end
 
       context "confirmed" do

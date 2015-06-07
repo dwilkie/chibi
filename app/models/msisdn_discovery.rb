@@ -55,7 +55,7 @@ class MsisdnDiscovery < ActiveRecord::Base
 
     event :queue_for_discovery do
       transitions(
-        :from   => :not_started,
+        :from   => [:not_started, :queued_for_discovery],
         :to     => :queued_for_discovery,
       )
     end
