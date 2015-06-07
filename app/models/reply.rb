@@ -254,8 +254,8 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
-  def delivered_by_smsc!(smsc_name, smsc_message_id, successful, error = nil)
-    self.smsc_message_status = error.downcase if error
+  def delivered_by_smsc!(smsc_name, smsc_message_id, successful, error_message = nil)
+    self.smsc_message_status = error_message.to_s.downcase.tr(" ", "_").presence
 
     if successful
       self.token = smsc_message_id
