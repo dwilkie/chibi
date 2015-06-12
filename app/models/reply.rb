@@ -194,7 +194,15 @@ class Reply < ActiveRecord::Base
   end
 
   def self.cleanup!
-    where.not(:delivered_at => nil).where("updated_at < ?", 1.month.ago).delete_all
+    delivered.where(self.arel_table[:updated_at].lt(1.month.ago)).delete_all
+  end
+
+  def self.accepted_by_smsc
+    delivered.where.not(:state => [:pending_delivery, :queued_for_smsc_delivery])
+  end
+
+  def self.not_a_msisdn_discovery
+    where(:msisdn_discovery_id => nil)
   end
 
   def body

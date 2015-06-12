@@ -274,6 +274,29 @@ describe Reply do
     end
   end
 
+  describe ".accepted_by_smsc" do
+    before do
+      create(:reply, :pending_delivery, :delivered)
+
+      Reply.aasm.states.each do |state|
+        create(:reply, state.name)
+      end
+    end
+
+    it { expect(described_class.accepted_by_smsc.pluck(:state)).not_to include("pending_delivery", "queued_for_smsc_delivery") }
+  end
+
+  describe ".not_a_msisdn_discovery" do
+    let(:reply_for_user) { create(:reply, :for_user) }
+
+    before do
+      reply_for_user
+      create(:reply, :for_msisdn_discovery)
+    end
+
+    it { expect(described_class.not_a_msisdn_discovery).to match_array([reply_for_user]) }
+  end
+
   describe "handling failed messages" do
     def create_user(*args)
       options = args.extract_options!

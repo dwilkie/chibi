@@ -86,6 +86,11 @@ FactoryGirl.define do
     msisdn_discovery_run
     sequence(:subscriber_number, 203000) { |n| n }
 
+    trait :queued_too_long do
+      queued_for_discovery
+      created_at { 1.day.ago }
+    end
+
     trait :not_started do
     end
 
@@ -112,6 +117,10 @@ FactoryGirl.define do
 
     trait :inactive do
       state "inactive"
+    end
+
+    trait :with_outdated_state do
+      association :reply, :factory => [:reply, :confirmed]
     end
   end
 
@@ -359,6 +368,16 @@ FactoryGirl.define do
       accepted_by_smsc
     end
 
+    trait :errored do
+      state "errored"
+      accepted_by_smsc
+    end
+
+    trait :unknown do
+      state "unknown"
+      accepted_by_smsc
+    end
+
     trait :with_token do
       delivered
       token
@@ -374,6 +393,12 @@ FactoryGirl.define do
 
     trait :with_no_body do
       body nil
+    end
+
+    trait :for_msisdn_discovery do
+      user nil
+      msisdn_discovery
+      to { msisdn_discovery.mobile_number }
     end
   end
 

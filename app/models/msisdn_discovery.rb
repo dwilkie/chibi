@@ -68,17 +68,11 @@ class MsisdnDiscovery < ActiveRecord::Base
     end
 
     event :activate, :after_commit => :msisdn_activate! do
-      transitions(
-        :from   => :awaiting_result,
-        :to     => :active,
-      )
+      transitions(:to => :active)
     end
 
     event :deactivate, :after_commit => :msisdn_deactivate! do
-      transitions(
-        :from   => [:queued_for_discovery, :awaiting_result],
-        :to     => :inactive,
-      )
+      transitions(:to => :inactive)
     end
   end
 
@@ -86,8 +80,36 @@ class MsisdnDiscovery < ActiveRecord::Base
     where(:state => [:not_started, :queued_for_discovery])
   end
 
+  def self.queued_too_long
+    queued.where(self.arel_table[:created_at].lt(1.day.ago))
+  end
+
   def self.highest_discovered_subscriber_number
     maximum(:subscriber_number)
+  end
+
+  def self.all_replies
+    msisdn_discoveries = self.arel_table
+    replies = Reply.arel_table
+
+    join = msisdn_discoveries.join(
+      replies, Arel::Nodes::OuterJoin
+    ).on(
+      msisdn_discoveries[:id].eq(replies[:msisdn_discovery_id])
+    ).join_sources
+  end
+
+  def self.with_outdated_state
+    queued_too_long.joins(:reply).merge(Reply.accepted_by_smsc)
+  end
+
+  def self.with_missing_broadcast
+    queued_too_long.joins(all_replies).merge(Reply.not_a_msisdn_discovery)
+  end
+
+  def self.cleanup_queued!
+    with_missing_broadcast.find_each { |msisdn_discovery| msisdn_discovery.broadcast! }
+    with_outdated_state.find_each    { |msisdn_discovery| msisdn_discovery.notify     }
   end
 
   def notify

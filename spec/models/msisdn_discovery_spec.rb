@@ -89,6 +89,34 @@ describe MsisdnDiscovery do
     it { expect(described_class.highest_discovered_subscriber_number).to eq(highest_subscriber_number) }
   end
 
+  describe ".cleanup_queued!" do
+    def create_msisdn_discovery(*args)
+      options = args.extract_options!
+      outdated_state = options.delete(:outdated_state)
+      msisdn_discovery = create(:msisdn_discovery, *args, options)
+      msisdn_discovery.update_column(:state, outdated_state) if outdated_state
+      msisdn_discovery
+    end
+
+    let(:msisdn_discovery_queued_too_long_with_missing_broadcast) { create_msisdn_discovery(:queued_too_long) }
+    let(:msisdn_discovery_with_missing_broadcast) { create_msisdn_discovery }
+    let(:msisdn_discovery_queued_too_long_with_outdated_state) { create_msisdn_discovery(:queued_too_long, :with_outdated_state, :outdated_state => :queued_for_discovery) }
+    let(:msisdn_discovery_with_outdated_state) { create_msisdn_discovery(:with_outdated_state, :outdated_state => :queued_for_discovery) }
+
+    before do
+      msisdn_discovery_queued_too_long_with_missing_broadcast
+      msisdn_discovery_with_missing_broadcast
+      expect(msisdn_discovery_queued_too_long_with_outdated_state).not_to be_active
+      expect(msisdn_discovery_queued_too_long_with_missing_broadcast.reply).to eq(nil)
+      described_class.cleanup_queued!
+    end
+
+    it { expect(msisdn_discovery_queued_too_long_with_missing_broadcast.reload.reply).to be_present }
+    it { expect(msisdn_discovery_with_missing_broadcast.reload.reply).to eq(nil) }
+    it { expect(msisdn_discovery_queued_too_long_with_outdated_state.reload).to be_active }
+    it { expect(msisdn_discovery_with_outdated_state.reload).not_to be_active }
+  end
+
   describe "#broadcast!" do
     before do
       subject.broadcast!
