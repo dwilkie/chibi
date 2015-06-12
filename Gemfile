@@ -14,7 +14,6 @@ gem 'hirefire-resource'
 gem 'unicorn'
 gem 'redis'
 gem 'torasup', :github => 'dwilkie/torasup'
-gem 'phony', :github => 'dwilkie/phony', :branch => "new_cambodian_prefixes"
 gem 'aasm', :github => 'aasm/aasm'
 gem 'twilio-ruby'
 gem 'multi_xml'
