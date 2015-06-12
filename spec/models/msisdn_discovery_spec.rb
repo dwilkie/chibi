@@ -104,10 +104,10 @@ describe MsisdnDiscovery do
     let(:msisdn_discovery_with_outdated_state) { create_msisdn_discovery(:with_outdated_state, :outdated_state => :queued_for_discovery) }
 
     before do
-      msisdn_discovery_queued_too_long_with_missing_broadcast
-      msisdn_discovery_with_missing_broadcast
-      expect(msisdn_discovery_queued_too_long_with_outdated_state).not_to be_active
       expect(msisdn_discovery_queued_too_long_with_missing_broadcast.reply).to eq(nil)
+      expect(msisdn_discovery_with_missing_broadcast.reply).to eq(nil)
+      expect(msisdn_discovery_queued_too_long_with_outdated_state).not_to be_active
+      expect(msisdn_discovery_with_outdated_state).not_to be_active
       described_class.cleanup_queued!
     end
 

@@ -297,6 +297,33 @@ describe Reply do
     it { expect(described_class.not_a_msisdn_discovery).to match_array([reply_for_user]) }
   end
 
+  describe ".fix_invalid_states!" do
+    let(:undelivered) do
+      reply = create_reply(:queued_for_smsc_delivery)
+      reply.update_column(:delivered_at, nil)
+      reply
+    end
+
+    let(:queued_for_smsc_delivery_too_long_with_token) do
+      create(:reply, :foo_bar, :with_token, :smsc_channel)
+    end
+
+    let(:queued_for_smsc_delivery_with_token) do
+      create(:reply, :queued_for_smsc_delivery, :with_token)
+    end
+
+    before do
+      expect(undelivered).not_to be_delivered
+      expect(queued_for_smsc_delivery_too_long_with_token).to be_queued_for_smsc_delivery
+      expect(queued_for_smsc_delivery_with_token).to be_queued_for_smsc_delivery
+      described_class.fix_invalid_states!
+    end
+
+    it { expect(undelivered.reload).to be_delivered }
+    it { expect(queued_for_smsc_delivery_too_long_with_token.reload).not_to be_queued_for_smsc_delivery }
+    it { expect(queued_for_smsc_delivery_with_token.reload).to be_queued_for_smsc_delivery }
+  end
+
   describe "handling failed messages" do
     def create_user(*args)
       options = args.extract_options!

@@ -190,7 +190,23 @@ class Reply < ActiveRecord::Base
   end
 
   def self.undelivered
-    where(:delivered_at => nil).order(:created_at)
+    where(:delivered_at => nil)
+  end
+
+  def self.with_token
+    where.not(:token => nil)
+  end
+
+  def self.queued_for_smsc_delivery_too_long
+    queued_for_smsc_delivery.where(self.arel_table[:delivered_at].lt(1.day.ago))
+  end
+
+  def self.fix_invalid_states!
+    queued_for_smsc_delivery.undelivered.update_all("delivered_at = updated_at")
+    queued_for_smsc_delivery_too_long.with_token.find_each do |reply|
+      reply.send(:update_delivery_state!, DELIVERED)
+      reply.send(:parse_smsc_delivery_status!)
+    end
   end
 
   def self.cleanup!

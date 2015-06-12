@@ -346,6 +346,7 @@ FactoryGirl.define do
 
     trait :accepted_by_smsc do
       with_token
+      delivered
     end
 
     trait :delivered_by_smsc do
@@ -379,7 +380,6 @@ FactoryGirl.define do
     end
 
     trait :with_token do
-      delivered
       token
     end
 
@@ -399,6 +399,11 @@ FactoryGirl.define do
       user nil
       msisdn_discovery
       to { msisdn_discovery.mobile_number }
+    end
+
+    trait :foo_bar do
+      queued_for_smsc_delivery
+      delivered_at { 1.day.ago }
     end
   end
 
