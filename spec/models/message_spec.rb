@@ -343,76 +343,21 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     end
   end
 
-  describe ".queue_unprocessed" do
-    def create_unprocessed_message(*args)
-      options = args.extract_options!
-      create(:message, *args, {:created_at => 5.minutes.ago}.merge(options))
-    end
-
-    let(:unprocessed_message) { create_unprocessed_message }
-    let(:recently_received_message) { create_unprocessed_message(:created_at => 2.minutes.ago) }
-    let(:unprocessed_message_with_chat) { create_unprocessed_message(:chat => chat) }
-    let(:message_awaiting_charge_result_for_too_long) { create_unprocessed_message(:awaiting_charge_result) }
-    let(:message_awaiting_charge_result) { create_unprocessed_message(:created_at => Time.current) }
-
-    let(:job_args) { enqueued_jobs.map { |job| job[:args].first } }
+  describe ".queue_unprocessed_multipart!" do
+    let(:unprocessed_multipart_message) { create(:message, :multipart, :unprocessed) }
+    let(:recently_received_multipart_message) { create(:message, :multipart) }
+    let(:unprocessed_message) { create(:message, :unprocessed) }
 
     before do
-      Timecop.freeze(Time.current)
-      message_awaiting_charge_result_for_too_long
-      message_awaiting_charge_result
-      unprocessed_message
-      processed_message
-      recently_received_message
-      unprocessed_message_with_chat
-      message
+      expect(unprocessed_multipart_message).not_to be_processed
+      expect(recently_received_multipart_message).not_to be_processed
+      expect(unprocessed_message).not_to be_processed
+      expect_message { trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed_multipart! } }
     end
 
-    after do
-      Timecop.return
-    end
-
-    context "passing no options" do
-      it "should queue for processing any non processed messages with no chat that were created more than 30 secs ago" do
-        trigger_job(:queue_only => true) { described_class.queue_unprocessed }
-        expect(enqueued_jobs.size).to eq(3)
-        expect(job_args).to contain_exactly(
-          unprocessed_message.id,
-          recently_received_message.id,
-          message_awaiting_charge_result_for_too_long.id
-        )
-      end
-
-      context "after the job has run" do
-        before do
-          expect_message { trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed } }
-        end
-
-        it "should process the messages" do
-          expect(message_awaiting_charge_result_for_too_long.reload).to be_processed
-          expect(message_awaiting_charge_result.reload).not_to be_processed
-          expect(unprocessed_message.reload).to be_processed
-          expect(processed_message.reload).to be_processed
-          expect(recently_received_message.reload).to be_processed
-          expect(unprocessed_message_with_chat.reload).to be_processed
-          expect(message.reload).not_to be_processed
-        end
-      end
-    end
-
-    context "passing :timeout => 5.minutes.ago" do
-      before do
-        trigger_job(:queue_only => true) { described_class.queue_unprocessed(:timeout => 5.minutes.ago) }
-      end
-
-      it "should queue for processing any non processed message that was created more than 5 mins ago" do
-        expect(enqueued_jobs.size).to eq(2)
-        expect(job_args).to contain_exactly(
-          unprocessed_message.id,
-          message_awaiting_charge_result_for_too_long.id
-        )
-      end
-    end
+    it { expect(unprocessed_multipart_message.reload).to be_processed }
+    it { expect(recently_received_multipart_message.reload).not_to be_processed }
+    it { expect(unprocessed_message.reload).not_to be_processed }
   end
 
   describe "#find_csms_message" do

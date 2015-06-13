@@ -653,7 +653,7 @@ class User < ActiveRecord::Base
   end
 
   def extract_location(info)
-    result = location.locate!(info)
+    result = location.locate(info)
     strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?#{result}/) if result
   end
 

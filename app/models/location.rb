@@ -35,14 +35,15 @@ class Location < ActiveRecord::Base
     raw_country_code.to_s.downcase if raw_country_code
   end
 
+  def locate(address = nil)
+    self.address = address if address
+    LocatorJob.perform_later(id, self.address) if locatable?
+  end
+
   private
 
   def locatable?
     address.present? && country_code.present?
-  end
-
-  def locate
-    LocatorJob.perform_later(id, address) if locatable?
   end
 
   def normalize_country_code

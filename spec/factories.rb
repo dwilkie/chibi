@@ -195,6 +195,9 @@ FactoryGirl.define do
       message_part_body "foo"
     end
 
+    trait :received do
+    end
+
     trait :awaiting_parts do
       multipart
       after(:build) do |message|
@@ -235,8 +238,9 @@ FactoryGirl.define do
       state "processed"
     end
 
-    trait :awaiting_charge_result do
-      state "awaiting_charge_result"
+    trait :unprocessed do
+      received
+      created_at { 5.minutes.ago }
     end
 
     trait :without_user do

@@ -39,24 +39,23 @@ class Message < ActiveRecord::Base
     state :processed
     state :awaiting_charge_result
 
-    event :process, :if => :can_be_processed?, :before => :queue_for_cleanup do
+    event :process, :if => :can_be_processed?, :before => [:queue_for_cleanup, :stop_awaiting_parts] do
       transitions(:from => :received, :to => :awaiting_charge_result, :unless => :user_charge!)
       transitions(:from => :received, :to => :processed, :after => :route_to_destination)
       transitions(:from => :awaiting_charge_result, :to => :processed, :after => :examine_charge_result)
     end
   end
 
-  def self.queue_unprocessed(options = {})
-    options[:timeout] ||= 30.seconds.ago
-    unprocessed = where.not(
-      :state => :processed
-    ).where("created_at <= ?", options[:timeout])
-    unprocessed.where(:chat_id => nil).find_each do |message|
-      message.queue_for_processing!
-    end
-    unprocessed.where.not(:chat_id => nil).find_each do |message|
-      message.process!
-    end
+  def self.queue_unprocessed_multipart!
+    unprocessed_multipart.find_each { |message| message.queue_for_processing! }
+  end
+
+  def self.unprocessed_multipart
+    received.multipart.where(self.arel_table[:created_at].lt(awaiting_parts_timeout.seconds.ago))
+  end
+
+  def self.multipart
+    where(self.arel_table[:number_of_parts].gt(1))
   end
 
   def self.from_aggregator(params = {})
@@ -115,21 +114,16 @@ class Message < ActiveRecord::Base
   end
 
   def stop_awaiting_parts
-    return false unless awaiting_parts_timeout?
-    self.number_of_parts = 1
-    save!
-    queue_for_processing!
-    true
+    if awaiting_parts_timeout?
+      self.number_of_parts = 1
+      save!
+    end
   end
 
   private
 
   def awaiting_parts_timeout?
-    awaiting_parts? &&
-    created_at < (
-      Rails.application.secrets[:message_awaiting_parts_timeout] ||
-      DEFAULT_AWAITING_PARTS_TIMEOUT
-    ).to_i.seconds.ago
+    awaiting_parts? && created_at < self.class.awaiting_parts_timeout.seconds.ago
   end
 
   def queue_for_cleanup
@@ -172,10 +166,10 @@ class Message < ActiveRecord::Base
   end
 
   def route_to_destination
-    return true unless pre_process
+    return true if !pre_process
     start_new_chat = true
 
-    unless user_wants_to_chat_with_someone_new?
+    if !user_wants_to_chat_with_someone_new?
       user.update_profile(normalized_body)
       chat_to_forward_message_to = Chat.intended_for(self, :num_recent_chats => 10) || user.active_chat
 
@@ -228,9 +222,14 @@ class Message < ActiveRecord::Base
     Chat.activate_multiple!(user, :starter => self, :notify => true)
   end
 
+  def self.awaiting_parts_timeout
+    (Rails.application.secrets[:message_awaiting_parts_timeout] || DEFAULT_AWAITING_PARTS_TIMEOUT).to_i
+  end
+
   def self.from_twilio(params)
     params = params.underscorify_keys
     new(params.slice(:body, :from, :to).merge(:guid => params[:message_sid], :channel => "twilio"))
   end
+
   private_class_method :from_twilio
 end

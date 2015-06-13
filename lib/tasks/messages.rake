@@ -1,6 +1,6 @@
 namespace :messages do
-  desc "Queues for processing any messages which have not yet been queued"
+  desc "Queues unprocessed multipart messages for processing"
   task :queue_unprocessed => :environment do
-    Message.queue_unprocessed(:timeout => 3.minutes.ago)
+    Message.queue_unprocessed_multipart!
   end
 end
