@@ -10,12 +10,12 @@ describe MessageProcessorJob do
     let(:message_id) { 1 }
 
     before do
-      allow(message).to receive(:process!)
+      allow(message).to receive(:pre_process!)
       allow(Message).to receive(:find).with(message_id).and_return(message)
     end
 
     it "should tell the message to process itself" do
-      expect(message).to receive(:process!)
+      expect(message).to receive(:pre_process!)
       subject.perform(message_id)
     end
   end

@@ -120,7 +120,7 @@ module MessagingHelpers
 
     expect_locate(options) do
       expect_message do
-        trigger_job(:only => [MessageProcessorJob]) do
+        trigger_job(:only => [MessageProcessorJob, LocatorJob]) do
           post(
             messages_path,
             aggregator_params,

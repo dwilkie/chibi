@@ -20,7 +20,7 @@ describe MoMessageReceivedJob do
     before do
       allow(Message).to receive(:from_smsc).and_return(message)
       allow(message).to receive(:save!)
-      allow(message).to receive(:process)
+      allow(message).to receive(:pre_process)
     end
 
     def do_perform
@@ -46,7 +46,7 @@ describe MoMessageReceivedJob do
         :sequence_number => csms_seq_num
       )
       expect(message).to receive(:save!)
-      expect(message).to receive(:process!)
+      expect(message).to receive(:pre_process!)
       do_perform
     end
   end

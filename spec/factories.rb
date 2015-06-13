@@ -238,6 +238,10 @@ FactoryGirl.define do
       state "processed"
     end
 
+    trait :awaiting_charge_result do
+      state "awaiting_charge_result"
+    end
+
     trait :unprocessed do
       received
       created_at { 5.minutes.ago }

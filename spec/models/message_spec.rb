@@ -352,7 +352,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
       expect(unprocessed_multipart_message).not_to be_processed
       expect(recently_received_multipart_message).not_to be_processed
       expect(unprocessed_message).not_to be_processed
-      expect_message { trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed_multipart! } }
+      expect_locate { expect_message { trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed_multipart! } } }
     end
 
     it { expect(unprocessed_multipart_message.reload).to be_processed }
@@ -453,7 +453,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     end
   end
 
-  describe "#process" do
+  describe "#pre_process!" do
     def create_message(*args)
       options = args.extract_options!
       create(:message, *args, {:user => user}.merge(options))
@@ -466,14 +466,14 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
       it "should try to activate multiple new chats" do
         expect(Chat).to receive(:activate_multiple!).with(user, :starter => subject, :notify => true)
-        subject.process!
+        subject.pre_process!
       end
     end
 
     shared_examples_for "not starting a new chat" do
       it "should not start a new chat" do
         expect(Chat).not_to receive(:activate_multiple!)
-        expect_message { subject.process! }
+        expect_message { subject.pre_process! }
       end
     end
 
@@ -484,7 +484,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     shared_examples_for "not routing the message" do
       it "should not try to route the message" do
         expect(Chat).not_to receive(:intended_for)
-        subject.process!
+        subject.pre_process!
       end
     end
 
@@ -505,7 +505,11 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
         before do
           subject
           clear_enqueued_jobs
-          subject.process!
+          subject.pre_process!
+          assert_state!
+        end
+
+        def assert_state!
           expect(subject).not_to be_processed
         end
 
@@ -513,6 +517,15 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
           subject { create(:message, :awaiting_parts) }
 
           it { expect(job).to eq(nil) }
+
+          context "for too long" do
+            subject { create(:message, :awaiting_parts, :unprocessed) }
+
+            def assert_state!
+            end
+
+            it { is_expected.to be_processed }
+          end
         end
 
         context "is invalid" do
@@ -526,16 +539,6 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
       end
 
       context "pre-processing" do
-        context "the message already belongs to a chat" do
-          subject { create_message(:chat => chat, :pre_process => true) }
-
-          after do
-            expect(subject).to be_processed
-          end
-
-          it_should_behave_like "not routing the message"
-        end # context "the message already belongs to a chat"
-
         context "the message body is" do
           ["stop", "off", "stop all"].each do |stop_variation|
             context "'#{stop_variation}'" do
@@ -547,7 +550,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
               it "should logout the user" do
                 expect(user).to receive(:logout!)
-                subject.process!
+                subject.pre_process!
                 expect(subject).to be_processed
               end
             end # context "'#{stop_variation}'"
@@ -561,12 +564,12 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
             it "should try to charge the user" do
               expect(user).to receive(:charge!).with(subject)
-              subject.process!
+              subject.pre_process!
             end
 
             it "should login the user" do
               expect(user).to receive(:login!)
-              subject.process!
+              subject.pre_process!
             end
 
             context "the charge request returns true" do
@@ -575,7 +578,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
               end
 
               it "should update the state to 'processed'" do
-                subject.process!
+                subject.pre_process!
                 expect(subject).to be_processed
               end
             end # context "the charge request returns true"
@@ -586,7 +589,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
               end
 
               it "should update the state to 'awaiting_charge_result'" do
-                subject.process!
+                subject.pre_process!
                 expect(subject).to be_awaiting_charge_result
               end
             end # context "the charge request returns false"
@@ -605,7 +608,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
           end
 
           it "should leave the message as 'received'" do
-            expect { subject.process! }.to raise_error
+            expect { subject.pre_process! }.to raise_error
             expect(subject).not_to be_processed
           end
         end
@@ -647,18 +650,18 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
                 it "should forward the message to a particular chat" do
                   expect(chat).to receive(:forward_message).with(subject)
-                  subject.process!
+                  subject.pre_process!
                 end
               end
 
               it "should try to update the users profile from the message text" do
                 expect(user).to receive(:update_profile).with(subject.body)
-                subject.process!
+                subject.pre_process!
               end
 
               it "should try to determine who the message is intended for" do
                 expect(Chat).to receive(:intended_for).with(subject, :num_recent_chats => 10)
-                subject.process!
+                subject.pre_process!
               end
 
               context "if the receipient cannot be determined" do
@@ -668,7 +671,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
                 it "try to get the sender's active chat" do
                   expect(user).to receive(:active_chat)
-                  subject.process!
+                  subject.pre_process!
                 end
 
                 context "if the sender is not currently chatting" do
@@ -723,7 +726,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
         it "should tell the sender they don't have enough credit" do
           expect(user).to receive(:reply_not_enough_credit!)
-          subject.process!
+          subject.pre_process!
         end
 
         it_should_behave_like "not routing the message"
@@ -754,7 +757,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
       subject { create_message(:processed) }
 
       it "should leave the state as 'processed'" do
-        expect { subject.process! }.not_to change { subject.updated_at }
+        expect { subject.pre_process! }.not_to change { subject.updated_at }
         expect(subject).to be_processed
       end
     end

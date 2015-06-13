@@ -179,7 +179,7 @@ class User < ActiveRecord::Base
   end
 
   def charge!(requester)
-    return true unless chargeable?
+    return true if !chargeable?
     if latest_charge_request
       if latest_charge_request.successful?
         if latest_charge_request.updated_at < 24.hours.ago
@@ -653,7 +653,7 @@ class User < ActiveRecord::Base
   end
 
   def extract_location(info)
-    result = location.locate(info)
+    result = location.locate!(info)
     strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?#{result}/) if result
   end
 

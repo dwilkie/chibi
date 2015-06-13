@@ -13,6 +13,6 @@ class MoMessageReceivedJob
       :sequence_number => csms_seq_num
     )
     message.save!
-    message.process!
+    message.pre_process!
   end
 end
