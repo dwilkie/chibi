@@ -221,8 +221,22 @@ FactoryGirl.define do
       end
     end
 
+    trait :single_part do
+      multipart
+      number_of_parts 1
+      csms_reference_number 0
+    end
+
     trait :invalid_multipart do
+      invalid_multipart_csms_reference_number
+      invalid_multipart_number_of_parts
+    end
+
+    trait :invalid_multipart_csms_reference_number do
       csms_reference_number 1
+    end
+
+    trait :invalid_multipart_number_of_parts do
       number_of_parts 2
     end
 

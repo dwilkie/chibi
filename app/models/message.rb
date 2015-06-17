@@ -206,7 +206,7 @@ class Message < ActiveRecord::Base
   end
 
   def multipart?
-    csms_reference_number.to_i > 0 && number_of_parts.to_i > 1
+    csms_reference_number.to_i > 0 || number_of_parts.to_i > 1
   end
 
   def do_pre_processing

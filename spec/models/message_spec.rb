@@ -78,7 +78,7 @@ describe Message do
         end
 
         context "for single part messages" do
-          subject { create(:message, :multipart, :number_of_parts => 1) }
+          subject { create(:message, :single_part) }
 
           it "should clear the message parts" do
             expect(subject.body).to be_present
@@ -529,11 +529,19 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
         end
 
         context "is invalid" do
-          subject { create(:message, :invalid_multipart) }
-
-          it "should enqueue a job to cleanup the message" do
+          def assert_enqueue!
             expect(job[:job]).to eq(MessageCleanupJob)
             expect(job[:args]).to eq([subject.id])
+          end
+
+          context "because it has the wrong number of parts" do
+            subject { create(:message, :invalid_multipart_number_of_parts) }
+            it { assert_enqueue! }
+          end
+
+          context "because it has an invalid csms reference number" do
+            subject { create(:message, :invalid_multipart_csms_reference_number) }
+            it { assert_enqueue! }
           end
         end
       end
