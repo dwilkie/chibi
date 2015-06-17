@@ -8,3 +8,8 @@ vendor/ruby
 latest.dump
 coverage
 remove_focus.rb
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
