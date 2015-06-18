@@ -5,7 +5,7 @@ kh:
   operators:
     smart:
       assertions:
-        smpp_server_id: "smart"
+        smpp_server_id: "smart_huawei"
         short_code: "2442"
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
