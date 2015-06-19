@@ -1,5 +1,3 @@
-require 'sidekiq/web'
-
 Rails.application.routes.draw do
   root "welcome#index"
 
@@ -29,5 +27,6 @@ Rails.application.routes.draw do
     username == Rails.application.secrets[:http_basic_auth_admin_user] && password == Rails.application.secrets[:http_basic_auth_admin_password]
   end
 
+  require 'sidekiq/web'
   mount Sidekiq::Web => '/sidekiq'
 end
