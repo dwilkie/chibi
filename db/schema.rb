@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150410154721) do
+ActiveRecord::Schema.define(version: 20150607062339) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,10 +33,6 @@ ActiveRecord::Schema.define(version: 20150410154721) do
     t.string   "cdr_data",       limit: 255
   end
 
-  add_index "call_data_records", ["bridge_uuid"], name: "index_call_data_records_on_bridge_uuid", using: :btree
-  add_index "call_data_records", ["direction"], name: "index_call_data_records_on_direction", using: :btree
-  add_index "call_data_records", ["from"], name: "index_call_data_records_on_from", using: :btree
-  add_index "call_data_records", ["inbound_cdr_id"], name: "index_call_data_records_on_inbound_cdr_id", using: :btree
   add_index "call_data_records", ["phone_call_id", "type"], name: "index_call_data_records_on_phone_call_id_and_type", unique: true, using: :btree
   add_index "call_data_records", ["user_id"], name: "index_call_data_records_on_user_id", using: :btree
   add_index "call_data_records", ["uuid"], name: "index_call_data_records_on_uuid", unique: true, using: :btree
@@ -71,7 +67,6 @@ ActiveRecord::Schema.define(version: 20150410154721) do
   add_index "chats", ["starter_type", "starter_id"], name: "index_chats_on_starter_type_and_starter_id", using: :btree
   add_index "chats", ["updated_at"], name: "index_chats_on_updated_at", using: :btree
   add_index "chats", ["user_id", "friend_id"], name: "index_chats_on_user_id_and_friend_id", unique: true, using: :btree
-  add_index "chats", ["user_id"], name: "index_chats_on_user_id", using: :btree
 
   create_table "locations", force: :cascade do |t|
     t.string   "city",         limit: 255
@@ -114,8 +109,37 @@ ActiveRecord::Schema.define(version: 20150410154721) do
 
   add_index "messages", ["chat_id"], name: "index_messages_on_chat_id", using: :btree
   add_index "messages", ["guid"], name: "index_messages_on_guid", unique: true, using: :btree
-  add_index "messages", ["state"], name: "index_messages_on_state", using: :btree
   add_index "messages", ["user_id"], name: "index_messages_on_user_id", using: :btree
+
+  create_table "msisdn_discoveries", force: :cascade do |t|
+    t.integer  "msisdn_id",               null: false
+    t.integer  "msisdn_discovery_run_id", null: false
+    t.integer  "subscriber_number",       null: false
+    t.string   "state",                   null: false
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+  end
+
+  add_index "msisdn_discoveries", ["msisdn_id", "msisdn_discovery_run_id"], name: "index_msisdn_discoveries", unique: true, using: :btree
+
+  create_table "msisdn_discovery_runs", force: :cascade do |t|
+    t.string   "prefix",                null: false
+    t.integer  "subscriber_number_min", null: false
+    t.integer  "subscriber_number_max", null: false
+    t.string   "operator",              null: false
+    t.string   "country_code",          null: false
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  create_table "msisdns", force: :cascade do |t|
+    t.string   "mobile_number",                 null: false
+    t.boolean  "active",        default: false, null: false
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+  end
+
+  add_index "msisdns", ["mobile_number"], name: "index_msisdns_on_mobile_number", unique: true, using: :btree
 
   create_table "phone_calls", force: :cascade do |t|
     t.string   "sid",           limit: 255
@@ -132,7 +156,6 @@ ActiveRecord::Schema.define(version: 20150410154721) do
   add_index "phone_calls", ["chat_id"], name: "index_phone_calls_on_chat_id", using: :btree
   add_index "phone_calls", ["dial_call_sid"], name: "index_phone_calls_on_dial_call_sid", unique: true, using: :btree
   add_index "phone_calls", ["sid"], name: "index_phone_calls_on_sid", unique: true, using: :btree
-  add_index "phone_calls", ["state"], name: "index_phone_calls_on_state", using: :btree
   add_index "phone_calls", ["user_id"], name: "index_phone_calls_on_user_id", using: :btree
 
   create_table "replies", force: :cascade do |t|
@@ -149,6 +172,8 @@ ActiveRecord::Schema.define(version: 20150410154721) do
     t.string   "delivery_channel"
     t.string   "operator_name"
     t.string   "smpp_server_id"
+    t.integer  "msisdn_discovery_id"
+    t.integer  "smsc_priority",                   default: 0,                  null: false
   end
 
   add_index "replies", ["chat_id"], name: "index_replies_on_chat_id", using: :btree
@@ -175,11 +200,12 @@ ActiveRecord::Schema.define(version: 20150410154721) do
 
   add_index "users", ["active_chat_id"], name: "index_users_on_active_chat_id", using: :btree
   add_index "users", ["date_of_birth"], name: "index_users_on_date_of_birth", using: :btree
-  add_index "users", ["gender"], name: "index_users_on_gender", using: :btree
   add_index "users", ["latest_charge_request_id"], name: "index_users_on_latest_charge_request_id", using: :btree
-  add_index "users", ["looking_for"], name: "index_users_on_looking_for", using: :btree
   add_index "users", ["mobile_number"], name: "index_users_on_mobile_number", unique: true, using: :btree
   add_index "users", ["operator_name"], name: "index_users_on_operator_name", using: :btree
   add_index "users", ["state"], name: "index_users_on_state", using: :btree
 
+  add_foreign_key "msisdn_discoveries", "msisdn_discovery_runs"
+  add_foreign_key "msisdn_discoveries", "msisdns"
+  add_foreign_key "replies", "msisdn_discoveries"
 end

@@ -6,12 +6,12 @@ class CallDataRecord < ActiveRecord::Base
   after_initialize  :set_type
   before_validation :set_cdr_attributes, :on => :create
 
-  include Chibi::Communicable
   include Chibi::Communicable::FromUser
 
   belongs_to :phone_call
   belongs_to :inbound_cdr
 
+  validates :user, :associated => true, :presence => true
   validates :duration, :bill_sec, :uuid, :type, :direction, :presence => true
   validates :type, :inclusion => { :in => VALID_TYPES }
 

@@ -3,25 +3,11 @@ require 'rails_helper'
 describe Report do
   include ReportHelpers
 
-  let(:base_report_data) do
-    {
-      "report" => {"month" => 1, "year" => 2014}
-    }
-  end
-
-  subject { Report.new(base_report_data["report"]) }
-
-  def set_report
-    REDIS.set("report", base_report_data.to_json)
-  end
+  subject { build_report }
 
   def asserted_report(options = {})
     return "{}" if options[:empty]
-    base_report_data.to_json
-  end
-
-  def report
-    subject.class
+    sample_report_data.to_json
   end
 
   before do
@@ -30,88 +16,61 @@ describe Report do
 
   describe "singleton methods" do
     before do
-      report
-      set_report
+      store_report
     end
 
-    describe ".clear" do
-      it "should clear the report" do
-        report.clear
-        expect(report.data).to eq(asserted_report(:empty => true))
+    describe "#clear" do
+      before do
+        subject.clear
       end
+
+      it { expect(subject.data).to eq(asserted_report(:empty => true)) }
     end
 
-    describe ".year" do
-      it "should return the report year" do
-        expect(report.year).to eq(base_report_data["report"]["year"])
-      end
+    describe "#year" do
+      it { expect(subject.year).to eq(sample_report_data["report"]["year"]) }
     end
 
-    describe ".month" do
-      it "should return the report month" do
-        expect(report.month).to eq(base_report_data["report"]["month"])
-      end
+    describe "#month" do
+      it { expect(subject.month).to eq(sample_report_data["report"]["month"]) }
     end
 
-    describe ".filename" do
-      it "should return a filename from the month and the date" do
-        expect(report.filename).to eq(asserted_report_filename(:january, 2014))
-      end
+    describe "#filename" do
+      it { expect(subject.filename).to eq(asserted_report_filename(:january, 2014)) }
     end
 
-    describe ".type" do
-      it "should return 'application/json'" do
-        expect(report.type).to eq(asserted_report_type)
-      end
+    describe "#type" do
+      it { expect(subject.type).to eq(asserted_report_type) }
     end
 
-    describe ".data" do
-      it "should return the report data" do
-        expect(report.data).to eq(asserted_report)
-      end
+    describe "#data" do
+      it { expect(subject.data).to eq(asserted_report) }
     end
 
-    describe ".generated?" do
+    describe "#generated?" do
       context "given the report has been generated" do
-        it "should return true" do
-          expect(report).to be_generated
-        end
+        it { is_expected.to be_generated }
       end
 
       context "given the report has not been generated (or has been cleared)" do
         before do
-          report.clear
+          subject.clear
         end
 
-        it "should return false" do
-          expect(report).not_to be_generated
-        end
+        it { is_expected.not_to be_generated }
       end
-    end
-  end
-
-  describe "#initialize(options = {})" do
-    before do
-      set_report
-    end
-
-    it "should clear the report" do
-      subject
-      expect(report.data).to eq(asserted_report(:empty => true))
     end
   end
 
   describe "#valid?" do
     context "given it has a month and a year" do
-      it "should return true" do
-        expect(subject).to be_valid
-      end
+      it { is_expected.to be_valid }
     end
 
     context "given is does not have a month or a year" do
-      it "should return false" do
-        expect(Report.new(:year => 2014)).not_to be_valid
-      end
+      subject { Report.new(:year => 2014) }
+
+      it { is_expected.not_to be_valid }
     end
   end
 
@@ -194,7 +153,7 @@ describe Report do
     end
 
     let(:asserted_report) do
-      report = base_report_data
+      report = sample_report_data
       interaction_options = {:report => report, :day => 1, :month => 1, :year => 2014}
       create_sample_interaction(interaction_options)
       create_sample_interaction(interaction_options.merge(:day => 31))
@@ -204,10 +163,10 @@ describe Report do
 
     it "should generate a report" do
       asserted_report
-      expect(report).not_to be_generated
+      is_expected.not_to be_generated
       generated_report = JSON.parse(subject.generate!)
       expect(generated_report).to eq(asserted_report)
-      expect(report).to be_generated
+      is_expected.to be_generated
     end
   end
 end

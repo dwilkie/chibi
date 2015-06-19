@@ -3,12 +3,13 @@
 kh:
   operators:
     smart:
+      default_mobile_subscriber_number_min: 203000
       metadata:
         short_code: "2442"
-        smpp_server_id: "smart"
+        smpp_server_id: "smart_huawei"
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
-        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}"
+        dial_string: "sofia/external/%{number_to_dial}@%{voip_gateway_host}"
         services:
           ifriendship_sms:
             type: "sms"
@@ -27,9 +28,9 @@ kh:
         short_code: "2442"
         caller_id: "2442"
         voip_gateway_host: "117.55.252.146"
-        dial_string: "sofia/internal/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
+        dial_string: "sofia/external/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}"
         dial_string_number_prefix: "2442"
-        chargeable: true
+        chargeable: false
         services:
           qb_friends:
             type: "charge"
@@ -43,7 +44,8 @@ kh:
         smpp_server_id: "cootel"
         caller_id: "2442"
         voip_gateway_host: "103.5.126.165"
-        dial_string: "sofia/internal/%{number_to_dial}@%{voip_gateway_host}:5061"
+        dial_string: "sofia/external/%{dial_string_number_prefix}%{number_to_dial}@%{voip_gateway_host}:5061"
+        dial_string_number_prefix: "00"
         services:
           cool_chat_sms:
             type: "sms"
@@ -57,3 +59,5 @@ kh:
             short_code: "2442"
             unit_cost: "0.01"
             revenue_share: "0.4"
+        blacklist:
+        - "855382038039"

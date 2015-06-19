@@ -8,4 +8,9 @@ namespace :replies do
   task :handle_failed => :environment do
     Reply.handle_failed!
   end
+
+  desc "Fixes invalid states"
+  task :fix_invalid_states => :environment do
+    Reply.fix_invalid_states!
+  end
 end

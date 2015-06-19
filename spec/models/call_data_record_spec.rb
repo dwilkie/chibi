@@ -26,8 +26,8 @@ describe CallDataRecord do
     end
   end
 
-  it_should_behave_like "communicable" do
-    let(:communicable_resource) { cdr }
+  it_should_behave_like "communicable from user" do
+    subject { cdr }
   end
 
   describe "callbacks" do

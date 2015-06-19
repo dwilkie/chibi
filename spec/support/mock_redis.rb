@@ -1,0 +1,1 @@
+require 'mock_redis'

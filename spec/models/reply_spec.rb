@@ -5,7 +5,6 @@ describe Reply do
   include MessagingHelpers
   include PhoneCallHelpers::TwilioHelpers
   include AnalyzableExamples
-  include EnvHelpers
 
   let(:user) { build(:user) }
 
@@ -88,10 +87,6 @@ describe Reply do
     end
   end
 
-  it_should_behave_like "communicable" do
-    let(:communicable_resource) { reply }
-  end
-
   it_should_behave_like "chatable" do
     let(:chatable_resource) { reply }
   end
@@ -104,6 +99,22 @@ describe Reply do
     end
   end
 
+  describe "associations" do
+    it { is_expected.to belong_to(:msisdn_discovery) }
+    it { is_expected.to belong_to(:user).touch(:last_contacted_at) }
+
+    describe "user" do
+      subject { create(:reply, :for_user) }
+
+      it "should record touch the user's last_contacted_at" do
+        user_timestamp = subject.user.updated_at
+        subject.touch
+        expect(subject.user.updated_at).to be > user_timestamp
+        expect(subject.user.last_contacted_at).to be > user_timestamp
+      end
+    end
+  end
+
   describe "validations" do
     it { is_expected.to validate_presence_of(:to) }
     it { is_expected.to validate_presence_of(:body) }
@@ -111,6 +122,19 @@ describe Reply do
   end
 
   describe "callbacks" do
+    describe "after_commit" do
+      context "reply belongs to a msisdn_discovery" do
+        let(:msisdn_discovery) { create(:msisdn_discovery) }
+
+        subject { build(:reply, :msisdn_discovery => msisdn_discovery) }
+
+        it "should notify the msisdn_discovery" do
+          expect(msisdn_discovery).to receive(:notify)
+          subject.save!
+        end
+      end
+    end
+
     describe "before_validation" do
       before do
         subject.valid?
@@ -250,6 +274,56 @@ describe Reply do
     end
   end
 
+  describe ".accepted_by_smsc" do
+    before do
+      create(:reply, :pending_delivery, :delivered)
+
+      Reply.aasm.states.each do |state|
+        create(:reply, state.name)
+      end
+    end
+
+    it { expect(described_class.accepted_by_smsc.pluck(:state)).not_to include("pending_delivery", "queued_for_smsc_delivery") }
+  end
+
+  describe ".not_a_msisdn_discovery" do
+    let(:reply_for_user) { create(:reply, :for_user) }
+
+    before do
+      reply_for_user
+      create(:reply, :for_msisdn_discovery)
+    end
+
+    it { expect(described_class.not_a_msisdn_discovery).to match_array([reply_for_user]) }
+  end
+
+  describe ".fix_invalid_states!" do
+    let(:undelivered) do
+      reply = create_reply(:queued_for_smsc_delivery)
+      reply.update_column(:delivered_at, nil)
+      reply
+    end
+
+    let(:queued_for_smsc_delivery_too_long_with_token) do
+      create(:reply, :foo_bar, :with_token, :smsc_channel)
+    end
+
+    let(:queued_for_smsc_delivery_with_token) do
+      create(:reply, :queued_for_smsc_delivery, :with_token)
+    end
+
+    before do
+      expect(undelivered).not_to be_delivered
+      expect(queued_for_smsc_delivery_too_long_with_token).to be_queued_for_smsc_delivery
+      expect(queued_for_smsc_delivery_with_token).to be_queued_for_smsc_delivery
+      described_class.fix_invalid_states!
+    end
+
+    it { expect(undelivered.reload).to be_delivered }
+    it { expect(queued_for_smsc_delivery_too_long_with_token.reload).not_to be_queued_for_smsc_delivery }
+    it { expect(queued_for_smsc_delivery_with_token.reload).to be_queued_for_smsc_delivery }
+  end
+
   describe "handling failed messages" do
     def create_user(*args)
       options = args.extract_options!
@@ -358,13 +432,13 @@ describe Reply do
     end
   end
 
-  describe "#delivered_by_smsc!(smsc_name, smsc_message_id, status)" do
+  describe "#delivered_by_smsc!(smsc_name, smsc_message_id, successful, error_message = nil)" do
     let(:subject) { create(:reply, :queued_for_smsc_delivery, :smsc_channel) }
     let(:smsc_name) { "SMART" }
     let(:smsc_message_id) { "7869576120333847249" }
 
     def do_delivered_by_smsc!
-      subject.delivered_by_smsc!(smsc_name, smsc_message_id, status)
+      subject.delivered_by_smsc!(smsc_name, smsc_message_id, successful, error_message)
       subject.reload
     end
 
@@ -373,21 +447,24 @@ describe Reply do
     end
 
     context "where the delivery was successful" do
-      let(:status) { true }
+      let(:successful) { true }
+      let(:error_message) { nil }
 
-      it "should update the message token and status" do
+      it "should update the message_token, smsc_message_status and state" do
         expect(subject.token).to eq(smsc_message_id)
+        expect(subject.smsc_message_status).to eq(error_message)
         expect(subject).to be_delivered_by_smsc
       end
     end
 
     context "where the status was not successful" do
-      let(:status) { false }
-      let(:job) { enqueued_jobs.last }
+      let(:successful) { false }
+      let(:error_message) { "Dest address invalid" }
 
-      it "should enqueue a job to redeliver the message" do
-        expect(job[:job]).to eq(MtMessageSenderJob)
-        expect(job[:args][0]).to eq(subject.id)
+      it "should update the smsc_message_status and state" do
+        expect(subject.token).to eq(nil)
+        expect(subject.smsc_message_status).to eq("dest_address_invalid")
+        expect(subject).to be_failed
       end
     end
   end
@@ -500,12 +577,19 @@ describe Reply do
     end
   end
 
-  describe "#send_reminder!" do
+  describe "#send_reminder!(options = {})" do
+    subject { build(:reply) }
+
     it "should send the user a reminder on how to use the service" do
       assert_reply(
         :send_reminder!, :anonymous_reminder, :approx => true,
         :args => [], :test_users => [local_users, create(:user, :gay), create(:user, :lesbian)].flatten
       )
+    end
+
+    it "should set #smsc_priority to -5" do
+      subject.send_reminder!
+      expect(subject.smsc_priority).to eq(-5)
     end
   end
 
@@ -519,12 +603,33 @@ describe Reply do
     end
   end
 
-  describe "#forward_message!" do
+  describe "#forward_message!(from, message, options = {})" do
+    subject { build(:reply) }
+
     it "should deliver the forwarded message" do
       assert_reply(
         :forward_message!, :forward_message,
         :args => [partner, "#{partner.screen_id.downcase}  :  hi how r u doing"], :interpolations => [partner.screen_id, "hi how r u doing"]
       )
+    end
+
+    it "should set #smsc_priority to 10" do
+      subject.forward_message!(partner, "foo")
+      expect(subject.smsc_priority).to eq(10)
+    end
+  end
+
+  describe "#broadcast!(options = {})" do
+    subject { build(:reply) }
+    let(:args) { [{ :locale => "kh" }] }
+
+    it "should send a broadcast message" do
+      assert_reply(:broadcast!, :broadcast, :args => args, :test_users => [create(:user, :cambodian)])
+    end
+
+    it "should set #smsc_priority to -10" do
+      subject.broadcast!(*args)
+      expect(subject.smsc_priority).to eq(-10)
     end
   end
 

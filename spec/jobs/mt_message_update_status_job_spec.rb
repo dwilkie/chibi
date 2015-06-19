@@ -7,12 +7,13 @@ describe MtMessageUpdateStatusJob do
     it { expect(described_class.sidekiq_options["queue"]).to eq(Rails.application.secrets[:smpp_mt_message_update_status_queue]) }
   end
 
-  describe "#perform(smsc_name, mt_message_id, smsc_message_id, status)" do
+  describe "#perform(smsc_name, mt_message_id, smsc_message_id, successful, error_message = nil)" do
     let(:reply) { double(Reply) }
     let(:mt_message_id) { "1" }
     let(:smsc_message_id) { "7869576120333847249" }
     let(:smsc_name) { "SMART" }
-    let(:status) { true }
+    let(:successful) { true }
+    let(:error_message) { nil }
 
     before do
       allow(Reply).to receive(:find).with(mt_message_id).and_return(reply)
@@ -20,8 +21,8 @@ describe MtMessageUpdateStatusJob do
     end
 
     it "should mark the reply as delivered by the smsc" do
-      expect(reply).to receive(:delivered_by_smsc!).with(smsc_name, smsc_message_id, status)
-      subject.perform(smsc_name, mt_message_id, smsc_message_id, status)
+      expect(reply).to receive(:delivered_by_smsc!).with(smsc_name, smsc_message_id, successful, error_message)
+      subject.perform(smsc_name, mt_message_id, smsc_message_id, successful, error_message)
     end
   end
 end

@@ -1,5 +1,4 @@
 class PhoneCall < ActiveRecord::Base
-  include Chibi::Communicable
   include Chibi::Communicable::FromUser
   include Chibi::Communicable::Chatable
   include Chibi::ChatStarter
@@ -15,6 +14,7 @@ class PhoneCall < ActiveRecord::Base
   attr_accessor :request_url, :to, :call_params
   alias_attribute :call_sid, :sid
 
+  validates :user, :associated => true, :presence => true
   validates :sid, :presence => true
 
   aasm :column => :state, :whiny_transitions => false do

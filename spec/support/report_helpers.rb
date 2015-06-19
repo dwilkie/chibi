@@ -1,9 +1,25 @@
-require_relative 'redis'
-
 module ReportHelpers
-  include RedisHelpers
-
   private
+
+  def sample_report_data
+    @sample_report_data ||= {"report" => {"month" => 1, "year" => 2014}}
+  end
+
+  def build_report
+    Report.new(sample_report_data["report"])
+  end
+
+  def store_report
+    build_report.store_report(sample_report_data)
+  end
+
+  def mock_redis
+    @mock_redis ||= MockRedis.new
+  end
+
+  def stub_redis
+    allow(Redis).to receive(:new).and_return(mock_redis)
+  end
 
   def asserted_report_type
     'application/json'

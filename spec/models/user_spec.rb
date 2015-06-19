@@ -10,7 +10,7 @@ describe User do
 
   include_context "replies"
 
-  let(:user) { create(:user) }
+  let(:user) { create(:user, :from_registered_service_provider) }
   let(:user_searching_for_friend) { create(:user, :searching_for_friend) }
   let(:new_user) { build(:user) }
   let(:cambodian) { build(:user, :cambodian) }
@@ -51,45 +51,37 @@ describe User do
   end
 
   shared_examples_for "within hours" do |background_job|
-    context "passing 'between' => [9, 22]" do
-      let(:hour_range_options) { {"between" => [9, 22]} }
+    include TimecopHelpers
 
-      context "given the current time is not between 09:00 ICT and 22:00 ICT" do
-        it "should not perform the task" do
-          Timecop.freeze(Time.zone.local(2012, 1, 7, 8)) do
-            send(task, hour_range_options)
-            send(negative_assertion)
-          end
+    context "given the current time is out of user hours" do
+      it "should not perform the task" do
+        at_time(7, 59) do
+          send(task)
+          send(negative_assertion)
         end
       end
+    end
 
-      context "given the current time is between 09:00 ICT and 22:00 ICT" do
-        before do
-          Timecop.freeze(Time.zone.local(2012, 1, 7, 22))
+    context "given the current time is not out of user hours" do
+      let(:valid_time) { [User::DEFAULT_USER_HOURS_MIN] }
+
+      def do_task_in_background
+        perform_background_job
+      end
+
+      def do_task
+        send(task, hour_range_options)
+      end
+
+      if background_job
+        it "should perform the task" do
+          at_time(*valid_time) { do_task_in_background }
+          send(positive_assertion)
         end
-
-        after do
-          Timecop.return
-        end
-
-        def do_task_in_background
-          perform_background_job(hour_range_options)
-        end
-
-        def do_task
-          send(task, hour_range_options)
-        end
-
-        if background_job
-          it "should perform the task" do
-            do_task_in_background
-            send(positive_assertion)
-          end
-        else
-          it "should perform the task" do
-            do_task
-            send(positive_assertion)
-          end
+      else
+        it "should perform the task" do
+          at_time(*valid_time) { do_task }
+          send(positive_assertion)
         end
       end
     end
@@ -312,38 +304,13 @@ describe User do
     end
   end
 
-  describe ".set_operator_name" do
-    it "should set the operator_name column for users without one set" do
-      asserted_operator_names = {}
-
-      with_operators(:only_registered => false) do |number_parts, assertions|
-        number = number_parts.join
-        user = create(:user, :mobile_number => number)
-        user.update_attribute(:operator_name, nil)
-        expect(user.operator_name).to be_nil
-        asserted_operator_names[user] == assertions["id"]
-      end
-
-      user_with_operator_name = create(:user, :mobile_number => "85512345678")
-      user_with_operator_name.update_attribute(:operator_name, "foo")
-      expect(user_with_operator_name.operator_name).to eq("foo")
-
-      described_class.set_operator_name
-
-      expect(user_with_operator_name.reload.operator_name).to eq("foo")
-      asserted_operator_names.each do |user, asserted_operator_name|
-        expect(user.reload.operator_name).to eq(asserted_operator_name)
-      end
-    end
-  end
-
-  describe ".find_friends" do
+  describe ".find_friends!" do
     def do_find_friends(options = {})
-      trigger_job(options) { described_class.find_friends(options) }
+      trigger_job(options) { described_class.find_friends! }
     end
 
-    def perform_background_job(options = {})
-      expect_message { do_find_friends(options) }
+    def perform_background_job
+      expect_message { do_find_friends }
     end
 
     before do
@@ -418,7 +385,7 @@ describe User do
     end
   end
 
-  describe ".remind!(options = {})" do
+  describe ".remind!" do
     let(:user_not_contacted_recently) { create(:user, :from_unknown_operator, :not_contacted_recently) }
 
     let(:registered_sp_user_not_contacted_recently) do
@@ -451,7 +418,7 @@ describe User do
 
     def do_remind(options = {})
       create_actors unless options.delete(:skip_create_actors)
-      expect_message { trigger_job(options) { described_class.remind!({"inactivity_cutoff" => 5.days.ago.to_s}.merge(options)) } }
+      expect_message { trigger_job(options) { described_class.remind! } }
     end
 
     def perform_background_job(options = {})
@@ -475,22 +442,6 @@ describe User do
       expect(reply_to(registered_sp_user_not_contacted_recently)).to be_nil
       expect(reply_to(registered_sp_user_with_recent_interaction)).to be_nil
       expect(reply_to(user_not_contacted_recently)).to be_nil
-    end
-
-    context "passing 'inactivity_cutoff' => 3.days.ago.to_s" do
-      it "should remind users that have not been contacted in the last 3 days" do
-        do_remind("inactivity_cutoff" => 3.days.ago.to_s)
-        assert_reminded
-        assert_user_reminded(registered_sp_user_not_contacted_for_a_short_time)
-      end
-    end
-
-    context "passing 'limit' => 1" do
-      it "should only remind the user who was contacted least recently" do
-        do_remind("limit" => 1)
-        assert_user_reminded(registered_sp_user_not_contacted_for_a_long_time)
-        expect(reply_to(registered_sp_user_not_contacted_recently)).to eq(nil)
-      end
     end
 
     it_should_behave_like "within hours", true do
@@ -525,7 +476,7 @@ describe User do
     end
   end
 
-  describe "#charge!(requester)" do
+  xdescribe "#charge!(requester)" do
     subject { create(:user, :from_chargeable_operator) }
     let(:requester) { Random.new.rand(0..1).zero? ? create(:message, :user => subject) : create(:phone_call, :user => subject) }
     let(:latest_charge_request) { subject.latest_charge_request }
@@ -643,48 +594,27 @@ describe User do
     end
   end
 
-  describe "#remind!(options = {})" do
-    let(:user) { create(:user, :not_contacted_recently) }
-
-    def do_remind(options = {})
-      expect_message { user.remind!({:inactivity_cutoff => 5.days.ago.to_s}.merge(options)) }
+  describe "#remind!" do
+    def assert_reminded!
+      expect(reply_to(subject).body).to be_present
     end
 
-    def assert_reminded
-      expect(reply_to(user).body).to be_present
+    def assert_not_reminded!
+      expect(reply_to(subject)).to be_nil
     end
 
-    def assert_not_reminded
-      expect(reply_to(user)).to be_nil
+    before do
+      expect_message { subject.remind! }
     end
 
     context "given the user needs reminding" do
-      it "should send a reminder to the user" do
-        do_remind
-        assert_reminded
-      end
-
-      context "passing :inactivity_cutoff => 8.days" do
-        it "not send a reminder to the user" do
-          do_remind(:inactivity_cutoff => 8.days.ago.to_s)
-          assert_not_reminded
-        end
-      end
+      subject { create(:user, :not_contacted_recently) }
+      it { assert_reminded! }
     end
 
     context "given the user does not need reminding" do
-      let(:user) { create(:user) }
-
-      it "should not send a reminder to the user" do
-        do_remind
-        assert_not_reminded
-      end
-    end
-
-    it_should_behave_like "within hours" do
-      let(:positive_assertion) { :assert_reminded }
-      let(:negative_assertion) { :assert_not_reminded }
-      let(:task) { :do_remind }
+      subject { create(:user) }
+      it { assert_not_reminded! }
     end
   end
 
@@ -1502,8 +1432,6 @@ describe User do
 
   describe "#can_call_short_code?" do
     it "should return true only if the user belongs to a operator supporting voice" do
-      expect(user).not_to be_can_call_short_code
-
       with_operators do |number_parts, assertions|
         number = number_parts.join
         new_user = build(:user, :mobile_number => number)
@@ -1703,7 +1631,7 @@ describe User do
   describe "#find_friends!" do
     def do_find_friends(options = {})
       reference_user = options.delete(:reference_user) || user_searching_for_friend
-      reference_user.find_friends!(options)
+      reference_user.find_friends!
     end
 
     before do
@@ -1727,12 +1655,6 @@ describe User do
           :searcher => user_not_searching_for_friend, :still_searching => false
         )
       end
-    end
-
-    it_should_behave_like "within hours" do
-      let(:positive_assertion) { :assert_friend_found }
-      let(:negative_assertion) { :assert_friend_not_found }
-      let(:task) { :do_find_friends }
     end
   end
 end

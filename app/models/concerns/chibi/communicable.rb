@@ -2,11 +2,6 @@ module Chibi
   module Communicable
     extend ActiveSupport::Concern
 
-    included do
-      belongs_to :user, :touch => :last_contacted_at
-      validates :user, :associated => true, :presence => true
-    end
-
     module FromUser
       extend ActiveSupport::Concern
       include Chibi::Twilio::ApiHelpers
@@ -18,10 +13,12 @@ module Chibi
       MIN_LOCAL_NUMBER_LENGTH = 8
 
       included do
+        belongs_to        :user
         before_validation :assign_to_user, :on => :create
         after_commit :record_user_interaction, :on => :create
 
-        validates :from, :presence => true
+        validates :user, :from, :presence => true
+        validates :user, :presence => true
       end
 
       def from=(value)
@@ -74,7 +71,7 @@ module Chibi
       end
 
       def assign_to_user
-        self.user = User.find_or_initialize_by(:mobile_number => from) unless user_id.present?
+        self.user ||= User.find_or_initialize_by(:mobile_number => from)
       end
 
       module ClassMethods

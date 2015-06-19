@@ -1,5 +1,4 @@
 class Message < ActiveRecord::Base
-  include Chibi::Communicable
   include Chibi::Communicable::FromUser
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
@@ -12,10 +11,11 @@ class Message < ActiveRecord::Base
 
   has_many :message_parts
 
-  attr_accessor :pre_process
+  attr_accessor :continue_processing
 
   alias_attribute :origin, :from
 
+  validates :user, :associated => true, :presence => true
   validates :channel, :presence => true
   validates :csms_reference_number, :presence => true,
                                     :numericality => {
@@ -34,29 +34,36 @@ class Message < ActiveRecord::Base
   before_validation :normalize_channel, :normalize_to, :on => :create
   before_validation :set_body_from_message_parts
 
+  delegate :login!, :logout!, :reply_not_enough_credit!, :to => :user
+
   aasm :column => :state, :whiny_transitions => false do
     state :received, :initial => true
     state :processed
     state :awaiting_charge_result
 
-    event :process, :if => :can_be_processed?, :before => :queue_for_cleanup do
-      transitions(:from => :received, :to => :awaiting_charge_result, :unless => :user_charge!)
-      transitions(:from => :received, :to => :processed, :after => :route_to_destination)
-      transitions(:from => :awaiting_charge_result, :to => :processed, :after => :examine_charge_result)
+    event :await_charge_result do
+      transitions(:from => :received, :to => :awaiting_charge_result)
+    end
+
+    event :process, :before => [:queue_for_cleanup, :stop_awaiting_parts], :if => :can_be_processed? do
+      transitions(
+        :from => [:received, :awaiting_charge_result],
+        :to => :processed,
+        :after => :post_process!
+      )
     end
   end
 
-  def self.queue_unprocessed(options = {})
-    options[:timeout] ||= 30.seconds.ago
-    unprocessed = where.not(
-      :state => :processed
-    ).where("created_at <= ?", options[:timeout])
-    unprocessed.where(:chat_id => nil).find_each do |message|
-      message.queue_for_processing!
-    end
-    unprocessed.where.not(:chat_id => nil).find_each do |message|
-      message.process!
-    end
+  def self.queue_unprocessed_multipart!
+    unprocessed_multipart.find_each { |message| message.queue_for_processing! }
+  end
+
+  def self.unprocessed_multipart
+    received.multipart.where(self.arel_table[:created_at].lt(awaiting_parts_timeout.seconds.ago))
+  end
+
+  def self.multipart
+    where(self.arel_table[:number_of_parts].gt(1))
   end
 
   def self.from_aggregator(params = {})
@@ -115,21 +122,61 @@ class Message < ActiveRecord::Base
   end
 
   def stop_awaiting_parts
-    return false unless awaiting_parts_timeout?
-    self.number_of_parts = 1
-    save!
-    queue_for_processing!
-    true
+    if awaiting_parts_timeout?
+      self.number_of_parts = 1
+      save!
+      queue_for_processing!
+    end
+  end
+
+  def pre_process!
+    wait_for_charge_result = false
+
+    if received?
+      do_pre_processing
+      wait_for_charge_result = true if continue_processing? && !charge!
+    end
+
+    wait_for_charge_result ? await_charge_result! : process!
   end
 
   private
 
+  def charge!
+    user.charge!(self)
+  end
+
+  def charge_request_failed?
+    charge_request && charge_request.failed?
+  end
+
+  def post_process!
+    charge_request_failed? ? reply_not_enough_credit! : route_to_destination
+  end
+
+  def route_to_destination
+    return if !continue_processing?
+    start_new_chat = true
+
+    if !user_wants_to_chat_with_someone_new?
+      user.update_profile(normalized_body)
+      chat_to_forward_message_to = Chat.intended_for(self, :num_recent_chats => 10) || user.active_chat
+
+      if chat_to_forward_message_to.present?
+        chat_to_forward_message_to.forward_message(self)
+        start_new_chat = false
+      end
+    end
+
+    activate_chats! if start_new_chat
+  end
+
+  def continue_processing?
+    continue_processing.nil? || !!continue_processing
+  end
+
   def awaiting_parts_timeout?
-    awaiting_parts? &&
-    created_at < (
-      Rails.application.secrets[:message_awaiting_parts_timeout] ||
-      DEFAULT_AWAITING_PARTS_TIMEOUT
-    ).to_i.seconds.ago
+    awaiting_parts? && created_at < self.class.awaiting_parts_timeout.seconds.ago
   end
 
   def queue_for_cleanup
@@ -159,57 +206,24 @@ class Message < ActiveRecord::Base
   end
 
   def multipart?
-    csms_reference_number.to_i > 0 && number_of_parts.to_i > 1
+    csms_reference_number.to_i > 0 || number_of_parts.to_i > 1
   end
 
-  def examine_charge_result
-    if charge_request && charge_request.failed?
-      user.reply_not_enough_credit!
-    else
-      self.pre_process = true
-      route_to_destination
-    end
-  end
-
-  def route_to_destination
-    return true unless pre_process
-    start_new_chat = true
-
-    unless user_wants_to_chat_with_someone_new?
-      user.update_profile(normalized_body)
-      chat_to_forward_message_to = Chat.intended_for(self, :num_recent_chats => 10) || user.active_chat
-
-      if chat_to_forward_message_to.present?
-        chat_to_forward_message_to.forward_message(self)
-        start_new_chat = false
-      end
-    end
-
-    activate_chats! if start_new_chat
-  end
-
-  def user_charge!
-    pre_process ? user.charge!(self) : true
-  end
-
-  def pre_process
-    self.pre_process = false if (processed? || chat_id.present?)
-    return @pre_process unless @pre_process.nil?
+  def do_pre_processing
     if user_wants_to_logout?
-      user.logout!
-      self.pre_process = false
+      logout!
+      self.continue_processing = false
     else
-      user.login!
-      self.pre_process = true
+      login!
     end
   end
 
   def user_wants_to_logout?
-    normalized_body == "stop" || normalized_body == "off" || normalized_body == "stop all"
+    ["stop", "off", "stop all"].include?(normalized_body)
   end
 
   def user_wants_to_chat_with_someone_new?
-    Rails.application.secrets[:text_new_for_new_chat].to_i == 1 && normalized_body.gsub(/["']/, "") == "new"
+    normalized_body.gsub(/["']/, "") == "new"
   end
 
   def normalized_body
@@ -217,7 +231,7 @@ class Message < ActiveRecord::Base
   end
 
   def normalize_channel
-    self.channel = channel.downcase if channel?
+    self.channel = channel.to_s.downcase.presence
   end
 
   def normalize_to
@@ -228,9 +242,14 @@ class Message < ActiveRecord::Base
     Chat.activate_multiple!(user, :starter => self, :notify => true)
   end
 
+  def self.awaiting_parts_timeout
+    (Rails.application.secrets[:message_awaiting_parts_timeout] || DEFAULT_AWAITING_PARTS_TIMEOUT).to_i
+  end
+
   def self.from_twilio(params)
     params = params.underscorify_keys
     new(params.slice(:body, :from, :to).merge(:guid => params[:message_sid], :channel => "twilio"))
   end
+
   private_class_method :from_twilio
 end

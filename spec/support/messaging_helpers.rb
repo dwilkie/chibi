@@ -107,7 +107,8 @@ module MessagingHelpers
         options[:smpp_server_id],
         options[:short_code],
         options[:to],
-        options[:body]
+        options[:body],
+        options[:smsc_priority].to_i
       ]
     )
     expect(job[:queue]).to eq(Rails.application.secrets[:smpp_internal_mt_message_queue])
@@ -119,7 +120,7 @@ module MessagingHelpers
 
     expect_locate(options) do
       expect_message do
-        trigger_job(:only => [MessageProcessorJob]) do
+        trigger_job(:only => [MessageProcessorJob, LocatorJob]) do
           post(
             messages_path,
             aggregator_params,

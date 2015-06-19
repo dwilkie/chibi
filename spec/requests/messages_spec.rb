@@ -1,11 +1,9 @@
 require 'rails_helper'
 
 describe "Messages" do
-
-  describe "POST /messages" do
+  describe "POST '/messages'" do
     include MessagingHelpers
     include TranslationHelpers
-    include EnvHelpers
 
     include_context "existing users"
     include_context "replies"

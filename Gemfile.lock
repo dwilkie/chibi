@@ -1,17 +1,17 @@
 GIT
   remote: git://github.com/aasm/aasm.git
-  revision: f394bde6462fab32808b3262009fc0cdfc1a54bf
+  revision: dad5b44bcfed33e51ad10bc47f04d4fe1bbfbe99
   specs:
-    aasm (4.1.0)
+    aasm (4.1.1)
 
 GIT
   remote: git://github.com/dwilkie/torasup.git
-  revision: fefa251e71975e2cde4b199092b9d2c6f2777b8e
+  revision: 32a449f9648077a515b3cbe0dd28987801aef4d1
   specs:
-    torasup (0.0.9)
+    torasup (0.0.10)
       countries
       deep_merge
-      phony (>= 2.10.2)
+      phony (>= 2.14.3)
 
 GEM
   remote: https://rubygems.org/
@@ -52,8 +52,8 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
-    addressable (2.3.7)
-    airbrake (4.1.0)
+    addressable (2.3.8)
+    airbrake (4.2.1)
       builder
       multi_json
     arel (6.0.0)
@@ -79,15 +79,15 @@ GEM
     coffee-rails (4.0.1)
       coffee-script (>= 2.2.0)
       railties (>= 4.0.0, < 5.0)
-    coffee-script (2.3.0)
+    coffee-script (2.4.1)
       coffee-script-source
       execjs
-    coffee-script-source (1.9.1)
+    coffee-script-source (1.9.1.1)
     colored (1.2)
-    connection_pool (2.1.3)
-    countries (0.11.3)
+    connection_pool (2.2.0)
+    countries (0.11.4)
       currencies (~> 0.4.2)
-      i18n_data (~> 0.6.0)
+      i18n_data (~> 0.7.0)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
     currencies (0.4.2)
@@ -95,21 +95,24 @@ GEM
     deep_merge (1.0.1)
     diff-lcs (1.2.5)
     erubis (2.7.0)
-    excon (0.45.0)
-    execjs (2.4.0)
+    excon (0.45.3)
+    execjs (2.5.2)
     factory_girl (4.5.0)
       activesupport (>= 3.0.0)
     faker (1.4.3)
       i18n (~> 0.5)
     fission (0.5.0)
       CFPropertyList (~> 2.2)
-    fog (1.28.0)
+    fog (1.31.0)
       fog-atmos
       fog-aws (~> 0.0)
       fog-brightbox (~> 0.4)
-      fog-core (~> 1.27, >= 1.27.3)
+      fog-core (~> 1.30)
       fog-ecloud
+      fog-google (>= 0.0.2)
       fog-json
+      fog-local
+      fog-powerdns (>= 0.1.1)
       fog-profitbricks
       fog-radosgw (>= 0.0.2)
       fog-riakcs
@@ -126,7 +129,7 @@ GEM
     fog-atmos (0.1.0)
       fog-core
       fog-xml
-    fog-aws (0.1.1)
+    fog-aws (0.4.0)
       fog-core (~> 1.27)
       fog-json (~> 1.0)
       fog-xml (~> 0.1)
@@ -135,23 +138,34 @@ GEM
       fog-core (~> 1.22)
       fog-json
       inflecto (~> 0.0.2)
-    fog-core (1.29.0)
+    fog-core (1.30.0)
       builder
-      excon (~> 0.38)
+      excon (~> 0.45)
       formatador (~> 0.2)
       mime-types
       net-scp (~> 1.1)
       net-ssh (>= 2.1.3)
-    fog-ecloud (0.0.2)
+    fog-ecloud (0.1.3)
       fog-core
       fog-xml
-    fog-json (1.0.0)
-      multi_json (~> 1.0)
-    fog-profitbricks (0.0.2)
+    fog-google (0.0.5)
+      fog-core
+      fog-json
+      fog-xml
+    fog-json (1.0.2)
+      fog-core (~> 1.0)
+      multi_json (~> 1.10)
+    fog-local (0.2.1)
+      fog-core (~> 1.27)
+    fog-powerdns (0.1.1)
+      fog-core (~> 1.27)
+      fog-json (~> 1.0)
+      fog-xml (~> 0.1)
+    fog-profitbricks (0.0.3)
       fog-core
       fog-xml
       nokogiri
-    fog-radosgw (0.0.3)
+    fog-radosgw (0.0.4)
       fog-core (>= 1.21.0)
       fog-json
       fog-xml (>= 0.0.1)
@@ -159,83 +173,82 @@ GEM
       fog-core
       fog-json
       fog-xml
-    fog-sakuracloud (1.0.0)
+    fog-sakuracloud (1.0.1)
       fog-core
       fog-json
-    fog-serverlove (0.1.1)
+    fog-serverlove (0.1.2)
       fog-core
       fog-json
-    fog-softlayer (0.4.1)
+    fog-softlayer (0.4.6)
       fog-core
       fog-json
-    fog-storm_on_demand (0.1.0)
+    fog-storm_on_demand (0.1.1)
       fog-core
       fog-json
-    fog-terremark (0.0.4)
+    fog-terremark (0.1.0)
       fog-core
       fog-xml
-    fog-vmfusion (0.0.1)
+    fog-vmfusion (0.1.0)
       fission
       fog-core
-    fog-voxel (0.0.2)
+    fog-voxel (0.1.0)
       fog-core
       fog-xml
-    fog-xml (0.1.1)
+    fog-xml (0.1.2)
       fog-core
       nokogiri (~> 1.5, >= 1.5.11)
     foreman (0.78.0)
       thor (~> 0.19.1)
     formatador (0.2.5)
     geocoder (1.2.8)
-    globalid (0.3.3)
+    globalid (0.3.5)
       activesupport (>= 4.1.0)
     haml (4.0.6)
       tilt
     hash-deep-merge (0.1.1)
     hike (1.2.3)
-    hirefire-resource (0.3.5)
+    hirefire-resource (0.3.7)
     hitimes (1.2.2)
     i18n (0.7.0)
-    i18n_data (0.6.3)
+    i18n_data (0.7.0)
     inflecto (0.0.2)
     ipaddress (0.8.0)
     jquery-rails (4.0.3)
       rails-dom-testing (~> 1.0)
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
-    json (1.8.2)
-    jwt (1.4.1)
+    json (1.8.3)
+    jwt (1.5.0)
     kaminari (0.16.3)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
-    kgio (2.9.3)
     launchy (2.4.3)
       addressable (~> 2.3)
     lazy_high_charts (1.5.4)
       bundler (>= 1.0)
       hash-deep-merge
-    loofah (2.0.1)
+    loofah (2.0.2)
       nokogiri (>= 1.5.9)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
     method_source (0.8.2)
-    mime-types (2.4.3)
+    mime-types (2.6.1)
     mini_portile (0.6.2)
-    minitest (5.5.1)
-    mock_redis (0.14.0)
-    multi_json (1.11.0)
+    minitest (5.7.0)
+    mock_redis (0.14.1)
+    multi_json (1.11.1)
     multi_xml (0.5.5)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.2)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
-    parallel (1.4.1)
-    parallel_tests (1.3.7)
+    parallel (1.6.0)
+    parallel_tests (1.3.9)
       parallel
-    pg (0.18.1)
-    phony (2.12.5)
-    phony_rails (0.12.0)
+    pg (0.18.2)
+    phony (2.14.3)
+    phony_rails (0.12.6)
       activesupport (>= 3.0)
       countries (~> 0.8, >= 0.8.2)
       phony (~> 2.12)
@@ -243,7 +256,9 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    rack (1.6.0)
+    puma (2.11.3)
+      rack (>= 1.1, < 2.0)
+    rack (1.6.1)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.3)
@@ -286,21 +301,20 @@ GEM
       activesupport (= 4.2.1)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
-    raindrops (0.13.0)
     rake (10.4.2)
     redis (3.2.1)
-    redis-namespace (1.5.1)
+    redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
     require_all (1.3.2)
-    rspec-core (3.2.2)
+    rspec-core (3.2.3)
       rspec-support (~> 3.2.0)
-    rspec-expectations (3.2.0)
+    rspec-expectations (3.2.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.2.0)
     rspec-mocks (3.2.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.2.0)
-    rspec-rails (3.2.1)
+    rspec-rails (3.2.3)
       actionpack (>= 3.0, < 4.3)
       activesupport (>= 3.0, < 4.3)
       railties (>= 3.0, < 4.3)
@@ -317,10 +331,10 @@ GEM
       sass (~> 3.2.2)
       sprockets (~> 2.8, < 3.0)
       sprockets-rails (~> 2.0)
-    sexp_processor (4.5.0)
+    sexp_processor (4.6.0)
     shoulda-matchers (2.8.0)
       activesupport (>= 3.0.0)
-    sidekiq (3.3.3)
+    sidekiq (3.3.4)
       celluloid (>= 0.16.0)
       connection_pool (>= 2.1.1)
       json
@@ -336,7 +350,7 @@ GEM
       multi_json (~> 1.0)
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
-    sprockets-rails (2.2.4)
+    sprockets-rails (2.3.1)
       actionpack (>= 3.0)
       activesupport (>= 3.0)
       sprockets (>= 2.8, < 4.0)
@@ -345,12 +359,12 @@ GEM
     thor (0.19.1)
     thread_safe (0.3.5)
     tilt (1.4.1)
-    timecop (0.7.3)
+    timecop (0.7.4)
     timers (4.0.1)
       hitimes
     turbolinks (2.5.3)
       coffee-rails
-    twilio-ruby (3.15.2)
+    twilio-ruby (4.2.0)
       builder (>= 2.1.2)
       jwt (~> 1.0)
       multi_json (>= 1.3.0)
@@ -359,17 +373,13 @@ GEM
     uglifier (2.7.1)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
-    unicorn (4.8.3)
-      kgio (~> 2.6)
-      rack
-      raindrops (~> 0.7)
     vcr (2.9.3)
     web-console (2.1.2)
       activemodel (>= 4.0)
       binding_of_caller (>= 0.7.2)
       railties (>= 4.0)
       sprockets-rails (>= 2.0, < 4.0)
-    webmock (1.20.4)
+    webmock (1.21.0)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
     xpath (2.0.0)
@@ -402,6 +412,7 @@ DEPENDENCIES
   pg
   phony_rails
   pry
+  puma
   rails (= 4.2.1)
   rails_12factor
   rails_best_practices
@@ -417,7 +428,6 @@ DEPENDENCIES
   turbolinks
   twilio-ruby
   uglifier (>= 1.3.0)
-  unicorn
   vcr
   web-console (~> 2.0)
   webmock

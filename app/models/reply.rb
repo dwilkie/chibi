@@ -1,8 +1,8 @@
 class Reply < ActiveRecord::Base
   before_validation :set_destination, :on => :create
   before_validation :normalize_token
+  after_commit :msisdn_discovery_notify
 
-  include Chibi::Communicable
   include Chibi::Communicable::Chatable
   include Chibi::Analyzable
   include Chibi::Twilio::ApiHelpers
@@ -15,6 +15,7 @@ class Reply < ActiveRecord::Base
   ERROR     = "error"
   EXPIRED   = "expired"
   UNKNOWN   = "unknown"
+  REJECTED  = "rejected"
 
   TWILIO_DELIVERED = DELIVERED
   TWILIO_FAILED = FAILED
@@ -54,6 +55,9 @@ class Reply < ActiveRecord::Base
     }
   }
 
+  belongs_to :user, :touch => :last_contacted_at
+  belongs_to :msisdn_discovery
+
   validates :to,
             :presence => true,
             :phony_plausible => true
@@ -63,6 +67,7 @@ class Reply < ActiveRecord::Base
   validates :delivery_channel, :inclusion => { :in => DELIVERY_CHANNELS }, :allow_nil => true
 
   delegate :mobile_number, :to => :user, :prefix => true, :allow_nil => true
+  delegate :notify, :to => :msisdn_discovery, :prefix => true, :allow_nil => true
 
   alias_attribute :destination, :to
 
@@ -90,6 +95,13 @@ class Reply < ActiveRecord::Base
         :from => :queued_for_smsc_delivery,
         :to   => :delivered_by_smsc,
         :if   => :delivery_accepted?
+      )
+    end
+
+    event :delivery_rejected do
+      transitions(
+        :from => :queued_for_smsc_delivery,
+        :to => :failed
       )
     end
 
@@ -178,11 +190,35 @@ class Reply < ActiveRecord::Base
   end
 
   def self.undelivered
-    where(:delivered_at => nil).order(:created_at)
+    where(:delivered_at => nil)
+  end
+
+  def self.with_token
+    where.not(:token => nil)
+  end
+
+  def self.queued_for_smsc_delivery_too_long
+    queued_for_smsc_delivery.where(self.arel_table[:delivered_at].lt(1.day.ago))
+  end
+
+  def self.fix_invalid_states!
+    queued_for_smsc_delivery.undelivered.update_all("delivered_at = updated_at")
+    queued_for_smsc_delivery_too_long.with_token.find_each do |reply|
+      reply.send(:update_delivery_state!, DELIVERED)
+      reply.send(:parse_smsc_delivery_status!)
+    end
   end
 
   def self.cleanup!
-    where.not(:delivered_at => nil).where("updated_at < ?", 1.month.ago).delete_all
+    delivered.where(self.arel_table[:updated_at].lt(1.month.ago)).delete_all
+  end
+
+  def self.accepted_by_smsc
+    delivered.where.not(:state => [:pending_delivery, :queued_for_smsc_delivery])
+  end
+
+  def self.not_a_msisdn_discovery
+    where(:msisdn_discovery_id => nil)
   end
 
   def body
@@ -190,7 +226,7 @@ class Reply < ActiveRecord::Base
   end
 
   def delivered?
-    delivered_at.present?
+    delivered_at?
   end
 
   def forward_message(from, message)
@@ -198,8 +234,9 @@ class Reply < ActiveRecord::Base
     save
   end
 
-  def forward_message!(from, message)
+  def forward_message!(from, message, options = {})
     forward_message(from, message)
+    self.smsc_priority = options[:smsc_priority] || 10
     deliver!
   end
 
@@ -223,21 +260,33 @@ class Reply < ActiveRecord::Base
     deliver!
   end
 
+  def broadcast!(options = {})
+    self.body = I18n.t(:broadcast, options)
+    self.smsc_priority = options[:smsc_priority] || -10
+    deliver!
+  end
+
   def not_enough_credit!
     self.body = I18n.t(:not_enough_credit, :locale => user.locale)
     deliver!
   end
 
-  def send_reminder!
+  def send_reminder!(options = {})
     self.body = user.gay? ? canned_reply(:recipient => user).gay_reminder : random_canned_greeting(:recipient => user)
     prepend_screen_id(Faker::Name.first_name)
+    self.smsc_priority = options[:smsc_priority] || -5
     deliver!
   end
 
-  def delivered_by_smsc!(smsc_name, smsc_message_id, status)
-    return request_delivery! unless status
-    self.token = smsc_message_id
-    update_delivery_state!(DELIVERED)
+  def delivered_by_smsc!(smsc_name, smsc_message_id, successful, error_message = nil)
+    self.smsc_message_status = error_message.to_s.downcase.tr(" ", "_").presence
+
+    if successful
+      self.token = smsc_message_id
+      update_delivery_state!(DELIVERED)
+    else
+      update_delivery_state!(REJECTED)
+    end
   end
 
   def delivered_by_twilio!
@@ -275,6 +324,8 @@ class Reply < ActiveRecord::Base
       delivery_expired!
     when UNKNOWN
       delivery_unknown!
+    when REJECTED
+      delivery_rejected!
     end
   end
 
@@ -383,7 +434,8 @@ class Reply < ActiveRecord::Base
       smpp_server_id,
       operator.short_code,
       destination,
-      body
+      body,
+      smsc_priority
     )
   end
 

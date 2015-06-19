@@ -11,7 +11,7 @@ module Chibi
       end
 
       def twilio_formatted(number)
-        Phony.formatted(number, :format => :international, :spaces => "")
+        "+" + Phony.normalize(number)
       end
 
       def twilio_outgoing_number(options = {})
