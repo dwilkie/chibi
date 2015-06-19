@@ -20,7 +20,7 @@ gem 'multi_xml'
 gem 'carrierwave'
 gem 'fog'
 gem 'sidekiq'
-gem 'sinatra', :require => nil
+gem 'sinatra', :require => false
 gem 'airbrake'
 
 # Bundle edge Rails instead:
