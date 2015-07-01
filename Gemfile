@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby '2.2.2'
 
-gem 'rails', '4.2.1'
+gem 'rails', '4.2.3'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -20,7 +20,7 @@ gem 'multi_xml'
 gem 'carrierwave'
 gem 'fog'
 gem 'sidekiq'
-gem 'sinatra'
+gem 'sinatra', :require => false
 gem 'airbrake'
 
 # Bundle edge Rails instead:

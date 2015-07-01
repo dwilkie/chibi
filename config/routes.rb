@@ -1,5 +1,3 @@
-require 'sidekiq/web'
-
 Rails.application.routes.draw do
   root "welcome#index"
 
@@ -27,6 +25,8 @@ Rails.application.routes.draw do
   resources :test_replies, :only => [:new, :create]
 
   resource :report, :only => [:create, :show, :destroy]
+
+  require 'sidekiq/web'
 
   Sidekiq::Web.use(Rack::Auth::Basic) do |username, password|
     username == Rails.application.secrets[:http_basic_auth_admin_user] && password == Rails.application.secrets[:http_basic_auth_admin_password]

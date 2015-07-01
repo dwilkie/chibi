@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150607062339) do
+ActiveRecord::Schema.define(version: 20150630080602) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -51,7 +51,6 @@ ActiveRecord::Schema.define(version: 20150607062339) do
   end
 
   add_index "charge_requests", ["requester_type", "requester_id"], name: "index_charge_requests_on_requester_type_and_requester_id", using: :btree
-  add_index "charge_requests", ["updated_at", "state"], name: "index_charge_requests_on_updated_at_and_state", using: :btree
   add_index "charge_requests", ["user_id"], name: "index_charge_requests_on_user_id", using: :btree
 
   create_table "chats", force: :cascade do |t|
@@ -63,9 +62,6 @@ ActiveRecord::Schema.define(version: 20150607062339) do
     t.string   "starter_type", limit: 255
   end
 
-  add_index "chats", ["friend_id"], name: "index_chats_on_friend_id", using: :btree
-  add_index "chats", ["starter_type", "starter_id"], name: "index_chats_on_starter_type_and_starter_id", using: :btree
-  add_index "chats", ["updated_at"], name: "index_chats_on_updated_at", using: :btree
   add_index "chats", ["user_id", "friend_id"], name: "index_chats_on_user_id_and_friend_id", unique: true, using: :btree
 
   create_table "locations", force: :cascade do |t|
@@ -177,7 +173,7 @@ ActiveRecord::Schema.define(version: 20150607062339) do
   end
 
   add_index "replies", ["chat_id"], name: "index_replies_on_chat_id", using: :btree
-  add_index "replies", ["state"], name: "index_replies_on_state", using: :btree
+  add_index "replies", ["msisdn_discovery_id"], name: "index_replies_on_msisdn_discovery_id", using: :btree
   add_index "replies", ["token"], name: "index_replies_on_token", unique: true, using: :btree
   add_index "replies", ["user_id"], name: "index_replies_on_user_id", using: :btree
 
@@ -198,12 +194,8 @@ ActiveRecord::Schema.define(version: 20150607062339) do
     t.integer  "latest_charge_request_id"
   end
 
-  add_index "users", ["active_chat_id"], name: "index_users_on_active_chat_id", using: :btree
   add_index "users", ["date_of_birth"], name: "index_users_on_date_of_birth", using: :btree
-  add_index "users", ["latest_charge_request_id"], name: "index_users_on_latest_charge_request_id", using: :btree
   add_index "users", ["mobile_number"], name: "index_users_on_mobile_number", unique: true, using: :btree
-  add_index "users", ["operator_name"], name: "index_users_on_operator_name", using: :btree
-  add_index "users", ["state"], name: "index_users_on_state", using: :btree
 
   add_foreign_key "msisdn_discoveries", "msisdn_discovery_runs"
   add_foreign_key "msisdn_discoveries", "msisdns"
