@@ -318,11 +318,6 @@ describe User do
       user
     end
 
-    it "should only try and find friends for users who are looking for them" do
-      do_find_friends
-      assert_friend_found
-    end
-
     it_should_behave_like "within hours", true do
       let(:positive_assertion) { :assert_friend_found }
       let(:negative_assertion) { :assert_friend_not_found }
