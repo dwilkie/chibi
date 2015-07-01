@@ -6,7 +6,7 @@ kh:
       default_mobile_subscriber_number_min: 203000
       metadata:
         short_code: "2442"
-        smpp_server_id: "smart"
+        smpp_server_id: "smart_huawei"
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
         dial_string: "sofia/external/%{number_to_dial}@%{voip_gateway_host}"
