@@ -178,7 +178,7 @@ class Reply < ActiveRecord::Base
   end
 
   def self.failed_to_deliver
-    where(:state => "failed")
+    where(self.arel_table[:state].eq("failed").or(self.arel_table[:state].eq("expired")))
   end
 
   def self.delivered
@@ -191,6 +191,14 @@ class Reply < ActiveRecord::Base
 
   def self.undelivered
     where(:delivered_at => nil)
+  end
+
+  def self.for_user(user)
+    where(:user_id => user.id)
+  end
+
+  def self.prepended_with(*names)
+    where(names.map {|name| self.arel_table[:body].matches("#{name.tr('%', '')}:%") }.reduce(:or))
   end
 
   def self.with_token
@@ -303,6 +311,18 @@ class Reply < ActiveRecord::Base
     self.smsc_message_status = twilio_message.status.downcase
     save!
     parse_twilio_delivery_status!
+  end
+
+  def deliver_via_twilio!
+    response = twilio_client.messages.create(
+      :from => twilio_outgoing_number(:sms_capable => true),
+      :to => twilio_formatted(destination),
+      :body => body
+    )
+    self.token = response.sid
+    save!
+    enqueue_twilio_mt_message_received
+    enqueue_twilio_message_status_fetch
   end
 
   private
@@ -440,15 +460,7 @@ class Reply < ActiveRecord::Base
   end
 
   def request_delivery_via_twilio!
-    response = twilio_client.messages.create(
-      :from => twilio_outgoing_number(:sms_capable => true),
-      :to => twilio_formatted(destination),
-      :body => body
-    )
-    self.token = response.sid
-    save!
-    enqueue_twilio_mt_message_received
-    enqueue_twilio_message_status_fetch
+    enqueue_twilio_mt_message_sender_job
   end
 
   def enqueue_twilio_message_status_fetch
@@ -457,6 +469,10 @@ class Reply < ActiveRecord::Base
 
   def enqueue_twilio_mt_message_received
     TwilioMtMessageReceivedJob.perform_later(id)
+  end
+
+  def enqueue_twilio_mt_message_sender_job
+    TwilioMtMessageSenderJob.perform_later(id)
   end
 
   def twilio_message_status_fetcher_delay

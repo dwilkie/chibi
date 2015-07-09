@@ -1,21 +1,21 @@
 namespace :chats do
-  desc "Ends all active chats which have had no activity in the last 10 minutes. (These chats can be restarted)"
-  task :end_inactive => :environment do
-    ChatExpirerJob.perform_later(:active_user => true, :activate_new_chats => true, :inactivity_cutoff => 10.minutes.ago.to_s)
+  desc "Provisionally deactivates chats with inactivity"
+  task :provisionally_deactivate => :environment do
+    ChatExpirerScheduledJob.perform_later("provisional")
   end
 
-  desc "Terminates all chats which have had no activity in the last 24 hours. (These chats cannot be restarted)"
-  task :terminate_inactive => :environment do
-    ChatExpirerJob.perform_later(:all => true, :inactivity_cutoff => 24.hours.ago.to_s)
+  desc "Permanently deactivates chats with inactivity"
+  task :permanently_deactivate => :environment do
+    ChatExpirerScheduledJob.perform_later("permanent")
   end
 
-  desc "Reactivates stagnant chats which have pending messages"
-  task :reactivate_stagnant => :environment do
-    ChatReinvigoratorJob.perform_later
+  desc "Reactivates chats which have pending messages"
+  task :reinvigorate => :environment do
+    ChatReinvigoratorScheduledJob.perform_later
   end
 
   desc "Removes old chats that have no interaction"
   task :cleanup => :environment do
-    Chat.cleanup!
+    ChatCleanupScheduledJob.perform_later
   end
 end

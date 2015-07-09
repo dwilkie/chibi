@@ -1,25 +1,22 @@
 require 'rails_helper'
 
 describe ChatExpirerJob do
-  let(:options) { {"active_user" => true, "activate_new_chats" => true, "all" => true, "inactivity_period" => 24.hours.ago.to_s} }
-  subject { described_class.new(options) }
-
-  it "should be serializeable" do
-    expect(subject.serialize["arguments"].first).to include(options)
-  end
-
   describe "#queue_name" do
     it { expect(subject.queue_name).to eq(Rails.application.secrets[:chat_expirer_queue]) }
   end
 
-  describe "#perform(options = {})" do
+  describe "#perform(chat_id, mode)" do
+    let(:chat) { double(Chat) }
+    let(:mode) { "mode" }
+
     before do
-      allow(Chat).to receive(:end_inactive)
+      allow(chat).to receive(:expire!)
+      allow(Chat).to receive(:find).and_return(chat)
     end
 
-    it "should end inactive chats" do
-      expect(Chat).to receive(:end_inactive).with(options)
-      subject.perform(options)
+    it "should tell the chat to expire itself with the correct mode" do
+      expect(chat).to receive(:expire!).with(mode)
+      subject.perform(1, mode)
     end
   end
 end

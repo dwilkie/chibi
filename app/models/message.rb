@@ -109,6 +109,10 @@ class Message < ActiveRecord::Base
     read_attribute(:body).to_s
   end
 
+  def english_words
+    body.split(/[^a-z]/i).reject(&:empty?)
+  end
+
   def charge_request_updated!
     queue_for_processing!
   end
@@ -160,7 +164,7 @@ class Message < ActiveRecord::Base
 
     if !user_wants_to_chat_with_someone_new?
       user.update_profile(normalized_body)
-      chat_to_forward_message_to = Chat.intended_for(self, :num_recent_chats => 10) || user.active_chat
+      chat_to_forward_message_to = Chat.intended_for(self) || user.active_chat
 
       if chat_to_forward_message_to.present?
         chat_to_forward_message_to.forward_message(self)

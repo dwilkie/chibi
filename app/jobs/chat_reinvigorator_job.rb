@@ -1,7 +1,7 @@
 class ChatReinvigoratorJob < ActiveJob::Base
-  queue_as Rails.application.secrets[:chat_reinvigorator_queue]
+  queue_as(Rails.application.secrets[:chat_reinvigorator_queue])
 
-  def perform
-    Chat.reinvigorate!
+  def perform(chat_id)
+    Chat.find(chat_id).reinvigorate!
   end
 end

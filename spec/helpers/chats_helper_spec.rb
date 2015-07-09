@@ -20,7 +20,7 @@ describe ChatsHelper do
     end
 
     it "should return a link for the chat user" do
-      assert_chat_user_link(chat, :inactive_user, :link => false)
+      assert_chat_user_link(chat, :active_user, :link => false)
 
       USER_TYPES_IN_CHAT.each do |user_type|
         assert_chat_user_link(active_chat_with_single_user, user_type)

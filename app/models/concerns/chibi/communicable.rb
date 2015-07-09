@@ -90,7 +90,15 @@ module Chibi
 
       module ClassMethods
         def filter_by(params = {})
-          where(params.slice(:user_id, :chat_id)).order("created_at DESC")
+          where(params.slice(:user_id, :chat_id)).latest
+        end
+
+        def latest
+          order(:created_at).reverse_order
+        end
+
+        def not_in_a_chat
+          where(:chat_id => nil)
         end
       end
     end

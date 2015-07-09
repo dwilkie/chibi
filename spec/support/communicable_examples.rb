@@ -8,7 +8,7 @@ module CommunicableExampleHelpers
   end
 end
 
-USER_TYPES_IN_CHAT = [:user, :friend, :inactive_user]
+USER_TYPES_IN_CHAT = [:user, :friend, :active_user]
 
 shared_examples_for "communicable from user" do |options|
   options ||= {}

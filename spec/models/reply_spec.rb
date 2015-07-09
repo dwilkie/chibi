@@ -54,7 +54,7 @@ describe Reply do
     expect(reply.token).to eq(options[:token]) if options[:token]
     if options[:deliver]
       assertions = {:body => reply.body, :to => reply.destination}
-      assertions.merge!(options.slice(:id, :suggested_channel, :via, :short_code, :smpp_server_id, :to, :body))
+      assertions.merge!(options.slice(:id, :suggested_channel, :via, :short_code, :smpp_server_id, :to, :body, :assertion_type))
       assert_deliver(assertions)
       expect(reply).to be_delivered
       expect(reply).to be_queued_for_smsc_delivery
@@ -69,7 +69,7 @@ describe Reply do
     options[:interpolations] || []
     (options[:test_users] || local_users).each do |local_user|
       reply = build(:reply, :user => local_user)
-      expect_message { reply.send(method, *options[:args]) }
+      reply.send(method, *options[:args])
       asserted_reply = spec_translate(key, local_user.locale, *options[:interpolations])
       if options[:approx]
         expect(reply.body).to match(/#{asserted_reply}/)
@@ -324,6 +324,23 @@ describe Reply do
     it { expect(queued_for_smsc_delivery_with_token.reload).to be_queued_for_smsc_delivery }
   end
 
+  describe ".failed_to_deliver" do
+    let(:failed_reply) { create(:reply, :failed) }
+    let(:expired_reply) { create(:reply, :expired) }
+    let(:results) { describ }
+
+    before do
+      failed_reply
+      expired_reply
+      create(:reply, :delivered)
+      create(:reply, :confirmed)
+      create(:reply, :unknown)
+      create(:reply, :errored)
+    end
+
+    it { expect(described_class.failed_to_deliver).to match_array([failed_reply, expired_reply]) }
+  end
+
   describe "handling failed messages" do
     def create_user(*args)
       options = args.extract_options!
@@ -406,7 +423,7 @@ describe Reply do
   describe "#delivered?" do
     it "should return true if the message has been delivered" do
       expect(reply).not_to be_delivered
-      expect_message { reply.deliver! }
+      reply.deliver!
       expect(reply).to be_delivered
     end
   end
@@ -495,6 +512,12 @@ describe Reply do
   describe "#deliver!" do
     include MobilePhoneHelpers
 
+    def expect_delivery_via_twilio(options = {}, &block)
+      VCR.use_cassette(twilio_post_messages_cassette, :erb => twilio_post_messages_erb(options)) do
+        trigger_job(:only => [TwilioMtMessageSenderJob]) { yield }
+      end
+    end
+
     def default_smpp_server_id
       :twilio
     end
@@ -546,7 +569,9 @@ describe Reply do
           dest_address,
           :id => subject.id,
           :via => :twilio,
+          :assertion_type => :request
         )
+        subject.reload
         expect(subject.token).to eq(message_sid)
         expect(subject.delivery_channel).to eq("twilio")
       end

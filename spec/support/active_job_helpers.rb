@@ -14,9 +14,9 @@ module ActiveJobHelpers
 
   def stub_unwanted_jobs(only = nil)
     if only
+      allow(ActiveJob::Base).to receive(:execute).and_call_original
       (active_jobs - only).each do |job|
-        allow(job).to receive(:set).and_return(job)
-        allow(job).to receive(:perform_later).and_return(nil)
+        allow(ActiveJob::Base).to receive(:execute).with(hash_including("job_class" => job.to_s))
       end
     end
   end

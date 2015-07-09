@@ -352,7 +352,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
       expect(unprocessed_multipart_message).not_to be_processed
       expect(recently_received_multipart_message).not_to be_processed
       expect(unprocessed_message).not_to be_processed
-      expect_locate { expect_message { trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed_multipart! } } }
+      expect_locate { trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed_multipart! } }
     end
 
     it { expect(unprocessed_multipart_message.reload).to be_processed }
@@ -394,6 +394,13 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
       let(:from) { "+855 12 239 135" }
       it { expect(subject.find_csms_message).to eq(nil) }
     end
+  end
+
+  describe "#english_words" do
+    subject { create(:message, :body => "Jane,hi how are you?+scott?+jen?what's up?") }
+    let(:result) { subject.english_words }
+
+    it { expect(result).to match_array(["Jane", "hi", "how", "are", "you", "scott", "jen", "what", "s", "up"]) }
   end
 
   describe "#origin" do
@@ -473,7 +480,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
     shared_examples_for "not starting a new chat" do
       it "should not start a new chat" do
         expect(Chat).not_to receive(:activate_multiple!)
-        expect_message { subject.pre_process! }
+        subject.pre_process!
       end
     end
 
@@ -636,7 +643,7 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
 
             context "indicates that the sender is not trying to explicitly start a new chat" do
               def stub_chat_intended_for(return_value = nil)
-                allow(Chat).to receive(:intended_for).and_return(return_value  )
+                allow(Chat).to receive(:intended_for).and_return(return_value)
               end
 
               def stub_user_active_chat(return_value = nil)
@@ -668,13 +675,14 @@ it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_g
               end
 
               it "should try to determine who the message is intended for" do
-                expect(Chat).to receive(:intended_for).with(subject, :num_recent_chats => 10)
+                expect(Chat).to receive(:intended_for).with(subject)
                 subject.pre_process!
               end
 
               context "if the receipient cannot be determined" do
                 before do
                   stub_chat_intended_for
+                  stub_user_active_chat(chat)
                 end
 
                 it "try to get the sender's active chat" do

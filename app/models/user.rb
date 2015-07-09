@@ -54,6 +54,7 @@ class User < ActiveRecord::Base
   before_save :cancel_searching_for_friend_if_chatting
 
   delegate :city, :country_code, :to => :location, :allow_nil => true
+  delegate :deactivate!, :to => :active_chat, :prefix => true, :allow_nil => true
 
   aasm :column => :state, :whiny_transitions => false do
     state :online, :initial => true
@@ -79,6 +80,10 @@ class User < ActiveRecord::Base
 
   def self.online
     where.not(:state => "offline")
+  end
+
+  def self.by_id(user)
+    where(:id => user.id)
   end
 
   def self.filter_by(params = {})
@@ -128,7 +133,11 @@ class User < ActiveRecord::Base
   end
 
   def self.available
-    where(:active_chat_id => nil).online
+    online.not_currently_chatting
+  end
+
+  def self.not_currently_chatting
+    where(:active_chat_id => nil)
   end
 
   def self.remind!
@@ -259,15 +268,19 @@ class User < ActiveRecord::Base
   end
 
   def available?(options = {})
-    online? && (!currently_chatting? || !options[:not_currently_chatting] && !active_chat.active?)
+    online? && (!currently_chatting? || !active_chat.active?)
   end
 
   def currently_chatting?
-    active_chat_id?
+    active_chat.present?
   end
 
   def screen_id
     (name || screen_name).try(:capitalize)
+  end
+
+  def deactivate_chats!
+    active_chat_deactivate!(:activate_new_chats => true)
   end
 
   def remind!
@@ -276,13 +289,6 @@ class User < ActiveRecord::Base
 
   def reply_not_enough_credit!
     replies.build.not_enough_credit!
-  end
-
-  def deactivate_chats!
-    if currently_chatting?
-      partner = active_chat.partner(self)
-      active_chat.deactivate!(:active_user => partner)
-    end
   end
 
   def matches

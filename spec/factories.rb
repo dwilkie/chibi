@@ -354,6 +354,10 @@ FactoryGirl.define do
       user
     end
 
+    trait :undelivered do
+      delivered_at nil
+    end
+
     trait :delivered do
       delivered_at { Time.current }
     end
@@ -440,14 +444,12 @@ FactoryGirl.define do
     trait :initiator_active do
       after(:create) do |chat|
         chat.active_users << chat.user
-        chat.save
       end
     end
 
     trait :friend_active do
       after(:create) do |chat|
         chat.active_users << chat.friend
-        chat.save
       end
     end
 
@@ -463,6 +465,14 @@ FactoryGirl.define do
     end
 
     trait :with_inactivity do
+      updated_at { 10.minutes.ago }
+    end
+
+    trait :will_permanently_timeout do
+      updated_at { 24.hours.ago }
+    end
+
+    trait :will_provisionally_timeout do
       updated_at { 10.minutes.ago }
     end
   end

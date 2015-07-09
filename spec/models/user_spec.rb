@@ -310,7 +310,7 @@ describe User do
     end
 
     def perform_background_job
-      expect_message { do_find_friends }
+      do_find_friends
     end
 
     before do
@@ -413,7 +413,7 @@ describe User do
 
     def do_remind(options = {})
       create_actors unless options.delete(:skip_create_actors)
-      expect_message { trigger_job(options) { described_class.remind! } }
+      trigger_job(options) { described_class.remind! }
     end
 
     def perform_background_job(options = {})
@@ -599,7 +599,7 @@ describe User do
     end
 
     before do
-      expect_message { subject.remind! }
+      subject.remind!
     end
 
     context "given the user needs reminding" do
@@ -1200,48 +1200,34 @@ describe User do
     end
   end
 
-  describe "#available?(options = {})" do
+  describe "#available?" do
+    subject { create(:user) }
+
     context "he is offline" do
-      it "should be false" do
-        expect(offline_user).not_to be_available
-      end
+      subject { create(:user, :offline) }
+
+      it { is_expected.not_to be_available }
     end
 
     context "he is online and not currently chatting" do
-      it "should be true" do
-        expect(user).to be_available
-      end
+      it { is_expected.to be_available }
     end
 
     context "he is currently chatting" do
       context "and his chat is active" do
         before do
-          active_chat
+          create(:chat, :active, :user => subject)
         end
 
-        it "should be false" do
-          expect(user).not_to be_available
-        end
+        it { is_expected.not_to be_available }
       end
 
       context "but his chat is not active" do
-        let(:active_chat_with_single_friend) do
-          create(:chat, :friend_active, :friend => user)
-        end
-
         before do
-          active_chat_with_single_friend
+          create(:chat, :initiator_active, :user => subject)
         end
 
-        it "should be true" do
-          expect(user).to be_available
-        end
-
-        context "passing :not_currently_chatting => true" do
-          it "should be false" do
-            expect(user).not_to be_available(:not_currently_chatting => true)
-          end
-        end
+        it { is_expected.to be_available }
       end
     end
   end
@@ -1585,41 +1571,29 @@ describe User do
   end
 
   describe "#logout!" do
-    let(:reply) { reply_to(user) }
-    let(:reply_to_partner) { reply_to(friend, active_chat) }
+    subject { create(:user) }
 
-    it "should put the user offline" do
-      user.logout!
-      expect(user).not_to be_online
+    def setup_scenario
     end
 
-    context "given the user is not currently chatting" do
-      before do
-        user.logout!
-      end
-
-      it "should not create any notifications" do
-        expect(reply).to be_nil
-        expect(reply_to_partner).to be_nil
-      end
+    before do
+      setup_scenario
+      subject.logout!
     end
 
-    context "given the user is in an active chat session" do
-      before do
-        active_chat
+    it { is_expected.not_to be_online }
+    it { expect(Reply).not_to be_any }
+
+    context "given the user is in an active chat" do
+      let(:chat) { create(:chat, :active, :user => subject) }
+      let(:partner) { chat.friend }
+
+      def setup_scenario
+        chat
       end
 
-      it "should deactivate the chat" do
-        expect(user).to be_currently_chatting
-        expect(friend).to be_currently_chatting
-
-        user.logout!
-
-        expect(user.reload).to be_currently_chatting
-        friend.reload
-        expect(friend).not_to be_currently_chatting
-        expect(friend).to be_online
-      end
+      it { expect(chat).not_to be_active }
+      it { expect(partner).to be_available }
     end
   end
 

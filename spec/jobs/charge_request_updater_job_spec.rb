@@ -49,7 +49,7 @@ describe ChargeRequestUpdaterJob do
     end
 
     it "should update the charge request" do
-      expect_message { trigger_job(:only => [described_class, MessageProcessorJob]) { enqueue_job } }
+      trigger_job(:only => [described_class, MessageProcessorJob]) { enqueue_job }
       expect(reply_to(user).body).to eq(spec_translate(
         :not_enough_credit, user.locale
       ))

@@ -24,26 +24,6 @@ module MessagingHelpers
     post_message(options)
   end
 
-  def expect_message(options = {}, &block)
-    # eject the current cassette, and insert a new twilio cassette with a unique token
-    # then after the request, eject the cassette
-    VCR.configure do |c|
-      cassette_filter = lambda { |req| URI.parse(req.uri).path == twilio_post_messages_path(options) }
-      c.before_http_request(cassette_filter) do |request|
-        VCR.eject_cassette
-        VCR.insert_cassette(twilio_post_messages_cassette, :erb => twilio_post_messages_erb(options))
-      end
-
-      c.after_http_request(cassette_filter) do
-        VCR.eject_cassette
-      end
-    end
-
-    yield
-  end
-
-  alias_method :expect_delivery_via_twilio, :expect_message
-
   def twilio_post_messages_cassette
     :"twilio/post_messages"
   end
@@ -86,20 +66,27 @@ module MessagingHelpers
   end
 
   def assert_deliver_via_twilio!(options = {})
-    last_request = webmock_requests.last
-    uri = last_request.uri
-    expect(uri.path).to eq(twilio_post_messages_path)
-    last_request_data = Rack::Utils.parse_query(last_request.body)
-    expect(last_request_data["To"]).to eq(asserted_number_formatted_for_twilio(options[:to]))
-    asserted_from = twilio_number(:sms_capable => true)
-    expect(last_request_data["From"]).to eq(asserted_from)
-    expect(last_request_data["Body"]).to eq(options[:body])
-    assert_twilio_mt_message_received_job_enqueued!(enqueued_jobs[-2], options)
-    assert_fetch_twilio_message_status_job_enqueued!(enqueued_jobs[-1], options)
+    assertion_type = options.delete(:assertion_type) || :job
+    if assertion_type == :job
+      job = enqueued_jobs.last
+      expect(job).to be_present
+      expect(job[:job]).to eq(TwilioMtMessageSenderJob)
+    else
+      last_request = webmock_requests.last
+      uri = last_request.uri
+      expect(uri.path).to eq(twilio_post_messages_path)
+      last_request_data = Rack::Utils.parse_query(last_request.body)
+      expect(last_request_data["To"]).to eq(asserted_number_formatted_for_twilio(options[:to]))
+      asserted_from = twilio_number(:sms_capable => true)
+      expect(last_request_data["From"]).to eq(asserted_from)
+      expect(last_request_data["Body"]).to eq(options[:body])
+      assert_twilio_mt_message_received_job_enqueued!(performed_jobs[-2], options)
+      assert_fetch_twilio_message_status_job_enqueued!(performed_jobs[-1], options)
+    end
   end
 
   def assert_deliver_via_smsc!(options = {})
-    job = enqueued_jobs.last
+    job = performed_jobs.last
     expect(job).to be_present
     expect(job[:args]).to eq(
       [
@@ -119,16 +106,14 @@ module MessagingHelpers
     aggregator_params = twilio_message_params(options)
 
     expect_locate(options) do
-      expect_message do
-        trigger_job(:only => [MessageProcessorJob, LocatorJob]) do
-          post(
-            messages_path,
-            aggregator_params,
-            authentication_params(:message)
-          )
+      trigger_job(:only => [MessageProcessorJob, LocatorJob]) do
+        post(
+          messages_path,
+          aggregator_params,
+          authentication_params(:message)
+        )
 
-          expect(response.status).to be(options[:response] || 201)
-        end
+        expect(response.status).to be(options[:response] || 201)
       end
     end
   end

@@ -2,6 +2,12 @@ class Chat < ActiveRecord::Base
   include Chibi::Communicable::HasCommunicableResources
   has_communicable_resources :phone_calls, :messages, :replies
 
+  DEFAULT_PERMANENT_TIMEOUT_MINUTES = 1440
+  DEFAULT_PROVISIONAL_TIMEOUT_MINUTES = 10
+  DEFAULT_MAX_ONE_SIDED_INTERACTIONS = 3
+  DEFAULT_MAX_TO_ACTIVATE = 5
+  DEFAULT_CLEANUP_AGE_DAYS = 30
+
   belongs_to :user
   belongs_to :friend, :class_name => 'User'
   belongs_to :starter, :polymorphic => true
@@ -12,10 +18,8 @@ class Chat < ActiveRecord::Base
 
   alias_attribute :initiator, :user
 
-  def self.end_inactive(options = {})
-    with_inactivity(options).find_each do |chat|
-      ChatDeactivatorJob.perform_later(chat.id, options)
-    end
+  def self.expire!(mode)
+    will_timeout(mode).find_each { |chat| ChatExpirerJob.perform_later(chat.id, mode) }
   end
 
   def self.reinvigorate!
@@ -24,171 +28,141 @@ class Chat < ActiveRecord::Base
     end
   end
 
+  def self.left_outer_join(join_table, join_column)
+    chats = self.arel_table
+    chats.join(
+      join_table, Arel::Nodes::OuterJoin
+    ).on(
+      chats[:id].eq(join_table[join_column])
+    ).join_sources
+  end
+
+  def self.all_active_users
+    left_outer_join(User.arel_table, :active_chat_id)
+  end
+
+  def self.all_interactions(interacting_class)
+    left_outer_join(interacting_class.arel_table, :chat_id)
+  end
+
   def self.cleanup!
-    joins(
-      :user
-    ).joins(
-      :friend
-    ).joins(
-      "LEFT OUTER JOIN messages ON messages.chat_id = #{table_name}.id"
-    ).joins(
-      "LEFT OUTER JOIN phone_calls ON phone_calls.chat_id = #{table_name}.id"
-    ).where(
-      "users.active_chat_id IS NULL OR users.active_chat_id != #{table_name}.id"
-    ).where(
-      "friends_chats.active_chat_id IS NULL OR friends_chats.active_chat_id != #{table_name}.id"
-    ).where(
-      :messages => {:id => nil}
-    ).where(
-      :phone_calls => {:id => nil}
-    ).where(
-      "#{table_name}.created_at < ?", 30.days.ago
-    ).where(
-      "#{table_name}.updated_at < ?", 30.days.ago
-    ).delete_all
+    joins(all_interactions(Message)).merge(Message.not_in_a_chat).joins(all_interactions(PhoneCall)).merge(PhoneCall.not_in_a_chat).joins(all_active_users).merge(User.not_currently_chatting).old.delete_all
   end
 
   def self.filter_by(params = {})
     super(params).includes(:user, :friend, :active_users)
   end
 
-  def self.activate_multiple!(user, options = {})
-    options = options.with_indifferent_access
-    num_new_chats = options[:count] || 5
-
-    # do this at least once in order to deactivate any existing chats
-    initialize_and_activate_for_friend!(user, nil, options)
-    user.matches.limit(num_new_chats - 1).each do |friend|
-      initialize_and_activate_for_friend!(user, friend, options)
+  def self.activate_multiple!(initiator, options = {})
+    initiator.active_chat_deactivate!(:for => initiator, :reactivate_previous_chat => false)
+    initiator.matches.limit(self.max_to_activate).each do |partner|
+      initialize_and_activate_for_friend!(initiator, partner, options)
     end
   end
 
-  # returns a chat that this message is intended for
-  def self.intended_for(message, options = {})
-    options[:num_recent_chats] ||= 5
+  def self.initiated_or_partnered_by(user)
+    where(self.arel_table[:user_id].eq(user.id).or(self.arel_table[:friend_id].eq(user.id)))
+  end
 
+  def self.old
+    where(self.arel_table[:updated_at].lt(cleanup_age.ago))
+  end
+
+  def self.latest
+    order(:created_at).reverse_order
+  end
+
+  def self.intended_for(message)
     sender = message.user
-
-    recent_chats = where(
-      "\"#{table_name}\".\"user_id\" = ? OR \"#{table_name}\".\"friend_id\" = ?",
-      sender.id, sender.id
-    ).where(
-      "(SELECT \"replies\".\"id\" FROM \"replies\"
-      WHERE (\"replies\".\"user_id\" = ?
-      AND \"replies\".\"chat_id\" = \"#{table_name}\".\"id\")
-      LIMIT 1) IS NOT NULL", sender.id
-    ).order("\"#{table_name}\".\"created_at\" DESC").limit(options[:num_recent_chats]).includes(:user, :friend).references(:replies, table_name)
-
-    normalized_message = message.body.downcase
-    intended_chat = nil
-
-    recent_chats.each do |chat|
-      recent_partner = chat.partner(sender)
-      if normalized_message =~ /\b#{recent_partner.screen_id}\b/i
-        intended_chat = chat
-        break
-      end
-    end
-    intended_chat
+    initiated_or_partnered_by(sender).joins(:replies).merge(Reply.for_user(sender)).merge(Reply.prepended_with(*message.english_words)).latest.limit(self.intended_for_limit).first
   end
 
   def activate!(options = {})
     self.starter ||= options[:starter]
     self.friend ||= user.match
-    active_users << user unless options[:activate_user] == false
 
-    active_users << friend if friend
-
-    if user.currently_chatting?
-      user.active_chat.deactivate!(:active_user => user, :reactivate_previous_chat => false)
-    end
-
-    if friend.present?
-      save!
+    if save
+      users_to_activate = [friend]
+      users_to_activate << user if options[:activate_user] != false
+      self.active_users = users_to_activate
       replies.build(:user => friend).introduce!(user) if options[:notify]
+      user.search_for_friend!
     end
-
-    user.search_for_friend!
   end
 
-  def activate(options = {})
-    activate!(options)
-    active?
+  def expire!(mode)
+    return if (!self.class.permanent_timeout?(mode) && !active?) || !has_inactivity?(mode)
+
+    deactivation_options = {}
+    deactivation_options.merge!(
+      :for => user_with_most_recent_interaction || user,
+      :activate_new_chats => true
+    ) if !self.class.permanent_timeout?(mode)
+
+    deactivate!(deactivation_options)
   end
 
   def deactivate!(options = {})
-    options = options.with_indifferent_access
-    return if options[:inactivity_cutoff] && !has_inactivity?(options)
+    return if deactivated?
 
-    # reactivate previous chats by default
-    options[:reactivate_previous_chat] = true unless options[:reactivate_previous_chat] == false
-
-    # find the user to remain in this chat if any
-    if active_user = options[:active_user]
-      user_to_remain_in_chat = in_this_chat?(active_user) ? partner(active_user) : (inactive_user || user_with_inactivity)
+    if user_to_leave_chat = options[:for]
+      users_to_leave_chat = [user_to_leave_chat]
+      user_to_remain_in_chat = partner(user_to_leave_chat)
+      users_to_remain_in_chat = active_users.include?(user_to_remain_in_chat) ? [user_to_remain_in_chat] : []
+    else
+      users_to_leave_chat = [user, friend]
+      users_to_remain_in_chat = []
     end
 
-    # find the users to leave this chat
-    users_to_leave_chat = set_active_users(user_to_remain_in_chat)
+    self.active_users = users_to_remain_in_chat
 
-    # reactivate expired chats
-    reinvigorate_expired_chats(users_to_leave_chat) if options[:reactivate_previous_chat]
+    if options[:reactivate_previous_chat] != false
+      users_to_leave_chat.each { |user| reinvigorate_expired!(user) }
+    end
 
     if options[:activate_new_chats]
       # create new chats for users who have been deactivated from the chat
       users_to_leave_chat.each do |user|
         self.class.activate_multiple!(
           user, :notify => true
-        ) unless user.reload.currently_chatting?
+        ) if user.reload.available? && !user.currently_chatting?
       end
     end
   end
 
   def forward_message(message)
-    reference_user = message.user
-    chat_partner = partner(reference_user)
-    reply_to_chat_partner = replies.build(:user => chat_partner)
+    sender = message.user
+    recipient = partner(sender)
+    reply_to_recipient = replies.build(:user => recipient)
 
     self.messages << message
     message_body = message.body
 
-    chat_deactivation = {}
+    chat_deactivation = true
 
-    if active? || chat_partner.available?
+    if active? || recipient.available?
       reactivate!
-      reply_to_chat_partner.forward_message!(reference_user, message_body)
-      one_sided? ? chat_deactivation.merge!(:active_user => reference_user) : chat_deactivation = nil
+      reply_to_recipient.forward_message!(sender, message_body)
+      chat_deactivation = one_sided?
     else
-      reply_to_chat_partner.forward_message(reference_user, message_body)
+      reply_to_recipient.forward_message(sender, message_body)
     end
 
     if chat_deactivation
-      # remove the sender of the message from current chat
-      # this can cause a previous chat to be reinvigorated
-      deactivate!(chat_deactivation)
-
-      # start a new chat for the sender of the message if they're still available
-      self.class.activate_multiple!(
-        reference_user, :starter => message, :notify => true
-      ) if reference_user.reload.available?(:not_currently_chatting => true)
+      self.class.activate_multiple!(sender, :starter => message, :notify => true)
     end
   end
 
   def reactivate!
     return if active?
-
     self.active_users = [user, friend]
-    save
-
-    replies.undelivered.each do |undelivered_reply|
-      undelivered_reply.deliver!
-    end
+    replies.undelivered.each { |undelivered_reply| undelivered_reply.deliver! }
   end
 
   def reinvigorate!
     [user, friend].each do |user_in_chat|
-      undelivered_replies = replies.undelivered.where(:replies => {:user_id => user_in_chat})
-      if user_in_chat.available?(:not_currently_chatting => true) && undelivered_replies.any?
+      undelivered_replies = replies.undelivered.for_user(user_in_chat)
+      if user_in_chat.available? && !user_in_chat.currently_chatting? && undelivered_replies.any?
         self.active_users << user_in_chat
         undelivered_replies.each { |undelivered_reply| undelivered_reply.deliver! }
       end
@@ -196,82 +170,95 @@ class Chat < ActiveRecord::Base
   end
 
   def active?
-    active_users.size >= 2
-  end
-
-  def inactive_user
-    active_users = self.active_users
-    active_users.first if active_users.size == 1
+    active_users.size == 2
   end
 
   def partner(reference_user)
     user == reference_user ? friend : user
   end
 
+  def active_user
+    active_users.count == 1 && active_users.first
+  end
+
   private
 
-  def self.initialize_and_activate_for_friend!(user, friend = nil, options = {})
-    new(:user => user, :friend => friend).activate!(options.merge(:activate_user => false))
+  def self.initialize_and_activate_for_friend!(initiator, partner = nil, options = {})
+    new(:user => initiator, :friend => partner).activate!({:activate_user => false}.merge(options))
   end
 
   def self.with_undelivered_messages
     # return chats that have undelivered messages
-    joins(:replies => :user).where(:replies => {:delivered_at => nil}).where.not(:users => {:state => :offline}).order(:id).readonly(false)
+    joins(:replies => :user).merge(Reply.undelivered).merge(User.online).readonly(false)
   end
 
   def self.with_undelivered_messages_for(user)
-    with_undelivered_messages.where(:replies => {:user_id => user.id})
+    with_undelivered_messages.merge(User.by_id(user))
   end
 
-  # a chat with inactivity, is a fully active chat (which has two or more active users) or
-  # a partially active chat chat (which has one or more active users)
-  # with no activity in the past inactivity_period timeframe
-  def self.with_inactivity(options = {})
-    options = options.with_indifferent_access
-    condition = options.delete(:all) ? "OR" : "AND"
+  def self.will_timeout(mode)
+    joins(:active_users).where(self.arel_table[:updated_at].lt(self.timeout_duration(mode).ago))
+  end
 
-    joins(:user).joins(:friend).where(
-      "users.active_chat_id = #{table_name}.id #{condition} friends_chats.active_chat_id = #{table_name}.id"
-    ).where("#{table_name}.updated_at < ?", DateTime.parse(options[:inactivity_cutoff]))
+  def self.timeout_duration(mode)
+    permanent_timeout?(mode) ? permanent_timeout_duration : provisional_timeout_duration
+  end
+
+  def self.permanent_timeout?(mode)
+    mode.to_s == "permanent"
+  end
+
+  def self.cleanup_age
+    (Rails.application.secrets[:chat_cleanup_age_days] || DEFAULT_CLEANUP_AGE_DAYS).to_i.days
+  end
+
+  def self.max_to_activate
+    (Rails.application.secrets[:chat_max_to_activate] || DEFAULT_MAX_TO_ACTIVATE).to_i
+  end
+
+  def self.max_one_sided_interactions
+    (Rails.application.secrets[:chat_max_one_sided_interactions] || DEFAULT_MAX_ONE_SIDED_INTERACTIONS).to_i
+  end
+
+  def self.permanent_timeout_duration
+    (Rails.application.secrets[:chat_permanent_timeout_minutes] || DEFAULT_PERMANENT_TIMEOUT_MINUTES).to_i.minutes
+  end
+
+  def self.provisional_timeout_duration
+    (Rails.application.secrets[:chat_provisional_timeout_minutes] || DEFAULT_PROVISIONAL_TIMEOUT_MINUTES).to_i.minutes
+  end
+
+  def self.intended_for_limit
+    value = Rails.application.secrets[:chat_intended_for_limit]
+    value.presence && value.to_i
   end
 
   def self.filter_params(params = {})
     super.where(params.slice(:user_id))
   end
 
-  def one_sided?(num_messages = 3)
-    last_messages = messages.order("created_at DESC").limit(num_messages).pluck(:user_id)
-    last_messages.uniq == [last_messages.first] if last_messages.count >= num_messages
+  def user_with_most_recent_interaction
+    last_interaction = messages.last || phone_calls.last
+    last_interaction && last_interaction.user
   end
 
-  def has_inactivity?(options = {})
-    updated_at < DateTime.parse(options[:inactivity_cutoff])
+  def deactivated?
+    active_users.empty?
   end
 
-  def reinvigorate_expired_chats(users)
-    users.each do |user|
-      self.class.with_undelivered_messages_for(user).each do |chat_to_reinvigorate|
-        chat_to_reinvigorate.reinvigorate!
-      end
-    end
+  def one_sided?
+    limit = self.class.max_one_sided_interactions
+    interaction = messages.latest.limit(limit) + phone_calls.latest.limit(limit)
+    user_interaction = interaction.sort_by {|e| (e.created_at) }.reverse.map(&:user_id)
+    user_interaction.size >= self.class.max_one_sided_interactions && user_interaction.take(self.class.max_one_sided_interactions).uniq.length == 1
   end
 
-  def in_this_chat?(reference_user)
-    reference_user == user || reference_user == friend
+  def has_inactivity?(mode)
+    updated_at < self.class.timeout_duration(mode).ago
   end
 
-  def set_active_users(user_to_remain_in_chat = nil)
-    if user_to_remain_in_chat && user_to_remain_in_chat.active_chat == self
-      self.active_users = [user_to_remain_in_chat]
-      users_to_leave_chat = [partner(user_to_remain_in_chat)]
-    else
-      active_users.clear
-      users_to_leave_chat = [user, friend]
-    end
-    users_to_leave_chat
-  end
-
-  def user_with_inactivity
-    replies.last_delivered.try(:user)
+  def reinvigorate_expired!(user)
+    chat = self.class.with_undelivered_messages_for(user).first
+    chat && chat.reinvigorate!
   end
 end

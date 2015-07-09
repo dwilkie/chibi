@@ -258,7 +258,7 @@ describe "Messages" do
 
         context "and my friend doesn't reply to me for a while" do
           before do
-            dave.reload.active_chat.deactivate!(:active_user => dave)
+            dave.reload.active_chat.deactivate!(:for => dave)
           end
 
           context "and I text" do
@@ -293,31 +293,25 @@ describe "Messages" do
           end
 
           context "and I send another message" do
-            let(:pauline) { create(:pauline) }
+            let(:message_body) { "Hi" }
 
-            before do
-              pauline
-              send_message(:from => dave, :body => "Hi Joy")
+            def send_message_from_dave
+              send_message(:from => dave, :body => message_body)
             end
 
-            shared_examples_for "forwarding the message" do |options|
-              options ||= {}
+            before do
+              expect { send_message_from_dave }.to change { replies_to(joy).count }.by(1)
+            end
 
+            shared_examples_for "forwarding the message" do
               it "should send the message to my current friend" do
                 expect(reply_to(joy).body).to eq(spec_translate(
-                  :forward_message, joy.locale, dave.screen_id, "Hi Joy"
+                  :forward_message, joy.locale, dave.screen_id, message_body
                 ))
-                expect(reply_to(pauline)).to be_nil
               end
 
-              if options[:deliver_message_from_mara]
-                it "should now deliver Mara's message to me" do
-                  expect(reply_to_dave).to be_delivered
-                end
-              else
-                it "should not deliver Mara's message to me" do
-                  expect(reply_to_dave).not_to be_delivered
-                end
+              it "should not deliver Mara's message to me" do
+                expect(reply_to_dave).not_to be_delivered
               end
             end
 
@@ -325,17 +319,25 @@ describe "Messages" do
 
             context "and another" do
               before do
-                send_message(:from => dave, :body => "Hi Joy")
+                expect { send_message_from_dave }.to change { replies_to(joy).count }.by(1)
               end
 
               it_should_behave_like "forwarding the message"
 
               context "and another" do
                 before do
-                  send_message(:from => dave, :body => "Hi Joy")
+                  expect { send_message_from_dave }.to change { replies_to(joy).count }.by(1)
                 end
 
-                it_should_behave_like "forwarding the message", :deliver_message_from_mara => true
+                it_should_behave_like "forwarding the message"
+
+                context "and another" do
+                  before do
+                    expect { send_message_from_dave }.not_to change { replies_to(joy).count }
+                  end
+
+                  it_should_behave_like "forwarding the message"
+                end
               end
             end
           end
@@ -403,9 +405,9 @@ describe "Messages" do
               send_message(:from => joy, :body => "stop")
             end
 
-            it "should keep joy in the chat with me" do
+            it "should deactivate the chat" do
               expect(dave.reload).not_to be_currently_chatting
-              expect(joy.reload).to be_currently_chatting
+              expect(joy.reload).not_to be_available
             end
           end
 
