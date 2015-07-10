@@ -198,7 +198,12 @@ class Chat < ActiveRecord::Base
   end
 
   def self.will_timeout(mode)
-    joins(:active_users).where(self.arel_table[:updated_at].lt(self.timeout_duration(mode).ago))
+    scope = joins(:active_users).where(self.arel_table[:updated_at].lt(self.timeout_duration(mode).ago)).uniq
+    permanent_timeout?(mode) ? scope : scope.active
+  end
+
+  def self.active
+    joins(:user, :friend).where("users.active_chat_id = chats.id").where("friends_chats.active_chat_id = chats.id")
   end
 
   def self.timeout_duration(mode)

@@ -722,5 +722,28 @@ describe Chat do
         end
       end
     end
+
+    describe ".will_timeout(mode)" do
+      let(:results) { described_class.will_timeout(mode) }
+      let(:active_chat) { create(:chat, :active, :will_permanently_timeout) }
+      let(:partially_active_chat) { create(:chat, :initiator_active, :will_permanently_timeout) }
+
+      before do
+        active_chat
+        partially_active_chat
+      end
+
+      context "'provisional_mode'" do
+        let(:mode) { "provisional" }
+
+        it { expect(results).to match_array([active_chat]) }
+      end
+
+      context "'permanent_mode'" do
+        let(:mode) { "permanent" }
+
+        it { expect(results).to match_array([active_chat, partially_active_chat]) }
+      end
+    end
   end
 end
