@@ -3,9 +3,9 @@ class User < ActiveRecord::Base
   include Chibi::Twilio::ApiHelpers
   include Chibi::Communicable::HasCommunicableResources
 
-  DEFAULT_RECENT_INTERACTION_CUTOFF_MONTHS = 1
+  DEFAULT_WITHOUT_RECENT_INTERACTION_MONTHS = 1
   DEFAULT_REMIND_MAX = 100
-  DEFAULT_REMIND_INACTIVITY_CUTOFF_DAYS = 5
+  DEFAULT_MAX_REMIND_FREQUENCY_DAYS = 5
   DEFAULT_USER_HOURS_MIN = 8
   DEFAULT_USER_HOURS_MAX = 20
 
@@ -522,7 +522,7 @@ class User < ActiveRecord::Base
   end
 
   def self.not_contacted_recently
-    where("#{coalesce_last_contacted_at} < ?", remind_inactivity_cutoff_days.days.ago)
+    where("#{coalesce_last_contacted_at} < ?", max_remind_frequency_days.ago)
   end
 
   def self.coalesce_last_contacted_at
@@ -573,21 +573,21 @@ class User < ActiveRecord::Base
   def self.without_recent_interaction
     where(
       "COALESCE(\"#{table_name}\".\"last_interacted_at\", ?) < ?",
-      recent_interaction_cutoff,
-      recent_interaction_cutoff
+      without_recent_interaction_months.ago,
+      without_recent_interaction_months.ago
     )
   end
 
-  def self.recent_interaction_cutoff
-    (Rails.application.secrets[:recent_interaction_cutoff_months] || DEFAULT_RECENT_INTERACTION_CUTOFF_MONTHS).to_i.months.ago
+  def self.without_recent_interaction_months
+    (Rails.application.secrets[:user_without_recent_interaction_months] || DEFAULT_WITHOUT_RECENT_INTERACTION_MONTHS).to_i.months
   end
 
   def self.remind_max
-    (Rails.application.secrets[:remind_max] || DEFAULT_REMIND_MAX).to_i
+    (Rails.application.secrets[:user_remind_max] || DEFAULT_REMIND_MAX).to_i
   end
 
-  def self.remind_inactivity_cutoff_days
-    (Rails.application.secrets[:remind_inactivity_cutoff_days] || DEFAULT_REMIND_INACTIVITY_CUTOFF_DAYS).to_i
+  def self.max_remind_frequency_days
+    (Rails.application.secrets[:user_max_remind_frequency_days] || DEFAULT_MAX_REMIND_FREQUENCY_DAYS).to_i.days
   end
 
   def self.user_hours_min
@@ -613,7 +613,7 @@ class User < ActiveRecord::Base
   end
 
   def contacted_recently?
-    (last_contacted_at || updated_at) >= self.class.remind_inactivity_cutoff_days.days.ago
+    (last_contacted_at || updated_at) >= self.class.max_remind_frequency_days.ago
   end
 
   def extract(info)
