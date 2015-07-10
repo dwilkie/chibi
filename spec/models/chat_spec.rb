@@ -736,6 +736,7 @@ describe Chat do
       context "'provisional_mode'" do
         let(:mode) { "provisional" }
 
+        it { expect(results.joins_values.uniq).to match_array([:active_users, :user, :friend]) }
         it { expect(results).to match_array([active_chat]) }
       end
 

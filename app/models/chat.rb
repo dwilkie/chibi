@@ -203,7 +203,7 @@ class Chat < ActiveRecord::Base
   end
 
   def self.active
-    joins(:user, :friend).where("users.active_chat_id = chats.id").where("friends_chats.active_chat_id = chats.id")
+    joins(:active_users, :user, :friend).where("users_chats.active_chat_id = chats.id").where("friends_chats.active_chat_id = chats.id")
   end
 
   def self.timeout_duration(mode)
