@@ -19,7 +19,7 @@ bundle exec rake parallel:spec
 
 ### Host
 
-[https://chibi.herokuapp.com/](https://chibi.herokuapp.com/)
+[https://www.chibitxt.me](https://www.chibitxt.me/)
 
 ### Deployment
 
