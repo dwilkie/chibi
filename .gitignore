@@ -5,8 +5,6 @@ tmp/
 .sass-cache/
 vendor/ruby
 *.swp
-latest.dump
-coverage
 remove_focus.rb
 
 # Elastic Beanstalk Files
