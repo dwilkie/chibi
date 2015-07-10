@@ -207,7 +207,6 @@ GEM
       tilt
     hash-deep-merge (0.1.1)
     hike (1.2.3)
-    hirefire-resource (0.3.7)
     hitimes (1.2.2)
     i18n (0.7.0)
     i18n_data (0.7.0)
@@ -401,7 +400,6 @@ DEPENDENCIES
   foreman
   geocoder
   haml
-  hirefire-resource
   jquery-rails
   kaminari
   launchy
