@@ -7,7 +7,7 @@ class Message < ActiveRecord::Base
 
   include AASM
 
-  DEFAULT_AWAITING_PARTS_TIMEOUT = 300
+  DEFAULT_AWAITING_PARTS_TIMEOUT_SECONDS = 300
 
   has_many :message_parts
 
@@ -59,7 +59,7 @@ class Message < ActiveRecord::Base
   end
 
   def self.unprocessed_multipart
-    received.multipart.where(self.arel_table[:created_at].lt(awaiting_parts_timeout.seconds.ago))
+    received.multipart.where(self.arel_table[:created_at].lt(awaiting_parts_timeout_seconds.ago))
   end
 
   def self.multipart
@@ -180,7 +180,7 @@ class Message < ActiveRecord::Base
   end
 
   def awaiting_parts_timeout?
-    awaiting_parts? && created_at < self.class.awaiting_parts_timeout.seconds.ago
+    awaiting_parts? && created_at < self.class.awaiting_parts_timeout_seconds.ago
   end
 
   def queue_for_cleanup
@@ -246,8 +246,8 @@ class Message < ActiveRecord::Base
     Chat.activate_multiple!(user, :starter => self, :notify => true)
   end
 
-  def self.awaiting_parts_timeout
-    (Rails.application.secrets[:message_awaiting_parts_timeout] || DEFAULT_AWAITING_PARTS_TIMEOUT).to_i
+  def self.awaiting_parts_timeout_seconds
+    (Rails.application.secrets[:message_awaiting_parts_timeout_seconds] || DEFAULT_AWAITING_PARTS_TIMEOUT_SECONDS).to_i.seconds
   end
 
   def self.from_twilio(params)
