@@ -1,6 +1,6 @@
 namespace :charge_requests do
-  desc "Timeout charge requests that are still awaiting a result after 24 hours"
+  desc "Timeout charge requests that are awaiting a result for too long"
   task :timeout => :environment do
-    ChargeRequest.timeout!
+    ChargeRequestTimeoutScheduledJob.perform_later
   end
 end

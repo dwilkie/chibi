@@ -5,6 +5,9 @@ class ChargeRequest < ActiveRecord::Base
   include Chibi::Analyzable
   include AASM
 
+  DEFAULT_LONG_TIMEOUT_DURATION_HOURS = 24
+  DEFAULT_SHORT_TIMEOUT_DURATION_SECONDS = 20
+
   validates :user, :operator, :presence => true
 
   after_commit :request_charge!, :on => :create
@@ -33,19 +36,22 @@ class ChargeRequest < ActiveRecord::Base
     ).order(:id).pluck(*charge_report_columns)
   end
 
+  def self.old
+    where(self.arel_table[:updated_at].lt(self.long_timeout_duration_hours.ago))
+  end
+
   def self.timeout!
     # timeout must be at least 24 hours to avoid the possibility of charging the user twice
-    where(
-      "state = ? OR state = ?", "awaiting_result", "created"
-    ).where(
-      "updated_at < ?", 24.hours.ago
-    ).update_all(:state => "errored", :reason => "timeout")
+    pending_result.old.update_all(:state => "errored", :reason => "timeout")
+  end
+
+  def self.pending_result
+    where(self.arel_table[:state].eq("awaiting_result").or(self.arel_table[:state].eq("created")))
   end
 
   # only returns false if the charge request is awaiting a result and the timeout has not been reached
   def slow?
-    timeout = 20.seconds # only applies if previous charge failed (see user#charge!)
-    (!awaiting_result? && !created?) || updated_at < timeout.ago
+    (!awaiting_result? && !created?) || updated_at < self.class.short_timeout_duration_seconds.ago
   end
 
   def set_result!(result, reason)
@@ -55,6 +61,14 @@ class ChargeRequest < ActiveRecord::Base
   end
 
   private
+
+  def self.long_timeout_duration_hours
+    (Rails.application.secrets[:charge_request_long_timeout_duration_hours] || DEFAULT_LONG_TIMEOUT_DURATION_HOURS).to_i.hours
+  end
+
+  def self.short_timeout_duration_seconds
+    (Rails.application.secrets[:charge_request_short_timeout_duration_hours] || DEFAULT_SHORT_TIMEOUT_DURATION_SECONDS).to_i.seconds
+  end
 
   def self.charge_report_columns(options = {})
     columns = {
