@@ -9,6 +9,10 @@ class Reply < ActiveRecord::Base
 
   include AASM
 
+  DEFAULT_MIN_CONSECUTIVE_FAILED = 3
+  DEFAULT_CLEANUP_AGE_DAYS = 30
+  DEFAULT_QUEUED_TIMEOUT_HOURS = 24
+
   DELIVERED = "delivered"
   FAILED    = "failed"
   CONFIRMED = "confirmed"
@@ -169,12 +173,8 @@ class Reply < ActiveRecord::Base
       :user_id
     ).having(
       "count(\"#{table_name}\".\"user_id\") > ?",
-      failed_replies_cutoff
+      min_consecutive_failed
     )
-  end
-
-  def self.failed_replies_cutoff
-    (Rails.application.secrets[:failed_replies_cutoff] || 3).to_i
   end
 
   def self.failed_to_deliver
@@ -206,7 +206,7 @@ class Reply < ActiveRecord::Base
   end
 
   def self.queued_for_smsc_delivery_too_long
-    queued_for_smsc_delivery.where(self.arel_table[:delivered_at].lt(1.day.ago))
+    queued_for_smsc_delivery.where(self.arel_table[:delivered_at].lt(queued_timeout_hours.ago))
   end
 
   def self.fix_invalid_states!
@@ -218,7 +218,7 @@ class Reply < ActiveRecord::Base
   end
 
   def self.cleanup!
-    delivered.where(self.arel_table[:updated_at].lt(1.month.ago)).delete_all
+    delivered.where(self.arel_table[:updated_at].lt(cleanup_age_days.ago)).delete_all
   end
 
   def self.accepted_by_smsc
@@ -326,6 +326,18 @@ class Reply < ActiveRecord::Base
   end
 
   private
+
+  def self.min_consecutive_failed
+    (Rails.application.secrets[:reply_min_consecutive_failed] || DEFAULT_MIN_CONSECUTIVE_FAILED).to_i
+  end
+
+  def self.cleanup_age_days
+    (Rails.application.secrets[:reply_cleanup_age_days] || DEFAULT_CLEANUP_AGE_DAYS).to_i.days
+  end
+
+  def self.queued_timeout_hours
+    (Rails.application.secrets[:reply_queued_timeout_hours] || DEFAULT_QUEUED_TIMEOUT_HOURS).to_i.hours
+  end
 
   def update_delivery_state!(status)
     @delivery_state = status

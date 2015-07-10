@@ -1,16 +1,16 @@
 namespace :replies do
   desc "Removes old delivered replies"
   task :cleanup => :environment do
-    Reply.cleanup!
+    ReplyCleanupScheduledJob.perform_later
   end
 
   desc "Handles failed replies"
   task :handle_failed => :environment do
-    Reply.handle_failed!
+    ReplyHandleFailedScheduledJob.perform_later
   end
 
   desc "Fixes invalid states"
   task :fix_invalid_states => :environment do
-    Reply.fix_invalid_states!
+    ReplyFixInvalidStatesScheduledJob.perform_later
   end
 end
