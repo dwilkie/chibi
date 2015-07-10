@@ -24,7 +24,7 @@ class Chat < ActiveRecord::Base
 
   def self.reinvigorate!
     with_undelivered_messages.find_each do |chat|
-      ChatReactivatorJob.perform_later(chat.id)
+      ChatReinvigoratorJob.perform_later(chat.id)
     end
   end
 
