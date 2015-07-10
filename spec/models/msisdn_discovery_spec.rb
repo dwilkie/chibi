@@ -89,7 +89,7 @@ describe MsisdnDiscovery do
     it { expect(described_class.highest_discovered_subscriber_number).to eq(highest_subscriber_number) }
   end
 
-  describe ".cleanup_queued!" do
+  describe ".cleanup!" do
     def create_msisdn_discovery(*args)
       options = args.extract_options!
       outdated_state = options.delete(:outdated_state)
@@ -108,7 +108,7 @@ describe MsisdnDiscovery do
       expect(msisdn_discovery_with_missing_broadcast.reply).to eq(nil)
       expect(msisdn_discovery_queued_too_long_with_outdated_state).not_to be_active
       expect(msisdn_discovery_with_outdated_state).not_to be_active
-      described_class.cleanup_queued!
+      described_class.cleanup!
     end
 
     it { expect(msisdn_discovery_queued_too_long_with_missing_broadcast.reload.reply).to be_present }

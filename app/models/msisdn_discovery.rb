@@ -1,4 +1,6 @@
 class MsisdnDiscovery < ActiveRecord::Base
+  DEFAULT_TIMEOUT_HOURS = 24
+
   belongs_to :msisdn_discovery_run
   belongs_to :msisdn
   has_one    :reply
@@ -81,7 +83,7 @@ class MsisdnDiscovery < ActiveRecord::Base
   end
 
   def self.queued_too_long
-    queued.where(self.arel_table[:created_at].lt(1.day.ago))
+    queued.where(self.arel_table[:created_at].lt(self.timeout_hours.ago))
   end
 
   def self.highest_discovered_subscriber_number
@@ -107,7 +109,7 @@ class MsisdnDiscovery < ActiveRecord::Base
     queued_too_long.joins(all_replies).merge(Reply.not_a_msisdn_discovery)
   end
 
-  def self.cleanup_queued!
+  def self.cleanup!
     with_missing_broadcast.find_each { |msisdn_discovery| msisdn_discovery.broadcast! }
     with_outdated_state.find_each    { |msisdn_discovery| msisdn_discovery.notify     }
   end
@@ -130,6 +132,10 @@ class MsisdnDiscovery < ActiveRecord::Base
   end
 
   private
+
+  def self.timeout_hours
+    (Rails.application.secrets[:msisdn_discovery_timeout_hours] || DEFAULT_TIMEOUT_HOURS).to_i.hours
+  end
 
   def skip_broadcast?
     blacklisted?
