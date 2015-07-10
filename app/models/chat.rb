@@ -54,8 +54,9 @@ class Chat < ActiveRecord::Base
   end
 
   def self.activate_multiple!(initiator, options = {})
+    limit = options.delete(:limit) || max_to_activate
     initiator.active_chat_deactivate!(:for => initiator, :reactivate_previous_chat => false)
-    initiator.matches.limit(self.max_to_activate).each do |partner|
+    initiator.matches.limit(limit).each do |partner|
       initialize_and_activate_for_friend!(initiator, partner, options)
     end
   end

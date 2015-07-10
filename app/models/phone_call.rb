@@ -7,6 +7,8 @@ class PhoneCall < ActiveRecord::Base
 
   include AASM
 
+  DEFAULT_MAX_SIMULTANIOUS_DIALS = 5
+
   module CallStatuses
     COMPLETED = "completed"
   end
@@ -268,11 +270,11 @@ class PhoneCall < ActiveRecord::Base
   def find_friends
     set_or_update_current_chat
     ask_partner_to_contact_me if user.currently_chatting? && !can_dial_to_partner?
-    Chat.activate_multiple!(user, :starter => self, :count => max_simultaneous_outbound_calls)
+    Chat.activate_multiple!(user, :starter => self, :limit => max_simultaneous_dials)
   end
 
   def new_friends
-    @new_friends ||= triggered_chats.order("created_at DESC").includes(:friend).limit(max_simultaneous_outbound_calls).map(&:friend)
+    @new_friends ||= triggered_chats.order("created_at DESC").includes(:friend).limit(max_simultaneous_dials).map(&:friend)
   end
 
   def friends_available?
@@ -347,7 +349,7 @@ class PhoneCall < ActiveRecord::Base
     I18n.t(:play_path_prefix, :locale => user.locale)
   end
 
-  def max_simultaneous_outbound_calls
-    (Rails.application.secrets[:max_simultaneous_outbound_calls] || 5).to_i
+  def max_simultaneous_dials
+    (Rails.application.secrets[:phone_call_max_simultaneous_dials] || DEFAULT_MAX_SIMULTANIOUS_DIALS).to_i
   end
 end

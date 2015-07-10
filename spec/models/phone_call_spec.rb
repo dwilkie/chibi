@@ -535,7 +535,7 @@ describe PhoneCall do
         let(:partner_from_registered_operator) { create(:user, :mobile_number => registered_operator_number) }
         let(:partner_from_non_registered_operator) { create(:user, :mobile_number => non_registered_operator_number) }
 
-        let(:asserted_max_simultaneous_dials) { Rails.application.secrets[:max_simultaneous_dials].to_i }
+        let(:asserted_max_simultaneous_dials) { Rails.application.secrets[:phone_call_max_simultaneous_dials].to_i }
 
         def setup_scenario
           create_list(:chat, 5, :starter => subject)
