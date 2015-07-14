@@ -97,6 +97,7 @@ describe User do
     it { is_expected.not_to allow_value(attributes_for(:user, :with_invalid_mobile_number)[:mobile_number]).for(:mobile_number) }
     it { is_expected.not_to allow_value("8559878917").for(:mobile_number) }
     it { is_expected.not_to allow_value("8559620617899").for(:mobile_number) }
+    it { is_expected.to validate_uniqueness_of(:mobile_number) }
 
     context "for persisted users" do
       subject { create(:user) }
