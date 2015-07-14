@@ -71,7 +71,7 @@ module Chibi
       end
 
       def assign_to_user
-        self.user ||= User.find_or_initialize_by(:mobile_number => from)
+        self.user = User.find_or_initialize_by(:mobile_number => from) if (!user || !user.persisted?)
       end
 
       module ClassMethods

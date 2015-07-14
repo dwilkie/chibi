@@ -154,6 +154,39 @@ describe PhoneCall do
       expect(phone_call).to be_answered
       expect(phone_call.request_url).to eq(request_url)
     end
+
+    context "a race condition occurs when trying to create the user. See https://github.com/dwilkie/chibi/issues/203" do
+      let(:new_user) { User.new(:mobile_number => from) }
+      let(:existing_user) { create(:user, :mobile_number => from) }
+      let(:race_conditions) { [new_user] * (SaveWithRetry::DEFAULT_MAX_TRIES - 1) }
+
+      def setup_scenario
+        existing_user
+        allow(User).to receive(:find_or_initialize_by).with(:mobile_number => from).and_return(*race_conditions)
+      end
+
+      before do
+        setup_scenario
+      end
+
+      context "after retrying the maximum number of times" do
+        def setup_scenario
+          race_conditions << new_user
+          super
+        end
+
+        it { expect { phone_call }.to raise_error(ActiveRecord::RecordInvalid) }
+      end
+
+      context "after retrying it's successful" do
+        def setup_scenario
+          race_conditions << existing_user
+          super
+        end
+
+        it { expect(phone_call).to be_persisted }
+      end
+    end
   end
 
   describe ".complete!(params)" do

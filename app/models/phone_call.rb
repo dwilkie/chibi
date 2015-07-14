@@ -4,6 +4,7 @@ class PhoneCall < ActiveRecord::Base
   include Chibi::ChatStarter
   include Chibi::ChargeRequester
   include Chibi::Analyzable
+  include SaveWithRetry
 
   include AASM
 
@@ -139,7 +140,7 @@ class PhoneCall < ActiveRecord::Base
   def self.answer!(params, request_url)
     phone_call = new
     phone_call.set_call_params(params, request_url, true)
-    phone_call.save!
+    save_with_retry! { phone_call.save! }
     phone_call.pre_process!
     phone_call
   end
