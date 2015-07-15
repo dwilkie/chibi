@@ -32,7 +32,7 @@ module TranslationHelpers
 
     :broadcast => {
       :en => "Hello! Want to meet new friends? Call to 2442 or SMS your name, age, sex and location. Ex. nhom Mara 26 girl in pp",
-      :kh => "Sousdey! Want to meet new friends? Call to 2442 or SMS your name, age, sex and location. Ex. nhom Mara 26 girl in pp",
+      :kh => "Sokyu: Sousdey!",
       :ph => "Gusto mo ba ng bagong kaibigan? Call to 2442 or SMS your name, age, sex and location. Ex. nhom Mara 26 girl in pp"
     }
   }
