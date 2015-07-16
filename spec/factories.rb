@@ -16,12 +16,12 @@ FactoryGirl.define do
     "296cba84-c82f-49c0-a732-a9b09815fbe#{n}"
   end
 
-  sequence :token do |n|
+  sequence :smsc_token do |n|
     "123abc84-a82e-23a1-b691-b2c19834bce#{n}"
   end
 
   sequence :twilio_sid do |n|
-    "SM908e28e9909641369494f1767ba5c0d#{n}"
+    "sm908e28e9909641369494f1767ba5c0d#{n}"
   end
 
   sequence :mobile_number, 855972345678 do |n|
@@ -406,11 +406,21 @@ FactoryGirl.define do
     end
 
     trait :with_token do
-      token
+      token { generate(:smsc_token) }
     end
 
     trait :twilio_channel do
       delivery_channel "twilio"
+    end
+
+    trait :twilio_delivered_by_smsc do
+      state "delivered_by_smsc"
+      delivered
+      with_twilio_token
+    end
+
+    trait :with_twilio_token do
+      token { generate(:twilio_sid) }
     end
 
     trait :smsc_channel do

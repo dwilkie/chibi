@@ -307,7 +307,7 @@ class Reply < ActiveRecord::Base
   end
 
   def fetch_twilio_message_status!
-    twilio_message = twilio_client.account.messages.get(token)
+    twilio_message = twilio_client.account.messages.get(format_token(token))
     self.smsc_message_status = twilio_message.status.downcase
     save!
     parse_twilio_delivery_status!

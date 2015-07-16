@@ -490,7 +490,7 @@ describe Reply do
     it "should update the message state from Twilio" do
       twilio_message_states.each do |twilio_message_state, assertions|
         clear_enqueued_jobs
-        subject = create(:reply, :twilio_channel, :delivered_by_smsc, :with_token)
+        subject = create(:reply, :twilio_channel, :twilio_delivered_by_smsc)
         expect_twilio_message_status_fetch(
           :message_sid => subject.token,
           :status => twilio_message_state
@@ -535,7 +535,7 @@ describe Reply do
           clear_enqueued_jobs
           number = number_parts.join
           reply = build(:reply, :to => number)
-          message_sid = generate(:token)
+          message_sid = generate(:smsc_token)
           expect_delivery_via_twilio(:message_sid => message_sid) { reply.deliver! }
           reply.reload
           expect(reply.operator_name).to eq(assertions["id"])

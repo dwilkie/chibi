@@ -10,6 +10,10 @@ module Chibi
         )
       end
 
+      def format_token(token)
+        token.to_s.gsub(/^sm/, "SM")
+      end
+
       def twilio_formatted(number)
         "+" + Phony.normalize(number)
       end

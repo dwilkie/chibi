@@ -156,9 +156,12 @@ module MessagingHelpers
   end
 
   def twilio_message_erb(options = {})
-    twilio_cassette_erb(options).merge(
-      :message_sid => generate(:twilio_sid)
-    ).merge(options)
+    options[:message_sid] = format_twilio_sid(options[:message_sid] || generate(:twilio_sid))
+    twilio_cassette_erb(options).merge(options)
+  end
+
+  def format_twilio_sid(twilio_sid)
+    twilio_sid.to_s.gsub(/^sm/, "SM")
   end
 
   def twilio_post_messages_path(options = {})
@@ -166,7 +169,7 @@ module MessagingHelpers
   end
 
   def twilio_get_message_path(options = {})
-    "/2010-04-01/Accounts/#{twilio_account_sid}/Messages/#{options[:message_sid]}.json"
+    "/2010-04-01/Accounts/#{twilio_account_sid}/Messages/#{format_twilio_sid(options[:message_sid])}.json"
   end
 
   def twilio_message_states
