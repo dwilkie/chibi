@@ -213,7 +213,7 @@ class User < ActiveRecord::Base
   end
 
   def contact_me_number
-    operator.short_code || twilio_outgoing_number
+    operator.reply_to_number || operator.short_code || twilio_outgoing_number
   end
 
   def can_call_short_code?

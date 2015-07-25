@@ -1438,7 +1438,7 @@ describe User do
     it "should retun the user's operator's SMS short code or the twilio number" do
       expect(create_user(:from_unknown_operator).contact_me_number).to eq(twilio_number)
       with_operators do |number_parts, assertions|
-        expect(build(:user, :mobile_number => number_parts.join).contact_me_number).to eq(assertions["short_code"] || twilio_number)
+        expect(build(:user, :mobile_number => number_parts.join).contact_me_number).to eq(assertions["reply_to_number"] || assertions["short_code"] || twilio_number)
       end
     end
   end
