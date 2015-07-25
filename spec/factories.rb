@@ -48,6 +48,10 @@ FactoryGirl.define do
     n.to_s
   end
 
+  sequence :number_without_chibi_smpp_connection, 85513234677 do |n|
+    n.to_s
+  end
+
   factory :msisdn_discovery_run do
     country_code "kh"
     operator "smart"
@@ -594,6 +598,10 @@ FactoryGirl.define do
 
     trait :from_unknown_operator do
       mobile_number { generate(:unknown_operator_number) }
+    end
+
+    trait :from_operator_without_chibi_smpp_connection do
+      mobile_number { generate(:number_without_chibi_smpp_connection) }
     end
 
     trait :searching_for_friend do

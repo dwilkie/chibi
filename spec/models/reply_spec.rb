@@ -532,6 +532,7 @@ describe Reply do
 
       it "should enqueue a MT message to be sent via SMPP" do
         with_operators do |number_parts, assertions|
+          next if !assertions["smpp_server_id"]
           clear_enqueued_jobs
           number = number_parts.join
           reply = build(:reply, :to => number)

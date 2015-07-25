@@ -512,6 +512,7 @@ class User < ActiveRecord::Base
       values << country_code
       operator_conditions = []
       operators.each do |operator_id, operator_metadata|
+        next if !operator_metadata["smpp_server_id"]
         operator_conditions << "\"#{table_name}\".\"operator_name\" = ?"
         values << operator_id
       end

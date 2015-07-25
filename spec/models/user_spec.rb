@@ -394,6 +394,12 @@ describe User do
       )
     end
 
+    let(:user_without_chibi_smpp_connection) {
+      create(
+        :user, :not_contacted_for_a_long_time, :from_operator_without_chibi_smpp_connection
+      )
+    }
+
     let(:registered_sp_user_not_contacted_for_a_short_time) do
       create(
         :user, :from_registered_service_provider, :not_contacted_for_a_short_time
@@ -410,10 +416,11 @@ describe User do
       registered_sp_user_not_contacted_for_a_short_time
       registered_sp_user_with_recent_interaction
       user_not_contacted_recently
+      user_without_chibi_smpp_connection
     end
 
     def do_remind(options = {})
-      create_actors unless options.delete(:skip_create_actors)
+      create_actors
       trigger_job(options) { described_class.remind! }
     end
 
@@ -434,6 +441,7 @@ describe User do
     end
 
     def assert_not_reminded
+      expect(reply_to(user_without_chibi_smpp_connection)).to be_nil
       expect(reply_to(registered_sp_user_not_contacted_for_a_long_time)).to be_nil
       expect(reply_to(registered_sp_user_not_contacted_recently)).to be_nil
       expect(reply_to(registered_sp_user_with_recent_interaction)).to be_nil
