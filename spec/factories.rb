@@ -40,7 +40,7 @@ FactoryGirl.define do
     n.to_s
   end
 
-  sequence :operator_number_with_voice, 85510234567 do |n|
+  sequence :operator_number_with_voice, 85513234567 do |n|
     n.to_s
   end
 
@@ -54,16 +54,10 @@ FactoryGirl.define do
 
   factory :msisdn_discovery_run do
     country_code "kh"
-    operator "smart"
-    prefix "85510"
-    subscriber_number_min 203000
-    subscriber_number_max 999999
-
-    trait :blacklisted do
-      prefix "85538"
-      subscriber_number_min 2000000
-      subscriber_number_max 9999999
-    end
+    operator "cootel"
+    prefix "85538"
+    subscriber_number_min 2000000
+    subscriber_number_max 9999999
 
     trait :finished do
       after(:build) do |msisdn_discovery_run|
@@ -88,7 +82,7 @@ FactoryGirl.define do
 
   factory :msisdn_discovery do
     msisdn_discovery_run
-    sequence(:subscriber_number, 203000) { |n| n }
+    sequence(:subscriber_number, 2000000) { |n| n }
 
     trait :queued_too_long do
       queued_for_discovery
@@ -99,7 +93,7 @@ FactoryGirl.define do
     end
 
     trait :blacklisted do
-      association :msisdn_discovery_run, :factory => [:msisdn_discovery_run, :blacklisted]
+      association :msisdn_discovery_run, :factory => [:msisdn_discovery_run]
       subscriber_number 2038039
     end
 

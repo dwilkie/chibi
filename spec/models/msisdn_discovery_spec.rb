@@ -10,8 +10,8 @@ describe MsisdnDiscovery do
     let(:msisdn_discovery_run) {
       create(
         :msisdn_discovery_run,
-        :subscriber_number_min => 203000,
-        :subscriber_number_max => 999999
+        :subscriber_number_min => 2000000,
+        :subscriber_number_max => 9999999
       )
     }
 
@@ -22,13 +22,13 @@ describe MsisdnDiscovery do
     it do
       is_expected.to validate_numericality_of(
         :subscriber_number
-      ).only_integer.is_greater_than_or_equal_to(203000)
+      ).only_integer.is_greater_than_or_equal_to(2000000)
     end
 
     it do
       is_expected.to validate_numericality_of(
         :subscriber_number
-      ).only_integer.is_less_than_or_equal_to(999999)
+      ).only_integer.is_less_than_or_equal_to(9999999)
     end
 
     it { is_expected.to validate_presence_of(:msisdn_discovery_run) }

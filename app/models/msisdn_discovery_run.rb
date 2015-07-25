@@ -135,6 +135,10 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
     @registered_operators ||= Torasup::Operator.registered
   end
 
+  def self.registered_operator(country, operator)
+    ((registered_operators[country] || {})[operator] || {})
+  end
+
   def self.set_broadcast_operators
     @broadcast_operators = registered_operators.dup
     @number_of_broadcast_operators = 0
@@ -146,7 +150,7 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   end
 
   def self.broadcast_to?(country, operator)
-    !!registered_operators[country][operator]["smpp_server_id"] && !(ENV["broadcast_to_#{country}_#{operator}".upcase] || 1).to_i.zero?
+    !!registered_operator(country, operator)["smpp_server_id"] && !(ENV["broadcast_to_#{country}_#{operator}".upcase] || 1).to_i.zero?
   end
 
   private_class_method :set_broadcast_operators,
