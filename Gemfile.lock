@@ -1,22 +1,8 @@
-GIT
-  remote: git://github.com/aasm/aasm.git
-  revision: 4ea38fc6fc9a3bcf728280c93ec362d1d1df1e32
-  specs:
-    aasm (4.2.0)
-
-GIT
-  remote: git://github.com/dwilkie/torasup.git
-  revision: 32a449f9648077a515b3cbe0dd28987801aef4d1
-  specs:
-    torasup (0.0.10)
-      countries
-      deep_merge
-      phony (>= 2.14.3)
-
 GEM
   remote: https://rubygems.org/
   specs:
     CFPropertyList (2.3.1)
+    aasm (4.2.0)
     actionmailer (4.2.3)
       actionpack (= 4.2.3)
       actionview (= 4.2.3)
@@ -56,7 +42,7 @@ GEM
     airbrake (4.3.0)
       builder
       multi_json
-    arel (6.0.0)
+    arel (6.0.2)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     builder (3.2.2)
@@ -85,7 +71,7 @@ GEM
     coffee-script-source (1.9.1.1)
     colored (1.2)
     connection_pool (2.2.0)
-    countries (0.11.4)
+    countries (0.11.5)
       currencies (~> 0.4.2)
       i18n_data (~> 0.7.0)
     crack (0.4.2)
@@ -95,7 +81,7 @@ GEM
     deep_merge (1.0.1)
     diff-lcs (1.2.5)
     erubis (2.7.0)
-    excon (0.45.3)
+    excon (0.45.4)
     execjs (2.5.2)
     factory_girl (4.5.0)
       activesupport (>= 3.0.0)
@@ -103,12 +89,12 @@ GEM
       i18n (~> 0.5)
     fission (0.5.0)
       CFPropertyList (~> 2.2)
-    fog (1.31.0)
+    fog (1.32.0)
       fog-atmos
-      fog-aws (~> 0.0)
+      fog-aws (>= 0.6.0)
       fog-brightbox (~> 0.4)
-      fog-core (~> 1.30)
-      fog-ecloud
+      fog-core (~> 1.32)
+      fog-ecloud (= 0.1.1)
       fog-google (>= 0.0.2)
       fog-json
       fog-local
@@ -129,26 +115,26 @@ GEM
     fog-atmos (0.1.0)
       fog-core
       fog-xml
-    fog-aws (0.6.0)
+    fog-aws (0.7.3)
       fog-core (~> 1.27)
       fog-json (~> 1.0)
       fog-xml (~> 0.1)
       ipaddress (~> 0.8)
-    fog-brightbox (0.7.2)
+    fog-brightbox (0.8.0)
       fog-core (~> 1.22)
       fog-json
       inflecto (~> 0.0.2)
-    fog-core (1.31.1)
+    fog-core (1.32.0)
       builder
       excon (~> 0.45)
       formatador (~> 0.2)
       mime-types
       net-scp (~> 1.1)
       net-ssh (>= 2.1.3)
-    fog-ecloud (0.3.0)
+    fog-ecloud (0.1.1)
       fog-core
       fog-xml
-    fog-google (0.0.6)
+    fog-google (0.0.7)
       fog-core
       fog-json
       fog-xml
@@ -161,7 +147,7 @@ GEM
       fog-core (~> 1.27)
       fog-json (~> 1.0)
       fog-xml (~> 0.1)
-    fog-profitbricks (0.0.3)
+    fog-profitbricks (0.0.5)
       fog-core
       fog-xml
       nokogiri
@@ -234,29 +220,28 @@ GEM
     mime-types (2.6.1)
     mini_portile (0.6.2)
     minitest (5.7.0)
-    mock_redis (0.14.1)
-    multi_json (1.11.1)
+    mock_redis (0.15.1)
+    multi_json (1.11.2)
     multi_xml (0.5.5)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.2)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
-    parallel (1.6.0)
-    parallel_tests (1.5.1)
+    parallel (1.6.1)
+    parallel_tests (1.6.0)
       parallel
     pg (0.18.2)
-    phony (2.14.5)
-    phony_rails (0.12.8)
+    phony (2.14.12)
+    phony_rails (0.12.9)
       activesupport (>= 3.0)
-      countries (~> 0.8, >= 0.8.2)
+      countries (~> 0.11, >= 0.11.5)
       phony (~> 2.12)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    puma (2.11.3)
-      rack (>= 1.1, < 2.0)
+    puma (2.12.2)
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
@@ -305,15 +290,15 @@ GEM
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
     require_all (1.3.2)
-    rspec-core (3.3.1)
+    rspec-core (3.3.2)
       rspec-support (~> 3.3.0)
-    rspec-expectations (3.3.0)
+    rspec-expectations (3.3.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.3.0)
-    rspec-mocks (3.3.1)
+    rspec-mocks (3.3.2)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.3.0)
-    rspec-rails (3.3.2)
+    rspec-rails (3.3.3)
       actionpack (>= 3.0, < 4.3)
       activesupport (>= 3.0, < 4.3)
       railties (>= 3.0, < 4.3)
@@ -333,12 +318,12 @@ GEM
     sexp_processor (4.6.0)
     shoulda-matchers (2.8.0)
       activesupport (>= 3.0.0)
-    sidekiq (3.4.1)
+    sidekiq (3.4.2)
       celluloid (~> 0.16.0)
-      connection_pool (>= 2.1.1)
-      json
-      redis (>= 3.0.6)
-      redis-namespace (>= 1.3.1)
+      connection_pool (~> 2.2, >= 2.2.0)
+      json (~> 1.0)
+      redis (~> 3.2, >= 3.2.1)
+      redis-namespace (~> 1.5, >= 1.5.2)
     sinatra (1.4.6)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -358,9 +343,13 @@ GEM
     thor (0.19.1)
     thread_safe (0.3.5)
     tilt (1.4.1)
-    timecop (0.7.4)
+    timecop (0.8.0)
     timers (4.0.1)
       hitimes
+    torasup (0.0.11)
+      countries
+      deep_merge
+      phony (>= 2.14.12)
     turbolinks (2.5.3)
       coffee-rails
     twilio-ruby (4.2.1)
@@ -373,7 +362,7 @@ GEM
       execjs (>= 0.3.0)
       json (>= 1.8.0)
     vcr (2.9.3)
-    web-console (2.1.3)
+    web-console (2.2.1)
       activemodel (>= 4.0)
       binding_of_caller (>= 0.7.2)
       railties (>= 4.0)
@@ -388,7 +377,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aasm!
+  aasm
   airbrake
   capybara
   carrierwave
@@ -422,7 +411,7 @@ DEPENDENCIES
   sinatra
   test_after_commit
   timecop
-  torasup!
+  torasup
   turbolinks
   twilio-ruby
   uglifier (>= 1.3.0)
