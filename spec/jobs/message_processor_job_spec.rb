@@ -19,4 +19,9 @@ describe MessageProcessorJob do
       subject.perform(message_id)
     end
   end
+
+  describe "automatic retries" do
+    include ActiveJobHelpers
+    it { expect { trigger_job { described_class.perform_later(-1) } }.not_to raise_error }
+  end
 end
