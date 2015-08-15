@@ -52,6 +52,10 @@ FactoryGirl.define do
     n.to_s
   end
 
+  sequence :landline_number, 855234512345 do |n|
+    n.to_s
+  end
+
   factory :msisdn_discovery_run do
     country_code "kh"
     operator "cootel"
@@ -550,6 +554,10 @@ FactoryGirl.define do
   factory :user do
     cambodian
 
+    trait :cannot_receive_sms do
+      with_landline_number
+    end
+
     trait :with_recent_interaction do
       last_interacted_at { Time.current }
     end
@@ -596,6 +604,10 @@ FactoryGirl.define do
 
     trait :from_operator_without_chibi_smpp_connection do
       mobile_number { generate(:number_without_chibi_smpp_connection) }
+    end
+
+    trait :with_landline_number do
+      mobile_number { generate(:landline_number) }
     end
 
     trait :searching_for_friend do

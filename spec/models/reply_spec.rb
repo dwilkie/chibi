@@ -522,14 +522,24 @@ describe Reply do
       :twilio
     end
 
-    context "by default" do
-      context "where there is no destination" do
-        it "should not deliver message" do
-          subject.deliver!
-          expect(subject).to be_pending_delivery
-        end
+    context "messages which cannot be delivered" do
+      before do
+        subject.deliver!
       end
 
+      context "because there is no destination" do
+        it { is_expected.to be_pending_delivery }
+      end
+
+      context "because the recipient cannot receive SMS" do
+        let(:subject) { build(:reply, :user => user) }
+        let(:user) { create(:user, :cannot_receive_sms) }
+
+        it { is_expected.to be_pending_delivery }
+      end
+    end
+
+    context "by default" do
       it "should enqueue a MT message to be sent via SMPP" do
         with_operators do |number_parts, assertions|
           next if !assertions["smpp_server_id"]

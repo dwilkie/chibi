@@ -369,7 +369,7 @@ class Reply < ActiveRecord::Base
   end
 
   def prepare_for_delivery
-    return unless save
+    return if !save || (user && !user.can_receive_sms?)
     self.delivery_channel = can_perform_delivery_via_smsc? ? DELIVERY_CHANNEL_SMSC : DELIVERY_CHANNEL_TWILIO
   end
 

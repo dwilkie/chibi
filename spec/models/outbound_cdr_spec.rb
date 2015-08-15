@@ -164,10 +164,13 @@ describe OutboundCdr do
             expect(chat.reload).to be_active
           end
 
-          it "should send a canned message to the caller from the receiver and to the receiver from the caller" do
-            subject.save!
-            expect(reply_to(user, chat).body).to match(/#{spec_translate(:forward_message_approx, user.locale, friend.screen_id)}/)
-            expect(reply_to(friend, chat).body).to match(/#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/)
+          context "canned messages" do
+            before do
+              subject.save!
+            end
+
+            it { expect(reply_to(user, chat).body).to match(/#{spec_translate(:forward_message_approx, user.locale, friend.screen_id)}/) }
+            it {  expect(reply_to(friend, chat).body).to match(/#{spec_translate(:forward_message_approx, friend.locale, user.screen_id)}/) }
           end
         end
 

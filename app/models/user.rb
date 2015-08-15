@@ -45,9 +45,10 @@ class User < ActiveRecord::Base
   validates :age, :inclusion => {:in => 10..99, :allow_nil => true}
 
   before_validation(:on => :create) do
-    self.screen_name = Faker::Name.first_name.downcase unless screen_name.present?
+    self.screen_name = Faker::Name.first_name.downcase if !screen_name.present?
     if mobile_number.present?
       set_operator_name
+      set_receive_sms_ability
       assign_location
     end
   end
@@ -141,9 +142,13 @@ class User < ActiveRecord::Base
     where(:active_chat_id => nil)
   end
 
+  def self.can_receive_sms
+    where(:can_receive_sms => true)
+  end
+
   def self.remind!
     return if out_of_user_hours?
-    users_to_remind = not_contacted_recently.from_registered_service_providers.online.order(coalesce_last_contacted_at).limit(remind_max)
+    users_to_remind = not_contacted_recently.from_registered_service_providers.can_receive_sms.online.order(coalesce_last_contacted_at).limit(remind_max)
 
     users_to_remind.each do |user_to_remind|
       UserRemindererJob.perform_later(user_to_remind.id)
@@ -602,6 +607,14 @@ class User < ActiveRecord::Base
 
   def set_operator_name
     self.operator_name = operator && operator.id
+  end
+
+  def set_receive_sms_ability
+    self.can_receive_sms = !mobile_number_is_landline?
+  end
+
+  def mobile_number_is_landline?
+    torasup_number && torasup_number.type == "landline"
   end
 
   def torasup_number

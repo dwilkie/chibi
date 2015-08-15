@@ -11,9 +11,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150630080602) do
+ActiveRecord::Schema.define(version: 20150815034441) do
 
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
 
   create_table "call_data_records", force: :cascade do |t|
@@ -192,6 +193,7 @@ ActiveRecord::Schema.define(version: 20150630080602) do
     t.datetime "last_contacted_at"
     t.string   "operator_name",            limit: 255
     t.integer  "latest_charge_request_id"
+    t.boolean  "can_receive_sms",                      default: true,     null: false
   end
 
   add_index "users", ["date_of_birth"], name: "index_users_on_date_of_birth", using: :btree

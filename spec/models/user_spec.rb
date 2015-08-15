@@ -186,6 +186,29 @@ describe User do
           subject.valid?
           expect(subject.operator_name).to be_present
         end
+
+        context "setting the receive_sms_ability" do
+          subject { build(:user, :mobile_number => mobile_number) }
+
+          before do
+            subject.valid?
+          end
+
+          context "for known landline numbers" do
+            let(:mobile_number) { generate(:landline_number) }
+            it { expect(subject).not_to be_can_receive_sms }
+          end
+
+          context "for unknown numbers" do
+            let(:mobile_number) { generate(:unknown_operator_number) }
+            it { expect(subject).to be_can_receive_sms }
+          end
+
+          context "for mobile numbers" do
+            let(:mobile_number) { generate(:mobile_number) }
+            it { expect(subject).to be_can_receive_sms }
+          end
+        end
       end
 
       context "given a mobile number is not present" do
@@ -410,6 +433,8 @@ describe User do
       create(:user, :from_registered_service_provider)
     end
 
+    let(:user_who_cannot_receive_sms) { create(:user, :not_contacted_recently, :cannot_receive_sms) }
+
     def create_actors
       registered_sp_user_not_contacted_recently
       registered_sp_user_not_contacted_for_a_long_time
@@ -417,6 +442,7 @@ describe User do
       registered_sp_user_with_recent_interaction
       user_not_contacted_recently
       user_without_chibi_smpp_connection
+      user_who_cannot_receive_sms
     end
 
     def do_remind(options = {})
@@ -438,6 +464,7 @@ describe User do
       assert_user_reminded(registered_sp_user_not_contacted_recently)
       expect(reply_to(registered_sp_user_with_recent_interaction)).to be_nil
       expect(reply_to(user_not_contacted_recently)).to be_nil
+      expect(reply_to(user_who_cannot_receive_sms)).to be_nil
     end
 
     def assert_not_reminded
