@@ -92,6 +92,18 @@ describe PhoneCall do
     end
   end
 
+  describe "#anonymous?" do
+    context "for anonymous calls" do
+      subject { build(:phone_call, :anonymous) }
+      it { is_expected.to be_anonymous }
+    end
+
+    context "for normal calls" do
+      subject { build(:phone_call) }
+      it { is_expected.not_to be_anonymous }
+    end
+  end
+
   describe "#fetch_inbound_twilio_cdr!" do
     include WebMockHelpers
     subject { create(:phone_call) }
@@ -153,6 +165,12 @@ describe PhoneCall do
       expect(phone_call.from).to eq(from)
       expect(phone_call).to be_answered
       expect(phone_call.request_url).to eq(request_url)
+    end
+
+    context "call is from an anonymous user" do
+      let(:from) { "Anonymous" }
+
+      it { expect(phone_call).not_to be_persisted }
     end
 
     context "a race condition occurs when trying to create the user. See https://github.com/dwilkie/chibi/issues/203" do
@@ -453,7 +471,14 @@ describe PhoneCall do
         let(:current_state) { :answered }
         let(:request_url) { authenticated_url(phone_calls_url(:host => host, :format => :xml)) }
 
-        it { assert_redirect! }
+        context "for a normal call" do
+          it { assert_redirect! }
+        end
+
+        context "for an anonymous call" do
+          let(:call_params) { sample_call_params(build(:phone_call, :anonymous).call_params.symbolize_keys) }
+          it { assert_hangup! }
+        end
       end
 
       context "telling_user_they_dont_have_enough_credit" do

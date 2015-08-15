@@ -25,10 +25,10 @@ module Chibi
         # this method is overriden because Twilio adds
         # random 1's to the start of phone numbers
 
-        return write_attribute(:from, value) if value.blank?
-
         # remove any non-digits and leading 0's to produce a more valid looking E.164 number
-        sanitized_value = value.gsub(/\D/, "").gsub(/\A0+/, "")
+        sanitized_value = value.to_s.gsub(/\D/, "").gsub(/\A0+/, "")
+
+        return write_attribute(:from, value) if sanitized_value.blank?
 
         number_with_country_code = Phony.normalize(sanitized_value)
         # don't do anything if it's a twilio number or it's too short

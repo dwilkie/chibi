@@ -283,6 +283,10 @@ FactoryGirl.define do
       state "answered"
     end
 
+    trait :anonymous do
+      call_params { { "from" => "Anonymous" } }
+    end
+
     trait :transitioning_from_answered do
       state "transitioning_from_answered"
     end

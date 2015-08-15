@@ -9,6 +9,7 @@ class PhoneCall < ActiveRecord::Base
   include AASM
 
   DEFAULT_MAX_SIMULTANIOUS_DIALS = 5
+  ANONYMOUS_FROM = "anonymous"
 
   module CallStatuses
     COMPLETED = "completed"
@@ -140,6 +141,7 @@ class PhoneCall < ActiveRecord::Base
   def self.answer!(params, request_url)
     phone_call = new
     phone_call.set_call_params(params, request_url, true)
+    return phone_call if phone_call.anonymous?
     save_with_retry! { phone_call.save! }
     phone_call.pre_process!
     phone_call
@@ -163,6 +165,10 @@ class PhoneCall < ActiveRecord::Base
       self.to = call_params["to"]
       self.sid = call_params["call_sid"]
     end
+  end
+
+  def anonymous?
+    (call_params || {})["from"].to_s.downcase == ANONYMOUS_FROM
   end
 
   def pre_process!
@@ -189,7 +195,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def twiml_for_answered
-    redirect_to_self("POST")
+    anonymous? ? hangup : redirect_to_self("POST")
   end
 
   def twiml_for_transitioning_from_answered
