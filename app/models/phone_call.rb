@@ -147,7 +147,7 @@ class PhoneCall < ActiveRecord::Base
 
   def self.complete!(params)
     call_params = params.underscorify_keys
-    phone_call = where(:sid => call_params["call_sid"]).first!
+    return if !(phone_call = where(:sid => call_params["call_sid"]).first)
     phone_call.duration = call_params["call_duration"]
     phone_call.complete!
   end

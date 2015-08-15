@@ -202,6 +202,10 @@ describe PhoneCall do
         expect(phone_call.duration).to eq(call_duration)
       end
     end
+
+    context "given the phone call cannot be found" do
+      it { expect { described_class.complete!(:call_sid => "does-not-exist") }.not_to raise_error }
+    end
   end
 
   describe "#process!" do
