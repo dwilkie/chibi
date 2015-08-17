@@ -237,7 +237,7 @@ GEM
     parallel_tests (1.6.1)
       parallel
     pg (0.18.2)
-    phony (2.14.13)
+    phony (2.14.14)
     phony_rails (0.12.9)
       activesupport (>= 3.0)
       countries (~> 0.11, >= 0.11.5)
@@ -351,10 +351,10 @@ GEM
     timecop (0.8.0)
     timers (4.0.1)
       hitimes
-    torasup (0.0.12)
+    torasup (0.0.13)
       countries
       deep_merge
-      phony (>= 2.14.12)
+      phony (>= 2.14.14)
     turbolinks (2.5.3)
       coffee-rails
     twilio-ruby (4.3.0)
