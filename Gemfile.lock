@@ -85,7 +85,7 @@ GEM
     execjs (2.6.0)
     factory_girl (4.5.0)
       activesupport (>= 3.0.0)
-    faker (1.4.3)
+    faker (1.5.0)
       i18n (~> 0.5)
     fission (0.5.0)
       CFPropertyList (~> 2.2)
@@ -217,7 +217,7 @@ GEM
     lazy_high_charts (1.5.4)
       bundler (>= 1.0)
       hash-deep-merge
-    loofah (2.0.2)
+    loofah (2.0.3)
       nokogiri (>= 1.5.9)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
@@ -246,7 +246,7 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    puma (2.12.2)
+    puma (2.13.4)
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
@@ -404,7 +404,7 @@ DEPENDENCIES
   pg
   phony_rails
   pry
-  puma (= 2.12.2)
+  puma
   rails (= 4.2.3)
   rails_12factor
   rails_best_practices
