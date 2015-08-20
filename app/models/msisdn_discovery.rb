@@ -86,10 +86,6 @@ class MsisdnDiscovery < ActiveRecord::Base
     queued.where(self.arel_table[:created_at].lt(self.timeout_hours.ago))
   end
 
-  def self.highest_discovered_subscriber_number
-    maximum(:subscriber_number)
-  end
-
   def self.all_replies
     msisdn_discoveries = self.arel_table
     replies = Reply.arel_table
@@ -112,6 +108,10 @@ class MsisdnDiscovery < ActiveRecord::Base
   def self.cleanup!
     with_missing_broadcast.find_each { |msisdn_discovery| msisdn_discovery.broadcast! }
     with_outdated_state.find_each    { |msisdn_discovery| msisdn_discovery.notify     }
+  end
+
+  def self.subscriber_numbers
+    pluck(:subscriber_number)
   end
 
   def notify

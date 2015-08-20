@@ -64,6 +64,7 @@ FactoryGirl.define do
     subscriber_number_max 9999999
 
     trait :finished do
+      subscriber_number_max 2000000
       after(:build) do |msisdn_discovery_run|
         msisdn_discovery_run.msisdn_discoveries << build(
           :msisdn_discovery,
@@ -74,6 +75,7 @@ FactoryGirl.define do
     end
 
     trait :nearly_finished do
+      subscriber_number_max 2000001
       after(:build) do |msisdn_discovery_run|
         msisdn_discovery_run.msisdn_discoveries << build(
           :msisdn_discovery,

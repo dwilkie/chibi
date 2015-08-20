@@ -11,14 +11,16 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   validates :subscriber_number_min, :subscriber_number_max,
             :presence => true, :numericality => { :only_integer => true, :greater_than_or_equal_to => 0 }
 
-  delegate :highest_discovered_subscriber_number, :to => :msisdn_discoveries
-
   def self.by_prefix(prefix)
     where(:prefix => prefix)
   end
 
   def self.by_operator(country_code, operator_id)
     where(:country_code => country_code, :operator => operator_id)
+  end
+
+  def self.active
+    select { |discovery_run| !discovery_run.finished? }
   end
 
   def self.discover!
@@ -28,34 +30,29 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
     batch_size = queue_buffer
     group(:country_code, :operator).count.each do |operator, count_by_operator|
       next if !broadcast_to?(*operator)
-      operator_scope = by_operator(*operator)
-      operator_scope.group(:prefix).count.sort_by {|k, v| [v, k]}.to_h.each do |prefix, count_by_prefix|
-        if mobile_prefixes((broadcast_operators[operator[0]] || {})[operator[1]]).has_key?(prefix)
-          operator_scope.by_prefix(prefix).last!.discover_batch!(batch_size)
-          break
+      active_discovery_runs = by_operator(*operator).active
+      discovery_batches = {}
+      enqueued_discoveries = []
+
+      while enqueued_discoveries.size < batch_size do
+        random_discovery_run = active_discovery_runs.sample
+        random_batch = discovery_batches[random_discovery_run.id] ||= random_discovery_run.random_batch(batch_size)
+
+        if random_subscriber_number = random_batch.pop
+          random_discovery_run.enqueue_discovery!(random_subscriber_number)
         end
+
+        enqueued_discoveries << random_subscriber_number
       end
     end
   end
 
-  def discover_batch!(batch_size)
-    subscriber_number_start = highest_discovered_subscriber_number ? highest_discovered_subscriber_number + 1 : subscriber_number_min
-    msisdn_discovery_start = msisdn_discoveries.build(
-      :subscriber_number => subscriber_number_start
-    )
-    msisdn_discovery_end = msisdn_discoveries.build(
-      :subscriber_number => msisdn_discovery_start.subscriber_number + batch_size - 1
-    )
-
-    msisdn_discovery_end.subscriber_number = subscriber_number_max if !msisdn_discovery_end.valid?
-
-    (msisdn_discovery_start.subscriber_number..msisdn_discovery_end.subscriber_number).each do |subscriber_number|
-      enqueue_discovery!(subscriber_number)
-    end
+  def random_batch(batch_size)
+    (subscriber_number_range.to_a - msisdn_discoveries.subscriber_numbers).shuffle.take(batch_size)
   end
 
   def finished?
-    highest_discovered_subscriber_number == subscriber_number_max
+    subscriber_number_range.count == msisdn_discoveries.count
   end
 
   def discover!(subscriber_number)
@@ -63,10 +60,14 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
     msisdn_discovery.broadcast! if msisdn_discovery.save
   end
 
-  private
-
   def enqueue_discovery!(subscriber_number)
     MsisdnDiscoveryJob.perform_later(self.id, subscriber_number)
+  end
+
+  private
+
+  def subscriber_number_range
+    subscriber_number_min..subscriber_number_max
   end
 
   def self.broadcasts_in_queue

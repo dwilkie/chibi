@@ -77,16 +77,14 @@ describe MsisdnDiscovery do
     it { expect(described_class.queued).to match_array([not_started, queued_for_discovery]) }
   end
 
-  describe ".highest_discovered_subscriber_number" do
-    let(:highest_subscriber_number) { msisdn_discovery_run.subscriber_number_max }
-    let(:msisdn_discovery_run) { create(:msisdn_discovery_run) }
+  describe ".subscriber_numbers" do
+    let(:msisdn_discovery) { create(:msisdn_discovery) }
 
     before do
-      create(:msisdn_discovery, :subscriber_number => highest_subscriber_number)
-      create(:msisdn_discovery, :subscriber_number => msisdn_discovery_run.subscriber_number_min)
+      msisdn_discovery
     end
 
-    it { expect(described_class.highest_discovered_subscriber_number).to eq(highest_subscriber_number) }
+    it { expect(described_class.subscriber_numbers).to match_array([msisdn_discovery.subscriber_number]) }
   end
 
   describe ".cleanup!" do

@@ -70,6 +70,17 @@ describe MsisdnDiscoveryRun do
     end
   end
 
+  describe ".active" do
+    let(:active_msisdn_discovery_run) { create(:msisdn_discovery_run) }
+
+    before do
+      active_msisdn_discovery_run
+      create(:msisdn_discovery_run, :finished)
+    end
+
+    it { expect(described_class.active).to match_array([active_msisdn_discovery_run]) }
+  end
+
   describe ".discover!" do
     include ActiveJobHelpers
 
@@ -111,12 +122,12 @@ describe MsisdnDiscoveryRun do
     context "given discovery will be enqueued" do
       let(:job_options) { {} }
 
-      context "when the queue is empty" do
-        def assert_discovery!
-          expect(MsisdnDiscovery.count).to eq(described_class::DEFAULT_BROADCAST_MAX_QUEUED)
-        end
+      def assert_max_discoveries!
+        expect(MsisdnDiscovery.count).to eq(described_class::DEFAULT_BROADCAST_MAX_QUEUED)
+      end
 
-        it { assert_discovery! }
+      context "when the queue is empty" do
+        it { assert_max_discoveries! }
       end
 
       context "a discovery run already exists" do
@@ -129,7 +140,6 @@ describe MsisdnDiscoveryRun do
           let(:msisdn_discovery_run) { create(:msisdn_discovery_run, :finished) }
 
           def assert_discovery!
-            expect(MsisdnDiscovery.count).to be > 1
             expect(msisdn_discovery_run.msisdn_discoveries.count).to eq(1)
           end
 
@@ -147,6 +157,11 @@ describe MsisdnDiscoveryRun do
         end
       end
     end
+  end
+
+  describe "#random_batch" do
+    subject { create(:msisdn_discovery_run) }
+    it { expect(subject.random_batch(10)).not_to match_array(subject.random_batch(10)) }
   end
 
   describe "#discover!(subscriber_number)" do
@@ -176,13 +191,13 @@ describe MsisdnDiscoveryRun do
   end
 
   describe "#finished?" do
-    context "#subscriber_number_max" do
-      context "has been discovered" do
+    context "all possibilities" do
+      context "have been discovered" do
         subject { create(:msisdn_discovery_run, :finished) }
         it { is_expected.to be_finished }
       end
 
-      context "has not been discovered" do
+      context "have not been discovered" do
         subject { create(:msisdn_discovery_run) }
         it { is_expected.not_to be_finished }
       end
