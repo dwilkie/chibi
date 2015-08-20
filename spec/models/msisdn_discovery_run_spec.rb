@@ -122,12 +122,12 @@ describe MsisdnDiscoveryRun do
     context "given discovery will be enqueued" do
       let(:job_options) { {} }
 
-      def assert_max_discoveries!
+      def assert_discovery!
         expect(MsisdnDiscovery.count).to eq(described_class::DEFAULT_BROADCAST_MAX_QUEUED)
       end
 
       context "when the queue is empty" do
-        it { assert_max_discoveries! }
+        it { assert_discovery! }
       end
 
       context "a discovery run already exists" do
@@ -141,6 +141,7 @@ describe MsisdnDiscoveryRun do
 
           def assert_discovery!
             expect(msisdn_discovery_run.msisdn_discoveries.count).to eq(1)
+            expect(MsisdnDiscovery.count).to be > 1
           end
 
           it { assert_discovery! }
@@ -150,6 +151,7 @@ describe MsisdnDiscoveryRun do
           let(:msisdn_discovery_run) { create(:msisdn_discovery_run, :nearly_finished) }
 
           def assert_discovery!
+            expect(MsisdnDiscovery.count).to be > 1
             expect(msisdn_discovery_run.reload).to be_finished
           end
 
