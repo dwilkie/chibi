@@ -101,13 +101,26 @@ class MsisdnDiscovery < ActiveRecord::Base
     queued_too_long.joins(:reply).merge(Reply.accepted_by_smsc)
   end
 
+  def self.without_broadcast
+    joins(all_replies).merge(Reply.not_a_msisdn_discovery)
+  end
+
   def self.with_missing_broadcast
-    queued_too_long.joins(all_replies).merge(Reply.not_a_msisdn_discovery)
+    without_broadcast.queued_too_long
+  end
+
+  def self.without_msisdn_discovery_run
+    where(:msisdn_discovery_run_id => nil)
   end
 
   def self.cleanup!
     with_missing_broadcast.find_each { |msisdn_discovery| msisdn_discovery.broadcast! }
     with_outdated_state.find_each    { |msisdn_discovery| msisdn_discovery.notify     }
+    from_inactive_msisdn_discovery_run.without_broadcast.delete_all
+  end
+
+  def self.from_inactive_msisdn_discovery_run
+    joins(:msisdn_discovery_run).merge(MsisdnDiscoveryRun.inactive)
   end
 
   def self.subscriber_numbers

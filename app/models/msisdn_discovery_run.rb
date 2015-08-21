@@ -20,11 +20,32 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   end
 
   def self.active
-    select { |discovery_run| !discovery_run.finished? }
+    where(:active => true)
+  end
+
+  def self.inactive
+    where.not(:active => true)
+  end
+
+  def self.cleanup!
+    inactive.joins(all_msisdn_discoveries).merge(MsisdnDiscovery.without_msisdn_discovery_run).delete_all
+  end
+
+  def self.all_msisdn_discoveries
+    msisdn_discovery_runs = self.arel_table
+    msisdn_discoveries = MsisdnDiscovery.arel_table
+
+    join = msisdn_discovery_runs.join(
+      msisdn_discoveries, Arel::Nodes::OuterJoin
+    ).on(
+      msisdn_discovery_runs[:id].eq(msisdn_discoveries[:msisdn_discovery_run_id])
+    ).join_sources
   end
 
   def self.discover!
     return if out_of_broadcast_hours? || queue_full?
+
+    deactivate!
     create_from_broadcast_operators!
 
     batch_size = queue_buffer
@@ -113,12 +134,21 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
     operator_metadata["mobile_prefixes"]
   end
 
+  def self.deactivate!
+    finished.update_all(:active => false)
+  end
+
+  def self.finished
+    active.where(:id => active.select(&:finished?).map(&:id))
+  end
+
   def self.create_from_broadcast_operators!
     broadcast_operators.each do |country, operators|
       operators.each do |operator, operator_metadata|
+        active_operator_discovery_runs = by_operator(country, operator).active
+        next if active_operator_discovery_runs.any?
         mobile_prefixes(operator_metadata).each do |prefix, prefix_metadata|
-          discovery_run = by_operator(country, operator).by_prefix(prefix).last
-          if !discovery_run || discovery_run.finished?
+          if active_operator_discovery_runs.by_prefix(prefix).empty?
             create!(
               :country_code => country,
               :operator => operator,
@@ -156,5 +186,7 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
 
   private_class_method :set_broadcast_operators,
                        :create_from_broadcast_operators!,
-                       :mobile_prefixes
+                       :mobile_prefixes,
+                       :deactivate!,
+                       :finished
 end

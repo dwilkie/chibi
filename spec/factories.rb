@@ -84,6 +84,10 @@ FactoryGirl.define do
         )
       end
     end
+
+    trait :inactive do
+      active false
+    end
   end
 
   factory :msisdn_discovery do
@@ -125,6 +129,10 @@ FactoryGirl.define do
 
     trait :with_outdated_state do
       association :reply, :factory => [:reply, :confirmed]
+    end
+
+    trait :from_inactive_msisdn_discovery_run do
+      association :msisdn_discovery_run, :factory => [:msisdn_discovery_run, :inactive]
     end
   end
 
@@ -445,7 +453,7 @@ FactoryGirl.define do
       to { msisdn_discovery.mobile_number }
     end
 
-    trait :foo_bar do
+    trait :queued_too_long do
       queued_for_smsc_delivery
       delivered_at { 1.day.ago }
     end

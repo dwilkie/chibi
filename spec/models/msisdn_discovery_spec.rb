@@ -4,6 +4,7 @@ describe MsisdnDiscovery do
   describe "associations" do
     it { is_expected.to belong_to(:msisdn_discovery_run) }
     it { is_expected.to belong_to(:msisdn) }
+    it { is_expected.to have_one(:reply) }
   end
 
   describe "validations" do
@@ -100,12 +101,16 @@ describe MsisdnDiscovery do
     let(:msisdn_discovery_with_missing_broadcast) { create_msisdn_discovery }
     let(:msisdn_discovery_queued_too_long_with_outdated_state) { create_msisdn_discovery(:queued_too_long, :with_outdated_state, :outdated_state => :queued_for_discovery) }
     let(:msisdn_discovery_with_outdated_state) { create_msisdn_discovery(:with_outdated_state, :outdated_state => :queued_for_discovery) }
+    let(:msisdn_discovery_from_inactive_run) { create_msisdn_discovery(:from_inactive_msisdn_discovery_run, :with_outdated_state) }
+    let(:msisdn_discovery_from_inactive_run_without_broadcast) { create_msisdn_discovery(:from_inactive_msisdn_discovery_run) }
 
     before do
       expect(msisdn_discovery_queued_too_long_with_missing_broadcast.reply).to eq(nil)
       expect(msisdn_discovery_with_missing_broadcast.reply).to eq(nil)
       expect(msisdn_discovery_queued_too_long_with_outdated_state).not_to be_active
       expect(msisdn_discovery_with_outdated_state).not_to be_active
+      expect(msisdn_discovery_from_inactive_run).to be_persisted
+      expect(msisdn_discovery_from_inactive_run_without_broadcast).to be_persisted
       described_class.cleanup!
     end
 
@@ -113,6 +118,8 @@ describe MsisdnDiscovery do
     it { expect(msisdn_discovery_with_missing_broadcast.reload.reply).to eq(nil) }
     it { expect(msisdn_discovery_queued_too_long_with_outdated_state.reload).to be_active }
     it { expect(msisdn_discovery_with_outdated_state.reload).not_to be_active }
+    it { expect(described_class.where(:id => msisdn_discovery_from_inactive_run.id)).to exist }
+    it { expect(described_class.where(:id => msisdn_discovery_from_inactive_run_without_broadcast.id)).not_to exist }
   end
 
   describe "#broadcast!" do

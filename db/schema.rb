@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150815034441) do
+ActiveRecord::Schema.define(version: 20150820102926) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -120,13 +120,14 @@ ActiveRecord::Schema.define(version: 20150815034441) do
   add_index "msisdn_discoveries", ["msisdn_id", "msisdn_discovery_run_id"], name: "index_msisdn_discoveries", unique: true, using: :btree
 
   create_table "msisdn_discovery_runs", force: :cascade do |t|
-    t.string   "prefix",                null: false
-    t.integer  "subscriber_number_min", null: false
-    t.integer  "subscriber_number_max", null: false
-    t.string   "operator",              null: false
-    t.string   "country_code",          null: false
-    t.datetime "created_at",            null: false
-    t.datetime "updated_at",            null: false
+    t.string   "prefix",                               null: false
+    t.integer  "subscriber_number_min",                null: false
+    t.integer  "subscriber_number_max",                null: false
+    t.string   "operator",                             null: false
+    t.string   "country_code",                         null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.boolean  "active",                default: true, null: false
   end
 
   create_table "msisdns", force: :cascade do |t|

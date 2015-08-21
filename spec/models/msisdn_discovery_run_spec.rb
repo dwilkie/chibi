@@ -75,10 +75,29 @@ describe MsisdnDiscoveryRun do
 
     before do
       active_msisdn_discovery_run
-      create(:msisdn_discovery_run, :finished)
+      create(:msisdn_discovery_run, :inactive)
     end
 
     it { expect(described_class.active).to match_array([active_msisdn_discovery_run]) }
+  end
+
+  describe ".cleanup!" do
+    let(:msisdn_discovery_run) { create(:msisdn_discovery_run) }
+    let(:inactive_msisdn_discovery_run) { create(:msisdn_discovery_run, :inactive) }
+    let(:inactive_msisdn_discovery_run_with_msisdn_discoveries) { create(:msisdn_discovery, :from_inactive_msisdn_discovery_run).msisdn_discovery_run }
+
+    def setup_scenario
+      msisdn_discovery_run
+      inactive_msisdn_discovery_run
+      inactive_msisdn_discovery_run_with_msisdn_discoveries
+    end
+
+    before do
+      setup_scenario
+      described_class.cleanup!
+    end
+
+    it { expect(MsisdnDiscoveryRun.all).to match_array([msisdn_discovery_run, inactive_msisdn_discovery_run_with_msisdn_discoveries]) }
   end
 
   describe ".discover!" do
@@ -98,10 +117,10 @@ describe MsisdnDiscoveryRun do
       at_time(*[current_time].flatten) { trigger_job(job_options) { described_class.discover! } }
     end
 
-    context "given discovery will not be enqueued because" do
+    context "given discovery will not be enqueued" do
       let(:job_options) { { :queue_only => true } }
 
-      context "the queue has reached it's maximum" do
+      context "because the queue has reached it's maximum" do
         def setup_scenario
           create_list(
             :msisdn_discovery,
@@ -113,7 +132,7 @@ describe MsisdnDiscoveryRun do
         it { assert_no_discovery! }
       end
 
-      context "it's out of broadcast hours" do
+      context "because it's out of broadcast hours" do
         let(:current_time) { described_class::DEFAULT_BROADCAST_HOURS_MAX + 1 }
         it { assert_no_discovery! }
       end
@@ -133,15 +152,17 @@ describe MsisdnDiscoveryRun do
       context "a discovery run already exists" do
         def setup_scenario
           super
-          msisdn_discovery_run
+          expect(msisdn_discovery_run).to be_active
         end
 
         context "that's finished" do
           let(:msisdn_discovery_run) { create(:msisdn_discovery_run, :finished) }
 
           def assert_discovery!
+            msisdn_discovery_run.reload
             expect(msisdn_discovery_run.msisdn_discoveries.count).to eq(1)
             expect(MsisdnDiscovery.count).to be > 1
+            expect(msisdn_discovery_run).not_to be_active
           end
 
           it { assert_discovery! }
@@ -151,8 +172,10 @@ describe MsisdnDiscoveryRun do
           let(:msisdn_discovery_run) { create(:msisdn_discovery_run, :nearly_finished) }
 
           def assert_discovery!
+            msisdn_discovery_run.reload
             expect(MsisdnDiscovery.count).to be > 1
-            expect(msisdn_discovery_run.reload).to be_finished
+            expect(msisdn_discovery_run).to be_finished
+            expect(msisdn_discovery_run).to be_active
           end
 
           it { assert_discovery! }

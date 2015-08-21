@@ -305,7 +305,7 @@ describe Reply do
     end
 
     let(:queued_for_smsc_delivery_too_long_with_token) do
-      create(:reply, :foo_bar, :with_token, :smsc_channel)
+      create(:reply, :queued_too_long, :with_token, :smsc_channel)
     end
 
     let(:queued_for_smsc_delivery_with_token) do
