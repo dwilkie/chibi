@@ -2,7 +2,6 @@ kh:
   not_enough_credit: "Sousdey! Want to meet new friends? Please top up your account to get 24hrs free SMS on 2442"
   play_path_prefix: "kh"
   language: Khmer
-  broadcast: "Sokyu: Sousdey!"
   activerecord:
     attributes:
       user:

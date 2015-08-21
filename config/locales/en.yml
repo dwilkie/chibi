@@ -1,11 +1,7 @@
-# Sample localization file for English. Add more files in this directory for other locales.
-# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
-
 en:
   not_enough_credit: "Hello! Want to meet new friends? Please top up your account to get 24hrs free SMS on 2442"
   play_path_prefix: "en"
   language: English
-  broadcast: "Hello! Want to meet new friends? Call to 2442 or SMS your name, age, sex and location. Ex. nhom Mara 26 girl in pp"
   activerecord:
     attributes:
       user:

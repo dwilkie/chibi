@@ -5,8 +5,10 @@ describe CannedReply do
 
   let(:sender) { create(:user, :female, :name => "bunheng") }
   let(:recipient) { create(:user) }
+  let(:contact_me_number) { "2442" }
+  let(:can_call_to_short_code) { false }
 
-  subject { CannedReply.new(:kh, :sender => sender, :recipient => recipient) }
+  subject { described_class.new(:kh, contact_me_number, can_call_to_short_code, :sender => sender, :recipient => recipient) }
 
   def assert_random(method, *args, &block)
     100.times do
@@ -17,7 +19,7 @@ describe CannedReply do
   end
 
   def assert_contact_number_included(result)
-    expect(result).to match(/#{Regexp.escape(recipient.contact_me_number)}/)
+    expect(result).to match(/#{Regexp.escape(contact_me_number)}/)
   end
 
   describe "#gay_reminder" do
@@ -101,7 +103,7 @@ describe CannedReply do
     end
 
     context "the recipient's operator has voice enabled" do
-      let(:recipient) { create(:user, :from_operator_with_voice) }
+      let(:can_call_to_short_code) { true }
 
       it "should generate a 'sms or call me' message" do
         assert_random(:contact_me) do |result|

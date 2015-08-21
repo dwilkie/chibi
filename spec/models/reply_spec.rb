@@ -656,17 +656,18 @@ describe Reply do
   end
 
   describe "#broadcast!(options = {})" do
-    subject { build(:reply) }
-    let(:args) { [{ :locale => "kh" }] }
+    let(:options) { { :locale => "kh" } }
+    let(:to) { generate(:mobile_number) }
 
-    it "should send a broadcast message" do
-      assert_reply(:broadcast!, :broadcast, :args => args, :test_users => [create(:user, :cambodian)])
+    subject { build(:reply, :to => to) }
+
+    before do
+      subject.broadcast!(options)
     end
 
-    it "should set #smsc_priority to -10" do
-      subject.broadcast!(*args)
-      expect(subject.smsc_priority).to eq(-10)
-    end
+    it { is_expected.to be_delivered }
+    it { expect(subject.body).to match(/#{spec_translate(:anonymous_reminder, :kh)}/) }
+    it { expect(subject.smsc_priority).to eq(-10) }
   end
 
   describe "#introduce!" do

@@ -1447,29 +1447,6 @@ describe User do
     end
   end
 
-  describe "#can_call_short_code?" do
-    it "should return true only if the user belongs to a operator supporting voice" do
-      with_operators do |number_parts, assertions|
-        number = number_parts.join
-        new_user = build(:user, :mobile_number => number)
-        if assertions["caller_id"]
-          expect(new_user).to be_can_call_short_code
-        else
-          expect(new_user).not_to be_can_call_short_code
-        end
-      end
-    end
-  end
-
-  describe "#contact_me_number" do
-    it "should retun the user's operator's SMS short code or the twilio number" do
-      expect(create_user(:from_unknown_operator).contact_me_number).to eq(twilio_number)
-      with_operators do |number_parts, assertions|
-        expect(build(:user, :mobile_number => number_parts.join).contact_me_number).to eq(assertions["reply_to_number"] || assertions["short_code"] || twilio_number)
-      end
-    end
-  end
-
   describe "#caller_id(requesting_api_version)" do
     def assert_caller_id(requesting_api_version, assert_twilio_number)
       # regardless of the requesting api it should always return the twilio number

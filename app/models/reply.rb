@@ -269,7 +269,8 @@ class Reply < ActiveRecord::Base
   end
 
   def broadcast!(options = {})
-    self.body = I18n.t(:broadcast, options)
+    self.body = random_canned_greeting(options)
+    prepend_screen_id(Faker::Name.first_name)
     self.smsc_priority = options[:smsc_priority] || -10
     deliver!
   end
@@ -326,6 +327,14 @@ class Reply < ActiveRecord::Base
   end
 
   private
+
+  def contact_me_number
+    operator.reply_to_number || operator.short_code || twilio_outgoing_number
+  end
+
+  def can_call_short_code?
+    operator.caller_id.present?
+  end
 
   def self.min_consecutive_failed
     (Rails.application.secrets[:reply_min_consecutive_failed] || DEFAULT_MIN_CONSECUTIVE_FAILED).to_i
@@ -403,7 +412,7 @@ class Reply < ActiveRecord::Base
   end
 
   def canned_reply(options = {})
-    CannedReply.new(user.locale, options)
+    CannedReply.new(options.delete(:locale) || user.locale, contact_me_number, can_call_short_code?, options)
   end
 
   def set_forward_message(from, message)
@@ -449,7 +458,7 @@ class Reply < ActiveRecord::Base
   end
 
   def torasup_number
-    @torasup_number ||= Torasup::PhoneNumber.new(destination)
+    @torasup_number ||= Torasup::PhoneNumber.new(destination || user_mobile_number)
   end
 
   def operator
