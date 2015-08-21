@@ -7,7 +7,7 @@ kh:
       assertions:
         smpp_server_id: "smart_huawei"
         short_code: "2442"
-        reply_to_number: "038 383 8380"
+        reply_to_number: "2442"
         caller_id: "2442"
         voip_gateway_host: "27.109.112.80"
         dial_string: "sofia/external/%{number_to_dial}@%{voip_gateway_host}"
