@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150820102926) do
+ActiveRecord::Schema.define(version: 20150822044424) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -63,7 +63,7 @@ ActiveRecord::Schema.define(version: 20150820102926) do
     t.string   "starter_type", limit: 255
   end
 
-  add_index "chats", ["user_id", "friend_id"], name: "index_chats_on_user_id_and_friend_id", unique: true, using: :btree
+  add_index "chats", ["user_id", "friend_id"], name: "index_chats_on_user_id_and_friend_id", using: :btree
 
   create_table "locations", force: :cascade do |t|
     t.string   "city",         limit: 255
