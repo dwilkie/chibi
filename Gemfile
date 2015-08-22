@@ -18,7 +18,8 @@ gem 'twilio-ruby'
 gem 'multi_xml'
 gem 'carrierwave'
 gem 'fog'
-gem 'sidekiq', :github => "mperham/sidekiq"
+gem 'sidekiq'
+gem "celluloid", '0.16.0'
 gem 'sinatra', :require => false
 gem 'airbrake'
 
