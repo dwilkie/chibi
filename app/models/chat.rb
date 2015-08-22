@@ -75,7 +75,7 @@ class Chat < ActiveRecord::Base
 
   def self.intended_for(message)
     sender = message.user
-    initiated_or_partnered_by(sender).joins(:replies).merge(Reply.for_user(sender)).merge(Reply.prepended_with(*message.english_words)).latest.limit(self.intended_for_limit).first
+    initiated_or_partnered_by(sender).joins(:replies).merge(Reply.for_user(sender)).merge(Reply.prepended_with(*message.english_words)).merge(Reply.prepended_with(sender.name, :not => true)).latest.limit(self.intended_for_limit).first
   end
 
   def activate!(options = {})

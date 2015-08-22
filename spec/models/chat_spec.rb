@@ -448,10 +448,14 @@ describe Chat do
     let(:bob) { create(:user, :name => "bob") }
     let(:dave) { create(:user, :name => "dave") }
     let(:chris) { create(:user, :name => "chris") }
+    let(:fake_bill) { create(:user, :screen_name => "bill") }
+    let(:real_bill) { create(:user, :name => "bill") }
 
     let(:chat_between_sender_and_bob) { create(:chat, :user => sender, :friend => bob) }
     let(:chat_between_sender_and_dave) { create(:chat, :initiator_active, :user => dave, :friend => sender) }
     let(:chat_between_sender_and_chris) { create(:chat, :user => sender, :friend => chris) }
+    let(:chat_between_sender_and_fake_bill) { create(:chat, :user => sender, :friend => fake_bill) }
+    let(:chat_between_sender_and_real_bill) { create(:chat, :user => sender, :friend => real_bill) }
 
     let(:reply_from_bob_to_sender) {
       create(:reply, :chat => chat_between_sender_and_bob, :user => sender, :body => "Bob: blah blah blah")
@@ -465,20 +469,32 @@ describe Chat do
       create(:reply, :chat => chat_between_sender_and_chris, :user => chris, :body => "Bill: hello what's up?")
     }
 
+    let(:reply_from_sender_to_fake_bill) {
+      create(:reply, :chat => chat_between_sender_and_fake_bill, :user => sender, :body => "Bill: Hi bill i'm not really bill")
+    }
+
+    let(:reply_from_sender_to_real_bill) {
+      create(:reply, :chat => chat_between_sender_and_fake_bill, :user => sender, :body => "Bill: Hi i'm really bill!")
+    }
+
     let(:message) { create(:message, :user => sender) }
 
     let(:messages_from_sender_to_bob) { ["Hi bob! how are you today?", "Bob: How are you?"] }
     let(:messages_from_sender_to_dave) { ["How are you dave?", "Dave: Soksabai", "Chheng: Dave: suosdey nhom chheng nov kean sviy nhom jong ban lek nak"] }
     let(:messages_from_sender_to_current_partner) { ["Hi! Welcome!", "Can I have your number?", "How are u", "im davey crocket", "i have a bobcat", "Hi Chris how are you?"] }
+    let(:messages_from_sender) { ["Hi! I'm Bill!", "Bill: that's me"] }
 
     before do
       reply_from_bob_to_sender
       active_chat
       reply_from_dave_to_sender
       reply_from_sender_to_chris
+      reply_from_sender_to_fake_bill
+      reply_from_sender_to_real_bill
     end
 
     it "should try to determine the chat in which the message is intended for" do
+
       messages_from_sender_to_bob.each do |bob_message|
         message.body = bob_message
         expect(described_class.intended_for(message)).to eq(chat_between_sender_and_bob)
@@ -487,6 +503,11 @@ describe Chat do
       messages_from_sender_to_dave.each do |dave_message|
         message.body = dave_message
         expect(described_class.intended_for(message)).to eq(chat_between_sender_and_dave)
+      end
+
+      messages_from_sender.each do |bill_message|
+        message.body = bill_message
+        expect(described_class.intended_for(message)).to be_nil
       end
 
       # Note:
