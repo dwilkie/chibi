@@ -67,7 +67,7 @@ module Chibi
       end
 
       def record_user_interaction
-        user.touch(:last_interacted_at) if self.class.user_interaction?
+        user && user.touch(:last_interacted_at) if self.class.user_interaction?
       end
 
       def assign_to_user

@@ -14,6 +14,7 @@ class CallDataRecord < ActiveRecord::Base
   validates :user, :associated => true, :presence => true
   validates :duration, :bill_sec, :uuid, :type, :direction, :presence => true
   validates :type, :inclusion => { :in => VALID_TYPES }
+  validates :phone_call_id, :uniqueness => {:scope => :type}, :allow_nil => true
 
   attr_accessor :body
 

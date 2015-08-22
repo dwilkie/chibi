@@ -24,6 +24,20 @@ describe CallDataRecord do
       new_cdr = build_cdr(:cdr_variables => {"variables" => {"uuid" => "invalid"}})
       expect(new_cdr).to be_valid
     end
+
+    context "uniqueness" do
+      context "phone_call_id" do
+        let(:phone_call) { create(:phone_call) }
+
+        before do
+          create_cdr(:phone_call => phone_call)
+        end
+
+        subject { build_cdr(:phone_call => phone_call) }
+
+        it { is_expected.to validate_uniqueness_of(:phone_call_id).scoped_to(:type).allow_nil }
+      end
+    end
   end
 
   it_should_behave_like "communicable from user" do
