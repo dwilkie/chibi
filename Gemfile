@@ -18,7 +18,7 @@ gem 'twilio-ruby'
 gem 'multi_xml'
 gem 'carrierwave'
 gem 'fog'
-gem 'sidekiq'
+gem 'sidekiq', :github => "mperham/sidekiq"
 gem 'sinatra', :require => false
 gem 'airbrake'
 
