@@ -186,7 +186,7 @@ describe MsisdnDiscoveryRun do
 
   describe "#random_batch" do
     subject { create(:msisdn_discovery_run) }
-    it { expect(subject.random_batch(10)).not_to match_array(subject.random_batch(10)) }
+    it { expect(subject.random_batch(10)).not_to eq(subject.random_batch(10).sort) }
   end
 
   describe "#discover!(subscriber_number)" do

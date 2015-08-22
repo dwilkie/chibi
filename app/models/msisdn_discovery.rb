@@ -124,7 +124,7 @@ class MsisdnDiscovery < ActiveRecord::Base
   end
 
   def self.subscriber_numbers
-    pluck(:subscriber_number)
+    select(:subscriber_number)
   end
 
   def notify

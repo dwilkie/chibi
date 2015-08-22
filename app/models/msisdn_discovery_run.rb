@@ -49,6 +49,7 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
     create_from_broadcast_operators!
 
     batch_size = queue_buffer
+
     group(:country_code, :operator).count.each do |operator, count_by_operator|
       next if !broadcast_to?(*operator)
       active_discovery_runs = by_operator(*operator).active
@@ -69,7 +70,7 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   end
 
   def random_batch(batch_size)
-    (subscriber_number_range.to_a - msisdn_discoveries.subscriber_numbers).shuffle.take(batch_size)
+    self.class.connection.select_all(random_batch_sql(batch_size)).rows.flatten
   end
 
   def finished?
@@ -86,6 +87,18 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   end
 
   private
+
+  def random_batch_sql(batch_size)
+    [generate_series_sql, "EXCEPT", subscriber_numbers_sql, "LIMIT ", batch_size].join(" ")
+  end
+
+  def generate_series_sql
+    "(SELECT generate_series(#{subscriber_number_min}, #{subscriber_number_max}))"
+  end
+
+  def subscriber_numbers_sql
+    "(#{msisdn_discoveries.subscriber_numbers.to_sql})"
+  end
 
   def subscriber_number_range
     subscriber_number_min..subscriber_number_max

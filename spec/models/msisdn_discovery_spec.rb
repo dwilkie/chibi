@@ -85,7 +85,7 @@ describe MsisdnDiscovery do
       msisdn_discovery
     end
 
-    it { expect(described_class.subscriber_numbers).to match_array([msisdn_discovery.subscriber_number]) }
+    it { expect(described_class.subscriber_numbers.map(&:subscriber_number)).to match_array([msisdn_discovery.subscriber_number]) }
   end
 
   describe ".cleanup!" do
