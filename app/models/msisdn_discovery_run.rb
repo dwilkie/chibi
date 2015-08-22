@@ -74,7 +74,7 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   end
 
   def finished?
-    subscriber_number_range.count == msisdn_discoveries.count
+    remaining_discoveries == 0
   end
 
   def discover!(subscriber_number)
@@ -89,7 +89,13 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   private
 
   def random_batch_sql(batch_size)
-    [generate_series_sql, "EXCEPT", subscriber_numbers_sql, "LIMIT ", batch_size].join(" ")
+    sql = [generate_series_sql, "EXCEPT", subscriber_numbers_sql, "LIMIT ", batch_size]
+    sql << "OFFSET" << "random() * #{remaining_discoveries}" if remaining_discoveries > batch_size * 2
+    sql.join(" ")
+  end
+
+  def remaining_discoveries
+    subscriber_number_range.count - msisdn_discoveries.count
   end
 
   def generate_series_sql
