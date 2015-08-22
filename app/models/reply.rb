@@ -199,7 +199,7 @@ class Reply < ActiveRecord::Base
 
   def self.prepended_with(*names)
     options = names.extract_options!
-    where(names.map {|name| query = self.arel_table[:body].matches("#{name.tr('%', '')}:%"); options[:not] ? query.not : query }.reduce(:or))
+    where(names.compact.map {|name| query = self.arel_table[:body].matches("#{name.tr('%', '')}:%"); options[:not] ? query.not : query }.reduce(:or))
   end
 
   def self.with_token
