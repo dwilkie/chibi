@@ -37,6 +37,10 @@ describe CallDataRecord do
 
         it { is_expected.to validate_uniqueness_of(:phone_call_id).scoped_to(:type).allow_nil }
       end
+
+      context "uuid" do
+        it { is_expected.to validate_uniqueness_of(:uuid) }
+      end
     end
   end
 
