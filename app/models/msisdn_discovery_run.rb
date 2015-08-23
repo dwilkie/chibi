@@ -56,8 +56,11 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
       discovery_batches = {}
       enqueued_discoveries = []
 
+      weighted_discovery_runs = Hash[active_discovery_runs.map { |discovery_run| [discovery_run, discovery_run.remaining_discoveries] }]
+      total_discoveries = weighted_discovery_runs.values.sum
+
       while enqueued_discoveries.size < batch_size do
-        random_discovery_run = active_discovery_runs.sample
+        random_discovery_run = choose_weighted(weighted_discovery_runs, total_discoveries)
         random_batch = discovery_batches[random_discovery_run.id] ||= random_discovery_run.random_batch(batch_size)
 
         if random_subscriber_number = random_batch.pop
@@ -86,16 +89,24 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
     MsisdnDiscoveryJob.perform_later(self.id, subscriber_number)
   end
 
+  def remaining_discoveries
+    subscriber_number_range.count - msisdn_discoveries.count
+  end
+
   private
+
+  def self.choose_weighted(weighted, sum)
+    target = rand(sum)
+    weighted.each do |item, weight|
+      return item if target <= weight
+      target -= weight
+    end
+  end
 
   def random_batch_sql(batch_size)
     sql = [generate_series_sql, "EXCEPT", subscriber_numbers_sql, "LIMIT ", batch_size]
     sql << "OFFSET" << "random() * #{remaining_discoveries}" if remaining_discoveries > batch_size * 2
     sql.join(" ")
-  end
-
-  def remaining_discoveries
-    subscriber_number_range.count - msisdn_discoveries.count
   end
 
   def generate_series_sql
