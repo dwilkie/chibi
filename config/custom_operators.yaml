@@ -24,6 +24,9 @@ kh:
             short_code: "2442"
             unit_cost: "0.1"
             revenue_share: "0.35"
+        blacklist:
+        - "85510202946"
+        - "85516738629"
     qb:
       metadata:
         short_code: "2442"
