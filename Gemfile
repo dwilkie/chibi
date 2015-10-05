@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby '2.2.2'
 
-gem 'rails', '4.2.3'
+gem 'rails', '4.2.4'
 gem 'haml'
 gem 'pg'
 gem 'kaminari'
@@ -55,6 +55,6 @@ group :test do
   gem 'timecop'
   gem 'capybara'
   gem 'launchy'
-  gem 'shoulda-matchers', :require => false
+  gem 'shoulda-matchers'
   gem 'test_after_commit'
 end

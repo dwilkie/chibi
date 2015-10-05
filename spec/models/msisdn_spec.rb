@@ -11,7 +11,7 @@ describe Msisdn do
   end
 
   describe "validations" do
-    subject { create(:msisdn) }
+    subject { build(:msisdn) }
 
     it { is_expected.to validate_presence_of(:mobile_number) }
     it { is_expected.to validate_uniqueness_of(:mobile_number) }
