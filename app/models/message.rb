@@ -34,7 +34,7 @@ class Message < ActiveRecord::Base
   before_validation :normalize_channel, :normalize_to, :on => :create
   before_validation :set_body_from_message_parts
 
-  delegate :login!, :logout!, :reply_not_enough_credit!, :to => :user
+  delegate :login!, :logout!, :reply_not_enough_credit!, :blacklisted?, :to => :user
 
   aasm :column => :state, :whiny_transitions => false do
     state :received, :initial => true
@@ -214,7 +214,7 @@ class Message < ActiveRecord::Base
   end
 
   def do_pre_processing
-    if user_wants_to_logout?
+    if user_wants_to_logout? || blacklisted?
       logout!
       self.continue_processing = false
     else

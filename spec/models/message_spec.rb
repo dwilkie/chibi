@@ -554,59 +554,49 @@ describe Message do
       end
 
       context "pre-processing" do
+        def setup_scenario
+        end
+
+        before do
+          setup_scenario
+          subject.pre_process!
+        end
+
+        context "if the number is blacklisted" do
+          let(:user) { create(:user, :blacklisted) }
+
+          it { expect(user).to be_offline }
+        end
+
         context "the message body is" do
           ["stop", "off", "stop all"].each do |stop_variation|
             context "'#{stop_variation}'" do
               subject { create_message(:body => stop_variation) }
 
-              before do
-                allow(user).to receive(:logout!)
-              end
-
-              it "should logout the user" do
-                expect(user).to receive(:logout!)
-                subject.pre_process!
-                expect(subject).to be_processed
-              end
+              it { expect(user).to be_offline }
+              it { is_expected.to be_processed }
             end # context "'#{stop_variation}'"
           end # ["stop", "off", "stop all"]
 
           context "indicates the sender wants to use the service" do
-            before do
-              allow(user).to receive(:login!)
-              stub_user_charge!
-            end
+            let(:user) { create(:user, :offline) }
 
-            it "should try to charge the user" do
-              expect(user).to receive(:charge!).with(subject)
-              subject.pre_process!
-            end
-
-            it "should login the user" do
-              expect(user).to receive(:login!)
-              subject.pre_process!
-            end
+            it { expect(user).to be_online }
 
             context "the charge request returns true" do
-              before do
+              def setup_scenario
                 stub_user_charge!(true)
               end
 
-              it "should update the state to 'processed'" do
-                subject.pre_process!
-                expect(subject).to be_processed
-              end
+              it { is_expected.to be_processed }
             end # context "the charge request returns true"
 
             context "the charge request returns false" do
-              before do
+              def setup_scenario
                 stub_user_charge!(false)
               end
 
-              it "should update the state to 'awaiting_charge_result'" do
-                subject.pre_process!
-                expect(subject).to be_awaiting_charge_result
-              end
+              it { is_expected.to be_awaiting_charge_result }
             end # context "the charge request returns false"
           end # context "indicates the sender wants to use the service"
         end # context "the message body is"

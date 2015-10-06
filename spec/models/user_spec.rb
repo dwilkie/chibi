@@ -1569,6 +1569,11 @@ describe User do
     end
   end
 
+  describe "#blacklisted?" do
+    it { expect(create(:user, :blacklisted)).to be_blacklisted }
+    it { expect(create(:user)).not_to be_blacklisted }
+  end
+
   describe "#login!" do
     it "should put the user online" do
       expect(offline_user).not_to be_online

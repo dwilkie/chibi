@@ -56,6 +56,8 @@ FactoryGirl.define do
     n.to_s
   end
 
+  sequence(:blacklisted_number) { "855382038039" }
+
   factory :msisdn_discovery_run do
     country_code "kh"
     operator "cootel"
@@ -144,7 +146,7 @@ FactoryGirl.define do
     end
 
     trait :blacklisted do
-      mobile_number "855382038039"
+      mobile_number { generate(:blacklisted_number) }
     end
 
     trait :active do
@@ -567,6 +569,10 @@ FactoryGirl.define do
 
   factory :user do
     cambodian
+
+    trait :blacklisted do
+      mobile_number { generate(:blacklisted_number) }
+    end
 
     trait :cannot_receive_sms do
       with_landline_number

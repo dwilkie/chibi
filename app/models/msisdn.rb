@@ -18,6 +18,10 @@ class Msisdn < ActiveRecord::Base
     update_column(:active, false)
   end
 
+  def self.blacklisted?(mobile_number)
+    new(:mobile_number => mobile_number).blacklisted?
+  end
+
   private
 
   def blacklist

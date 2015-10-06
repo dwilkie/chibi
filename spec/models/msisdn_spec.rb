@@ -18,6 +18,11 @@ describe Msisdn do
     it { is_expected.not_to allow_value(attributes_for(:user, :with_invalid_mobile_number)[:mobile_number]).for(:mobile_number) }
   end
 
+  describe ".blacklisted?" do
+    it { expect(described_class).to be_blacklisted(generate(:blacklisted_number)) }
+    it { expect(described_class).not_to be_blacklisted(generate(:mobile_number)) }
+  end
+
   describe "#blacklisted?" do
     subject { create(:msisdn) }
 

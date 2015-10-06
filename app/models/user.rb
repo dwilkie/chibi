@@ -193,6 +193,10 @@ class User < ActiveRecord::Base
     save
   end
 
+  def blacklisted?
+    Msisdn.blacklisted?(mobile_number)
+  end
+
   def charge!(requester)
     return true if !chargeable?
     if latest_charge_request
