@@ -200,9 +200,7 @@ describe Reply do
       delivered_reply
     end
 
-    it "should return only the undelivered replies" do
-      expect(subject.class.undelivered).to eq([reply, another_reply])
-    end
+    it { expect(subject.class.undelivered).to match_array([reply, another_reply]) }
   end
 
   describe ".delivered" do

@@ -11,11 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150822044424) do
+ActiveRecord::Schema.define(version: 20151014143555) do
 
   # These are extensions that must be enabled in order to support this database
-  enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
+  enable_extension "pg_stat_statements"
 
   create_table "call_data_records", force: :cascade do |t|
     t.string   "uuid",           limit: 255
@@ -175,6 +175,7 @@ ActiveRecord::Schema.define(version: 20150822044424) do
   end
 
   add_index "replies", ["chat_id"], name: "index_replies_on_chat_id", using: :btree
+  add_index "replies", ["delivered_at"], name: "index_replies_on_delivered_at", using: :btree
   add_index "replies", ["msisdn_discovery_id"], name: "index_replies_on_msisdn_discovery_id", using: :btree
   add_index "replies", ["token"], name: "index_replies_on_token", unique: true, using: :btree
   add_index "replies", ["user_id"], name: "index_replies_on_user_id", using: :btree
