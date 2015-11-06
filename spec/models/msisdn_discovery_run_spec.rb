@@ -68,6 +68,12 @@ describe MsisdnDiscoveryRun do
       it { expect(queue_buffer).to be <= described_class::DEFAULT_BROADCAST_MAX_QUEUED }
       it { expect(queue_buffer).to be > 0 }
     end
+
+    context "there's no broadcast operators" do
+      before { allow(described_class).to receive(:broadcast_to?).and_return(false) }
+      let(:number_in_queue) { described_class::DEFAULT_BROADCAST_MAX_QUEUED }
+      it { expect(queue_buffer).to eq(0) }
+    end
   end
 
   describe ".active" do

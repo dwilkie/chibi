@@ -130,7 +130,7 @@ class MsisdnDiscoveryRun < ActiveRecord::Base
   end
 
   def self.queue_buffer
-    (broadcast_max_queued - [broadcasts_in_queue, broadcast_max_queued].min) / number_of_broadcast_operators
+    number_of_broadcast_operators > 0 ? ((broadcast_max_queued - [broadcasts_in_queue, broadcast_max_queued].min) / number_of_broadcast_operators) : 0
   end
 
   def self.out_of_broadcast_hours?
