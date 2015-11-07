@@ -172,8 +172,12 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def pre_process!
-    user.login!
-    user.charge!(self)
+    if user.blacklisted?
+      user.logout!
+    else
+      user.login!
+      user.charge!(self)
+    end
   end
 
   def to=(value)
@@ -195,7 +199,7 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def twiml_for_answered
-    anonymous? ? hangup : redirect_to_self("POST")
+    (anonymous? || user.blacklisted?) ? hangup : redirect_to_self("POST")
   end
 
   def twiml_for_transitioning_from_answered

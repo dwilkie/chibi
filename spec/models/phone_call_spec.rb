@@ -61,6 +61,15 @@ describe PhoneCall do
       let(:user) { create(:user, :offline) }
       it { expect(user).to be_online }
     end
+
+    context "is from a blacklisted number" do
+      def set_expectations
+        expect(user).not_to receive(:charge!)
+      end
+
+      let(:user) { create(:user, :blacklisted) }
+      it { expect(user).to be_offline }
+    end
   end
 
   describe "#call_sid" do
@@ -473,6 +482,11 @@ describe PhoneCall do
 
         context "for a normal call" do
           it { assert_redirect! }
+        end
+
+        context "from a blacklisted number" do
+          let(:user) { create(:user, :blacklisted) }
+          it { assert_hangup! }
         end
 
         context "for an anonymous call" do
