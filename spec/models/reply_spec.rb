@@ -229,7 +229,7 @@ describe Reply do
   end
 
   describe ".cleanup!" do
-    let(:time_considered_old) { 1.month.ago }
+    let(:time_considered_old) { 31.days.ago }
 
     def create_old_reply(*args)
       options = args.extract_options!
@@ -246,14 +246,16 @@ describe Reply do
       old_delivered_reply
       new_undelivered_reply
       new_delivered_reply
+      described_class.cleanup!
     end
 
-    it "should remove any delivered replies that are older than 1 month" do
-      subject.class.cleanup!
+    def assert_cleanup!
       expect(Reply.all).to match_array([
         old_undelivered_reply, new_undelivered_reply, new_delivered_reply
       ])
     end
+
+    it { assert_cleanup! }
   end
 
   describe ".token_find!(token)" do
