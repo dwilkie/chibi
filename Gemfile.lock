@@ -336,6 +336,10 @@ GEM
       rack-protection (~> 1.4)
       tilt (>= 1.3, < 3)
     slop (3.6.0)
+    spring (2.0.1)
+      activesupport (>= 4.2)
+    spring-commands-rspec (1.0.4)
+      spring (>= 0.9.1)
     sprockets (2.12.4)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -419,6 +423,8 @@ DEPENDENCIES
   shoulda-matchers
   sidekiq
   sinatra
+  spring
+  spring-commands-rspec
   test_after_commit
   timecop
   torasup
@@ -430,4 +436,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   1.10.6
+   1.13.7

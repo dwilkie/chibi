@@ -1,5 +1,11 @@
 source 'https://rubygems.org'
-ruby '2.2.4'
+
+ruby(File.read(".ruby-version").strip) if ENV["GEMFILE_LOAD_RUBY_VERSION"].to_i == 1 && File.exist?(".ruby-version")
+
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
+  "https://github.com/#{repo_name}.git"
+end
 
 gem 'rails', '4.2.5'
 gem 'haml'
@@ -38,6 +44,8 @@ gem 'rails_12factor', :group => :production
 group :development do
   gem 'web-console', '~> 2.0'
   gem 'rails_best_practices'
+  gem 'spring'
+  gem 'spring-commands-rspec'
 end
 
 group :test, :development do
