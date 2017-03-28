@@ -65,4 +65,5 @@ group :test do
   gem 'launchy'
   gem 'shoulda-matchers'
   gem 'test_after_commit'
+  gem 'dotenv'
 end

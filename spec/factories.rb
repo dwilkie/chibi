@@ -876,12 +876,26 @@ FactoryGirl.define do
   end
 
   factory :call_data_record do
+    inbound
+    duration 100
+    from { generate(:mobile_number) }
+    phone_call { build(:phone_call, :from => from) }
+    bill_sec 90
+    uuid { generate(:guid) }
+
+    trait :inbound do
+      direction "inbound"
+      rfc2822_date { Date.today }
+    end
+
+    factory :inbound_twilio_cdr, :class => Chibi::Twilio::InboundCdr do
+    end
+
     transient do
       cdr_variables nil
       user nil
       user_who_called nil
       user_who_was_called nil
-      phone_call nil
 
       default_body <<-CDR
         <?xml version="1.0"?>

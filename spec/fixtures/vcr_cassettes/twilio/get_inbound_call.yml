@@ -1,0 +1,74 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.twilio.com/2010-04-01/Accounts/ACC123456789/Calls/CAbcff7efa7dbcad4e8b2615fa065b54b9.json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Charset:
+      - utf-8
+      User-Agent:
+      - twilio-ruby/4.13.0 (ruby/x86_64-linux 2.3.3-p222)
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Authorization:
+      - "<ENCODED AUTH HEADER>"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - Accept, Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match,
+        If-Unmodified-Since
+      Access-Control-Allow-Methods:
+      - GET, POST, DELETE, OPTIONS
+      Access-Control-Allow-Origin:
+      - "*"
+      Access-Control-Expose-Headers:
+      - ETag
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 28 Mar 2017 10:52:20 GMT
+      Etag:
+      - 0bb26c420e351cde5e3a36f7bd32f9dc
+      Last-Modified:
+      - Mon, 27 Mar 2017 10:36:41 +0000
+      Strict-Transport-Security:
+      - max-age=15768000
+      Twilio-Request-Duration:
+      - '0.052'
+      Twilio-Request-Id:
+      - RQfe10ee170e0b4697803d2e4f639a0c76
+      X-Powered-By:
+      - AT-5000
+      X-Shenanigans:
+      - none
+      Content-Length:
+      - '1146'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: '{"sid": "CAbcff7efa7dbcad4e8b2615fa065b54b9", "date_created": "Mon,
+        27 Mar 2017 10:35:53 +0000", "date_updated": "Mon, 27 Mar 2017 10:36:41 +0000",
+        "parent_call_sid": null, "account_sid": "ACC123456789", "to": "+14156926280",
+        "to_formatted": "(415) 692-6280", "from": "+161401435255", "from_formatted":
+        "+161401435255", "phone_number_sid": "PN6af8d7ecdc9146b095e5227f55fd726b",
+        "status": "completed", "start_time": "Mon, 27 Mar 2017 10:36:03 +0000", "end_time":
+        "Mon, 27 Mar 2017 10:36:41 +0000", "duration": "38", "price": "-0.00750",
+        "price_unit": "USD", "direction": "inbound", "answered_by": null, "api_version":
+        "2010-04-01", "annotation": null, "forwarded_from": "+14156926280", "group_sid":
+        null, "caller_name": null, "uri": "/2010-04-01/Accounts/ACC123456789/Calls/CAbcff7efa7dbcad4e8b2615fa065b54b9.json",
+        "subresource_uris": {"notifications": "/2010-04-01/Accounts/ACC123456789/Calls/CAbcff7efa7dbcad4e8b2615fa065b54b9/Notifications.json",
+        "recordings": "/2010-04-01/Accounts/ACC123456789/Calls/CAbcff7efa7dbcad4e8b2615fa065b54b9/Recordings.json"}}'
+    http_version: 
+  recorded_at: Tue, 28 Mar 2017 10:52:21 GMT
+recorded_with: VCR 3.0.3

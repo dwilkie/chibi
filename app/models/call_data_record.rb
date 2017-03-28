@@ -4,7 +4,6 @@ class CallDataRecord < ActiveRecord::Base
   mount_uploader :cdr_data, CdrDataUploader
 
   after_initialize  :set_type
-  before_validation :set_cdr_attributes, :on => :create
 
   include Chibi::Communicable::FromUser
 
@@ -23,15 +22,6 @@ class CallDataRecord < ActiveRecord::Base
     VALID_TYPES.include?(type) ? type.constantize.new(:body => body) : self
   end
 
-  private
-
-  def set_type
-    if new_record? && body.present?
-      self.direction ||= variables["direction"]
-      self.type ||= "#{direction}_cdr".classify
-    end
-  end
-
   def set_cdr_attributes
     if body.present?
       self.uuid ||= variables["uuid"]
@@ -41,6 +31,19 @@ class CallDataRecord < ActiveRecord::Base
       self.from ||= cdr_from
       self.phone_call ||= find_related_phone_call
       set_cdr_data
+    end
+  end
+
+  def inbound?
+    direction == "inbound"
+  end
+
+  private
+
+  def set_type
+    if new_record? && body.present?
+      self.direction ||= variables["direction"]
+      self.type ||= "#{direction}_cdr".classify
     end
   end
 

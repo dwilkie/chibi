@@ -1,8 +1,5 @@
 class CdrDataUploader < CarrierWave::Uploader::Base
-  include CarrierWave::MimeTypes
-
   storage :fog
-  process :set_content_type
 
   private
 
