@@ -1,55 +1,74 @@
-# DO NOT EDIT
-# This is an exact copy of get_call.yml
-# It's only used for nesting cassettes
-<% response = "{\"sid\":\"#{call_sid}\",\"date_created\":\"Wed, 12 Jun 2013 19:27:42 +0000\",\"date_updated\":\"Wed, 12 Jun 2013 19:28:02 +0000\",\"parent_call_sid\":\"#{parent_call_sid}\",\"account_sid\":\"#{account_sid}\",\"to\":\"+#{to}\",\"to_formatted\":\"(415) 692-3656\",\"from\":\"+#{from}\",\"from_formatted\":\"(737) 874-2833\",\"phone_number_sid\":\"PN99dc941492473c44532e19ef0c5f3600\",\"status\":\"completed\",\"start_time\":\"Wed, 12 Jun 2013 19:27:42 +0000\",\"end_time\":\"Wed, 12 Jun 2013 19:28:02 +0000\",\"duration\":\"#{duration}\",\"price\":\"-0.01000\",\"price_unit\":\"USD\",\"direction\":\"#{direction}\",\"answered_by\":null,\"api_version\":\"2010-04-01\",\"annotation\":null,\"forwarded_from\":\"+14156923656\",\"group_sid\":null,\"caller_name\":null,\"uri\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/#{call_sid}.json\",\"subresource_uris\":{\"notifications\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/#{call_sid}\/Notifications.json\",\"recordings\":\"\/2010-04-01\/Accounts\/#{account_sid}\/Calls\/#{call_sid}\/Recordings.json\"}}" %>
 ---
 http_interactions:
 - request:
     method: get
-    uri: https://<%= account_sid %>:<%= auth_token %>@api.twilio.com/2010-04-01/Accounts/<%= account_sid %>/Calls/<%= call_sid %>.json
+    uri: https://api.twilio.com/2010-04-01/Accounts/ACC123456789/Calls/CAe7339f02996257ac5d8f33af1b2bd056.json
     body:
       encoding: US-ASCII
       string: ''
     headers:
-      accept:
+      Accept:
       - application/json
-      accept-charset:
+      Accept-Charset:
       - utf-8
-      user-agent:
-      - twilio-ruby/3.9.0
-      accept-encoding:
+      User-Agent:
+      - twilio-ruby/4.13.0 (ruby/x86_64-linux 2.3.3-p222)
+      Accept-Encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      authorization:
-      - Basic <%= Base64.encode64("#{account_sid}:#{auth_token}").gsub(/\s/, "") %>
+      Authorization:
+      - "<ENCODED AUTH HEADER>"
   response:
     status:
       code: 200
       message: OK
     headers:
-      server:
-      - nginx
-      date:
-      - Thu, 13 Jun 2013 10:16:06 GMT
-      content-type:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - Accept, Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match,
+        If-Unmodified-Since
+      Access-Control-Allow-Methods:
+      - GET, POST, DELETE, OPTIONS
+      Access-Control-Allow-Origin:
+      - "*"
+      Access-Control-Expose-Headers:
+      - ETag
+      Content-Type:
       - application/json; charset=utf-8
-      content-length:
-      - '1111'
-      connection:
-      - close
-      x-powered-by:
-      - PHP/5.3.11
+      Date:
+      - Fri, 28 Apr 2017 07:06:37 GMT
+      Etag:
+      - dd9a0e616c41e9c1a73bf28146d1cf9c
+      Last-Modified:
+      - Mon, 24 Apr 2017 14:05:23 +0000
+      Strict-Transport-Security:
+      - max-age=15768000
+      Twilio-Request-Duration:
+      - '0.051'
+      Twilio-Request-Id:
+      - RQ9628290c81cf4062946e49f3e0ee7c93
+      X-Powered-By:
       - AT-5000
-      etag:
-      - cb6e7bccc5d304b383a7d5b9f47f370d
-      last-modified:
-      - Wed, 12 Jun 2013 12:28:02 -0700
-      access-control-allow-origin:
-      - https://www.twilio.com
-      x-shenanigans:
+      X-Shenanigans:
       - none
+      Content-Length:
+      - '1184'
+      Connection:
+      - keep-alive
     body:
       encoding: UTF-8
-      string: <%= response.to_json %>
-    http_version: '1.1'
-  recorded_at: Thu, 13 Jun 2013 10:16:05 GMT
-recorded_with: VCR 2.3.0
+      string: '{"sid": "CAe7339f02996257ac5d8f33af1b2bd056", "date_created": "Mon,
+        24 Apr 2017 14:04:09 +0000", "date_updated": "Mon, 24 Apr 2017 14:05:23 +0000",
+        "parent_call_sid": "CAbfe1a911d12c224d860d5b622c3507ef", "account_sid": "ACC123456789",
+        "to": "+855966865371", "to_formatted": "+855966865371", "from": "+855383838380",
+        "from_formatted": "+855383838380", "phone_number_sid": "PN6af8d7ecdc9146b095e5227f55fd726b",
+        "status": "completed", "start_time": "Mon, 24 Apr 2017 14:04:23 +0000", "end_time":
+        "Mon, 24 Apr 2017 14:05:23 +0000", "duration": "60", "price": "-0.10000",
+        "price_unit": "USD", "direction": "outbound-dial", "answered_by": null, "api_version":
+        "2010-04-01", "annotation": null, "forwarded_from": "+14156926280", "group_sid":
+        null, "caller_name": null, "uri": "/2010-04-01/Accounts/ACC123456789/Calls/CAe7339f02996257ac5d8f33af1b2bd056.json",
+        "subresource_uris": {"notifications": "/2010-04-01/Accounts/ACC123456789/Calls/CAe7339f02996257ac5d8f33af1b2bd056/Notifications.json",
+        "recordings": "/2010-04-01/Accounts/ACC123456789/Calls/CAe7339f02996257ac5d8f33af1b2bd056/Recordings.json"}}'
+    http_version: 
+  recorded_at: Fri, 28 Apr 2017 07:06:38 GMT
+recorded_with: VCR 3.0.3

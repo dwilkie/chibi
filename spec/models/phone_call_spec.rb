@@ -113,48 +113,90 @@ describe PhoneCall do
     end
   end
 
-  describe "#fetch_inbound_twilio_cdr!" do
+  describe "fetching remote cdrs", :vcr, :vcr_options => {:match_requests_on => [:method, :twilio_api_request]} do
     include WebMockHelpers
-    subject { create(:phone_call) }
 
-    context "given the CDR has not already been saved" do
-      it "should create a Chibi Twilio Inbound CDR" do
-        expect_twilio_cdr_fetch(:call_sid => subject.sid) { subject.fetch_inbound_twilio_cdr! }
-        expect(Chibi::Twilio::InboundCdr.last.phone_call).to eq(subject)
-      end
+    def setup_scenario
     end
 
-    context "given the CDR has already been saved" do
-      before do
-        expect_twilio_cdr_fetch(:call_sid => subject.sid) { subject.fetch_inbound_twilio_cdr! }
+    def subject_traits
+      {}
+    end
+
+    def subject_options
+      {}
+    end
+
+    before do
+      setup_scenario
+    end
+
+    let(:sid) { attributes_for(cdr_factory, :with_recorded_sid)[:sid] }
+    let(:asserted_cdr) { asserted_cdr_type.last }
+
+    let(:subject) { create(:phone_call, *subject_traits.keys, subject_options) }
+
+    def assert_fetched!
+      expect(asserted_cdr).to be_present
+      expect(asserted_cdr.phone_call).to eq(subject)
+      expect(webmock_requests).to be_present
+    end
+
+    def assert_not_fetched!
+      expect(webmock_requests).to be_empty
+    end
+
+    describe "#fetch_inbound_twilio_cdr!", :cassette => :"twilio/get_inbound_call" do
+      let(:cdr_factory) { :inbound_twilio_cdr }
+      let(:asserted_cdr_type) { Chibi::Twilio::InboundCdr }
+
+      def subject_options
+        super.merge(:sid => sid)
       end
 
-      it "should not fetch the CDR" do
-        WebMock.clear_requests!
+      def setup_scenario
+        super
         subject.fetch_inbound_twilio_cdr!
-        expect(webmock_requests).to be_empty
+      end
+
+      context "given the CDR has not already been saved" do
+        it { assert_fetch! }
+      end
+
+      context "given the CDR has already been saved" do
+        let(:cdr) { create(:inbound_twilio_cdr, :phone_call => subject) }
+
+        def setup_scenario
+          create(:inbound_twilio_cdr, :phone_call => subject, :uuid => sid)
+          super
+        end
+
+        it { assert_not_fetched! }
       end
     end
-  end
 
-  describe "#fetch_outbound_twilio_cdr!" do
-    context "given the phone call has a dial_call_sid" do
-      let(:phone_call) { create(:phone_call, :with_dial_call_sid) }
+    describe "#fetch_outbound_twilio_cdr!", :cassette => :"twilio/get_outbound_call" do
+      let(:cdr_factory) { :outbound_twilio_cdr }
+      let(:asserted_cdr_type) { Chibi::Twilio::OutboundCdr }
 
-      it "should create a Chibi Twilio Outbound CDR" do
-        expect_twilio_cdr_fetch(
-          :call_sid => phone_call.dial_call_sid, :direction => :outbound,
-          :parent_call_sid => phone_call.sid
-        ) { phone_call.fetch_outbound_twilio_cdr! }
-
-        expect(Chibi::Twilio::OutboundCdr.last.phone_call).to eq(phone_call)
+      def subject_options
+        super.merge(:dial_call_sid => sid)
       end
-    end
 
-    context "given the phone call does not have a dial_call_sid" do
-      it "should not create a Chibi Twilio Outbound CDR" do
-        phone_call.fetch_outbound_twilio_cdr!
-        expect(Chibi::Twilio::OutboundCdr.last).to be_nil
+      def setup_scenario
+        super
+        subject.fetch_outbound_twilio_cdr!
+      end
+
+      context "given the phone call has a dial_call_sid" do
+        it { assert_fetched! }
+      end
+
+      context "given the phone call does not have a dial_call_sid" do
+        it "should not create a Chibi Twilio Outbound CDR" do
+          phone_call.fetch_outbound_twilio_cdr!
+          expect(Chibi::Twilio::OutboundCdr.last).to be_nil
+        end
       end
     end
   end

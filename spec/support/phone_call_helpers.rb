@@ -90,44 +90,4 @@ module PhoneCallHelpers
       authentication_params(:phone_call)
     )
   end
-
-  module TwilioHelpers
-    include ::TwilioHelpers
-
-    shared_examples_for "a Chibi Twilio CDR" do
-      describe "#body" do
-        let(:uuid) { generate(:guid) }
-        subject { klass.new(:uuid => uuid) }
-
-        it "should fetch the body from the Twilio API" do
-          expect_twilio_cdr_fetch(:call_sid => uuid, :direction => direction) { subject.body }
-          parsed_body = MultiXml.parse(subject.body)["cdr"]
-          expect(parsed_body["variables"]["duration"]).to be_present
-          expect(parsed_body["variables"]["billsec"]).to be_present
-          assertions.each do |assertion_key, assertion_value|
-            actual_value = parsed_body["variables"][assertion_key]
-            if assertion_value == true
-              expect(actual_value).to be_present
-            else
-              expect(actual_value).to eq(assertion_value)
-            end
-          end
-        end
-      end
-    end
-
-    private
-
-    def expect_twilio_cdr_fetch(options = {}, &block)
-      cassette = options.delete(:cassette) || "get_call"
-      options[:direction] ||= "inbound"
-      options[:direction] = "outbound-dial" if options[:direction] == :outbound
-      options[:duration] ||= 20
-      options[:from] ||= generate(:mobile_number)
-      options[:to] ||= generate(:mobile_number)
-      options[:call_sid] ||= generate(:guid)
-      options[:parent_call_sid] ||= generate(:guid)
-      VCR.use_cassette("twilio/#{cassette}", :erb => twilio_cassette_erb(options)) { yield }
-    end
-  end
 end

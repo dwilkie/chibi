@@ -9,7 +9,7 @@ VCR.configure do |c|
   twilreapi_account_sid_regexp = /Accounts\/(.+?)\//
 
   c.filter_sensitive_data("<ENCODED AUTH HEADER>") do |interaction|
-    interaction.request.headers["Authorization"].first
+    (interaction.request.headers["Authorization"] || []).first
   end
 
   c.filter_sensitive_data(replacement_twilreapi_account_sid) do |interaction|

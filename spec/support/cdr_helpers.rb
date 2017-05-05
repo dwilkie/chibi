@@ -7,6 +7,7 @@ module CdrHelpers
 
   def create_cdr(*args)
     typed_cdr = typed_cdr(*args)
+    binding.pry
     typed_cdr.save!
     typed_cdr
   end

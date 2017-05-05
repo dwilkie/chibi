@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151014143555) do
+ActiveRecord::Schema.define(version: 20170501055825) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20151014143555) do
     t.string   "from",           limit: 255
     t.integer  "user_id"
     t.string   "cdr_data",       limit: 255
+    t.jsonb    "body"
   end
 
   add_index "call_data_records", ["phone_call_id", "type"], name: "index_call_data_records_on_phone_call_id_and_type", unique: true, using: :btree

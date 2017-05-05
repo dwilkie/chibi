@@ -355,10 +355,6 @@ FactoryGirl.define do
       dial_status "completed"
     end
 
-    trait :with_dial_call_sid do
-      dial_call_sid { generate(:guid) }
-    end
-
     trait :from_offline_user do
       association :user, :factory => [:user, :offline]
     end
@@ -879,64 +875,30 @@ FactoryGirl.define do
     inbound
     duration 100
     from { generate(:mobile_number) }
-    phone_call { build(:phone_call, :from => from) }
     bill_sec 90
     uuid { generate(:guid) }
 
     trait :inbound do
       direction "inbound"
-      rfc2822_date { Date.today }
+      phone_call { build(:phone_call, :from => from) }
     end
 
-    factory :inbound_twilio_cdr, :class => Chibi::Twilio::InboundCdr do
-    end
-
-    transient do
-      cdr_variables nil
-      user nil
-      user_who_called nil
-      user_who_was_called nil
-
-      default_body <<-CDR
-        <?xml version="1.0"?>
-        <cdr core-uuid="fa2fc41d-ccc1-478b-99b8-4b90e74bb11d">
-        </cdr>
-      CDR
-    end
-
-    body do
-      dynamic_body = MultiXml.parse(default_body)["cdr"]
-      calling_user = user_who_called || user || FactoryGirl.create(:user)
-
-      dynamic_cdr = cdr_variables || {}
-      dynamic_cdr_variables = dynamic_cdr["variables"] ||= {}
-
-      dynamic_cdr_callflow = dynamic_cdr["callflow"] ||= {}
-      dynamic_cdr_callflow_caller_profile = dynamic_cdr_callflow["caller_profile"] ||= {}
-
-      dynamic_cdr_variables["direction"] ||= "inbound"
-      dynamic_cdr_variables["duration"] ||= "20"
-      dynamic_cdr_variables["billsec"] ||= "15"
-
-      if dynamic_cdr_variables["direction"] == "inbound"
-        dynamic_cdr_variables["sip_from_user"] ||= calling_user.mobile_number
-        dynamic_cdr_variables["sip_from_user_stripped"] ||= dynamic_cdr_variables["sip_from_user"]
-        dynamic_cdr_variables["sip_P-Asserted-Identity"] ||= Rack::Utils.escape("+#{dynamic_cdr_variables["sip_from_user"]}")
-
-        dynamic_cdr_variables["uuid"] ||= phone_call.try(:sid) || FactoryGirl.generate(:guid)
-        dynamic_cdr_variables["start_epoch"] ||= Time.current.to_i.to_s
-      else
-        called_user = user_who_was_called || FactoryGirl.create(:user)
-        default_host = "27.109.112.12"
-        dynamic_cdr_variables["uuid"] ||= FactoryGirl.generate(:guid)
-        dynamic_cdr_variables["sip_to_user"] ||= called_user.mobile_number
-        dynamic_cdr_variables["sip_to_host"] ||= default_host
-        dynamic_cdr_callflow_caller_profile["destination_number"] ||= called_user.mobile_number
-        dynamic_cdr_callflow_caller_profile["network_addr"] ||= default_host
+    factory :twilio_cdr, :class => CallDataRecord::Twilio do
+      trait :with_recorded_inbound_sid do
+        # from VCR cassette
+        sid "CAbcff7efa7dbcad4e8b2615fa065b54b9"
       end
 
-      dynamic_body.deep_merge!(dynamic_cdr)
-      dynamic_body.to_xml(:root => "cdr")
+      trait :with_recorded_sid do
+        # from VCR cassette
+        sid "CAbcff7efa7dbcad4e8b2615fa065b54b9"
+      end
+
+      trait :with_recorded_outbound_sid do
+        # from VCR cassette
+        sid "CAe7339f02996257ac5d8f33af1b2bd056"
+        parent_call_sid "CAbfe1a911d12c224d860d5b622c3507ef"
+      end
     end
   end
 end

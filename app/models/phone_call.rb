@@ -185,16 +185,23 @@ class PhoneCall < ActiveRecord::Base
   end
 
   def fetch_inbound_twilio_cdr!
-    twilio_cdr = Chibi::Twilio::InboundCdr.first_or_initialize(:uuid => sid)
-    twilio_cdr.fetch!
-    twilio_cdr.save
+    do_fetch_twilio_cdr!(sid)
   end
 
   def fetch_outbound_twilio_cdr!
-    Chibi::Twilio::OutboundCdr.create(:uuid => dial_call_sid) if dial_call_sid.present?
+    do_fetch_twilio_cdr!(dial_call_sid)
   end
 
   private
+
+  def do_fetch_twilio_cdr!(cdr_sid)
+    if call_sid.present? && twilio_cdr = CallDataRecord::Twilio.first_or_initialize(:uuid => cdr_sid)
+      if twilio_cdr.new_record?
+        twilio_cdr.fetch!
+        twilio_cdr.save
+      end
+    end
+  end
 
   def queue_for_processing!
     PhoneCallProcessorJob.perform_later(id, call_params, request_url)

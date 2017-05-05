@@ -17,7 +17,6 @@ module Chibi::Communicable
       after_commit :record_user_interaction, :on => :create
 
       validates :user, :from, :presence => true
-      validates :user, :presence => true
     end
 
     def from=(value)

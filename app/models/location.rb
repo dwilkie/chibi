@@ -75,7 +75,7 @@ class Location < ActiveRecord::Base
 
       country.subdivisions.values.each do |subdivision|
         subdivision_name = normalize_subdivision(subdivision["name"])
-        other_names = [subdivision["names"]].flatten.map { |name| normalize_subdivision(name) }
+        other_names = [subdivision["unofficial_names"]].flatten.map { |name| normalize_subdivision(name) }
         other_names << subdivision_name unless other_names.include?(subdivision_name)
 
         other_names.map! do |name|

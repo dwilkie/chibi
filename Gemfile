@@ -27,7 +27,6 @@ gem 'fog'
 gem 'sidekiq'
 gem "celluloid", '0.16.0'
 gem 'sinatra', :require => false
-gem 'airbrake'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -40,6 +39,10 @@ gem 'jquery-rails'
 gem 'turbolinks'
 
 gem 'rails_12factor', :group => :production
+
+group :produciton do
+  gem 'airbrake'
+end
 
 group :development do
   gem 'web-console', '~> 2.0'
