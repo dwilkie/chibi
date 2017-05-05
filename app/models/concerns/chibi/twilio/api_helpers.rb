@@ -1,14 +1,6 @@
 module Chibi::Twilio::ApiHelpers
   private
 
-  def twilio_client
-    @client ||= ::Twilio::REST::Client.new(ENV["TWILIO_ACCOUNT_SID"], ENV["TWILIO_AUTH_TOKEN"])
-  end
-
-  def format_token(token)
-    token.to_s.gsub(/^sm/, "SM")
-  end
-
   def twilio_formatted(number)
     "+" + Phony.normalize(number)
   end

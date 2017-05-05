@@ -1,6 +1,4 @@
 class CallDataRecord::Twilio < CallDataRecord::Base
-  include Chibi::Twilio::ApiHelpers
-
   def fetch!
     self.direction = twilio_call.direction =~ /\Aoutbound/ ? "outbound" : twilio_call.direction
     self.rfc2822_date = twilio_call.start_time
@@ -15,6 +13,10 @@ class CallDataRecord::Twilio < CallDataRecord::Base
   private
 
   def twilio_call
-    @twilio_call ||= twilio_client.account.calls.get(uuid)
+    @twilio_call ||= twilio_client.fetch_call(uuid)
+  end
+
+  def twilio_client
+    @twilio_client ||= ::TwilioClient.new
   end
 end

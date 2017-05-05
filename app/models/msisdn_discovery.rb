@@ -1,4 +1,4 @@
-class MsisdnDiscovery < ActiveRecord::Base
+class MsisdnDiscovery < ApplicationRecord
   DEFAULT_TIMEOUT_HOURS = 24
 
   belongs_to :msisdn_discovery_run

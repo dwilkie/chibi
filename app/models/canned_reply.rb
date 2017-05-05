@@ -68,7 +68,7 @@ class CannedReply
   end
 
   def city(user)
-    user_info(user, :city) || "pp"
+    "pp"
   end
 
   def female?(user)

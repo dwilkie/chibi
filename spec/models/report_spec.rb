@@ -77,7 +77,6 @@ describe Report do
   describe "#generate!" do
     include MobilePhoneHelpers
     include TimecopHelpers
-    include CdrHelpers
 
     def increment_sms(service_metadata, options = {})
       service_metadata["headers"] ||= asserted_sms_report_headers

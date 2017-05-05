@@ -1,14 +1,12 @@
 require 'rails_helper'
 
 describe CannedReply do
-  include PhoneCallHelpers::TwilioHelpers
-
   let(:sender) { create(:user, :female, :name => "bunheng") }
   let(:recipient) { create(:user) }
   let(:contact_me_number) { "2442" }
   let(:can_call_to_short_code) { false }
 
-  subject { described_class.new(:kh, contact_me_number, can_call_to_short_code, :sender => sender, :recipient => recipient) }
+  subject { described_class.new(:km, contact_me_number, can_call_to_short_code, :sender => sender, :recipient => recipient) }
 
   def assert_random(method, *args, &block)
     100.times do

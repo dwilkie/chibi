@@ -1,4 +1,4 @@
-class Chat < ActiveRecord::Base
+class Chat < ApplicationRecord
   include Chibi::Communicable::HasCommunicableResources
   has_communicable_resources :phone_calls, :messages, :replies
 
@@ -47,10 +47,6 @@ class Chat < ActiveRecord::Base
 
   def self.cleanup!
     joins(all_interactions(Message)).merge(Message.not_in_a_chat).joins(all_interactions(PhoneCall)).merge(PhoneCall.not_in_a_chat).joins(all_active_users).merge(User.not_currently_chatting).old.delete_all
-  end
-
-  def self.filter_by(params = {})
-    super(params).includes(:user, :friend, :active_users)
   end
 
   def self.activate_multiple!(initiator, options = {})
@@ -237,10 +233,6 @@ class Chat < ActiveRecord::Base
   def self.intended_for_limit
     value = Rails.application.secrets[:chat_intended_for_limit]
     value.presence && value.to_i
-  end
-
-  def self.filter_params(params = {})
-    super.where(params.slice(:user_id))
   end
 
   def user_with_most_recent_interaction

@@ -1,5 +1,4 @@
-class User < ActiveRecord::Base
-  include Chibi::Analyzable
+class User < ApplicationRecord
   include Chibi::Twilio::ApiHelpers
   include Chibi::Communicable::HasCommunicableResources
 
@@ -9,6 +8,12 @@ class User < ActiveRecord::Base
   DEFAULT_USER_HOURS_MIN = 8
   DEFAULT_USER_HOURS_MAX = 20
 
+  COUNTRY_CODE_LOCALE_MAPPINGS = {
+    "kh" => "km"
+  }
+
+  DEFAULT_LOCALE = "en"
+
   include AASM
 
   has_communicable_resources :phone_calls, :messages, :replies
@@ -16,8 +21,6 @@ class User < ActiveRecord::Base
   MALE = "m"
   FEMALE = "f"
   MINIMUM_MOBILE_NUMBER_LENGTH = 10
-
-  has_one :location, :autosave => true
 
   # describes initiated chats i.e. chat initiated by user
   has_many :chats
@@ -27,10 +30,10 @@ class User < ActiveRecord::Base
   has_many :participating_chats, :class_name => "Chat", :foreign_key => "friend_id"
   has_many :chat_friends, :through => :participating_chats, :source => :user
 
-  has_many :charge_requests
+  # can remove
+  has_one  :location
 
   belongs_to :active_chat, :class_name => "Chat"
-  belongs_to :latest_charge_request, :class_name => "ChargeRequest"
 
   validates :mobile_number,
             :presence => true,
@@ -38,24 +41,17 @@ class User < ActiveRecord::Base
             :phony_plausible => true,
             :uniqueness => true
 
-  validates :location, :screen_name, :presence => true
+  validates :screen_name, :presence => true
+  validates :country_code, :presence => true
 
   validates :gender, :inclusion => {:in => [MALE, FEMALE], :allow_nil => true}
   validates :looking_for, :inclusion => {:in => [MALE, FEMALE], :allow_nil => true}
   validates :age, :inclusion => {:in => 10..99, :allow_nil => true}
 
-  before_validation(:on => :create) do
-    self.screen_name = Faker::Name.first_name.downcase if !screen_name.present?
-    if mobile_number.present?
-      set_operator_name
-      set_receive_sms_ability
-      assign_location
-    end
-  end
+  before_validation :set_defaults, :on => :create
 
   before_save :cancel_searching_for_friend_if_chatting
 
-  delegate :city, :country_code, :to => :location, :allow_nil => true
   delegate :deactivate!, :to => :active_chat, :prefix => true, :allow_nil => true
 
   aasm :column => :state, :whiny_transitions => false do
@@ -86,17 +82,6 @@ class User < ActiveRecord::Base
 
   def self.by_id(user)
     where(:id => user.id)
-  end
-
-  def self.filter_by(params = {})
-    super(params).includes(:location)
-  end
-
-  def self.filter_params(params = {})
-    scope = super.where(params.slice(:gender))
-    scope = scope.available if params[:available]
-    scope = scope.joins(:location).where(:locations => {:country_code => params[:country_code]}) if params[:country_code]
-    scope
   end
 
   def self.between_the_ages(range)
@@ -181,9 +166,6 @@ class User < ActiveRecord::Base
     # then by age difference
     match_scope = order_by_age_difference(user, match_scope)
 
-    # order last by location
-    match_scope = filter_by_location(user, match_scope)
-
     # group by user and make sure the records are not read only
     match_scope.group(self.all_columns).readonly(false)
   end
@@ -195,30 +177,6 @@ class User < ActiveRecord::Base
 
   def blacklisted?
     Msisdn.blacklisted?(mobile_number)
-  end
-
-  def charge!(requester)
-    return true if !chargeable?
-    if latest_charge_request
-      if latest_charge_request.successful?
-        if latest_charge_request.updated_at < 24.hours.ago
-          create_charge_request!(requester)
-        else
-          true
-        end
-      elsif latest_charge_request.failed?
-        create_charge_request!(requester, true)
-        false
-      else
-        (latest_charge_request.errored? && create_charge_request!(requester)) || latest_charge_request.slow?
-      end
-    else
-      create_charge_request!(requester)
-    end
-  end
-
-  def chargeable?
-    operator.chargeable
   end
 
   def caller_id(requesting_api_version)
@@ -254,7 +212,7 @@ class User < ActiveRecord::Base
   end
 
   def locale
-    country_code.to_sym
+    (COUNTRY_CODE_LOCALE_MAPPINGS[country_code] || DEFAULT_LOCALE).to_sym
   end
 
   def age
@@ -289,10 +247,6 @@ class User < ActiveRecord::Base
     replies.build.send_reminder! if !contacted_recently?
   end
 
-  def reply_not_enough_credit!
-    replies.build.not_enough_credit!
-  end
-
   def matches
     self.class.matches(self)
   end
@@ -301,33 +255,11 @@ class User < ActiveRecord::Base
     matches.first
   end
 
-  def assign_location(address = nil)
-    unless location
-      build_location
-      location.country_code = torasup_number && torasup_number.country_id
-      location.address = address.present? ? address : torasup_number && torasup_number.location.area
-    end
-  end
-
   def operator
     torasup_number && torasup_number.operator
   end
 
   private
-
-  def create_charge_request!(requester, notify_requester = false)
-    self.latest_charge_request = ChargeRequest.new(
-      :requester => requester,
-      :notify_requester => notify_requester,
-      :operator => operator.id
-    )
-    charge_requests << latest_charge_request
-    save!
-  end
-
-  def self.by_operator_joins
-    joins(:location)
-  end
 
   def self.by_operator_name_joins_conditions(options)
     by_operator_name_conditions(options)
@@ -487,14 +419,6 @@ class User < ActiveRecord::Base
     scope
   end
 
-  def self.filter_by_location(user, scope)
-    # only match users from the same country
-    scope = scope.joins(:location).where(:locations => {:country_code => user.country_code})
-
-    # order by distance
-    scope.group("locations.latitude, locations.longitude").order(Location.distance_from_sql(user.location))
-  end
-
   def self.not_scope(scope, options)
     include_nil = options.delete(:include_nil)
     attribute = options.keys.first
@@ -509,7 +433,7 @@ class User < ActiveRecord::Base
     values = []
 
     Torasup::Operator.registered.each do |country_code, operators|
-      country_condition = "\"#{Location.table_name}\".\"country_code\" = ?"
+      country_condition = "\"#{table_name}\".\"country_code\" = ?"
       values << country_code
       operator_conditions = []
       operators.each do |operator_id, operator_metadata|
@@ -631,7 +555,6 @@ class User < ActiveRecord::Base
     stripped_info = info.dup
     extract_gender_and_looking_for(stripped_info)
     extract_date_of_birth(stripped_info)
-    extract_location(stripped_info)
     extract_name(stripped_info)
   end
 
@@ -667,11 +590,6 @@ class User < ActiveRecord::Base
       match.strip!
       self.name = match.downcase if match.present?
     end
-  end
-
-  def extract_location(info)
-    result = location.locate!(info)
-    strip_match!(info, /(?:#{profile_keywords(:i_am)}\s*)?#{result}/) if result
   end
 
   def extract_gender(info, options = {})
@@ -735,6 +653,15 @@ class User < ActiveRecord::Base
 
   def profile_keywords(*keys)
     self.class.profile_keywords(*keys, :locale => country_code)
+  end
+
+  def set_defaults
+    self.screen_name ||= Faker::Name.first_name.downcase
+    self.country_code ||= torasup_number && torasup_number.country_id
+    if mobile_number.present?
+      set_operator_name
+      set_receive_sms_ability
+    end
   end
 
   def valid_mobile_number?

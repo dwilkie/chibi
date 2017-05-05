@@ -1,12 +1,9 @@
-class Reply < ActiveRecord::Base
+class Reply < ApplicationRecord
   before_validation :set_destination, :on => :create
   before_validation :normalize_token
   after_commit :msisdn_discovery_notify
 
   include Chibi::Communicable::Chatable
-  include Chibi::Analyzable
-  include Chibi::Twilio::ApiHelpers
-
   include AASM
 
   DEFAULT_MIN_CONSECUTIVE_FAILED = 3
@@ -308,12 +305,7 @@ class Reply < ActiveRecord::Base
     parse_smsc_delivery_status!
   end
 
-  def fetch_twilio_message_status!
-    twilio_message = twilio_client.account.messages.get(format_token(token))
-    self.smsc_message_status = twilio_message.status.downcase
-    save!
-    parse_twilio_delivery_status!
-  end
+
 
   def deliver_via_twilio!
     response = twilio_client.messages.create(
@@ -325,6 +317,17 @@ class Reply < ActiveRecord::Base
     save!
     enqueue_twilio_mt_message_received
     enqueue_twilio_message_status_fetch
+  end
+
+  def parse_smsc_delivery_status!
+    if reply_state = DELIVERY_STATES[delivery_channel][smsc_message_status]
+      update_delivery_state!(reply_state)
+      reply_state
+    end
+  end
+
+  def enqueue_twilio_message_status_fetch
+    TwilioMessageStatusFetcherJob.set(:wait => twilio_message_status_fetcher_delay.seconds).perform_later(id)
   end
 
   private
@@ -394,17 +397,6 @@ class Reply < ActiveRecord::Base
 
   def can_be_queued_for_smsc_delivery?
     persisted? && valid? && delivery_channel?
-  end
-
-  def parse_twilio_delivery_status!
-    enqueue_twilio_message_status_fetch if !parse_smsc_delivery_status! || delivered_by_smsc?
-  end
-
-  def parse_smsc_delivery_status!
-    if reply_state = DELIVERY_STATES[delivery_channel][smsc_message_status]
-      update_delivery_state!(reply_state)
-      reply_state
-    end
   end
 
   def random_canned_greeting(options = {})
@@ -483,10 +475,6 @@ class Reply < ActiveRecord::Base
 
   def request_delivery_via_twilio!
     enqueue_twilio_mt_message_sender_job
-  end
-
-  def enqueue_twilio_message_status_fetch
-    TwilioMessageStatusFetcherJob.set(:wait => twilio_message_status_fetcher_delay.seconds).perform_later(id)
   end
 
   def enqueue_twilio_mt_message_received

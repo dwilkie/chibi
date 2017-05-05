@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 describe Message do
-  include AnalyzableExamples
   include ActiveJobHelpers
   include MessagingHelpers
 
@@ -110,21 +109,13 @@ describe Message do
     it { is_expected.to be_valid }
     it { is_expected.to validate_presence_of(:channel) }
     it { is_expected.to validate_presence_of(:csms_reference_number) }
-    it { pending("Awaiting fix from should-matchers"); is_expected.to validate_numericality_of(:csms_reference_number).only_integer.is_greater_than_or_equal_to(0).is_less_than_or_equal_to(255) }
+    it { is_expected.to validate_numericality_of(:csms_reference_number).only_integer.is_greater_than_or_equal_to(0).is_less_than_or_equal_to(255) }
     it { is_expected.to validate_presence_of(:number_of_parts) }
-    it { pending("Awaiting fix from should-matchers"); is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_greater_than_or_equal_to(1).is_less_than_or_equal_to(255) }
+    it { is_expected.to validate_numericality_of(:number_of_parts).only_integer.is_greater_than_or_equal_to(1).is_less_than_or_equal_to(255) }
   end
 
   it_should_behave_like "a chat starter" do
     let(:starter) { message }
-  end
-
-  it_should_behave_like "analyzable" do
-    let(:group_by_column) { :created_at }
-
-    def create_resource(*args)
-      create(:message, *args)
-    end
   end
 
   it_should_behave_like "communicable from user" do
@@ -352,7 +343,7 @@ describe Message do
       expect(unprocessed_multipart_message).not_to be_processed
       expect(recently_received_multipart_message).not_to be_processed
       expect(unprocessed_message).not_to be_processed
-      expect_locate { trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed_multipart! } }
+      trigger_job(:only => [MessageProcessorJob]) { described_class.queue_unprocessed_multipart! }
     end
 
     it { expect(unprocessed_multipart_message.reload).to be_processed }
@@ -412,16 +403,6 @@ describe Message do
       sample_number = generate(:mobile_number)
       subject.origin = sample_number
       expect(subject.from).to eq(sample_number)
-    end
-  end
-
-  describe "#charge_request_updated!" do
-    subject { create(:message) }
-
-    it "should queue the message for processing" do
-      trigger_job(:queue_only => true) { subject.charge_request_updated! }
-      job = enqueued_jobs.first
-      expect(job[:args].first).to eq(subject.id)
     end
   end
 
@@ -499,10 +480,6 @@ describe Message do
       let(:job) { enqueued_jobs.first }
 
       subject { create_message }
-
-      def stub_user_charge!(result = nil)
-        allow(user).to receive(:charge!).and_return(result)
-      end
 
       def stub_user_update_profile
         allow(user).to receive(:update_profile)
@@ -582,31 +559,11 @@ describe Message do
             let(:user) { create(:user, :offline) }
 
             it { expect(user).to be_online }
-
-            context "the charge request returns true" do
-              def setup_scenario
-                stub_user_charge!(true)
-              end
-
-              it { is_expected.to be_processed }
-            end # context "the charge request returns true"
-
-            context "the charge request returns false" do
-              def setup_scenario
-                stub_user_charge!(false)
-              end
-
-              it { is_expected.to be_awaiting_charge_result }
-            end # context "the charge request returns false"
           end # context "indicates the sender wants to use the service"
         end # context "the message body is"
       end # context "pre-processing"
 
       context "processing" do
-        before do
-          stub_user_charge!(true)
-        end
-
         context "if an exception is raised" do
           before do
             allow(Chat).to receive(:activate_multiple!).and_raise(ArgumentError)
@@ -711,53 +668,6 @@ describe Message do
         end # context "unless an exception is raised"
       end # context "processing"
     end # context "state is 'received'"
-
-    context "state is 'awaiting_charge_result'" do
-      subject { create_message(:awaiting_charge_result) }
-
-      def create_charge_request(*args)
-        options = args.extract_options!
-        create(:charge_request, *args, options.merge(:requester => subject))
-      end
-
-      after do
-        expect(subject).to be_processed
-      end
-
-      context "if the charge request failed" do
-        before do
-          create_charge_request(:failed)
-          allow(user).to receive(:reply_not_enough_credit!)
-        end
-
-        it "should tell the sender they don't have enough credit" do
-          expect(user).to receive(:reply_not_enough_credit!)
-          subject.pre_process!
-        end
-
-        it_should_behave_like "not routing the message"
-      end
-
-      context "if the charge request is not present" do
-        it_should_behave_like "routing the message"
-      end
-
-      context "if the charge request was successful" do
-        before do
-          create_charge_request(:successful)
-        end
-
-        it_should_behave_like "routing the message"
-      end
-
-      context "if the charge request was errored" do
-        before do
-          create_charge_request(:errored)
-        end
-
-        it_should_behave_like "routing the message"
-      end
-    end
 
     context "state is 'processed'" do
       subject { create_message(:processed) }

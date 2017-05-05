@@ -21,14 +21,12 @@ describe MsisdnDiscovery do
     it { is_expected.to validate_presence_of(:state) }
 
     it do
-      pending("Awaiting fix from shoulda-matchers")
       is_expected.to validate_numericality_of(
         :subscriber_number
       ).only_integer.is_greater_than_or_equal_to(2000000)
     end
 
     it do
-      pending("Awaiting fix from shoulda-matchers")
       is_expected.to validate_numericality_of(
         :subscriber_number
       ).only_integer.is_less_than_or_equal_to(9999999)

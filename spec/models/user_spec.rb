@@ -6,7 +6,6 @@ describe User do
   include TranslationHelpers
   include MessagingHelpers
   include ActiveJobHelpers
-  include AnalyzableExamples
 
   include_context "replies"
 
@@ -223,26 +222,6 @@ describe User do
         end
       end
     end
-  end
-
-  it_should_behave_like "analyzable", true do
-    let(:group_by_column) { :created_at }
-
-    def operator_name
-      resource.operator_name
-    end
-
-    def country_code
-      resource.country_code
-    end
-
-    def create_resource(*args)
-      create(:user, *args)
-    end
-  end
-
-  it_should_behave_like "filtering with communicable resources" do
-    let(:resources) { [user, friend] }
   end
 
   describe ".between_the_ages(ranges)" do

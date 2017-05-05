@@ -8,35 +8,16 @@ git_source(:github) do |repo_name|
 end
 
 gem 'rails', '4.2.8'
-gem 'haml'
 gem 'pg'
-gem 'kaminari'
-gem 'lazy_high_charts'
-gem 'geocoder'
 gem 'phony_rails'
-gem 'countries'
 gem 'faker'
 gem 'puma'
 gem 'redis'
 gem 'torasup'
 gem 'aasm'
 gem 'twilio-ruby'
-gem 'multi_xml'
-gem 'carrierwave'
-gem 'fog'
 gem 'sidekiq'
-gem "celluloid", '0.16.0'
 gem 'sinatra', :require => false
-
-# Bundle edge Rails instead:
-# gem 'rails',     :git => 'git://github.com/rails/rails.git'
-
-gem 'sass-rails', '~> 4.0.3'
-gem 'coffee-rails', '~> 4.0.0'
-gem 'uglifier', '>= 1.3.0'
-
-gem 'jquery-rails'
-gem 'turbolinks'
 
 gem 'rails_12factor', :group => :production
 

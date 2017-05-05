@@ -59,7 +59,7 @@ describe CallDataRecord::Twilio do
       it { assert_fetch! }
     end
 
-    context "for outbound call", :focus, :cassette => "twilio/get_outbound_call" do
+    context "for outbound call", :cassette => "twilio/get_outbound_call" do
       let(:sid_trait) { :with_recorded_outbound_sid }
       let(:parent_call_sid) { recorded_parameters[:parent_call_sid] }
       let(:inbound_cdr) { create(factory, :inbound, :uuid => parent_call_sid) }

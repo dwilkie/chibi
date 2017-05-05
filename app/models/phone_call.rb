@@ -1,9 +1,7 @@
-class PhoneCall < ActiveRecord::Base
+class PhoneCall < ApplicationRecord
   include Chibi::Communicable::FromUser
   include Chibi::Communicable::Chatable
   include Chibi::ChatStarter
-  include Chibi::ChargeRequester
-  include Chibi::Analyzable
   include SaveWithRetry
 
   include AASM
@@ -24,8 +22,6 @@ class PhoneCall < ActiveRecord::Base
   aasm :column => :state, :whiny_transitions => false do
     state :answered, :initial => true
     state :transitioning_from_answered
-    state :telling_user_they_dont_have_enough_credit
-    state :transitioning_from_telling_user_they_dont_have_enough_credit
     state :connecting_user_with_friend
     state :transitioning_from_connecting_user_with_friend
     state :finding_friends
@@ -37,10 +33,7 @@ class PhoneCall < ActiveRecord::Base
 
     event :flag_as_processing, :after_commit => :queue_for_processing! do
       transitions(:from => :answered, :to => :transitioning_from_answered)
-      transitions(
-        :from => :telling_user_they_dont_have_enough_credit,
-        :to => :transitioning_from_telling_user_they_dont_have_enough_credit
-      )
+
       transitions(
         :from => :connecting_user_with_friend,
         :to => :transitioning_from_connecting_user_with_friend
@@ -60,20 +53,6 @@ class PhoneCall < ActiveRecord::Base
     end
 
     event :process, :after_commit => :fetch_twilio_cdr do
-      # if the charge failed
-      # tell him that he doesn't have enough credit
-      transitions(
-        :from => :transitioning_from_answered,
-        :to => :telling_user_they_dont_have_enough_credit,
-        :if => :charge_failed?
-      )
-
-      # then hang up
-      transitions(
-        :from => :transitioning_from_telling_user_they_dont_have_enough_credit,
-        :to => :awaiting_completion,
-      )
-
       # if can dial to current chat parter
       # connect him with his existing friend
       transitions(
@@ -176,7 +155,6 @@ class PhoneCall < ActiveRecord::Base
       user.logout!
     else
       user.login!
-      user.charge!(self)
     end
   end
 
@@ -215,14 +193,6 @@ class PhoneCall < ActiveRecord::Base
     redirect_to_self
   end
 
-  def twiml_for_telling_user_they_dont_have_enough_credit
-    play(:not_enough_credit)
-  end
-
-  def twiml_for_transitioning_from_telling_user_they_dont_have_enough_credit
-    redirect_to_self
-  end
-
   def twiml_for_awaiting_completion
     hangup
   end
@@ -253,10 +223,6 @@ class PhoneCall < ActiveRecord::Base
 
   def twiml_for_transitioning_from_dialing_friends
     redirect_to_self
-  end
-
-  def charge_failed?
-    charge_request && charge_request.failed?
   end
 
   def from_adhearsion_twilio?

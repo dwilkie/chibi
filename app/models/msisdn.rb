@@ -1,4 +1,4 @@
-class Msisdn < ActiveRecord::Base
+class Msisdn < ApplicationRecord
   has_many   :msisdn_discoveries
 
   validates :mobile_number,

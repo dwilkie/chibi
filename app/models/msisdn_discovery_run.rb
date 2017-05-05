@@ -1,4 +1,4 @@
-class MsisdnDiscoveryRun < ActiveRecord::Base
+class MsisdnDiscoveryRun < ApplicationRecord
   DEFAULT_BROADCAST_MAX_QUEUED = 100
   DEFAULT_BROADCAST_HOURS_MIN = 8
   DEFAULT_BROADCAST_HOURS_MAX = 20

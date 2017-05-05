@@ -437,10 +437,6 @@ describe Chat do
     end
   end
 
-  it_should_behave_like "filtering with communicable resources" do
-    let(:resources) { [chat, unique_active_chat] }
-  end
-
   describe ".intended_for(message)" do
     let(:sender) { create(:user, :name => "bill") }
     let(:active_chat) { create(:chat, :active, :user => sender) }
@@ -517,36 +513,6 @@ describe Chat do
       messages_from_sender_to_current_partner.each do |current_partner_message|
         message.body = current_partner_message
         expect(described_class.intended_for(message)).to be_nil
-      end
-    end
-  end
-
-  describe ".filter_by" do
-    it "should include users, friends & active users to avoid loading them for each user" do
-      expect(subject.class.filter_by.includes_values).to include(:user, :friend, :active_users)
-    end
-
-    context ":user_id => 2" do
-      before do
-        chat
-        unique_active_chat
-      end
-
-      it "should return all chats with the given user id" do
-        expect(subject.class.filter_by(:user_id => chat.user_id)).to eq([chat])
-      end
-    end
-  end
-
-  describe ".filter_by_count" do
-    context ":user_id => 2" do
-      before do
-        chat
-        unique_active_chat
-      end
-
-      it "should return the count of the chats with the given user id" do
-        expect(subject.class.filter_by_count(:user_id => chat.user_id)).to eq(1)
       end
     end
   end

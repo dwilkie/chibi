@@ -3,8 +3,6 @@ require 'rails_helper'
 describe Reply do
   include TranslationHelpers
   include MessagingHelpers
-  include PhoneCallHelpers::TwilioHelpers
-  include AnalyzableExamples
 
   let(:user) { build(:user) }
 
@@ -89,14 +87,6 @@ describe Reply do
 
   it_should_behave_like "chatable" do
     let(:chatable_resource) { reply }
-  end
-
-  it_should_behave_like "analyzable" do
-    let(:group_by_column) { :created_at }
-
-    def create_resource(*args)
-      create(:reply, *args)
-    end
   end
 
   describe "associations" do
@@ -482,29 +472,6 @@ describe Reply do
         expect(subject.token).to eq(nil)
         expect(subject.smsc_message_status).to eq("dest_address_invalid")
         expect(subject).to be_failed
-      end
-    end
-  end
-
-  describe "#fetch_twilio_message_status!" do
-    it "should update the message state from Twilio" do
-      twilio_message_states.each do |twilio_message_state, assertions|
-        clear_enqueued_jobs
-        subject = create(:reply, :twilio_channel, :twilio_delivered_by_smsc)
-        expect_twilio_message_status_fetch(
-          :message_sid => subject.token,
-          :status => twilio_message_state
-        ) { subject.fetch_twilio_message_status! }
-        assert_twilio_message_status_fetched!(:message_sid => subject.token)
-        subject.reload
-        expect(subject.smsc_message_status).to eq(twilio_message_state)
-        expect(subject.state).to eq(assertions[:reply_state])
-        job = enqueued_jobs.last
-        if assertions[:reschedule_job]
-          assert_fetch_twilio_message_status_job_enqueued!(job, :id => subject.id)
-        else
-          expect(enqueued_jobs).to be_empty
-        end
       end
     end
   end

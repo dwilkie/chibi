@@ -87,10 +87,6 @@ module Chibi::Communicable
     end
 
     module ClassMethods
-      def filter_by(params = {})
-        where(params.slice(:user_id, :chat_id)).latest
-      end
-
       def latest
         order(:created_at).reverse_order
       end
@@ -133,22 +129,10 @@ module Chibi::Communicable
         end
       end
 
-      def filter_by(params = {})
-        communicable_resources_scope.filter_params(params)
-      end
-
-      def filter_by_count(params = {})
-        filter_params(params).count
-      end
-
       def find_with_communicable_resources(id)
         result = communicable_resources_scope.where(:id => id).first
         raise ActiveRecord::RecordNotFound unless result.present?
         result
-      end
-
-      def filter_params(params = {})
-        all
       end
 
       private

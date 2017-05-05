@@ -110,14 +110,6 @@ class Report
     service_metadata["data"] = cdr_report
   end
 
-  def generate_charge_report!(service_metadata, operator_options)
-    charge_report = ChargeRequest.charge_report(report_options(operator_options))
-
-    service_metadata["quantity"] = charge_report.count
-    service_metadata["headers"] = ChargeRequest.charge_report_columns(:header => true)
-    service_metadata["data"] = charge_report
-  end
-
   def report_options(options = {})
     time_of_month = Time.zone.local(year, month)
     {

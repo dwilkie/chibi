@@ -20,17 +20,6 @@ module LastRequest
   end
 end
 
-module WebMockHelpers
-  require 'uri'
-  require 'rack/utils'
-
-  private
-
-  def webmock_requests
-    requests = WebMock.requests
-  end
-end
-
 WebMock.extend(LastRequest)
 WebMock.after_request do |request_signature, response|
   WebMock.last_request = request_signature

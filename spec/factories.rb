@@ -44,10 +44,6 @@ FactoryGirl.define do
     n.to_s
   end
 
-  sequence :chargeable_operator_number, 85513234567 do |n|
-    n.to_s
-  end
-
   sequence :number_without_chibi_smpp_connection, 85513234677 do |n|
     n.to_s
   end
@@ -158,49 +154,6 @@ FactoryGirl.define do
     end
   end
 
-  factory :charge_request do
-    association :user, :factory => [:user, :from_chargeable_operator]
-    qb
-
-    after(:build) do |charge_request|
-      user = charge_request.user
-      user.latest_charge_request = charge_request
-      user.save!
-    end
-
-    trait :awaiting_result do
-      state "awaiting_result"
-    end
-
-    trait :successful do
-      state "successful"
-    end
-
-    trait :errored do
-      state "errored"
-    end
-
-    trait :failed do
-      state "failed"
-    end
-
-    trait :qb do
-      operator "qb"
-    end
-
-    trait :from_message do
-      association :requester, :factory => :message
-    end
-
-    trait :from_phone_call do
-      association :requester, :factory => :phone_call
-    end
-
-    trait :notify_requester do
-      notify_requester true
-    end
-  end
-
   factory :message do
     from { generate(:mobile_number) }
     twilio_channel
@@ -266,10 +219,6 @@ FactoryGirl.define do
       state "processed"
     end
 
-    trait :awaiting_charge_result do
-      state "awaiting_charge_result"
-    end
-
     trait :unprocessed do
       received
       created_at { 5.minutes.ago }
@@ -301,14 +250,6 @@ FactoryGirl.define do
 
     trait :transitioning_from_answered do
       state "transitioning_from_answered"
-    end
-
-    trait :telling_user_they_dont_have_enough_credit do
-      state "telling_user_they_dont_have_enough_credit"
-    end
-
-    trait :transitioning_from_telling_user_they_dont_have_enough_credit do
-      state "transitioning_from_telling_user_they_dont_have_enough_credit"
     end
 
     trait :awaiting_completion do
@@ -455,6 +396,10 @@ FactoryGirl.define do
       queued_for_smsc_delivery
       delivered_at { 1.day.ago }
     end
+
+    trait :with_recorded_twilio_message_sid do
+      token "SMd7fe60617415486185ef14320e7e2700"
+    end
   end
 
   factory :chat do
@@ -498,68 +443,6 @@ FactoryGirl.define do
 
     trait :will_provisionally_timeout do
       updated_at { 10.minutes.ago }
-    end
-  end
-
-  factory :location do
-    country_code "kh"
-
-    trait :cambodia do
-      country_code "kh"
-    end
-
-    trait :thailand do
-      country_code "th"
-    end
-
-    trait :england do
-      country_code "gb"
-    end
-
-    trait :united_states do
-      country_code "us"
-    end
-
-    trait :phnom_penh do
-      cambodia
-      city "Phnom Penh"
-      latitude 11.558831
-      longitude 104.917445
-    end
-
-    trait :siem_reap do
-      cambodia
-      city "Siem Reap"
-      latitude 13.3622222
-      longitude 103.8597222
-    end
-
-    trait :battambang do
-      cambodia
-      city "Battambang"
-      latitude 13.1
-      longitude 103.2
-    end
-
-    trait :chiang_mai do
-      thailand
-      city "Samoeng"
-      latitude 18.7964642
-      longitude 98.6600586
-    end
-
-    trait :london do
-      england
-      city "London"
-      latitude 51.5081289
-      longitude -0.128005
-    end
-
-    trait :new_york do
-      united_states
-      city "New York"
-      latitude 40.7127837
-      longitude -74.0059413
     end
   end
 
@@ -610,10 +493,6 @@ FactoryGirl.define do
       mobile_number { generate(:operator_number_with_voice) }
     end
 
-    trait :from_chargeable_operator do
-      mobile_number { generate(:chargeable_operator_number) }
-    end
-
     trait :from_unknown_operator do
       mobile_number { generate(:unknown_operator_number) }
     end
@@ -646,10 +525,6 @@ FactoryGirl.define do
       looking_for "m"
     end
 
-    trait :with_location do
-      association :location, :phnom_penh
-    end
-
     trait :with_date_of_birth do
       date_of_birth { 23.years.ago }
     end
@@ -659,11 +534,10 @@ FactoryGirl.define do
       with_date_of_birth
       with_gender
       with_looking_for_preference
-      with_location
     end
 
     trait :from_england do
-      association :location, :london
+      country_code "en"
     end
 
     trait :male do
@@ -786,13 +660,11 @@ FactoryGirl.define do
       gender "f"
       with_semi_recent_interaction
       thai
-      association :location, :chiang_mai
 
       factory :joy do
         name "joy"
         age 27
         cambodian
-        association :location, :phnom_penh
       end
     end
 
@@ -802,12 +674,12 @@ FactoryGirl.define do
       age 39
       gender "m"
       with_semi_recent_interaction
-      association :location, :phnom_penh
+      country_code "kh"
 
       factory :con do
         name "con"
         age 37
-        association :location, :siem_reap
+        country_code "kh"
       end
 
       factory :dave do
@@ -829,11 +701,10 @@ FactoryGirl.define do
       gender "f"
       looking_for "f"
       with_semi_recent_interaction
-      association :location, :battambang
+      country_code "kh"
 
       factory :eva do
         name "eva"
-        association :location, :siem_reap
       end
     end
 
@@ -845,7 +716,6 @@ FactoryGirl.define do
       age 28
       with_semi_recent_interaction
       thai
-      association :location, :chiang_mai
 
       factory :view do
         name "view"
@@ -858,7 +728,7 @@ FactoryGirl.define do
       gender "f"
       age 25
       with_semi_recent_interaction
-      association :location, :phnom_penh
+      country_code "kh"
     end
 
     factory :michael do
@@ -867,7 +737,6 @@ FactoryGirl.define do
       age 29
       with_semi_recent_interaction
       thai
-      association :location, :chiang_mai
     end
   end
 

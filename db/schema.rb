@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170501055825) do
+ActiveRecord::Schema.define(version: 20170505040908) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -197,8 +197,10 @@ ActiveRecord::Schema.define(version: 20170501055825) do
     t.string   "operator_name",            limit: 255
     t.integer  "latest_charge_request_id"
     t.boolean  "can_receive_sms",                      default: true,     null: false
+    t.string   "country_code",             limit: 2,                      null: false
   end
 
+  add_index "users", ["country_code"], name: "index_users_on_country_code", using: :btree
   add_index "users", ["date_of_birth"], name: "index_users_on_date_of_birth", using: :btree
   add_index "users", ["mobile_number"], name: "index_users_on_mobile_number", unique: true, using: :btree
 

@@ -14,7 +14,7 @@ describe Msisdn do
     subject { build(:msisdn) }
 
     it { is_expected.to validate_presence_of(:mobile_number) }
-    it { is_expected.to validate_uniqueness_of(:mobile_number) }
+    it { is_expected.to validate_uniqueness_of(:mobile_number).case_insensitive }
     it { is_expected.not_to allow_value(attributes_for(:user, :with_invalid_mobile_number)[:mobile_number]).for(:mobile_number) }
   end
 

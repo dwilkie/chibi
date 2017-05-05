@@ -1,4 +1,4 @@
-class MessagePart < ActiveRecord::Base
+class MessagePart < ApplicationRecord
   belongs_to :message
 
   before_validation :normalize_body, :on => :create

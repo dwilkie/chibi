@@ -2,7 +2,6 @@ require 'rails_helper'
 
 describe "PhoneCalls" do
   include PhoneCallHelpers
-  include PhoneCallHelpers::TwilioHelpers
   include TwilioHelpers::TwimlAssertions::RSpec
   include MobilePhoneHelpers
   include ActiveJobHelpers
@@ -52,45 +51,6 @@ describe "PhoneCalls" do
       end
 
       context "in the meantime" do
-        context "if the charge failed" do
-          def setup_scenario
-            create(:charge_request, :failed, :requester => phone_call)
-          end
-
-          context "when the twiml is requested" do
-            let(:asserted_filename) { "#{asserted_locale}/not_enough_credit.mp3" }
-
-            before do
-              get_phone_call(phone_call)
-            end
-
-            it "should play a file telling the user they don't have enough credit" do
-              assert_play!
-              assert_redirect!
-            end
-          end
-
-          context "after the file has been played" do
-            before do
-              trigger_job { update_phone_call(phone_call) }
-            end
-
-            it "should redirect to the phone call" do
-              assert_redirect!(:method => "GET")
-            end
-
-            context "when the twiml is requested" do
-              before do
-                get_phone_call(phone_call)
-              end
-
-              it "should hangup" do
-                assert_hangup!
-              end
-            end
-          end
-        end
-
         context "if there are friends available" do
           let(:friend) { create(:user, :mobile_number => friends_number) }
           let(:friends_number) { registered_operator(:number) }

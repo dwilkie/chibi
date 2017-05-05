@@ -9,7 +9,6 @@ describe "Messages" do
     include_context "replies"
 
     let(:new_user) { User.last }
-    let(:new_location) { Location.last }
     let(:new_message) { Message.last }
 
     let(:my_number) { "855977123876" }

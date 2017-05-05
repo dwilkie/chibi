@@ -1,4 +1,5 @@
 require_relative 'phone_call_helpers'
+require_relative 'twilio_helpers'
 
 module CommunicableExampleHelpers
   private
@@ -30,8 +31,8 @@ shared_examples_for "communicable from user" do |options|
   end
 
   describe "#from=(value)" do
-    include PhoneCallHelpers::TwilioHelpers
     include MobilePhoneHelpers
+    include TwilioHelpers
 
     it "should sanitize the number" do
       subject.from = "+1111-737-874-2833"
@@ -185,76 +186,6 @@ shared_examples_for "chatable" do
       chatable_resource.save
 
       expect(chat.reload.updated_at).to be > original_chat_timestamp
-    end
-  end
-
-  describe ".filter_by" do
-    let(:another_chatable_resource) { create(chatable_resource.class.to_s.underscore.to_sym, :chat => chat) }
-
-    before do
-      another_chatable_resource
-    end
-
-    context "passing no params" do
-      it "should return all chatable resources ordered by latest created at date" do
-        expect(subject.class.filter_by).to eq([another_chatable_resource, chatable_resource])
-      end
-    end
-
-    context ":user_id => 2" do
-      it "should return all chatable resources with the given user id" do
-        expect(subject.class.filter_by(:user_id => chatable_resource.user.id)).to eq([chatable_resource])
-      end
-    end
-
-    context ":chat_id => 2" do
-      it "should return all messages with the given chat id" do
-        expect(subject.class.filter_by(:chat_id => chat.id)).to eq([another_chatable_resource])
-      end
-    end
-  end
-end
-
-shared_examples_for "filtering with communicable resources" do
-  include CommunicableExampleHelpers
-
-  before do
-    resources
-  end
-
-  describe ".filter_by" do
-    it "should order by latest updated at" do
-      expect(subject.class.filter_by).to eq(resources.reverse)
-    end
-
-    it "should include the communicable resources associations" do
-      expect(subject.class.filter_by.includes_values).to include(*asserted_communicable_resources)
-    end
-  end
-
-  describe ".filter_by_count" do
-    it "should return the total number of resources" do
-      expect(subject.class.filter_by_count).to eq(resources.count)
-    end
-  end
-
-  describe ".filter_params" do
-    it "should return the total number of resources" do
-      expect(subject.class.filter_params).to eq(subject.class.all)
-    end
-  end
-
-  describe ".communicable_resources" do
-    it "should return the configured communicable resources" do
-      expect(subject.class.communicable_resources).to match_array(asserted_communicable_resources)
-    end
-  end
-
-  describe ".find_with_communicable_resources" do
-    it "should behave like .find but the result should include the communicable resources" do
-      expect {
-        subject.class.find_with_communicable_resources(0)
-      }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 end

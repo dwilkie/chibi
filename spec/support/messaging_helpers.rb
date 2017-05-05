@@ -1,13 +1,10 @@
 require_relative "authentication_helpers"
-require_relative "location_helpers"
 require_relative "active_job_helpers"
 require_relative "web_mock"
 
 module MessagingHelpers
   include AuthenticationHelpers
-  include LocationHelpers
   include ActiveJobHelpers
-  include WebMockHelpers
   include TwilioHelpers
 
   EXAMPLES = YAML.load_file(File.join(File.dirname(__FILE__), 'message_examples.yaml'))
@@ -26,34 +23,6 @@ module MessagingHelpers
 
   def twilio_post_messages_cassette
     :"twilio/post_messages"
-  end
-
-  def expect_twilio_message_status_fetch(options = {}, &block)
-    VCR.use_cassette(
-      :"twilio/get_message",
-      :erb => twilio_get_message_erb(options)
-    ) { yield }
-  end
-
-  def assert_twilio_message_status_fetched!(options = {})
-    last_request = webmock_requests.last
-    uri = last_request.uri
-    expect(uri.path).to eq(twilio_get_message_path(options))
-  end
-
-  def assert_twilio_job!(job, options = {})
-    expect(job).to be_present
-    expect(job[:args]).to eq([options[:id]]) if options[:id]
-    expect(job[:job]).to eq(options[:job_class])
-    if options[:scheduled]
-      expect(job[:at]).to be_present
-    else
-      expect(job[:at]).not_to be_present
-    end
-  end
-
-  def assert_fetch_twilio_message_status_job_enqueued!(job, options = {})
-    assert_twilio_job!(job, {:job_class => TwilioMessageStatusFetcherJob, :scheduled => true}.merge(options))
   end
 
   def assert_twilio_mt_message_received_job_enqueued!(job, options = {})
@@ -105,16 +74,14 @@ module MessagingHelpers
     options[:from] = options[:from].mobile_number if options[:from].is_a?(User)
     aggregator_params = twilio_message_params(options)
 
-    expect_locate(options) do
-      trigger_job(:only => [MessageProcessorJob, LocatorJob]) do
-        post(
-          messages_path,
-          aggregator_params,
-          authentication_params(:message)
-        )
+    trigger_job(:only => [MessageProcessorJob]) do
+      post(
+        messages_path,
+        aggregator_params,
+        authentication_params(:message)
+      )
 
-        expect(response.status).to be(options[:response] || 201)
-      end
+      expect(response.status).to be(options[:response] || 201)
     end
   end
 
@@ -142,13 +109,6 @@ module MessagingHelpers
     }
   end
 
-  def twilio_get_message_erb(options = {})
-    twilio_message_erb(options).merge(
-      :status => "delivered",
-      :path => twilio_get_message_path(twilio_message_erb(options))
-    ).merge(options)
-  end
-
   def twilio_post_messages_erb(options = {})
     twilio_message_erb(options).merge(
       :path => twilio_post_messages_path(twilio_message_erb(options))
@@ -166,22 +126,6 @@ module MessagingHelpers
 
   def twilio_post_messages_path(options = {})
     "/2010-04-01/Accounts/#{twilio_account_sid}/Messages.json"
-  end
-
-  def twilio_get_message_path(options = {})
-    "/2010-04-01/Accounts/#{twilio_account_sid}/Messages/#{format_twilio_sid(options[:message_sid])}.json"
-  end
-
-  def twilio_message_states
-    {
-      "queued" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
-      "sending" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
-      "sent" => { :reply_state => "unknown", :reschedule_job => false},
-      "receiving" => {:reply_state => "delivered_by_smsc", :reschedule_job => true},
-      "delivered" => {:reply_state => "confirmed", :reschedule_job => false},
-      "undelivered" => {:reply_state => "failed", :reschedule_job => false},
-      "failed" => {:reply_state => "errored", :reschedule_job => false}
-    }
   end
 
   def smsc_message_states

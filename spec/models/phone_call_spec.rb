@@ -2,9 +2,7 @@ require 'rails_helper'
 
 describe PhoneCall do
   include PhoneCallHelpers
-  include PhoneCallHelpers::TwilioHelpers
   include ActiveJobHelpers
-  include AnalyzableExamples
 
   let(:phone_call) { create(:phone_call) }
   let(:new_phone_call) { build(:phone_call) }
@@ -24,14 +22,6 @@ describe PhoneCall do
     it { is_expected.to validate_presence_of(:sid) }
   end
 
-  it_should_behave_like "analyzable" do
-    let(:group_by_column) { :created_at }
-
-    def create_resource(*args)
-      create(:phone_call, *args)
-    end
-  end
-
   it_should_behave_like "a chat starter" do
     let(:starter) { phone_call }
   end
@@ -48,12 +38,7 @@ describe PhoneCall do
     subject { create(:phone_call, :user => user) }
     let(:user) { create(:user) }
 
-    def set_expectations
-      expect(user).to receive(:charge!).with(subject)
-    end
-
     before do
-      set_expectations
       subject.pre_process!
     end
 
@@ -63,10 +48,6 @@ describe PhoneCall do
     end
 
     context "is from a blacklisted number" do
-      def set_expectations
-        expect(user).not_to receive(:charge!)
-      end
-
       let(:user) { create(:user, :blacklisted) }
       it { expect(user).to be_offline }
     end
@@ -110,94 +91,6 @@ describe PhoneCall do
     context "for normal calls" do
       subject { build(:phone_call) }
       it { is_expected.not_to be_anonymous }
-    end
-  end
-
-  describe "fetching remote cdrs", :vcr, :vcr_options => {:match_requests_on => [:method, :twilio_api_request]} do
-    include WebMockHelpers
-
-    def setup_scenario
-    end
-
-    def subject_traits
-      {}
-    end
-
-    def subject_options
-      {}
-    end
-
-    before do
-      setup_scenario
-    end
-
-    let(:sid) { attributes_for(cdr_factory, :with_recorded_sid)[:sid] }
-    let(:asserted_cdr) { asserted_cdr_type.last }
-
-    let(:subject) { create(:phone_call, *subject_traits.keys, subject_options) }
-
-    def assert_fetched!
-      expect(asserted_cdr).to be_present
-      expect(asserted_cdr.phone_call).to eq(subject)
-      expect(webmock_requests).to be_present
-    end
-
-    def assert_not_fetched!
-      expect(webmock_requests).to be_empty
-    end
-
-    describe "#fetch_inbound_twilio_cdr!", :cassette => :"twilio/get_inbound_call" do
-      let(:cdr_factory) { :inbound_twilio_cdr }
-      let(:asserted_cdr_type) { Chibi::Twilio::InboundCdr }
-
-      def subject_options
-        super.merge(:sid => sid)
-      end
-
-      def setup_scenario
-        super
-        subject.fetch_inbound_twilio_cdr!
-      end
-
-      context "given the CDR has not already been saved" do
-        it { assert_fetch! }
-      end
-
-      context "given the CDR has already been saved" do
-        let(:cdr) { create(:inbound_twilio_cdr, :phone_call => subject) }
-
-        def setup_scenario
-          create(:inbound_twilio_cdr, :phone_call => subject, :uuid => sid)
-          super
-        end
-
-        it { assert_not_fetched! }
-      end
-    end
-
-    describe "#fetch_outbound_twilio_cdr!", :cassette => :"twilio/get_outbound_call" do
-      let(:cdr_factory) { :outbound_twilio_cdr }
-      let(:asserted_cdr_type) { Chibi::Twilio::OutboundCdr }
-
-      def subject_options
-        super.merge(:dial_call_sid => sid)
-      end
-
-      def setup_scenario
-        super
-        subject.fetch_outbound_twilio_cdr!
-      end
-
-      context "given the phone call has a dial_call_sid" do
-        it { assert_fetched! }
-      end
-
-      context "given the phone call does not have a dial_call_sid" do
-        it "should not create a Chibi Twilio Outbound CDR" do
-          phone_call.fetch_outbound_twilio_cdr!
-          expect(Chibi::Twilio::OutboundCdr.last).to be_nil
-        end
-      end
     end
   end
 
@@ -308,14 +201,6 @@ describe PhoneCall do
         context "answered" do
           let(:current_state) { :transitioning_from_answered }
 
-          context "the charge request failed" do
-            def setup_scenario
-              create(:charge_request, :failed, :requester => subject)
-            end
-
-            it { expect(subject.reload).to be_telling_user_they_dont_have_enough_credit }
-          end
-
           context "the user is not currently chatting" do
             it { expect(subject.reload).to be_finding_friends }
 
@@ -374,11 +259,6 @@ describe PhoneCall do
               end
             end
           end
-        end
-
-        context "telling_user_they_dont_have_enough_credit" do
-          let(:current_state) { :transitioning_from_telling_user_they_dont_have_enough_credit }
-          it { is_expected.to be_awaiting_completion }
         end
 
         context "connecting_user_with_friend" do
@@ -462,12 +342,6 @@ describe PhoneCall do
         it { is_expected.to be_transitioning_from_answered }
       end
 
-      context "telling_user_they_dont_have_enough_credit" do
-        let(:current_state) { :telling_user_they_dont_have_enough_credit }
-
-        it { is_expected.to be_transitioning_from_telling_user_they_dont_have_enough_credit }
-      end
-
       context "connecting_user_with_friend" do
         let(:current_state) { :connecting_user_with_friend }
 
@@ -537,25 +411,6 @@ describe PhoneCall do
         end
       end
 
-      context "telling_user_they_dont_have_enough_credit" do
-        let(:current_state) { :telling_user_they_dont_have_enough_credit }
-        let(:asserted_filename) { "#{asserted_locale}/not_enough_credit.mp3" }
-
-        it { assert_redirect! }
-
-        context "given the user is Khmer" do
-          let(:user) { create(:user, :cambodian) }
-          let(:asserted_locale) { "kh" }
-          it { assert_play! }
-        end
-
-        context "given the user is Filipino" do
-          let(:user) { create(:user, :filipino) }
-          let(:asserted_locale) { "ph" }
-          it { assert_play! }
-        end
-      end
-
       context "awaiting_completion" do
         let(:current_state) { :awaiting_completion }
         it { assert_hangup! }
@@ -616,12 +471,6 @@ describe PhoneCall do
             context "given the dialer is Khmer" do
               let(:user) { create(:user, :cambodian) }
               let(:asserted_locale) { "kh" }
-              it { assert_dial! }
-            end
-
-            context "given the dialer is Filipino" do
-              let(:user) { create(:user, :filipino) }
-              let(:asserted_locale) { "ph" }
               it { assert_dial! }
             end
           end
@@ -721,11 +570,6 @@ describe PhoneCall do
 
         context "answered" do
           let(:current_state) { :transitioning_from_answered }
-          it { assert_redirect! }
-        end
-
-        context "telling_user_they_dont_have_enough_credit" do
-          let(:current_state) { :transitioning_from_telling_user_they_dont_have_enough_credit }
           it { assert_redirect! }
         end
 

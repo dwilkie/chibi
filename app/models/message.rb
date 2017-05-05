@@ -1,10 +1,7 @@
-class Message < ActiveRecord::Base
+class Message < ApplicationRecord
   include Chibi::Communicable::FromUser
   include Chibi::Communicable::Chatable
-  include Chibi::Analyzable
   include Chibi::ChatStarter
-  include Chibi::ChargeRequester
-
   include AASM
 
   DEFAULT_AWAITING_PARTS_TIMEOUT_SECONDS = 300
@@ -34,7 +31,7 @@ class Message < ActiveRecord::Base
   before_validation :normalize_channel, :normalize_to, :on => :create
   before_validation :set_body_from_message_parts
 
-  delegate :login!, :logout!, :reply_not_enough_credit!, :blacklisted?, :to => :user
+  delegate :login!, :logout!, :blacklisted?, :to => :user
 
   aasm :column => :state, :whiny_transitions => false do
     state :received, :initial => true
@@ -113,10 +110,6 @@ class Message < ActiveRecord::Base
     body.split(/[^a-z]/i).reject(&:empty?)
   end
 
-  def charge_request_updated!
-    queue_for_processing!
-  end
-
   def queue_for_processing!
     MessageProcessorJob.perform_later(id)
   end
@@ -134,28 +127,14 @@ class Message < ActiveRecord::Base
   end
 
   def pre_process!
-    wait_for_charge_result = false
-
-    if received?
-      do_pre_processing
-      wait_for_charge_result = true if continue_processing? && !charge!
-    end
-
-    wait_for_charge_result ? await_charge_result! : process!
+    do_pre_processing if received?
+    process!
   end
 
   private
 
-  def charge!
-    user.charge!(self)
-  end
-
-  def charge_request_failed?
-    charge_request && charge_request.failed?
-  end
-
   def post_process!
-    charge_request_failed? ? reply_not_enough_credit! : route_to_destination
+    route_to_destination
   end
 
   def route_to_destination

@@ -1,10 +1,8 @@
 ---
-<% response = "{\"sid\": \"#{message_sid}\", \"date_created\": \"Mon, 09 Mar 2015 09:43:35 +0000\", \"date_updated\": \"Mon, 09 Mar 2015 09:43:44 +0000\", \"date_sent\": \"Mon, 09 Mar 2015 09:43:35 +0000\", \"account_sid\": \"#{account_sid}\", \"to\": \"+85589481811\", \"from\": \"+14156926280\", \"body\": \"test from twilio\", \"status\": \"#{status}\", \"num_segments\": \"1\", \"num_media\": \"0\", \"direction\": \"outbound-api\", \"api_version\": \"2010-04-01\", \"price\": \"-0.01083\", \"price_unit\": \"USD\", \"error_code\": null, \"error_message\": null, \"uri\": \"/2010-04-01/Accounts/#{account_sid}/Messages/#{message_sid}.json\", \"subresource_uris\": {\"media\": \"/2010-04-01/Accounts/#{account_sid}/Messages/#{message_sid}/Media.json\"}}" %>
-
 http_interactions:
 - request:
     method: get
-    uri: https://<%= account_sid %>:<%= auth_token %>@api.twilio.com<%= path %>
+    uri: https://api.twilio.com/2010-04-01/Accounts/ACC123456789/Messages/SMd7fe60617415486185ef14320e7e2700.json
     body:
       encoding: US-ASCII
       string: ''
@@ -14,31 +12,56 @@ http_interactions:
       Accept-Charset:
       - utf-8
       User-Agent:
-      - twilio-ruby/3.14.4 (ruby/x86_64-linux 2.2.0-p0)
+      - twilio-ruby/4.13.0 (ruby/x86_64-linux 2.3.3-p222)
       Accept-Encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Authorization:
+      - "<ENCODED AUTH HEADER>"
   response:
     status:
       code: 200
       message: OK
     headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - Accept, Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match,
+        If-Unmodified-Since
+      Access-Control-Allow-Methods:
+      - GET, POST, DELETE, OPTIONS
       Access-Control-Allow-Origin:
-      - https://www.twilio.com
+      - "*"
+      Access-Control-Expose-Headers:
+      - ETag
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 09 Mar 2015 12:17:18 GMT
+      - Fri, 05 May 2017 09:57:40 GMT
+      Strict-Transport-Security:
+      - max-age=15768000
+      Twilio-Request-Duration:
+      - '0.036'
+      Twilio-Request-Id:
+      - RQd50f5788bb20406ca25cc5abf72ad8f9
       X-Powered-By:
       - AT-5000
       X-Shenanigans:
       - none
       Content-Length:
-      - '787'
+      - '832'
       Connection:
       - keep-alive
     body:
       encoding: UTF-8
-      string: <%= response.to_json %>
+      string: '{"sid": "SMd7fe60617415486185ef14320e7e2700", "date_created": "Fri,
+        05 May 2017 09:28:08 +0000", "date_updated": "Fri, 05 May 2017 09:28:08 +0000",
+        "date_sent": "Fri, 05 May 2017 09:28:08 +0000", "account_sid": "ACC123456789",
+        "to": "+85560808850", "from": "+14156926280", "messaging_service_sid": null,
+        "body": "Dara: Ok sms to me on +855383838380", "status": "<%= twilio_status %>", "num_segments":
+        "1", "num_media": "0", "direction": "outbound-api", "api_version": "2010-04-01",
+        "price": "-0.04400", "price_unit": "USD", "error_code": null, "error_message":
+        null, "uri": "/2010-04-01/Accounts/ACC123456789/Messages/SMd7fe60617415486185ef14320e7e2700.json",
+        "subresource_uris": {"media": "/2010-04-01/Accounts/ACC123456789/Messages/SMd7fe60617415486185ef14320e7e2700/Media.json"}}'
     http_version:
-  recorded_at: Mon, 09 Mar 2015 12:17:18 GMT
-recorded_with: VCR 2.9.3
+  recorded_at: Fri, 05 May 2017 09:57:40 GMT
+recorded_with: VCR 3.0.3

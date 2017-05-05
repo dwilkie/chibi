@@ -24,7 +24,7 @@ module Chibi
     config.active_record.raise_in_transactional_callbacks = true
 
     config.time_zone = 'Bangkok'
-    config.i18n.available_locales = [:kh, :en, :ph]
+    config.i18n.available_locales = [:km, :en]
     config.i18n.fallbacks = true
     config.i18n.enforce_available_locales = false
     config.i18n.default_locale = :en

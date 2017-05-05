@@ -1,4 +1,4 @@
-class CallDataRecord::Base < ActiveRecord::Base
+class CallDataRecord::Base < ApplicationRecord
   self.table_name = :call_data_records
 
   INBOUND_DIRECTION = "inbound"
@@ -15,6 +15,14 @@ class CallDataRecord::Base < ActiveRecord::Base
 
   def self.outbound
     where(:direction => OUTBOUND_DIRECTION)
+  end
+
+  def self.overview_of_duration(options = {})
+    group_by_timeframe(
+      options.merge(
+        :group_by_column => default_date_column
+      )
+    ).billable.sum(rounded_mins_sql).integerify.to_a
   end
 
   def inbound?
